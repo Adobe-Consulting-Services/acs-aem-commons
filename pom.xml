@@ -114,6 +114,10 @@
                     <artifactId>findbugs-maven-plugin</artifactId>
                     <version>2.5.2</version>
                 </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.9</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -268,8 +272,8 @@
             <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>
-  <modules>
-    <module>bundle</module>
-    <module>content</module>
-  </modules>
+    <modules>
+        <module>bundle</module>
+        <module>content</module>
+    </modules>
 </project>

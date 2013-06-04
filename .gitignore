@@ -9,3 +9,5 @@ target/
 *.iml
 content/src/main/content/jcr_root/.content.xml
 content/src/main/content/jcr_root/apps/.content.xml
+content/src/main/content/jcr_root/etc/.content.xml
+content/src/main/content/jcr_root/etc/designs/.content.xml

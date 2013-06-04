@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    title="Generic List Item"
+    xtype="panel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <title
+            jcr:primaryType="cq:Widget"
+            fieldDescription="This is typically the text displayed to a user or author"
+            fieldLabel="Title"
+            name="./jcr:title"
+            xtype="textfield"/>
+        <value
+            jcr:primaryType="cq:Widget"
+            fieldDescription="This is typically the text used internally or for URL generation"
+            fieldLabel="Value"
+            name="./value"
+            xtype="textfield"/>
+    </items>
+</jcr:root>
