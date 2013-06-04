@@ -7,3 +7,4 @@ target/
 #Intellij
 .idea/
 *.iml
+content/src/main/content/jcr_root/.content.xml
