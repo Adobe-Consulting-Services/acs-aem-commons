@@ -8,3 +8,4 @@ target/
 .idea/
 *.iml
 content/src/main/content/jcr_root/.content.xml
+content/src/main/content/jcr_root/apps/.content.xml
