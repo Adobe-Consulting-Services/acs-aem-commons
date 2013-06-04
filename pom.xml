@@ -91,6 +91,29 @@
                         </lifecycleMappingMetadata>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>cobertura-maven-plugin</artifactId>
+                    <version>2.5.2</version>
+                    <configuration>
+                        <formats>
+                            <format>html</format>
+                            <format>xml</format>
+                        </formats>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>3.0.1</version>
+                    <configuration>
+                        <linkXRef>false</linkXRef>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -173,6 +196,48 @@
                                 <id>install-bundle</id>
                                 <goals>
                                     <goal>install</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>analysis</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-pmd-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>pmd</goal>
+                                    <goal>cpd</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>javadoc</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>findbugs-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>findbugs</goal>
                                 </goals>
                             </execution>
                         </executions>
