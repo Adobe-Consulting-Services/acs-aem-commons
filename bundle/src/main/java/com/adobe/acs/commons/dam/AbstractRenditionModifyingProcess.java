@@ -74,7 +74,7 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
             layer = processLayer(layer, rendition, workflowSession, args);
 
             String mimetype = layer.getMimeType();
-            double quality = (mimetype.equals("image/gif")) ? getQuality(255, qualityStr) : getQuality(1.0, qualityStr);
+            double quality = mimetype.equals("image/gif") ? getQuality(255, qualityStr) : getQuality(1.0, qualityStr);
 
             saveImage(asset, rendition, layer, mimetype, quality);
         } catch (IIOException e) {
