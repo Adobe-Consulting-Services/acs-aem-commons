@@ -1,3 +1,7 @@
 #base=source
 
 add_multifield_limit.js
+create_namespace.js
+predicates/AuthorizablePredicate.js
+predicates/PathPropertyPredicate.js
+predicates/SelectionPredicate.js
