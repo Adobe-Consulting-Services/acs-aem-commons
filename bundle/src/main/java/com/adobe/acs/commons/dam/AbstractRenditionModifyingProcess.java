@@ -100,7 +100,7 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
         }
     }
 
-    private void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality)
+    void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality)
             throws IOException {
         File tmpFile = File.createTempFile(getTempFileSpecifier(), "." + getExtension(mimetype));
         OutputStream out = FileUtils.openOutputStream(tmpFile);

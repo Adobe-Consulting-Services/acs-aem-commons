@@ -187,10 +187,24 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.day.cq</groupId>
+            <artifactId>cq-security-api</artifactId>
+            <version>5.6.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>1.9.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit-addons</groupId>
+            <artifactId>junit-addons</artifactId>
         </dependency>
     </dependencies>
     
