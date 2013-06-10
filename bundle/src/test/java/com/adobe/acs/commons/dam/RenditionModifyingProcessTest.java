@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.mockito.verification.VerificationMode;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
@@ -65,9 +64,20 @@ public class RenditionModifyingProcessTest {
     }
 
     @Test
-    public void test_with_no_rendition_arg_is_noop() throws Exception {
+    public void test_with_null_rendition_arg_is_noop() throws Exception {
         WorkItem workItem = mock(WorkItem.class);
         MetaDataMap metaData = new SimpleMetaDataMap();
+
+        process.execute(workItem, workflowSession, metaData);
+
+        verifyZeroInteractions(harness);
+    }
+
+    @Test
+    public void test_with_blank_rendition_arg_is_noop() throws Exception {
+        WorkItem workItem = mock(WorkItem.class);
+        MetaDataMap metaData = new SimpleMetaDataMap();
+        metaData.put("PROCESS_ARGS", "");
 
         process.execute(workItem, workflowSession, metaData);
 
