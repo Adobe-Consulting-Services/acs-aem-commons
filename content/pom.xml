@@ -49,7 +49,7 @@
                         <embedded>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>acs-aem-commons-bundle</artifactId>
-                            <target>/apps/acs-common/install</target>
+                            <target>/apps/acs-commons/install</target>
                         </embedded>
                     </embeddeds>
                     <targetURL>http://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
