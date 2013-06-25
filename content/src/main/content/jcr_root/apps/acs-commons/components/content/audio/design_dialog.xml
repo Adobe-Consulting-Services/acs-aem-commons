@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    height="400"
+    stateful="false"
+    xtype="dialog">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <tabs jcr:primaryType="cq:TabPanel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <audio
+                    jcr:primaryType="cq:Widget"
+                    path="/apps/acs-commons/components/content/audio/designtab_audio.infinity.json"
+                    xtype="cqinclude"/>
+                <profiles
+                    jcr:primaryType="cq:Widget"
+                    path="/apps/acs-commons/components/content/audio/designtab_profiles.infinity.json"
+                    xtype="cqinclude"/>
+                <playback
+                    jcr:primaryType="cq:Widget"
+                    path="/apps/acs-commons/components/content/audio/designtab_playback.infinity.json"
+                    xtype="cqinclude"/>
+            </items>
+        </tabs>
+    </items>
+</jcr:root>

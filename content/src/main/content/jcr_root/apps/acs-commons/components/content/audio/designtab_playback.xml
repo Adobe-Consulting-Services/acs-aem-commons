@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Panel"
+    title="Playback">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <noControls
+            jcr:primaryType="cq:Widget"
+            checkboxBoolTypeHint="{Boolean}true"
+            defaultValue="{Boolean}false"
+            fieldDescription="Check if the browser should not show playback controls."
+            fieldLabel="No Controls"
+            name="./noControls"
+            type="checkbox"
+            xtype="selection"/>
+        <autoplay
+            jcr:primaryType="cq:Widget"
+            checkboxBoolTypeHint="{Boolean}true"
+            defaultValue="{Boolean}false"
+            fieldDescription="Start playback automatically."
+            fieldLabel="Autoplay"
+            name="./autoplay"
+            type="checkbox"
+            xtype="selection"/>
+        <loop
+            jcr:primaryType="cq:Widget"
+            checkboxBoolTypeHint="{Boolean}true"
+            defaultValue="{Boolean}false"
+            fieldDescription="Jump back to the start when the end of the audio is reached."
+            fieldLabel="Loop"
+            name="./loop"
+            type="checkbox"
+            xtype="selection"/>
+        <preload
+            jcr:primaryType="cq:Widget"
+            fieldDescription="If the audio should automatically be downloaded on page load."
+            fieldLabel="Preload"
+            name="./preload"
+            type="select"
+            xtype="selection">
+            <options jcr:primaryType="cq:WidgetCollection">
+                <auto
+                    jcr:primaryType="nt:unstructured"
+                    text="Preload video on page load (auto)"
+                    value="auto"/>
+                <metadata
+                    jcr:primaryType="nt:unstructured"
+                    text="Preload only audio metadata (metadata)"
+                    value="metadata"/>
+                <none
+                    jcr:primaryType="nt:unstructured"
+                    text="No preloading (none)"
+                    value="none"/>
+                <empty
+                    jcr:primaryType="nt:unstructured"
+                    text="Skip preload setting (browser default behavior)"
+                    value=""/>
+            </options>
+        </preload>
+    </items>
+</jcr:root>

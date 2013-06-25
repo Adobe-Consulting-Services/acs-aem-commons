@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Panel"
+    title="Profiles">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <profiles
+            jcr:primaryType="cq:Widget"
+            fieldDescription="Select the profiles to use for the HTML5 audio sources, in order."
+            fieldLabel="Profiles"
+            name="./profiles"
+            xtype="multifield">
+            <fieldConfig
+                jcr:primaryType="nt:unstructured"
+                options="/etc/dam/video.profiles.list.json"
+                type="select"
+                xtype="selection"/>
+        </profiles>
+    </items>
+</jcr:root>

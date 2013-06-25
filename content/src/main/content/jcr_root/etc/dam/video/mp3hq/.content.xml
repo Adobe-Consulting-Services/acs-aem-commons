@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:lastModified="{Date}2013-06-24T11:27:15.185-04:00"
+        cq:lastModifiedBy="admin"
+        cq:template="/libs/dam/templates/videoprofile"
+        jcr:description="MP3 High Quality encode"
+        jcr:lastModified="{Date}2013-06-24T11:26:42.491-04:00"
+        jcr:lastModifiedBy="admin"
+        jcr:primaryType="nt:unstructured"
+        jcr:title="MP3 High Quality"
+        sling:resourceType="dam/components/video/profile"
+        customArgs="-q:a 2"
+        customArgsOnly="true"
+        extension="mp3"
+        htmlType="audio/mpeg"
+        mimeType="audio/mpeg"/>
+</jcr:root>
