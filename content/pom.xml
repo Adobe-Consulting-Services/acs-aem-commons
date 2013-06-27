@@ -70,6 +70,9 @@
                     <sourceJsFolder>src/main/content/jcr_root</sourceJsFolder>
                     <failOnIssues>true</failOnIssues>
                     <predefinedVars>jQuery,window,$</predefinedVars>
+                    <excludes>
+                        <exclude>**/extensions/**/*.js</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

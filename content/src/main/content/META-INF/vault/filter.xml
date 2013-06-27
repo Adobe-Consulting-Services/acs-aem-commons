@@ -2,4 +2,6 @@
 <workspaceFilter version="1.0">
     <filter root="/apps/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
+    <filter root="/etc/dam/video/mp3hq"/>
+    <filter root="/etc/dam/video/ogghq"/>
 </workspaceFilter>

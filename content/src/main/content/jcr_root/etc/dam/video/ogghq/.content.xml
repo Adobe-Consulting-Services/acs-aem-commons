@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:lastModified="{Date}2013-06-24T11:30:58.328-04:00"
+        cq:lastModifiedBy="admin"
+        cq:template="/libs/dam/templates/videoprofile"
+        jcr:description="OGG Vorbis High Quality Encode"
+        jcr:lastModified="{Date}2013-06-24T11:30:35.701-04:00"
+        jcr:lastModifiedBy="admin"
+        jcr:primaryType="nt:unstructured"
+        jcr:title="OGG High Quality"
+        sling:resourceType="dam/components/video/profile"
+        audioCodec="libvorbis"
+        customArgs="-q:a 2"
+        extension="ogg"
+        htmlType="audio/ogg"
+        mimeType="audio/ogg"/>
+</jcr:root>

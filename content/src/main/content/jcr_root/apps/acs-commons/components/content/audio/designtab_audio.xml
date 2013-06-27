@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Panel"
+    title="Video (Design)">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <fallbackMessage
+            jcr:primaryType="cq:Widget"
+            fieldDescription="What to show when no audio can be played at all."
+            fieldLabel="Fallback message"
+            height="50"
+            name="./fallbackMessage"
+            xtype="textarea"/>
+        <audioClass
+            jcr:primaryType="cq:Widget"
+            fieldDescription="HTML class name for the audio tag."
+            fieldLabel="Audio element class"
+            name="./audioClass"
+            xtype="textfield"/>
+    </items>
+</jcr:root>
