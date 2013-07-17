@@ -1,0 +1,171 @@
+package com.adobe.acs.commons.util;
+
+import org.junit.*;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+public class CookieUtilTest {
+
+    private static HttpServletRequest request;
+    private static HttpServletResponse response;
+
+    private static Cookie dogCookie;
+    private static Cookie catCookie;
+    private static Cookie frogCookie;
+    private static Cookie tortoiseCookie;
+
+    private static Cookie[] cookies;
+
+    public CookieUtilTest() {
+    }
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
+
+    @Before
+    public void setUp() {
+        request = mock(HttpServletRequest.class);
+        response = mock(HttpServletResponse.class);
+
+        dogCookie = new Cookie("dog-mammal", "woof");
+        catCookie = new Cookie("cat-mammal", "meow");
+        frogCookie = new Cookie("frog-amphibian", "ribbit");
+        tortoiseCookie = new Cookie("tortoise", "...?");
+        tortoiseCookie.setMaxAge(100);
+
+        cookies = new Cookie[]{frogCookie, catCookie, tortoiseCookie, dogCookie};
+
+        when(request.getCookies()).thenReturn(cookies);
+
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    /**
+     * Test of addCookie method, of class CookieUtil.
+     */
+    @Test
+    public void testAddCookie() {
+        boolean expResult = false;
+        boolean result = CookieUtil.addCookie(null, response);
+        assertEquals(expResult, result);
+
+        expResult = true;
+        result = CookieUtil.addCookie(dogCookie, response);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of getCookie method, of class CookieUtil.
+     */
+    @Test
+    public void testGetCookie() {
+        String cookieName = "snake";
+        Cookie expResult = null;
+        Cookie result = CookieUtil.getCookie(request, cookieName);
+        assertEquals(expResult, result);
+
+        cookieName = "dog-mammal";
+        expResult = dogCookie;
+        result = CookieUtil.getCookie(request, cookieName);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of getCookies method, of class CookieUtil.
+     */
+    @Test
+    public void testGetCookies() {
+        String regex = "(.*)mammal(.*)";
+        List expResult = new ArrayList<Cookie>();
+        expResult.add(catCookie);
+        expResult.add(dogCookie);
+
+        List result = CookieUtil.getCookies(request, regex);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of extendCookieLife method, of class CookieUtil.
+     */
+    @Test
+    public void testExtendCookieLife() {
+        String cookieName = "tortoise";
+        int expiry = 1000;
+        boolean expResult = true;
+        boolean result = CookieUtil.extendCookieLife(request, response, cookieName, "/", expiry);
+        assertEquals(expResult, result);
+
+        cookieName = "dodo";
+        expResult = false;
+        result = CookieUtil.extendCookieLife(request, response, cookieName, "/", expiry);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of dropCookies method, of class CookieUtil.
+     */
+    @Test
+    public void testDropCookies() {
+        String[] cookieNames = {"dog-mammal", "cat-mammal"};
+        CookieUtil.dropCookies(request, response, "/", cookieNames);
+        assertTrue(true);
+    }
+
+    /**
+     * Test of dropCookiesByRegex method, of class CookieUtil.
+     */
+    @Test
+    public void testDropCookiesByRegex() {
+        int expResult = 3;
+        int result = CookieUtil.dropCookiesByRegex(request, response, "/", "(.*)mammal(.*)", "^fr(.*)");
+        assertEquals(expResult, result);
+
+        expResult = 0;
+        result = CookieUtil.dropCookiesByRegex(request, response, "/", "nothere");
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of dropCookiesByRegexArray method, of class CookieUtil.
+     */
+    @Test
+    public void testDropCookiesByRegexArray() {
+        String[] regexes = new String[]{"(.*)mammal(.*)", "^fr.*"};
+
+        int expResult = 3;
+        int result = CookieUtil.dropCookiesByRegex(request, response, "/", regexes);
+        assertEquals(expResult, result);
+
+        expResult = 0;
+        result = CookieUtil.dropCookiesByRegex(request, response, "/", "nothere");
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of dropAllCookies method, of class CookieUtil.
+     */
+    @Test
+    public void testDropAllCookies() {
+        int expResult = cookies.length;
+        int result = CookieUtil.dropAllCookies(request, response, "/");
+        assertEquals(expResult, result);
+    }
+}
