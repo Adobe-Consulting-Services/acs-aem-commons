@@ -6,7 +6,9 @@
         url += "?t=" + (new Date()).getTime();
 
         $.get(url).success(function(data) {
-            $this.replaceWith(data);
+            if(!data.match(/\sdata-ajax-component/)) {
+                $this.replaceWith(data);
+            }
         });
     });
 });
