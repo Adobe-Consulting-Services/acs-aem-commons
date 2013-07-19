@@ -16,10 +16,11 @@
     final String url = resourceResolver.map(resource.getPath()) + ".ajax.nocache.html";
 
 %><% if(WCMMode.PREVIEW.equals(mode) || WCMMode.DISABLED.equals(mode)) { %>
+    <cq:includeClientLib categories="acs-commons.components"/>
     <div data-ajax-component data-url="<%= url %>" class="acs-ajax-component"></div>
 <% } else { %>
     <%-- In Authoring modes, do not bother AJAX'ing in components;
          Instead include them using the usual methods --%>
     <% IncludeOptions.getOptions(request, true).forceSameContext(true); %>
-    <cq:include path=".ajax.nocache" resourceType="<%= component.getPath() %>"/>
+    <sling:include replaceSelectors="ajax.nocache" resource="<%= resource %>"/>
 <% } %>
