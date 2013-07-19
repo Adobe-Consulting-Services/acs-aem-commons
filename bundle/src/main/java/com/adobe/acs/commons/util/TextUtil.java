@@ -10,6 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtil {
+    
+    private static final Pattern RICH_TEXT_PATTERN = Pattern.compile("<[^>]+>");
 
     private TextUtil() {
     }
@@ -121,8 +123,7 @@ public class TextUtil {
      * @return
      */
     public static boolean isRichText(String str) {
-        Pattern p = Pattern.compile("<[^>]+>");
-        Matcher m = p.matcher(str);
+        Matcher m = RICH_TEXT_PATTERN.matcher(str);
 
         return m.find();
     }
