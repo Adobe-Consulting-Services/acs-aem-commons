@@ -1,6 +1,5 @@
 # WCM Helpers
 
-
 ## ComponentHelper
 
 ### Purpose
@@ -9,7 +8,7 @@ Provide a simple abstraction for creating CQ-specific markup that drive componen
 
 ### Example
 
-The mode common usecase of the WCMHelper is to control the execution of a component JSP based on it configured status.
+The mode common use case of the ComponentHelper is to control the execution of a component JSP based on it configured status.
 
     <%@ include file="/libs/foundation/global.jsp" %><%
     %><%@ page import="com.adobe.acs.commons.wcm.ComponentHelper,
@@ -22,7 +21,7 @@ The mode common usecase of the WCMHelper is to control the execution of a compon
         boolean hasTitle = title.length > 5;
         boolean hasDescription = description.length > 10;
 
-    %><% if(ComponentHelper.isNotConfigured(slingRequest, slingResponse, WCMEditType.TITLE, hasTitle, hasDescription) {
+    %><% if(ComponentHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.TITLE, hasTitle, hasDescription) {
         // If (hasTitle && hasDescription) == false, then print out the Title placeholder image and stop further
         // execution of this component. This will also intelligently build out drop-targets based on the components cq:editConfigs
         return;

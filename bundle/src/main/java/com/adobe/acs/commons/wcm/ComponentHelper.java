@@ -113,20 +113,18 @@ public class ComponentHelper {
      * <p/>
      * Normal use: inclusion at top of component JSP before any markup is output:
      * <p/>
-     * <% if(WCMHelper.isNotConfigured(slingRequest, slingResponse, WCMEditType.NONE,
+     * <% if(WCMHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.NONE,
      * StringUtils.isNotBlank(properties.get("foo", ""))) {
      * return; // Stops execution of the JSP; leaving only the Edit Block rendered in Authoring Mode or nothing in non-Authoring Modes
      * } %>
-     * 
-     * TODO - rename?
-     *
+     *      *
      * @param request
      * @param response
      * @param editType
      * @param isConfigured
      * @return true is
      */
-    public static boolean isNotConfigured(SlingHttpServletRequest request,
+    public static boolean printEditBlockOrNothing(SlingHttpServletRequest request,
                                           SlingHttpServletResponse response,
                                           ComponentEditType.Type editType,
                                           boolean... isConfigured) {
