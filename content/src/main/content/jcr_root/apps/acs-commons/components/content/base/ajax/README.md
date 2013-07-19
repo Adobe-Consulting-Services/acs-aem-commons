@@ -6,7 +6,7 @@ Provide a simple extension point for turning "normal" components into components
 
 ## Prerequisites
 * Requires jQuery 1.8+
-* Requires inclusion of the `acs-commons.components` clientlib
+* Requires inclusion of the `acs-commons.main` clientlib
 
 ## Instructions
 
