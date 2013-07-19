@@ -37,7 +37,7 @@ public class TypeUtil {
      * @return
      */
     public static <T> Map<T, T> ArrayToMap(T[] list) {
-        final HashMap<T, T> map = new HashMap();
+        final HashMap<T, T> map = new HashMap<T, T>();
         if (list == null) {
             return map;
         }
@@ -59,12 +59,13 @@ public class TypeUtil {
      * @param json
      * @return
      */
-    public static Map toMap(JSONObject json) throws JSONException {
+    public static Map<String, Object> toMap(JSONObject json) throws JSONException {
         final HashMap<String, Object> map = new HashMap<String, Object>();
-        final List<String> keys = IteratorUtils.toList(json.keys());
+        final List<?> keys = IteratorUtils.toList(json.keys());
 
-        for (final String key : keys) {
-            map.put(key, json.get(key));
+        for (final Object key : keys) {
+            String str = key.toString();
+            map.put(str, json.get(str));
         }
 
         return map;
@@ -72,11 +73,14 @@ public class TypeUtil {
 
     /**
      * Determines the type of the parameter object
+     * 
+     * TODO - review this method
      *
      * @param object
      * @param <T>
      * @return
      */
+    @SuppressWarnings("unchecked")
     public static <T> Class<T> getType(final Object object) {
         if (object instanceof Double || object instanceof Float) {
             return (Class<T>) Double.class;
@@ -130,7 +134,7 @@ public class TypeUtil {
      * @param klass
      * @return
      */
-    public static String toString(final Object obj, final Class klass) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    public static String toString(final Object obj, final Class<?> klass) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         return toString(obj, klass, null);
     }
 
@@ -142,7 +146,7 @@ public class TypeUtil {
      * @param methodName
      * @return
      */
-    public static String toString(final Object obj, final Class klass, String methodName) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public static String toString(final Object obj, final Class<?> klass, String methodName) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         if (StringUtils.isBlank(methodName)) {
             methodName = "toString";
         }

@@ -23,7 +23,7 @@ public class OsgiPropertyUtil {
      * @param separator separator between the values
      * @return Returns a SimpleEntry representing the key/value pair
      */
-    public static AbstractMap.SimpleEntry toSimpleEntry(final String value, final String separator) {
+    public static AbstractMap.SimpleEntry<String, String> toSimpleEntry(final String value, final String separator) {
         final String[] tmp = StringUtils.split(value, separator);
 
         if (tmp == null) {
@@ -31,7 +31,7 @@ public class OsgiPropertyUtil {
         }
 
         if (tmp.length == 2) {
-            return new AbstractMap.SimpleEntry(tmp[0], tmp[1]);
+            return new AbstractMap.SimpleEntry<String, String>(tmp[0], tmp[1]);
         } else {
             return null;
         }
