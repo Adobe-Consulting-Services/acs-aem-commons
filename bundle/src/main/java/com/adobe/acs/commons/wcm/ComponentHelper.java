@@ -16,8 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class WCMHelper {
-    private static final Logger log = LoggerFactory.getLogger(WCMHelper.class);
+public class ComponentHelper {
+    private static final Logger log = LoggerFactory.getLogger(ComponentHelper.class);
 
     private static final String CSS_EDIT_MODE = "wcm-helper-edit-mode";
 
@@ -89,7 +89,7 @@ public class WCMHelper {
      */
     public static boolean printEditBlock(SlingHttpServletRequest request,
                                          SlingHttpServletResponse response,
-                                         WCMEditType.Type editType,
+                                         ComponentEditType.Type editType,
                                          boolean... isConfigured) {
 
         final String html = getEditBlock(request, editType, isConfigured);
@@ -117,6 +117,8 @@ public class WCMHelper {
      * StringUtils.isNotBlank(properties.get("foo", ""))) {
      * return; // Stops execution of the JSP; leaving only the Edit Block rendered in Authoring Mode or nothing in non-Authoring Modes
      * } %>
+     * 
+     * TODO - rename?
      *
      * @param request
      * @param response
@@ -126,7 +128,7 @@ public class WCMHelper {
      */
     public static boolean isNotConfigured(SlingHttpServletRequest request,
                                           SlingHttpServletResponse response,
-                                          WCMEditType.Type editType,
+                                          ComponentEditType.Type editType,
                                           boolean... isConfigured) {
         if (isAuthoringMode(request)) {
             return printEditBlock(request, response, editType, isConfigured);
@@ -173,7 +175,7 @@ public class WCMHelper {
     public static boolean printDDEditBlock(SlingHttpServletRequest request,
                                            SlingHttpServletResponse response,
                                            String name,
-                                           WCMEditType.Type editType,
+                                           ComponentEditType.Type editType,
                                            boolean... isConfigured) {
 
         final String html = getDDEditBlock(request, name, editType, isConfigured);
@@ -203,7 +205,7 @@ public class WCMHelper {
      * @return
      */
     public static String getEditBlock(SlingHttpServletRequest request,
-                                      WCMEditType.Type editType,
+                                      ComponentEditType.Type editType,
                                       boolean... isConfigured) {
 
         final Resource resource = request.getResource();
@@ -211,7 +213,7 @@ public class WCMHelper {
         if (!isAuthoringMode(request)
                 || conditionAndCheck(isConfigured)) {
             return null;
-        } else if (WCMEditType.NONE.equals(editType)) {
+        } else if (ComponentEditType.NONE.equals(editType)) {
             return "<!-- Edit Mode Placeholder is specified as: " + editType.getName() + " -->";
         }
 
@@ -220,7 +222,7 @@ public class WCMHelper {
         if (component == null) {
             html += getCssStyle();
             html += "Could not resolve CQ Component type.";
-        } else if (WCMEditType.NOICON.equals(editType) || WCMEditType.NONE.equals(editType)) {
+        } else if (ComponentEditType.NOICON.equals(editType) || ComponentEditType.NONE.equals(editType)) {
             final String title = StringUtils.capitalize(component.getTitle());
 
             html += getCssStyle();
@@ -240,7 +242,7 @@ public class WCMHelper {
             }
 
             html += "</dl>";
-        } else if (WCMEditType.DROPTARGETS.equals(editType)) {
+        } else if (ComponentEditType.DROPTARGETS.equals(editType)) {
             // Use DropTargets
             ComponentEditConfig editConfig = component.getEditConfig();
             Map<String, DropTarget> dropTargets = (editConfig != null) ? editConfig.getDropTargets() : null;
@@ -299,7 +301,7 @@ public class WCMHelper {
      * @param isConfigured will display edit block if evaluates to false
      * @return
      */
-    public static String getDDEditBlock(SlingHttpServletRequest request, String name, WCMEditType.Type editType, boolean... isConfigured) {
+    public static String getDDEditBlock(SlingHttpServletRequest request, String name, ComponentEditType.Type editType, boolean... isConfigured) {
         if (!isAuthoringMode(request) || conditionAndCheck(isConfigured)) {
             return null;
         }
@@ -348,7 +350,7 @@ public class WCMHelper {
      * @param editType
      * @return
      */
-    public static String getEditIconImgTag(WCMEditType.Type editType) {
+    public static String getEditIconImgTag(ComponentEditType.Type editType) {
         final String title = StringUtils.capitalize(editType.getName());
 
         return "<img src=\"/libs/cq/ui/resources/0.gif\"" + " "
@@ -368,34 +370,34 @@ public class WCMHelper {
      * @param dropTarget
      * @return
      */
-    protected static WCMEditType.Type getWCMEditType(DropTarget dropTarget) {
+    protected static ComponentEditType.Type getWCMEditType(DropTarget dropTarget) {
         if (dropTarget == null) {
-            return WCMEditType.NONE;
+            return ComponentEditType.NONE;
         }
         List<String> groups = Arrays.asList(dropTarget.getGroups());
         List<String> accepts = Arrays.asList(dropTarget.getAccept());
 
         if (groups.isEmpty() && accepts.isEmpty()) {
-            return WCMEditType.NONE;
+            return ComponentEditType.NONE;
         }
 
         if (groups.contains("media")) {
             if (matches(accepts, "image")) {
-                return WCMEditType.IMAGE;
+                return ComponentEditType.IMAGE;
             } else if (matches(accepts, "video")) {
-                return WCMEditType.VIDEO;
+                return ComponentEditType.VIDEO;
             } else if (matches(accepts, "flash")) {
-                return WCMEditType.FLASH;
+                return ComponentEditType.FLASH;
             } else if (accepts.size() == 1 && ".*".equals(accepts.get(0))) {
-                return WCMEditType.FILE;
+                return ComponentEditType.FILE;
             }
         } else if (groups.contains("page")) {
-            return WCMEditType.REFERENCE;
+            return ComponentEditType.REFERENCE;
         } else if (groups.contains("paragraph")) {
-            return WCMEditType.REFERENCE;
+            return ComponentEditType.REFERENCE;
         }
 
-        return WCMEditType.TEXT;
+        return ComponentEditType.TEXT;
     }
 
     /**

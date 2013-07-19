@@ -6,11 +6,11 @@ import org.apache.commons.lang.StringUtils;
  * This is a wrapper class that allows the "canned" list to be extends to include
  * custom Types:
  * <p/>
- * public class CustomEditTypes extends WCMEditType {
- * public static final Type CUSTOM = new WCMEditType.Type("CUSTOM");
+ * public class CustomEditTypes extends ComponentEditType {
+ * public static final Type CUSTOM = new ComponentEditType.Type("CUSTOM");
  * }
  */
-public class WCMEditType {
+public class ComponentEditType {
     public static final Type CHART = new Type("CHART");
     public static final Type IMAGE = new Type("IMAGE");
     public static final Type VIDEO = new Type("VIDEO");
