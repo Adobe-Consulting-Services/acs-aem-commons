@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:primaryType="cq:Dialog"
+          title="Error Page Handler - CQ Include Dialog Container"
+          activeTab="{Long}0"
+          xtype="dialog">
+    <errorpages
+            jcr:primaryType="cq:Widget"
+            fieldLabel="Error Pages"
+            fieldDescription="Error pages for this content tree"
+            name="./errorPages"
+            xtype="pathfield"
+            />
+</jcr:root>

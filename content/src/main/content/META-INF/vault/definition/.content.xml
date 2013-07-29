@@ -10,10 +10,15 @@
     path="/etc/packages/day_internal/consulting/acs-aem-commons-content-0.0.1-SNAPSHOT"
     version="0.0.1-SNAPSHOT">
     <filter jcr:primaryType="nt:unstructured">
-        <f0
+        <filter1
             jcr:primaryType="nt:unstructured"
             mode="replace"
             root="/apps/acs-commons"
+            rules="[]"/>
+        <filter2
+            jcr:primaryType="nt:unstructured"
+            mode="replace"
+            root="/apps/sling/servlet/errorhandler"
             rules="[]"/>
     </filter>
 </jcr:root>
