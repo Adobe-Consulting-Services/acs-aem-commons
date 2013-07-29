@@ -11,6 +11,7 @@ import com.day.cq.search.eval.NodenamePredicateEvaluator;
 import com.day.cq.search.eval.TypePredicateEvaluator;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
+import com.day.cq.wcm.api.NameConstants;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -123,6 +124,8 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         Resource page = null;
         final ResourceResolver resourceResolver = errorResource.getResourceResolver();
 
+        final boolean isError = this.getStatusCode(request) >= SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+
         // Get error page name to look for based on the error code/name
         final String pageName = getErrorPageName(request);
 
@@ -136,6 +139,8 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             final String errorsPath = this.getErrorPagesPath(parent, errorPagesMap);
 
             if(StringUtils.isNotBlank(errorsPath)) {
+                log.debug("Best matching errors path for request is: {}", errorsPath);
+
                 // Search for CQ Page for specific servlet named Page (404, 500, Throwable, etc.)
                 SearchResult result = executeQuery(resourceResolver, pageName);
                 List<String> errorPaths = filterResults(errorsPath, result);
@@ -259,7 +264,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @return
      */
     public int getStatusCode(SlingHttpServletRequest request) {
-        Integer statusCode = (Integer) request.getAttribute(ErrorPageHandlerService.STATUS_CODE);
+        Integer statusCode = (Integer) request.getAttribute(SlingConstants.ERROR_STATUS);
 
         if (statusCode != null) {
             return statusCode;
@@ -271,7 +276,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /**
      * Get the Error Page's name (all lowercase) that should be used to render the page for this error.
      *
-     * This looks at the Servlet Sling has already resolved to handle this request (making Sling do all the hard work)!
+     * This looks at the Status code delivered via by Sling into the error page content
      *
      * @param request
      * @return
@@ -281,22 +286,31 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         // Set the servlet name ot find to statusCode; update later if needed
         String servletName = String.valueOf(getStatusCode(request));
 
-        if(StringUtils.isBlank(servletName)) { servletName = this.fallbackErrorName; }
+        // Only support Status codes as error exception lookup scheme is too complex/expensive at this time.
+        // Using the 500 response code/default error page should suffice for all errors pages generated from exceptions.
 
-        final String servletPath = (String) request.getAttribute(ErrorPageHandlerService.SERVLET_NAME);
-        if(StringUtils.isBlank(servletPath)) { return servletName; }
+        /*
+        final Object tmp = request.getAttribute(SlingConstants.ERROR_EXCEPTION_TYPE);
 
-        try {
-            final PathInfo pathInfo = new PathInfo(servletPath);
-            final String[] parts = StringUtils.split(pathInfo.getResourcePath(), '/');
-            if (parts.length > 0) {
-                servletName = parts[parts.length - 1];
+        if(tmp != null && tmp instanceof Class) {
+            final Class clazz = (Class) tmp;
+
+            final String exceptionName = clazz.getSimpleName();
+            log.debug("Servlet path used to derived exception name: {} ", exceptionName);
+
+            if(StringUtils.isNotBlank(exceptionName)) {
+                servletName = exceptionName;
             }
-        } catch(IllegalArgumentException ex) {
-            // Use status code
         }
 
-        return StringUtils.lowerCase(servletName);
+        if(StringUtils.isBlank(servletName)) { servletName = this.fallbackErrorName; }
+        */
+
+        servletName = StringUtils.lowerCase(servletName);
+
+        log.debug("Error page name to (try to) use: {} ", servletName);
+
+        return servletName;
     }
 
 
@@ -306,7 +320,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         SortedMap<String, String> authoredMap =  new TreeMap<String, String>(new StringLengthComparator());
 
         // Construct query builder query
-        map.put(TypePredicateEvaluator.TYPE, "cq:Page");
+        map.put(TypePredicateEvaluator.TYPE, NameConstants.NT_PAGE);
         map.put(JcrPropertyPredicateEvaluator.PROPERTY, JcrConstants.JCR_CONTENT + "/" + ERROR_PAGE_PROPERTY);
         map.put(JcrPropertyPredicateEvaluator.PROPERTY + "." + JcrPropertyPredicateEvaluator.OPERATION, JcrPropertyPredicateEvaluator.OP_EXISTS);
         map.put("p.limit", "0");
@@ -496,7 +510,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /** Script Support Methods **/
 
     /**
-     * Determins if the request has been authenticated or is Anonymous
+     * Determines if the request has been authenticated or is Anonymous
      *
      * @param request
      * @return
@@ -603,6 +617,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Override
     public void resetRequestAndResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, int statusCode) {
         // Clear client libraries
+        // TODO: Replace with proper API call is HtmlLibraryManager provides one in the future; Currently this is our only option.
         request.setAttribute(com.day.cq.widget.HtmlLibraryManager.class.getName() + ".included",
                 new HashSet<String>());
         // Clear the response
