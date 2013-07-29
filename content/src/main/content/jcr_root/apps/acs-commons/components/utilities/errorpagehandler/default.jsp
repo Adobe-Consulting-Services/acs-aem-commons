@@ -11,8 +11,8 @@ if(errorPageHandlerService != null && errorPageHandlerService.isEnabled()) {
     final int status = errorPageHandlerService.getStatusCode(slingRequest);
 
     if(status >= SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR &&
-            componentHelper.isDisabledMode(slingRequest)) {
-        // If error is some sort of internal error (500+) and on Author (WCMMode.DISABLED ~> Publish)
+            !componentHelper.isDisabledMode(slingRequest)) {
+        // If error is some sort of internal error (500+) and on Author (since WCMMode.DISABLED ~> Publish)
         if(componentHelper.isPreviewMode(slingRequest)) {
             %><cq:include script="/apps/acs-commons/components/utilities/errorpagehandler/preview/errormessage.jsp" /><%
             return;
