@@ -11,8 +11,6 @@ import org.apache.sling.api.resource.Resource;
  * This service is used via the ACS-AEM-Commons error page handler implementation to create author-able error pages.
  */
 public interface ErrorPageHandlerService {
-    public static final String STATUS_CODE = SlingConstants.ERROR_STATUS;
-    public static final String SERVLET_NAME = SlingConstants.ERROR_SERVLET_NAME;
     public static final int DEFAULT_STATUS_CODE = SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
     /**
