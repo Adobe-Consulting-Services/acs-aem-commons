@@ -1,6 +1,7 @@
 package com.adobe.acs.commons.errorpagehandler.impl;
 
 import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
+import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.PathInfo;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
@@ -10,7 +11,6 @@ import com.day.cq.search.eval.NodenamePredicateEvaluator;
 import com.day.cq.search.eval.TypePredicateEvaluator;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
-import com.day.cq.wcm.api.WCMMode;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -25,9 +25,9 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.auth.core.AuthUtil;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.apache.sling.engine.auth.Authenticator;
-import org.apache.sling.engine.auth.NoAuthenticationHandlerException;
+import org.apache.sling.commons.auth.Authenticator;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +56,6 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ErrorPageHandlerImpl.class);
 
-    private static final String USER_AGENT = "User-Agent";
-    private static final String MOZILLA = "Mozilla";
-    private static final String OPERA = "Opera";
     public static final String DEFAULT_ERROR_PAGE_NAME = "errors";
     public static final String ERROR_PAGE_PROPERTY = "errorPages";
 
@@ -107,10 +104,13 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Reference
     private Authenticator authenticator;
 
+    @Reference
+    private ComponentHelper componentHelper;
+
     private SortedMap<String, String> pathMap = new TreeMap<String, String>();
 
     /**
-     * Find the full path to the most appropriate Error Page
+     * Find the JCR full path to the most appropriate Error Page
      *
      * @param request
      * @param errorResource
@@ -253,7 +253,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /** HTTP Request Data Retrieval Methods **/
 
     /**
-     * Get Error Status Code from Request
+     * Get Error Status Code from Request or Default (500) if no status code can be found
      *
      * @param request
      * @return
@@ -269,7 +269,9 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
+     * Get the Error Page's name (all lowercase) that should be used to render the page for this error.
      *
+     * This looks at the Servlet Sling has already resolved to handle this request (making Sling do all the hard work)!
      *
      * @param request
      * @return
@@ -334,8 +336,10 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /** OSGi Component Property Getters/Setters **/
 
     /**
+     * Determines if this Service is "enabled". If it has been configured to be "Disabled" the Service still exists however it should not be used.
+     * This OSGi Property toggle allows error page handler to be toggled on an off without via OSGi means without throwing Null pointers, etc.
      *
-     * @return
+     * @return true is the Service should be considered enabled
      */
     public boolean isEnabled() {
         return enabled;
@@ -502,41 +506,6 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Determines if the request originated from a Browser
-     *
-     * @param request
-     * @return
-     */
-    protected boolean isBrowserRequest(SlingHttpServletRequest request) {
-        final String userAgent = request.getHeader(USER_AGENT);
-        return !StringUtils.isBlank(userAgent) && (StringUtils.contains(userAgent, MOZILLA) || StringUtils.contains(userAgent, OPERA));
-    }
-
-    /**
-     * Determines if the Request is to Author
-     *
-     * @param request
-     * @return
-     */
-    @Override
-    public boolean isAuthorModeRequest(SlingHttpServletRequest request) {
-        final WCMMode mode = WCMMode.fromRequest(request);
-        return (mode != null && !WCMMode.DISABLED.equals(mode));
-    }
-
-    /**
-     * Determines is the Request is to Author in Preview mode
-     *
-     * @param request
-     * @return true if Request is to an Author in Preview
-     */
-    @Override
-    public boolean isAuthorPreviewModeRequest(SlingHttpServletRequest request) {
-        final WCMMode mode = WCMMode.fromRequest(request);
-        return WCMMode.PREVIEW.equals(mode);
-    }
-
-    /**
      * Attempts to invoke a valid Sling Authentication Handler for the request
      *
      * @param request
@@ -548,28 +517,26 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             return;
         }
 
-        try {
-            authenticator.login(request, response);
-        } catch (NoAuthenticationHandlerException ex) {
-            log.warn("Cannot login: No Authentication Handler is willing to authenticate");
-        }
+        authenticator.login(request, response);
     }
 
     /**
-     * Determine and handle 404 Requests
+     * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies .
+     *
+     * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
      *
      * @param request
      * @param response
      */
     @Override
     public void doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response) {
-        if(!isAuthorModeRequest(request)) {
+        if(componentHelper.isDisabledMode(request)) {
             return;
         } else if (getStatusCode(request) != SlingHttpServletResponse.SC_NOT_FOUND) {
             return;
         }
 
-        if (isAnonymousRequest(request) && isBrowserRequest(request)) {
+        if (isAnonymousRequest(request) && AuthUtil.isBrowserRequest(request)) {
             authenticateRequest(request, response);
         }
     }
