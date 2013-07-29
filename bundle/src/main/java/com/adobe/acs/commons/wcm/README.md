@@ -13,6 +13,8 @@ The mode common use case of the ComponentHelper is to control the execution of a
     <%@ include file="/libs/foundation/global.jsp" %><%
     %><%@ page import="com.adobe.acs.commons.wcm.ComponentHelper,
                        com.adobe.acs.commons.wcm.ComponentEditType"%><%
+        // Get the ComponentHelper Service
+        ComponentHelper componentHelper = sling.getService(ComponentHelper.class);
 
         // Initialize component
         String title = properties.get("title", "");
@@ -21,7 +23,7 @@ The mode common use case of the ComponentHelper is to control the execution of a
         boolean hasTitle = title.length > 5;
         boolean hasDescription = description.length > 10;
 
-    %><% if(ComponentHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.TITLE, hasTitle, hasDescription) {
+    %><% if(componentHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.TITLE, hasTitle, hasDescription) {
         // If (hasTitle && hasDescription) == false, then print out the Title placeholder image and stop further
         // execution of this component. This will also intelligently build out drop-targets based on the components cq:editConfigs
         return;
