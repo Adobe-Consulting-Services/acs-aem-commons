@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/apps/acs-commons"/>
+<<<<<<< HEAD
     <filter root="/etc/clientlibs/acs-commons"/>
+=======
+    <filter root="/apps/sling/servlet/errorhandler/404.jsp"/>
+    <filter root="/apps/sling/servlet/errorhandler/default.jsp"/>
+>>>>>>> 304663e49fd54031291ddbc1b9dce9f8f871caa4
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/dam/video/mp3hq"/>
     <filter root="/etc/dam/video/ogghq"/>
