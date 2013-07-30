@@ -1,13 +1,19 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@page session="false"
-        import="com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService"%><%
+        import="org.apache.sling.api.SlingHttpServletResponse,
+                com.adobe.acs.commons.wcm.ComponentHelper,
+                com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService"%>
+<%
 final ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
 
 if(errorPageHandlerService != null && errorPageHandlerService.isEnabled()) {
+    final ComponentHelper componentHelper = sling.getService(ComponentHelper.class);
     final int status = errorPageHandlerService.getStatusCode(slingRequest);
 
-    if(status >= 500 && errorPageHandlerService.isAuthorModeRequest(slingRequest)) {
-        if(errorPageHandlerService.isAuthorPreviewModeRequest(slingRequest)) {
+    if(status >= SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR &&
+            !componentHelper.isDisabledMode(slingRequest)) {
+        // If error is some sort of internal error (500+) and on Author (since WCMMode.DISABLED ~> Publish)
+        if(componentHelper.isPreviewMode(slingRequest)) {
             %><cq:include script="/apps/acs-commons/components/utilities/errorpagehandler/preview/errormessage.jsp" /><%
             return;
         } else {
