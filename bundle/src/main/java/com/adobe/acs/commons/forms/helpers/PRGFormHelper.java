@@ -13,7 +13,46 @@ public interface PRGFormHelper extends FormHelper {
     public final static String KEY_FORM = "f";
     public final static String KEY_ERRORS = "e";
 
+    /**
+     * Issues a 302 redirect with the form serialized into a JSON object that can be
+     * read out by the PRGFormHelper on the "other side".
+     *
+     * Allows 302 redirect to target the specified path.
+     *
+     * @param form
+     * @param path
+     * @param response
+     * @throws IOException
+     * @throws JSONException
+     */
     public void sendRedirect(Form form, String path, HttpServletResponse response) throws IOException, JSONException;
+
+    /**
+     * Issues a 302 redirect with the form serialized into a JSON object that can be
+     * read out by the PRGFormHelper on the "other side".
+     *
+     * Allows 302 redirect to target the specified CQ Page.
+     *
+     * @param form
+     * @param page
+     * @param response
+     * @throws IOException
+     * @throws JSONException
+     */
     public void sendRedirect(Form form, Page page, HttpServletResponse response) throws IOException, JSONException;
+
+    /**
+     /**
+     * Issues a 302 redirect with the form serialized into a JSON object that can be
+     * read out by the PRGFormHelper on the "other side".
+     *
+     * Allows 302 redirect to target the specified resource with provided .html extension.
+     *
+     * @param form
+     * @param resource
+     * @param response
+     * @throws IOException
+     * @throws JSONException
+     */
     public void sendRedirect(Form form, Resource resource, HttpServletResponse response) throws IOException, JSONException;
 }

@@ -48,13 +48,13 @@ This example used the PRGFormHelper, however this can easily be swapped out for 
 ### CQ5 Component
 
 #### /apps/acme/components/demo
-*** When using the ForwardFormHelper, add the following to your component: ***
-
-* sling:resourceSuperType: `acs-commons/components/content/base/form`
 
 #### demo.jsp
 
-    <%@page session="false" "%><%
+    <%@include file="/libs/foundation/global.jsp"%>
+    <%@page session="false"
+        import="com.adobe.acs.commons.forms.*,
+                com.adobe.acs.commons.forms.helpers.*"%><%
     %><%--
     	 Initialize the Form object with the slingRequest.
 
@@ -64,68 +64,93 @@ This example used the PRGFormHelper, however this can easily be swapped out for 
 
     	 If the request is a "fresh" request to the page,
     	 the form and its errors will be empty.
+
+         Changing between Form strategies (PRG vs Fwd-as-GET) is as
+         easy as swapping out the FormHelper as show below.
+         Also, don't forget to make them the same in post.POST.jsp.
     --%>
 
     <%
-    	PRGFormHelper formHelper = sling.getService(PRGFormHelper.class);
+        //ForwardFormHelper formHelper = sling.getService(ForwardFormHelper.class);
+        PRGFormHelper formHelper = sling.getService(PRGFormHelper.class);
     	Form form = formHelper.getForm("demo", slingRequest);
     %>
 
     <%--
-    	Check if the form has any errors, and display a list of all the error messages.
+    	Check if the form has any errors,
+    	and display a list of all the error messages.
     --%>
     <% if(form.hasErrors()) { %>
-    	<h2 class="alert">The following errors prevented you from submitting this form.</h2><%	}
+    	<h2 class="alert">Your form has errors!</h2><%	}
     %>
 
     <%--
     	Set the form to POST back to the component
     --%>
-    <form method="POST" action="<%= form.getAction(resource) %>">
+    <form method="post" action="<%= formHelper.getAction(resource) %>">
+    <%= formHelper.getFormInputsHTML(form) %>
     <fieldset>
-    	<legend>Demo</legend>
+    	<legend>Form Demo</legend>
 
     	<%--
-    	    You can check for specific error messages, and handle them discretely.     		    Here we check to see if each field has an error and apply a "error" CSS Class
-            to the label.
+    	    You can check for specific error messages..
 
-            You can also pull out any Server-provided error messages via: 		    form.getError("myField")
+            Below we use Server-provided error messages via: form.getError("myField")
+        	and apply an "error" CSS Class to the label.
     	--%>
-    	<label <% form.hasError("myField") ? "class=\"error\"" : "" %>>My Field:</label>
+
+        <div><%= form.getError("myField") %></div>
+    	<label <%= form.hasError("myField") ? "class=\"error\"" : "" %>>My Field:</label>
 
     	<%--
     		The form fields can be "re-populated" with submitted values by setting the
             `value` attribute of the input field.
     	--%>
-    	<input type="text" value="<%= form.get("myField") %>"/>
+    	<input type="text" name="myField" value="<%= form.get("myField") %>"/>
 
     	<input type="submit" value="Submit"/>
     </fieldset>
     </form>
 
+
 #### post.POST.jsp
 
 Note the naming convention of post.POST.jsp; `form.getAction(resource)` returns: `resource.getPath() + ".post.html"`
 
-    <%@page session="false"%><%
+    <%@include file="/libs/foundation/global.jsp"%>
+    <%@page session="false"
+        import="com.adobe.acs.commons.forms.*,
+    	    	com.adobe.acs.commons.forms.helpers.*"%><%
 
-    PRGFormHelper formHelper = sling.getService(PRGFormHelper.class);
+    <%--
+         Changing between Form strategies (PRG vs Fwd-as-GET) is as
+         easy as swapping out the FormHelper as show below.
+         Also, don't forget to make them the same in post.POST.jsp.
+    --%>
+
+    //ForwardFormHelper formHelper = sling.getService(ForwardFormHelper.class);
+	PRGFormHelper formHelper = sling.getService(PRGFormHelper.class);
+
     Form form = formHelper.getForm("demo", slingRequest);
 
-    if(form.get("myField") != null && form.get("myField").length > 10) {
+	if(form.get("myField") != null && form.get("myField").length() > 100) {
     	// Data is all good!
     } else {
-    	form.setError("myField", "Something is wrong w/ this!")
+        form.setError("myField", "What kind of answer is:" + form.get("myField"));
     }
 
     if(form.hasErrors()) {
-    	formHelper.sendRedirect(form, currentPage, slingResponse);
+        <%--
+            Choose the return-to-form method based on the Form strategy.
+            Uncommented line used PRG, commented uses Fwd-as-GET
+        --%>
+        formHelper.sendRedirect(form, currentPage, slingResponse);
+        //formHelper.forwardAsGet(form, currentPage, slingRequest, slingResponse);
+
     } else {
 		// Save the data; or whatever you want with it
-    	slingResponse.sendRedirect("/success.html");
+        slingResponse.sendRedirect("/content/success.html");
     }
 
     return;
     %>
-
-

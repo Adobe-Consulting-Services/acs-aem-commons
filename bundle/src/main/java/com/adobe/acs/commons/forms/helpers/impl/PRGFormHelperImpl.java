@@ -4,12 +4,10 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PRGFormHelper;
 import com.adobe.acs.commons.util.TypeUtil;
+import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -24,8 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-
-@Component(label = "ACS AEM Commons - PRG Form Helper", description = "POST-Redirect-GET Form Helper", enabled = true, metatype = false, immediate = false)
+@Component(label = "ACS AEM Commons - PRG Form Helper", description = "POST-Redirect-GET Form Helper", enabled = true, metatype = false, immediate = false, inherit = true)
 @Properties({ @Property(label = "Vendor", name = Constants.SERVICE_VENDOR, value = "ACS", propertyPrivate = true) })
 @Service( value = { FormHelper.class, PRGFormHelper.class })
 public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGFormHelper {
@@ -51,14 +48,14 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
     @Override
     public Form getForm(final String formName, final HttpServletRequest request) {
 		if (this.doHandlePost(formName, request)) {
-			log.debug("Getting FORM {} from POST parameters", formName);
-			return this.getGetForm(formName, request);
+			log.debug("Getting FORM [ {} ] from POST parameters", formName);
+			return this.getPostForm(formName, request);
 		} else if(this.doHandleGet(formName, request)) {
-            log.debug("Getting FORM {} from GET parameters", formName);
-            return this.getPostForm(formName, request);
+            log.debug("Getting FORM [ {} ] from GET parameters", formName);
+            return this.getGetForm(formName, request);
         }
 
-        log.debug("Creating empty form for FORM {}", formName);
+        log.debug("Creating empty form for FORM [ {} ]", formName);
         return new Form(formName);
 	}
 
@@ -130,18 +127,18 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
      * @return
      */
     protected Form getGetForm(final String formName, final HttpServletRequest request) {
-        Map<String, String> form = new HashMap<String, String>();
+        Map<String, String> data = new HashMap<String, String>();
         Map<String, String> errors = new HashMap<String, String>();
 
         // Get the QP lookup for this form
-        final String data = this.decode(request.getParameter(this.getGetLookupKey(formName)));
+        final String requestData = this.decode(request.getParameter(this.getGetLookupKey(formName)));
 
-        if(StringUtils.isBlank(data)) {
+        if(StringUtils.isBlank(requestData)) {
             return new Form(formName);
         }
 
         try {
-            final JSONObject jsonData = new JSONObject(data);
+            final JSONObject jsonData = new JSONObject(requestData);
 
             final String incomingFormName = jsonData.optString(KEY_FORM_NAME);
 
@@ -149,21 +146,25 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
             if(StringUtils.equals(incomingFormName, formName)) {
                 final JSONObject incomingJsonForm = jsonData.optJSONObject(KEY_FORM);
                 if(incomingJsonForm != null) {
-                    form = TypeUtil.toMap(incomingJsonForm);
+                    data = TypeUtil.toMap(incomingJsonForm);
+                    log.debug("Form data: {}", data);
                 }
 
                 final JSONObject incomingJsonErrors = jsonData.optJSONObject(KEY_ERRORS);
 
                 if(incomingJsonErrors != null) {
                     errors = TypeUtil.toMap(incomingJsonErrors);
+                    log.debug("Form data: {}", errors);
                 }
             }
         } catch (JSONException e) {
-            log.warn("Cannot parse query parameters for request: {}", data);
+            log.warn("Cannot parse query parameters for request: {}", requestData);
             return new Form(formName);
         }
 
-        return new Form(formName, form, errors);
+        return new Form(formName,
+                this.getProtectedData(data),
+                this.getProtectedErrors(errors));
     }
 
     /**
@@ -201,7 +202,7 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
      */
     public String getRedirectPath(Form form, Resource resource) throws JSONException,
             UnsupportedEncodingException {
-        return getRedirectPath(form, resource.getPath().concat(".html"));
+        return getRedirectPath(form, resource.getPath() + FormHelper.EXTENSION);
     }
 
     /**

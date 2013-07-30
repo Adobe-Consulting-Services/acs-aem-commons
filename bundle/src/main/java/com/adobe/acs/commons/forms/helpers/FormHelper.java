@@ -6,10 +6,12 @@ import org.apache.sling.api.resource.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-public interface FormHelper {
-    public static final String FORM_NAME_INPUT = "__form_name";
+public interface FormHelper extends AbstractFormHelper {
+    public static final String SELECTOR = "post";
+    public static final String EXTENSION = ".html";
+    public static final String FORM_NAME_INPUT = "_form";
 
-	/**
+    /**
 	 * Gets the From from either the POST Requests parameters or the GET
 	 * request's (synthetic) attributes.
 	 * 
@@ -34,6 +36,8 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the current resource
+     *
+     * Appends ".post.html" to the resource's path.
      *
      * @param resource
      * @return

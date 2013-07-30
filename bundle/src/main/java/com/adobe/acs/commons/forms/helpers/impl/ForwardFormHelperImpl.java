@@ -1,17 +1,14 @@
 package com.adobe.acs.commons.forms.helpers.impl;
 
-
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.ForwardFormHelper;
 import com.adobe.acs.commons.forms.helpers.impl.synthetics.SyntheticHttpServletGetRequest;
 import com.adobe.acs.commons.forms.helpers.impl.synthetics.SyntheticSlingHttpServletGetRequest;
+import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
@@ -25,8 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-
-@Component(label = "ACS AEM Commons - Forward Form Manager", description = "Internal Forward-as-GET Form Helper", enabled = true, metatype = false, immediate = false)
+@Component(label = "ACS AEM Commons - Forward Form Manager", description = "Internal Forward-as-GET Form Helper", enabled = true, metatype = false, immediate = false, inherit = true)
 @Properties({ @Property(label = "Vendor", name = Constants.SERVICE_VENDOR, value = "ACS", propertyPrivate = true) })
 @Service( value = { FormHelper.class, ForwardFormHelper.class })
 public class ForwardFormHelperImpl extends AbstractFormHelperImpl implements ForwardFormHelper {
@@ -47,7 +43,7 @@ public class ForwardFormHelperImpl extends AbstractFormHelperImpl implements For
             final String key = this.getLookupKey(formName);
             final Object obj = request.getAttribute(key);
             if (obj instanceof Form) {
-                return (Form) obj;
+                return this.getProtectedForm((Form) obj);
             } else {
                 log.info("Unable to find Form in request attribute: [ {} => {} ]", key, obj);
                 return new Form(formName);
@@ -115,7 +111,11 @@ public class ForwardFormHelperImpl extends AbstractFormHelperImpl implements For
                              final SlingHttpServletRequest request,
                              final SlingHttpServletResponse response) throws ServletException,
             IOException {
-        forwardAsGet(form, page.adaptTo(Resource.class), request, response);
+        final RequestDispatcherOptions options = new RequestDispatcherOptions();
+        options.setReplaceSelectors("");
+        options.setForceResourceType("cq/Page");
+        final String path = page.getPath() + FormHelper.EXTENSION;
+        forwardAsGet(form, path, request, response, options);
     }
 
     /**
@@ -152,12 +152,37 @@ public class ForwardFormHelperImpl extends AbstractFormHelperImpl implements For
                              final SlingHttpServletResponse response,
                              final RequestDispatcherOptions options) throws ServletException,
             IOException {
+        final String path = resource.getPath();
+        forwardAsGet(form, path, request, response, options);
+
+    }
+
+    /**
+     *
+     * @param form
+     * @param path
+     * @param request
+     * @param response
+     * @param options
+     * @throws ServletException
+     * @throws IOException
+     */
+    @Override
+    public void forwardAsGet(final Form form, final String path,
+                             final SlingHttpServletRequest request,
+                             final SlingHttpServletResponse response,
+                             final RequestDispatcherOptions options) throws ServletException,
+            IOException {
         this.setRequestAttrForm(request, form);
 
         final SlingHttpServletRequest syntheticRequest = new SyntheticSlingHttpServletGetRequest(
                 request);
+        log.debug("Forwarding as GET to path: {} ", path);
+        log.debug("Forwarding as GET w/ replace selectors: {} ", options.getReplaceSelectors());
+        log.debug("Forwarding as GET w/ add selectors: {} ", options.getAddSelectors());
+        log.debug("Forwarding as GET w/ suffix: {} ", options.getReplaceSuffix());
+        log.debug("Forwarding as GET w/ forced resourceType: {} ", options.getForceResourceType());
 
-        final String path = resource.getPath() + ".html";
         request.getRequestDispatcher(path, options).forward(syntheticRequest, response);
     }
 
@@ -167,7 +192,18 @@ public class ForwardFormHelperImpl extends AbstractFormHelperImpl implements For
 
     /**
      *
-     * @param formName
+     * @param formName                 this.setRequestAttrForm(request, form);
+
+    final SlingHttpServletRequest syntheticRequest = new SyntheticSlingHttpServletGetRequest(
+    request);
+    final String path = resource.getPath();
+    log.debug("Forwarding as GET to path: {} ", path);
+    log.debug("Forwarding as GET w/ replace selectors: {} ", options.getReplaceSelectors());
+    log.debug("Forwarding as GET w/ add selectors: {} ", options.getAddSelectors());
+    log.debug("Forwarding as GET w/ suffix: {} ", options.getReplaceSuffix());
+    log.debug("Forwarding as GET w/ forced resourceType: {} ", options.getForceResourceType());
+
+    request.getRequestDispatcher(path, options).forward(syntheticRequest, response);
      * @return
      */
     private String getLookupKey(String formName) {
