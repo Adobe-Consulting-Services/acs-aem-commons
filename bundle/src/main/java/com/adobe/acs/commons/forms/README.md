@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provide an abstraction for managing the submission of statically defined Forms.
+Provide an abstraction for managing the submission of statically defined HTML Forms.
 
 ### Form.java
 
@@ -23,10 +23,9 @@ The Forward Form Helper is used when Forms need to redirect internally to render
 1. The same form but with error messages
 2. A multi-step form (form wizard)
 
-Forward Form Helper requests the target resource as an internal Sythetic GET Request, and passes the Form object as a HttpServletRequest attribute.
+Forward Form Helper requests the target resource as an internal Synthetic GET Request, and passes the Form object as a HttpServletRequest attribute.
 
-*** Note: Form Components using the Forward scheme, should have a `sling:resourceSuperType` of `acs-commons/components/content/base/form` to allow internal fowards to re-render the Page, rather than just the Component. ***
-
+*Note: BrowserMap JS existing on the page with the form seems to have odd side-effects (JS-based auto-redirect) when using FowardFormHelper. PRGFormHelper works fine.
 
 #### PRG Form Helper (POST-Redirect-GET)
 
