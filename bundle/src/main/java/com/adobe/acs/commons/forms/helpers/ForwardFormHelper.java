@@ -8,8 +8,6 @@ import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.resource.Resource;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -17,6 +15,14 @@ import java.io.IOException;
  */
 public interface ForwardFormHelper extends FormHelper {
     public final String REQUEST_ATTR_FORM_KEY = "__acs-aem-commons_form_";
+
+    /**
+     * Creates the action URL when posting to a Page (non AJAX call)
+     *
+     * @param page
+     * @return
+     */
+    public String getAction(final Page page);
 
     /**
      * Creates a synthetic GET request that can be used in the context of a real
@@ -101,25 +107,4 @@ public interface ForwardFormHelper extends FormHelper {
                              final SlingHttpServletResponse response,
                              final RequestDispatcherOptions options) throws ServletException, IOException;
 
-    /**
-     /**
-     * Creates a synthetic GET request that can be used in the context of a real
-     * POST request to retrieve GET renditions of resources.
-     *
-     * This method is best used for a customized scenarios where the current resource or currentPage do not suffice.
-     *
-     * Same as above, but uses empty RequestDispatcherOptions.
-     *
-     * Note: BrowserMap JS may auto-redirect the result is a CQ Page that loads BrowserMap.
-     *
-     * @param form
-     * @param path
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException
-     */
-    public void forwardAsGet(final Form form, final String path,
-                             final HttpServletRequest request,
-                             final HttpServletResponse response) throws ServletException, IOException;
 }

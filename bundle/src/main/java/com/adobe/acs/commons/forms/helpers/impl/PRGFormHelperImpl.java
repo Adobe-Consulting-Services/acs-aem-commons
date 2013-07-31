@@ -4,7 +4,6 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PRGFormHelper;
 import com.adobe.acs.commons.util.TypeUtil;
-import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
@@ -17,8 +16,6 @@ import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -27,7 +24,7 @@ import java.util.Map;
 @Component(label = "ACS AEM Commons - PRG Form Helper", description = "POST-Redirect-GET Form Helper", enabled = true, metatype = false, immediate = false, inherit = true)
 @Properties({ @Property(label = "Vendor", name = Constants.SERVICE_VENDOR, value = "ACS", propertyPrivate = true) })
 @Service( value = { FormHelper.class, PRGFormHelper.class })
-public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGFormHelper {
+public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelper {
 	private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
     /**
@@ -54,11 +51,14 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
 			return this.getPostForm(formName, request);
 		} else if(this.doHandleGet(formName, request)) {
             log.debug("Getting FORM [ {} ] from GET parameters", formName);
-            return this.getGetForm(formName, request);
+            Form form = this.getGetForm(formName, request);
+            form = this.setResourcePath(form, request);
+            return form;
         }
 
         log.debug("Creating empty form for FORM [ {} ]", formName);
-        return new Form(formName);
+        Form form = new Form(formName);
+        return this.setResourcePath(form, request);
 	}
 
     /**

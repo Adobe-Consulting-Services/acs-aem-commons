@@ -18,21 +18,19 @@ Form objects represent the the form data; Helpers interact with Form objects.
 
 #### Forward Form Helper
 
-The Forward Form Helper is used when Forms need to redirect internally to render either
+The Forward Form Helper is used when Forms need to redirect (Forward-as-GET) internally to render end state of forms.
 
-1. The same form but with error messages
-2. A multi-step form (form wizard)
+Forward Form Helper requests the target resource as an internal Synthetic GET Request, and passes the Form object as a SlingHttpServletRequest attribute.
 
-Forward Form Helper requests the target resource as an internal Synthetic GET Request, and passes the Form object as a HttpServletRequest attribute.
+Key features/use-cases:
 
-*Note: BrowserMap JS existing on the page with the form seems to have odd side-effects (JS-based auto-redirect) when using FowardFormHelper. PRGFormHelper works fine.
+    * Form-payload is too large to be transferred via GET Query Params (to render error page)
+    * Customer is uncomfortable exposing for- data as clear text in query params (even though they fall under SSL envelope)
+    * ForwardFormHelper.getAction(resource
 
 #### PRG Form Helper (POST-Redirect-GET)
 
 The PRG Form Helper is used when Forms need to redirect externally (302) to render either
-
-1. The same form but with error messages
-2. A multi-step form (form wizard)
 
 PRG Form Helper requests the target resource as a 302 Redirect, serialized the Form data, data pass it as GET Query Parameters. This works well when Form data is under 2000 characters in total.
 
@@ -87,7 +85,9 @@ This example used the PRGFormHelper, however this can easily be swapped out for 
     	Set the form to POST back to the component
     --%>
     <form method="post" action="<%= formHelper.getAction(resource) %>">
-    <%= formHelper.getFormInputsHTML(form) %>
+
+    <%-- For ForwardFormHelper passing currentPage is usually desired unless using AJAX scheme
+    <form method="post" action="<%= formHelper.getAction(currentPage) %>">--%>
     <fieldset>
     	<legend>Form Demo</legend>
 
@@ -132,7 +132,7 @@ Note the naming convention of post.POST.jsp; `form.getAction(resource)` returns:
 
     Form form = formHelper.getForm("demo", slingRequest);
 
-	if(form.get("myField") != null && form.get("myField").length() > 100) {
+	if(form.get("myField") != null && form.get("myField").length() > 10) {
     	// Data is all good!
     } else {
         form.setError("myField", "What kind of answer is:" + form.get("myField"));

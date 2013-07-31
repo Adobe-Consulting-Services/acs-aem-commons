@@ -2,6 +2,7 @@ package com.adobe.acs.commons.forms.helpers;
 
 import com.adobe.acs.commons.forms.Form;
 import com.day.cq.wcm.api.Page;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 
@@ -25,7 +26,7 @@ public interface PRGFormHelper extends FormHelper {
      * @throws IOException
      * @throws JSONException
      */
-    public void sendRedirect(Form form, String path, HttpServletResponse response) throws IOException, JSONException;
+    public void sendRedirect(Form form, String path, SlingHttpServletResponse response) throws IOException, JSONException;
 
     /**
      * Issues a 302 redirect with the form serialized into a JSON object that can be
@@ -39,7 +40,7 @@ public interface PRGFormHelper extends FormHelper {
      * @throws IOException
      * @throws JSONException
      */
-    public void sendRedirect(Form form, Page page, HttpServletResponse response) throws IOException, JSONException;
+    public void sendRedirect(Form form, Page page, SlingHttpServletResponse response) throws IOException, JSONException;
 
     /**
      /**
@@ -54,5 +55,5 @@ public interface PRGFormHelper extends FormHelper {
      * @throws IOException
      * @throws JSONException
      */
-    public void sendRedirect(Form form, Resource resource, HttpServletResponse response) throws IOException, JSONException;
+    public void sendRedirect(Form form, Resource resource, SlingHttpServletResponse response) throws IOException, JSONException;
 }

@@ -1,6 +1,7 @@
 package com.adobe.acs.commons.forms;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ public class Form {
 	private final String name;
 	private final Map<String, String> data;
 	private final Map<String, String> errors;
+    private String resourcePath = null;
 
 	public Form() {
 		this.name = AUTO_GEN_FORM_NAME;
@@ -117,4 +119,12 @@ public class Form {
 		map.putAll(this.errors);
 		return new ValueMapDecorator(map);
 	}
+
+    public void setResourcePath(final String path) {
+        this.resourcePath = path;
+    }
+
+    public String getResourcePath() {
+        return this.resourcePath;
+    }
 }
