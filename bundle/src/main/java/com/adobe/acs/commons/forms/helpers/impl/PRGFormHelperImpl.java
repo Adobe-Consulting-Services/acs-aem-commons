@@ -8,6 +8,8 @@ import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -35,7 +37,7 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
      * @param request
      * @return
      */
-    protected boolean doHandle(final String formName, final HttpServletRequest request) {
+    protected boolean doHandle(final String formName, final SlingHttpServletRequest request) {
         return this.doHandleGet(formName, request) || this.doHandlePost(formName, request);
     }
 
@@ -46,7 +48,7 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
      * @return
      */
     @Override
-    public Form getForm(final String formName, final HttpServletRequest request) {
+    public Form getForm(final String formName, final SlingHttpServletRequest request) {
 		if (this.doHandlePost(formName, request)) {
 			log.debug("Getting FORM [ {} ] from POST parameters", formName);
 			return this.getPostForm(formName, request);
@@ -68,7 +70,7 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
      * @throws JSONException
      */
     @Override
-    public void sendRedirect(Form form, String path, HttpServletResponse response) throws IOException, JSONException {
+    public void sendRedirect(Form form, String path, SlingHttpServletResponse response) throws IOException, JSONException {
         final String url = this.getRedirectPath(form, path);
         response.sendRedirect(url);
     }
@@ -82,7 +84,7 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
      * @throws JSONException
      */
     @Override
-    public void sendRedirect(Form form, Page page, HttpServletResponse response) throws IOException, JSONException {
+    public void sendRedirect(Form form, Page page, SlingHttpServletResponse response) throws IOException, JSONException {
         final String url = this.getRedirectPath(form, page);
         response.sendRedirect(url);
     }
@@ -96,7 +98,7 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
      * @throws JSONException
      */
     @Override
-    public void sendRedirect(Form form, Resource resource, HttpServletResponse response) throws IOException, JSONException {
+    public void sendRedirect(Form form, Resource resource, SlingHttpServletResponse response) throws IOException, JSONException {
         final String url = this.getRedirectPath(form, resource);
         response.sendRedirect(url);
     }
@@ -108,7 +110,7 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
      * @param request
      * @return
      */
-    protected boolean doHandleGet(final String formName, final HttpServletRequest request) {
+    protected boolean doHandleGet(final String formName, final SlingHttpServletRequest request) {
         if (StringUtils.equalsIgnoreCase("GET", request.getMethod())) {
             return (StringUtils.isNotBlank(request.getParameter(this.getGetLookupKey(formName))));
         } else {
@@ -126,7 +128,7 @@ public class PRGFormHelperImpl extends AbstractFormHelperImpl implements PRGForm
      * @param request
      * @return
      */
-    protected Form getGetForm(final String formName, final HttpServletRequest request) {
+    protected Form getGetForm(final String formName, final SlingHttpServletRequest request) {
         Map<String, String> data = new HashMap<String, String>();
         Map<String, String> errors = new HashMap<String, String>();
 
