@@ -51,14 +51,11 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
 			return this.getPostForm(formName, request);
 		} else if(this.doHandleGet(formName, request)) {
             log.debug("Getting FORM [ {} ] from GET parameters", formName);
-            Form form = this.getGetForm(formName, request);
-            form = this.setResourcePath(form, request);
-            return form;
+            return this.getGetForm(formName, request);
         }
 
         log.debug("Creating empty form for FORM [ {} ]", formName);
-        Form form = new Form(formName);
-        return this.setResourcePath(form, request);
+        return new Form(formName, request.getResource());
 	}
 
     /**
@@ -136,7 +133,7 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
         final String requestData = this.decode(request.getParameter(this.getGetLookupKey(formName)));
 
         if(StringUtils.isBlank(requestData)) {
-            return new Form(formName);
+            return new Form(formName, request.getResource());
         }
 
         try {
@@ -161,10 +158,11 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
             }
         } catch (JSONException e) {
             log.warn("Cannot parse query parameters for request: {}", requestData);
-            return new Form(formName);
+            return new Form(formName, request.getResource());
         }
 
         return new Form(formName,
+                request.getResource(),
                 this.getProtectedData(data),
                 this.getProtectedErrors(errors));
     }

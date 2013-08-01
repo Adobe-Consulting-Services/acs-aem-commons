@@ -34,14 +34,10 @@ public class ForwardFormHelperImpl extends PostFormHelperImpl implements Forward
             final String key = this.getLookupKey(formName);
             final Object obj = request.getAttribute(key);
             if (obj instanceof Form) {
-                Form form = this.getProtectedForm((Form) obj);
-                form = this.setResourcePath(form, request);
-                return form;
+                return this.getProtectedForm((Form) obj);
             } else {
                 log.info("Unable to find Form in Request attribute: [ {} => {} ]", key, obj);
-                Form form = new Form(formName);
-                form = this.setResourcePath(form, request);
-                return form;
+                return new Form(formName, request.getResource());
             }
         }
     }

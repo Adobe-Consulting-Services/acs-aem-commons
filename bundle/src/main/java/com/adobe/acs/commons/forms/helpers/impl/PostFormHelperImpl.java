@@ -54,7 +54,7 @@ public class PostFormHelperImpl implements FormHelper {
         html += "<input type=\"hidden\" name=\"" + FORM_NAME_INPUT + "\" value=\""
                 + xssApi.encodeForHTMLAttr(form.getName()) + "\"/>\n";
 
-        final String resourcePath = form.getResourcePath();
+        final String resourcePath = form.getResource().getPath();
         html += "<input type=\"hidden\" name=\"" + FORM_RESOURCE_INPUT + "\" value=\""
                 + xssApi.encodeForHTMLAttr(resourcePath) + "\"/>\n";
 
@@ -127,9 +127,7 @@ public class PostFormHelperImpl implements FormHelper {
             }
         }
 
-        Form form = new Form(formName, map);
-        form = this.setResourcePath(form, request);
-        return form;
+        return new Form(formName, request.getResource(), map);
     }
 
     protected String getPostLookupKey(final String formName) {
@@ -154,7 +152,7 @@ public class PostFormHelperImpl implements FormHelper {
                 cleanedMap.put(key, map.get(key));
             }
         }
-        return new Form(form.getName(), cleanedMap, form.getErrors());
+        return new Form(form.getName(), form.getResource(), cleanedMap, form.getErrors());
     }
 
     /**
@@ -165,6 +163,7 @@ public class PostFormHelperImpl implements FormHelper {
      */
     protected Form getProtectedForm(final Form form) {
         return new Form(form.getName(),
+                form.getResource(),
                 this.getProtectedData(form.getData()),
                 this.getProtectedErrors(form.getErrors()));
     }
@@ -239,11 +238,6 @@ public class PostFormHelperImpl implements FormHelper {
         } catch (UnsupportedEncodingException e) {
             return encoded;
         }
-    }
-
-    protected Form setResourcePath(final Form form, final SlingHttpServletRequest slingRequest) {
-        form.setResourcePath(slingRequest.getRequestPathInfo().getResourcePath());
-        return form;
     }
 
     /**
