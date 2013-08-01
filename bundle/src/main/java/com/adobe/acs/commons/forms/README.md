@@ -25,8 +25,9 @@ Forward Form Helper requests the target resource as an internal Synthetic GET Re
 Key features/use-cases:
 
     * Form-payload is too large to be transferred via GET Query Params (to render error page)
-    * Customer is uncomfortable exposing for- data as clear text in query params (even though they fall under SSL envelope)
-    * ForwardFormHelper.getAction(resource
+    * You aren't uncomfortable exposing for- data as clear text in query params (even though they fall under SSL envelope)
+    * You don't mind resubmitting forms when a user clicked "refresh"
+    * Keeps a "clean" address bar in the browser
 
 #### PRG Form Helper (POST-Redirect-GET)
 
@@ -34,13 +35,26 @@ The PRG Form Helper is used when Forms need to redirect externally (302) to rend
 
 PRG Form Helper requests the target resource as a 302 Redirect, serialized the Form data, data pass it as GET Query Parameters. This works well when Form data is under 2000 characters in total.
 
-*** Remember: GET Query Parameters are passed WITHIN the HTTPS envelope, so they are not visible on the wire ***
+Key features/use-cases:
 
+    * Form-payload is too small-ish (< 2000 chars encoded)
+    * You like a clean separation between your GET and POST requests
+    * Don't mind a messy address bar in the browser (errors are returned to form via GET QPs)
 
+* Remember: GET Query Parameters are passed WITHIN the HTTPS envelope, so they are not visible on the wire *
 
 ## Sample Implementation
 
-This example used the PRGFormHelper, however this can easily be swapped out for the ForwardFormHelper; The main change would be calling: `formHelper.forwardAsGet(form, currentPage, slingRequest, slingResponse)` in `post.POST.jsp` (see below).
+This example used the PRGFormHelper, however this can easily be swapped out for the ForwardFormHelper;
+The main difference is how errors are sent back to the original form
+
+Forward-as-GET
+    `formHelper.forwardAsGet(...)` in `post.POST.jsp`
+
+vs.
+
+POST-redirect-GET
+    `formHelper.sendRedirect(...)` in `post.POST.jsp`
 
 ### CQ5 Component
 
@@ -82,12 +96,19 @@ This example used the PRGFormHelper, however this can easily be swapped out for 
     %>
 
     <%--
-    	Set the form to POST back to the component
+    	Set the form to POST back to the component; use getAction(..) to add the suffix that is registered with the POST handler
     --%>
-    <form method="post" action="<%= formHelper.getAction(resource) %>">
+    <form method="post" action="<%= formHelper.getAction(currentPage) %>">
+    <%= formHelper.getFormInputsHTML(form) %>
+    <%--
+        Optionally specify the selector used to resolve the script handler
+        for this POST request. If not used defaults to "post" (to resolve to post.POST.jsp).
 
-    <%-- For ForwardFormHelper passing currentPage is usually desired unless using AJAX scheme
-    <form method="post" action="<%= formHelper.getAction(currentPage) %>">--%>
+        Useful for multi-page form wizards.
+    --%>
+    <%= formHelper.getFormSelectorInputHTML(form) %>
+
+
     <fieldset>
     	<legend>Form Demo</legend>
 
@@ -114,7 +135,8 @@ This example used the PRGFormHelper, however this can easily be swapped out for 
 
 #### post.POST.jsp
 
-Note the naming convention of post.POST.jsp; `form.getAction(resource)` returns: `resource.getPath() + ".post.html"`
+Note the naming convention of post.POST.jsp; Unless overridden using `formHelper.getFormSelectorInputHTML("custom")`
+in `formdemo.jsp`, the selector `post` is used.
 
     <%@include file="/libs/foundation/global.jsp"%>
     <%@page session="false"
@@ -135,21 +157,21 @@ Note the naming convention of post.POST.jsp; `form.getAction(resource)` returns:
 	if(form.get("myField") != null && form.get("myField").length() > 10) {
     	// Data is all good!
     } else {
-        form.setError("myField", "What kind of answer is:" + form.get("myField"));
+        form.setError("myField", "What kind of answer is: " + form.get("myField"));
     }
 
     if(form.hasErrors()) {
         <%--
             Choose the return-to-form method based on the Form strategy.
             Uncommented line used PRG, commented uses Fwd-as-GET
+
+            You'll want to match currentPage/resource/path up to form.getAction(..) in formdemo.jsp
         --%>
         formHelper.sendRedirect(form, currentPage, slingResponse);
         //formHelper.forwardAsGet(form, currentPage, slingRequest, slingResponse);
 
     } else {
-		// Save the data; or whatever you want with it
+		// Save the data; or whatever you want
         slingResponse.sendRedirect("/content/success.html");
     }
-
-    return;
     %>
