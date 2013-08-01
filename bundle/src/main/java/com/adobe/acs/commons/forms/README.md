@@ -24,10 +24,10 @@ Forward Form Helper requests the target resource as an internal Synthetic GET Re
 
 Key features/use-cases:
 
-    * Form-payload is too large to be transferred via GET Query Params (to render error page)
-    * You aren't uncomfortable exposing for- data as clear text in query params (even though they fall under SSL envelope)
-    * You don't mind resubmitting forms when a user clicked "refresh"
-    * Keeps a "clean" address bar in the browser
+* Form-payload is too large to be transferred via GET Query Params (to render error page)
+* You aren't uncomfortable exposing for- data as clear text in query params (even though they fall under SSL envelope)
+* You don't mind resubmitting forms when a user clicked "refresh"
+* Keeps a "clean" address bar in the browser
 
 #### PRG Form Helper (POST-Redirect-GET)
 
@@ -37,11 +37,11 @@ PRG Form Helper requests the target resource as a 302 Redirect, serialized the F
 
 Key features/use-cases:
 
-    * Form-payload is too small-ish (< 2000 chars encoded)
-    * You like a clean separation between your GET and POST requests
-    * Don't mind a messy address bar in the browser (errors are returned to form via GET QPs)
+* Form-payload is too small-ish (< 2000 chars encoded)
+* You like a clean separation between your GET and POST requests
+* Don't mind a messy address bar in the browser (errors are returned to form via GET QPs)
 
-* Remember: GET Query Parameters are passed WITHIN the HTTPS envelope, so they are not visible on the wire *
+Remember: GET Query Parameters are passed WITHIN the HTTPS envelope, so they are not visible on the wire
 
 ## Sample Implementation
 
