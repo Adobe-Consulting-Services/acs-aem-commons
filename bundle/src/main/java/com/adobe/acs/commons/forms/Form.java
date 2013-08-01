@@ -39,11 +39,14 @@ public class Form {
         this.data = data;
 		this.errors = errors;
 	}
-	
+
+    /**
+     * @return the form's name
+     */
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public Map<String, String> getData() {
 		return this.data;
 	}

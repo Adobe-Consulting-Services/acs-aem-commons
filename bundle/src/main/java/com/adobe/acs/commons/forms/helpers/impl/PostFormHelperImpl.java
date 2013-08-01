@@ -5,6 +5,7 @@ import com.adobe.acs.commons.forms.helpers.PostFormHelper;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -16,7 +17,6 @@ import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,8 +46,7 @@ public class PostFormHelperImpl implements FormHelper {
     }
 
     @Override
-	public String getFormInputsHTML(final Form form, final String... keys)
-			throws IOException {
+	public String getFormInputsHTML(final Form form, final String... keys) {
         // The form obj's data and errors should be xssProtected before being passed into this method
 		String html = "";
 
@@ -67,6 +66,14 @@ public class PostFormHelperImpl implements FormHelper {
 
 		return html;
 	}
+
+    @Override
+    public String getFormSelectorInputHTML(final String selector) {
+        String html = "<input type=\"hidden\" name=\"" + FORM_SELECTOR_INPUT + "\" value=\""
+                + xssApi.encodeForHTMLAttr(selector) + "\"/>\n";
+
+        return html;
+    }
 
     @Override
     public String getAction(final String path) {
@@ -127,7 +134,7 @@ public class PostFormHelperImpl implements FormHelper {
             }
         }
 
-        return new Form(formName, request.getResource(), map);
+        return this.clean(new Form(formName, request.getResource(), map));
     }
 
     protected String getPostLookupKey(final String formName) {
@@ -143,15 +150,15 @@ public class PostFormHelperImpl implements FormHelper {
     protected Form clean(final Form form) {
         final Map<String, String> map = form.getData();
         final Map<String, String> cleanedMap = new HashMap<String, String>();
+
         for (final String key : map.keySet()) {
-            if(StringUtils.equals(key, FORM_NAME_INPUT)) {
-                continue;
-            } else if(StringUtils.equals(key, FORM_RESOURCE_INPUT)) {
+            if(ArrayUtils.contains(FORM_INPUTS, key)) {
                 continue;
             } else if (StringUtils.isNotBlank(map.get(key))) {
                 cleanedMap.put(key, map.get(key));
             }
         }
+
         return new Form(form.getName(), form.getResource(), cleanedMap, form.getErrors());
     }
 

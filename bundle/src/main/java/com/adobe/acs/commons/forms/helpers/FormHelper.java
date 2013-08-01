@@ -10,8 +10,11 @@ import java.io.IOException;
 public interface FormHelper extends PostFormHelper {
     public static final String SELECTOR = "post";
     public static final String EXTENSION = ".html";
+
     public static final String FORM_NAME_INPUT = ":form";
     public static final String FORM_RESOURCE_INPUT = ":formResource";
+    public static final String FORM_SELECTOR_INPUT = ":formSelector";
+    public static final String[] FORM_INPUTS = { FORM_NAME_INPUT, FORM_RESOURCE_INPUT, FORM_SELECTOR_INPUT };
 
     /**
 	 * Gets the From from either the POST Requests parameters or the GET
@@ -33,8 +36,18 @@ public interface FormHelper extends PostFormHelper {
 	 * @return
 	 * @throws java.io.IOException
 	 */
-	public String getFormInputsHTML(Form form, String... keys)
-			throws IOException;
+	public String getFormInputsHTML(Form form, String... keys);
+
+    /**
+     * Returns an input type="hidden" used to override the selector used for resolving
+     * the custom script used to handle the POST.
+     *
+     * If not set/used, defaults to "post"
+     *
+     * @param selector
+     * @return
+     */
+    public String getFormSelectorInputHTML(final String selector);
 
     /**
      * Builds the form's action URI based on the provided resource's path

@@ -1,7 +1,6 @@
 package com.adobe.acs.commons.forms.impl;
 
 import com.adobe.acs.commons.forms.helpers.FormHelper;
-import com.adobe.acs.commons.forms.helpers.ForwardFormHelper;
 import com.adobe.acs.commons.forms.helpers.PostFormHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
@@ -58,15 +57,20 @@ public class FormsSlingFilterImpl implements javax.servlet.Filter {
             return;
         }
 
-        final String formResource = StringUtils.stripToEmpty(requestParameter.getString());
-        if(slingRequest.getResourceResolver().resolve(formResource) == null) {
+        final String formResource = this.getParameter(slingRequest, FormHelper.FORM_RESOURCE_INPUT);
+        if(formResource == null || slingRequest.getResourceResolver().resolve(formResource) == null) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
+        String formSelector = this.getParameter(slingRequest, FormHelper.FORM_SELECTOR_INPUT);
+        if(formSelector == null) {
+            formSelector = FormHelper.SELECTOR;
+        }
+
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
 
-        options.setReplaceSelectors(FormHelper.SELECTOR);
+        options.setReplaceSelectors(formSelector);
         options.setReplaceSuffix("");
 
         slingRequest.getRequestDispatcher(formResource, options).forward(slingRequest, slingResponse);
@@ -75,5 +79,12 @@ public class FormsSlingFilterImpl implements javax.servlet.Filter {
 
     @Override
     public void destroy() {
+    }
+
+    private String getParameter(SlingHttpServletRequest slingRequest, String param) {
+        final RequestParameter requestParameter =
+                slingRequest.getRequestParameter(param);
+        if(requestParameter == null) { return null; }
+        return StringUtils.stripToNull(requestParameter.getString());
     }
 }
