@@ -80,7 +80,7 @@ public class TypeUtil {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "PMD.CollapsibleIfStatements"})
     public static <T> Class<T> getType(final Object object) {
         if (object instanceof Double || object instanceof Float) {
             return (Class<T>) Double.class;

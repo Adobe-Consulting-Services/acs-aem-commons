@@ -35,6 +35,8 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 
 @Component(componentAbstract = true, metatype = true)
 public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowProcess {
+    
+    @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
@@ -49,6 +51,7 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
 
     private File workingDir;
 
+    @SuppressWarnings("PMD.CollapsibleIfStatements")
     public void execute(WorkItem workItem, WorkflowSession wfSession, MetaDataMap metaData) throws WorkflowException {
 
         final Asset asset = getAssetFromPayload(workItem, wfSession.getSession());

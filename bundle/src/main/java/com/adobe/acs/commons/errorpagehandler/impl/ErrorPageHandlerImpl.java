@@ -515,6 +515,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param request
      * @return
      */
+    @SuppressWarnings("PMD.UselessParentheses")
     protected boolean isAnonymousRequest(SlingHttpServletRequest request) {
         return (request.getAuthType() == null || request.getRemoteUser() == null);
     }

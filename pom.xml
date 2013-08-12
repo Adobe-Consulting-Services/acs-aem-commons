@@ -116,6 +116,12 @@
                     <version>3.0.1</version>
                     <configuration>
                         <linkXRef>false</linkXRef>
+                        <rulesets>
+                            <!--  see http://pmd.sourceforge.net/pmd-5.0.4/rules/index.html for all rules -->
+                            <ruleset>rulesets/java/basic.xml</ruleset>
+                            <ruleset>rulesets/java/logging-java.xml</ruleset>
+                        </rulesets>
+                        <targetJdk>1.6</targetJdk>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -245,6 +251,8 @@
                                 <goals>
                                     <goal>pmd</goal>
                                     <goal>cpd</goal>
+                                    <!-- build will fail on warnings -->
+                                    <goal>check</goal> 
                                 </goals>
                             </execution>
                         </executions>
@@ -276,6 +284,8 @@
             </build>
         </profile>
     </profiles>
+
+
 
     <!--
         Inclusion of repositories in POMs is controversial, to say the least.
