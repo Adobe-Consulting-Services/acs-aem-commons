@@ -16,7 +16,12 @@ Bug fixes and minor updates should just be made in the shared repository itself.
 
 There's a good guide to performing pull requests at [https://help.github.com/articles/using-pull-requests](https://help.github.com/articles/using-pull-requests). In the terms used in that article, we use both the **Fork & Pull** and the **Shared Repository Model**.
 
-## Before Contributing Code
+### Before Contributing Code
 
 * Run Maven build with -Panalysis to run the static analysis checks.
 * More stuff TBD
+
+## Participating in Code Reviews
+
+Even if you don't have time to contribute code, reviewing code contributed by other people is an option. To do this, go to [https://git.corp.adobe.com/ACS/acs-aem-commons/pulls](https://git.corp.adobe.com/ACS/acs-aem-commons/pulls) to see the open pull requests.
+
