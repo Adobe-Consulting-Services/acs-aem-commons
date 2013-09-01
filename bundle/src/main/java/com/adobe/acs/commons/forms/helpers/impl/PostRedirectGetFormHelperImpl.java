@@ -2,11 +2,14 @@ package com.adobe.acs.commons.forms.helpers.impl;
 
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
-import com.adobe.acs.commons.forms.helpers.PRGFormHelper;
+import com.adobe.acs.commons.forms.helpers.PostRedirectGetFormHelper;
 import com.adobe.acs.commons.util.TypeUtil;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -16,34 +19,18 @@ import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component(label = "ACS AEM Commons - PRG Form Helper", description = "POST-Redirect-GET Form Helper", enabled = true, metatype = false, immediate = false, inherit = true)
+@Component(label = "ACS AEM Commons - POST-Redirect-GET Form Helper", description = "POST-Redirect-GET Form Helper", enabled = true, metatype = false, immediate = false, inherit = true)
 @Properties({ @Property(label = "Vendor", name = Constants.SERVICE_VENDOR, value = "ACS", propertyPrivate = true) })
-@Service( value = { FormHelper.class, PRGFormHelper.class })
-public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelper {
-	private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
+@Service( value = { FormHelper.class, PostRedirectGetFormHelper.class })
+public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements PostRedirectGetFormHelper {
+    private static final Logger log = LoggerFactory.getLogger(PostRedirectGetFormHelperImpl.class);
 
-    /**
-     * Checks if this Form Manager should handle this request
-     *
-     * @param formName
-     * @param request
-     * @return
-     */
-    protected boolean doHandle(final String formName, final SlingHttpServletRequest request) {
-        return this.doHandleGet(formName, request) || this.doHandlePost(formName, request);
-    }
-
-    /**
-     *
-     * @param formName
-     * @param request
-     * @return
-     */
     @Override
     public Form getForm(final String formName, final SlingHttpServletRequest request) {
 		if (this.doHandlePost(formName, request)) {
@@ -55,59 +42,92 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
         }
 
         log.debug("Creating empty form for FORM [ {} ]", formName);
-        return new Form(formName, request.getResource());
+        return new Form(formName, request.getResource().getPath());
 	}
 
-    /**
-     *
-     * @param form
-     * @param path
-     * @param response
-     * @throws IOException
-     * @throws JSONException
-     */
     @Override
     public void sendRedirect(Form form, String path, SlingHttpServletResponse response) throws IOException, JSONException {
-        final String url = this.getRedirectPath(form, path);
-        response.sendRedirect(url);
+        this.sendRedirect(form, path, null, response);
     }
 
-    /**
-     *
-     * @param form
-     * @param page
-     * @param response
-     * @throws IOException
-     * @throws JSONException
-     */
     @Override
     public void sendRedirect(Form form, Page page, SlingHttpServletResponse response) throws IOException, JSONException {
-        final String url = this.getRedirectPath(form, page);
-        response.sendRedirect(url);
+        this.sendRedirect(form, page, null, response);
     }
 
-    /**
-     *
-     * @param form
-     * @param resource
-     * @param response
-     * @throws IOException
-     * @throws JSONException
-     */
     @Override
     public void sendRedirect(Form form, Resource resource, SlingHttpServletResponse response) throws IOException, JSONException {
-        final String url = this.getRedirectPath(form, resource);
+        this.sendRedirect(form, resource, null, response);
+    }
+
+    @Override
+    public void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response) throws IOException, JSONException {
+        final String url = this.getRedirectPath(form, path, formSelector);
         response.sendRedirect(url);
     }
 
+    @Override
+    public void sendRedirect(Form form, Page page, String formSelector, SlingHttpServletResponse response) throws IOException, JSONException {
+        final String url = this.getRedirectPath(form, page, formSelector);
+        response.sendRedirect(url);
+    }
+
+    @Override
+    public void sendRedirect(Form form, Resource resource, String formSelector, SlingHttpServletResponse response) throws IOException, JSONException {
+        final String url = this.getRedirectPath(form, resource, formSelector);
+        response.sendRedirect(url);
+    }
+
+    @Override
+    public void renderForm(final Form form, final Page page, final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        this.sendRedirect(form, page, this.getFormSelector(request), response);
+    }
+
+    @Override
+    public void renderForm(final Form form, final Resource resource, final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        this.sendRedirect(form, resource, this.getFormSelector(request), response);
+    }
+
+    @Override
+    public void renderForm(final Form form, final String path, final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        this.sendRedirect(form, path, this.getFormSelector(request), response);
+    }
+
+    @Override
+    public void renderOtherForm(Form form, String path, String formSelector, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        this.sendRedirect(form, path, formSelector, response);
+    }
+
+    @Override
+    public void renderOtherForm(Form form, Page page, String formSelector, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        this.sendRedirect(form, page, formSelector, response);
+    }
+
+    @Override
+    public void renderOtherForm(Form form, Resource resource, String formSelector, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        this.sendRedirect(form, resource, formSelector, response);
+    }
+
     /**
-     * Checks if this Form Manager should handle this request
+     * Determines if this Form Manager should handle this request
+     *
+     * @param formName
+     * @param request
+     * @return
+     */
+    protected boolean doHandle(final String formName, final SlingHttpServletRequest request) {
+        return this.doHandleGet(formName, request) || this.doHandlePost(formName, request);
+    }
+
+    /**
+     * Checks if this Form Manager should handle this request as a GET request
      *
      * @param formName
      * @param request
      * @return
      */
     protected boolean doHandleGet(final String formName, final SlingHttpServletRequest request) {
+        //noinspection SimplifiableIfStatement
         if (StringUtils.equalsIgnoreCase("GET", request.getMethod())) {
             return (StringUtils.isNotBlank(request.getParameter(this.getGetLookupKey(formName))));
         } else {
@@ -119,12 +139,13 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
      * Derives the form from the request's Query Parameters as best it can
      *
      * Falls back to an empty form if it runs into problems.
-     * Fallback is due to ease of (inadvertant) tampering with query params
+     * Fallback is due to ease of (inadvertent) tampering with query params
      *
      * @param formName
      * @param request
      * @return
      */
+    @SuppressWarnings({"unchecked"})
     protected Form getGetForm(final String formName, final SlingHttpServletRequest request) {
         Map<String, String> data = new HashMap<String, String>();
         Map<String, String> errors = new HashMap<String, String>();
@@ -133,7 +154,7 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
         final String requestData = this.decode(request.getParameter(this.getGetLookupKey(formName)));
 
         if(StringUtils.isBlank(requestData)) {
-            return new Form(formName, request.getResource());
+            return new Form(formName, request.getResource().getPath());
         }
 
         try {
@@ -158,11 +179,11 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
             }
         } catch (JSONException e) {
             log.warn("Cannot parse query parameters for request: {}", requestData);
-            return new Form(formName, request.getResource());
+            return new Form(formName, request.getResource().getPath());
         }
 
         return new Form(formName,
-                request.getResource(),
+                request.getResource().getPath(),
                 this.getProtectedData(data),
                 this.getProtectedErrors(errors));
     }
@@ -174,7 +195,7 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
      * @return
      */
     protected String getGetLookupKey(final String formName) {
-        return "form_" + formName;
+        return KEY_PREFIX_FORM_NAME + formName;
     }
 
     /**
@@ -186,9 +207,9 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
      * @throws org.apache.sling.commons.json.JSONException
      * @throws java.io.UnsupportedEncodingException
      */
-    public String getRedirectPath(Form form, Page page) throws JSONException,
+    protected String getRedirectPath(final Form form, final Page page, final String formSelector) throws JSONException,
             UnsupportedEncodingException {
-        return getRedirectPath(form, page.adaptTo(Resource.class));
+        return getRedirectPath(form, page.adaptTo(Resource.class), formSelector);
     }
 
     /**
@@ -200,9 +221,9 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
      * @throws org.apache.sling.commons.json.JSONException
      * @throws java.io.UnsupportedEncodingException
      */
-    public String getRedirectPath(Form form, Resource resource) throws JSONException,
+    protected String getRedirectPath(final Form form, final Resource resource, final String formSelector) throws JSONException,
             UnsupportedEncodingException {
-        return getRedirectPath(form, resource.getPath() + FormHelper.EXTENSION);
+        return getRedirectPath(form, resource.getPath() + FormHelper.EXTENSION, formSelector);
     }
 
     /**
@@ -212,11 +233,13 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
      * @param path
      * @return
      * @throws org.apache.sling.commons.json.JSONException
-     * @throws java.io.UnsupportedEncodingException
      */
-    public String getRedirectPath(Form form, String path) throws JSONException,
-            UnsupportedEncodingException {
-        return path.concat("?").concat(this.getQueryParameters(form));
+    protected String getRedirectPath(final Form form, final String path, final String formSelector) throws JSONException {
+        String redirectPath = path;
+        redirectPath += this.getSuffix();
+        redirectPath += "?";
+        redirectPath += this.getQueryParameters(form, formSelector);
+        return redirectPath;
     }
 
     /**
@@ -226,10 +249,10 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
      *
      * @return
      * @throws org.apache.sling.commons.json.JSONException
-     * @throws java.io.UnsupportedEncodingException
      */
-    protected String getQueryParameters(Form form) throws UnsupportedEncodingException, JSONException {
+    protected String getQueryParameters(Form form, final String formSelector) throws JSONException {
         boolean hasData = false;
+        boolean hasFormSelector = StringUtils.isNotBlank(formSelector);
         final JSONObject jsonData = new JSONObject();
 
         String params = "";
@@ -253,6 +276,13 @@ public class PRGFormHelperImpl extends PostFormHelperImpl implements PRGFormHelp
             params = this.getGetLookupKey(form.getName());
             params += "=";
             params += this.encode(jsonData.toString());
+
+            if(hasFormSelector) {
+                params += "&";
+                params += QUERY_PARAM_FORM_SELECTOR;
+                params += "=";
+                params += this.encode(formSelector);
+            }
         }
 
         return params;

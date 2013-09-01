@@ -1,13 +1,8 @@
 package com.adobe.acs.commons.forms.helpers;
 
 /**
- * Do not directly implement
+ * Used to register the PostFormHelper as an OSGi Service
  */
-public interface PostFormHelper {
-    /**
-     * Gets the OSGi-configured suffix used by the Fwd-as-GET form implementation
-     *
-     * @return
-     */
+public interface PostFormHelper extends FormHelper {
     public String getSuffix();
 }

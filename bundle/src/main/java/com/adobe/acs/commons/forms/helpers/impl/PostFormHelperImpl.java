@@ -1,33 +1,41 @@
 package com.adobe.acs.commons.forms.helpers.impl;
 
 import com.adobe.acs.commons.forms.Form;
-import com.adobe.acs.commons.forms.helpers.PostFormHelper;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
+import com.adobe.acs.commons.forms.helpers.PostFormHelper;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-@Component(label = "ACS AEM Commons - Abstract Form Helper", description = "Abstract Form Helper. Do not use directly; instead use the PRGFormHelper or ForwardFormHelper.", enabled = true, metatype = false, immediate = false)
+@Component(label = "ACS AEM Commons - Abstract POST Form Helper", description = "Abstract Form Helper. Do not use directly; instead use the PostRedirectGetFormHelper or ForwardAsGetFormHelper.", enabled = true, metatype = false, immediate = false)
 @Properties({ @Property(label = "Vendor", name = Constants.SERVICE_VENDOR, value = "ACS", propertyPrivate = true) })
 @Service(value = PostFormHelper.class)
-public class PostFormHelperImpl implements FormHelper {
-	private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
+public class PostFormHelperImpl implements PostFormHelper {
+    private static final Logger log = LoggerFactory.getLogger(PostFormHelperImpl.class);
+
+    @Reference
+    protected ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     protected XSSAPI xssApi;
@@ -35,10 +43,10 @@ public class PostFormHelperImpl implements FormHelper {
     /**
      * OSGi Properties *
      */
-    private static final String DEFAULT_SUFFIX = "/acs/form";
+    private static final String DEFAULT_SUFFIX = "/submit/form";
     private String suffix = DEFAULT_SUFFIX;
     @Property(label = "Suffix", description = "Forward-as-GET Request Suffix used to identify Forward-as-GET POST Request", value = DEFAULT_SUFFIX)
-    private static final String PROP_SUFFIX = "prop.suffix";
+    private static final String PROP_SUFFIX = "prop.form-suffix";
 
     @Override
     public Form getForm(String formName, SlingHttpServletRequest request) {
@@ -47,13 +55,13 @@ public class PostFormHelperImpl implements FormHelper {
 
     @Override
 	public String getFormInputsHTML(final Form form, final String... keys) {
-        // The form obj's data and errors should be xssProtected before being passed into this method
+        // The form objects data and errors should be xssProtected before being passed into this method
 		String html = "";
 
         html += "<input type=\"hidden\" name=\"" + FORM_NAME_INPUT + "\" value=\""
                 + xssApi.encodeForHTMLAttr(form.getName()) + "\"/>\n";
 
-        final String resourcePath = form.getResource().getPath();
+        final String resourcePath = form.getResourcePath();
         html += "<input type=\"hidden\" name=\"" + FORM_RESOURCE_INPUT + "\" value=\""
                 + xssApi.encodeForHTMLAttr(resourcePath) + "\"/>\n";
 
@@ -69,15 +77,59 @@ public class PostFormHelperImpl implements FormHelper {
 
     @Override
     public String getFormSelectorInputHTML(final String selector) {
-        String html = "<input type=\"hidden\" name=\"" + FORM_SELECTOR_INPUT + "\" value=\""
+        return "<input type=\"hidden\" name=\"" + FORM_SELECTOR_INPUT + "\" value=\""
                 + xssApi.encodeForHTMLAttr(selector) + "\"/>\n";
-
-        return html;
     }
 
     @Override
     public String getAction(final String path) {
-        return path + FormHelper.EXTENSION + this.getSuffix();
+        String actionPath = path;
+
+        ResourceResolver adminResourceResolver = null;
+        try {
+            adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            actionPath = adminResourceResolver.map(path);
+        } catch (LoginException e) {
+            log.error("Could not attain an admin ResourceResolver to map the Form's Action URI");
+            // Use the unmapped ActionPath
+        } finally {
+            if(adminResourceResolver != null && adminResourceResolver.isLive()) {
+                adminResourceResolver.close();
+            }
+        }
+
+        return actionPath + FormHelper.EXTENSION + this.getSuffix();
+
+    }
+
+    @Override
+    public void renderForm(Form form, String path, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
+    }
+
+    @Override
+    public void renderForm(Form form, Page page, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
+    }
+
+    @Override
+    public void renderForm(Form form, Resource resource, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
+    }
+
+    @Override
+    public void renderOtherForm(Form form, String path, String selectors, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
+    }
+
+    @Override
+    public void renderOtherForm(Form form, Page page, String selectors, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
+    }
+
+    @Override
+    public void renderOtherForm(Form form, Resource resource, String selectors, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
     }
 
     @Override
@@ -95,7 +147,15 @@ public class PostFormHelperImpl implements FormHelper {
         return this.suffix;
     }
 
+    /**
+     * Determines of this FormHelper should handle the POST request
+     *
+     * @param formName
+     * @param request
+     * @return
+     */
     protected boolean doHandlePost(final String formName, final SlingHttpServletRequest request) {
+        //noinspection SimplifiableIfStatement,SimplifiableIfStatement
         if(StringUtils.equalsIgnoreCase("POST", request.getMethod())) {
             // Form should have a hidden input with the name this.getLookupKey(..) and value formName
             return StringUtils.equals(formName, request.getParameter(this.getPostLookupKey(formName)));
@@ -104,13 +164,19 @@ public class PostFormHelperImpl implements FormHelper {
         }
     }
 
+    /**
+     * Gets the Form from POST requests
+     *
+     * @param formName
+     * @param request
+     * @return
+     */
     protected Form getPostForm(final String formName,
                             final SlingHttpServletRequest request) {
         final Map<String, String> map = new HashMap<String, String>();
 
 
-        final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
-        final RequestParameterMap requestMap = slingRequest.getRequestParameterMap();
+        final RequestParameterMap requestMap = request.getRequestParameterMap();
 
         for (final String key : requestMap.keySet()) {
             // POST LookupKey formName param does not matter
@@ -120,24 +186,34 @@ public class PostFormHelperImpl implements FormHelper {
 
             if (values == null || values.length == 0) {
                 log.debug("Value did not exist for key: {}", key);
-
-                continue;
             } else if (values.length == 1) {
                 log.debug("Adding to form data: {} ~> {}", key, values[0].toString());
                 map.put(key, values[0].getString());
             } else {
-                final List<String> list = new ArrayList<String>();
+                // TODO: Handle multi-value parameter values; Requires support for transporting them and re-writing them back into HTML Form on error
                 for(final RequestParameter value : values) {
-                    list.add(value.toString());                    
+                    // Use the first non-blank value, or use the last value (which will be blank or not-blank)
+                    final String tmp = value.toString();
+                    map.put(key, tmp);
+
+                    if(StringUtils.isNotBlank(tmp)) {
+                        break;
+                    }
                 }
-                map.put(key, StringUtils.join(list, ","));
             }
         }
 
-        return this.clean(new Form(formName, request.getResource(), map));
+        return this.clean(new Form(formName, request.getResource().getPath(), map));
     }
 
+    /**
+     * Gets the Key used to look up the form during handling of POST requests
+     *
+     * @param formName
+     * @return
+     */
     protected String getPostLookupKey(final String formName) {
+        // This may change; keeping as method call to ease future refactoring
         return FORM_NAME_INPUT;
     }
 
@@ -152,14 +228,12 @@ public class PostFormHelperImpl implements FormHelper {
         final Map<String, String> cleanedMap = new HashMap<String, String>();
 
         for (final String key : map.keySet()) {
-            if(ArrayUtils.contains(FORM_INPUTS, key)) {
-                continue;
-            } else if (StringUtils.isNotBlank(map.get(key))) {
+            if(!ArrayUtils.contains(FORM_INPUTS, key) && StringUtils.isNotBlank(map.get(key))) {
                 cleanedMap.put(key, map.get(key));
             }
         }
 
-        return new Form(form.getName(), form.getResource(), cleanedMap, form.getErrors());
+        return new Form(form.getName(), form.getResourcePath(), cleanedMap, form.getErrors());
     }
 
     /**
@@ -170,7 +244,7 @@ public class PostFormHelperImpl implements FormHelper {
      */
     protected Form getProtectedForm(final Form form) {
         return new Form(form.getName(),
-                form.getResource(),
+                form.getResourcePath(),
                 this.getProtectedData(form.getData()),
                 this.getProtectedErrors(form.getErrors()));
     }
@@ -210,14 +284,26 @@ public class PostFormHelperImpl implements FormHelper {
     }
 
     /**
-     * Internal method for encoding URL data
+     * Gets the Form Selector for the form POST request
+     *
+     * @param slingRequest
+     * @return
+     */
+    protected String getFormSelector(final SlingHttpServletRequest slingRequest) {
+        final RequestParameter requestParameter =
+                slingRequest.getRequestParameter(FORM_SELECTOR_INPUT);
+        if(requestParameter == null) { return null; }
+        return StringUtils.stripToNull(requestParameter.getString());
+    }
+
+    /**
+     * Encodes URL data
      *
      * @param unencoded
      * @return
      */
     protected String encode(String unencoded) {
         if(StringUtils.isBlank(unencoded)) {
-            log.debug("Data to encode is blank.");
             return "";
         }
 
@@ -229,14 +315,13 @@ public class PostFormHelperImpl implements FormHelper {
     }
 
     /**
-     * Internal method for decoding URL data
+     * Decodes URL data
      *
      * @param encoded
      * @return
      */
     protected String decode(String encoded) {
         if(StringUtils.isBlank(encoded)) {
-            log.debug("Data to decode is blank.");
             return "";
         }
 
@@ -247,11 +332,8 @@ public class PostFormHelperImpl implements FormHelper {
         }
     }
 
-    /**
-     * OSGi Component Methods *
-     */
     @Activate
-    protected void activate(final Map<String, String> properties) throws Exception {
+    protected void activate(final Map<String, String> properties) {
         this.suffix = PropertiesUtil.toString(properties.get(PROP_SUFFIX), DEFAULT_SUFFIX);
         if(StringUtils.isBlank(this.suffix)) {
             // No whitespace please

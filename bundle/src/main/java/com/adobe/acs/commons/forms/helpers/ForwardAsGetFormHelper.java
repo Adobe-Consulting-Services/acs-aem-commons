@@ -13,8 +13,8 @@ import java.io.IOException;
 /**
  * Interface used for working with ACS-AEM-Commons forms.
  */
-public interface ForwardFormHelper extends FormHelper {
-    public final String REQUEST_ATTR_FORM_KEY = "__acs-aem-commons_form_";
+public interface ForwardAsGetFormHelper extends FormHelper {
+    public final String REQUEST_ATTR_FORM_KEY = ForwardAsGetFormHelper.class.getName() + "__Form_";
 
     /**
      * Creates the action URL when posting to a Page (non AJAX call)
@@ -22,14 +22,14 @@ public interface ForwardFormHelper extends FormHelper {
      * @param page
      * @return
      */
-    public String getAction(final Page page);
+    public String getAction(Page page);
 
     /**
      * Creates a synthetic GET request that can be used in the context of a real
      * POST request to retrieve GET renditions of resources.
      *
      * This method is best used for AJAX-based forms, as the result on error is
-     * only the markup associated with the erroring form (not the whole page)
+     * only the markup associated with the error-ing form (not the whole page)
      *
      * @param form
      * @param resource
@@ -39,17 +39,17 @@ public interface ForwardFormHelper extends FormHelper {
      * @throws javax.servlet.ServletException
      * @throws java.io.IOException
      */
-    public void forwardAsGet(final Form form, final Resource resource,
-                             final SlingHttpServletRequest request,
-                             final SlingHttpServletResponse response,
-                             final RequestDispatcherOptions options) throws ServletException, IOException;
+    public void forwardAsGet(Form form, Resource resource,
+                             SlingHttpServletRequest request,
+                             SlingHttpServletResponse response,
+                             RequestDispatcherOptions options) throws ServletException, IOException;
 
     /**
      * Creates a synthetic GET request that can be used in the context of a real
      * POST request to retrieve GET renditions of resources.
      *
      * This method is best used for AJAX-based forms, as the result on error is
-     * only the markup associated with the erroring form (not the whole page)
+     * only the markup associated with the error-ing form (not the whole page)
      *
      * Same as above, but uses empty RequestDispatcherOptions.
      *
@@ -60,9 +60,9 @@ public interface ForwardFormHelper extends FormHelper {
      * @throws ServletException
      * @throws IOException
      */
-    public void forwardAsGet(final Form form, final Resource resource,
-                             final SlingHttpServletRequest request,
-                             final SlingHttpServletResponse response) throws ServletException, IOException;
+    public void forwardAsGet(Form form, Resource resource,
+                             SlingHttpServletRequest request,
+                             SlingHttpServletResponse response) throws ServletException, IOException;
 
     /**
      * Creates a synthetic GET request that can be used in the context of a real
@@ -71,7 +71,7 @@ public interface ForwardFormHelper extends FormHelper {
      * This method is best used for full POST-back forms that perform a full synchronous POST
      * on submission.
      *
-     * Note: BrowserMap JS may auto-redirect the result of this page, the the target Page loads BrowserMap JS libs.
+     * Forces resourceType to "cq/Page" and removes all selectors.
      *
      * @param form
      * @param page
@@ -80,9 +80,28 @@ public interface ForwardFormHelper extends FormHelper {
      * @throws ServletException
      * @throws IOException
      */
-    public void forwardAsGet(final Form form, final Page page,
-                             final SlingHttpServletRequest request,
-                             final SlingHttpServletResponse response) throws ServletException,IOException;
+    public void forwardAsGet(Form form, Page page,
+                             SlingHttpServletRequest request,
+                             SlingHttpServletResponse response) throws ServletException,IOException;
+
+    /**
+     * Same as forwardAsGet(Form form, Page pae, SlingHttpServletRequest request, SlingHttpServletResponse) except allows
+     * RequestDispatcherOptions to be passed in.
+     *
+     * Note; this WILL force a resourceType of "cq/Page" even if a previous "setForceResourceType" as been set on the options.
+     *
+     * @param form
+     * @param page
+     * @param request
+     * @param response
+     * @param options
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void forwardAsGet(Form form, Page page,
+                             SlingHttpServletRequest request,
+                             SlingHttpServletResponse response,
+                             RequestDispatcherOptions options) throws ServletException,IOException;
 
 
     /**
@@ -102,9 +121,9 @@ public interface ForwardFormHelper extends FormHelper {
      * @throws ServletException
      * @throws IOException
      */
-    public void forwardAsGet(final Form form, final String path,
-                             final SlingHttpServletRequest request,
-                             final SlingHttpServletResponse response,
-                             final RequestDispatcherOptions options) throws ServletException, IOException;
+    public void forwardAsGet(Form form, String path,
+                             SlingHttpServletRequest request,
+                             SlingHttpServletResponse response,
+                             RequestDispatcherOptions options) throws ServletException, IOException;
 
 }

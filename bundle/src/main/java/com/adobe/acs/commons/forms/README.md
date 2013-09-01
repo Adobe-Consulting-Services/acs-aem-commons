@@ -56,76 +56,106 @@ vs.
 POST-redirect-GET
     `formHelper.sendRedirect(...)` in `post.POST.jsp`
 
+
+There is also a normalized FormHelper API that wraps common usecases in .renderForm(..) and .renderOtherForm(...) methods.
+Generally these methods can be used, and `.sendRedrect(..)` and `.forwardAsGet(..)` can be reserved for unusual use-cases where even more control is required.
+
+
 ### CQ5 Component
 
 #### /apps/acme/components/demo
 
 #### demo.jsp
 
+
+
     <%@include file="/libs/foundation/global.jsp"%>
     <%@page session="false"
         import="com.adobe.acs.commons.forms.*,
-                com.adobe.acs.commons.forms.helpers.*"%><%
-    %><%--
-    	 Initialize the Form object with the slingRequest.
+                com.adobe.acs.commons.forms.helpers.*"%>
 
-    	 This will intelligent look for the Form data from POST Parameters,
-    	 GET Query Parameters, or HttpServletRequest Attributes,
-    	 depending on the FormHelper used.
+    <%-- ***********************************************************************************************************
 
-    	 If the request is a "fresh" request to the page,
-    	 the form and its errors will be empty.
 
-         Changing between Form strategies (PRG vs Fwd-as-GET) is as
-         easy as swapping out the FormHelper as show below.
-         Also, don't forget to make them the same in post.POST.jsp.
-    --%>
+         Initialize the Form object with the slingRequest.
+
+         This will intelligently look for the Form data from POST Parameters, GET Query Parameters,
+         or HttpServletRequest Attributes depending on the context and FormHelper used.
+
+         If the request is a "fresh" request to the page, the form and its errors will be empty.
+
+         Changing between Form strategies (PRG vs Fwd-as-GET) is as easy as swapping out the FormHelper as shown below.
+
+         Also, don't forget to make them the same in post.POST.jsp;
+
+         IMPORTANT: FormHelper Services should be sync'd between the form rendering JSP and the POST handler JSP.
+
+    ************************************************************************************************************ --%>
 
     <%
-        //ForwardFormHelper formHelper = sling.getService(ForwardFormHelper.class);
-        PRGFormHelper formHelper = sling.getService(PRGFormHelper.class);
-    	Form form = formHelper.getForm("demo", slingRequest);
+
+    // FormHelper formHelper = sling.getService(PostRedirectGetFormHelper.class);
+    FormHelper formHelper = sling.getService(ForwardAsGetFormHelper.class);
+
+    Form form = formHelper.getForm("demo", slingRequest);
+
     %>
 
-    <%--
-    	Check if the form has any errors,
-    	and display a list of all the error messages.
-    --%>
+    <%-- ***********************************************************************************************************
+
+        Check if the form has any errors, and display a list of all the error messages.
+
+    ************************************************************************************************************ --%>
+
     <% if(form.hasErrors()) { %>
     	<h2 class="alert">Your form has errors!</h2><%	}
     %>
 
-    <%--
-    	Set the form to POST back to the component; use getAction(..) to add the suffix that is registered with the POST handler
-    --%>
+    <%-- ***********************************************************************************************************
+
+    	Set the form to POST back to the component; use formHelper.getAction(..) to add the suffix that is
+    	registered with the POST handler. Defaults to /acs/form -- can change via OSGi Configuration on:
+
+    	    * com.adobe.acs.commons.forms.helpers.impl.PostFormHelperImpl#prop.form-suffix
+
+    ************************************************************************************************************ --%>
+
     <form method="post" action="<%= formHelper.getAction(currentPage) %>">
     <%= formHelper.getFormInputsHTML(form) %>
-    <%--
+
+    <%-- ***********************************************************************************************************
+
         Optionally specify the selector used to resolve the script handler
         for this POST request. If not used defaults to "post" (to resolve to post.POST.jsp).
 
         Useful for multi-page form wizards.
-    --%>
-    <%= formHelper.getFormSelectorInputHTML(form) %>
 
+    ************************************************************************************************************ --%>
+
+    <%= formHelper.getFormSelectorInputHTML("post") %>
 
     <fieldset>
     	<legend>Form Demo</legend>
 
-    	<%--
+         <%-- *******************************************************************************************************
+
     	    You can check for specific error messages..
 
             Below we use Server-provided error messages via: form.getError("myField")
         	and apply an "error" CSS Class to the label.
-    	--%>
+
+         ******************************************************************************************************* --%>
 
         <div><%= form.getError("myField") %></div>
     	<label <%= form.hasError("myField") ? "class=\"error\"" : "" %>>My Field:</label>
 
-    	<%--
+         <%-- *******************************************************************************************************
+
     		The form fields can be "re-populated" with submitted values by setting the
             `value` attribute of the input field.
-    	--%>
+
+         ******************************************************************************************************* --%>
+
     	<input type="text" name="myField" value="<%= form.get("myField") %>"/>
 
     	<input type="submit" value="Submit"/>
@@ -133,27 +163,39 @@ POST-redirect-GET
     </form>
 
 
+
 #### post.POST.jsp
 
 Note the naming convention of post.POST.jsp; Unless overridden using `formHelper.getFormSelectorInputHTML("custom")`
 in `formdemo.jsp`, the selector `post` is used.
 
+
     <%@include file="/libs/foundation/global.jsp"%>
     <%@page session="false"
         import="com.adobe.acs.commons.forms.*,
-    	    	com.adobe.acs.commons.forms.helpers.*"%><%
+    	    	com.adobe.acs.commons.forms.helpers.*"%>
 
-    <%--
-         Changing between Form strategies (PRG vs Fwd-as-GET) is as
+    <%-- ***********************************************************************************************************
+
+         Changing between Form strategies (PostRedirectGet vs ForwardAsGet) is as
          easy as swapping out the FormHelper as show below.
-         Also, don't forget to make them the same in post.POST.jsp.
-    --%>
+         Or for the common case, use generic FormHelper with .renderForm(..)
 
-    //ForwardFormHelper formHelper = sling.getService(ForwardFormHelper.class);
-	PRGFormHelper formHelper = sling.getService(PRGFormHelper.class);
+    ************************************************************************************************************ --%>
 
+    <%
+
+    //PostRedirectGetFormHelper formHelper = sling.getService(ForwardAsGetFormHelper.class);
+    //ForwardAsGetFormHelper formHelper = sling.getService(ForwardAsGetFormHelper.class);
+
+	// FormHelper formHelper = sling.getService(PostRedirectGetFormHelper.class);
+	FormHelper formHelper = sling.getService(ForwardAsGetFormHelper.class);
+
+
+    //  Get the Form
     Form form = formHelper.getForm("demo", slingRequest);
 
+	// Validation should be moved to a supporting OSGi Service - placement only for illustration
 	if(form.get("myField") != null && form.get("myField").length() > 10) {
     	// Data is all good!
     } else {
@@ -161,14 +203,18 @@ in `formdemo.jsp`, the selector `post` is used.
     }
 
     if(form.hasErrors()) {
-        <%--
-            Choose the return-to-form method based on the Form strategy.
-            Uncommented line used PRG, commented uses Fwd-as-GET
+    %>
+    <%-- *******************************************************************************************************
 
-            You'll want to match currentPage/resource/path up to form.getAction(..) in formdemo.jsp
-        --%>
-        formHelper.sendRedirect(form, currentPage, slingResponse);
-        //formHelper.forwardAsGet(form, currentPage, slingRequest, slingResponse);
+        Choose the return-to-form method based on the Form strategy.
+        You can use PostRedirectGetFormHelper.sendRedirect(..) or ForwardAsGetFormHelper.forwardAsGet(..) variations
+        if the FormHelper.renderForm(..) variations are sufficient (renderForm covers the 80% usecase)
+
+        You'll want to match currentPage/resource/path up to form.getAction(..) in formdemo.jsp
+
+    ******************************************************************************************************* --%>
+    <%
+         formHelper.renderForm(form, currentPage, slingRequest, slingResponse);
 
     } else {
 		// Save the data; or whatever you want
