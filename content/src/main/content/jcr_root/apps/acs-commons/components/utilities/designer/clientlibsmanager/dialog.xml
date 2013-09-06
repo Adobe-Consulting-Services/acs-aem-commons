@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Dialog"
+    activeTab="0"
+    title="Designer - ClientLibs Manager"
+    xtype="tabpanel">
+
+    <items jcr:primaryType="cq:WidgetCollection">
+        <tab1
+            jcr:primaryType="cq:Widget"
+            title="CSS ClientLibs"
+            xtype="panel">
+
+            <items jcr:primaryType="cq:WidgetCollection">
+                <headLibs
+                    jcr:primaryType="cq:Widget"
+                    fieldLabel="Head"
+                    fieldDescription="Click the '+' to add a new CSS ClientLib"
+                    name="./css/headLibs"
+                    xtype="multifield">
+                    <fieldConfig
+                        jcr:primaryType="cq:Widget"
+                        xtype="textfield"/>
+                </headLibs>
+
+                <bodyStartLibs
+                    jcr:primaryType="cq:Widget"
+                    fieldLabel="After body"
+                    fieldDescription="Click the '+' to add a new CSS ClientLib"
+                    name="./css/bodyStartLibs"
+                    xtype="multifield">
+                    <fieldConfig
+                        jcr:primaryType="cq:Widget"
+                        xtype="textfield"/>
+                </bodyStartLibs>
+
+                <bodyEndLibs
+                    jcr:primaryType="cq:Widget"
+                    fieldLabel="Before body close"
+                    fieldDescription="Click the '+' to add a new CSS ClientLib"
+                    name="./css/bodyEndLibs"
+                    xtype="multifield">
+                    <fieldConfig
+                        jcr:primaryType="cq:Widget"
+                        xtype="textfield"/>
+                </bodyEndLibs>
+            </items>
+         </tab1>
+         <tab2
+                jcr:primaryType="cq:Widget"
+                title="JavaScript ClientLibs"
+                xtype="panel">
+
+            <items jcr:primaryType="cq:WidgetCollection">
+                <headLibs
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Head"
+                        fieldDescription="Click the '+' to add a new JS ClientLib"
+                        name="./js/headLibs"
+                        xtype="multifield">
+                    <fieldConfig
+                            jcr:primaryType="cq:Widget"
+                            xtype="textfield"/>
+                </headLibs>
+
+                <bodyStartLibs
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="After body"
+                        fieldDescription="Click the '+' to add a new JS ClientLib"
+                        name="./js/bodyStartLibs"
+                        xtype="multifield">
+                    <fieldConfig
+                            jcr:primaryType="cq:Widget"
+                            xtype="textfield"/>
+                </bodyStartLibs>
+
+                <bodyEndLibs
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Before body close"
+                        fieldDescription="Click the '+' to add a new JS ClientLib"
+                        name="./js/bodyEndLibs"
+                        xtype="multifield">
+                    <fieldConfig
+                            jcr:primaryType="cq:Widget"
+                            xtype="textfield"/>
+                </bodyEndLibs>
+            </items>
+        </tab2>
+     </items>
+</jcr:root>
