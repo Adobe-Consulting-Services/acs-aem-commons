@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.util;
 
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
 import org.junit.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -57,6 +59,39 @@ public class TypeUtilTest {
         } catch (IllegalArgumentException ex) {
             assertTrue(true);
         }
+    }
+
+    @Test
+    public void testToMap() throws JSONException {
+        final JSONObject json = new JSONObject();
+        json.put("one", "uno");
+        json.put("two", 2);
+        json.put("three", new Long(3));
+
+        final Map<String, Object> expResult = new HashMap<String, Object>();
+        expResult.put("one", "uno");
+        expResult.put("two", 2);
+        expResult.put("three", new Long(3));
+
+        final Map<String, Object> actual = TypeUtil.toMap(json);
+
+        assertEquals(expResult, actual);
+    }
+
+    @Test
+    public void testToMap_withType() throws JSONException {
+        final JSONObject json = new JSONObject();
+        json.put("one", "uno");
+        json.put("two", 2);
+        json.put("three", "tres");
+
+        final Map<String, String> expResult = new HashMap<String, String>();
+        expResult.put("one", "uno");
+        expResult.put("three", "tres");
+
+        final Map<String, String> actual = TypeUtil.toMap(json, String.class);
+
+        assertEquals(expResult, actual);
     }
 
     @Test

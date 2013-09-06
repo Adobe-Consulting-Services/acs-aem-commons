@@ -56,19 +56,36 @@ public class TypeUtil {
      * Converts a JSONObject to a simple Map. This will only work properly for
      * JSONObjects of depth 1.
      *
+     * Resulting map will be type'd <String, T> where T is the type of the second parameter (klass)
+     *
+     * @param json
+     * @param klass
+     * @return
+     */
+    public static <T> Map<String, T> toMap(JSONObject json, Class<T> klass) throws JSONException {
+        final HashMap<String, T> map = new HashMap<String, T>();
+        final List<?> keys = IteratorUtils.toList(json.keys());
+
+        for (final Object key : keys) {
+            final String strKey = key.toString();
+            final Object obj = json.get(strKey);
+            if(klass.isInstance(obj)) {
+                // Only add objects of this type
+                map.put(strKey, (T)obj);
+            }
+        }
+
+        return map;
+    }
+
+    /**
+     * Convenience wrapper for toMap(jsonObj, Object.class)
+     *
      * @param json
      * @return
      */
     public static Map<String, Object> toMap(JSONObject json) throws JSONException {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
-        final List<?> keys = IteratorUtils.toList(json.keys());
-
-        for (final Object key : keys) {
-            String str = key.toString();
-            map.put(str, json.get(str));
-        }
-
-        return map;
+        return toMap(json, Object.class);
     }
 
     /**
