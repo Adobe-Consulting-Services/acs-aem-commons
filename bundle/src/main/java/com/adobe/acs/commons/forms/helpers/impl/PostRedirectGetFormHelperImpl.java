@@ -237,8 +237,11 @@ public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements
     protected String getRedirectPath(final Form form, final String path, final String formSelector) throws JSONException {
         String redirectPath = path;
         redirectPath += this.getSuffix();
+        if(StringUtils.isNotBlank(formSelector)) {
+            redirectPath += "/" + formSelector;
+        }
         redirectPath += "?";
-        redirectPath += this.getQueryParameters(form, formSelector);
+        redirectPath += this.getQueryParameters(form);
         return redirectPath;
     }
 
@@ -250,9 +253,8 @@ public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements
      * @return
      * @throws org.apache.sling.commons.json.JSONException
      */
-    protected String getQueryParameters(Form form, final String formSelector) throws JSONException {
+    protected String getQueryParameters(Form form) throws JSONException {
         boolean hasData = false;
-        boolean hasFormSelector = StringUtils.isNotBlank(formSelector);
         final JSONObject jsonData = new JSONObject();
 
         String params = "";
@@ -276,13 +278,6 @@ public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements
             params = this.getGetLookupKey(form.getName());
             params += "=";
             params += this.encode(jsonData.toString());
-
-            if(hasFormSelector) {
-                params += "&";
-                params += QUERY_PARAM_FORM_SELECTOR;
-                params += "=";
-                params += this.encode(formSelector);
-            }
         }
 
         return params;

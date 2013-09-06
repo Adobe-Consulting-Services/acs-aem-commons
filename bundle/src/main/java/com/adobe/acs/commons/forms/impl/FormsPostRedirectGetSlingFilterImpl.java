@@ -58,13 +58,13 @@ public class FormsPostRedirectGetSlingFilterImpl implements Filter {
          */
 
         if(!StringUtils.equals("GET", slingRequest.getMethod()) ||
-                !StringUtils.equals(slingRequest.getRequestPathInfo().getSuffix(), formHelper.getSuffix())) {
+                !formHelper.hasValidSuffix(slingRequest)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
         /* Ensure there is a valid form selector as part of Query Params */
-        final String formSelector = this.getParameter(slingRequest, PostRedirectGetFormHelper.QUERY_PARAM_FORM_SELECTOR);
+        final String formSelector = formHelper.getFormSelector(slingRequest);//this.getParameter(slingRequest, PostRedirectGetFormHelper.QUERY_PARAM_FORM_SELECTOR);
         if(formSelector == null) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
@@ -80,7 +80,7 @@ public class FormsPostRedirectGetSlingFilterImpl implements Filter {
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
 
         options.setReplaceSelectors(formSelector);
-        options.setReplaceSuffix("");
+        options.setReplaceSuffix(slingRequest.getRequestPathInfo().getSuffix());
 
         if(log.isDebugEnabled()) {
             log.debug("Post-Redirect-Get Form Filter; Internal forward to resource: {} ", slingRequest.getResource());

@@ -118,21 +118,20 @@ Generally these methods can be used, and `.sendRedrect(..)` and `.forwardAsGet(.
 
     	    * com.adobe.acs.commons.forms.helpers.impl.PostFormHelperImpl#prop.form-suffix
 
-    ************************************************************************************************************ --%>
 
-    <form method="post" action="<%= formHelper.getAction(currentPage) %>">
-    <%= formHelper.getFormInputsHTML(form) %>
-
-    <%-- ***********************************************************************************************************
-
-        Optionally specify the selector used to resolve the script handler
-        for this POST request. If not used defaults to "post" (to resolve to post.POST.jsp).
+        Optionally pass a second parameter to the `getAction()` method the selector used to resolve the script handler
+        for this POST request. If not provided, defaults to "post" (to resolve to post.POST.jsp).
 
         Useful for multi-page form wizards.
 
+        Example: `<%= formHelper.getAction(currentPage, "step1") %>` will be handled by `/apps/acme/components/demo/step1.POST.jsp`
+
     ************************************************************************************************************ --%>
 
-    <%= formHelper.getFormSelectorInputHTML("post") %>
+    <form method="post" action="<%= formHelper.getAction(currentPage) %>">
+
+        <%= formHelper.getFormInputsHTML(form) %>
+
 
     <fieldset>
     	<legend>Form Demo</legend>

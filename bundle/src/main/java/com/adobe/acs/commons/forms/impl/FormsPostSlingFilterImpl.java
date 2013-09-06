@@ -56,7 +56,7 @@ public class FormsPostSlingFilterImpl implements javax.servlet.Filter {
          */
 
         if(!StringUtils.equals("POST", slingRequest.getMethod()) ||
-                !StringUtils.equals(slingRequest.getRequestPathInfo().getSuffix(), formHelper.getSuffix())) {
+                !formHelper.hasValidSuffix(slingRequest)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
@@ -67,7 +67,7 @@ public class FormsPostSlingFilterImpl implements javax.servlet.Filter {
             return;
         }
 
-        String formSelector = this.getParameter(slingRequest, FormHelper.FORM_SELECTOR_INPUT);
+        String formSelector = formHelper.getFormSelector(slingRequest);//this.getParameter(slingRequest, FormHelper.FORM_SELECTOR_INPUT);
         if(formSelector == null) {
             formSelector = FormHelper.SELECTOR;
         }
@@ -75,7 +75,7 @@ public class FormsPostSlingFilterImpl implements javax.servlet.Filter {
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
 
         options.setReplaceSelectors(formSelector);
-        options.setReplaceSuffix("");
+        options.setReplaceSuffix(slingRequest.getRequestPathInfo().getSuffix());
 
         if(log.isDebugEnabled()) {
             log.debug("Form Filter; Internal forward to path: {} ", formResource);

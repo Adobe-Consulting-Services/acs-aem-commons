@@ -3,6 +3,7 @@ package com.adobe.acs.commons.forms.helpers.impl;
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PostFormHelper;
+import com.adobe.acs.commons.util.PathInfoUtil;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.ArrayUtils;
@@ -12,6 +13,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
+import org.apache.sling.api.request.RequestUtil;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -76,13 +78,12 @@ public class PostFormHelperImpl implements PostFormHelper {
 	}
 
     @Override
-    public String getFormSelectorInputHTML(final String selector) {
-        return "<input type=\"hidden\" name=\"" + FORM_SELECTOR_INPUT + "\" value=\""
-                + xssApi.encodeForHTMLAttr(selector) + "\"/>\n";
+    public String getAction(final String path) {
+        return getAction(path, null);
     }
 
     @Override
-    public String getAction(final String path) {
+    public String getAction(final String path, final String formSelector) {
         String actionPath = path;
 
         ResourceResolver adminResourceResolver = null;
@@ -98,8 +99,12 @@ public class PostFormHelperImpl implements PostFormHelper {
             }
         }
 
-        return actionPath + FormHelper.EXTENSION + this.getSuffix();
+        actionPath += FormHelper.EXTENSION + this.getSuffix();
+        if(StringUtils.isNotBlank(formSelector)) {
+            actionPath += "/" + formSelector;
+        }
 
+        return actionPath;
     }
 
     @Override
@@ -138,8 +143,18 @@ public class PostFormHelperImpl implements PostFormHelper {
     }
 
     @Override
+    public String getAction(final Resource resource, final String formSelector) {
+        return getAction(resource.getPath(), formSelector);
+    }
+
+    @Override
     public String getAction(final Page page) {
         return getAction(page.getPath());
+    }
+
+    @Override
+    public String getAction(final Page page, final String formSelector) {
+        return getAction(page.getPath(), formSelector);
     }
 
     @Override
@@ -283,17 +298,37 @@ public class PostFormHelperImpl implements PostFormHelper {
         return protectedErrors;
     }
 
+
+    public boolean hasValidSuffix(final SlingHttpServletRequest slingRequest) {
+        final String requestSuffix = slingRequest.getRequestPathInfo().getSuffix();
+        if(StringUtils.equals(requestSuffix, this.getSuffix()) ||
+                StringUtils.startsWith(requestSuffix, this.getSuffix() + "/")) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Gets the Form Selector for the form POST request
      *
      * @param slingRequest
      * @return
      */
-    protected String getFormSelector(final SlingHttpServletRequest slingRequest) {
-        final RequestParameter requestParameter =
-                slingRequest.getRequestParameter(FORM_SELECTOR_INPUT);
-        if(requestParameter == null) { return null; }
-        return StringUtils.stripToNull(requestParameter.getString());
+    public String getFormSelector(final SlingHttpServletRequest slingRequest) {
+        final String requestSuffix = slingRequest.getRequestPathInfo().getSuffix();
+        if(StringUtils.equals(requestSuffix, this.getSuffix()) ||
+                !StringUtils.startsWith(requestSuffix, this.getSuffix() + "/")) {
+            return null;
+        }
+
+        final int segments = StringUtils.split(this.getSuffix(), '/').length;
+        if(segments < 1) {
+            return null;
+        }
+
+        final String formSelector = PathInfoUtil.getSuffixSegment(slingRequest, segments);
+        return StringUtils.stripToNull(formSelector);
     }
 
     /**

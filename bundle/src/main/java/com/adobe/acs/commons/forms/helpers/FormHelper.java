@@ -11,13 +11,11 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 public interface FormHelper {
-    public static final String SELECTOR = "post";
     public static final String EXTENSION = ".html";
 
     public static final String FORM_NAME_INPUT = ":form";
     public static final String FORM_RESOURCE_INPUT = ":formResource";
-    public static final String FORM_SELECTOR_INPUT = ":formSelector";
-    public static final String[] FORM_INPUTS = { FORM_NAME_INPUT, FORM_RESOURCE_INPUT, FORM_SELECTOR_INPUT };
+    public static final String[] FORM_INPUTS = { FORM_NAME_INPUT, FORM_RESOURCE_INPUT };
 
     /**
 	 * Gets the From from either the POST Requests parameters or the GET
@@ -41,15 +39,12 @@ public interface FormHelper {
 	public String getFormInputsHTML(Form form, String... keys);
 
     /**
-     * Returns an input type="hidden" used to override the selector used for resolving
-     * the custom script used to handle the POST.
+     * Gets the Form Selector for the form POST request
      *
-     * If not set/used, defaults to "post"
-     *
-     * @param selector
+     * @param slingRequest
      * @return
      */
-    public String getFormSelectorInputHTML(final String selector);
+    public String getFormSelector(final SlingHttpServletRequest slingRequest);
 
     /**
      * Builds the form's action URI based on the provided resource's path
@@ -62,9 +57,20 @@ public interface FormHelper {
     public String getAction(final Resource resource);
 
     /**
-     * Builds the form's action URI based on the provided page's path
+     * Builds the form's action URI based on the provided resource's path
      *
      * Appends ".html/<suffix>" to the resource's path.
+     *
+     * @param resource
+     * @param formSelector
+     * @return
+     */
+    public String getAction(final Resource resource, String formSelector);
+
+    /**
+     * Builds the form's action URI based on the provided page's path
+     *
+     * Appends ".html/<suffix>/<formSelector>" to the page's path.
      *
      * @param page
      * @return
@@ -72,14 +78,36 @@ public interface FormHelper {
     public String getAction(final Page page);
 
     /**
+     * Builds the form's action URI based on the provided page's path
+     *
+     * Appends ".html/<suffix>/<formSelector>" to the page's path.
+     *
+     * @param page
+     * @param formSelector
+     * @return
+     */
+    public String getAction(final Page page, String formSelector);
+
+    /**
      * Builds the form's action URI based on the provided path
      *
-     * Appends ".html/<suffix>" to the resource's path.
+     * Appends ".html/<suffix>" to the path.
      *
      * @param path
      * @return
      */
     public String getAction(final String path);
+
+    /**
+     * Builds the form's action URI based on the provided path
+     *
+     * Appends ".html/<suffix>/<formSelector>" to the path.
+     *
+     * @param path
+     * @param formSelector
+     * @return
+     */
+    public String getAction(final String path, final String formSelector);
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
@@ -110,7 +138,6 @@ public interface FormHelper {
      * @throws JSONException
      */
     public void renderForm(Form form, Page page, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException, JSONException;
-
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
