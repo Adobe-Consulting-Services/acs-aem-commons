@@ -36,6 +36,7 @@ Watch this space.
 * Spaces, not tabs.
 * Provide documentation in the Wiki. Doesn't have to be a lot. Just something.
 * Target AEM 5.6. If it works on 5.5, super. But don't go out of your way.
+* API classes and interfaces must have JavaDocs. Not necessary for implentation classes.
 * Don't use author tags. This is a community project.
 
 ## Want commit rights?
