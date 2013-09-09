@@ -117,9 +117,7 @@
                     <configuration>
                         <linkXRef>false</linkXRef>
                         <rulesets>
-                            <!--  see http://pmd.sourceforge.net/pmd-5.0.4/rules/index.html for all rules -->
-                            <ruleset>rulesets/java/basic.xml</ruleset>
-                            <ruleset>rulesets/java/logging-java.xml</ruleset>
+                            <ruleset>https://raw.github.com/Adobe-Consulting-Services/coding-standards/master/pmd/rules.xml</ruleset>
                         </rulesets>
                         <targetJdk>1.6</targetJdk>
                     </configuration>
