@@ -69,7 +69,7 @@ public class FormsPostSlingFilterImpl implements javax.servlet.Filter {
 
         String formSelector = formHelper.getFormSelector(slingRequest);//this.getParameter(slingRequest, FormHelper.FORM_SELECTOR_INPUT);
         if(formSelector == null) {
-            formSelector = FormHelper.SELECTOR;
+            formSelector = FormHelper.DEFAULT_FORM_SELECTOR;
         }
 
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
