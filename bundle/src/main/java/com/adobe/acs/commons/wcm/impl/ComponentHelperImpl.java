@@ -93,7 +93,6 @@ public class ComponentHelperImpl implements ComponentHelper {
      * @param request
      * @return
      */
-    @SuppressWarnings("PMD.UselessParentheses")
     public boolean isAuthoringMode(SlingHttpServletRequest request) {
         return (isEditMode(request) || isDesignMode(request));
     }
