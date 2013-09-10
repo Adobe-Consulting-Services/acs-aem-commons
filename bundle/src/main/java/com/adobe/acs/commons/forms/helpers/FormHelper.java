@@ -11,12 +11,12 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 public interface FormHelper {
-    public static final String EXTENSION = ".html";
+    static final String EXTENSION = ".html";
 
-    public static final String DEFAULT_FORM_SELECTOR= "post";
-    public static final String FORM_NAME_INPUT = ":form";
-    public static final String FORM_RESOURCE_INPUT = ":formResource";
-    public static final String[] FORM_INPUTS = { FORM_NAME_INPUT, FORM_RESOURCE_INPUT };
+    static final String DEFAULT_FORM_SELECTOR = "post";
+    static final String FORM_NAME_INPUT = ":form";
+    static final String FORM_RESOURCE_INPUT = ":formResource";
+    static final String[] FORM_INPUTS = { FORM_NAME_INPUT, FORM_RESOURCE_INPUT };
 
     /**
 	 * Gets the From from either the POST Requests parameters or the GET

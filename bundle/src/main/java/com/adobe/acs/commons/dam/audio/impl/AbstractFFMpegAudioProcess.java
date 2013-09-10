@@ -160,7 +160,7 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
         // working dir of current JVM) and get the absolute path name from that
         File workingDir = new File(path);
         if (!workingDir.isAbsolute()) {
-            File baseDir = new File((slingHome == null) ? "" /* jvm working dir */: slingHome).getAbsoluteFile();
+            File baseDir = new File((slingHome == null) ? "" /* jvm working dir */ : slingHome).getAbsoluteFile();
             workingDir = new File(baseDir, path).getAbsoluteFile();
         }
         try {

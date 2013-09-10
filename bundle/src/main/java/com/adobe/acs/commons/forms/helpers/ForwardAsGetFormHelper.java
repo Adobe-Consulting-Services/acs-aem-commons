@@ -82,7 +82,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
      */
     public void forwardAsGet(Form form, Page page,
                              SlingHttpServletRequest request,
-                             SlingHttpServletResponse response) throws ServletException,IOException;
+                             SlingHttpServletResponse response) throws ServletException, IOException;
 
     /**
      * Same as forwardAsGet(Form form, Page pae, SlingHttpServletRequest request, SlingHttpServletResponse) except allows
@@ -101,7 +101,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
     public void forwardAsGet(Form form, Page page,
                              SlingHttpServletRequest request,
                              SlingHttpServletResponse response,
-                             RequestDispatcherOptions options) throws ServletException,IOException;
+                             RequestDispatcherOptions options) throws ServletException, IOException;
 
 
     /**

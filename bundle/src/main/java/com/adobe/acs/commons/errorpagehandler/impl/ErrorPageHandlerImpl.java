@@ -637,17 +637,17 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @return
      */
     private SortedMap<String, String> mergeMaps(SortedMap<String, String> master, SortedMap<String, String> slave) {
-        SortedMap<String, String>map = new TreeMap<String, String>(new StringLengthComparator());
+        SortedMap<String, String> map = new TreeMap<String, String>(new StringLengthComparator());
 
-        for(final String key : master.keySet()) {
-            if(StringUtils.isNotBlank(master.get(key))) {
+        for (final String key : master.keySet()) {
+            if (StringUtils.isNotBlank(master.get(key))) {
                 map.put(key, master.get(key));
             }
         }
 
-        for(final String key : slave.keySet()) {
-            if(master.containsKey(key)) { continue; }
-            if(StringUtils.isNotBlank(slave.get(key))) {
+        for (final String key : slave.keySet()) {
+            if (master.containsKey(key)) { continue; }
+            if (StringUtils.isNotBlank(slave.get(key))) {
                 map.put(key, slave.get(key));
             }
         }

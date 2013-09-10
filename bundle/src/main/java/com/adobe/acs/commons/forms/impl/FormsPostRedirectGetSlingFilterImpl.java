@@ -64,7 +64,7 @@ public class FormsPostRedirectGetSlingFilterImpl implements Filter {
         }
 
         /* Ensure there is a valid form selector as part of Query Params */
-        final String formSelector = formHelper.getFormSelector(slingRequest);//this.getParameter(slingRequest, PostRedirectGetFormHelper.QUERY_PARAM_FORM_SELECTOR);
+        final String formSelector = formHelper.getFormSelector(slingRequest); //this.getParameter(slingRequest, PostRedirectGetFormHelper.QUERY_PARAM_FORM_SELECTOR);
         if(formSelector == null) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;

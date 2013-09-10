@@ -27,7 +27,7 @@ import java.util.Map;
 
 @Component(label = "ACS AEM Commons - POST-Redirect-GET Form Helper", description = "POST-Redirect-GET Form Helper", enabled = true, metatype = false, immediate = false, inherit = true)
 @Properties({ @Property(label = "Vendor", name = Constants.SERVICE_VENDOR, value = "ACS", propertyPrivate = true) })
-@Service( value = { FormHelper.class, PostRedirectGetFormHelper.class })
+@Service(value = { FormHelper.class, PostRedirectGetFormHelper.class })
 public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements PostRedirectGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetFormHelperImpl.class);
 
@@ -36,7 +36,7 @@ public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements
 		if (this.doHandlePost(formName, request)) {
 			log.debug("Getting FORM [ {} ] from POST parameters", formName);
 			return this.getPostForm(formName, request);
-		} else if(this.doHandleGet(formName, request)) {
+		} else if (this.doHandleGet(formName, request)) {
             log.debug("Getting FORM [ {} ] from GET parameters", formName);
             return this.getGetForm(formName, request);
         }
