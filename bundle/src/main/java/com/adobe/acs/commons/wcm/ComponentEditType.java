@@ -94,6 +94,19 @@ public class ComponentEditType {
         }
 
         /**
+         * Checks if the provided name matches the name of the Type
+         *
+         * @param obj
+         * @return
+         */
+        public boolean equals(Object obj) {
+            if(obj instanceof Type) {
+                return this.equals((Type) obj);
+            }
+            return false;
+        }
+
+        /**
          * HashCode implementation based on the underlying "name" data point.
          * The "name" is what identifies uniqueness between Types
          *

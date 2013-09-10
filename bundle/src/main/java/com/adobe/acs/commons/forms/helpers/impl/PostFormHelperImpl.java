@@ -34,7 +34,7 @@ import java.util.Map;
 @Service(value = PostFormHelper.class)
 public class PostFormHelperImpl implements PostFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostFormHelperImpl.class);
-    protected static final String[] FORM_INPUTS = { FORM_NAME_INPUT, FORM_RESOURCE_INPUT };
+    static final String[] FORM_INPUTS = { FORM_NAME_INPUT, FORM_RESOURCE_INPUT };
 
     @Reference
     protected ResourceResolverFactory resourceResolverFactory;

@@ -444,7 +444,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private Resource findFirstRealParentOrSelf(Resource resource) {
         if(resource == null) {
             return null;
-        } else if(resource != null && !ResourceUtil.isNonExistingResource(resource)) {
+        } else if(!ResourceUtil.isNonExistingResource(resource)) {
             return resource;
         }
 
