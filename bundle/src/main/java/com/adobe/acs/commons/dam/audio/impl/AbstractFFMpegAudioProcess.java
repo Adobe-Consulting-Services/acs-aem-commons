@@ -41,7 +41,6 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
 
     /**
      * FFmpeg working directory. If relative, relative to sling.home.
-     * 
      */
     @Property(value = "./logs/ffmpeg")
     public static final String PROP_WORKING_DIR = "ffmpeg.workingdir";
