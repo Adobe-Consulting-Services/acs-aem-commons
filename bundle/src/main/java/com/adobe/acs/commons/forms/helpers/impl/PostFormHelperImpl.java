@@ -13,7 +13,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
-import org.apache.sling.api.request.RequestUtil;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -35,6 +34,7 @@ import java.util.Map;
 @Service(value = PostFormHelper.class)
 public class PostFormHelperImpl implements PostFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostFormHelperImpl.class);
+    protected static final String[] FORM_INPUTS = { FORM_NAME_INPUT, FORM_RESOURCE_INPUT };
 
     @Reference
     protected ResourceResolverFactory resourceResolverFactory;
@@ -58,23 +58,23 @@ public class PostFormHelperImpl implements PostFormHelper {
     @Override
 	public String getFormInputsHTML(final Form form, final String... keys) {
         // The form objects data and errors should be xssProtected before being passed into this method
-		String html = "";
+		StringBuffer html = new StringBuffer();
 
-        html += "<input type=\"hidden\" name=\"" + FORM_NAME_INPUT + "\" value=\""
-                + xssApi.encodeForHTMLAttr(form.getName()) + "\"/>\n";
+        html.append("<input type=\"hidden\" name=\"").append(FORM_NAME_INPUT).append("\" value=\"")
+                .append(xssApi.encodeForHTMLAttr(form.getName())).append("\"/>\n");
 
         final String resourcePath = form.getResourcePath();
-        html += "<input type=\"hidden\" name=\"" + FORM_RESOURCE_INPUT + "\" value=\""
-                + xssApi.encodeForHTMLAttr(resourcePath) + "\"/>\n";
+        html.append("<input type=\"hidden\" name=\"").append(FORM_RESOURCE_INPUT).append("\" value=\"")
+                .append(xssApi.encodeForHTMLAttr(resourcePath)).append("\"/>\n");
 
 		for (final String key : keys) {
 			if (form.has(key)) {
-				html += "<input type=\"hidden\" name=\"" + key + "\" value=\""
-						+ form.get(key) + "\"/>\n";
+				html.append("<input type=\"hidden\" name=\"").append(key).append("\" value=\"")
+						.append(form.get(key)).append("\"/>\n");
 			}
 		}
 
-		return html;
+		return html.toString();
 	}
 
     @Override
@@ -170,7 +170,6 @@ public class PostFormHelperImpl implements PostFormHelper {
      * @return
      */
     protected boolean doHandlePost(final String formName, final SlingHttpServletRequest request) {
-        //noinspection SimplifiableIfStatement,SimplifiableIfStatement
         if(StringUtils.equalsIgnoreCase("POST", request.getMethod())) {
             // Form should have a hidden input with the name this.getLookupKey(..) and value formName
             return StringUtils.equals(formName, request.getParameter(this.getPostLookupKey(formName)));
@@ -242,9 +241,9 @@ public class PostFormHelperImpl implements PostFormHelper {
         final Map<String, String> map = form.getData();
         final Map<String, String> cleanedMap = new HashMap<String, String>();
 
-        for (final String key : map.keySet()) {
-            if(!ArrayUtils.contains(FORM_INPUTS, key) && StringUtils.isNotBlank(map.get(key))) {
-                cleanedMap.put(key, map.get(key));
+        for(final Map.Entry<String, String> entry : map.entrySet()) {
+            if(!ArrayUtils.contains(FORM_INPUTS, entry.getKey()) && StringUtils.isNotBlank(entry.getValue())) {
+                cleanedMap.put(entry.getKey(), entry.getValue());
             }
         }
 
@@ -274,8 +273,8 @@ public class PostFormHelperImpl implements PostFormHelper {
         final Map<String, String> protectedData = new HashMap<String, String>();
 
         // Protect data for HTML Attributes
-        for (final String key : data.keySet()) {
-            protectedData.put(key, xssApi.encodeForHTMLAttr(data.get(key)));
+        for (final Map.Entry<String, String> entry : data.entrySet()) {
+            protectedData.put(entry.getKey(), xssApi.encodeForHTMLAttr(entry.getValue()));
         }
 
         return protectedData;
@@ -291,8 +290,8 @@ public class PostFormHelperImpl implements PostFormHelper {
         final Map<String, String> protectedErrors = new HashMap<String, String>();
 
         // Protect data for HTML
-        for (final String key : errors.keySet()) {
-            protectedErrors.put(key, xssApi.encodeForHTML(errors.get(key)));
+        for (final Map.Entry<String, String> entry : errors.entrySet()) {
+            protectedErrors.put(entry.getKey(), xssApi.encodeForHTML(entry.getValue()));
         }
 
         return protectedErrors;

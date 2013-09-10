@@ -92,5 +92,15 @@ public class ComponentEditType {
         public boolean equals(String name) {
             return StringUtils.equalsIgnoreCase(this.getName(), name);
         }
+
+        /**
+         * HashCode implementation based on the underlying "name" data point.
+         * The "name" is what identifies uniqueness between Types
+         *
+         * @return
+         */
+        public int hashCode() {
+            return this.name.hashCode();
+        }
     }
 }

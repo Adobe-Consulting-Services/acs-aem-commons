@@ -327,7 +327,6 @@ public class ComponentHelperImpl implements ComponentHelper {
 
         final Resource resource = request.getResource();
         final com.day.cq.wcm.api.components.Component component = WCMUtils.getComponent(resource);
-        final String title = StringUtils.capitalize(component.getTitle());
 
         String html = "";
 
