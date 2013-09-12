@@ -17,7 +17,7 @@ public interface GenericList {
      */
     @Nonnull
     List<Item> getItems();
-    
+
     /**
      * Get an item's title by its value.
      * 
@@ -32,7 +32,7 @@ public interface GenericList {
      *
      */
     interface Item {
-        
+
         /**
          * Get the item's title.
          * 
