@@ -10,7 +10,7 @@ import com.day.cq.wcm.api.Page;
 /**
  * Utility functions for working with CQ Templates.
  */
-public class TemplateUtils {
+public final class TemplateUtils {
 
     private TemplateUtils() {
     }
