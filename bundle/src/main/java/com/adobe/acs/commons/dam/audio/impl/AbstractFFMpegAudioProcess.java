@@ -181,6 +181,8 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
      * 
      * @param parentDir parent directory in which temporary directory is to be
      *            created
+     * 
+     * @return a temporary directory
      */
     protected File createTempDir(File parentDir) {
         File tempDir = null;

@@ -19,8 +19,8 @@ public class TemplateUtils {
      * Determine if the page is of a particular template type. This method
      * is null safe and works properly in the publish and author environments.
      * 
-     * @param page
-     * @param templatePath
+     * @param page the page to check
+     * @param templatePath the path of the template to check
      * @return true if the page is of the defined template
      */
     public static boolean hasTemplate(@CheckForNull final Page page, @CheckForNull final String templatePath) {

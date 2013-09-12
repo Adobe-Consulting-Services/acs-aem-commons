@@ -21,8 +21,8 @@ public interface GenericList {
     /**
      * Get an item's title by its value.
      * 
-     * @param value
-     * @return the title
+     * @param value the list item's value
+     * @return the title or null
      */
     @CheckForNull
     String lookupTitle(String value);

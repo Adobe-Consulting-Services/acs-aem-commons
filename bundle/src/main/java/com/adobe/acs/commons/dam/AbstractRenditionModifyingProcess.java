@@ -117,18 +117,49 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
         }
     }
 
+    /**
+     * Return the extension corresponding to the mime type.
+     * 
+     * @param mimetype the mimetype
+     * @return the corresponding extension
+     */
     protected String getExtension(String mimetype) {
         return mimeTypeService.getExtension(mimetype);
     }
 
+    /**
+     * Parse the provided quality string, from 1 to 100, and
+     * apply it to the base. Allows for a constant scale to be used
+     * and applied to different image types which support different
+     * quality scales.
+     * 
+     * @param base the maximal quality value
+     * @param qualityStr the string to parse
+     * @return a usable quality value
+     */
     protected double getQuality(double base, String qualityStr) {
         int q = Integer.valueOf(qualityStr);
         double res = base * q / 100;
         return res;
     }
 
+    /**
+     * Create a specifier to be used for temporary file location.
+     * 
+     * @return the temp file qualifier
+     */
     protected abstract String getTempFileSpecifier();
 
+    /**
+     * Perform the actual layer processing and return the layer to be saved.
+     * 
+     * @param layer the source image data
+     * @param rendition the source rendition object
+     * @param workflowSession the workflow session
+     * @param args the parsed process arguments
+     * 
+     * @return the modified layer
+     */
     protected abstract Layer processLayer(Layer layer, Rendition rendition, WorkflowSession workflowSession,
             String[] args);
 }
