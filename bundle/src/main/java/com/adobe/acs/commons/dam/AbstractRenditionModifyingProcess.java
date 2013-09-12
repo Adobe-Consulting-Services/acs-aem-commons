@@ -23,7 +23,8 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.image.Layer;
 
 /**
- * Abstract asset workflow which performs some action on a particular rendition (which was presumably created by an earlier workflow process).
+ * Abstract asset workflow which performs some action on a particular rendition
+ * (which was presumably created by an earlier workflow process).
  * 
  * Arguments:
  * <ul>
@@ -81,7 +82,8 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
             layer = processLayer(layer, rendition, workflowSession, args);
 
             String mimetype = layer.getMimeType();
-            double quality = mimetype.equals("image/gif") ? getQuality(MAX_GIF_QUALITY, qualityStr) : getQuality(1.0, qualityStr);
+            double quality = mimetype.equals("image/gif") ? getQuality(MAX_GIF_QUALITY, qualityStr) : getQuality(1.0,
+                    qualityStr);
 
             saveImage(asset, rendition, layer, mimetype, quality);
         } catch (IIOException e) {
