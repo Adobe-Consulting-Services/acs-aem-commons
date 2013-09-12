@@ -3,6 +3,7 @@ package com.adobe.acs.commons.forms.helpers.impl;
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PostFormHelper;
+import com.adobe.acs.commons.util.PathInfoUtil;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.ArrayUtils;
@@ -33,6 +34,7 @@ import java.util.Map;
 @Service(value = PostFormHelper.class)
 public class PostFormHelperImpl implements PostFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostFormHelperImpl.class);
+    static final String[] FORM_INPUTS = { FORM_NAME_INPUT, FORM_RESOURCE_INPUT };
 
     @Reference
     protected ResourceResolverFactory resourceResolverFactory;
@@ -56,33 +58,32 @@ public class PostFormHelperImpl implements PostFormHelper {
     @Override
 	public String getFormInputsHTML(final Form form, final String... keys) {
         // The form objects data and errors should be xssProtected before being passed into this method
-		String html = "";
+		StringBuffer html = new StringBuffer();
 
-        html += "<input type=\"hidden\" name=\"" + FORM_NAME_INPUT + "\" value=\""
-                + xssApi.encodeForHTMLAttr(form.getName()) + "\"/>\n";
+        html.append("<input type=\"hidden\" name=\"").append(FORM_NAME_INPUT).append("\" value=\"")
+                .append(xssApi.encodeForHTMLAttr(form.getName())).append("\"/>\n");
 
         final String resourcePath = form.getResourcePath();
-        html += "<input type=\"hidden\" name=\"" + FORM_RESOURCE_INPUT + "\" value=\""
-                + xssApi.encodeForHTMLAttr(resourcePath) + "\"/>\n";
+        html.append("<input type=\"hidden\" name=\"").append(FORM_RESOURCE_INPUT).append("\" value=\"")
+                .append(xssApi.encodeForHTMLAttr(resourcePath)).append("\"/>\n");
 
 		for (final String key : keys) {
 			if (form.has(key)) {
-				html += "<input type=\"hidden\" name=\"" + key + "\" value=\""
-						+ form.get(key) + "\"/>\n";
+				html.append("<input type=\"hidden\" name=\"").append(key).append("\" value=\"")
+						.append(form.get(key)).append("\"/>\n");
 			}
 		}
 
-		return html;
+		return html.toString();
 	}
 
     @Override
-    public String getFormSelectorInputHTML(final String selector) {
-        return "<input type=\"hidden\" name=\"" + FORM_SELECTOR_INPUT + "\" value=\""
-                + xssApi.encodeForHTMLAttr(selector) + "\"/>\n";
+    public String getAction(final String path) {
+        return getAction(path, null);
     }
 
     @Override
-    public String getAction(final String path) {
+    public String getAction(final String path, final String formSelector) {
         String actionPath = path;
 
         ResourceResolver adminResourceResolver = null;
@@ -98,8 +99,12 @@ public class PostFormHelperImpl implements PostFormHelper {
             }
         }
 
-        return actionPath + FormHelper.EXTENSION + this.getSuffix();
+        actionPath += FormHelper.EXTENSION + this.getSuffix();
+        if(StringUtils.isNotBlank(formSelector)) {
+            actionPath += "/" + formSelector;
+        }
 
+        return actionPath;
     }
 
     @Override
@@ -138,8 +143,18 @@ public class PostFormHelperImpl implements PostFormHelper {
     }
 
     @Override
+    public String getAction(final Resource resource, final String formSelector) {
+        return getAction(resource.getPath(), formSelector);
+    }
+
+    @Override
     public String getAction(final Page page) {
         return getAction(page.getPath());
+    }
+
+    @Override
+    public String getAction(final Page page, final String formSelector) {
+        return getAction(page.getPath(), formSelector);
     }
 
     @Override
@@ -155,7 +170,6 @@ public class PostFormHelperImpl implements PostFormHelper {
      * @return
      */
     protected boolean doHandlePost(final String formName, final SlingHttpServletRequest request) {
-        //noinspection SimplifiableIfStatement,SimplifiableIfStatement
         if(StringUtils.equalsIgnoreCase("POST", request.getMethod())) {
             // Form should have a hidden input with the name this.getLookupKey(..) and value formName
             return StringUtils.equals(formName, request.getParameter(this.getPostLookupKey(formName)));
@@ -227,9 +241,9 @@ public class PostFormHelperImpl implements PostFormHelper {
         final Map<String, String> map = form.getData();
         final Map<String, String> cleanedMap = new HashMap<String, String>();
 
-        for (final String key : map.keySet()) {
-            if(!ArrayUtils.contains(FORM_INPUTS, key) && StringUtils.isNotBlank(map.get(key))) {
-                cleanedMap.put(key, map.get(key));
+        for(final Map.Entry<String, String> entry : map.entrySet()) {
+            if(!ArrayUtils.contains(FORM_INPUTS, entry.getKey()) && StringUtils.isNotBlank(entry.getValue())) {
+                cleanedMap.put(entry.getKey(), entry.getValue());
             }
         }
 
@@ -259,8 +273,8 @@ public class PostFormHelperImpl implements PostFormHelper {
         final Map<String, String> protectedData = new HashMap<String, String>();
 
         // Protect data for HTML Attributes
-        for (final String key : data.keySet()) {
-            protectedData.put(key, xssApi.encodeForHTMLAttr(data.get(key)));
+        for (final Map.Entry<String, String> entry : data.entrySet()) {
+            protectedData.put(entry.getKey(), xssApi.encodeForHTMLAttr(entry.getValue()));
         }
 
         return protectedData;
@@ -276,11 +290,22 @@ public class PostFormHelperImpl implements PostFormHelper {
         final Map<String, String> protectedErrors = new HashMap<String, String>();
 
         // Protect data for HTML
-        for (final String key : errors.keySet()) {
-            protectedErrors.put(key, xssApi.encodeForHTML(errors.get(key)));
+        for (final Map.Entry<String, String> entry : errors.entrySet()) {
+            protectedErrors.put(entry.getKey(), xssApi.encodeForHTML(entry.getValue()));
         }
 
         return protectedErrors;
+    }
+
+
+    public boolean hasValidSuffix(final SlingHttpServletRequest slingRequest) {
+        final String requestSuffix = slingRequest.getRequestPathInfo().getSuffix();
+        if(StringUtils.equals(requestSuffix, this.getSuffix()) ||
+                StringUtils.startsWith(requestSuffix, this.getSuffix() + "/")) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -289,11 +314,20 @@ public class PostFormHelperImpl implements PostFormHelper {
      * @param slingRequest
      * @return
      */
-    protected String getFormSelector(final SlingHttpServletRequest slingRequest) {
-        final RequestParameter requestParameter =
-                slingRequest.getRequestParameter(FORM_SELECTOR_INPUT);
-        if(requestParameter == null) { return null; }
-        return StringUtils.stripToNull(requestParameter.getString());
+    public String getFormSelector(final SlingHttpServletRequest slingRequest) {
+        final String requestSuffix = slingRequest.getRequestPathInfo().getSuffix();
+        if(StringUtils.equals(requestSuffix, this.getSuffix()) ||
+                !StringUtils.startsWith(requestSuffix, this.getSuffix() + "/")) {
+            return null;
+        }
+
+        final int segments = StringUtils.split(this.getSuffix(), '/').length;
+        if(segments < 1) {
+            return null;
+        }
+
+        final String formSelector = PathInfoUtil.getSuffixSegment(slingRequest, segments);
+        return StringUtils.stripToNull(formSelector);
     }
 
     /**

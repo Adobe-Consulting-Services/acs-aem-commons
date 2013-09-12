@@ -23,7 +23,8 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.image.Layer;
 
 /**
- * Abstract asset workflow which performs some action on a particular rendition (which was presumably created by an earlier workflow process).
+ * Abstract asset workflow which performs some action on a particular rendition
+ * (which was presumably created by an earlier workflow process).
  * 
  * Arguments:
  * <ul>
@@ -32,6 +33,12 @@ import com.day.image.Layer;
  *
  */
 public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWorkflowProcess {
+
+    private static final int MAX_GIF_QUALITY = 255;
+
+    private static final String DEFAULT_QUALITY = "60";
+
+    private static final int MAX_GENERIC_QUALITY = 100;
 
     private static final String ARG_QUALITY = "quality";
 
@@ -53,7 +60,7 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
 
         // image quality: from 0 t0 100%
         final String qualityStr = getValuesFromArgs(ARG_QUALITY, args).size() > 0 ? getValuesFromArgs(ARG_QUALITY, args)
-                .get(0) : "60";
+                .get(0) : DEFAULT_QUALITY;
 
         if (renditionName == null) {
             log.warn("Rendition name was not configured in arguments. Skipping.");
@@ -75,7 +82,8 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
             layer = processLayer(layer, rendition, workflowSession, args);
 
             String mimetype = layer.getMimeType();
-            double quality = mimetype.equals("image/gif") ? getQuality(255, qualityStr) : getQuality(1.0, qualityStr);
+            double quality = mimetype.equals("image/gif") ? getQuality(MAX_GIF_QUALITY, qualityStr) : getQuality(1.0,
+                    qualityStr);
 
             saveImage(asset, rendition, layer, mimetype, quality);
         } catch (IIOException e) {
@@ -117,18 +125,49 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
         }
     }
 
-    protected String getExtension(String mimetype) {
+    /**
+     * Return the extension corresponding to the mime type.
+     * 
+     * @param mimetype the mimetype
+     * @return the corresponding extension
+     */
+    protected final String getExtension(String mimetype) {
         return mimeTypeService.getExtension(mimetype);
     }
 
-    protected double getQuality(double base, String qualityStr) {
+    /**
+     * Parse the provided quality string, from 1 to 100, and
+     * apply it to the base. Allows for a constant scale to be used
+     * and applied to different image types which support different
+     * quality scales.
+     * 
+     * @param base the maximal quality value
+     * @param qualityStr the string to parse
+     * @return a usable quality value
+     */
+    protected final double getQuality(double base, String qualityStr) {
         int q = Integer.valueOf(qualityStr);
-        double res = base * q / 100;
+        double res = base * q / MAX_GENERIC_QUALITY;
         return res;
     }
 
+    /**
+     * Create a specifier to be used for temporary file location.
+     * 
+     * @return the temp file qualifier
+     */
     protected abstract String getTempFileSpecifier();
 
+    /**
+     * Perform the actual layer processing and return the layer to be saved.
+     * 
+     * @param layer the source image data
+     * @param rendition the source rendition object
+     * @param workflowSession the workflow session
+     * @param args the parsed process arguments
+     * 
+     * @return the modified layer
+     */
     protected abstract Layer processLayer(Layer layer, Rendition rendition, WorkflowSession workflowSession,
             String[] args);
 }

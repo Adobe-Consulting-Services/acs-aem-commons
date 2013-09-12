@@ -44,7 +44,7 @@ import java.util.Set;
 })
 @Service
 public class QueryBuilderViewHandler extends ViewHandler {
-    private final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
 
     @Override
     protected ViewQuery createQuery(SlingHttpServletRequest slingRequest, Session session, String queryString) throws Exception {

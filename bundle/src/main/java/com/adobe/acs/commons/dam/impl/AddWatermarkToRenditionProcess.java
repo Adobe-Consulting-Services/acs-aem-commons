@@ -28,7 +28,7 @@ import com.day.image.Layer;
 @Component(metatype = false)
 @Service
 @Property(name = "process.label", value = "Add Watermark to Rendition")
-public class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess {
+public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess {
 
     private static final String ARG_WATERMARK = "watermark";
 
