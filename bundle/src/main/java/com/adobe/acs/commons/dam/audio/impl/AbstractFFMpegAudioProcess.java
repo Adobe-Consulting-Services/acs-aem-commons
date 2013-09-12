@@ -50,7 +50,8 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
     private File workingDir;
 
     @SuppressWarnings("PMD.CollapsibleIfStatements")
-    public final void execute(WorkItem workItem, WorkflowSession wfSession, MetaDataMap metaData) throws WorkflowException {
+    public final void execute(WorkItem workItem, WorkflowSession wfSession, MetaDataMap metaData)
+            throws WorkflowException {
 
         final Asset asset = getAssetFromPayload(workItem, wfSession.getSession());
 
@@ -139,7 +140,7 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
             }
         }
     }
-    
+
     protected final ExecutableLocator getLocator() {
         return locator;
     }
@@ -162,7 +163,13 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
         // working dir of current JVM) and get the absolute path name from that
         File workingDir = new File(path);
         if (!workingDir.isAbsolute()) {
-            File baseDir = new File((slingHome == null) ? "" /* jvm working dir */ : slingHome).getAbsoluteFile();
+            File baseDir;
+            if (slingHome == null) {
+                /* use jvm working dir */
+                baseDir = new File("").getAbsoluteFile();
+            } else {
+                baseDir = new File(slingHome).getAbsoluteFile();
+            }
             workingDir = new File(baseDir, path).getAbsoluteFile();
         }
         try {
@@ -182,8 +189,8 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
     /**
      * creates a temporary directory in the given dir.
      * 
-     * @param parentDir parent directory in which temporary directory is to be
-     *            created
+     * @param parentDir
+     *            parent directory in which temporary directory is to be created
      * 
      * @return a temporary directory
      */
