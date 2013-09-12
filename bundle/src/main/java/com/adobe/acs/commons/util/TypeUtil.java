@@ -36,7 +36,7 @@ public class TypeUtil {
      * @param list
      * @return
      */
-    public static <T> Map<T, T> ArrayToMap(T[] list) {
+    public static <T> Map<T, T> arrayToMap(T[] list) {
         final HashMap<T, T> map = new HashMap<T, T>();
         if (list == null) {
             return map;

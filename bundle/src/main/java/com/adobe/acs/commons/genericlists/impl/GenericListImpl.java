@@ -23,16 +23,16 @@ public class GenericListImpl implements GenericList {
         private final String title;
         private final String value;
 
-        public ItemImpl(String title, String value) {
-            this.title = title;
-            this.value = value;
+        public ItemImpl(String t, String v) {
+            this.title = t;
+            this.value = v;
         }
 
-        public String getTitle() {
+        public final String getTitle() {
             return title;
         }
 
-        public String getValue() {
+        public final String getValue() {
             return value;
         }
 
@@ -60,11 +60,11 @@ public class GenericListImpl implements GenericList {
         valueMapping = Collections.unmodifiableMap(tempValueMapping);
     }
 
-    public List<Item> getItems() {
+    public final List<Item> getItems() {
         return items;
     }
 
-    public String lookupTitle(String value) {
+    public final String lookupTitle(String value) {
         return valueMapping.get(value);
     }
 

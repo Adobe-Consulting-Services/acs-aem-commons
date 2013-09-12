@@ -240,11 +240,7 @@ public class GQLToQueryBuilderConverter {
      * @return
      */
     public static boolean has(SlingHttpServletRequest request, String key) {
-        if (request.getRequestParameters(key) != null) {
-            return StringUtils.isNotBlank(request.getRequestParameters(key).toString());
-        }
-
-        return false;
+        return request.getParameterValues(key) != null;
     }
 
     /**

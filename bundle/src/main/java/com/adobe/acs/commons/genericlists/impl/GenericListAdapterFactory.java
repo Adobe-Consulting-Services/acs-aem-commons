@@ -18,10 +18,10 @@ import com.day.cq.wcm.api.Page;
 @Properties({ @Property(name = AdapterFactory.ADAPTABLE_CLASSES, value = "com.day.cq.wcm.api.Page"),
         @Property(name = AdapterFactory.ADAPTER_CLASSES, value = "com.adobe.acs.fordmedia.lists.GenericList") })
 public class GenericListAdapterFactory implements AdapterFactory {
-    
+
     @SuppressWarnings("unchecked")
     @Override
-    public <AdapterType> AdapterType getAdapter(@CheckForNull Object obj, @Nonnull Class<AdapterType> clazz) {
+    public final <AdapterType> AdapterType getAdapter(@CheckForNull Object obj, @Nonnull Class<AdapterType> clazz) {
         if (clazz == GenericList.class) {
             return (AdapterType) adaptToGenericList(obj);
         }

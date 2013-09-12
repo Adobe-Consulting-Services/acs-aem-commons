@@ -21,7 +21,7 @@ import java.io.IOException;
 
 @Component(label = "ACS AEM Commons - Forward Form Manager", description = "Internal Forward-as-GET Form Helper", enabled = true, metatype = true, immediate = false, inherit = true)
 @Properties({ @Property(label = "Vendor", name = Constants.SERVICE_VENDOR, value = "ACS", propertyPrivate = true) })
-@Service( value = { FormHelper.class, ForwardAsGetFormHelper.class })
+@Service(value = { FormHelper.class, ForwardAsGetFormHelper.class })
 public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements ForwardAsGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(ForwardAsGetFormHelperImpl.class);
     private static final String CQ_PAGE_RESOURCE_TYPE = "cq/Page";

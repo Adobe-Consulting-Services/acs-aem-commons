@@ -444,7 +444,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private Resource findFirstRealParentOrSelf(Resource resource) {
         if(resource == null) {
             return null;
-        } else if(resource != null && !ResourceUtil.isNonExistingResource(resource)) {
+        } else if(!ResourceUtil.isNonExistingResource(resource)) {
             return resource;
         }
 
@@ -515,7 +515,6 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param request
      * @return
      */
-    @SuppressWarnings("PMD.UselessParentheses")
     protected boolean isAnonymousRequest(SlingHttpServletRequest request) {
         return (request.getAuthType() == null || request.getRemoteUser() == null);
     }
@@ -638,18 +637,18 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @return
      */
     private SortedMap<String, String> mergeMaps(SortedMap<String, String> master, SortedMap<String, String> slave) {
-        SortedMap<String, String>map = new TreeMap<String, String>(new StringLengthComparator());
+        SortedMap<String, String> map = new TreeMap<String, String>(new StringLengthComparator());
 
-        for(final String key : master.keySet()) {
-            if(StringUtils.isNotBlank(master.get(key))) {
-                map.put(key, master.get(key));
+        for (final Map.Entry<String, String> masterEntry : master.entrySet()) {
+            if (StringUtils.isNotBlank(masterEntry.getValue())) {
+                map.put(masterEntry.getKey(), masterEntry.getValue());
             }
         }
 
-        for(final String key : slave.keySet()) {
-            if(master.containsKey(key)) { continue; }
-            if(StringUtils.isNotBlank(slave.get(key))) {
-                map.put(key, slave.get(key));
+        for (final Map.Entry<String, String> slaveEntry : slave.entrySet()) {
+            if (master.containsKey(slaveEntry.getKey())) { continue; }
+            if (StringUtils.isNotBlank(slaveEntry.getValue())) {
+                map.put(slaveEntry.getKey(), slaveEntry.getValue());
             }
         }
 

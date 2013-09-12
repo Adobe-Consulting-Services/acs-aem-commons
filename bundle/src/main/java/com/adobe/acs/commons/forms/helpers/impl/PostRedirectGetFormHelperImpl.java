@@ -27,7 +27,7 @@ import java.util.Map;
 
 @Component(label = "ACS AEM Commons - POST-Redirect-GET Form Helper", description = "POST-Redirect-GET Form Helper", enabled = true, metatype = false, immediate = false, inherit = true)
 @Properties({ @Property(label = "Vendor", name = Constants.SERVICE_VENDOR, value = "ACS", propertyPrivate = true) })
-@Service( value = { FormHelper.class, PostRedirectGetFormHelper.class })
+@Service(value = { FormHelper.class, PostRedirectGetFormHelper.class })
 public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements PostRedirectGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetFormHelperImpl.class);
 
@@ -36,7 +36,7 @@ public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements
 		if (this.doHandlePost(formName, request)) {
 			log.debug("Getting FORM [ {} ] from POST parameters", formName);
 			return this.getPostForm(formName, request);
-		} else if(this.doHandleGet(formName, request)) {
+		} else if (this.doHandleGet(formName, request)) {
             log.debug("Getting FORM [ {} ] from GET parameters", formName);
             return this.getGetForm(formName, request);
         }
@@ -237,8 +237,11 @@ public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements
     protected String getRedirectPath(final Form form, final String path, final String formSelector) throws JSONException {
         String redirectPath = path;
         redirectPath += this.getSuffix();
+        if(StringUtils.isNotBlank(formSelector)) {
+            redirectPath += "/" + formSelector;
+        }
         redirectPath += "?";
-        redirectPath += this.getQueryParameters(form, formSelector);
+        redirectPath += this.getQueryParameters(form);
         return redirectPath;
     }
 
@@ -250,9 +253,8 @@ public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements
      * @return
      * @throws org.apache.sling.commons.json.JSONException
      */
-    protected String getQueryParameters(Form form, final String formSelector) throws JSONException {
+    protected String getQueryParameters(Form form) throws JSONException {
         boolean hasData = false;
-        boolean hasFormSelector = StringUtils.isNotBlank(formSelector);
         final JSONObject jsonData = new JSONObject();
 
         String params = "";
@@ -276,13 +278,6 @@ public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements
             params = this.getGetLookupKey(form.getName());
             params += "=";
             params += this.encode(jsonData.toString());
-
-            if(hasFormSelector) {
-                params += "&";
-                params += QUERY_PARAM_FORM_SELECTOR;
-                params += "=";
-                params += this.encode(formSelector);
-            }
         }
 
         return params;

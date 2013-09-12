@@ -20,20 +20,20 @@ public class RenditionPatternPicker implements RenditionPicker {
      * Create an Asset Rendition Picker that will pick a Rendition by matching
      * the supplied Regex pattern (as String).
      *
-     * @param pattern Regex pattern to match against Rendition names.
+     * @param p Regex pattern to match against Rendition names.
      */
-    public RenditionPatternPicker(String pattern) {
-        this.pattern = Pattern.compile(pattern);
+    public RenditionPatternPicker(String p) {
+        this.pattern = Pattern.compile(p);
     }
 
     /**
      * Create an Asset Rendition Picker that will pick a Rendition by matching
      * the supplied Regex pattern.
      *
-     * @param pattern Pattern used to find the Asset rendition
+     * @param p Pattern used to find the Asset rendition
      */
-    public RenditionPatternPicker(final Pattern pattern) {
-        this.pattern = pattern;
+    public RenditionPatternPicker(final Pattern p) {
+        this.pattern = p;
     }
 
     private Pattern getPattern() {
@@ -51,7 +51,7 @@ public class RenditionPatternPicker implements RenditionPicker {
      * @return The first rendition whose name matches the supplied pattern (via constructor).
      */
     @Override
-    public Rendition getRendition(final Asset asset) {
+    public final Rendition getRendition(final Asset asset) {
 
         final List<Rendition> renditions = asset.getRenditions();
         final Pattern p = getPattern();

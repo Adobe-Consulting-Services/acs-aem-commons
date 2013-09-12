@@ -56,8 +56,8 @@ public class QueryBuilderViewQuery implements ViewQuery {
         final Map<String, Object> map = ContentFinderHitBuilder.buildGenericResult(hit);
         final com.day.cq.wcm.core.contentfinder.Hit cfHit = new com.day.cq.wcm.core.contentfinder.Hit();
 
-        for (final String key : map.keySet()) {
-            cfHit.set(key, map.get(key));
+        for (final Map.Entry<String, Object> entry : map.entrySet()) {
+            cfHit.set(entry.getKey(), entry.getValue());
         }
 
         return cfHit;

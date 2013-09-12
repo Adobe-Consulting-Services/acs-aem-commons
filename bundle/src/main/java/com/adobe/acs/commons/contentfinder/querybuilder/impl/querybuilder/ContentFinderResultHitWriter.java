@@ -45,8 +45,8 @@ public class ContentFinderResultHitWriter implements ResultHitWriter {
 
         jsonWriter.object();
 
-        for (final String key : map.keySet()) {
-            jsonWriter.key(key).value(map.get(key));
+        for (final Map.Entry<String, Object> entry : map.entrySet()) {
+            jsonWriter.key(entry.getKey()).value(entry.getValue());
         }
 
         jsonWriter.endObject();

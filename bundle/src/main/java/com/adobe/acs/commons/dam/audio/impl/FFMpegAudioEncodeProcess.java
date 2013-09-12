@@ -14,6 +14,8 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.handler.ffmpeg.FFMpegWrapper;
@@ -22,10 +24,13 @@ import com.day.cq.dam.video.VideoProfile;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-@Component(label = "CQ DAM FFmpeg Audio Encode Process", description = "Workflow process that transcodes audio files into different formats")
+@Component(label = "CQ DAM FFmpeg Audio Encode Process",
+        description = "Workflow process that transcodes audio files into different formats")
 @Service
 @Properties({ @Property(name = "process.label", value = "Encode Audio", propertyPrivate = true) })
-public class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
+public final class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
+
+    private static final Logger log = LoggerFactory.getLogger(FFMpegAudioEncodeProcess.class);
 
     String[] buildArguments(MetaDataMap metaData) {
         String processArgs = metaData.get("PROCESS_ARGS", String.class);
@@ -54,7 +59,7 @@ public class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
                 // creating temp working directory for ffmpeg
                 File tmpWorkingDir = createTempDir(getWorkingDir());
                 FFMpegWrapper ffmpegWrapper = FFMpegWrapper.fromProfile(tmpFile, profile, tmpWorkingDir);
-                ffmpegWrapper.setExecutableLocator(locator);
+                ffmpegWrapper.setExecutableLocator(getLocator());
                 FileInputStream fis = null;
                 try {
                     final String renditionName = getRenditionName(ffmpegWrapper);

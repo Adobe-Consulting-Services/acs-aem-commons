@@ -44,7 +44,7 @@ public class TypeUtilTest {
         expResult.put("key2", "value2");
         expResult.put("key3", "value3");
 
-        Map result = TypeUtil.ArrayToMap(list);
+        Map result = TypeUtil.arrayToMap(list);
         assertEquals(expResult, result);
     }
 
@@ -54,7 +54,7 @@ public class TypeUtilTest {
 
         // Expect and exception to be thrown
         try {
-            TypeUtil.ArrayToMap(list);
+            TypeUtil.arrayToMap(list);
             assertTrue(false);
         } catch (IllegalArgumentException ex) {
             assertTrue(true);

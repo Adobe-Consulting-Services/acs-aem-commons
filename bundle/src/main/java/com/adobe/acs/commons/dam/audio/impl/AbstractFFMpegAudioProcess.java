@@ -35,24 +35,23 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 
 @Component(componentAbstract = true, metatype = true)
 public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowProcess {
-    
-    @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
-    protected final Logger log = LoggerFactory.getLogger(getClass());
+
+    private static final Logger log = LoggerFactory.getLogger(AbstractFFMpegAudioProcess.class);
 
     /**
      * FFmpeg working directory. If relative, relative to sling.home.
-     * 
      */
     @Property(value = "./logs/ffmpeg")
     public static final String PROP_WORKING_DIR = "ffmpeg.workingdir";
 
     @Reference(policy = ReferencePolicy.STATIC)
-    protected ExecutableLocator locator;
+    private ExecutableLocator locator;
 
     private File workingDir;
 
     @SuppressWarnings("PMD.CollapsibleIfStatements")
-    public void execute(WorkItem workItem, WorkflowSession wfSession, MetaDataMap metaData) throws WorkflowException {
+    public final void execute(WorkItem workItem, WorkflowSession wfSession, MetaDataMap metaData)
+            throws WorkflowException {
 
         final Asset asset = getAssetFromPayload(workItem, wfSession.getSession());
 
@@ -142,12 +141,16 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
         }
     }
 
-    protected File getWorkingDir() {
+    protected final ExecutableLocator getLocator() {
+        return locator;
+    }
+
+    protected final File getWorkingDir() {
         workingDir.mkdir();
         return workingDir;
     }
 
-    private File resolveWorkingDir(String slingHome, String path) {
+    private static File resolveWorkingDir(String slingHome, String path) {
         if (path == null) {
             path = "";
         }
@@ -160,7 +163,13 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
         // working dir of current JVM) and get the absolute path name from that
         File workingDir = new File(path);
         if (!workingDir.isAbsolute()) {
-            File baseDir = new File((slingHome == null) ? "" /* jvm working dir */: slingHome).getAbsoluteFile();
+            File baseDir;
+            if (slingHome == null) {
+                /* use jvm working dir */
+                baseDir = new File("").getAbsoluteFile();
+            } else {
+                baseDir = new File(slingHome).getAbsoluteFile();
+            }
             workingDir = new File(baseDir, path).getAbsoluteFile();
         }
         try {
@@ -172,7 +181,7 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
         return workingDir;
     }
 
-    protected void activate(ComponentContext ctx) {
+    protected final void activate(ComponentContext ctx) {
         String slingHome = ctx.getBundleContext().getProperty("sling.home");
         workingDir = resolveWorkingDir(slingHome, (String) ctx.getProperties().get(PROP_WORKING_DIR));
     }
@@ -180,10 +189,12 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
     /**
      * creates a temporary directory in the given dir.
      * 
-     * @param parentDir parent directory in which temporary directory is to be
-     *            created
+     * @param parentDir
+     *            parent directory in which temporary directory is to be created
+     * 
+     * @return a temporary directory
      */
-    protected File createTempDir(File parentDir) {
+    protected final File createTempDir(File parentDir) {
         File tempDir = null;
         try {
             tempDir = File.createTempFile("cqdam", null, parentDir);

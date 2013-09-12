@@ -17,12 +17,12 @@ public interface GenericList {
      */
     @Nonnull
     List<Item> getItems();
-    
+
     /**
      * Get an item's title by its value.
      * 
-     * @param value
-     * @return the title
+     * @param value the list item's value
+     * @return the title or null
      */
     @CheckForNull
     String lookupTitle(String value);
@@ -32,7 +32,7 @@ public interface GenericList {
      *
      */
     interface Item {
-        
+
         /**
          * Get the item's title.
          * 

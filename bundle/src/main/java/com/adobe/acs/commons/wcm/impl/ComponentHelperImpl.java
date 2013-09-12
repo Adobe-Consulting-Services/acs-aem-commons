@@ -93,7 +93,6 @@ public class ComponentHelperImpl implements ComponentHelper {
      * @param request
      * @return
      */
-    @SuppressWarnings("PMD.UselessParentheses")
     public boolean isAuthoringMode(SlingHttpServletRequest request) {
         return (isEditMode(request) || isDesignMode(request));
     }
@@ -269,8 +268,8 @@ public class ComponentHelperImpl implements ComponentHelper {
 
             if (dropTargets != null && !dropTargets.isEmpty()) {
                 // Auto generate images with drop-targets
-                for (String key : dropTargets.keySet()) {
-                    final DropTarget dropTarget = (DropTarget) dropTargets.get(key);
+                for (final Map.Entry<String, DropTarget> entry : dropTargets.entrySet()) {
+                    final DropTarget dropTarget = entry.getValue();
 
                     html += "<img src=\"/libs/cq/ui/resources/0.gif\"" + " "
                             + "class=\"" + dropTarget.getId() + " " + getWCMEditType(dropTarget).getCssClass() + "\""
@@ -328,7 +327,6 @@ public class ComponentHelperImpl implements ComponentHelper {
 
         final Resource resource = request.getResource();
         final com.day.cq.wcm.api.components.Component component = WCMUtils.getComponent(resource);
-        final String title = StringUtils.capitalize(component.getTitle());
 
         String html = "";
 
@@ -339,8 +337,8 @@ public class ComponentHelperImpl implements ComponentHelper {
             DropTarget dropTarget = null;
 
             // Find the named Drop Target
-            for (String key : dropTargets.keySet()) {
-                dropTarget = dropTargets.get(key);
+            for (final Map.Entry<String, DropTarget> entry : dropTargets.entrySet()) {
+                dropTarget = entry.getValue();
                 if (StringUtils.equals(name, dropTarget.getName())) {
                     break;
                 } else {
