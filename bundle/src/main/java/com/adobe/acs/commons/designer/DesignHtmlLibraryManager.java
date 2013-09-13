@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 public interface DesignHtmlLibraryManager {
-    public static final String RESOURCE_NAME = "_clientlibs";
+    public static final String RESOURCE_NAME = "clientlibs";
     public static final String PROPERTY_CSS = "css";
     public static final String PROPERTY_JS = "js";
 

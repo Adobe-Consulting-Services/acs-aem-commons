@@ -56,7 +56,7 @@
                         jcr:primaryType="cq:Widget"
                         fieldLabel="Body"
                         fieldDescription="Click the '+' to add a new JS ClientLib"
-                        name="./body/libs"
+                        name="./body/js"
                         xtype="multifield">
                     <fieldConfig
                             jcr:primaryType="cq:Widget"

@@ -10,6 +10,8 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.osgi.framework.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -30,6 +32,7 @@ import java.util.*;
 })
 @Service
 public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
+    private static final Logger log = LoggerFactory.getLogger(DesignHtmlLibraryManagerImpl.class);
 
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
@@ -63,28 +66,43 @@ public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
 
     @Override
     public String[] getIncludes(final Design design, final PageRegion pageRegion) {
-        final Set<String> libs = new HashSet<String>();
+        final List<String> libs = new ArrayList<String>();
 
-        final ValueMap props = this.getPageRegionProperties(design, pageRegion);
+        final String[] cssLibs = this.getCssIncludes(design, pageRegion);
+        final String[] jsLibs = this.getJsIncludes(design, pageRegion);
 
-        final String[] cssLibs = props.get(PROPERTY_CSS, new String[]{});
-        final String[] jsLibs = props.get(PROPERTY_JS, new String[] {});
+        for(final String lib : cssLibs) {
+            if(!libs.contains(lib)) {
+                libs.add(lib);
+            }
+        }
 
-        libs.addAll(Arrays.asList(cssLibs));
-        libs.addAll(Arrays.asList(jsLibs));
+        for(final String lib : jsLibs) {
+            if(!libs.contains(lib)) {
+                libs.add(lib);
+            }
+        }
 
         return libs.toArray(new String[libs.size()]);
     }
 
     private ValueMap getPageRegionProperties(final Design design, final PageRegion pageRegion) {
-        return this.getProperties(design, pageRegion.toString());
+        final String relPath = RESOURCE_NAME + "/" + pageRegion;
+        return this.getProperties(design, relPath);
     }
 
     private ValueMap getProperties(final Design design, final String relPath) {
-        if(design == null ||
-                design.getContentResource() == null ||
-                design.getContentResource().getChild(relPath) == null) {
-            return new ValueMapDecorator(new HashMap<String, Object>());
+        final ValueMap empty = new ValueMapDecorator(new HashMap<String, Object>());
+
+        if(design == null) {
+            log.warn("Cannot find properties for `null` Design");
+            return empty;
+        } else if(design.getContentResource() == null) {
+            log.warn("Cannot find properties for `null` Design content resource");
+            return empty;
+        } else if(design.getContentResource().getChild(relPath) == null) {
+            log.warn("Could not find resource: {}", design.getContentResource().getPath() + "/" + relPath);
+            return empty;
         }
 
         return design.getContentResource().getChild(relPath).adaptTo(ValueMap.class);
