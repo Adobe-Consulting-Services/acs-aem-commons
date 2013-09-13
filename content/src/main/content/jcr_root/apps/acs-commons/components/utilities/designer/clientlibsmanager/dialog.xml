@@ -16,34 +16,23 @@
                     jcr:primaryType="cq:Widget"
                     fieldLabel="Head"
                     fieldDescription="Click the '+' to add a new CSS ClientLib"
-                    name="./css/headLibs"
+                    name="./head/css"
                     xtype="multifield">
                     <fieldConfig
                         jcr:primaryType="cq:Widget"
                         xtype="textfield"/>
                 </headLibs>
 
-                <bodyStartLibs
+                <bodyLibs
                     jcr:primaryType="cq:Widget"
-                    fieldLabel="After body"
+                    fieldLabel="Body"
                     fieldDescription="Click the '+' to add a new CSS ClientLib"
-                    name="./css/bodyStartLibs"
+                    name="./body/css"
                     xtype="multifield">
                     <fieldConfig
                         jcr:primaryType="cq:Widget"
                         xtype="textfield"/>
-                </bodyStartLibs>
-
-                <bodyEndLibs
-                    jcr:primaryType="cq:Widget"
-                    fieldLabel="Before body close"
-                    fieldDescription="Click the '+' to add a new CSS ClientLib"
-                    name="./css/bodyEndLibs"
-                    xtype="multifield">
-                    <fieldConfig
-                        jcr:primaryType="cq:Widget"
-                        xtype="textfield"/>
-                </bodyEndLibs>
+                </bodyLibs>
             </items>
          </tab1>
          <tab2
@@ -56,34 +45,23 @@
                         jcr:primaryType="cq:Widget"
                         fieldLabel="Head"
                         fieldDescription="Click the '+' to add a new JS ClientLib"
-                        name="./js/headLibs"
+                        name="./head/js"
                         xtype="multifield">
                     <fieldConfig
                             jcr:primaryType="cq:Widget"
                             xtype="textfield"/>
                 </headLibs>
 
-                <bodyStartLibs
+                <bodyLibs
                         jcr:primaryType="cq:Widget"
-                        fieldLabel="After body"
+                        fieldLabel="Body"
                         fieldDescription="Click the '+' to add a new JS ClientLib"
-                        name="./js/bodyStartLibs"
+                        name="./body/libs"
                         xtype="multifield">
                     <fieldConfig
                             jcr:primaryType="cq:Widget"
                             xtype="textfield"/>
-                </bodyStartLibs>
-
-                <bodyEndLibs
-                        jcr:primaryType="cq:Widget"
-                        fieldLabel="Before body close"
-                        fieldDescription="Click the '+' to add a new JS ClientLib"
-                        name="./js/bodyEndLibs"
-                        xtype="multifield">
-                    <fieldConfig
-                            jcr:primaryType="cq:Widget"
-                            xtype="textfield"/>
-                </bodyEndLibs>
+                </bodyLibs>
             </items>
         </tab2>
      </items>

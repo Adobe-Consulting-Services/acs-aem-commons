@@ -1,118 +1,86 @@
 package com.adobe.acs.commons.designer.impl;
 
 import com.adobe.acs.commons.designer.DesignHtmlLibraryManager;
+import com.adobe.acs.commons.designer.PageRegion;
 import com.day.cq.wcm.api.designer.Design;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
+import com.day.cq.widget.HtmlLibraryManager;
+import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.osgi.framework.Constants;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
 
 @Component(
         label = "ACS Commons - Design HTML Library Manager",
         description = "Service description",
-        metatype = true,
+        metatype = false,
         immediate = false)
 @Properties({
         @Property(
                 label = "Vendor",
                 name = Constants.SERVICE_VENDOR,
-                value = "Customer",
+                value = "ACS AEM Commons",
                 propertyPrivate = true
         )
 })
 @Service
 public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
-    @Override
-    public String getHeadLibs(Design design) {
-        return this.getCombinedLibs(design, PROP_HEAD_LIBS);
-    }
+
+    @Reference
+    private HtmlLibraryManager htmlLibraryManager;
 
     @Override
-    public String getCssHeadLibs(Design design) {
-        return this.getCssLibs(design, PROP_HEAD_LIBS);
-    }
-
-    @Override
-    public String getJsHeadLibs(Design design) {
-        return this.getJsLibs(design, PROP_HEAD_LIBS);
+    public void writeCssInclude(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
+        htmlLibraryManager.writeCssInclude(request, writer, this.getCssIncludes(design, pageRegion));
     }
 
     @Override
-    public String getBodyStartLibs(Design design) {
-        return this.getCombinedLibs(design, PROP_BODY_START_LIBS);
+    public void writeJsInclude(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
+        htmlLibraryManager.writeJsInclude(request, writer, this.getJsIncludes(design, pageRegion));
     }
 
     @Override
-    public String getCssBodyStartLibs(Design design) {
-        return this.getCssLibs(design, PROP_BODY_START_LIBS);
+    public void writeIncludes(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
+        htmlLibraryManager.writeIncludes(request, writer, this.getJsIncludes(design, pageRegion));
     }
 
     @Override
-    public String getJsBodyStartLibs(Design design) {
-        return this.getJsLibs(design, PROP_BODY_START_LIBS);
+    public String[] getCssIncludes(final Design design, final PageRegion pageRegion) {
+        final ValueMap cssProps = this.getPageRegionProperties(design, pageRegion);
+        return cssProps.get(PROPERTY_CSS, new String[]{});
     }
 
     @Override
-    public String getBodyEndLibs(Design design) {
-        return this.getCombinedLibs(design, PROP_BODY_END_LIBS);
+    public String[] getJsIncludes(final Design design, final PageRegion pageRegion) {
+        final ValueMap jsProps = this.getPageRegionProperties(design, pageRegion);
+        return jsProps.get(PROPERTY_JS, new String[] {});
     }
 
     @Override
-    public String getCssBodyEndLibs(Design design) {
-        return this.getCssLibs(design, PROP_BODY_END_LIBS);
-    }
-
-    @Override
-    public String getJsBodyEndLibs(Design design) {
-        return this.getJsLibs(design, PROP_BODY_END_LIBS);
-    }
-
-    private String getCssLibs(Design design, String propertyName) {
-        final ValueMap cssProps = this.getCssProperties(design);
-        final String[] cssLibs = cssProps.get(propertyName, new String[]{});
-        return StringUtils.join(cssLibs, ',');
-    }
-
-    private String getJsLibs(Design design, String propertyName) {
-        final ValueMap jsProps = this.getJsProperties(design);
-        final String[] jsLibs = jsProps.get(propertyName, new String[] {});
-        return StringUtils.join(jsLibs, ',');
-    }
-
-    private String getCombinedLibs(Design design, String propertyName) {
+    public String[] getIncludes(final Design design, final PageRegion pageRegion) {
         final Set<String> libs = new HashSet<String>();
 
-        final ValueMap cssProps = this.getCssProperties(design);
-        final ValueMap jsProps = this.getJsProperties(design);
+        final ValueMap props = this.getPageRegionProperties(design, pageRegion);
 
-        final String[] cssLibs = cssProps.get(propertyName, new String[]{});
-        final String[] jsLibs = jsProps.get(propertyName, new String[] {});
+        final String[] cssLibs = props.get(PROPERTY_CSS, new String[]{});
+        final String[] jsLibs = props.get(PROPERTY_JS, new String[] {});
 
         libs.addAll(Arrays.asList(cssLibs));
         libs.addAll(Arrays.asList(jsLibs));
 
-        return StringUtils.join(libs, ',');
+        return libs.toArray(new String[libs.size()]);
     }
 
-    private ValueMap getCssProperties(Design design) {
-        return this.getProperties(design, REL_PATH_CSS);
+    private ValueMap getPageRegionProperties(final Design design, final PageRegion pageRegion) {
+        return this.getProperties(design, pageRegion.toString());
     }
 
-    private ValueMap getJsProperties(Design design) {
-        return this.getProperties(design, REL_PATH_JS);
-    }
-
-    private ValueMap getProperties(Design design, String relPath) {
+    private ValueMap getProperties(final Design design, final String relPath) {
         if(design == null ||
                 design.getContentResource() == null ||
                 design.getContentResource().getChild(relPath) == null) {
