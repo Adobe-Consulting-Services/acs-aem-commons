@@ -8,6 +8,7 @@
     final String[] jsHeadLibs = properties.get(PageRegion.HEAD + "/" + DesignHtmlLibraryManager.PROPERTY_JS, new String[]{});
 
     /* Body */
+    final String[] cssBodyLibs = properties.get(PageRegion.BODY + "/" + DesignHtmlLibraryManager.PROPERTY_CSS, new String[]{});
     final String[] jsBodyLibs = properties.get(PageRegion.BODY + "/" + DesignHtmlLibraryManager.PROPERTY_JS, new String[]{});
 %>
 
@@ -38,6 +39,14 @@
     <div class="body-libs">
         <h2>Body ClientLibs</h2>
         <p class="instructions">Typically used immediately before &lt;/body&gt;</p>
+
+        <h3>CSS ClientLibs</h3>
+        <ul>
+            <% if(cssBodyLibs.length == 0) { %><li class="not-set">CSS ClientLibs not set</li><% } %>
+            <% for(String lib : cssBodyLibs) { %>
+            <li><%= lib %></li>
+            <% } %>
+        </ul>
 
         <h3>JavaScript ClientLibs</h3>
         <ul>

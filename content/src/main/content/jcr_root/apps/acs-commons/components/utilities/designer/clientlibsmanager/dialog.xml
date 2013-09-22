@@ -8,61 +8,64 @@
     <items jcr:primaryType="cq:WidgetCollection">
         <tab1
             jcr:primaryType="cq:Widget"
-            title="CSS ClientLibs"
+            title="ClientLibs"
             xtype="panel">
 
             <items jcr:primaryType="cq:WidgetCollection">
-                <headLibs
-                    jcr:primaryType="cq:Widget"
-                    fieldLabel="Head"
-                    fieldDescription="Click the '+' to add a new CSS ClientLib"
-                    name="./head/css"
-                    xtype="multifield">
-                    <fieldConfig
-                        jcr:primaryType="cq:Widget"
-                        xtype="textfield"/>
-                </headLibs>
 
-                <bodyLibs
-                    jcr:primaryType="cq:Widget"
-                    fieldLabel="Body"
-                    fieldDescription="Click the '+' to add a new CSS ClientLib"
-                    name="./body/css"
-                    xtype="multifield">
-                    <fieldConfig
+                <head-libs
                         jcr:primaryType="cq:Widget"
-                        xtype="textfield"/>
-                </bodyLibs>
-            </items>
-         </tab1>
-         <tab2
-                jcr:primaryType="cq:Widget"
-                title="JavaScript ClientLibs"
-                xtype="panel">
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}false"
+                        title="Head ClientLibs"
+                        xtype="dialogfieldset">
 
-            <items jcr:primaryType="cq:WidgetCollection">
-                <headLibs
-                        jcr:primaryType="cq:Widget"
-                        fieldLabel="Head"
-                        fieldDescription="Click the '+' to add a new JS ClientLib"
-                        name="./head/js"
-                        xtype="multifield">
-                    <fieldConfig
+                    <items jcr:primaryType="cq:WidgetCollection">
+                        <css
                             jcr:primaryType="cq:Widget"
-                            xtype="textfield"/>
-                </headLibs>
+                            fieldLabel="CSS"
+                            fieldDescription="Click the '+' to add a new CSS ClientLib"
+                            name="./head/css"
+                            xtype="multifield">
+                            <fieldConfig
+                                jcr:primaryType="cq:Widget"
+                                xtype="textfield"/>
+                        </css>
 
-                <bodyLibs
-                        jcr:primaryType="cq:Widget"
-                        fieldLabel="Body"
-                        fieldDescription="Click the '+' to add a new JS ClientLib"
-                        name="./body/js"
-                        xtype="multifield">
-                    <fieldConfig
+                        <js
                             jcr:primaryType="cq:Widget"
-                            xtype="textfield"/>
-                </bodyLibs>
+                            fieldLabel="JavaScript"
+                            fieldDescription="Click the '+' to add a new JavaScript ClientLib"
+                            name="./head/js"
+                            xtype="multifield">
+                            <fieldConfig
+                                jcr:primaryType="cq:Widget"
+                                xtype="textfield"/>
+                        </js>
+                    </items>
+                </head-libs>
+
+                <body-libs
+                    jcr:primaryType="cq:Widget"
+                    collapsed="{Boolean}false"
+                    collapsible="{Boolean}false"
+                    title="Body ClientLibs"
+                    xtype="dialogfieldset">
+
+                    <items jcr:primaryType="cq:WidgetCollection">
+                        <js
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="JavaScript"
+                                fieldDescription="Click the '+' to add a new JavaScript ClientLib"
+                                name="./body/js"
+                                xtype="multifield">
+                            <fieldConfig
+                                    jcr:primaryType="cq:Widget"
+                                    xtype="textfield"/>
+                        </js>
+                    </items>
+                </body-libs>
             </items>
-        </tab2>
+        </tab1>
      </items>
 </jcr:root>
