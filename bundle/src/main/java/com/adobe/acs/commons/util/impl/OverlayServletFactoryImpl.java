@@ -1,11 +1,11 @@
-package com.adobe.acs.commons.designer.impl;
+package com.adobe.acs.commons.util.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
@@ -57,8 +57,8 @@ import java.util.Map;
         )
 })
 @Service(Servlet.class)
-public class OverlayServletConfigurationFactoryImpl extends SlingSafeMethodsServlet {
-    protected static final Logger log = LoggerFactory.getLogger(OverlayServletConfigurationFactoryImpl.class);
+public class OverlayServletFactoryImpl extends SlingAllMethodsServlet {
+    protected static final Logger log = LoggerFactory.getLogger(OverlayServletFactoryImpl.class);
 
     private static final String DEFAULT_TARGET_RESOURCE_TYPE = "";
     private String targetResourceType = DEFAULT_TARGET_RESOURCE_TYPE;
@@ -67,8 +67,49 @@ public class OverlayServletConfigurationFactoryImpl extends SlingSafeMethodsServ
             value = DEFAULT_TARGET_RESOURCE_TYPE)
     public static final String PROP_TARGET_RESOURCE_TYPE = "prop.target-resource-type";
 
+    /** Safe HTTP Methods **/
+
+    public void doGeneric(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        this.overlay(request, response);
+    }
 
     public void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        this.overlay(request, response);
+    }
+
+    public void doHead(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        this.overlay(request, response);
+    }
+
+    public void doOptions(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        this.overlay(request, response);
+    }
+
+    public void doTrace(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        this.overlay(request, response);
+    }
+
+    /** Un-Safe HTTP Methods **/
+
+    public void doDelete(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        this.overlay(request, response);
+    }
+
+    public void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        this.overlay(request, response);
+    }
+
+    public void doPut(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        this.overlay(request, response);
+    }
+
+    /**
+     * Proxies request through to the target resource type
+     *
+     * @param request
+     * @param response
+     */
+    private void overlay(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
         if(StringUtils.isNotBlank(targetResourceType)) {
             log.debug("Overlaying Request resource type with: {}", targetResourceType);
