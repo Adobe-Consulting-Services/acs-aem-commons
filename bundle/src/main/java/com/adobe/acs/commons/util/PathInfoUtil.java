@@ -57,15 +57,41 @@ public class PathInfoUtil {
      * @return null if selector cannot be found at the specified index
      */
     public static String getSelector(SlingHttpServletRequest request, int index) {
+        return getSelector(request, index, null);
+    }
+
+    /**
+     * <p>
+     * Gets the selector at the supplied index, using a default if
+     * there is no selector at that index.
+     * </p><p>
+     * Given: /content/page.selA.html
+     * <br/>
+     * getSelector(request, 0, "default") // --> "selA"
+     * <br/>
+     * getSelector(request, 1, "default2") // --> "default2"
+     * </p>
+     *
+     * @param request the request
+     * @param index the index
+     * @param defaultValue the default value
+     * @return the selector value or the default
+     */
+    public static String getSelector(SlingHttpServletRequest request, int index, String defaultValue) {
         RequestPathInfo pathInfo = request.getRequestPathInfo();
-        if (pathInfo == null || pathInfo.getSelectors() == null) {
+        if (pathInfo == null) {
+            return null;
+        }
+        
+        String[] selectors =  pathInfo.getSelectors();
+        if (selectors == null) {
             return null;
         }
 
-        if (index >= 0 && index < pathInfo.getSelectors().length) {
-            return pathInfo.getSelectors()[index];
+        if (index >= 0 && index < selectors.length) {
+            return selectors[index];
         } else {
-            return null;
+            return defaultValue;
         }
     }
 

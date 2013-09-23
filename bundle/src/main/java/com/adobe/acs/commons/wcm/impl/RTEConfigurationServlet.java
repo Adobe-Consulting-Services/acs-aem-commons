@@ -24,6 +24,7 @@ import org.apache.sling.commons.json.io.JSONWriter;
 import org.apache.sling.commons.json.jcr.JsonItemWriter;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
+import com.adobe.acs.commons.util.PathInfoUtil;
 import com.adobe.granite.xss.XSSAPI;
 
 /**
@@ -61,18 +62,10 @@ public class RTEConfigurationServlet extends SlingSafeMethodsServlet {
             IOException {
         String componentPath = request.getResource().getPath();
 
-        String configName = DEFAULT_CONFIG_NAME;
+        String configName = PathInfoUtil.getSelector(request, 1, DEFAULT_CONFIG_NAME);
 
         // the actual property name
-        String rteName = "text";
-
-        String[] selectors = request.getRequestPathInfo().getSelectors();
-        if (selectors.length > 1) {
-            configName = selectors[1];
-            if (selectors.length > 2) {
-                rteName = selectors[2];
-            }
-        }
+        String rteName = PathInfoUtil.getSelector(request, 2, "text");
 
         Resource root = request.getResourceResolver().getResource(rootPath);
         if (root != null) {
