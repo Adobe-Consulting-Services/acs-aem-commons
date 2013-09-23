@@ -19,7 +19,7 @@ import java.util.*;
 
 @Component(
         label = "ACS Commons - Design HTML Library Manager",
-        description = "Service description",
+        description = "Helper service used to expose configured Design-specific client libraries in JSPs.",
         metatype = false,
         immediate = false)
 @Properties({
@@ -39,37 +39,37 @@ public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
 
     @Override
     public void writeCssInclude(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
-        htmlLibraryManager.writeCssInclude(request, writer, this.getCssIncludes(design, pageRegion));
+        htmlLibraryManager.writeCssInclude(request, writer, this.getCssLibraries(design, pageRegion));
     }
 
     @Override
     public void writeJsInclude(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
-        htmlLibraryManager.writeJsInclude(request, writer, this.getJsIncludes(design, pageRegion));
+        htmlLibraryManager.writeJsInclude(request, writer, this.getJsLibraries(design, pageRegion));
     }
 
     @Override
     public void writeIncludes(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
-        htmlLibraryManager.writeIncludes(request, writer, this.getJsIncludes(design, pageRegion));
+        htmlLibraryManager.writeIncludes(request, writer, this.getJsLibraries(design, pageRegion));
     }
 
     @Override
-    public String[] getCssIncludes(final Design design, final PageRegion pageRegion) {
+    public String[] getCssLibraries(final Design design, final PageRegion pageRegion) {
         final ValueMap cssProps = this.getPageRegionProperties(design, pageRegion);
         return cssProps.get(PROPERTY_CSS, new String[]{});
     }
 
     @Override
-    public String[] getJsIncludes(final Design design, final PageRegion pageRegion) {
+    public String[] getJsLibraries(final Design design, final PageRegion pageRegion) {
         final ValueMap jsProps = this.getPageRegionProperties(design, pageRegion);
         return jsProps.get(PROPERTY_JS, new String[] {});
     }
 
     @Override
-    public String[] getIncludes(final Design design, final PageRegion pageRegion) {
+    public String[] getLibraries(final Design design, final PageRegion pageRegion) {
         final List<String> libs = new ArrayList<String>();
 
-        final String[] cssLibs = this.getCssIncludes(design, pageRegion);
-        final String[] jsLibs = this.getJsIncludes(design, pageRegion);
+        final String[] cssLibs = this.getCssLibraries(design, pageRegion);
+        final String[] jsLibs = this.getJsLibraries(design, pageRegion);
 
         for(final String lib : cssLibs) {
             if(!libs.contains(lib)) {
@@ -86,12 +86,16 @@ public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
         return libs.toArray(new String[libs.size()]);
     }
 
+    /**
+     * Gets the ValueMap that contains the client library lists for the specified design and PageRegion
+     *
+     * @param design
+     * @param pageRegion
+     * @return the ValueMap associated with the PageRegion; CSS and JS libraries can be looked up via PROPERTY_CSS and PROPERTY_JS
+     */
     private ValueMap getPageRegionProperties(final Design design, final PageRegion pageRegion) {
         final String relPath = RESOURCE_NAME + "/" + pageRegion;
-        return this.getProperties(design, relPath);
-    }
 
-    private ValueMap getProperties(final Design design, final String relPath) {
         final ValueMap empty = new ValueMapDecorator(new HashMap<String, Object>());
 
         if(design == null) {
