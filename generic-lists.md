@@ -19,6 +19,7 @@ On a list page, the items in the list are components within a parsys. New items 
 
 One of the primary purposes of Generic Lists is to populate a selection widget in a component (or page) dialog. To do this, set the `options` configuration property to the list path *plus* `/jcr:content.list.json`. For example:
 
+{% highlight xml %}
     <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
         jcr:primaryType="cq:Widget"
         fieldLabel="Target"
@@ -26,6 +27,7 @@ One of the primary purposes of Generic Lists is to populate a selection widget i
         options="/etc/acs-commons/lists/age-ranges/_jcr_content.list.json"
         type="select"
         xtype="selection"/>
+{% endhighlight %}
 
 This can also be used in multifield scenarios.
 
@@ -40,13 +42,17 @@ You will frequently need to do two things with lists:
 
 To do this, first obtain the `com.day.cq.wcm.api.Page` object for the list page:
 
+{% highlight java %}
     PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
     Page listPage = pageManager.getPage("/etc/acs-commons/lists/targets");
+{% endhighlight %}
     
 Then adapt the `Page` object to a `com.adobe.acs.fordmedia.lists.GenericList` object:
 
+{% highlight java %}
     GenericList list = listPage.adaptTo(GenericList.class);
-    
+{% endhighlight %}
+
 The `GenericList` interface has two methods:
 
 * `getItems()` - returns a `java.util.List` of the items in the list.
