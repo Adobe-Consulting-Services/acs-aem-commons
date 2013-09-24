@@ -12,8 +12,9 @@ Provide a simple extension point for turning "normal" components into components
 * Requires jQuery 1.8+
 * Requires inclusion of the `acs-commons.components` clientlib
 
-
+{% highlight jsp %}
         <cq:includeClientLib categories="acs-commons.components"/>
+{% endhighlight %}
 
 ## Instructions
 
