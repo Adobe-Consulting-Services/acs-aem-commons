@@ -1,0 +1,529 @@
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.clearfix:after {
+  clear: both;
+}
+.hide-text {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+.input-block-level {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+/**
+ * CUI Configuration
+ */
+/**
+ Mixin: .gradient
+ A simpler syntax for gradients
+*/
+/**
+ Mixin: .pinstripe
+ Print a pinstripe gradient
+*/
+/**
+ Mixin: .shadow
+ A simpler syntax for shadow with defaults
+*/
+/**
+ Mixin: .ellipsis
+ Truncate overflowed text using ellipsis: ...
+*/
+/**
+ Mixin: .scrollable
+ Make an area scrollable when the contents overflow
+
+ Note: Does not work for flexbox children in Chrome
+*/
+/**
+ Mixin: .spin
+ Rotate an element forever
+*/
+/**
+ Mixin: .background-size
+ Set the scaling of the background image or gradient
+*/
+/**
+ Mixin: .glow
+ Make an element glow
+ TODO: add partial glow mixin for mixed top/bottom/left/right only
+*/
+/**
+ Mixin: .glow-text
+ Make text or a font icon glow
+*/
+/**
+ Mixin: .no-glow
+ Make an element glow
+ TODO: add partial glow mixin for mixed top/bottom/left/right only
+*/
+/**
+ Mixin: .no-select
+ Stop text selection for an element and its children
+*/
+/**
+ Mixin: .placeholder
+ Input field placeholder font color
+*/
+/**
+ Mixin: .box-sizing
+ Set an element as a border box
+*/
+.border-box {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+/**
+ Mixin: .calc-width
+ Sets the width with a calc() expression
+*/
+/*
+  Mixin: .button-square
+  Turn any button into a square button. For use with the .icon-* mixins or classes.
+*/
+/*
+  Mixin: .button-square-transparent
+  Overrides background and border, otherwise the same as .button-square
+*/
+/*
+  shortcuts for a specific font or style
+*/
+.bold {
+  font-weight: bold;
+}
+.italic {
+  font-style: italic;
+}
+.clean-light {
+  font-family: AdobeCleanLight;
+}
+.condensed {
+  font-family: AdobeCleanCondensed;
+}
+h1.line,
+h2.line,
+h3.line,
+h4.line {
+  border-bottom: 0.0625rem solid #c8c8c8;
+}
+#SectionAnchor {
+  display: inline-block;
+  width: 1.25rem;
+  font-family: monospace;
+  line-height: 1rem;
+  text-align: center;
+  text-decoration: none;
+}
+section > p {
+  margin-left: 0.5rem;
+}
+pre.prettyprint,
+code.prettyprint,
+code {
+  font-size: 0.8rem;
+  padding: 0 0.25rem;
+  -webkit-border-radius: 0.35rem;
+  -moz-border-radius: 0.35rem;
+  border-radius: 0.35rem;
+  border: 0.0625rem solid #bbbbbb;
+  background: #f7f7f7;
+}
+pre.prettyprint.linenums,
+code.prettyprint.linenums,
+code.linenums {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+}
+div.shadowBox,
+.prettyprint,
+div.componentSample {
+  border: 0.0625rem solid #bbbbbb;
+  -webkit-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+}
+.prettyprint.linenums {
+  font-size: 0.85rem;
+  border: 0.0625rem solid #bbbbbb;
+  -webkit-box-shadow: inset 2.75rem 0 0 #fbfbfc, inset 2.8125rem 0 0 #ececf0, 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: inset 2.75rem 0 0 #fbfbfc, inset 2.8125rem 0 0 #ececf0, 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: inset 2.75rem 0 0 #fbfbfc, inset 2.8125rem 0 0 #ececf0, 0 0 0.5rem rgba(0, 0, 0, 0.1);
+}
+.prettyprint.linenums ol.linenums {
+  margin: 0;
+  padding-left: 2.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  overflow: auto;
+}
+.prettyprint.linenums ol.linenums li {
+  line-height: 1.1rem;
+}
+div.componentSample {
+  margin: 0.75rem 0 0 0;
+  background: #f7f7f7;
+  -webkit-border-radius: 0.25rem;
+  -moz-border-radius: 0.25rem;
+  border-radius: 0.25rem;
+  *zoom: 1;
+}
+div.componentSample:before,
+div.componentSample:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+div.componentSample:after {
+  clear: both;
+}
+div.componentSample.noCode {
+  padding: 0.75rem;
+  display: inline-block;
+}
+div.componentSample .example {
+  background: #fbfbfb;
+  -webkit-border-radius: 0.25rem 0.25rem 0 0;
+  -moz-border-radius: 0.25rem 0.25rem 0 0;
+  border-radius: 0.25rem 0.25rem 0 0;
+  padding: 1rem;
+  border-bottom: 0.0625rem solid #d4d4d4;
+}
+div.componentSample .prettyprint {
+  margin: 0;
+  border: none;
+  -webkit-border-radius: 0 0 0.25rem 0.25rem;
+  -moz-border-radius: 0 0 0.25rem 0.25rem;
+  border-radius: 0 0 0.25rem 0.25rem;
+}
+div.componentSample .prettyprint.linenums {
+  -webkit-box-shadow: inset 2.75rem 0 0 #fbfbfc, inset 2.8125rem 0 0 #ececf0;
+  -moz-box-shadow: inset 2.75rem 0 0 #fbfbfc, inset 2.8125rem 0 0 #ececf0;
+  box-shadow: inset 2.75rem 0 0 #fbfbfc, inset 2.8125rem 0 0 #ececf0;
+}
+div.largeToolTipSample {
+  padding: 0.5rem 0 0 0.5rem;
+}
+div.fakeBody {
+  display: block !important;
+  padding: 0 !important;
+}
+.headingSample * {
+  margin: 0.5rem 0;
+}
+.headingSample *:first-child {
+  margin-top: 0;
+}
+.headingSample *:last-child {
+  margin-bottom: 0;
+}
+.headingSample h4,
+.headingSample h5 {
+  margin: 0.75rem 0;
+}
+.textfieldSample {
+  overflow: auto;
+}
+.textfieldSample label {
+  display: inline-block;
+  width: 5em;
+  text-align: right;
+  padding-right: 1em;
+}
+.sampleTitle {
+  width: 5em;
+  height: 3em;
+  padding-right: 1em;
+  margin-right: 1em;
+  border-right: 0.0625rem solid #cccccc;
+  line-height: 3em;
+  font-weight: bold;
+  text-align: right;
+}
+.sampleTitle.extended {
+  height: 8em;
+}
+.textareaSample {
+  overflow: auto;
+}
+.textareaSample label {
+  display: inline-block;
+  width: 5em;
+  text-align: right;
+  padding-right: 1em;
+  padding-top: 1em;
+}
+.textareaSample .sampleTitle {
+  line-height: 5em;
+  height: 6em;
+}
+.iconSample {
+  position: relative;
+}
+.iconSample .sampleTitle {
+  position: absolute;
+  line-height: 2.1em;
+  width: 6em;
+  height: 100%;
+}
+.iconSample div.sample,
+.iconSample .icongroup {
+  margin: 1em 0 1em 8em;
+}
+.spinnerSample .spinner {
+  margin: 0.5rem;
+}
+.spinnerSample .spinner.large {
+  margin: 0 0 0 1rem;
+}
+.waitSample .wait {
+  margin: 0.5rem;
+}
+.waitSample .wait.large {
+  margin: 0 0 0 1rem;
+}
+.filterSample {
+  overflow: visible;
+  *zoom: 1;
+}
+.filterSample:before,
+.filterSample:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.filterSample:after {
+  clear: both;
+}
+.sliderSample {
+  margin: 1rem 0;
+}
+.sliderSample.left {
+  padding-left: 0rem !important;
+  margin-right: 0.5rem;
+}
+.sliderSample label {
+  display: inline-block;
+  width: 10em;
+  text-align: right;
+  vertical-align: middle;
+  padding-right: 1em;
+}
+.numberInputSample {
+  *zoom: 1;
+}
+.numberInputSample .numberinput {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+.numberInputSample input {
+  width: 6.25rem;
+}
+.numberInputSample:before,
+.numberInputSample:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.numberInputSample:after {
+  clear: both;
+}
+.buttonSample button + button,
+.buttonSample a.button + button {
+  margin-left: 1rem;
+}
+.railSample .page {
+  position: static;
+  height: 11em;
+}
+.res-buttons {
+  margin-bottom: 1rem;
+  *zoom: 1;
+}
+.res-buttons label {
+  float: left;
+  line-height: 1.25rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  display: inline-block;
+  margin-right: 1rem;
+}
+.res-buttons button {
+  float: left;
+  width: 2rem;
+  min-width: 0;
+  padding: 0 0;
+}
+.res-buttons button + button {
+  border-left: none;
+}
+.res-buttons:before,
+.res-buttons:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.res-buttons:after {
+  clear: both;
+}
+pre.jsDocExample + h3 {
+  margin-top: 2.5rem;
+}
+h1.noMargin {
+  margin-top: 0;
+}
+ul.grid.componentGrid li {
+  background: white;
+  outline: none;
+  -webkit-box-shadow: 0 0 0.357rem #e6e6e6;
+  -moz-box-shadow: 0 0 0.357rem #e6e6e6;
+  box-shadow: 0 0 0.357rem #e6e6e6;
+  border: 0.0625rem solid #e6e6e6;
+  width: 16rem;
+  height: 14rem;
+}
+ul.grid.componentGrid li:hover {
+  outline: none;
+  -webkit-box-shadow: 0 0 0.357rem #cdcdcd;
+  -moz-box-shadow: 0 0 0.357rem #cdcdcd;
+  box-shadow: 0 0 0.357rem #cdcdcd;
+  border: 0.0625rem solid #d9d9d9;
+}
+ul.grid.componentGrid li a {
+  color: #4b4b4b;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  text-decoration: none;
+}
+ul.grid.componentGrid li a h3 {
+  margin: 0.5rem;
+}
+ul.grid.componentGrid li a img {
+  display: block;
+  width: 14rem;
+  height: 10.5rem;
+  margin: auto;
+  border: 0.0625rem solid #e6e6e6;
+}
+div.left.column {
+  width: 50%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+div.left.column:first-child {
+  padding-right: 0.5rem;
+}
+div.left.column:last-child {
+  padding-left: 0.5rem;
+}
+.example div.left + div.left {
+  padding-left: 0.5rem;
+}
+.example [class^="card-"],
+.example [class*=" card-"] {
+  width: 15rem;
+  margin-right: 0.9375rem;
+  float: left;
+}
+/**
+Icon browser
+************************/
+.contentContainer {
+  padding: 1rem;
+}
+#iconSearchField {
+  width: 18rem;
+}
+div.search.iconSearchContainer {
+  display: inline-block;
+  margin-right: 1rem;
+}
+#iconTable {
+  margin-top: 1rem;
+}
+#iconTable tr {
+  cursor: pointer;
+}
+#iconTable td.iconCell {
+  width: 28px;
+  text-align: center;
+}
+#iconTable td.iconCell img {
+  width: 24px;
+  height: 24px;
+  margin-top: 0.0625rem;
+  opacity: 0.65;
+}
+.svgCell {
+  display: none;
+}
+div.iconBoxContainer {
+  text-align: center;
+}
+div.iconBox {
+  display: inline-block;
+  margin: 0.5rem;
+  padding: 1rem;
+  -webkit-border-radius: 0.5rem;
+  -moz-border-radius: 0.5rem;
+  border-radius: 0.5rem;
+  border: 0.0625rem solid #a5a5a5;
+  background: #e6e6e6;
+  -webkit-box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
+}
+div.iconBox.dark {
+  border: 0.0625rem solid #373737;
+  background: #4d4d4d;
+}
+#iconCode {
+  display: block;
+  padding: 0.5rem;
+  margin: 0.5rem;
+}
+.iconLabelText {
+  width: 10rem !important;
+  margin-right: 0.5rem !important;
+}
+.iconUIColorBox {
+  margin-left: 1.5rem;
+}
+#iconDetails pre {
+  display: inline-block;
+}
+#iconDetails p {
+  font-size: 0.85rem;
+  margin: 0.25rem 0  0.75rem 0;
+}
+.iconDetailRail {
+  width: 20rem !important;
+}
+span.deprecated {
+  font-size: 0.75rem;
+  border: 1px solid #ff9c00;
+  border-radius: 5px;
+  background: #fff600;
+  margin: 0 5px;
+  padding: 1px;
+  color: #0a0a0a;
+}
