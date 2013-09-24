@@ -13,7 +13,7 @@
             <items jcr:primaryType="cq:WidgetCollection">
                 <text
                     jcr:primaryType="cq:Widget"
-                    script="rte.generic.json.jsp"
+                    script="rte.json.jsp"
                     xtype="slingscriptinclude"/>
                 <isRichTextFlag
                     jcr:primaryType="cq:Widget"
