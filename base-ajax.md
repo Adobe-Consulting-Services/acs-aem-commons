@@ -48,7 +48,7 @@ This is done by checking for the existence of the string 'data-ajax-component' i
 
 * `/apps/geometrixx/compoments/title`
     * sling:resourceType: `acs-commons/components/content/base/ajax`
-    * ajaxSelectors: `nocache'
+    * ajaxSelectors: `nocache`
 
 * `/apps/geometrixx/compoments/title/title.jsp`
     * moved to: `/apps/geometrixx/compoments/title/nocache.jsp`
