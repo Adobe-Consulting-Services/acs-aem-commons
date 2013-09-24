@@ -1,56 +1,15 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>{{ page.title }}</title>
-        <meta name="viewport" content="width=device-width">
+---
+layout: base
+---
+<div class="content">
+    <section class="feature-doc">
+        <h1>{{ page.title }}</h1>
 
-        <!-- syntax highlighting CSS -->
-        <link rel="stylesheet" href="css/syntax.css">
+    {{ content }}
 
-        <link rel="stylesheet" href="css/cui.css">
-        <link rel="stylesheet" href="css/misc.css">
-        
-        <script src="js/libs/moment.js"></script>
-        <script src="js/libs/jquery.js"></script>
-        <script src="js/libs/toe.js"></script>
-
-        <script src="js/CUI.js"></script>
-
-    </head>
-    <body class="desktop">
-        
-        <header class="top">
-            <div class="logo"><i class="icon-coral medium"/>CoralUI logo</i></div>
-
-            <nav class="main">
-                <a href="index.html">Introduction</a>
-                <a href="features.html" class="selected">Features</a>
-                <a href="http://git.corp.adobe.com/ACS/acs-aem-commons">GitHub</a>
-            </nav>
-
-<!--
-            <div class="drawer">
-                <div class="badge">1.11.0</div>
-            </div>
--->
-        </header>
-
-        <div class="page" role="main">
-            <div class="content">
-                <section class="feature-doc">
-                    <h1>{{ page.title }}</h1>
-
-          {{ content }}
-
-                </section>
-                <footer>
-                    <a href="license.html">License</a>
-                    <span class="right">Adobe Systems Incorporated. All Rights Reserved</span>
-                </footer>
-            </div>
-        </div>
-
-    </body>
-</html>
+    </section>
+    <footer>
+        <a href="license.html">License</a>
+        <span class="right">Adobe Systems Incorporated. All Rights Reserved</span>
+    </footer>
+</div>

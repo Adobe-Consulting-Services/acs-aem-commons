@@ -1,9 +1,16 @@
 ---
-layout: default
+layout: base
 ---
-<h2>{{ page.title }}</h2>
-<p class="meta">{{ page.date | date_to_string }}</p>
+<div class="content">
+    <section class="post">
+        <h1>{{ page.title }}</h1>
+        <h2>{{ page.date | date_to_string }}</h2>
 
-<div class="post">
-{{ content }}
+    {{ content }}
+
+    </section>
+    <footer>
+        <a href="license.html">License</a>
+        <span class="right">Adobe Systems Incorporated. All Rights Reserved</span>
+    </footer>
 </div>

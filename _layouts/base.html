@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <base href="{{ site.baseurl }}" />
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>{{ page.title }}</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="css/syntax.css">
+
+        <link rel="stylesheet" href="css/cui.css">
+        <link rel="stylesheet" href="css/guide.css">
+        <link rel="stylesheet" href="css/prettify.css">
+        <link rel="stylesheet" href="css/misc.css">
+
+        <script src="js/libs/moment.js"></script>
+        <script src="js/libs/jquery.js"></script>
+        <script src="js/libs/toe.js"></script>
+
+        <script src="js/CUI.js"></script>
+
+        <script src="js/guide.js"></script>
+        <script src="js/prettify.js"></script>
+
+    </head>
+    <body class="desktop">
+        
+        <header class="top">
+            <div class="logo"><i class="icon-coral medium"/>CoralUI logo</i></div>
+
+            <nav class="main">
+                <a href="index.html" {% if page.path == 'index.html' %}class="selected"{% endif %}>Introduction</a>
+                <a href="features.html" {% if page.path == 'features.html' %}class="selected"{% endif %}>Features</a>
+                <a href="http://git.corp.adobe.com/ACS/acs-aem-commons">GitHub</a>
+            </nav>
+
+<!--
+            <div class="drawer">
+                <div class="badge">1.11.0</div>
+            </div>
+-->
+        </header>
+
+        <div class="page" role="main">
+
+{{ content }}
+        </div>
+
+    </body>
+</html>
