@@ -37,19 +37,19 @@ This is done by checking for the existence of the string 'data-ajax-component' i
 
 ### Default configuration
 
-* /apps/geometrixx/compoments/title
+* `/apps/geometrixx/compoments/title`
     * sling:resourceType: `acs-commons/components/content/base/ajax`
 
-* `/apps/geometrixx/compoments/title/title.jsp
+* `/apps/geometrixx/compoments/title/title.jsp`
     * moved to: `/apps/geometrixx/compoments/title/ajax.jsp`
     * `title.jsp` will no longer exist
 
 ### Customized selector configuration
 
-* /apps/geometrixx/compoments/title
+* `/apps/geometrixx/compoments/title`
     * sling:resourceType: `acs-commons/components/content/base/ajax`
     * ajaxSelectors: `nocache'
 
-* `/apps/geometrixx/compoments/title/title.jsp
+* `/apps/geometrixx/compoments/title/title.jsp`
     * moved to: `/apps/geometrixx/compoments/title/nocache.jsp`
     * `title.jsp` will no longer exist
