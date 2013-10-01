@@ -13,11 +13,11 @@ Generic Lists are a feature allowing easy creation and management of lists of ti
 
 Generic Lists are represented as CQ Pages under `/etc/acs-commons/lists`, e.g. `/etc/acs-commons/lists/age-ranges`. They are editable by using the Tools screen:
 
-![image](images/generic-lists/in-miscadmin.png)
+![image]({{ site.baseurl }}/images/generic-lists/in-miscadmin.png)
 
 On a list page, the items in the list are components within a parsys. New items can be created using the Sidekick. Items can be removed using the context menu.
 
-![image](images/generic-lists/editor.png)
+![image]({{ site.baseurl }}/images/generic-lists/editor.png)
 
 ## Use in Dialogs
 
