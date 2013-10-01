@@ -9,10 +9,10 @@
     
         <title>{{ page.title }}</title>
     
-        <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
-        <link rel="stylesheet" href="fonts/source-sans/stylesheet.css">
-        <link rel="stylesheet" href="css/style.css">        
-        <link rel="shortcut icon" href="images/favicon.png">
+        <link rel="stylesheet" href="{{ site.baseurl }}/css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/fonts/source-sans/stylesheet.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/css/style.css">        
+        <link rel="shortcut icon" href="{{ site.baseurl }}/images/favicon.png">
     </head>
 
     <body> 
@@ -36,7 +36,7 @@
 
             <footer>
                 <div class="container">
-                    <a href="pages/license.html">License</a>
+                    <a href="{{ site.baseurl }}/pages/license.html">License</a>
                     <span class="right">
                             Adobe Systems Incorporated. All Rights Reserved
                     </span>
@@ -45,7 +45,7 @@
 
         </div>
 
-        <script src="js/libs/jquery.js"></script>
-        <script src="js/bootstrap/bootstrap.min.js"></script>
+        <script src="{{ site.baseurl }}/js/libs/jquery.js"></script>
+        <script src="{{ site.baseurl }}/js/bootstrap/bootstrap.min.js"></script>
     </body>
 </html>

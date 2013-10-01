@@ -71,8 +71,8 @@ title: ACS AEM Commons
       {% for post in site.posts %}
       <div class="col-md-4 col-sm-6 col-xs-12">
         <div class="feature">
-          <img class="img-responsive" src="{{ post.thumbnail }}"/>
-          <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+          <img class="img-responsive" src="{{ site.baseurl }}{{ post.thumbnail }}"/>
+          <h3><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h3>
           <p>{{ post.description }}</p>
           <hr class="visible-sm visible-xs"/>
         </div>
