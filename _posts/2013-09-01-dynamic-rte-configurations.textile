@@ -1,6 +1,10 @@
 ---
 layout: feature
 title: Dynamic RTE Configuration
+description: Create a re-usable set of RTE configurations.
+date: 2013-09-24 23:39:29
+thumbnail: /images/generic-lists/thumbnail.png
+categories: features
 ---
 
 A common challenge we run into on complex projects is where multiple business units within a company want to use the

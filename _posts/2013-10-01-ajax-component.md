@@ -1,6 +1,10 @@
 ---
 layout: feature
-title: Base Ajax Component
+title: Base AJAX Component
+description: AJAX-ify your AEM Components with ease!
+date: 2013-10-01 23:39:29
+thumbnail: /images/generic-lists/thumbnail.png
+categories: features
 ---
 
 ## Purpose
@@ -13,14 +17,14 @@ Provide a simple extension point for turning "normal" components into components
 * Requires inclusion of the `acs-commons.components` clientlib
 
 {% highlight jsp %}
-        <cq:includeClientLib categories="acs-commons.components"/>
+<cq:includeClientLib categories="acs-commons.components"/>
 {% endhighlight %}
 
 ## Instructions
 
 1. Install the ACS AEM Commons package
-2. Make sur the `acs-commons.components` clientlib is included (preferably at the end of the page)
-2. On any existing component definition; update the component's sling:resourceSuperType to be `acs-commons/components/content/base/ajax`
+2. Make sure the `acs-commons.components` clientlib is included (preferably at the end of the page)
+2. On any existing component definition; set the component's sling:resourceSuperType to be `acs-commons/components/content/base/ajax`
 3. Optionally, set the property `ajaxSelectors` on the `cq:Component` node. This selector is used to resolve the script for this `cq:Component`
     * If this value is not set, 'ajax' is default
 4. Rename the default component JSP to be `ajax.jsp` (or whatever your custom 'ajaxSelectors' property specifies)
@@ -39,18 +43,21 @@ This is done by checking for the existence of the string 'data-ajax-component' i
 ### Default configuration
 
 * `/apps/geometrixx/compoments/title`
+    
     * sling:resourceType: `acs-commons/components/content/base/ajax`
 
-* `/apps/geometrixx/compoments/title/title.jsp`
+* `/apps/geometrixx/compoments/title/title.jsp`  
     * moved to: `/apps/geometrixx/compoments/title/ajax.jsp`
     * `title.jsp` will no longer exist
 
 ### Customized selector configuration
 
-* `/apps/geometrixx/compoments/title`
+* `/apps/geometrixx/compoments/title`  
+    
     * sling:resourceType: `acs-commons/components/content/base/ajax`
     * ajaxSelectors: `nocache`
 
 * `/apps/geometrixx/compoments/title/title.jsp`
+    
     * moved to: `/apps/geometrixx/compoments/title/nocache.jsp`
     * `title.jsp` will no longer exist

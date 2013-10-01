@@ -1,6 +1,10 @@
 ---
 layout: feature
 title: Generic Lists
+description: Easy creation of simple name/value pair lists.
+date: 2013-10-01 23:39:29
+thumbnail: /images/generic-lists/thumbnail.png
+categories: features
 ---
 
 Generic Lists are a feature allowing easy creation and management of lists of title/value pairs.
