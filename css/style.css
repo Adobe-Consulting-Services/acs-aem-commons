@@ -52,7 +52,7 @@ header.top {
 
 #jumbotron {
 	background-color: #00B4CC;
-	background-image: url('/images/cyan-bg.png');
+	background-image: url('../images/cyan-bg.png');
 	background-repeat: repeat-x;
 
 	border-bottom: solid 1px #008C9E;
