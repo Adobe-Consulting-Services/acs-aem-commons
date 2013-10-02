@@ -166,6 +166,11 @@
                     <artifactId>jslint-maven-plugin</artifactId>
                     <version>1.0.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>1.5</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
