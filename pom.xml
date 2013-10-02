@@ -138,7 +138,7 @@
                         <dependency>
                             <groupId>com.adobe.acs</groupId>
                             <artifactId>checkstyle-osgi-checks</artifactId>
-                            <version>0.0.2</version>
+                            <version>0.0.3</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -375,26 +375,6 @@
             <url>http://repo.adobe.com/nexus/content/groups/public/</url>
             <layout>default</layout>
         </repository>
-        <repository>
-            <id>acs-github-releases</id>
-            <url>http://adobe-consulting-services.github.io/maven-repo/releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>acs-github-snapshots</id>
-            <url>http://adobe-consulting-services.github.io/maven-repo/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -402,26 +382,6 @@
             <name>Adobe Public Repository</name>
             <url>http://repo.adobe.com/nexus/content/groups/public/</url>
             <layout>default</layout>
-        </pluginRepository>
-        <pluginRepository>
-            <id>acs-github-releases</id>
-            <url>http://adobe-consulting-services.github.io/maven-repo/releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </pluginRepository>
-        <pluginRepository>
-            <id>acs-github-snapshots</id>
-            <url>http://adobe-consulting-services.github.io/maven-repo/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
         </pluginRepository>
     </pluginRepositories>
     <modules>
