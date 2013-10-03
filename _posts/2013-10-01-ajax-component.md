@@ -1,9 +1,9 @@
 ---
 layout: feature
 title: Base AJAX Component
-description: AJAX-ify your AEM Components with ease!
+description: AJAX-ify your AEM Components with ease
 date: 2013-10-01 23:39:29
-thumbnail: /images/generic-lists/thumbnail.png
+thumbnail: /images/ajax-component/thumbnail.png
 categories: features
 ---
 
@@ -16,9 +16,8 @@ Provide a simple extension point for turning "normal" components into components
 * Requires jQuery 1.8+
 * Requires inclusion of the `acs-commons.components` clientlib
 
-{% highlight jsp %}
-<cq:includeClientLib categories="acs-commons.components"/>
-{% endhighlight %}
+&lt;cq:includeClientLib categories="acs-commons.components"/>
+
 
 ## Instructions
 

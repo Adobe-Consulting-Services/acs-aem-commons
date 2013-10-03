@@ -1,9 +1,9 @@
 ---
 layout: feature
 title: Dynamic RTE Configuration
-description: Create a re-usable set of RTE configurations.
+description: Create a re-usable RTE configurations
 date: 2013-09-24 23:39:29
-thumbnail: /images/generic-lists/thumbnail.png
+thumbnail: /images/dynamic-rte-configuration/thumbnail.png
 categories: features
 ---
 

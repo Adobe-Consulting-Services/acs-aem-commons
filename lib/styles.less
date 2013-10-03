@@ -1,0 +1,166 @@
+@import "red.less";
+
+body {
+  background: #fff;
+  font-family: 'SourceSans';
+  font-weight: 200;
+  font-style: normal;
+  -webkit-font-smoothing: subpixel-antialiased;
+  color: #4d4d4d;
+  font-size: 175%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'SourceSans';
+	font-weight: 200;
+	color: @color2;
+}
+
+a {
+	color: @color4;
+}
+
+a:hover {
+	color: @color5;
+}
+
+code {
+	color: @color2;
+}
+
+header.top {
+	background-color: @color1;
+}
+
+
+/* Header Navigation */
+
+header {
+	.nav {
+		a {
+			color: #fff;
+			
+			&:hover {
+				background-color: #000 !important;
+			}			
+		}
+	}
+}
+
+/* Jumbotron */
+
+#jumbotron {
+	background-color: @color4;
+	background-image: @colored-bg;
+	background-repeat: repeat-x;
+	border-bottom: solid 1px @color3;
+	border-top: solid 1px #000;
+	color: #fff;
+	min-height: 35rem;
+	padding-top: 7rem;
+	text-align: center;
+
+	h1 {
+		font-size: 5em;
+		font-weight: 200;
+		color: @color2;
+		text-shadow: @color-highlight 0px 1px 0px;
+	}
+
+	.lead {
+		font-size: 3em;
+		font-weight: 200;
+		color: #fff;
+		text-shadow: @color1 0px 2px 0px;
+	}
+
+	.lead em {
+		font-weight: 200;
+		text-decoration: none;
+	}
+}
+
+
+/* Homepage */
+
+.info-row {
+	padding: 2rem;	
+}
+
+.info-row-odd {
+	background-color: #fff;
+	border-bottom: solid 1px #ccc;	
+}
+
+.info-row-even {
+	background-color: #f7f7f7;
+	border-bottom: solid 1px #ccc;		
+}
+
+
+/* Feature Grid */
+
+.features {
+	padding-top: 2em;
+
+	.feature {
+		text-align: center;
+
+		img {
+			border: solid 1px #ccc;
+		}
+
+		 h3 {
+			margin: 1em 0;
+		}
+
+		p {
+			color: #999;
+			font-weight: 200;
+			margin-bottom: 4rem;
+		}
+	}
+}
+
+/* Feature Doc */
+
+.feature-doc {
+	margin-top: 2em;
+
+	h1 {
+		margin-top: 2em;
+	}
+
+	h1, 
+	h2, 
+	h3 {
+		margin-top: 1.25em;
+	}
+
+	h2 {
+		border-bottom: dotted 1px #ccc;
+		padding-bottom: .25em;
+	}
+
+	img {
+    	width: 100%;
+	}
+
+	pre code {
+		font-size: 1em;
+	}
+
+	code {
+		font-size: .8em;
+	}
+
+}
+
+/* Footer */
+
+footer {
+	background-color: #f7f7f7;
+	margin-top: 4em;
+	padding: 2em 0;
+	border-top: solid 1px #ccc;
+}
