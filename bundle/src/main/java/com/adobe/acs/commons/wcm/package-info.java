@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Service for viewing generic list of key/value pairs.
+ * Miscellaneous WCM Utilities
  */
 @aQute.bnd.annotation.Version("0.0.1")
 package com.adobe.acs.commons.wcm;
