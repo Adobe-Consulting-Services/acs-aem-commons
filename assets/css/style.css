@@ -1,0 +1,128 @@
+body {
+  background: #fff;
+  font-family: 'SourceSans';
+  font-weight: 200;
+  font-style: normal;
+  -webkit-font-smoothing: subpixel-antialiased;
+  color: #4d4d4d;
+  font-size: 175%;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'SourceSans';
+  font-weight: 200;
+  color: #a72c00;
+}
+a {
+  color: #f44100;
+}
+a:hover {
+  color: #ff6128;
+}
+code {
+  color: #a72c00;
+}
+header.top {
+  background-color: #343838;
+}
+/* Header Navigation */
+header .nav a {
+  color: #fff;
+}
+header .nav a:hover {
+  background-color: #000 !important;
+}
+/* Jumbotron */
+#jumbotron {
+  background-color: #f44100;
+  background-image: url('../images/red-bg.png');
+  background-repeat: repeat-x;
+  border-bottom: solid 1px #c13300;
+  border-top: solid 1px #000;
+  color: #fff;
+  min-height: 35rem;
+  padding-top: 7rem;
+  text-align: center;
+}
+#jumbotron h1 {
+  font-size: 5em;
+  font-weight: 200;
+  color: #a72c00;
+  text-shadow: #ffac8e 0px 1px 0px;
+}
+#jumbotron .lead {
+  font-size: 3em;
+  font-weight: 200;
+  color: #fff;
+  text-shadow: #343838 0px 2px 0px;
+}
+#jumbotron .lead em {
+  font-weight: 200;
+  text-decoration: none;
+}
+/* Homepage */
+.info-row {
+  padding: 2rem;
+}
+.info-row-odd {
+  background-color: #fff;
+  border-bottom: solid 1px #ccc;
+}
+.info-row-even {
+  background-color: #f7f7f7;
+  border-bottom: solid 1px #ccc;
+}
+/* Feature Grid */
+.features {
+  padding-top: 2em;
+}
+.features .feature {
+  text-align: center;
+}
+.features .feature img {
+  border: solid 1px #ccc;
+}
+.features .feature h3 {
+  margin: 1em 0;
+}
+.features .feature p {
+  color: #999;
+  font-weight: 200;
+  margin-bottom: 4rem;
+}
+/* Feature Doc */
+.feature-doc {
+  margin-top: 2em;
+}
+.feature-doc h1 {
+  margin-top: 2em;
+}
+.feature-doc h1,
+.feature-doc h2,
+.feature-doc h3 {
+  margin-top: 1.25em;
+}
+.feature-doc h2 {
+  border-bottom: dotted 1px #ccc;
+  padding-bottom: .25em;
+}
+.feature-doc img {
+  width: 100%;
+}
+.feature-doc pre code {
+  font-size: 1em;
+}
+.feature-doc code {
+  font-size: .8em;
+}
+/* Footer */
+footer {
+  background-color: #f7f7f7;
+  margin-top: 4em;
+  padding: 2em 0;
+  border-top: solid 1px #ccc;
+}

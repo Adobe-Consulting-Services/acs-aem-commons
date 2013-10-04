@@ -1,55 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <base href="{{ site.baseurl }}" />
 
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
         <title>{{ page.title }}</title>
-        <meta name="viewport" content="width=device-width">
-
-        <!-- syntax highlighting CSS -->
-        <link rel="stylesheet" href="css/syntax.css">
-
-        <link rel="stylesheet" href="css/cui.css">
-        <!--
-        <link rel="stylesheet" href="css/guide.css">
-        <link rel="stylesheet" href="css/prettify.css">
-        -->
-        <link rel="stylesheet" href="css/misc.css">
-
-        <script src="js/libs/moment.js"></script>
-        <script src="js/libs/jquery.js"></script>
-        <script src="js/libs/toe.js"></script>
-
-        <script src="js/CUI.js"></script>
-<!--
-        <script src="js/guide.js"></script>
-        <script src="js/prettify.js"></script>
--->
+    
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/fonts/source-sans/stylesheet.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/prettify.css">        
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/syntax.css">        
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css">        
+        <link rel="shortcut icon" href="{{ site.baseurl }}/assets/images/favicon.png">
     </head>
-    <body class="desktop">
-        
+
+    <body> 
         <header class="top">
-            <div class="logo"><i class="icon-coral medium"/>CoralUI logo</i></div>
-
-            <nav class="main">
-                <a href="index.html" {% if page.path == 'index.html' %}class="selected"{% endif %}>Introduction</a>
-                <a href="features.html" {% if page.path == 'features.html' %}class="selected"{% endif %}>Features</a>
-                <a href="http://git.corp.adobe.com/ACS/acs-aem-commons">GitHub</a>
-            </nav>
-
-<!--
-            <div class="drawer">
-                <div class="badge">1.11.0</div>
+            <div class="container">
+                <ul class="nav nav-justified">
+                  <li {% if page.path == 'index.html' %}class="active"{% endif %}><a href="{{ site.baseurl }}/index.html">ACS AEM Commons</a></li>
+                  <li><a href="{{ site.baseurl }}/index.html#features">Features</a></li>
+                  <li><a href="http://git.corp.adobe.com/ACS/acs-aem-commons" target="_blank">Github Project</a></li>
+                  <li><a href="#">Contribute</a></li>
+                  <li><a href="#">Contact</a></li>
+                </ul>
             </div>
--->
         </header>
 
         <div class="page" role="main">
-
-{{ content }}
+            {{ content }}
         </div>
 
+        <footer>
+            <div class="container">
+                <a href="{{ site.baseurl }}/pages/license.html">License</a>
+                <span class="right">
+                        Adobe Systems Incorporated. All Rights Reserved
+                </span>
+            </div>
+        </footer>
+
+        <script src="{{ site.baseurl }}/assets/js/jquery.js"></script>
+        <script src="{{ site.baseurl }}/assets/js/prettify.js"></script>
+        <script src="{{ site.baseurl }}/assets/js/bootstrap/bootstrap.min.js"></script>
     </body>
 </html>

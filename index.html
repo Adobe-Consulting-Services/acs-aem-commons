@@ -1,25 +1,97 @@
 ---
-layout: default
+layout: home
 title: ACS AEM Commons
 ---
 
-<section id="intro">
-  <h1>Introduction</h1>
-  
-  <p>Welcome to the ACS AEM Commons site!<br/></p>
-  <p></p>
+<section id="jumbotron">
+  <div class="container">
+    <h1>{{ page.title }}</h1>
+    <p class="lead">The Future is <em>NOW!</em></p>
+  </div>
 </section>
 
-<section id="description">
-    <h2>Project Description</h2>
-    <p>ACS AEM Commons </p>
+<!-- Introductions -->
+<section class="info-row info-row-odd">
+  <div class="container">
+    <div class="row">
+
+      <div class="col-lg-5 col-lg-offset-1 col-md-6">
+        <h2>What is it?</h2>
+        <ul>
+          <li>A way to <em>boostrap your AEM project</em> with commonly required functionality</li>      
+          <li>A set of <em>re-usable components</em></li>      
+          <li>An <em>AEM development toolkit</em></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-5 col-md-6">
+        <h2>What isn't it?</h2>
+        <ul>
+          <li>A framework</li>
+        </ul> 
+      </div>
+
+    </div>
+  </div>
 </section>
 
-<section id="it-isnt">
-    <h2>What it isn't</h2>
-    <p>ACS AEM Commons is <b>not</b>:</p>
-    <ul>
-        <li>A framework</li>
-    </ul>
+
+<section class="info-row info-row-even">
+  <div class="container">
+    <div class="row">
+
+      <div class="col-lg-5 col-lg-offset-1 col-md-6">
+        <h2>How do I use it?</h2>
+          <ul>
+            <li>Add the maven depedency to your pom.xml</li>      
+            <li>Add the ACS AEM Commons CQ Package as part of your package deployment</li>      
+          </ul>  
+      </div>
+
+      <div class="col-lg-5 col-md-6">
+          <h2>Where do I get it?</h2>
+          <ul>
+            <li>Download the CQ Package from Adobe Package Share or Github Releases</li>      
+            <li>ACM AEM Commons artifact is hosted on XYZ Nexus repository</li>      
+          </ul>  
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- Feature Grid -->
+<section id="features" class="features">
+  <div class="container">
+
+    <h2>Features</h2>
+
+    <div class="row">
+      {% for post in site.categories.features %}
+        {% assign mod2 = forloop.index|modulo:2 %}
+        {% assign mod3 = forloop.index|modulo:3 %}
+
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+          <div class="feature">
+            <img class="img-responsive" src="{{ site.baseurl }}{{ post.thumbnail }}"/>
+            <h3><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h3>
+            <p>{{ post.description }}</p>
+          </div>
+        </div>
+
+
+        {% if mod2 == 0 %}
+        <div class="clearfix visible-sm visible-xs hidden-md hidden-lg"></div>
+        {% endif %}
+
+        {% if mod3 == 0 %}
+        <div class="clearfix hidden-sm hidden-xs visible-md visible-lg"></div>
+        {% endif %}
+
+
+      {% endfor %}
+    </div>
+  </div>
 </section>
 
