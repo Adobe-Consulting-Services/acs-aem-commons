@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.wcm.tags.wcmmode;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.jsp.PageContext;
 
 import tldgen.Function;
 
@@ -40,7 +41,14 @@ public final class WCMModeFunctions {
      * @return true if the WCMMode is design
      */
     @Function
-    public static boolean isDesign(ServletRequest request) {
+    public static boolean isDesign(PageContext pageContext) {
+        if (pageContext == null) {
+            return false;
+        }
+        final ServletRequest request = pageContext.getRequest();
+        if (request == null) {
+            return false;
+        }
         return WCMMode.fromRequest(request) == WCMMode.DESIGN;
     }
 
@@ -51,7 +59,14 @@ public final class WCMModeFunctions {
      * @return true if the WCMMode is disabled
      */
     @Function
-    public static boolean isDisabled(ServletRequest request) {
+    public static boolean isDisabled(PageContext pageContext) {
+        if (pageContext == null) {
+            return true;
+        }
+        final ServletRequest request = pageContext.getRequest();
+        if (request == null) {
+            return true;
+        }
         return WCMMode.fromRequest(request) == WCMMode.DISABLED;
     }
 
@@ -62,7 +77,14 @@ public final class WCMModeFunctions {
      * @return true if the WCMMode is edit
      */
     @Function
-    public static boolean isEdit(ServletRequest request) {
+    public static boolean isEdit(PageContext pageContext) {
+        if (pageContext == null) {
+            return false;
+        }
+        final ServletRequest request = pageContext.getRequest();
+        if (request == null) {
+            return false;
+        }
         return WCMMode.fromRequest(request) == WCMMode.EDIT;
     }
 
@@ -73,7 +95,14 @@ public final class WCMModeFunctions {
      * @return true if the WCMMode is preview
      */
     @Function
-    public static boolean isPreview(ServletRequest request) {
+    public static boolean isPreview(PageContext pageContext) {
+        if (pageContext == null) {
+            return false;
+        }
+        final ServletRequest request = pageContext.getRequest();
+        if (request == null) {
+            return false;
+        }
         return WCMMode.fromRequest(request) == WCMMode.PREVIEW;
     }
 
