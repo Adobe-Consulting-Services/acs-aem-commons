@@ -44,6 +44,10 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
+                        <Include-Resource>
+                            {maven-resources},
+                            META-INF/wcmmode.tld=target/classes/META-INF/wcmmode.tld
+                        </Include-Resource>
                     </instructions>
                 </configuration>
             </plugin>
