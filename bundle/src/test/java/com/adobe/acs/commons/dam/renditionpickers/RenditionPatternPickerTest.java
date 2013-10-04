@@ -19,9 +19,10 @@
  */
 package com.adobe.acs.commons.dam.renditionpickers;
 
-import com.adobe.acs.commons.dam.renditionspickers.RenditionPatternPicker;
+import com.adobe.acs.commons.dam.RenditionPatternPicker;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
+
 import org.junit.*;
 
 import java.util.ArrayList;
