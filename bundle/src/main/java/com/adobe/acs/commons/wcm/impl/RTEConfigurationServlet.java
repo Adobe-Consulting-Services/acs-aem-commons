@@ -64,14 +64,19 @@ import com.adobe.granite.xss.XSSAPI;
  */
 @SuppressWarnings("serial")
 @SlingServlet(extensions = "json", selectors = "rte", resourceTypes = "sling/servlet/default")
-public class RTEConfigurationServlet extends SlingSafeMethodsServlet {
+public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
+
+    private static final int RTE_HEIGHT = 200;
+
+    private static final int RTE_WIDTH = 430;
 
     private static final String DEFAULT_CONFIG_NAME = "default";
 
     @Reference
     private XSSAPI xssApi;
 
-    private static final String DEFAULT_CONFIG = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
+    private static final String DEFAULT_CONFIG =
+            "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
 
     private static final String DEFAULT_ROOT_PATH = "/etc/rteconfig";
 
@@ -119,20 +124,18 @@ public class RTEConfigurationServlet extends SlingSafeMethodsServlet {
 
     private JSONObject toJSONObject(Resource resource) throws JSONException, ServletException {
         JSONObject config = null;
-        {
-            Node node = resource.adaptTo(Node.class);
-            if (node != null) {
+        Node node = resource.adaptTo(Node.class);
+        if (node != null) {
 
-                JsonItemWriter writer = new JsonItemWriter(null);
-                StringWriter string = new StringWriter();
-                try {
-                    writer.dump(node, string, -1);
-                } catch (RepositoryException e) {
-                    throw new ServletException(e);
-                }
-                config = new JSONObject(string.toString());
-
+            JsonItemWriter writer = new JsonItemWriter(null);
+            StringWriter string = new StringWriter();
+            try {
+                writer.dump(node, string, -1);
+            } catch (RepositoryException e) {
+                throw new ServletException(e);
             }
+            config = new JSONObject(string.toString());
+
         }
         return config;
     }
@@ -148,7 +151,8 @@ public class RTEConfigurationServlet extends SlingSafeMethodsServlet {
      * @throws JSONException
      * @throws ServletException
      */
-    private JSONObject underlayDefault(ResourceResolver resolver, JSONObject config) throws JSONException, ServletException {
+    private JSONObject underlayDefault(ResourceResolver resolver, JSONObject config) throws JSONException,
+            ServletException {
         JSONObject defaultStructure = toJSONObject(resolver.getResource(DEFAULT_CONFIG));
         if (defaultStructure != null) {
             Iterator<String> keys = config.keys();
@@ -168,9 +172,9 @@ public class RTEConfigurationServlet extends SlingSafeMethodsServlet {
 
         // these two size properties seem to be necessary to get the size correct
         // in a component dialog
-        widget.put("width", 430);
-        widget.put("height", 200);
-        
+        widget.put("width", RTE_WIDTH);
+        widget.put("height", RTE_HEIGHT);
+
         JSONObject config = toJSONObject(resource);
 
         if (config == null) {
@@ -191,7 +195,8 @@ public class RTEConfigurationServlet extends SlingSafeMethodsServlet {
         parent.write(response.getWriter());
     }
 
-    private void writeEmptyRTE(String rteName, SlingHttpServletResponse response) throws IOException, JSONException {
+    private void writeEmptyRTE(String rteName, SlingHttpServletResponse response) throws IOException,
+            JSONException {
         JSONObject rte = createEmptyRTE(rteName);
         rte.write(response.getWriter());
     }
@@ -202,8 +207,8 @@ public class RTEConfigurationServlet extends SlingSafeMethodsServlet {
     }
 
     @Override
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException,
-            IOException {
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
         String componentPath = request.getResource().getPath();
 
         String configName = PathInfoUtil.getSelector(request, 1, DEFAULT_CONFIG_NAME);
