@@ -24,5 +24,5 @@ There's a good guide to performing pull requests at [https://help.github.com/art
 
 ## Participating in Code Reviews
 
-Even if you don't have time to contribute code, reviewing code contributed by other people is an option. To do this, go to [https://git.corp.adobe.com/ACS/acs-aem-commons/pulls](https://git.corp.adobe.com/ACS/acs-aem-commons/pulls) to see the open pull requests.
+Even if you don't have time to contribute code, reviewing code contributed by other people is an option. To do this, go to [https://github.com/Adobe-Consulting-Services/acs-aem-commons/pulls](https://github.com/Adobe-Consulting-Services/acs-aem-commons/pulls) to see the open pull requests.
 
