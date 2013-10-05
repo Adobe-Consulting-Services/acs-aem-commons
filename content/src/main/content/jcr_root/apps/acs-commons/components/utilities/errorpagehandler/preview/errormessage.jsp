@@ -18,16 +18,18 @@
   #L%
   --%>
 <%@include file="/libs/foundation/global.jsp" %><%
-%><%@page session="false" import="com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService,
-                                javax.servlet.http.HttpServletResponse" %><%
+%><%@page session="false" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"
+          import="com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService,
+                org.apache.commons.lang.StringEscapeUtils,
+                javax.servlet.http.HttpServletResponse" %><%
 
     final ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
     if (errorPageHandlerService == null || !errorPageHandlerService.isEnabled()) {
         return;
     }
 
-    final String stackTrace = errorPageHandlerService.getException(slingRequest);
-    final String requestProgress = errorPageHandlerService.getRequestProgress(slingRequest);
+    final String stackTrace = StringEscapeUtils.escapeHtml(errorPageHandlerService.getException(slingRequest));
+    final String requestProgress = StringEscapeUtils.escapeHtml(errorPageHandlerService.getRequestProgress(slingRequest));
     final String path = errorPageHandlerService.findErrorPage(slingRequest, resource);
 
     final String erroringTitle = currentPage == null ? resource.getName() : currentPage.getTitle();
@@ -41,8 +43,8 @@
 <html lang="en">
 
 <head>
-    <title>Error Page | Adobe AEM</title>
-    <cq:includeClientLib css="acs.error-page-handler"/>
+    <title>Error | Adobe Experience Manager</title>
+    <cq:includeClientLib css="acs-commons.error-page-handler"/>
     <cq:includeClientLib js="cq.foundation-main"/>
     <cq:includeClientLib js="cq.wcm.edit"/>
 </head>
@@ -51,7 +53,7 @@
 <div id="error-page-handler">
     <nav class="toolbar content-header">
         <div class="right icongroup">
-            <a href="<%= path %>.html" class="button edit-error-page" target="_blank">Edit Error Page</a>
+            <a href="<%= path %>" class="button edit-error-page" target="_blank">Edit Error Page</a>
             <a href="<%= resource.getPath() %>.html?wcmmode=disabled" class="button" target="_blank">Publish Preview</a>
             <a href="<%= resource.getPath() %>.html" class="button primary edit-mode">Return to Edit mode</a>
         </div>
@@ -61,7 +63,7 @@
         <h1>ATTENTION</h1>
 
         <p>
-            An error occurred preventing the page <strong><%= erroringTitle %> at <%= erroringPath %></strong> from rendering.
+            An error occurred preventing the page <strong><%= erroringTitle %></strong> at <strong><%= erroringPath %></strong> from rendering.
         </p>
 
         <p>
@@ -96,6 +98,6 @@
         </div>
     </div>
 </div>
-<cq:includeClientLib js="acs.error-page-handler"/>
+<cq:includeClientLib js="acs-commons.error-page-handler"/>
 </body>
 </html>
