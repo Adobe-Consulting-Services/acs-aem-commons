@@ -3,7 +3,7 @@ layout: feature
 title: Component Helper
 description: Simplify your components
 date: 2013-10-01 23:39:29
-thumbnail: /images/componenthelper/thumbnail.png
+thumbnail: /images/default/thumbnail.png
 categories: features
 ---
 
@@ -13,26 +13,26 @@ Provide a simple abstraction for creating CQ-specific markup that drive componen
 
 ## Example
 
-The mode common use case of the ComponentHelper is to control the execution of a component JSP based on it configured status.
+The most common use case of the ComponentHelper is to control the execution of a component JSP based on it configured status.
 
-        <%@ include file="/libs/foundation/global.jsp" %><%
-        %><%@ page import="com.adobe.acs.commons.wcm.ComponentHelper,
-                           com.adobe.acs.commons.wcm.ComponentEditType"%><%
-            // Get the ComponentHelper Service
-            ComponentHelper componentHelper = sling.getService(ComponentHelper.class);
+{% highlight jsp %}
+<%
+// Get the ComponentHelper Service
+ComponentHelper componentHelper = sling.getService(ComponentHelper.class);
 
-            // Initialize component
-            String title = properties.get("title", "");
-            String description = properties.get("description", "");
+// Initialize component
+String title = properties.get("title", "");
+String description = properties.get("description", "");
 
-            boolean hasTitle = title.length > 5;
-            boolean hasDescription = description.length > 10;
+boolean hasTitle = title.length > 5;
+boolean hasDescription = description.length > 10;
 
-        %><% if(componentHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.TITLE, hasTitle, hasDescription) {
-            // If (hasTitle && hasDescription) == false, then print out the Title placeholder image and stop further
-            // execution of this component. This will also intelligently build out drop-targets based on the components cq:editConfigs
-            return;
-        } %>
-        <%-- Else all conditions are true so display the component --%>
-        <h2><cq:text property="title"/></h2>
-        <p><cq:text property="description"/></p>
+%><% if(componentHelper.printEditBlockOrNothing(slingRequest, slingResponse, 
+        WCMEditType.TITLE, hasTitle, hasDescription) {
+// If (hasTitle && hasDescription) == false, then print out the Title placeholder image and stop further execution of this component. This will also intelligently build out drop-targets based on the components cq:editConfigs
+return;
+} %>
+<%-- Else all conditions are true so display the component --%>
+<h2><cq:text property="title"/></h2>
+<p><cq:text property="description"/></p>
+{% endhighlight %}        
