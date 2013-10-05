@@ -7,9 +7,13 @@ thumbnail: /images/generic-lists/thumbnail.png
 categories: features
 ---
 
+## Purpose
+
 Generic Lists are a feature allowing easy creation and management of lists of title/value pairs.
 
-## Content
+## How to Use
+
+### Creating Lists
 
 Generic Lists are represented as CQ Pages under `/etc/acs-commons/lists`, e.g. `/etc/acs-commons/lists/age-ranges`. They are editable by using the Tools screen:
 
@@ -19,18 +23,18 @@ On a list page, the items in the list are components within a parsys. New items 
 
 ![image]({{ site.baseurl }}/images/generic-lists/editor.png)
 
-## Use in Dialogs
+### Using Lists in Dialogs
 
 One of the primary purposes of Generic Lists is to populate a selection widget in a component (or page) dialog. To do this, set the `options` configuration property to the list path *plus* `/jcr:content.list.json`. For example:
 
 {% highlight xml %}
-    <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-        jcr:primaryType="cq:Widget"
-        fieldLabel="Target"
-        name="./target"
-        options="/etc/acs-commons/lists/age-ranges/_jcr_content.list.json"
-        type="select"
-        xtype="selection"/>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Widget"
+    fieldLabel="Target"
+    name="./target"
+    options="/etc/acs-commons/lists/age-ranges/_jcr_content.list.json"
+    type="select"
+    xtype="selection"/>
 {% endhighlight %}
 
 This can also be used in multifield scenarios.
