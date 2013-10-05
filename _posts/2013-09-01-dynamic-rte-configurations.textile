@@ -7,6 +7,8 @@ thumbnail: /images/dynamic-rte-configuration/thumbnail.png
 categories: features
 ---
 
+h2. Purpose
+
 A common challenge we run into on complex projects is where multiple business units within a company want to use the
 same component, but with different rich text editor configurations. For example, let's say you have a simple text component used on two sites:
 
@@ -17,7 +19,7 @@ On SiteA, the text component should include the default plugins. On SiteB, the s
 
 Using dynamic RTE configuration, this can be done without creating extra components. This also allows for the easy sharing of RTE configurations within a site. If @/apps/myco/components/content/text@ and @/apps/myco/components/content/other-text@ need to share the same RTE configuration, that can be easily done by using a named configuration. This is *even* true if @text@ and @other-text@ use different property names, something that is very challenging with @cqinclude@.
 
-h2. Usage
+h2. How to Use
 
 # Create a node structure under @/etc/rteconfig@. Each node directly under @/etc/rteconfig@ defines a set of configurations, most commonly associated with a site. For the example above, you would have @/etc/rteconfig/sitea@ and @/etc/rteconfig/siteb@.
 # On these site nodes, set a @pattern@ property with a regex defining when the rules within that node are applied, e.g. @/etc/rteconfig/sitea@ would have a @pattern@ of @/content/sitea/.*@

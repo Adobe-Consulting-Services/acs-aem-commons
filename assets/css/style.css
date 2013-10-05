@@ -1,3 +1,14 @@
+/* Mixins */
+.code {
+  background-color: #f7f7f7;
+  border-radius: 0;
+}
+.code-block {
+  background-color: #f7f7f7;
+  border-radius: 0;
+  font-family: Courier, serif;
+}
+/* Styles */
 body {
   background: #fff;
   font-family: 'SourceSans';
@@ -55,9 +66,10 @@ header .nav a:hover {
   text-shadow: #ffac8e 0px 1px 0px;
 }
 #jumbotron .lead {
-  font-size: 3em;
+  font-size: 2.5em;
   font-weight: 200;
   color: #fff;
+  line-height: 1em;
   text-shadow: #343838 0px 2px 0px;
 }
 #jumbotron .lead em {
@@ -65,14 +77,16 @@ header .nav a:hover {
   text-decoration: none;
 }
 /* Homepage */
-.info-row {
+.striation {
   padding: 2rem;
 }
-.info-row-odd {
+.striation-light {
+  padding: 2rem;
   background-color: #fff;
   border-bottom: solid 1px #ccc;
 }
-.info-row-even {
+.striation-dark {
+  padding: 2rem;
   background-color: #f7f7f7;
   border-bottom: solid 1px #ccc;
 }
@@ -87,7 +101,7 @@ header .nav a:hover {
   border: solid 1px #ccc;
 }
 .features .feature h3 {
-  margin: 1em 0;
+  margin: 1em 0 .5em 0;
 }
 .features .feature p {
   color: #999;
@@ -103,7 +117,9 @@ header .nav a:hover {
 }
 .feature-doc h1,
 .feature-doc h2,
-.feature-doc h3 {
+.feature-doc h3,
+.feature-doc h4,
+.feature-doc h5 {
   margin-top: 1.25em;
 }
 .feature-doc h2 {
@@ -116,8 +132,30 @@ header .nav a:hover {
 .feature-doc pre code {
   font-size: 1em;
 }
-.feature-doc code {
-  font-size: .8em;
+.feature-doc ul,
+.feature-doc ol,
+.feature-doc dl {
+  margin-bottom: 1em;
+}
+/* Inline Code */
+code {
+  background-color: #f7f7f7;
+  border-radius: 0;
+  font-family: SourceSans, sans-serif;
+  font-weight: 200;
+  padding: .25rem .75rem;
+}
+/* Code Blocks */
+pre {
+  border-radius: 0;
+  border-color: #eee;
+  padding: 1.5rem 2rem;
+}
+pre code {
+  background-color: #f7f7f7;
+  border-radius: 0;
+  font-family: Courier, serif;
+  border: 0;
 }
 /* Footer */
 footer {

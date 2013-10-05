@@ -1,84 +1,84 @@
 ---
 layout: feature
-title: Client Libs Manager
-description: Associate Client Libs with Designs
+title: ClientLibs Manager
+description: AEM Design-driven, reusable ClientLibs
 date: 2013-10-01 23:39:29
-thumbnail: /images/designer-clientlibsmanager/thumbnail.png
+thumbnail: /images/default/thumbnail.png
 categories: features
 ---
 
 ## Purpose
 
-Provide an author-able means for defining, creating and managing custom Error pages per content tree/site.
+AEM Designs (/etc/designs) traditionally holds data that does not have the same scope;
 
-## Expected Behavior
+* Design content: "per site"
+* Front End Assets: "cross-site"
 
-### Edit/Design mode
+Designer - ClientLibs Manager provides a simple interface and common abstraction for decoupling Front-end assets (CSS/JS Clientlibs) with Designs AND Page implementations.
 
-#### 40x Handling
-Author is displayed the corresponding Error page
+## Use Cases
 
-#### 50x Handling
-Normal/OOTB 500x/Exception error handling behavior is respected. JSP exceptions are displayed inline w the JSP.
+Create one ClientLib (/etc/clientlibs/us-brands) and use it across all US Sites but not European sites simply by configuring the association on each site's Design.
 
-### Preview mode
+## How to Use
 
-#### 40x Handling
-Author is displayed the corresponding Error page
+* Override of the OOTB CQ Design Page implementation to allow for customization of "Head" and "Body" based ClientLibs.
+  * Notes
+    * Body Clientlibs only accept JavaScript as CSS should always be loaded in the Head.
+      * Leverages the [ACS Commons - Delegating Servlet]({{ site.baseurl }}/features/delegating-servlet.html) to provide an unobtrusive overlay
+* DesignHtmlLibraryManager Service
+    * Wraps the OOTB HtmlLibraryManager Serivce but is driven by the ClientLib configuration from the current design (first bullet point)
 
-#### 50x Handling
-A custom "Error page" is displayed that includes the Request Progress and Stack Trace.
+### Required Sling OSGi Configuration
 
-### Disabled (Publish) mode
+To enable the CQ Design Page overlay, the following sling:osgiConfig must be added to the project.
 
-The corresponding Error page is displayed.
+    /apps/myapp/config.author/com.adobe.acs.util.impl.OverlayServletFactoryImpl-DesignerClientLibsManager.xml
 
-## Instructions
+{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="sling:osgiConfig"
+    sling.servlet.resourceTypes="wcm/core/components/designer"
+    sling.servlet.selectors=""
+    sling.servlet.extensions="html"
+    sling.servlet.methods="GET"
+    prop.target-resource-type="acs-commons/components/utilities/designer"/>
+{% endhighlight %}
 
-1. Create the proxy overlays for Sling errorhandler scripts (404.jsp and default.jsp) which include the acs-commons counterparts.
+## Example
 
- * /apps/sling/servlet/errorhandler/404.jsp
+{% highlight jsp %}
+<% DesignHtmlLibraryManager dhlm = sling.getService(DesignHtmlLibraryManager.class); %>
 
-	    <%@page session="false"%><%
- 	    %><%@include file="/apps/acs-commons/components/utilities/errorpagehandler/404.jsp" %>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Demo Page</title>
+        ...
 
- * /apps/sling/servlet/errorhandler/default.jsp
+        dhlm.writeCssInclude(slingRequest, currentDesign, PageRegion.HEAD, out);
+        dhlm.writeJsInclude(slingRequest, currentDesign, PageRegion.HEAD, out);
+        dhlm.writeIncludes(slingRequest, currentDesign, PageRegion.HEAD, out);
 
-	    <%@page session="false"%><%
- 	    %><%@include file="/apps/acs-commons/components/utilities/errorpagehandler/default.jsp" %>
+        <!-- OR, manually pass the list to the OOTB cq:includeClientLib tag; Effectively the same thing -->
 
-2. In your base page implementation, add the following `cq:Widget` to the Page Properties dialog
+        <cq:includeClientLib css="<%= StringUtils.join(dhlm.getCssLibraries(currentDesign, PageRegion.HEAD), ',') %>"/>
+        <cq:includeClientLib js="<%= StringUtils.join(dhlm.getJsLibraries(currentDesign, PageRegion.HEAD), ',') %>"/>
+        <cq:includeClientLib categories="<%= StringUtils.join(dhlm.getLibraries(currentDesign, PageRegion.HEAD), ',') %>"/>
+    </head>
+    <body>
+        <h1>Demo Page</h1>
 
-    &lt;errorpages
-        jcr:primaryType="cq:Widget"
-        path="./apps/acs-commons/components/utilities/errorpagehandler/dialog/errorpages"
-        xtype="cqinclude"/>
+        <p>CSS has no business being in the body of a document, and its almost always better to push JS load to the end of the body</p>
 
-    - OR create a your own custom pathfield widget -
+        dhlm.writeJsInclude(slingRequest, currentDesign, PageRegion.BODY, out);
+        dhlm.writeIncludes(slingRequest, currentDesign, PageRegion.BODY, out);
 
-    &lt;errorpages
-        jcr:primaryType="cq:Widget"
-        fieldLabel="Error Pages"
-        fieldDescription="Error pages for this content tree"
-        name="./errorPages"
-        xtype="pathfield"/>
+        <!-- OR, manually pass the list to the OOTB cq:includeClientLib tag; Effectively the same thing -->
 
-3. Create a CQ Page that will act as the default Error page, and also contain all custom variations of error pages.
-Each error page's "name" (Node name) should correspond to the HTTP Response Status code it should respond to.
-    * 500: Internal Server Error
-    * 404: Not Found
-    * 403: Forbidden
-Typically only 404 and 500 are needed with everything else using the fallback (default error page) as the messaging around these tends to be less useful to Web site visitors.
-A common pattern is to create this at the site's root under a node named "errors"
-    * Ex. /content/geometrixx/en/us/errors
-4. Create any error-specific pages under this default error page created in Step 2.
-Note, it is critical that the page NAMES (node names) follow status codes. The Page Titles can be anything.
-    * Ex. /content/geometrixx/en/us/errors/404
-    * Ex. /content/geometrixx/en/us/errors/500
-5. Edit the Page Properties of the site's root node, and in the new "Error Pages" dialog input (Step 1) select the default error page (Step 2).
-    * Ex. ./errorPages => /content/geometrixx/en/us/errors
-6. Further customizations can be made via the OSGi Configuration for the `ACS AEM Commons - Error Page Handler` Configuration, including a "System wide" fallback error page.
-
-*** Note: *** At this time the full Sling exception-name look-up scheme is not supported. Implementing a `500` error page is sufficient.
-
-
+        <cq:includeClientLib js="<%= StringUtils.join(dhlm.getJsLibraries(currentDesign, PageRegion.BODY), ',') %>"/>
+        <cq:includeClientLib categories="<%= StringUtils.join(dhlm.getLibraries(currentDesign, PageRegion.BODY), ',') %>"/>
+    </body>
+</html>
+{% endhighlight %}
