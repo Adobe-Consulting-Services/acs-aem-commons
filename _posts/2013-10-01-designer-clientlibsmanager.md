@@ -3,7 +3,7 @@ layout: feature
 title: ClientLibs Manager
 description: AEM Design-driven, reusable ClientLibs
 date: 2013-10-01 23:39:29
-thumbnail: /images/default/thumbnail.png
+thumbnail: /images/designer-clientlibsmanager/thumbnail.png
 categories: features
 ---
 
@@ -28,6 +28,8 @@ Create one ClientLib (/etc/clientlibs/us-brands) and use it across all US Sites 
       * Leverages the [ACS Commons - Delegating Servlet]({{ site.baseurl }}/features/delegating-servlet.html) to provide an unobtrusive overlay
 * DesignHtmlLibraryManager Service
     * Wraps the OOTB HtmlLibraryManager Serivce but is driven by the ClientLib configuration from the current design (first bullet point)
+
+![image]({{ site.baseurl }}/images/designer-clientlibsmanager/designs-page.png)
 
 ### Required Sling OSGi Configuration
 
