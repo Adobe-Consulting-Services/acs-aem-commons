@@ -38,8 +38,8 @@ import java.util.Map;
 import java.util.Set;
 
 @Component(
-        label = "ACS Commons - Overlay Servlet",
-        description = "Overlay Servlet enabling the unobtrusive delegate of Resource Types.",
+        label = "ACS AEM Commons - Delegating Servlet",
+        description = "Delegating Servlet enabling the unobtrusive delegate of Resource Types.",
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE,
         metatype = true,
@@ -48,7 +48,7 @@ import java.util.Set;
         @Property(
                 label = "Vendor",
                 name = Constants.SERVICE_VENDOR,
-                value = "ACS Commons",
+                value = "ACS AEM Commons",
                 propertyPrivate = true
         ),
         @Property(
@@ -166,7 +166,7 @@ public class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
      * @return true is Request will cause a and infinite delegation cycle
      */
     private boolean isCyclic(final SlingHttpServletRequest request, final String targetResourceType) {
-        if(StringUtils.isNotBlank(targetResourceType)) {
+        if(StringUtils.isBlank(targetResourceType)) {
             log.debug("Delegating Servlet's \"Target Resource Type\" is blank or null");
             return true;
         }

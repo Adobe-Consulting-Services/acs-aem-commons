@@ -641,6 +641,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 new HashSet<String>());
         // Clear the response
         response.reset();
+        response.setContentType("text/html");
         response.setStatus(statusCode);
     }
 
@@ -720,6 +721,11 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         this.fallbackErrorName = PropertiesUtil.toString(properties.get(PROP_FALLBACK_ERROR_NAME), DEFAULT_FALLBACK_ERROR_NAME);
 
         this.pathMap = configurePathMap(PropertiesUtil.toStringArray(properties.get(PROP_SEARCH_PATHS), DEFAULT_SEARCH_PATHS));
+
+        log.debug("Enabled: {}", this.enabled);
+        log.debug("System Error Page Path: {}", this.systemErrorPagePath);
+        log.debug("Error Page Extension: {}", this.errorPageExtension);
+        log.debug("Fallback Error Page Name: {}", this.fallbackErrorName);
     }
 
     /**
