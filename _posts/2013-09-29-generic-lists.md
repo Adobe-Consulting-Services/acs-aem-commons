@@ -55,7 +55,7 @@ To do this, first obtain the `com.day.cq.wcm.api.Page` object for the list page:
     Page listPage = pageManager.getPage("/etc/acs-commons/lists/targets");
 {% endhighlight %}
     
-Then adapt the `Page` object to a `com.adobe.acs.fordmedia.lists.GenericList` object:
+Then adapt the `Page` object to a `com.adobe.acs.commons.genericlists.GenericList` object:
 
 {% highlight java %}
     GenericList list = listPage.adaptTo(GenericList.class);
