@@ -1,0 +1,41 @@
+---
+layout: feature
+title: ACS AEM Commons Utils
+description: A collection of common utils
+date: 2013-10-01 23:39:29
+thumbnail: /images/default/thumbnail.png
+categories: features
+---
+
+h2. Purpose
+
+Provide common utility functionality across projects.
+
+h2. Overview
+
+The best overview are the "ACS AEM Commons Utils JavaDocs":{{ site.baseurl }}/apidocs/com/adobe/acs/commons/util/package-summary.html.
+
+Characteristics of the ACS AEM Commons Utils are:
+
+* Static Java classes
+* Do *NOT* have mutable state
+* Do *NOT* have inherent access to OSGi/JCR/Sling context and typically do not require it
+** Any required context must be passed into the utility method
+
+h2. ACS AEM Commons Utils List
+
+- @CookieUtil@ := Creation, deletion and modification of HTTP Cookies
+- @OsgiPropertyUtil@ := Parsing OSGi component property String values into "complex" data structures (usually Maps or Key/Value pairs)
+- @PathInfoUtil@ := Getting values from a HTTP Request's Path and Query Params
+- @ResourceDataUtil@ :=
+Gets less-common data renditions from Resources including:
+* Getting the rendition of a resource as a @String@
+* Getting a @InputStream@ representation of a @nt:file@
+* Getting a @String@ representation of a @nt:file@
+=:
+
+- @TemplateUtil@ := Utility methods for working with CQ Templates.
+
+- @TextUtil@ := Gets default values, non-blank values. See also "CQ TextUtils":http://dev.day.com/docs/en/cq/current/javadoc/com/day/text/TextUtils.html and "Apache Commons StringUtils":http://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/StringUtils.html.
+
+- @TypeUtil@ := Intelligently determines Java object types and converts between types (including "unusual" transformations like Array to Map)
