@@ -40,7 +40,7 @@ To create a delegation mapping, create a new sling:osgiConfig
 
 ## Example
 
-The ACS AEM Commons Designer - ClientLibs implementation uses the Delegatin Servlet to delegate requests from resource type `wcm/core/components/designer` to `acs-commons/components/utilities/designer`
+The ACS AEM Commons Designer - ClientLibs implementation uses the Delegating Servlet to delegate requests from resource type `wcm/core/components/designer` to `acs-commons/components/utilities/designer`
 
 {% highlight xml %}
 <?xml version="1.0" encoding="UTF-8"?>
