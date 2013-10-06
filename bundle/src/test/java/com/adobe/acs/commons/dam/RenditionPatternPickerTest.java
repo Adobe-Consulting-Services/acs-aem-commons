@@ -17,9 +17,8 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.dam.renditionpickers;
+package com.adobe.acs.commons.dam;
 
-import com.adobe.acs.commons.dam.RenditionPatternPicker;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 
