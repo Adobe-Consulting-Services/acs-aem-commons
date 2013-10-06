@@ -17,6 +17,9 @@
  * limitations under the License.
  * #L%
  */
+/**
+ * Miscellaneous Utilities.
+ */
 @Version("1.0.0")
 package com.adobe.acs.commons.util;
 

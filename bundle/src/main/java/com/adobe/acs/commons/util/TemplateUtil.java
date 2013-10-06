@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm;
+package com.adobe.acs.commons.util;
 
 import javax.annotation.CheckForNull;
 
@@ -29,9 +29,9 @@ import com.day.cq.wcm.api.Page;
 /**
  * Utility functions for working with CQ Templates.
  */
-public final class TemplateUtils {
+public final class TemplateUtil {
 
-    private TemplateUtils() {
+    private TemplateUtil() {
     }
 
     /**
