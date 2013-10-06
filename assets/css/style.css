@@ -165,8 +165,5 @@ footer {
   border-top: solid 1px #ccc;
 }
 dd {
-    text-indent: 2em;
-}
-dd li {
-    text-indent: 0em;
+    margin-left: 2em;
 }
