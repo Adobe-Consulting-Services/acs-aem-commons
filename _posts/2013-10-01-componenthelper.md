@@ -24,8 +24,8 @@ ComponentHelper componentHelper = sling.getService(ComponentHelper.class);
 String title = properties.get("title", "");
 String description = properties.get("description", "");
 
-boolean hasTitle = title.length > 5;
-boolean hasDescription = description.length > 10;
+boolean hasTitle = title.length() > 5;
+boolean hasDescription = description.length() > 10;
 
 %><% if(componentHelper.printEditBlockOrNothing(slingRequest, slingResponse, 
         WCMEditType.TITLE, hasTitle, hasDescription) {
