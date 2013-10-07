@@ -46,7 +46,8 @@
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
                         <Include-Resource>
                             {maven-resources},
-                            META-INF/wcmmode.tld=target/classes/META-INF/wcmmode.tld
+                            META-INF/wcmmode.tld=target/classes/META-INF/wcmmode.tld,
+                            META-INF/audio.tld=target/classes/META-INF/audio.tld
                         </Include-Resource>
                     </instructions>
                 </configuration>
