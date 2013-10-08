@@ -27,7 +27,7 @@ import com.day.cq.dam.video.VideoProfile;
 /**
  * Audio JSP functions.
  */
-public class AudioFunctions {
+public final class AudioFunctions {
 
     private AudioFunctions() {
     }

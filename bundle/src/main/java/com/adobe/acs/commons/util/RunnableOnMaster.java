@@ -28,6 +28,9 @@ public abstract class RunnableOnMaster implements ClusterAware, Runnable {
 
     private boolean isMaster;
 
+    /**
+     * Run the scheduled job.
+     */
     protected abstract void runOnMaster();
 
     /**
@@ -46,6 +49,9 @@ public abstract class RunnableOnMaster implements ClusterAware, Runnable {
         isMaster = false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void run() {
         if (isMaster) {

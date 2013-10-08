@@ -37,7 +37,7 @@ public final class WCMModeFunctions {
     /**
      * Determine if the current WCMMode is design mode.
      * 
-     * @param request the current request
+     * @param pageContext the current page context
      * @return true if the WCMMode is design
      */
     @Function
@@ -55,7 +55,7 @@ public final class WCMModeFunctions {
     /**
      * Determine if the current WCMMode is disabled mode.
      * 
-     * @param request the current request
+     * @param pageContext the current page context
      * @return true if the WCMMode is disabled
      */
     @Function
@@ -73,7 +73,7 @@ public final class WCMModeFunctions {
     /**
      * Determine if the current WCMMode is edit mode.
      * 
-     * @param request the current request
+     * @param pageContext the current page context
      * @return true if the WCMMode is edit
      */
     @Function
@@ -91,7 +91,7 @@ public final class WCMModeFunctions {
     /**
      * Determine if the current WCMMode is preview mode.
      * 
-     * @param request the current request
+     * @param pageContext the current page context
      * @return true if the WCMMode is preview
      */
     @Function
