@@ -3,7 +3,7 @@ layout: feature
 title: Audio Component
 description: An HTML5 audio component and related workflow process
 date: 2013-10-01 23:39:29
-thumbnail: /images/default/thumbnail.png
+thumbnail: /images/audio/thumbnail.png
 categories: features
 ---
 
