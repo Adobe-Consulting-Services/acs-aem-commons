@@ -1,0 +1,33 @@
+---
+layout: feature
+title: Audio Component
+description: An HTML5 audio component and related workflow process
+date: 2013-10-01 23:39:29
+thumbnail: /images/default/thumbnail.png
+categories: features
+---
+
+h2. Purpose
+
+Provide an HTML5 audio component, similar to the HTML5 video component.
+
+h2. Overview
+
+Similar to the AEM HTML5 video component, audio files added to the DAM are transcoded into formats supported by HTML5, currently mp3 and OGG Vorbis, by FFMPEG.
+
+h2. How to Use
+
+* Edit the DAM Update Asset Workflow model
+* Add a Process Step using the "Encode Audio" process.
+* For the Process Arguments, provide "profile:ogghq,profile:mp3hq"
+* Save the Workflow model
+
+!{width: 400px}{{ site.baseurl }}/images/audio/workflow-dialog.png!
+
+* Drop the Audio component into your page, either from the Sidekick or the Audio Content Finder tab.
+
+h2. Profiles
+
+Like the HTML5 video support in AEM, audio support is based on profiles. Two profiles are included - "mp3hq" and "ogghq". If you need/want additional profiles, edit them just like you would a video profile.
+
+If you create additional profiles, you will need to add them both in the workflow model and in the design dialog of the audio component.
