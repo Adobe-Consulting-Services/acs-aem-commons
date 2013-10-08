@@ -24,11 +24,8 @@ import com.day.cq.search.Query;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.writer.ResultHitWriter;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.io.JSONWriter;
-import org.osgi.framework.Constants;
 
 import javax.jcr.RepositoryException;
 import java.util.Map;
@@ -40,14 +37,6 @@ import java.util.Map;
         immediate = false,
         metatype = false
 )
-@Properties({
-        @Property(
-                label = "Vendor",
-                name = Constants.SERVICE_VENDOR,
-                value = "ACS",
-                propertyPrivate = true
-        )
-})
 public class ContentFinderResultHitWriter implements ResultHitWriter {
     /**
      * Result hit writer integration

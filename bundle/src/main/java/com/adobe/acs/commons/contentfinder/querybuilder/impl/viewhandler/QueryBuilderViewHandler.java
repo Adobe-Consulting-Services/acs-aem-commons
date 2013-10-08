@@ -32,7 +32,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,12 +51,6 @@ import java.util.Set;
                 label = "Servlet Paths",
                 name = "sling.servlet.paths",
                 value = "/bin/wcm/contentfinder/qb/view",
-                propertyPrivate = true
-        ),
-        @Property(
-                label = "Vendor",
-                name = Constants.SERVICE_VENDOR,
-                value = "ACS",
                 propertyPrivate = true
         )
 })

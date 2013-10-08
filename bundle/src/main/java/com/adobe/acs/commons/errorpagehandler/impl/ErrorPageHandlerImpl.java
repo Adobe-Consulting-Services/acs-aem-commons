@@ -35,7 +35,6 @@ import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -65,11 +64,6 @@ import java.util.*;
             description = "Error Page Handling module which facilitates the resolution of errors against authorable pages for discrete content trees.",
             immediate = false,
             metatype = true)
-@Properties({
-    @Property(
-        name = "service.vendor",
-        value = "ACS")
-})
 @Service
 public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 

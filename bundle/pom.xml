@@ -33,6 +33,11 @@
                         <goals>
                             <goal>scr</goal>
                         </goals>
+                        <configuration>
+                            <properties>
+                                <service.vendor>Adobe Systems Incorporated</service.vendor>
+                            </properties>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

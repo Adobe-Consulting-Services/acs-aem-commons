@@ -24,11 +24,9 @@ import com.adobe.acs.commons.designer.PageRegion;
 import com.day.cq.wcm.api.designer.Design;
 import com.day.cq.widget.HtmlLibraryManager;
 import org.apache.felix.scr.annotations.*;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,14 +39,6 @@ import java.util.*;
         description = "Helper service used to expose configured Design-specific client libraries in JSPs.",
         metatype = false,
         immediate = false)
-@Properties({
-        @Property(
-                label = "Vendor",
-                name = Constants.SERVICE_VENDOR,
-                value = "ACS AEM Commons",
-                propertyPrivate = true
-        )
-})
 @Service
 public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
     private static final Logger log = LoggerFactory.getLogger(DesignHtmlLibraryManagerImpl.class);
