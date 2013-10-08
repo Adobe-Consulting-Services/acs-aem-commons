@@ -31,8 +31,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -50,8 +48,6 @@ import java.util.Map;
         metatype = true)
 @Service
 public class ComponentHelperImpl implements ComponentHelper {
-    private static final Logger log = LoggerFactory.getLogger(ComponentHelperImpl.class);
-
     private static final String CSS_EDIT_MODE = "wcm-helper-edit-mode";
 
     /**

@@ -67,7 +67,6 @@ import java.util.*;
 @Service
 public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ErrorPageHandlerImpl.class);
 
     public static final String DEFAULT_ERROR_PAGE_NAME = "errors";
@@ -676,7 +675,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param separator
      * @return
      */
-    private SimpleEntry toSimpleEntry(String value, String separator) {
+    private SimpleEntry<String, String> toSimpleEntry(String value, String separator) {
         String[] tmp = StringUtils.split(value, separator);
 
         if (tmp == null) {
@@ -684,7 +683,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         }
 
         if (tmp.length == 2) {
-            return new SimpleEntry(tmp[0], tmp[1]);
+            return new SimpleEntry<String, String>(tmp[0], tmp[1]);
         } else {
             return null;
         }
@@ -704,7 +703,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     private void configure(ComponentContext componentContext) {
-        Dictionary properties = componentContext.getProperties();
+        Dictionary<?,?> properties = componentContext.getProperties();
 
         this.enabled = PropertiesUtil.toBoolean(properties.get(PROP_ENABLED), DEFAULT_ENABLED);
 
@@ -734,7 +733,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         for (String path : paths) {
             if(StringUtils.isBlank(path)) { continue; }
 
-            final SimpleEntry tmp = toSimpleEntry(path, ":");
+            final SimpleEntry<String, String> tmp = toSimpleEntry(path, ":");
 
             if(tmp == null) { continue; }
 
