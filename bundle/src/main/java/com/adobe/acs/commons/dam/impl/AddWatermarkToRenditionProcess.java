@@ -30,6 +30,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.dam.AbstractRenditionModifyingProcess;
 import com.day.cq.dam.api.Rendition;
@@ -48,6 +50,8 @@ import com.day.image.Layer;
 @Service
 @Property(name = "process.label", value = "Add Watermark to Rendition")
 public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess {
+
+    private static final Logger log = LoggerFactory.getLogger(AddWatermarkToRenditionProcess.class);
 
     private static final String ARG_WATERMARK = "watermark";
 
