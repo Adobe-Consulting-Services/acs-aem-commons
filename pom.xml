@@ -175,6 +175,11 @@
         </pluginManagement>
     </build>
 
+    <scm>
+        <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
+      <tag>HEAD</tag>
+  </scm>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -404,6 +409,21 @@
             <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>
+
+    <distributionManagement>
+        <repository>
+            <id>${releaseRepository-Id}</id>
+            <name>${releaseRepository-Name}</name>
+            <url>${releaseRepository-URL}</url>
+        </repository>
+        <snapshotRepository>
+            <id>${snapshotRepository-Id}</id>
+            <name>${snapshotRepository-Name}</name>
+            <url>${snapshotRepository-URL}</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+        
     <modules>
         <module>bundle</module>
         <module>content</module>
