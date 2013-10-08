@@ -18,8 +18,7 @@
  * #L%
  */
 /**
- * Audio JSP Functions.
+ * Forms System - Components.
  */
 @aQute.bnd.annotation.Version("1.0.0")
-@tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/audio", descriptorFile = "audio.tld")
-package com.adobe.acs.commons.dam.audio;
+package com.adobe.acs.commons.forms.components;
