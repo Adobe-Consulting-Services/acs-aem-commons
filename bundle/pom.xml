@@ -51,7 +51,8 @@
                         <Include-Resource>
                             {maven-resources},
                             META-INF/wcmmode.tld=target/classes/META-INF/wcmmode.tld,
-                            META-INF/audio.tld=target/classes/META-INF/audio.tld
+                            META-INF/audio.tld=target/classes/META-INF/audio.tld,
+                            META-INF/dhlm.tld=target/classes/META-INF/dhlm.tld
                         </Include-Resource>
                     </instructions>
                 </configuration>
@@ -280,6 +281,12 @@
             <groupId>org.apache.jackrabbit</groupId>
             <artifactId>jackrabbit-jcr-commons</artifactId>
             <version>2.5.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.scripting.jsp</artifactId>
+            <version>2.0.28</version>
             <scope>provided</scope>
         </dependency>
 
