@@ -58,7 +58,7 @@ public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
 
     @Override
     public void writeIncludes(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
-        htmlLibraryManager.writeIncludes(request, writer, this.getJsLibraries(design, pageRegion));
+        htmlLibraryManager.writeIncludes(request, writer, this.getLibraries(design, pageRegion));
     }
 
     @Override
@@ -75,22 +75,12 @@ public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
 
     @Override
     public String[] getLibraries(final Design design, final PageRegion pageRegion) {
-        final List<String> libs = new ArrayList<String>();
-
         final String[] cssLibs = this.getCssLibraries(design, pageRegion);
         final String[] jsLibs = this.getJsLibraries(design, pageRegion);
-
-        for(final String lib : cssLibs) {
-            if(!libs.contains(lib)) {
-                libs.add(lib);
-            }
-        }
-
-        for(final String lib : jsLibs) {
-            if(!libs.contains(lib)) {
-                libs.add(lib);
-            }
-        }
+        
+        final LinkedHashSet<String> libs = new LinkedHashSet<String>();
+        libs.addAll(Arrays.asList(cssLibs));
+        libs.addAll(Arrays.asList(jsLibs));
 
         return libs.toArray(new String[libs.size()]);
     }
