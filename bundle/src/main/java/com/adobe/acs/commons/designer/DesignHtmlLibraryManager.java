@@ -26,66 +26,70 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * A service interface for looking up client libraries based on a Design
+ * A service interface for looking up client libraries based on a Design.
  */
 public interface DesignHtmlLibraryManager {
 
     /**
      * Resource name for the client library configuration within a design resource.
      */
-    static final String RESOURCE_NAME = "clientlibs";
+    static String RESOURCE_NAME = "clientlibs";
 
     /**
      * Resource name for the CSS library configuration within a configuration resource.
      */
-    static final String PROPERTY_CSS = "css";
+    static String PROPERTY_CSS = "css";
 
     /**
      * Resource name for the JavaScript library configuration within a configuration resource.
      */
-    static final String PROPERTY_JS = "js";
+    static String PROPERTY_JS = "js";
 
     /**
      * Writes the CSS include snippets to the given writer.
-     * The paths to the CSS libraries are included that match the given categories for client libraries (as specified on the Design page) associated with the pageRegion for the currentDesign
+     * The paths to the CSS libraries are included that match the given categories for client libraries (as specified
+     * on the Design page) associated with the pageRegion for the currentDesign.
      *
      * @param request Sling Request obj
      * @param design the Design to look up appropriate client libs from (usually currentDesign)
      * @param pageRegion PageRegion enum
      * @param writer writer to output link and script tags to
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     void writeCssInclude(SlingHttpServletRequest request, Design design, PageRegion pageRegion, Writer writer)
             throws IOException;
 
     /**
      * Writes the JS include snippets to the given writer.
-     * The paths to the JS libraries are included that match the given categories for client libraries (as specified on the Design page) associated with the pageRegion for the currentDesign
+     * The paths to the JS libraries are included that match the given categories for client libraries (as specified
+     * on the Design page) associated with the pageRegion for the currentDesign.
      *
      * @param request Sling Request obj
      * @param design the Design to look up appropriate client libs from (usually currentDesign)
      * @param pageRegion PageRegion enum
      * @param writer writer to output link and script tags to
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     void writeJsInclude(SlingHttpServletRequest request, Design design, PageRegion pageRegion, Writer writer)
             throws IOException;
 
     /**
      * Writes the include snippets to the given writer.
-     * The paths to the libraries (CSS and JS) are included that match the given categories for client libraries (as specified on the Design page) associated with the pageRegion for the currentDesign
+     * The paths to the libraries (CSS and JS) are included that match the given categories for client libraries
+     * (as specified on the Design page) associated with the pageRegion for the currentDesign
      *
      * @param request Sling Request obj
      * @param design the Design to look up appropriate client libs from (usually currentDesign)
      * @param pageRegion PageRegion enum
      * @param writer writer to output link and script tags to
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     void writeIncludes(SlingHttpServletRequest request, Design design, PageRegion pageRegion, Writer writer)
             throws IOException;
 
     /**
-     * Returns an ordered list of all CSS (as specified on the Design page) client libraries associated with the pageRegion for the design.
+     * Returns an ordered list of all CSS (as specified on the Design page) client libraries associated with the
+     * pageRegion for the design.
      *
      * @param design the Design to look up appropriate client libs from (usually currentDesign)
      * @param pageRegion PageRegion enum
@@ -94,7 +98,8 @@ public interface DesignHtmlLibraryManager {
     String[] getCssLibraries(Design design, PageRegion pageRegion);
 
     /**
-     * Returns an ordered list of all JS (as specified on the Design page) client libraries associated with the pageRegion for the design.
+     * Returns an ordered list of all JS (as specified on the Design page) client libraries associated with the
+     * pageRegion for the design.
      *
      * @param design the Design to look up appropriate client libs from (usually currentDesign)
      * @param pageRegion PageRegion enum
@@ -103,7 +108,8 @@ public interface DesignHtmlLibraryManager {
     String[] getJsLibraries(Design design, PageRegion pageRegion);
 
     /**
-     * Returns an ordered list of all (CSS and JS; as specified on the Design page) client libraries associated with the pageRegion for the design
+     * Returns an ordered list of all (CSS and JS; as specified on the Design page) client libraries associated with
+     * the pageRegion for the design.
      *
      * @param design the Design to look up appropriate client libs from (usually currentDesign)
      * @param pageRegion PageRegion enum
