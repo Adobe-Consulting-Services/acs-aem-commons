@@ -33,17 +33,17 @@ public interface DesignHtmlLibraryManager {
     /**
      * Resource name for the client library configuration within a design resource.
      */
-    static String RESOURCE_NAME = "clientlibs";
+    String RESOURCE_NAME = "clientlibs";
 
     /**
      * Resource name for the CSS library configuration within a configuration resource.
      */
-    static String PROPERTY_CSS = "css";
+    String PROPERTY_CSS = "css";
 
     /**
      * Resource name for the JavaScript library configuration within a configuration resource.
      */
-    static String PROPERTY_JS = "js";
+    String PROPERTY_JS = "js";
 
     /**
      * Writes the CSS include snippets to the given writer.
