@@ -19,20 +19,25 @@
  */
 package com.adobe.acs.commons.designer.impl;
 
-import com.adobe.acs.commons.designer.DesignHtmlLibraryManager;
-import com.adobe.acs.commons.designer.PageRegion;
-import com.day.cq.wcm.api.designer.Design;
-import com.day.cq.widget.HtmlLibraryManager;
-import org.apache.felix.scr.annotations.*;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.*;
+import com.adobe.acs.commons.designer.DesignHtmlLibraryManager;
+import com.adobe.acs.commons.designer.PageRegion;
+import com.day.cq.wcm.api.designer.Design;
+import com.day.cq.widget.HtmlLibraryManager;
 
 @Component(
         label = "ACS Commons - Design HTML Library Manager",
@@ -40,31 +45,34 @@ import java.util.*;
         metatype = false,
         immediate = false)
 @Service
-public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
+public final class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
     private static final Logger log = LoggerFactory.getLogger(DesignHtmlLibraryManagerImpl.class);
 
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
 
     @Override
-    public void writeCssInclude(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
+    public void writeCssInclude(final SlingHttpServletRequest request, final Design design,
+            final PageRegion pageRegion, final Writer writer) throws IOException {
         htmlLibraryManager.writeCssInclude(request, writer, this.getCssLibraries(design, pageRegion));
     }
 
     @Override
-    public void writeJsInclude(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
+    public void writeJsInclude(final SlingHttpServletRequest request, final Design design,
+            final PageRegion pageRegion, final Writer writer) throws IOException {
         htmlLibraryManager.writeJsInclude(request, writer, this.getJsLibraries(design, pageRegion));
     }
 
     @Override
-    public void writeIncludes(final SlingHttpServletRequest request, final Design design, final PageRegion pageRegion, final Writer writer) throws IOException {
+    public void writeIncludes(final SlingHttpServletRequest request, final Design design,
+            final PageRegion pageRegion, final Writer writer) throws IOException {
         htmlLibraryManager.writeIncludes(request, writer, this.getLibraries(design, pageRegion));
     }
 
     @Override
     public String[] getCssLibraries(final Design design, final PageRegion pageRegion) {
         final ValueMap cssProps = this.getPageRegionProperties(design, pageRegion);
-        return cssProps.get(PROPERTY_CSS, new String[]{});
+        return cssProps.get(PROPERTY_CSS, new String[] {});
     }
 
     @Override
@@ -77,7 +85,7 @@ public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
     public String[] getLibraries(final Design design, final PageRegion pageRegion) {
         final String[] cssLibs = this.getCssLibraries(design, pageRegion);
         final String[] jsLibs = this.getJsLibraries(design, pageRegion);
-        
+
         final LinkedHashSet<String> libs = new LinkedHashSet<String>();
         libs.addAll(Arrays.asList(cssLibs));
         libs.addAll(Arrays.asList(jsLibs));
@@ -86,7 +94,7 @@ public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
     }
 
     /**
-     * Gets the ValueMap that contains the client library lists for the specified design and PageRegion
+     * Gets the ValueMap that contains the client library lists for the specified design and PageRegion.
      *
      * @param design
      * @param pageRegion
@@ -97,13 +105,13 @@ public class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
 
         final ValueMap empty = new ValueMapDecorator(new HashMap<String, Object>());
 
-        if(design == null) {
+        if (design == null) {
             log.warn("Cannot find properties for `null` Design");
             return empty;
-        } else if(design.getContentResource() == null) {
+        } else if (design.getContentResource() == null) {
             log.warn("Cannot find properties for `null` Design content resource");
             return empty;
-        } else if(design.getContentResource().getChild(relPath) == null) {
+        } else if (design.getContentResource().getChild(relPath) == null) {
             log.warn("Could not find resource: {}", design.getContentResource().getPath() + "/" + relPath);
             return empty;
         }
