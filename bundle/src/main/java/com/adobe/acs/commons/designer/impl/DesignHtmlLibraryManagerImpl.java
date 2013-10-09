@@ -98,7 +98,8 @@ public final class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryMana
      *
      * @param design
      * @param pageRegion
-     * @return the ValueMap associated with the PageRegion; CSS and JS libraries can be looked up via PROPERTY_CSS and PROPERTY_JS
+     * @return the ValueMap associated with the PageRegion;
+     *         CSS and JS libraries can be looked up via PROPERTY_CSS and PROPERTY_JS
      */
     private ValueMap getPageRegionProperties(final Design design, final PageRegion pageRegion) {
         final String relPath = RESOURCE_NAME + "/" + pageRegion;
