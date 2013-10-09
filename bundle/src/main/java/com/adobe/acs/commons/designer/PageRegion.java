@@ -25,12 +25,12 @@ package com.adobe.acs.commons.designer;
  */
 public enum PageRegion {
     /**
-     * The head section
+     * The head section.
      */
     HEAD("head"),
-    
+
     /**
-     * The body section
+     * The body section.
      */
     BODY("body");
 
