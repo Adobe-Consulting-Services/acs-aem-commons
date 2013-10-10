@@ -325,7 +325,10 @@
                                 <phase>package</phase>
                                 <goals>
                                     <goal>checkstyle</goal>
+                                    <!--
+                                    See https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/28
                                     <goal>check</goal>
+                                    -->
                                 </goals>
                             </execution>
                         </executions>
