@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -8,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -34,6 +33,11 @@
                         <goals>
                             <goal>scr</goal>
                         </goals>
+                        <configuration>
+                            <properties>
+                                <service.vendor>Adobe Systems Incorporated</service.vendor>
+                            </properties>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -44,6 +48,11 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
+                        <Include-Resource>
+                            {maven-resources},
+                            META-INF/wcmmode.tld=target/classes/META-INF/wcmmode.tld,
+                            META-INF/audio.tld=target/classes/META-INF/audio.tld
+                        </Include-Resource>
                     </instructions>
                 </configuration>
             </plugin>
@@ -217,7 +226,19 @@
             <groupId>com.adobe.granite</groupId>
             <artifactId>com.adobe.granite.xssprotection</artifactId>
             <version>5.5.14</version>
-            <scope>provided</scope>            
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>jsp-api</artifactId>
+            <version>2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -278,7 +299,26 @@
         <dependency>
             <groupId>junit-addons</groupId>
             <artifactId>junit-addons</artifactId>
-        </dependency>        
+        </dependency>
+        
+        <!--  Build Dependencies -->
+        <dependency>
+            <groupId>com.google.code.tld-generator</groupId>
+            <artifactId>tld-generator</artifactId>
+            <version>1.1</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javax.servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>javax.servlet.jsp-api</artifactId>
+                    <groupId>javax.servlet.jsp</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <profiles>

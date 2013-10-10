@@ -27,14 +27,10 @@ import com.day.cq.wcm.api.components.DropTarget;
 import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -44,21 +40,14 @@ import java.util.Map;
 /**
  * Component Helper is an OSGi Service used in the context of CQ Components for encapsulating common tasks and performing common checks.
  *
- * Get using @Reference annotation for via SlingScriptHelper's .getService(..) method
+ * Get using @Reference annotation or via SlingScriptHelper's .getService(..) method
  */
 @Component(label = "ACS AEM Commons - Component Helper",
         description = "Component Helper is a service used in the context of CQ Components for encapsulating common tasks and performing common checks.",
         immediate = false,
         metatype = true)
-@Properties({
-        @Property(
-                name = "service.vendor",
-                value = "ACS")
-})
 @Service
 public class ComponentHelperImpl implements ComponentHelper {
-    private static final Logger log = LoggerFactory.getLogger(ComponentHelperImpl.class);
-
     private static final String CSS_EDIT_MODE = "wcm-helper-edit-mode";
 
     /**

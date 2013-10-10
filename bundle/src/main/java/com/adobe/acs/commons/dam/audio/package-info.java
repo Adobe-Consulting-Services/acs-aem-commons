@@ -18,7 +18,8 @@
  * #L%
  */
 /**
- * Miscellaneous WCM Utilities.
+ * Audio JSP Functions.
  */
 @aQute.bnd.annotation.Version("1.0.0")
-package com.adobe.acs.commons.wcm;
+@tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/audio", descriptorFile = "audio.tld")
+package com.adobe.acs.commons.dam.audio;

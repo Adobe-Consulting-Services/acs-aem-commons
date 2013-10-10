@@ -19,8 +19,19 @@
  */
 package com.adobe.acs.commons.designer;
 
+/**
+ * Enum representing the possible target regions for a client library within an HTML page.
+ *
+ */
 public enum PageRegion {
+    /**
+     * The head section.
+     */
     HEAD("head"),
+
+    /**
+     * The body section.
+     */
     BODY("body");
 
     private String name;

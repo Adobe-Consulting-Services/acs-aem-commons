@@ -18,7 +18,8 @@
  * #L%
  */
 /**
- * Miscellaneous WCM Utilities.
+ * WCM JSP Tags and Function.
  */
 @aQute.bnd.annotation.Version("1.0.0")
-package com.adobe.acs.commons.wcm;
+@tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/wcmmode", descriptorFile = "wcmmode.tld")
+package com.adobe.acs.commons.wcm.tags.wcmmode;

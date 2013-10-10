@@ -25,21 +25,33 @@ import com.day.cq.jcrclustersupport.ClusterAware;
  * Abstact base class for scheduled job to be run only on the cluster master.
  */
 public abstract class RunnableOnMaster implements ClusterAware, Runnable {
-    
+
     private boolean isMaster;
-    
+
+    /**
+     * Run the scheduled job.
+     */
     protected abstract void runOnMaster();
-    
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void bindRepository(String repositoryId, String clusterId, boolean isMaster) {
-        this.isMaster = isMaster;
+    public final void bindRepository(String repositoryId, String clusterId, boolean master) {
+        this.isMaster = master;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void unbindRepository() {
+    public final void unbindRepository() {
         isMaster = false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void run() {
         if (isMaster) {

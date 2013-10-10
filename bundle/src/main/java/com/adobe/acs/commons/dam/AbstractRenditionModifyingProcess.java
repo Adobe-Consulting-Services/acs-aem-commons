@@ -66,8 +66,7 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
     /**
      * Logger instance for this class.
      */
-    @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
-    protected final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(AbstractRenditionModifyingProcess.class);
 
     @Override
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaData)

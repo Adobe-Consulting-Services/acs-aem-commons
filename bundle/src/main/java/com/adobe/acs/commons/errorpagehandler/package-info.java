@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Miscellaneous WCM Utilities.
+ * Dynamic Error Page Handler.
  */
 @aQute.bnd.annotation.Version("1.0.0")
-package com.adobe.acs.commons.wcm;
+package com.adobe.acs.commons.errorpagehandler;

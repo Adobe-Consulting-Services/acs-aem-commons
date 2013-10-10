@@ -1,41 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:Dialog"
     activeTab="0"
     title="Designer - ClientLibs Manager"
     xtype="tabpanel">
-
     <items jcr:primaryType="cq:WidgetCollection">
         <tab1
             jcr:primaryType="cq:Widget"
             title="ClientLibs"
             xtype="panel">
-
             <items jcr:primaryType="cq:WidgetCollection">
-
                 <head-libs
-                        jcr:primaryType="cq:Widget"
-                        collapsed="{Boolean}false"
-                        collapsible="{Boolean}false"
-                        title="Head ClientLibs"
-                        xtype="dialogfieldset">
-
+                    jcr:primaryType="cq:Widget"
+                    collapsed="{Boolean}false"
+                    collapsible="{Boolean}false"
+                    title="Head ClientLibs"
+                    xtype="dialogfieldset">
                     <items jcr:primaryType="cq:WidgetCollection">
                         <css
                             jcr:primaryType="cq:Widget"
-                            fieldLabel="CSS"
                             fieldDescription="Click the '+' to add a new CSS ClientLib"
+                            fieldLabel="CSS"
                             name="./head/css"
                             xtype="multifield">
                             <fieldConfig
                                 jcr:primaryType="cq:Widget"
                                 xtype="textfield"/>
                         </css>
-
                         <js
                             jcr:primaryType="cq:Widget"
-                            fieldLabel="JavaScript"
                             fieldDescription="Click the '+' to add a new JavaScript ClientLib"
+                            fieldLabel="JavaScript"
                             name="./head/js"
                             xtype="multifield">
                             <fieldConfig
@@ -44,28 +39,26 @@
                         </js>
                     </items>
                 </head-libs>
-
                 <body-libs
                     jcr:primaryType="cq:Widget"
                     collapsed="{Boolean}false"
                     collapsible="{Boolean}false"
                     title="Body ClientLibs"
                     xtype="dialogfieldset">
-
                     <items jcr:primaryType="cq:WidgetCollection">
                         <js
-                                jcr:primaryType="cq:Widget"
-                                fieldLabel="JavaScript"
-                                fieldDescription="Click the '+' to add a new JavaScript ClientLib"
-                                name="./body/js"
-                                xtype="multifield">
+                            jcr:primaryType="cq:Widget"
+                            fieldDescription="Click the '+' to add a new JavaScript ClientLib"
+                            fieldLabel="JavaScript"
+                            name="./body/js"
+                            xtype="multifield">
                             <fieldConfig
-                                    jcr:primaryType="cq:Widget"
-                                    xtype="textfield"/>
+                                jcr:primaryType="cq:Widget"
+                                xtype="textfield"/>
                         </js>
                     </items>
                 </body-libs>
             </items>
         </tab1>
-     </items>
+    </items>
 </jcr:root>

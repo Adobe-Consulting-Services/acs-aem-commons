@@ -38,7 +38,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +48,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component(label = "ACS AEM Commons - Abstract POST Form Helper", description = "Abstract Form Helper. Do not use directly; instead use the PostRedirectGetFormHelper or ForwardAsGetFormHelper.", enabled = true, metatype = false, immediate = false)
-@Properties({ @Property(label = "Vendor", name = Constants.SERVICE_VENDOR, value = "ACS", propertyPrivate = true) })
 @Service(value = PostFormHelper.class)
 public class PostFormHelperImpl implements PostFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostFormHelperImpl.class);

@@ -26,7 +26,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +44,6 @@ import java.util.Set;
         metatype = true,
         immediate = false)
 @Properties({
-        @Property(
-                label = "Vendor",
-                name = Constants.SERVICE_VENDOR,
-                value = "ACS AEM Commons",
-                propertyPrivate = true
-        ),
         @Property(
                 label = "Source Resource Types",
                 description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",

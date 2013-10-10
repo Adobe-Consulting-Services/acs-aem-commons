@@ -17,8 +17,26 @@
  * limitations under the License.
  * #L%
  */
-/**
- * Miscellaneous WCM Utilities.
- */
-@aQute.bnd.annotation.Version("1.0.0")
-package com.adobe.acs.commons.wcm;
+package com.adobe.acs.commons.wcm.tags.wcmmode;
+
+import org.mockito.InjectMocks;
+
+import com.day.cq.wcm.api.WCMMode;
+
+public class EditModeTest extends AbstractModeTest {
+
+    @InjectMocks
+    private EditMode tag = new EditMode();
+
+    @Override
+    AbstractMode getTag() {
+        return tag;
+    }
+
+    @Override
+    WCMMode getCorrectMode() {
+        return WCMMode.EDIT;
+    }
+    
+
+}
