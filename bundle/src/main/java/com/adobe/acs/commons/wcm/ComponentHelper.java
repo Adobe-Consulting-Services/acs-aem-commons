@@ -24,60 +24,60 @@ import org.apache.sling.api.SlingHttpServletResponse;
 
 public interface ComponentHelper {
     /**
-     * Checks if Page equals in WCM Mode DESIGN
+     * Checks if Page equals in WCM Mode DESIGN.
      *
-     * @return if current request equals in Edit mode.
+     * @return true if current request equals in Edit mode.
      */
-    public boolean isDesignMode(SlingHttpServletRequest request);
+    boolean isDesignMode(SlingHttpServletRequest request);
 
     /**
-     * Checks if Page equals in WCM Mode DISABLED
+     * Checks if Page equals in WCM Mode DISABLED.
      *
-     * @return if current request equals in Edit mode.
+     * @return true if current request equals in DISABLED mode.
      */
-    public boolean isDisabledMode(SlingHttpServletRequest request);
+    boolean isDisabledMode(SlingHttpServletRequest request);
 
     /**
-     * Checks if Page equals in WCM Mode EDIT
+     * Checks if Page equals in WCM Mode EDIT.
      *
-     * @return
+     * @return true if current request equals in EDIT mode.
      */
-    public boolean isEditMode(SlingHttpServletRequest request);
+    boolean isEditMode(SlingHttpServletRequest request);
 
     /**
-     * Checks if Page equals in WCM Mode PREVIEW
+     * Checks if Page equals in WCM Mode PREVIEW.
      *
-     * @return if current request equals in Edit mode.
+     * @return true if current request equals in PREVIEW mode.
      */
-    public boolean isPreviewMode(SlingHttpServletRequest request);
+    boolean isPreviewMode(SlingHttpServletRequest request);
 
     /**
-     * Checks if Page equals in WCM Mode READ_ONLY
+     * Checks if Page equals in WCM Mode READ_ONLY.
      *
-     * @return if current request equals in Edit mode.
+     * @return true if current request equals in READ_ONLY mode.
      */
-    public boolean isReadOnlyMode(SlingHttpServletRequest request);
+    boolean isReadOnlyMode(SlingHttpServletRequest request);
 
     /**
      * Checks if the mode equals in an "Authoring" mode; Edit or Design.
      *
-     * @param request
-     * @return
+     * @param request the current request
+     * @return true if the mode is either EDIT or DESIGN
      */
-    public boolean isAuthoringMode(SlingHttpServletRequest request);
+    boolean isAuthoringMode(SlingHttpServletRequest request);
 
     /**
      * Prints the HTML representation of the Component's edit block to the Response.
      * If EditType DropTargets equals specified, Block will created by inspecting the
      * Drop Targets.
      *
-     * @param request
-     * @param response
-     * @param editType
+     * @param request the request
+     * @param response the response
+     * @param editType the edit type
      * @param isConfigured will display edit block if evaluates to FALSE
-     * @return true equals editblock has been printed
+     * @return true if editblock has been printed
      */
-    public boolean printEditBlock(SlingHttpServletRequest request,
+    boolean printEditBlock(SlingHttpServletRequest request,
                                          SlingHttpServletResponse response,
                                          ComponentEditType.Type editType,
                                          boolean... isConfigured);
@@ -92,13 +92,13 @@ public interface ComponentHelper {
      * return; // Stops execution of the JSP; leaving only the Edit Block rendered in Authoring Mode or nothing in non-Authoring Modes
      * } %>
      *      *
-     * @param request
-     * @param response
-     * @param editType
-     * @param isConfigured
-     * @return true is
+     * @param request the request
+     * @param response the response
+     * @param editType the edit type
+     * @param isConfigured will display edit block if evaluates to FALSE
+     * @return true if editblock has been printed
      */
-    public boolean printEditBlockOrNothing(SlingHttpServletRequest request,
+    boolean printEditBlockOrNothing(SlingHttpServletRequest request,
                                                   SlingHttpServletResponse response,
                                                   ComponentEditType.Type editType,
                                                   boolean... isConfigured);
@@ -117,7 +117,7 @@ public interface ComponentHelper {
      * @param isConfigured will display edit block if evaluates to false
      * @return
      */
-    public boolean printDDEditBlock(SlingHttpServletRequest request,
+    boolean printDDEditBlock(SlingHttpServletRequest request,
                                            SlingHttpServletResponse response,
                                            String name,
                                            boolean... isConfigured);
@@ -135,7 +135,7 @@ public interface ComponentHelper {
      * @param isConfigured will display edit block if evaluates to false
      * @return
      */
-    public boolean printDDEditBlock(SlingHttpServletRequest request,
+    boolean printDDEditBlock(SlingHttpServletRequest request,
                                            SlingHttpServletResponse response,
                                            String name,
                                            ComponentEditType.Type editType,
@@ -151,7 +151,7 @@ public interface ComponentHelper {
      * @param isConfigured will display edit block if evaluates to false
      * @return
      */
-    public String getEditBlock(SlingHttpServletRequest request,
+    String getEditBlock(SlingHttpServletRequest request,
                                       ComponentEditType.Type editType,
                                       boolean... isConfigured);
 
@@ -165,7 +165,7 @@ public interface ComponentHelper {
      * @param isConfigured will display edit block if evaluates to false
      * @return
      */
-    public String getDDEditBlock(SlingHttpServletRequest request, String name, boolean... isConfigured);
+    String getDDEditBlock(SlingHttpServletRequest request, String name, boolean... isConfigured);
 
     /**
      * Returns the HTML for creating DropTarget Edit Icon(s) for a specific
@@ -181,7 +181,7 @@ public interface ComponentHelper {
      * @param isConfigured will display edit block if evaluates to false
      * @return
      */
-    public String getDDEditBlock(SlingHttpServletRequest request, String name,
+    String getDDEditBlock(SlingHttpServletRequest request, String name,
                                         ComponentEditType.Type editType, boolean... isConfigured);
     /**
      * Get the edit icon HTML img tag (&gt;img ...&lt;) for the specified
@@ -190,5 +190,5 @@ public interface ComponentHelper {
      * @param editType
      * @return
      */
-    public String getEditIconImgTag(ComponentEditType.Type editType);
+    String getEditIconImgTag(ComponentEditType.Type editType);
 }

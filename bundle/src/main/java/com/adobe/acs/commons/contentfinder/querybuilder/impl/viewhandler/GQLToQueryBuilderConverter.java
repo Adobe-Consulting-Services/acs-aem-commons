@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class GQLToQueryBuilderConverter {
+public final class GQLToQueryBuilderConverter {
     private static final Logger log = LoggerFactory.getLogger(GQLToQueryBuilderConverter.class);
 
     public static final String DELIMITER = ContentFinderConstants.DELIMITER;

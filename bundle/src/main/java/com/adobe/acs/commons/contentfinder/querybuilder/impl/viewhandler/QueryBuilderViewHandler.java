@@ -55,7 +55,7 @@ import java.util.Set;
         )
 })
 @Service
-public class QueryBuilderViewHandler extends ViewHandler {
+public final class QueryBuilderViewHandler extends ViewHandler {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
 
     @Override

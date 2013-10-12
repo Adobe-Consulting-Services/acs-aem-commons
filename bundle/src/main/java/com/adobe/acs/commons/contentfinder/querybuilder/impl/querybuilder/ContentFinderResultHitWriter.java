@@ -37,16 +37,8 @@ import java.util.Map;
         immediate = false,
         metatype = false
 )
-public class ContentFinderResultHitWriter implements ResultHitWriter {
-    /**
-     * Result hit writer integration
-     *
-     * @param hit
-     * @param jsonWriter
-     * @param query
-     * @throws javax.jcr.RepositoryException
-     * @throws org.apache.sling.commons.json.JSONException
-     */
+public final class ContentFinderResultHitWriter implements ResultHitWriter {
+
     @Override
     public void write(Hit hit, JSONWriter jsonWriter, Query query) throws RepositoryException, JSONException {
         Map<String, Object> map = ContentFinderHitBuilder.buildGenericResult(hit);

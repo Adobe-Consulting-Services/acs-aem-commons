@@ -37,10 +37,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ContentFinderHitBuilder {
+    private ContentFinderHitBuilder() {}
+    
+    private static final int ELLIPSE_LENGTH = 3;
+    
+    private static final int MAX_EXCERPT_LENGTH = 32;
+    
     private static final String DAM_THUMBNAIL = "cq5dam.thumbnail.48.48.png";
 
     /**
-     * Builds the result object that will representing a CF view record for the provided hit
+     * Builds the result object that will representing a CF view record for the provided hit.
      *
      * This method will generate the result object data points based on if the hit is:
      * 1) a Page
@@ -76,7 +82,7 @@ public class ContentFinderHitBuilder {
     }
 
     /**
-     * Derives and adds Page related information to the map representing the hit
+     * Derives and adds Page related information to the map representing the hit.
      *
      * @param hit
      * @param map
@@ -103,8 +109,8 @@ public class ContentFinderHitBuilder {
         String excerpt = hit.getExcerpt();
         if(StringUtils.isBlank(hit.getExcerpt())) {
             excerpt = StringUtils.stripToEmpty(page.getDescription());
-            if(excerpt.length() > 32) {
-                excerpt = StringUtils.substring(excerpt, 0, 29) + "...";
+            if(excerpt.length() > MAX_EXCERPT_LENGTH) {
+                excerpt = StringUtils.substring(excerpt, 0, (MAX_EXCERPT_LENGTH - ELLIPSE_LENGTH)) + "...";
             }
         }
 
@@ -118,7 +124,7 @@ public class ContentFinderHitBuilder {
     }
 
     /**
-     * Derives and adds Asset related information to the map representing the hit
+     * Derives and adds Asset related information to the map representing the hit.
      *
      * @param hit
      * @param map
@@ -139,8 +145,8 @@ public class ContentFinderHitBuilder {
         String excerpt = hit.getExcerpt();
         if(StringUtils.isBlank(hit.getExcerpt())) {
             excerpt = StringUtils.stripToEmpty(asset.getMetadataValue(DamConstants.DC_DESCRIPTION));
-            if(excerpt.length() > 32) {
-                excerpt = StringUtils.substring(excerpt, 0, 29) + "...";
+            if(excerpt.length() > MAX_EXCERPT_LENGTH) {
+                excerpt = StringUtils.substring(excerpt, 0, (MAX_EXCERPT_LENGTH - ELLIPSE_LENGTH)) + "...";
             }
         }
 
@@ -157,7 +163,7 @@ public class ContentFinderHitBuilder {
 
 
     /**
-     * Derives and adds Other (non-Page, non-Asset) related information to the map representing the hit
+     * Derives and adds Other (non-Page, non-Asset) related information to the map representing the hit.
      *
      * @param hit
      * @param map
@@ -196,7 +202,7 @@ public class ContentFinderHitBuilder {
     }
 
     /**
-     * Get the last modified date for a Page
+     * Get the last modified date for a Page.
      *
      * @param page
      * @return
@@ -216,7 +222,7 @@ public class ContentFinderHitBuilder {
     }
 
     /**
-     * Get the last modified date for a generic resource
+     * Get the last modified date for a generic resource.
      *
      * @param resource
      * @return
@@ -238,7 +244,7 @@ public class ContentFinderHitBuilder {
     }
 
     /**
-     * Get the size of the Asset (the original rendition)
+     * Get the size of the Asset (the original rendition).
      *
      * @param asset
      * @return
@@ -253,7 +259,7 @@ public class ContentFinderHitBuilder {
 
 
     /**
-     * Get the timestamp for the last change to the thumbnail
+     * Get the timestamp for the last change to the thumbnail.
      *
      * @param asset
      * @return
