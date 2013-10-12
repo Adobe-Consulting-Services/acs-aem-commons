@@ -282,6 +282,12 @@
             <version>2.5.3</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.rewriter</artifactId>
+            <version>1.0.4</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

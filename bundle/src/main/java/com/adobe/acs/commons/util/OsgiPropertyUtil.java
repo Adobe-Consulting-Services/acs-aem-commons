@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.AbstractMap;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class OsgiPropertyUtil {
@@ -64,7 +64,7 @@ public class OsgiPropertyUtil {
      * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => "meow"
      */
     public static Map<String, String> toMap(final String[] values, final String separator) {
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new LinkedHashMap<String, String>();
 
         if (values == null || values.length < 1) {
             return map;
@@ -78,5 +78,22 @@ public class OsgiPropertyUtil {
         }
 
         return map;
+    }
+
+    /**
+     * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;map-separator&lt;&gt;value&gt;list-separator&lt;&gt;value&lt;&lt;
+     *
+     * @param values    Array of key/value pairs in the format => [ a<map-separator>b, x<map-separator>y<list-separator>z ] ... ex. ["dog:woof", "cat:meow,purr"]
+     * @param mapSeparator separator between the key/values in the amp
+     * @param listSeparator separator between the values in each list
+     * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => "meow"
+     */
+    public static Map<String, String[]> toMap(final String[] values, final String mapSeparator, final String listSeparator) {
+        final Map<String, String> map = toMap(values, mapSeparator);
+        final Map<String, String[]> result = new LinkedHashMap<String, String[]>(map.size());
+        for (final Map.Entry<String, String> entry : map.entrySet()) {
+            result.put(entry.getKey(), StringUtils.split(entry.getValue(), listSeparator));
+        }
+        return result;
     }
 }
