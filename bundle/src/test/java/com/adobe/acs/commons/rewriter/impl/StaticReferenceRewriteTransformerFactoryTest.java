@@ -1,0 +1,193 @@
+package com.adobe.acs.commons.rewriter.impl;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import org.apache.sling.commons.testing.osgi.MockBundle;
+import org.apache.sling.commons.testing.osgi.MockComponentContext;
+import org.apache.sling.rewriter.Transformer;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.helpers.AttributesImpl;
+
+@RunWith(MockitoJUnitRunner.class)
+public class StaticReferenceRewriteTransformerFactoryTest {
+
+    @Mock
+    private ContentHandler handler;
+
+    @Captor
+    private ArgumentCaptor<Attributes> attributesCaptor;
+
+    @Test
+    public void test_without_config_is_noop() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/test.css");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("/etc/clientlib/test.css", out.getValue(0));
+    }
+
+    @Test
+    public void test_with_prefix_and_single_host() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", "static.host.com");
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/test.css");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("//static.host.com/etc/clientlib/test.css", out.getValue(0));
+    }
+
+    @Test
+    public void test_with_nostatic_class() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", "static.host.com");
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/test.css");
+        in.addAttribute(null, "class", null, "CDATA", "something nostatic");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("/etc/clientlib/test.css", out.getValue(0));
+    }
+
+
+    @Test
+    public void test_with_non_matching_prefix_and_single_host() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", "static.host.com");
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "href", null, "CDATA", "/content/clientlib/test.css");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("/content/clientlib/test.css", out.getValue(0));
+    }
+
+    @Test
+    public void test_with_prefix_and_multiple_hosts() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", "static{}.host.com");
+        ctx.setProperty("host.count", 2);
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/testABC.css");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("//static2.host.com/etc/clientlib/testABC.css", out.getValue(0));
+    }
+
+    @Test
+    public void test_with_nonrewritten_attribute() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", "static{}.host.com");
+        ctx.setProperty("host.count", 2);
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "src", null, "CDATA", "/etc/clientlib/testABC.css");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("/etc/clientlib/testABC.css", out.getValue(0));
+    }
+
+    @Test
+    public void test_with_nonrewritten_element() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", "static{}.host.com");
+        ctx.setProperty("host.count", 2);
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "src", null, "CDATA", "/etc/clientlib/testABC.css");
+        transformer.startElement(null, "iframe", null, in);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("iframe"), isNull(String.class),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("/etc/clientlib/testABC.css", out.getValue(0));
+    }
+
+}
