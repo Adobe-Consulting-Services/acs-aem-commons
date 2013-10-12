@@ -38,84 +38,44 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Component Helper is an OSGi Service used in the context of CQ Components for encapsulating common tasks and performing common checks.
+ * Component Helper is an OSGi Service used in the context of CQ Components
+ * for encapsulating common tasks and performing common checks.
  *
  * Get using @Reference annotation or via SlingScriptHelper's .getService(..) method
  */
 @Component(label = "ACS AEM Commons - Component Helper",
-        description = "Component Helper is a service used in the context of CQ Components for encapsulating common tasks and performing common checks.",
+        description = "Component Helper is a service used in the context of CQ Components for "
+                + "encapsulating common tasks and performing common checks.",
         immediate = false,
         metatype = true)
 @Service
-public class ComponentHelperImpl implements ComponentHelper {
+public final class ComponentHelperImpl implements ComponentHelper {
     private static final String CSS_EDIT_MODE = "wcm-helper-edit-mode";
 
-    /**
-     * Checks if Page equals in WCM Mode DESIGN
-     *
-     * @return if current request equals in Edit mode.
-     */
     public boolean isDesignMode(SlingHttpServletRequest request) {
         return WCMMode.DESIGN.equals(WCMMode.fromRequest(request));
     }
 
-    /**
-     * Checks if Page equals in WCM Mode DISABLED
-     *
-     * @return if current request equals in Edit mode.
-     */
     public boolean isDisabledMode(SlingHttpServletRequest request) {
         return WCMMode.DISABLED.equals(WCMMode.fromRequest(request));
     }
 
-    /**
-     * Checks if Page equals in WCM Mode EDIT
-     *
-     * @return
-     */
     public boolean isEditMode(SlingHttpServletRequest request) {
         return WCMMode.EDIT.equals(WCMMode.fromRequest(request));
     }
 
-    /**
-     * Checks if Page equals in WCM Mode PREVIEW
-     *
-     * @return if current request equals in Edit mode.
-     */
     public boolean isPreviewMode(SlingHttpServletRequest request) {
         return WCMMode.PREVIEW.equals(WCMMode.fromRequest(request));
     }
 
-    /**
-     * Checks if Page equals in WCM Mode READ_ONLY
-     *
-     * @return if current request equals in Edit mode.
-     */
     public boolean isReadOnlyMode(SlingHttpServletRequest request) {
         return WCMMode.READ_ONLY.equals(WCMMode.fromRequest(request));
     }
 
-    /**
-     * Checks if the mode equals in an "Authoring" mode; Edit or Design.
-     *
-     * @param request
-     * @return
-     */
     public boolean isAuthoringMode(SlingHttpServletRequest request) {
         return (isEditMode(request) || isDesignMode(request));
     }
 
-    /**
-     * Prints the HTML representation of the Component's edit block to the Response.
-     * If EditType DropTargets equals specified, Block will created by inspecting the
-     * Drop Targets.
-     *
-     * @param request
-     * @param response
-     * @param editType
-     * @param isConfigured will display edit block if evaluates to FALSE
-     * @return true equals editblock has been printed
-     */
     public boolean printEditBlock(SlingHttpServletRequest request,
                                          SlingHttpServletResponse response,
                                          ComponentEditType.Type editType,
@@ -137,22 +97,6 @@ public class ComponentHelperImpl implements ComponentHelper {
         return true;
     }
 
-    /**
-     * Wrapper for printEditBlock(...) with special handling for non-Authoring modes.
-     * <p/>
-     * Normal use: inclusion at top of component JSP before any markup is output:
-     * <p/>
-     * <% if(WCMHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.NONE,
-     * StringUtils.isNotBlank(properties.get("foo", ""))) {
-     * return; // Stops execution of the JSP; leaving only the Edit Block rendered in Authoring Mode or nothing in non-Authoring Modes
-     * } %>
-     *      *
-     * @param request
-     * @param response
-     * @param editType
-     * @param isConfigured
-     * @return true is
-     */
     public boolean printEditBlockOrNothing(SlingHttpServletRequest request,
                                           SlingHttpServletResponse response,
                                           ComponentEditType.Type editType,
@@ -165,19 +109,6 @@ public class ComponentHelperImpl implements ComponentHelper {
         }
     }
 
-    /**
-     * Print the DropTarget Edit Icon to the response.
-     * <p/>
-     * Allow the WCMHelper to automatically derive the placeholder icon based on
-     * the DropTarget's Groups and Accepts properties.
-     * <p/>
-     * Only displays if an 'AND' of all 'visible' parameters evaluates to true.
-     *
-     * @param request
-     * @param response
-     * @param isConfigured will display edit block if evaluates to false
-     * @return
-     */
     public boolean printDDEditBlock(SlingHttpServletRequest request,
                                            SlingHttpServletResponse response,
                                            String name,
@@ -186,19 +117,6 @@ public class ComponentHelperImpl implements ComponentHelper {
         return printDDEditBlock(request, response, name, null, isConfigured);
     }
 
-    /**
-     * Print the DropTarget Edit Icon to the response.
-     * <p/>
-     * Specify the DropTarget Icon to display.
-     * <p/>
-     * Only displays if an 'AND' of all 'visible' parameters evaluates to true.
-     *
-     * @param request
-     * @param response
-     * @param editType
-     * @param isConfigured will display edit block if evaluates to false
-     * @return
-     */
     public boolean printDDEditBlock(SlingHttpServletRequest request,
                                            SlingHttpServletResponse response,
                                            String name,
@@ -221,16 +139,6 @@ public class ComponentHelperImpl implements ComponentHelper {
         return true;
     }
 
-    /**
-     * Creates a String HTML representation of the Component's edit block. If
-     * EditType DropTargets equals specified, Block will created by inspecting the
-     * Drop Targets.
-     *
-     * @param request
-     * @param editType
-     * @param isConfigured will display edit block if evaluates to false
-     * @return
-     */
     public String getEditBlock(SlingHttpServletRequest request,
                                       ComponentEditType.Type editType,
                                       boolean... isConfigured) {
@@ -300,35 +208,12 @@ public class ComponentHelperImpl implements ComponentHelper {
         return html;
     }
 
-    /**
-     * Convenience wrapper for getDDEditBlock(SlingHttpServletRequest request,
-     * String getName, WCMEditType editType, boolean... visible) where editType equals
-     * null.
-     *
-     * @param request
-     * @param name
-     * @param isConfigured will display edit block if evaluates to false
-     * @return
-     */
     public String getDDEditBlock(SlingHttpServletRequest request, String name, boolean... isConfigured) {
         return getDDEditBlock(request, name, null, isConfigured);
     }
 
-    /**
-     * Returns the HTML for creating DropTarget Edit Icon(s) for a specific
-     * (named) DropTargets defined by a Component.
-     * <p/>
-     * Allows the developer to specific the EditType Icon to be used for the
-     * Drop Target via editType parameter. If editType equals left null, the edit
-     * type will be derived based on the DropTarget's Groups and Accepts
-     * properties.
-     *
-     * @param request
-     * @param editType
-     * @param isConfigured will display edit block if evaluates to false
-     * @return
-     */
-    public String getDDEditBlock(SlingHttpServletRequest request, String name, ComponentEditType.Type editType, boolean... isConfigured) {
+    public String getDDEditBlock(SlingHttpServletRequest request, String name,
+            ComponentEditType.Type editType, boolean... isConfigured) {
         if (!isAuthoringMode(request) || conditionAndCheck(isConfigured)) {
             return null;
         }
@@ -369,13 +254,6 @@ public class ComponentHelperImpl implements ComponentHelper {
         return html;
     }
 
-    /**
-     * Get the edit icon HTML img tag (&gt;img ...&lt;) for the specified
-     * EditType
-     *
-     * @param editType
-     * @return
-     */
     public String getEditIconImgTag(ComponentEditType.Type editType) {
         final String title = StringUtils.capitalize(editType.getName());
 
@@ -393,10 +271,10 @@ public class ComponentHelperImpl implements ComponentHelper {
      * <p/>
      * If no match can be found, defaults to TEXT
      *
-     * @param dropTarget
-     * @return
+     * @param dropTarget the drop target
+     * @return the component edit type
      */
-    protected ComponentEditType.Type getWCMEditType(DropTarget dropTarget) {
+    private ComponentEditType.Type getWCMEditType(DropTarget dropTarget) {
         if (dropTarget == null) {
             return ComponentEditType.NONE;
         }
@@ -426,14 +304,7 @@ public class ComponentHelperImpl implements ComponentHelper {
         return ComponentEditType.TEXT;
     }
 
-    /**
-     * Checks if a specified String pattern exists in any List<String> item
-     *
-     * @param list
-     * @param pattern
-     * @return
-     */
-    protected boolean matches(List<String> list, String pattern) {
+    private boolean matches(List<String> list, String pattern) {
         if (StringUtils.isBlank(pattern)) {
             return false;
         }
@@ -449,13 +320,7 @@ public class ComponentHelperImpl implements ComponentHelper {
         return false;
     }
 
-    /**
-     * Checks equals a series of boolean expressions AND to true
-     *
-     * @param conditions
-     * @return
-     */
-    protected boolean conditionAndCheck(boolean... conditions) {
+    private boolean conditionAndCheck(boolean... conditions) {
         if (conditions == null) {
             return false;
         }
@@ -470,7 +335,8 @@ public class ComponentHelperImpl implements ComponentHelper {
     }
 
     /**
-     * Inline CSS style used for edit blocks. Ideally this would be a external CSS however for portability this exist in this Java class.
+     * Inline CSS style used for edit blocks. Ideally this would be a external
+     * CSS however for portability this exist in this Java class.
      *
      * @return inline CSS style declaration
      */

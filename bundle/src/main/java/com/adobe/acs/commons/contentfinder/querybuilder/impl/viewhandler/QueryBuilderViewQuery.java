@@ -33,7 +33,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class QueryBuilderViewQuery implements ViewQuery {
+public final class QueryBuilderViewQuery implements ViewQuery {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewQuery.class);
 
     private final Query query;
