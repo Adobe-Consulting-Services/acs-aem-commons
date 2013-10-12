@@ -18,7 +18,7 @@ There's a good guide to performing pull requests at [https://help.github.com/art
 
 ### Before Contributing Code
 
-* Run Maven build with -Panalysis to run the static analysis checks.
+* Run Maven build by running `mvn -Panalysis clean install` to run the static analysis checks.
 * Ensure license is applied correctly by running `mvn license:update-file-header`
 * More stuff TBD
 
