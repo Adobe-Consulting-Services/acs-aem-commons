@@ -1,3 +1,4 @@
+<%@ page import="com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher" %>
 <%--
   #%L
   ACS AEM Commons Package
@@ -18,7 +19,16 @@
   #L%
   --%>
 <%@include file="/libs/foundation/global.jsp"%><%
-%><%@page session="false" contentType="text/html" pageEncoding="utf-8" %><%
+%><%@page session="false" contentType="text/html" pageEncoding="utf-8"
+        import="com.day.cq.replication.Agent,
+        com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher"%><%
+
+    /* Services */
+    final DispatcherFlusher dispatcherFlusher = sling.getService(DispatcherFlusher.class);
+
+    /* Agents */
+    final Agent[] flushAgents = dispatcherFlusher.getFlushAgents();
+    boolean hasAgents = flushAgents.length > 0;
 
     /* Flush Paths */
     final String[] paths = properties.get("paths", new String[]{});
@@ -26,7 +36,7 @@
 %>
 
 <div class="dispatcher-flush-config">
-
+    <h3>Paths to Flush</h3>
     <ul>
         <% if(!hasPaths) { %><li class="not-set">Dispatcher flush paths not set</li><% } %>
         <% for(final String path : paths) { %>
@@ -35,10 +45,16 @@
     </ul>
 
     <% if(hasPaths) { %>
-        <hr/>
-
-        <form action="<%= resource.getPath() %>.flush.html" method="post">
-            <input type="submit" value="Flush Paths"/>
-        </form>
+    <form action="<%= resource.getPath() %>.flush.html" method="post">
+        <input type="submit" value="Flush Paths"/>
+    </form>
     <% } %>
+
+    <h3>Active Flush Agents' Logs</h3>
+    <ul>
+        <% if(!hasAgents) { %><li class="not-set">No active Dispatcher Flush agents</li><% } %>
+        <% for(final Agent agent : flushAgents) { %>
+        <li><a href="<%= resourceResolver.map(agent.getConfiguration().getConfigPath()) %>.log.html" target="_target"><%= agent.getConfiguration().getName() %></a></li>
+        <% } %>
+    </ul>
 </div>

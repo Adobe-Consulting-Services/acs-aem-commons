@@ -9,6 +9,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.Session;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component(
         label = "ACS AEM Commons - Dispatcher Flusher",
@@ -20,6 +22,9 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
 
     @Reference
     private Replicator replicator;
+
+    @Reference
+    private AgentManager agentManager;
 
     @Override
     public void flush(final ResourceResolver resourceResolver, final String... paths) throws ReplicationException {
@@ -34,6 +39,18 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
             replicator.replicate(resourceResolver.adaptTo(Session.class),
                     ReplicationActionType.ACTIVATE, path, opts);
         }
+    }
+
+    public Agent[] getFlushAgents() {
+        final List<Agent> flushAgents = new ArrayList<Agent>();
+        final DispatcherFlushAgentFilter filter = new DispatcherFlushAgentFilter();
+
+        for(final Agent agent : agentManager.getAgents().values()) {
+            if(filter.isIncluded(agent)) {
+                flushAgents.add(agent);
+            }
+        }
+        return flushAgents.toArray(new Agent[flushAgents.size()]);
     }
 }
 
