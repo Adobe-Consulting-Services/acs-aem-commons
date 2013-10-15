@@ -133,13 +133,13 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         transformer.setContentHandler(handler);
 
         AttributesImpl in = new AttributesImpl();
-        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/testABC.css");
+        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/testA.css");
         transformer.startElement(null, "link", null, in);
 
         verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
-        assertEquals("//static2.host.com/etc/clientlib/testABC.css", out.getValue(0));
+        assertEquals("//static2.host.com/etc/clientlib/testA.css", out.getValue(0));
     }
 
     @Test

@@ -100,11 +100,11 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     private String getStaticHostNum(final String filePath) {
         String hostNumberString = "1";
         if (staticHostCount > 1) {
-            int fileHash = Math.abs(filePath.hashCode());
-            String baseValue = Integer.toString(fileHash, staticHostCount);
-            if (baseValue.length() >= 2) {
+            final int fileHash = ((filePath.hashCode() & Integer.MAX_VALUE) % staticHostCount) + 1;
+            hostNumberString = Integer.toString(fileHash);
+            if (hostNumberString.length() >= 2) {
                 // get the 2nd digit as the 1st digit will not contain "0"
-                Character c = baseValue.charAt(1);
+                Character c = hostNumberString.charAt(1);
                 hostNumberString = c.toString();
                 // If there are more than 10 hosts, convert it back to base10
                 // so we do not have alpha
