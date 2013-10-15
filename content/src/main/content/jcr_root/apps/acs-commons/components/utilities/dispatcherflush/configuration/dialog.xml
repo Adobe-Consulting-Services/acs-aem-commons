@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    activeTab="0"
+    title="Dispatcher Flush Configuration"
+    xtype="tabpanel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <tab1
+            jcr:primaryType="cq:Widget"
+            title="Dispatcher Flush Configuration"
+            xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <configuration
+                    jcr:primaryType="cq:Widget"
+                    fieldDescription="Click the '+' to add a new paths to flush"
+                    fieldLabel="Paths to flush"
+                    name="./paths"
+                    xtype="multifield">
+                    <fieldConfig
+                        jcr:primaryType="cq:Widget"
+                        showTitlesInTree="{Boolean}false"
+                        rootPath="/"
+                        xtype="pathfield"/>
+                </configuration>
+            </items>
+        </tab1>
+    </items>
+</jcr:root>
