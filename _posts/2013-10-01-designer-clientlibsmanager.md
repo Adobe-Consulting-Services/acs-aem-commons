@@ -35,7 +35,7 @@ Create one ClientLib (/etc/clientlibs/us-brands) and use it across all US Sites 
 
 To enable the CQ Design Page overlay, the following sling:osgiConfig must be added to the project.
 
-    /apps/myapp/config.author/com.adobe.acs.util.impl.OverlayServletFactoryImpl-DesignerClientLibsManager.xml
+    /apps/myapp/config.author/com.adobe.acs.util.impl.DelegatingServletFactoryImpl-DesignerClientLibsManager.xml
 
 {% highlight xml %}
 <?xml version="1.0" encoding="UTF-8"?>
