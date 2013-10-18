@@ -86,6 +86,7 @@ public final class IncludeDesignLibrariesTag extends TagSupport {
         this.css = css;
     }
 
+    @TagAttribute(runtimeValueAllowed = true)
     public void setDesign(Design design) {
         this.design = design;
     }
