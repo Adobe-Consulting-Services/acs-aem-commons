@@ -10,7 +10,31 @@
             title="Dispatcher Flush Configuration"
             xtype="panel">
             <items jcr:primaryType="cq:WidgetCollection">
-                <configuration
+                <replicationactiontype
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Replication action type"
+                        fieldDescription="Replication action type used to issue Dispatcher Flush requests. This effects how cached files are effected (invalidate or delete)."
+                        defaultValue="ACTIVATE"
+                        value="ACTIVATE"
+                        name="./replicationActionType"
+                        type="select"
+                        xtype="selection">
+                    <options jcr:primaryType="cq:WidgetCollection">
+                        <activate
+                                jcr:primaryType="nt:unstructured"
+                                text="Activate"
+                                value="ACTIVATE"/>
+                        <deactivate
+                                jcr:primaryType="nt:unstructured"
+                                text="Deactivate"
+                                value="DEACTIVATE"/>
+                        <delete
+                                jcr:primaryType="nt:unstructured"
+                                text="Delete"
+                                value="DELETE"/>
+                    </options>
+                </replicationactiontype>
+                <paths
                     jcr:primaryType="cq:Widget"
                     fieldDescription="Click the '+' to add a new paths to flush"
                     fieldLabel="Paths to flush"
@@ -20,8 +44,9 @@
                         jcr:primaryType="cq:Widget"
                         showTitlesInTree="{Boolean}false"
                         rootPath="/"
+                        predicate="[hierarchy]"
                         xtype="pathfield"/>
-                </configuration>
+                </paths>
             </items>
         </tab1>
     </items>

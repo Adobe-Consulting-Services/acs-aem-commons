@@ -1,6 +1,5 @@
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
-import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushAgentFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.adobe.acs.commons.util.OsgiPropertyUtil;
 import com.day.cq.replication.*;
@@ -13,7 +12,9 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,37 +42,36 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
-    private static final String[] DEFAULT_MAPPED_PATHS = { "/content/dam:/content/mysite/.*", "/etc/designs:/content/mysite.*", "/etc/packages/.*:/" };
+    private static final String[] DEFAULT_FLUSH_RULES = { "/content/dam:/content/mysite/.*", "/etc/designs:/content/mysite.*", "/etc/packages/.*:/" };
     @Property(label = "Flush Rules",
             description = "Pattern to Path associations for flush rules. Format: <pattern-of-replicated-content>:<path-to-flush>",
             cardinality = Integer.MAX_VALUE,
             value = { "/content/dam/.*:/content/mysite/en", "/etc/designs/.*:/content/mysite/en", "/etc/packages/.*:/" })
-    private static final String PROP_MAPPED_PATHS = "prop.flush-rules";
-    private Map<Pattern, String> map = new HashMap<Pattern, String>();
+    private static final String PROP_FLUSH_RULES = "prop.flush-rules";
+    private Map<Pattern, String> flushRules = new HashMap<Pattern, String>();
 
     private static final String DEFAULT_REPLICATION_ACTION_TYPE_NAME = OPTION_INHERIT;
     @Property(label = "Replication Action Type",
             description = "Force a Replication Action Type to use when issuing the flush commands to the associated paths. If 'Inherit' is selected, the Replication Action Type of the observed Replication Action will be used.",
             options = {
-                @PropertyOption(name=OPTION_INHERIT, value="Inherit"),
-                @PropertyOption(name=OPTION_ACTIVATE, value="Activate"),
-                @PropertyOption(name=OPTION_DEACTIVATE, value="Deactivate"),
-                @PropertyOption(name=OPTION_DELETE, value="Delete")
+                @PropertyOption(name = OPTION_INHERIT, value = "Inherit"),
+                @PropertyOption(name = OPTION_ACTIVATE, value = "Activate"),
+                @PropertyOption(name = OPTION_DEACTIVATE, value = "Deactivate"),
+                @PropertyOption(name = OPTION_DELETE, value = "Delete")
             }
     )
     private static final String PROP_REPLICATION_ACTION_TYPE_NAME = "prop.replication-action-type";
 
     private ReplicationActionType replicationActionType = null;
+    private boolean enabled = true;
 
     @Override
     public void preprocess(final ReplicationAction replicationAction, final ReplicationOptions replicationOptions) throws ReplicationException {
-        final String path = replicationAction.getPath();
-        if(StringUtils.isBlank(path) ||
-                StringUtils.equals(DispatcherFlushAgentFilter.SERIALIZATION_TYPE, replicationAction.getConfig().getSerializationType())) {
-            // Do not trigger associated flushes based on Flush requests or empty paths. This prevents infinite flushing.
+        if(!this.accepts(replicationAction)) {
             return;
         }
 
+        final String path = replicationAction.getPath();
         final ReplicationActionType flushActionType = replicationActionType == null ? replicationAction.getType() : replicationActionType;
 
         ResourceResolver resourceResolver = null;
@@ -79,7 +79,7 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
         try {
             resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
-            for(final Map.Entry<Pattern, String> entry : map.entrySet()) {
+            for(final Map.Entry<Pattern, String> entry : flushRules.entrySet()) {
                 final Pattern pattern = entry.getKey();
                 final Matcher m = pattern.matcher(path);
 
@@ -95,6 +95,83 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
                 resourceResolver.close();
             }
         }
+    }
+
+    /**
+     * Checks if this service should react to or ignore this replication action
+     *
+     * @param replicationAction The replication action that is initiating this flush request
+     * @return true is this service should attempt to flush associated resources for this replication request
+     */
+    private boolean accepts(final ReplicationAction replicationAction) {
+        final String path = replicationAction.getPath();
+
+        if(!this.enabled) {
+            log.error("Ignored due to dangerous (cyclic) flush rule configuration.");
+            return false;
+        } else if(StringUtils.isBlank(path)) {
+            // Do nothing on blank paths
+            log.debug("Replication Action path is blank. Skipping this replication.");
+            return false;
+        } else if(replicationAction == null) {
+            log.debug("Replication Action is null. Skipping this replication.");
+            return false;
+        } else if(!ReplicationActionType.ACTIVATE.equals(replicationAction.getType()) &&
+                !ReplicationActionType.DEACTIVATE.equals(replicationAction.getType()) &&
+                !ReplicationActionType.DELETE.equals(replicationAction.getType())) {
+            // Ignoring non-modifying ReplicationActionTypes
+            return false;
+        }
+
+        return true;
+
+    }
+
+    /**
+     * Note: This detection is PER OSGi Configuration. This will NOT detect cycles between configurations.
+     *
+     * @return true is a cyclic rule path has been detected for this OSGi configuration
+     */
+    private boolean hasCyclicFlushRules() {
+        for(final Map.Entry<Pattern, String> entry : flushRules.entrySet()) {
+            List<Map.Entry<Pattern, String>> list = new ArrayList<Map.Entry<Pattern, String>>();
+
+            list.add(entry);
+            if(this.findCyclicFlushRules(entry, list)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Recursive "working" function that performs the cyclic detection.
+     *
+     * Note: This detection is PER OSGi Configuration. This will NOT detect cycles between configurations.
+     *
+     * @param parent the previous entry in the flush rule "stack"
+     * @param list the "stack" of previous flush rule entries
+     * @return true if a cyclic rule path has been detected in this OSGi configuration
+     */
+    private boolean findCyclicFlushRules(final Map.Entry<Pattern, String> parent, List<Map.Entry<Pattern, String>> list) {
+        for(final Map.Entry<Pattern, String> child : flushRules.entrySet()) {
+           final Pattern pattern = child.getKey();
+           final Matcher m = pattern.matcher(parent.getValue());
+
+            if(m.matches()) {
+                if(list.contains(child)) {
+                    log.error("Cyclic flush rules detected: {} ~> {}", parent.getValue(), child.getKey().toString());
+                    return true;
+                }  else {
+                    // Some other rule will flush based for a parent flush
+                    list.add(child);
+                    return this.findCyclicFlushRules(child, list);
+                }
+            }
+        }
+
+        return false;
     }
 
     @Activate
@@ -113,20 +190,25 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
 
         /* Mapped Paths */
 
-        this.map = new HashMap<Pattern, String>();
+        this.flushRules = new HashMap<Pattern, String>();
 
-        final Map<String, String> tmp = OsgiPropertyUtil.toMap(PropertiesUtil.toStringArray(properties.get(PROP_MAPPED_PATHS), DEFAULT_MAPPED_PATHS), ":");
+        final Map<String, String> tmp = OsgiPropertyUtil.toMap(PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES), DEFAULT_FLUSH_RULES), ":");
 
         for(final Map.Entry<String, String> entry : tmp.entrySet()) {
             final Pattern pattern = Pattern.compile(entry.getKey());
-            this.map.put(pattern, entry.getValue());
-            log.debug("Adding mapped flush path: {} => {}", pattern.pattern(), entry.getValue());
+            this.flushRules.put(pattern, entry.getValue());
+            log.debug("Adding flush rule: {} => {}", pattern.pattern(), entry.getValue());
+        }
+
+        if(this.hasCyclicFlushRules()) {
+            enabled = false;
+            log.error("Configuration defines cyclic flush rules. Disabling this configuration for safety!");
         }
     }
 
     @Deactivate
     protected void deactivate(final Map<String, String> properties) {
-        this.map = new HashMap<Pattern, String>();
+        this.flushRules = new HashMap<Pattern, String>();
         this.replicationActionType = null;
     }
 }

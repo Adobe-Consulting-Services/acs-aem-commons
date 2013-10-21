@@ -72,7 +72,7 @@
 
                 do {
                     final Agent agent = agents.get(PathInfoUtil.getSuffixSegment(slingRequest, index));
-                    final boolean status = StringUtils.equals("true", PathInfoUtil.getSuffixSegment(slingRequest, index));
+                    final boolean status = StringUtils.equals("true", PathInfoUtil.getSuffixSegment(slingRequest, index + 1));
 
                     if(agent == null) { break; }
                     if(!status || errors) { errors = true;}
