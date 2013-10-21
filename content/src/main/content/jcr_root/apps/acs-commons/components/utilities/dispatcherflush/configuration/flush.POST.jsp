@@ -19,17 +19,31 @@
   --%>
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8"
-          import="com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher"%><%
+          import="com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher,
+          com.day.cq.replication.Agent,
+          com.day.cq.replication.ReplicationResult,
+          com.day.cq.replication.ReplicationActionType,
+          java.util.Map"%><%
 
     /* Services */
     final DispatcherFlusher dispatcherFlusher = sling.getService(DispatcherFlusher.class);
 
     /* Properties */
     final String[] paths = properties.get("paths", new String[]{});
+    final ReplicationActionType replicationActionType = ReplicationActionType.valueOf(properties.get("replicationActionType", "ACTIVATE"));
+
+    String suffix = "";
 
     if(paths.length > 0) {
-        dispatcherFlusher.flush(resourceResolver, paths);
+        final Map<Agent, ReplicationResult> results = dispatcherFlusher.flush(resourceResolver, replicationActionType, true, paths);
+
+        for(final Map.Entry<Agent, ReplicationResult> entry : results.entrySet()) {
+            final Agent agent = entry.getKey();
+            final ReplicationResult result = entry.getValue();
+
+            suffix = "/" + agent.getId() + "/" + (result.isSuccess() && result.getCode() == 200);
+        }
     }
 
-    response.sendRedirect(currentPage.getPath() + ".html/success");
+    response.sendRedirect(currentPage.getPath() + ".html" + suffix);
 %>

@@ -20,16 +20,29 @@
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8"
           import="org.apache.commons.lang3.StringEscapeUtils,
+                org.apache.commons.lang.StringUtils,
+                java.util.Map,
     			com.adobe.acs.commons.util.TextUtil,
+    			com.adobe.acs.commons.util.PathInfoUtil,
+    			com.day.cq.replication.Agent,
+    			com.day.cq.replication.AgentManager,
     			com.day.cq.wcm.api.WCMMode"%><%
 
+    /* Services */
+    final AgentManager agentManager = sling.getService(AgentManager.class);
+
+
+    /* Properties and Data */
     final WCMMode mode = WCMMode.fromRequest(slingRequest);
+
+    final Map<String, Agent> agents = agentManager.getAgents();
+
     final String title = TextUtil.getFirstNonEmpty(
                     currentPage.getPageTitle(),
                     currentPage.getTitle(),
                     currentPage.getName());
 
-    final boolean success = "/success".equals(slingRequest.getRequestPathInfo().getSuffix());
+    final boolean result = StringUtils.isNotBlank((slingRequest.getRequestPathInfo().getSuffix()));
 
 %>
 <% WCMMode.EDIT.toRequest(slingRequest); %>
@@ -46,14 +59,39 @@
     <body class="dispatcher-flusher">
         <h1><%= StringEscapeUtils.escapeHtml4(title) %></h1>
 
-        <% if(success) { %>
-        <div class="success-message">
+        <% if(result) { %>
+        <div class="result-message">
             <p>
-                Your dispatcher flush requests have been issued.
+                Your dispatcher flush requests have been issued with the following results.
             </p>
+
+            <ul>
+                <%
+                boolean errors = false;
+                int index = 0;
+
+                do {
+                    final Agent agent = agents.get(PathInfoUtil.getSuffixSegment(slingRequest, index));
+                    final boolean status = StringUtils.equals("true", PathInfoUtil.getSuffixSegment(slingRequest, index));
+
+                    if(agent == null) { break; }
+                    if(!status || errors) { errors = true;}
+
+                    %><li><a href="<%= resourceResolver.map(agent.getConfiguration().getConfigPath()) %>.html" target="_blank"><%= agent.getConfiguration().getName() %></a>: <%= status ? "Success" : "Error" %></li><%
+
+                    index += 2;
+                } while(true);
+
+                if(index == 0) { %>No Active Dispatcher Flush agents could be found for this run mode.<% }
+                %>
+
+            </ul>
+
+            <% if(errors) { %>
             <p>
                 Please review your Dispatcher Flush Agent logs to ensure all replication requests were successfully processed.
             </p>
+            <% } %>
         </div>
         <% } %>
 

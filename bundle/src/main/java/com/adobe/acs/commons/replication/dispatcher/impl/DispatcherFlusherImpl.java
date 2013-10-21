@@ -2,15 +2,24 @@ package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushAgentFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
-import com.day.cq.replication.*;
+import com.day.cq.replication.Agent;
+import com.day.cq.replication.AgentManager;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationException;
+import com.day.cq.replication.ReplicationOptions;
+import com.day.cq.replication.ReplicationResult;
+import com.day.cq.replication.Replicator;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component(
         label = "ACS AEM Commons - Dispatcher Flusher",
@@ -19,6 +28,7 @@ import java.util.List;
 )
 @Service
 public class DispatcherFlusherImpl implements DispatcherFlusher {
+    private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherImpl.class);
 
     @Reference
     private Replicator replicator;
@@ -27,18 +37,27 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
     private AgentManager agentManager;
 
     @Override
-    public void flush(final ResourceResolver resourceResolver, final String... paths) throws ReplicationException {
-        final ReplicationOptions opts = new ReplicationOptions();
+    public Map<Agent, ReplicationResult> flush(final ResourceResolver resourceResolver, final String... paths) throws ReplicationException {
+        return this.flush(resourceResolver, ReplicationActionType.ACTIVATE, false, paths);
+    }
 
-        opts.setFilter(new DispatcherFlushAgentFilter());
-        opts.setSynchronous(true);
-        opts.setSuppressStatusUpdate(true);
-        opts.setSuppressVersions(true);
+    @Override
+    public Map<Agent, ReplicationResult> flush(final ResourceResolver resourceResolver, final ReplicationActionType actionType, final boolean synchronous, final String... paths) throws ReplicationException {
+        final ReplicationOptions options = new ReplicationOptions();
+        final ReplicationResultListener listener = new ReplicationResultListener();
+
+        options.setFilter(new DispatcherFlushAgentFilter());
+        options.setSynchronous(synchronous);
+        options.setSuppressStatusUpdate(true);
+        options.setSuppressVersions(true);
+        options.setListener(listener);
 
         for(final String path : paths) {
             replicator.replicate(resourceResolver.adaptTo(Session.class),
-                    ReplicationActionType.ACTIVATE, path, opts);
+                    actionType, path, options);
         }
+
+        return listener.getResults();
     }
 
     public Agent[] getFlushAgents() {

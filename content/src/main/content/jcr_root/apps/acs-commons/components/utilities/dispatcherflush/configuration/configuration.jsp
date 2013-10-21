@@ -50,7 +50,7 @@
     </form>
     <% } %>
 
-    <h3>Active Flush Agents' Logs</h3>
+    <h3>Active Flush Agent Logs</h3>
     <ul>
         <% if(!hasAgents) { %><li class="not-set">No active Dispatcher Flush agents</li><% } %>
         <% for(final Agent agent : flushAgents) { %>
