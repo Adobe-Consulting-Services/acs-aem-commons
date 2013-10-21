@@ -1,3 +1,23 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushAgentFilter;
@@ -38,12 +58,16 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
     private AgentManager agentManager;
 
     @Override
-    public Map<Agent, ReplicationResult> flush(final ResourceResolver resourceResolver, final String... paths) throws ReplicationException {
+    public final Map<Agent, ReplicationResult> flush(final ResourceResolver resourceResolver, final String... paths)
+            throws ReplicationException {
         return this.flush(resourceResolver, ReplicationActionType.ACTIVATE, false, paths);
     }
 
     @Override
-    public Map<Agent, ReplicationResult> flush(final ResourceResolver resourceResolver, final ReplicationActionType actionType, final boolean synchronous, final String... paths) throws ReplicationException {
+    public final Map<Agent, ReplicationResult> flush(final ResourceResolver resourceResolver,
+                                                     final ReplicationActionType actionType,
+                                                     final boolean synchronous,
+                                                     final String... paths) throws ReplicationException {
         final ReplicationOptions options = new ReplicationOptions();
         final ReplicationResultListener listener = new ReplicationResultListener();
 
@@ -53,8 +77,8 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
         options.setSuppressVersions(true);
         options.setListener(listener);
 
-        for(final String path : paths) {
-            if(log.isDebugEnabled()) {
+        for (final String path : paths) {
+            if (log.isDebugEnabled()) {
                 log.debug("Issuing Dispatcher Flush request for: {}", path);
                 log.debug("  > Synchronous: {}", options.isSynchronous());
                 log.debug("  > Replication Action Type: {}", actionType.name());
@@ -66,12 +90,12 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
         return listener.getResults();
     }
 
-    public Agent[] getFlushAgents() {
+    public final Agent[] getFlushAgents() {
         final List<Agent> flushAgents = new ArrayList<Agent>();
         final DispatcherFlushAgentFilter filter = new DispatcherFlushAgentFilter();
 
-        for(final Agent agent : agentManager.getAgents().values()) {
-            if(filter.isIncluded(agent)) {
+        for (final Agent agent : agentManager.getAgents().values()) {
+            if (filter.isIncluded(agent)) {
                 flushAgents.add(agent);
             }
         }
