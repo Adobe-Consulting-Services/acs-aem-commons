@@ -27,7 +27,7 @@ Create one ClientLib (/etc/clientlibs/us-brands) and use it across all US Sites 
     * Body Clientlibs only accept JavaScript as CSS should always be loaded in the Head.
       * Leverages the [ACS Commons - Delegating Servlet]({{ site.baseurl }}/features/delegating-servlet.html) to provide an unobtrusive overlay
 * DesignHtmlLibraryManager Service
-    * Wraps the OOTB HtmlLibraryManager Serivce but is driven by the ClientLib configuration from the current design (first bullet point)
+  * Wraps the OOTB HtmlLibraryManager Serivce but is driven by the ClientLib configuration from the current design (first bullet point)
 
 ![image]({{ site.baseurl }}/images/designer-clientlibsmanager/designs-page.png)
 
