@@ -1,9 +1,6 @@
 package com.adobe.acs.commons.replication.dispatcher;
 
-import com.day.cq.replication.Agent;
-import com.day.cq.replication.ReplicationActionType;
-import com.day.cq.replication.ReplicationException;
-import com.day.cq.replication.ReplicationResult;
+import com.day.cq.replication.*;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.Map;

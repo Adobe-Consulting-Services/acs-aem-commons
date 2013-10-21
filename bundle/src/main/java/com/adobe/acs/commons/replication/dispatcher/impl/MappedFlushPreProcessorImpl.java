@@ -1,16 +1,11 @@
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushAgentFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.adobe.acs.commons.util.OsgiPropertyUtil;
 import com.day.cq.replication.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -25,8 +20,11 @@ import java.util.regex.Pattern;
 
 @Component(
         label = "ACS AEM Commons - Associated Dispatcher Flush",
+        description = "Facilitates the flushing of associated paths based on resources being replicated. This service allows un-related paths to be flushed based on replications to any part of the content tree. Be careful to avoid infinite flush requests.",
         immediate = true,
-        metatype = true
+        metatype = true,
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE
 )
 @Service
 public class MappedFlushPreProcessorImpl implements Preprocessor {
@@ -43,17 +41,17 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
-    private static final String[] DEFAULT_MAPPED_PATHS = { "/content/dam:/content/mysite", "/etc/designs:/content/mysite", "/etc/packages:/" };
-    @Property(label = "Flush Path Mapping",
-            description = "Example: /content/dam:/content/geometrixx",
+    private static final String[] DEFAULT_MAPPED_PATHS = { "/content/dam:/content/mysite/.*", "/etc/designs:/content/mysite.*", "/etc/packages/.*:/" };
+    @Property(label = "Flush Rules",
+            description = "Pattern to Path associations for flush rules. Format: <pattern-of-replicated-content>:<path-to-flush>",
             cardinality = Integer.MAX_VALUE,
-            value = { "/content/dam:/content/mysite", "/etc/designs:/content/mysite", "/etc/packages:/" })
-    private static final String PROP_MAPPED_PATHS = "prop.mapped-paths";
+            value = { "/content/dam/.*:/content/mysite/en", "/etc/designs/.*:/content/mysite/en", "/etc/packages/.*:/" })
+    private static final String PROP_MAPPED_PATHS = "prop.flush-rules";
     private Map<Pattern, String> map = new HashMap<Pattern, String>();
 
     private static final String DEFAULT_REPLICATION_ACTION_TYPE_NAME = OPTION_INHERIT;
     @Property(label = "Replication Action Type",
-            description = "",
+            description = "Force a Replication Action Type to use when issuing the flush commands to the associated paths. If 'Inherit' is selected, the Replication Action Type of the observed Replication Action will be used.",
             options = {
                 @PropertyOption(name=OPTION_INHERIT, value="Inherit"),
                 @PropertyOption(name=OPTION_ACTIVATE, value="Activate"),
@@ -68,7 +66,11 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
     @Override
     public void preprocess(final ReplicationAction replicationAction, final ReplicationOptions replicationOptions) throws ReplicationException {
         final String path = replicationAction.getPath();
-        if(StringUtils.isBlank(path)) { return; }
+        if(StringUtils.isBlank(path) ||
+                StringUtils.equals(DispatcherFlushAgentFilter.SERIALIZATION_TYPE, replicationAction.getConfig().getSerializationType())) {
+            // Do not trigger associated flushes based on Flush requests or empty paths. This prevents infinite flushing.
+            return;
+        }
 
         final ReplicationActionType flushActionType = replicationActionType == null ? replicationAction.getType() : replicationActionType;
 
@@ -82,7 +84,7 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
                 final Matcher m = pattern.matcher(path);
 
                 if(m.matches()) {
-                    log.debug("Requesting flush of mapped path: {} ~> {}", path, entry.getValue());
+                    log.debug("Requesting flush of associated path: {} ~> {}", path, entry.getValue());
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false, entry.getValue());
                 }
             }
@@ -103,10 +105,10 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
         final String replicationActionTypeName = PropertiesUtil.toString(properties.get(PROP_REPLICATION_ACTION_TYPE_NAME), DEFAULT_REPLICATION_ACTION_TYPE_NAME);
         try {
             replicationActionType = ReplicationActionType.valueOf(replicationActionTypeName);
-            log.debug("Using replication action type: {}", replicationActionType.getName());
+            log.debug("Using replication action type: {}", replicationActionType.name());
         } catch(IllegalArgumentException ex) {
             replicationActionType = null;
-            log.debug("Using replication action type: {}", "Inherit");
+            log.debug("Using replication action type: {}", OPTION_INHERIT);
         }
 
         /* Mapped Paths */

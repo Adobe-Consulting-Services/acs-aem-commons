@@ -23,8 +23,9 @@ import java.util.Map;
 
 @Component(
         label = "ACS AEM Commons - Dispatcher Flusher",
-        description = "Service used to issue flush requests to configured Dispatcher Flush Agents.",
-        immediate = false
+        description = "Service used to issue flush requests to enabled Dispatcher Flush Agents.",
+        immediate = false,
+        metatype = false
 )
 @Service
 public class DispatcherFlusherImpl implements DispatcherFlusher {
@@ -53,6 +54,11 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
         options.setListener(listener);
 
         for(final String path : paths) {
+            if(log.isDebugEnabled()) {
+                log.debug("Issuing Dispatcher Flush request for: {}", path);
+                log.debug("  > Synchronous: {}", options.isSynchronous());
+                log.debug("  > Replication Action Type: {}", actionType.name());
+            }
             replicator.replicate(resourceResolver.adaptTo(Session.class),
                     actionType, path, options);
         }
