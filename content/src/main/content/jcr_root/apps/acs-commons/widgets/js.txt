@@ -5,3 +5,4 @@ create_namespace.js
 predicates/AuthorizablePredicate.js
 predicates/PathPropertyPredicate.js
 predicates/SelectionPredicate.js
+DDPathField.js
