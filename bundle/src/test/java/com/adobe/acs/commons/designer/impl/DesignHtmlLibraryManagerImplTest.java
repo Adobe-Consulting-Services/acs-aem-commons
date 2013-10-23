@@ -74,7 +74,10 @@ public class DesignHtmlLibraryManagerImplTest {
     private Writer writer;
 
     @Captor
-    ArgumentCaptor<String[]> libraryCaptor;
+    ArgumentCaptor<String[]> jsLibraryCaptor;
+
+    @Captor
+    ArgumentCaptor<String[]> cssLibraryCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -90,12 +93,17 @@ public class DesignHtmlLibraryManagerImplTest {
 
         instance.writeIncludes(request, design, PageRegion.HEAD, writer);
 
-        verify(verifyingLibraryManager, only()).writeIncludes(any(SlingHttpServletRequest.class),
-                any(Writer.class), libraryCaptor.capture());
+        verify(verifyingLibraryManager).writeCssInclude(any(SlingHttpServletRequest.class),
+                any(Writer.class), cssLibraryCaptor.capture());
+        verify(verifyingLibraryManager).writeJsInclude(any(SlingHttpServletRequest.class),
+                any(Writer.class), jsLibraryCaptor.capture());
         verifyNoMoreInteractions(verifyingLibraryManager);
 
-        assertEquals(4, libraryCaptor.getValue().length);
-        assertArrayEquals(new Object[] { "css1", "css2", "js1", "js2" }, libraryCaptor.getValue());
+        assertEquals(2, jsLibraryCaptor.getValue().length);
+        assertArrayEquals(new Object[] { "js1", "js2" }, jsLibraryCaptor.getValue());
+
+        assertEquals(2, cssLibraryCaptor.getValue().length);
+        assertArrayEquals(new Object[] { "css1", "css2" }, cssLibraryCaptor.getValue());
 
     }
 
@@ -133,21 +141,19 @@ public class DesignHtmlLibraryManagerImplTest {
         @Override
         public void writeJsInclude(SlingHttpServletRequest request, Writer out, boolean themed,
                 String... categories) throws IOException {
-            // TODO Auto-generated method stub
-
+            // TODO
         }
 
         @Override
         public void writeJsInclude(SlingHttpServletRequest request, Writer out, String... categories)
                 throws IOException {
-            // TODO Auto-generated method stub
-
+            verifyingLibraryManager.writeJsInclude(request, out, categories);
         }
 
         @Override
         public void writeIncludes(SlingHttpServletRequest request, Writer out, String... categories)
                 throws IOException {
-            verifyingLibraryManager.writeIncludes(request, out, categories);
+         // TODO Auto-generated method stub
         }
 
         @Override
@@ -160,8 +166,7 @@ public class DesignHtmlLibraryManagerImplTest {
         @Override
         public void writeCssInclude(SlingHttpServletRequest request, Writer out, String... categories)
                 throws IOException {
-            // TODO Auto-generated method stub
-
+            verifyingLibraryManager.writeCssInclude(request, out, categories);
         }
 
         @Override
@@ -221,7 +226,11 @@ public class DesignHtmlLibraryManagerImplTest {
      *
      */
     interface NonVarArgsHtmlLibraryManager {
-        void writeIncludes(SlingHttpServletRequest request, Writer out, String[] categories);
+
+        void writeJsInclude(SlingHttpServletRequest request, Writer out, String[] categories);
+
+        void writeCssInclude(SlingHttpServletRequest request, Writer out, String[] categories);
+        
     }
 
 }

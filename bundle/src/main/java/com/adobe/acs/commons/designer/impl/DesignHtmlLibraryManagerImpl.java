@@ -66,7 +66,8 @@ public final class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryMana
     @Override
     public void writeIncludes(final SlingHttpServletRequest request, final Design design,
             final PageRegion pageRegion, final Writer writer) throws IOException {
-        htmlLibraryManager.writeIncludes(request, writer, this.getLibraries(design, pageRegion));
+        writeCssInclude(request, design, pageRegion, writer);
+        writeJsInclude(request, design, pageRegion, writer);
     }
 
     @Override
