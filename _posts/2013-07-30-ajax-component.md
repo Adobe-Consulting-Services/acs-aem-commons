@@ -2,7 +2,7 @@
 layout: feature
 title: Base AJAX Component
 description: AJAX-ify your AEM Components with ease
-date: 2013-10-01 23:39:29
+date: 2013-07-30 23:39:29
 thumbnail: /images/ajax-component/thumbnail.png
 categories: features
 initial-release: 1.0.0

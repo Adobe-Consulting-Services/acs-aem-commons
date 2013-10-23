@@ -2,7 +2,7 @@
 layout: feature
 title: Generic Lists
 description: Easy creation of simple name/value pair lists
-date: 2013-10-01 23:39:29
+date: 2013-09-10 23:39:29
 thumbnail: /images/generic-lists/thumbnail.png
 categories: features
 initial-release: 1.0.0

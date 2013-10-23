@@ -2,7 +2,7 @@
 layout: feature
 title: Component Helper
 description: Simplify your components
-date: 2013-10-01 23:39:29
+date: 2013-06-10 23:39:29
 thumbnail: /images/default/thumbnail.png
 categories: features
 initial-release: 1.0.0

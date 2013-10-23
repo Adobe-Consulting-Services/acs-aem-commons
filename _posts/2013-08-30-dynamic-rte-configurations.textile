@@ -2,7 +2,7 @@
 layout: feature
 title: Dynamic RTE Configuration
 description: Create a re-usable RTE configurations
-date: 2013-09-24 23:39:29
+date: 2013-08-30 23:39:29
 thumbnail: /images/dynamic-rte-configuration/thumbnail.png
 categories: features
 initial-release: 1.0.0

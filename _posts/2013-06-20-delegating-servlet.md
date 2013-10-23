@@ -2,7 +2,7 @@
 layout: feature
 title: Delegating Servlet
 description: Clean-up those one-off overlays
-date: 2013-10-01 23:39:29
+date: 2013-06-20 23:39:29
 thumbnail: /images/delegating-servlet/thumbnail.png
 categories: features
 initial-release: 1.0.0

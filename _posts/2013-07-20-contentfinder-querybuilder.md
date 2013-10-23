@@ -2,7 +2,7 @@
 layout: feature
 title: Content Finder - Query Builder
 description: Use QueryBuilder syntax to build ContentFinder tabs
-date: 2013-10-01 23:39:29
+date: 2013-07-20 23:39:29
 thumbnail: /images/contentfinder-querybuilder/thumbnail.png
 categories: features
 initial-release: 1.0.0
