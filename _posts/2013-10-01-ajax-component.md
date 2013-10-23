@@ -5,6 +5,7 @@ description: AJAX-ify your AEM Components with ease
 date: 2013-10-01 23:39:29
 thumbnail: /images/ajax-component/thumbnail.png
 categories: features
+initial-release: 1.0.0
 ---
 
 ## Purpose
