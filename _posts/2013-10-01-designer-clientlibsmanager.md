@@ -21,20 +21,23 @@ Designer - ClientLibs Manager provides a simple interface and common abstraction
 
 Create one ClientLib (/etc/clientlibs/us-brands) and use it across all US Sites but not European sites simply by configuring the association on each site's Design.
 
-## How to Use
+## Usage
 
-* Override of the OOTB CQ Design Page implementation to allow for customization of "Head" and "Body" based ClientLibs.
-  * Notes
-    * Body Clientlibs only accept JavaScript as CSS should always be loaded in the Head.
-      * Leverages the [ACS Commons - Delegating Servlet]({{ site.baseurl }}/features/delegating-servlet.html) to provide an unobtrusive overlay
-* DesignHtmlLibraryManager Service
-  * Wraps the OOTB HtmlLibraryManager Serivce but is driven by the ClientLib configuration from the current design (first bullet point)
+- Override of the OOTB CQ Design Page implementation to allow for customization of "Head" and "Body" based ClientLibs.
+
+  > Body Clientlibs only accept JavaScript as CSS should always be loaded in the Head.
+
+- Leverages the [ACS Commons - Delegating Servlet]({{ site.baseurl }}/features/delegating-servlet.html) to provide an unobtrusive overlay
+
+- [DesignHtmlLibraryManager]({{ site.baseurl }}/apidocs/index.html?com/adobe/acs/commons/designer/DesignHtmlLibraryManager.html) Service
+
+  > Wraps the OOTB HtmlLibraryManager Service but is driven by the ClientLib configuration from the current design (first bullet point)
 
 ![image]({{ site.baseurl }}/images/designer-clientlibsmanager/designs-page.png)
 
 ### Required Sling OSGi Configuration
 
-To enable the CQ Design Page overlay, the following sling:osgiConfig must be added to the project.
+To enable the CQ Design Page overlay, the following `sling:osgiConfig` must be added to the project.
 
     /apps/myapp/config.author/com.adobe.acs.commons.util.impl.DelegatingServletFactoryImpl-DesignerClientLibsManager.xml
 
