@@ -12,8 +12,8 @@
             <items jcr:primaryType="cq:WidgetCollection">
                 <replicationactiontype
                         jcr:primaryType="cq:Widget"
-                        fieldLabel="Replication action type"
-                        fieldDescription="Replication action type used to issue Dispatcher Flush requests. This effects how cached files are effected (invalidate or delete)."
+                        fieldLabel="Flush method"
+                        fieldDescription="Dispatcher flush method. This effects how cached files are effected (invalidate or delete)."
                         defaultValue="ACTIVATE"
                         value="ACTIVATE"
                         name="./replicationActionType"
