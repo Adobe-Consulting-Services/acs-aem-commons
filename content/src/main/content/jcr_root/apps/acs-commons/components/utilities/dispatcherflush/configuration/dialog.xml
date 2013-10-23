@@ -22,15 +22,11 @@
                     <options jcr:primaryType="cq:WidgetCollection">
                         <activate
                                 jcr:primaryType="nt:unstructured"
-                                text="Activate"
+                                text="Invalidate Cache"
                                 value="ACTIVATE"/>
-                        <deactivate
-                                jcr:primaryType="nt:unstructured"
-                                text="Deactivate"
-                                value="DEACTIVATE"/>
                         <delete
                                 jcr:primaryType="nt:unstructured"
-                                text="Delete"
+                                text="Delete Cache"
                                 value="DELETE"/>
                     </options>
                 </replicationactiontype>

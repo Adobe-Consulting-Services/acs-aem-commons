@@ -51,16 +51,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component(
-        label = "ACS AEM Commons - Associated Dispatcher Flush",
+        label = "ACS AEM Commons - Dispatcher Flush Mapping",
         description = "Facilitates the flushing of associated paths based on resources being replicated. "
                 + "Be careful to avoid infinite flush requests.",
-        immediate = true,
+        immediate = false,
         metatype = true,
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
 @Service
-public class MappedFlushPreProcessorImpl implements Preprocessor {
-    private static final Logger log = LoggerFactory.getLogger(MappedFlushPreProcessorImpl.class);
+public class DispatcherFlushMappingImpl implements Preprocessor {
+    private static final Logger log = LoggerFactory.getLogger(DispatcherFlushMappingImpl.class);
 
     private static final String OPTION_INHERIT = "INHERIT";
     private static final String OPTION_ACTIVATE = "ACTIVATE";
@@ -87,14 +87,13 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
 
     private static final String DEFAULT_REPLICATION_ACTION_TYPE_NAME = OPTION_INHERIT;
     @Property(label = "Replication Action Type",
-            description = "The Replication Action Type to use when issuing the flush cmd to the associated paths."
-                    + " If 'Inherit' is selected, the Replication Action Type of the observed Replication Action "
+            description = "The Replication Action Type to use when issuing the flush cmd to the associated paths. "
+                    + "If 'Inherit' is selected, the Replication Action Type of the observed Replication Action "
                     + "will be used.",
             options = {
                     @PropertyOption(name = OPTION_INHERIT, value = "Inherit"),
-                    @PropertyOption(name = OPTION_ACTIVATE, value = "Activate"),
-                    @PropertyOption(name = OPTION_DEACTIVATE, value = "Deactivate"),
-                    @PropertyOption(name = OPTION_DELETE, value = "Delete")
+                    @PropertyOption(name = OPTION_ACTIVATE, value = "Invalidate Cache"),
+                    @PropertyOption(name = OPTION_DELETE, value = "Delete Cache")
             })
     private static final String PROP_REPLICATION_ACTION_TYPE_NAME = "prop.replication-action-type";
 
@@ -171,7 +170,6 @@ public class MappedFlushPreProcessorImpl implements Preprocessor {
         }
 
         return true;
-
     }
 
     /**
