@@ -54,11 +54,11 @@ To enable the CQ Design Page overlay, the following `sling:osgiConfig` must be a
 
 ## Custom Tag Example
 
-Since version 1.1.0, a custom tag can be used in JSP pages.
+Since version 1.1.0, a custom tag can be used in JSP pages. Be sure to include the JSP taglib declaration:
+
+    <%@ taglib prefix="dhlm" uri="http://www.adobe.com/consulting/acs-aem-commons/dhlm" %>
 
 {% highlight jsp %}
-<% taglib prefix="dhlm" uri="http://www.adobe.com/consulting/acs-aem-commons/dhlm" %>
-
 <!DOCTYPE html>
 <html>
     <head>
