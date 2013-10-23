@@ -3,7 +3,7 @@ layout: feature
 title: WCMMode Tags & Functions
 description: JSP Taglib for working with WCM Mode
 date: 2013-10-01 23:39:29
-thumbnail: /images/default/thumbnail.png
+thumbnail: /images/wcmmode/thumbnail.png
 categories: features
 initial-release: 1.0.0
 ---
