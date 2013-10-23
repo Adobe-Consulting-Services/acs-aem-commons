@@ -52,7 +52,31 @@ To enable the CQ Design Page overlay, the following `sling:osgiConfig` must be a
     prop.target-resource-type="acs-commons/components/utilities/designer"/>
 {% endhighlight %}
 
-## Example
+## Custom Tag Example
+
+Since version 1.1.0, a custom tag can be used in JSP pages.
+
+{% highlight jsp %}
+<% taglib prefix="dhlm" uri="http://www.adobe.com/consulting/acs-aem-commons/dhlm" %>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Demo Page</title>
+        <dhlm:includeClientLibraries css="true" js="true" region="head" />
+    </head>
+    <body>
+        <h1>Demo Page</h1>
+
+        <p>CSS has no business being in the body of a document, and its almost always better to push JS load to the end of the body</p>
+
+        <dhlm:includeClientLibraries js="true" region="body" />
+    </body>
+</html>
+{% endhighlight %}
+
+
+## Scriptlet Example
 
 {% highlight jsp %}
 <% DesignHtmlLibraryManager dhlm = sling.getService(DesignHtmlLibraryManager.class); %>
@@ -65,13 +89,11 @@ To enable the CQ Design Page overlay, the following `sling:osgiConfig` must be a
 
         dhlm.writeCssInclude(slingRequest, currentDesign, PageRegion.HEAD, out);
         dhlm.writeJsInclude(slingRequest, currentDesign, PageRegion.HEAD, out);
-        dhlm.writeIncludes(slingRequest, currentDesign, PageRegion.HEAD, out);
 
         <!-- OR, manually pass the list to the OOTB cq:includeClientLib tag; Effectively the same thing -->
 
         <cq:includeClientLib css="<%= StringUtils.join(dhlm.getCssLibraries(currentDesign, PageRegion.HEAD), ',') %>"/>
         <cq:includeClientLib js="<%= StringUtils.join(dhlm.getJsLibraries(currentDesign, PageRegion.HEAD), ',') %>"/>
-        <cq:includeClientLib categories="<%= StringUtils.join(dhlm.getLibraries(currentDesign, PageRegion.HEAD), ',') %>"/>
     </head>
     <body>
         <h1>Demo Page</h1>
@@ -79,7 +101,6 @@ To enable the CQ Design Page overlay, the following `sling:osgiConfig` must be a
         <p>CSS has no business being in the body of a document, and its almost always better to push JS load to the end of the body</p>
 
         dhlm.writeJsInclude(slingRequest, currentDesign, PageRegion.BODY, out);
-        dhlm.writeIncludes(slingRequest, currentDesign, PageRegion.BODY, out);
 
         <!-- OR, manually pass the list to the OOTB cq:includeClientLib tag; Effectively the same thing -->
 
