@@ -38,14 +38,14 @@ Create one ClientLib (/etc/clientlibs/us-brands) and use it across all US Sites 
 
 ### Required Sling OSGi Configuration
 
-To enable the CQ Design Page overlay, the following `sling:osgiConfig` must be added to the project.
+To enable the CQ Design Page overlay, the following `sling:OsgiConfig` must be added to the project.
 
     /apps/myapp/config.author/com.adobe.acs.commons.util.impl.DelegatingServletFactoryImpl-DesignerClientLibsManager.xml
 
 {% highlight xml %}
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:primaryType="sling:osgiConfig"
+    jcr:primaryType="sling:OsgiConfig"
     sling.servlet.resourceTypes="wcm/core/components/designer"
     sling.servlet.selectors=""
     sling.servlet.extensions="html"

@@ -5,7 +5,6 @@ description: Create authorable error pages with ease
 date: 2013-09-30 23:39:29
 thumbnail: /images/errorpagehandler/thumbnail.png
 categories: features
-tags: new
 initial-release: 1.0.0
 ---
 
@@ -63,7 +62,7 @@ Then create the overlay for the default.jsp
 {% highlight xml %}
 <errorpages
     jcr:primaryType="cq:Widget"
-    path="./apps/acs-commons/components/utilities/errorpagehandler/dialog/errorpages"
+    path="/apps/acs-commons/components/utilities/errorpagehandler/dialog/errorpages"
     xtype="cqinclude"/>
 {% endhighlight %}
 
@@ -87,18 +86,37 @@ Each error page's "name" (Node name) should correspond to the HTTP Response Stat
   Typically only 404 and 500 are needed with everything else using the fallback (default error page) as the messaging around these tends to be less useful to Web site visitors.
 A common pattern is to create this at the site's root under a node named "errors"
   
-  * Ex. /content/geometrixx/en/us/errors
+  * Ex. /content/geometrixx/en/errors
 
 * Create any error-specific pages under this default error page created in Step 2. Note, it is critical that the page NAMES (node names) follow status codes. The Page Titles can be anything.
 
-  * Ex. /content/geometrixx/en/us/errors/404
-  * Ex. /content/geometrixx/en/us/errors/500
+  * Ex. /content/geometrixx/en/errors/404
+  * Ex. /content/geometrixx/en/errors/500
 
 * Edit the Page Properties of the site's root node, and in the new "Error Pages" dialog input (Step 1) select the default error page (Step 2).
   
-  * Ex. ./errorPages => /content/geometrixx/en/us/errors
+  * Ex. ./errorPages => /content/geometrixx/en/errors
 * Further customizations can be made via the OSGi Configuration for the *ACS AEM Commons - Error Page Handler* Configuration, including a "System wide" fallback error page.
 
 ***Note:*** At this time the full Sling exception-name look-up scheme is not supported. Implementing a *500* error page is sufficient.
 
+
+### Sling OSGi Configuration
+
+The following `sling:OsgiConfig` can be used to configure the Error Page Handler.
+
+    /apps/myapp/config/com.adobe.acs.commons.errorpagehandler.impl.ErrorPageHandlerImpl.xml
+
+{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="sling:OsgiConfig"
+    prop.enabled="{Boolean}true"
+    prop.error-page.system-path="/content/error"
+    prop.error-page.extension="html"
+    prop.error-page.fallback-name="500"
+    prop.paths="[/content/mysite/en:errors,/content/mysite/fr:erreurs]"/>
+{% endhighlight %}
+
+***Note: It is better to use the Page Properties-defined `errorPages` than the `prop.paths` in the OSGi Configuration. Typically `prop.paths` is left blank.***
 
