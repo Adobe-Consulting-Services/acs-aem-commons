@@ -93,20 +93,26 @@ title: ACS AEM Commons
     
 </section>
 
-
-<!-- Feature Grid -->
+<!-- Features -->
 <section id="features" class="features">
   <div class="container">
 
     <h2>Features</h2>
     <div class="row">
       {% for post in site.categories.features %}
+        {% assign mod2 = forloop.index|modulo:2 %}
+        {% assign mod3 = forloop.index|modulo:3 %}
+
         {% include feature-card.html feature=post %}
 
-        {% cycle 'features': '', '<div class="clearfix visible-sm visible-xs hidden-md hidden-lg"></div>', '<div class="clearfix hidden-sm hidden-xs visible-md visible-lg"></div>' %}
+        {% if mod2 == 0 %}
+        <div class="clearfix visible-sm visible-xs hidden-md hidden-lg"></div>
+        {% endif %}
 
+        {% if mod3 == 0 %}
+        <div class="clearfix hidden-sm hidden-xs visible-md visible-lg"></div>
+        {% endif %}
       {% endfor %}
     </div>
   </div>
 </section>
-
