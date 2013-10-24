@@ -189,3 +189,16 @@ footer {
   padding: 2em 0;
   border-top: solid 1px #ccc;
 }
+.news .title {
+  font-weight: bold;
+}
+.news .description {
+  display: block;
+}
+.news li {
+  margin-bottom: 10px;
+}
+.news li:last-child {
+  border-bottom-width: inherit;
+  border-bottom-style: inherit;
+}
