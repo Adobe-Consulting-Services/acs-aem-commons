@@ -99,27 +99,11 @@ title: ACS AEM Commons
   <div class="container">
 
     <h2>Features</h2>
-
     <div class="row">
       {% for post in site.categories.features %}
-        {% assign mod2 = forloop.index|modulo:2 %}
-        {% assign mod3 = forloop.index|modulo:3 %}
+        {% include feature-card.html feature=post %}
 
-        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-          <div class="feature">
-            <a href="{{ site.baseurl }}{{ post.url }}"><img class="img-responsive" src="{{ site.baseurl }}{{ post.thumbnail }}"/></a>
-            <h3><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h3>
-            <p>{{ post.description }}</p>
-          </div>
-        </div>
-
-        {% if mod2 == 0 %}
-        <div class="clearfix visible-sm visible-xs hidden-md hidden-lg"></div>
-        {% endif %}
-
-        {% if mod3 == 0 %}
-        <div class="clearfix hidden-sm hidden-xs visible-md visible-lg"></div>
-        {% endif %}
+        {% cycle 'features': '', '<div class="clearfix visible-sm visible-xs hidden-md hidden-lg"></div>', '<div class="clearfix hidden-sm hidden-xs visible-md visible-lg"></div>' %}
 
       {% endfor %}
     </div>

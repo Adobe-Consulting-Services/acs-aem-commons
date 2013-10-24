@@ -5,6 +5,7 @@ description: AEM Design-driven, reusable ClientLibs
 date: 2013-09-20 23:39:29
 thumbnail: /images/designer-clientlibsmanager/thumbnail.png
 categories: features
+tags: new
 initial-release: 1.0.0
 ---
 

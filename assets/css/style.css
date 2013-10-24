@@ -96,6 +96,7 @@ header .nav a:hover {
 }
 .features .feature {
   text-align: center;
+  position: relative;
 }
 .features .feature img {
   border: solid 1px #ccc;
@@ -107,6 +108,17 @@ header .nav a:hover {
   color: #999;
   font-weight: 200;
   margin-bottom: 4rem;
+}
+.features .feature .new {
+  background-image: url('../images/new-light.png');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: top left;
+  width: 119px;
+  height: 119px;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 /* Feature Doc */
 .feature-doc {
@@ -137,6 +149,9 @@ header .nav a:hover {
 .feature-doc dd {
   margin-bottom: 1em;
 }
+.feature-doc dd {
+  margin-left: 2em;
+}
 /* Inline Code */
 code {
   background-color: #f7f7f7;
@@ -163,7 +178,4 @@ footer {
   margin-top: 4em;
   padding: 2em 0;
   border-top: solid 1px #ccc;
-}
-dd {
-    margin-left: 2em;
 }
