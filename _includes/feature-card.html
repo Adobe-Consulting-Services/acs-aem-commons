@@ -1,0 +1,13 @@
+{% assign feature = include.feature %}
+
+<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+  <div class="feature">
+    <a href="{{ site.baseurl }}{{ feature.url }}">
+      {% if feature.tags contains 'new' %}
+      <div class="new"></div>
+      {% endif %}
+      <img class="img-responsive" src="{{ site.baseurl }}{{ feature.thumbnail }}"/></a>
+    <h3><a href="{{ site.baseurl }}{{ feature.url }}">{{ feature.title }}</a></h3>
+    <p>{{ feature.description }}</p>
+  </div>
+</div>
