@@ -77,6 +77,22 @@ title: ACS AEM Commons
   </div>
 </section>
 
+<section class="striation-dark">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-11 col-lg-offset-1 col-md-12">
+                <h2>News</h2>
+                <ul>
+                  {% for post in site.categories.news %}
+                  <li>{{ post.date | date: "%B %-d, %Y" }}<br/><strong>{{ post.title }}</strong><br/>{{ post.description }}</li>
+                  {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+</section>
+
 
 <!-- Feature Grid -->
 <section id="features" class="features">
