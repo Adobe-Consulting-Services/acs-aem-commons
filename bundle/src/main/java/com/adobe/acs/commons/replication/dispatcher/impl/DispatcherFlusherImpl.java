@@ -83,6 +83,7 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
                 log.debug("  > Synchronous: {}", options.isSynchronous());
                 log.debug("  > Replication Action Type: {}", actionType.name());
             }
+
             replicator.replicate(resourceResolver.adaptTo(Session.class),
                     actionType, path, options);
         }

@@ -65,11 +65,9 @@ public class DispatcherFlushMapImpl implements Preprocessor {
 
     private static final String OPTION_INHERIT = "INHERIT";
     private static final String OPTION_ACTIVATE = "ACTIVATE";
-    private static final String OPTION_DEACTIVATE = "DEACTIVATE";
     private static final String OPTION_DELETE = "DELETE";
 
-       /* Flush Rules */
-
+    /* Flush Rules */
     private static final String[] DEFAULT_FLUSH_RULES = {"/content/dam:/content/mysite/.*",
             "/etc/designs:/content/mysite.*",
             "/etc/packages/.*:/"

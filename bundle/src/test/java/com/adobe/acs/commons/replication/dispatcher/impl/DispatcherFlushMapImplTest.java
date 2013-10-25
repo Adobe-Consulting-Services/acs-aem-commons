@@ -114,7 +114,6 @@ public class DispatcherFlushMapImplTest {
         validFlushRules.put("/b/.*", "/c");
         validFlushRules.put("/c/d/.*", "/e/f");
 
-
         final Map<Pattern, String> expected = new LinkedHashMap<Pattern, String>();
         expected.put(Pattern.compile("/a/.*"), "/b");
         expected.put(Pattern.compile("/b/.*"), "/c");
@@ -143,8 +142,6 @@ public class DispatcherFlushMapImplTest {
         assertEquals(0, actual.size());
     }
 
-
-
     @Test
     public void testPreprocess_notAccepts_ReplicationActionIsNull() throws Exception {
         when(flushRules.size()).thenReturn(9);
@@ -154,7 +151,6 @@ public class DispatcherFlushMapImplTest {
                 anyString());
     }
 
-
     @Test
     public void testPreprocess_notAccepts_ReplicationActionNoFlushRules() throws Exception {
         when(flushRules.size()).thenReturn(0);
@@ -163,8 +159,8 @@ public class DispatcherFlushMapImplTest {
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons");
 
         dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
-        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class), anyBoolean(),
-                anyString());
+        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
+                anyBoolean(), anyString());
     }
 
     @Test
@@ -175,8 +171,8 @@ public class DispatcherFlushMapImplTest {
         when(replicationAction.getPath()).thenReturn("");
 
         dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
-        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class), anyBoolean(),
-                anyString());
+        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
+                anyBoolean(), anyString());
     }
 
     @Test
@@ -187,8 +183,8 @@ public class DispatcherFlushMapImplTest {
         when(replicationAction.getPath()).thenReturn(null);
 
         dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
-        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class), anyBoolean(),
-                anyString());
+        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
+                anyBoolean(), anyString());
     }
 
     @Test
@@ -200,8 +196,8 @@ public class DispatcherFlushMapImplTest {
         when(replicationAction.getType()).thenReturn(ReplicationActionType.INTERNAL_POLL);
 
         dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
-        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class), anyBoolean(),
-                anyString());
+        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
+                anyBoolean(), anyString());
     }
 
     @Test
@@ -213,8 +209,8 @@ public class DispatcherFlushMapImplTest {
         when(replicationAction.getType()).thenReturn(ReplicationActionType.TEST);
 
         dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
-        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class), anyBoolean(),
-                anyString());
+        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
+                anyBoolean(), anyString());
     }
 
     @Test
