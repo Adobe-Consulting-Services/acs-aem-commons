@@ -45,13 +45,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component(
-        label = "ACS AEM Commons - Dispatcher Flush Mapping",
+        label = "ACS AEM Commons - Dispatcher Flush Map",
         description = "Facilitates the flushing of associated paths based on resources being replicated. "
                 + "Be careful to avoid infinite flush requests.",
         immediate = false,
@@ -59,8 +60,8 @@ import java.util.regex.Pattern;
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
 @Service
-public class DispatcherFlushMappingImpl implements Preprocessor {
-    private static final Logger log = LoggerFactory.getLogger(DispatcherFlushMappingImpl.class);
+public class DispatcherFlushMapImpl implements Preprocessor {
+    private static final Logger log = LoggerFactory.getLogger(DispatcherFlushMapImpl.class);
 
     private static final String OPTION_INHERIT = "INHERIT";
     private static final String OPTION_ACTIVATE = "ACTIVATE";
@@ -75,7 +76,7 @@ public class DispatcherFlushMappingImpl implements Preprocessor {
     };
     @Property(label = "Flush Rules",
             description = "Pattern to Path associations for flush rules. "
-                    + "Format: <pattern-of-replicated-content>:<path-to-flush>",
+                    + "Format: <pattern-of-trigger-content>:<path-to-flush>",
             cardinality = Integer.MAX_VALUE,
             value = { "/content/dam/.*:/content/mysite/en",
                     "/etc/designs/.*:/content/mysite/en",
@@ -103,9 +104,8 @@ public class DispatcherFlushMappingImpl implements Preprocessor {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
-    private Map<Pattern, String> flushRules = new HashMap<Pattern, String>();
+    private Map<Pattern, String> flushRules = new LinkedHashMap<Pattern, String>();
     private ReplicationActionType replicationActionType = null;
-    private boolean enabled = true;
 
     @Override
     public final void preprocess(final ReplicationAction replicationAction,
@@ -155,8 +155,8 @@ public class DispatcherFlushMappingImpl implements Preprocessor {
 
         final String path = replicationAction.getPath();
 
-        if (!this.enabled) {
-            log.error("Ignored due to dangerous (cyclic) flush rule configuration.");
+        if (this.flushRules == null || this.flushRules.size() < 1) {
+            log.error("Ignored due to dangerous (cyclic) flush rule configuration or no flush rules.");
             return false;
         } else if (StringUtils.isBlank(path)) {
             // Do nothing on blank paths
@@ -177,12 +177,12 @@ public class DispatcherFlushMappingImpl implements Preprocessor {
      *
      * @return true is a cyclic rule path has been detected for this OSGi configuration
      */
-    private boolean hasCyclicFlushRules() {
+    private boolean hasCyclicFlushRules(final Map<Pattern, String> flushRules) {
         for (final Map.Entry<Pattern, String> entry : flushRules.entrySet()) {
             List<Map.Entry<Pattern, String>> list = new ArrayList<Map.Entry<Pattern, String>>();
 
             list.add(entry);
-            if (this.findCyclicFlushRules(entry, list)) {
+            if (this.findCyclicFlushRules(flushRules, entry, list)) {
                 return true;
             }
         }
@@ -199,7 +199,8 @@ public class DispatcherFlushMappingImpl implements Preprocessor {
      * @param list   the "stack" of previous flush rule entries
      * @return true if a cyclic rule path has been detected in this OSGi configuration
      */
-    private boolean findCyclicFlushRules(final Map.Entry<Pattern, String> parent,
+    private boolean findCyclicFlushRules(final Map<Pattern, String> flushRules,
+                                         final Map.Entry<Pattern, String> parent,
                                          List<Map.Entry<Pattern, String>> list) {
         for (final Map.Entry<Pattern, String> child : flushRules.entrySet()) {
             final Pattern pattern = child.getKey();
@@ -212,7 +213,7 @@ public class DispatcherFlushMappingImpl implements Preprocessor {
                 } else {
                     // Some other rule will flush based for a parent flush
                     list.add(child);
-                    return this.findCyclicFlushRules(child, list);
+                    return this.findCyclicFlushRules(flushRules, child, list);
                 }
             }
         }
@@ -224,34 +225,52 @@ public class DispatcherFlushMappingImpl implements Preprocessor {
     protected final void activate(final Map<String, String> properties) {
 
         /* Replication Action Type */
-
-        final String replicationActionTypeName =
+        this.replicationActionType = this.configureReplicationActionType(
                 PropertiesUtil.toString(properties.get(PROP_REPLICATION_ACTION_TYPE_NAME),
-                        DEFAULT_REPLICATION_ACTION_TYPE_NAME);
-        try {
-            replicationActionType = ReplicationActionType.valueOf(replicationActionTypeName);
-            log.debug("Using replication action type: {}", replicationActionType.name());
-        } catch (IllegalArgumentException ex) {
-            replicationActionType = null;
-            log.debug("Using replication action type: {}", OPTION_INHERIT);
-        }
+                        DEFAULT_REPLICATION_ACTION_TYPE_NAME));
 
-        /* Mapped Paths */
+        /* Flush Rules */
+        this.flushRules = this.configureFlushRules(OsgiPropertyUtil.toMap(
+                PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES), DEFAULT_FLUSH_RULES), ":"));
+    }
 
-        this.flushRules = new HashMap<Pattern, String>();
+    /**
+     * Create Pattern-based flush rules map
+     *
+     * @param configuredRules String based flush rules from OSGi configuration
+     * @return returns the configures flush rules, or an empty map if the rules are cyclic
+     */
+    protected Map<Pattern, String> configureFlushRules(final Map<String, String> configuredRules) {
+        final Map<Pattern, String> flushRules = new LinkedHashMap<Pattern, String>();
 
-        final Map<String, String> tmp = OsgiPropertyUtil.toMap(
-                PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES), DEFAULT_FLUSH_RULES), ":");
-
-        for (final Map.Entry<String, String> entry : tmp.entrySet()) {
+        for (final Map.Entry<String, String> entry : configuredRules.entrySet()) {
             final Pattern pattern = Pattern.compile(entry.getKey());
-            this.flushRules.put(pattern, entry.getValue());
+            flushRules.put(pattern, entry.getValue());
             log.debug("Adding flush rule: {} => {}", pattern.pattern(), entry.getValue());
         }
 
-        if (this.hasCyclicFlushRules()) {
-            enabled = false;
+        if (this.hasCyclicFlushRules(flushRules)) {
             log.error("Configuration defines cyclic flush rules. Disabling this configuration for safety!");
+            return new LinkedHashMap<Pattern, String>();
+        } else {
+            return flushRules;
+        }
+    }
+
+    /**
+     * Derive the ReplicationActionType scheme to be used for Flushes
+     * @param replicationActionTypeName String name of ReplicationActionType to use
+     * @return the ReplicationActionType to use, or null if the ReplicationActionType should be inherited from the
+     * incoming ReplicationAction
+     */
+    protected ReplicationActionType configureReplicationActionType(final String replicationActionTypeName) {
+        try {
+            final ReplicationActionType replicationActionType = ReplicationActionType.valueOf(replicationActionTypeName);
+            log.debug("Using replication action type: {}", replicationActionType.name());
+            return replicationActionType;
+        } catch (IllegalArgumentException ex) {
+            log.debug("Using replication action type: {}", OPTION_INHERIT);
+            return null;
         }
     }
 

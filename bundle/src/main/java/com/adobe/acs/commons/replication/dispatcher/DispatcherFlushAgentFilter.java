@@ -1,4 +1,3 @@
-
 /*
  * #%L
  * ACS AEM Commons Bundle
@@ -31,9 +30,9 @@ import org.slf4j.LoggerFactory;
  * Replication Agent Filter used to identify Flush agents.
  */
 public class DispatcherFlushAgentFilter implements AgentFilter {
-    public static final String SERIALIZATION_TYPE = "flush";
-
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushAgentFilter.class);
+
+    public static final String SERIALIZATION_TYPE = "flush";
 
     /**
      * Checks if the @agent is considered an active Flush agent (Serialization Type ~> Flush and is enabled).
