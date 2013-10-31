@@ -21,6 +21,8 @@ package com.adobe.acs.commons.dam.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.imageio.IIOException;
 import javax.jcr.Session;
@@ -50,6 +52,19 @@ import com.day.image.Layer;
 @Service
 @Property(name = "process.label", value = "Add Watermark to Rendition")
 public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess {
+    
+    private static ConcurrentMap<String, Object> watermarkLogCache = new ConcurrentHashMap<String, Object>();
+    
+    private static void logMissingWatermark(final String path) {
+        if (watermarkLogCache.putIfAbsent(path, new Object()) == null) {
+            log.warn("Watermark path {} is not found.", path);
+        }
+    }
+    private static void logInvalidWatermark(final String path) {
+        if (watermarkLogCache.putIfAbsent(path, new Object()) == null) {
+            log.warn("Watermark path {} is not valid.", path);
+        }
+    }
 
     private static final Logger log = LoggerFactory.getLogger(AddWatermarkToRenditionProcess.class);
 
@@ -76,7 +91,11 @@ public final class AddWatermarkToRenditionProcess extends AbstractRenditionModif
                     } catch (IOException e) {
                         log.warn("Unable to load image layer from " + path, e);
                     }
+                } else {
+                    logInvalidWatermark(path);
                 }
+            } else {
+                logMissingWatermark(path);
             }
         }
         return null;
