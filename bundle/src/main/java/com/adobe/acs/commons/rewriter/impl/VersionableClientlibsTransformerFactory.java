@@ -37,16 +37,13 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-/**
- * Rewriter pipeline component which 
- *
- */
 @Component(
-        label = "ACS AEM Commons - Versionable Clientlibs Rewriter",
-        description = "",
+        label = "ACS AEM Commons - Versionable Clientlibs (CSS/JS) Rewriter",
+        description = "Re-writes paths to CSS and JS clientlib includes to include the last modified timestamp as a "
+                + "selector.",
         metatype = true)
 @Property(name = "pipeline.type",
-        value="versionableclientlibs",
+        value = "versionableclientlibs",
         label = "Rewriter Pipeline Type",
         propertyPrivate = true,
         description = "Type identifier to be referenced in rewriter pipeline configuration.")
@@ -57,6 +54,9 @@ public final class VersionableClientlibsTransformerFactory implements Transforme
     private static final String ATTR_JS_PATH = "src";
     private static final String ATTR_CSS_PATH = "href";
 
+    private static final String CSS_TYPE = "text/css";
+    private static final String JS_TYPE = "text/javascript";
+
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
 
@@ -65,24 +65,24 @@ public final class VersionableClientlibsTransformerFactory implements Transforme
     }
 
     private Attributes versionClientLibs(final String elementName, final Attributes attrs) {
+        if (this.isCSS(elementName, attrs)) {
+            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_CSS_PATH),
+                    attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS);
 
-        if(this.isCSS(elementName, attrs)) {
-            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex(ATTR_CSS_PATH),
-                    attrs.getValue(ATTR_CSS_PATH), LibraryType.CSS);
-
-        } else if(this.isJavaScript(elementName, attrs)) {
-            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex(ATTR_JS_PATH),
-                    attrs.getValue(ATTR_JS_PATH), LibraryType.JS);
+        } else if (this.isJavaScript(elementName, attrs)) {
+            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_JS_PATH),
+                    attrs.getValue("", ATTR_JS_PATH), LibraryType.JS);
 
         } else {
             return attrs;
         }
     }
 
-    private Attributes rebuildAttributes(AttributesImpl newAttributes, int index, String path, LibraryType libraryType) {
+    private Attributes rebuildAttributes(final AttributesImpl newAttributes, final int index, final String path,
+                                         final LibraryType libraryType) {
         final String versionedPath = this.getVersionedPath(path, libraryType);
 
-        if(StringUtils.isNotBlank(versionedPath)) {
+        if (StringUtils.isNotBlank(versionedPath)) {
             log.debug("Rewriting to: {}", versionedPath);
             newAttributes.setValue(index, versionedPath);
         } else {
@@ -95,10 +95,10 @@ public final class VersionableClientlibsTransformerFactory implements Transforme
     private boolean isCSS(final String elementName, final Attributes attrs) {
         final String regex = "/\\S+\\" + LibraryType.CSS.extension + "$";
 
-        if(StringUtils.equals("link", elementName) &&
-                this.hasValue(attrs, "rel", "stylesheet") &&
-                (this.hasValue(attrs, "type", "text/css") || this.hasValue(attrs, "type", LibraryType.CSS.contentType)) &&
-                this.hasValue(attrs, "href", regex)) {
+        if (StringUtils.equals("link", elementName)
+                && this.hasValue(attrs, "rel", "stylesheet")
+                && this.hasValue(attrs, "type", CSS_TYPE)
+                && this.hasValue(attrs, "href", regex)) {
             return true;
         }
 
@@ -108,20 +108,20 @@ public final class VersionableClientlibsTransformerFactory implements Transforme
     private boolean isJavaScript(final String elementName, final Attributes attrs) {
         final String regex = "/\\S+\\" + LibraryType.JS.extension + "$";
 
-        if(StringUtils.equals("script", elementName) &&
-                (this.hasValue(attrs, "type", "text/javascript") || this.hasValue(attrs, "type", LibraryType.JS.contentType)) &&
-                this.hasValue(attrs, "src", regex)) {
+        if (StringUtils.equals("script", elementName)
+                && this.hasValue(attrs, "type", JS_TYPE)
+                && this.hasValue(attrs, "src", regex)) {
             return true;
         }
-
         return false;
     }
 
     private String getVersionedPath(final String originalPath, final LibraryType libraryType) {
         final PathInfo pathInfo = new PathInfo(originalPath);
+
         final HtmlLibrary htmlLibrary = htmlLibraryManager.getLibrary(libraryType, pathInfo.getResourcePath());
 
-        if(htmlLibrary != null) {
+        if (htmlLibrary != null) {
             return htmlLibrary.getLibraryPath() + "." + htmlLibrary.getLastModified() + libraryType.extension;
         } else {
             log.debug("Could not find HtmlLibrary fro path: {}", pathInfo.getResourcePath());
@@ -130,15 +130,16 @@ public final class VersionableClientlibsTransformerFactory implements Transforme
     }
 
     private boolean hasValue(final Attributes attributes, final String attributeName, final String regex) {
-        final String value = attributes.getValue(attributeName);
-        if(value == null) { return false; }
+        final String value = attributes.getValue("", attributeName);
+        if (value == null) { return false; }
         return value.matches(regex);
     }
 
     private class VersionableClientlibsTransformer extends AbstractTransformer {
-        public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
+        public void startElement(final String namespaceURI, final String localName, final String qName,
+                                 final Attributes attrs)
                 throws SAXException {
-            getContentHandler().startElement(namespaceURI, localName, qName, versionClientLibs(localName, atts));
+            getContentHandler().startElement(namespaceURI, localName, qName, versionClientLibs(localName, attrs));
         }
     }
 }
