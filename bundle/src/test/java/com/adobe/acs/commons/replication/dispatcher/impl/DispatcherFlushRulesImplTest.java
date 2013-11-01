@@ -50,7 +50,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class DispatcherFlushMapImplTest {
+public class DispatcherFlushRulesImplTest {
     @Mock
     private DispatcherFlusher dispatcherFlusher;
 
@@ -61,7 +61,7 @@ public class DispatcherFlushMapImplTest {
     private ResourceResolverFactory resourceResolverFactory;
 
     @InjectMocks
-    private DispatcherFlushMapImpl dispatcherFlushMap = new DispatcherFlushMapImpl();
+    private DispatcherFlushRulesImpl dispatcherFlushMap = new DispatcherFlushRulesImpl();
 
     @Before
     public void setUp() throws Exception {

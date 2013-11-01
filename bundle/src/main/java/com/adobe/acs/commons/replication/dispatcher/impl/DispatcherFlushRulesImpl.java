@@ -60,8 +60,8 @@ import java.util.regex.Pattern;
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
 @Service
-public class DispatcherFlushMapImpl implements Preprocessor {
-    private static final Logger log = LoggerFactory.getLogger(DispatcherFlushMapImpl.class);
+public class DispatcherFlushRulesImpl implements Preprocessor {
+    private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
 
     private static final String OPTION_INHERIT = "INHERIT";
     private static final String OPTION_ACTIVATE = "ACTIVATE";
@@ -244,7 +244,7 @@ public class DispatcherFlushMapImpl implements Preprocessor {
      * @param configuredRules String based flush rules from OSGi configuration
      * @return returns the configures flush rules, or an empty map if the rules are cyclic
      */
-    private Map<Pattern, String> configureFlushRules(final Map<String, String> configuredRules) {
+    protected final Map<Pattern, String> configureFlushRules(final Map<String, String> configuredRules) {
         final Map<Pattern, String> rules = new LinkedHashMap<Pattern, String>();
 
         for (final Map.Entry<String, String> entry : configuredRules.entrySet()) {
@@ -268,7 +268,7 @@ public class DispatcherFlushMapImpl implements Preprocessor {
      * @return the ReplicationActionType to use, or null if the ReplicationActionType should be inherited from the
      * incoming ReplicationAction
      */
-    private ReplicationActionType configureReplicationActionType(final String replicationActionTypeName) {
+    protected final ReplicationActionType configureReplicationActionType(final String replicationActionTypeName) {
         try {
             final ReplicationActionType repActionType =
                     ReplicationActionType.valueOf(replicationActionTypeName);
