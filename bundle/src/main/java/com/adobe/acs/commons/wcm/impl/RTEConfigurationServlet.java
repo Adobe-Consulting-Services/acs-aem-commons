@@ -146,7 +146,7 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
      * configuration.
      * 
      * @param resolver the resource resolver
-     * @param config the config to underlay
+     * @param config the configuration to underlay
      * @return the underlayed configuration
      * @throws JSONException
      * @throws ServletException
