@@ -65,7 +65,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
     private static final String CLASS_NOSTATIC = "nostatic";
 
-    private static final String[] DEFAULT_ATTRIBUTES = { "img:src", "link:href", "script:src" };
+    private static final String[] DEFAULT_ATTRIBUTES = new String[] { "img:src", "link:href", "script:src" };
 
     private static final int DEFAULT_HOST_COUNT = 1;
 
