@@ -52,7 +52,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component(
-        label = "ACS AEM Commons - Dispatcher Flush Map",
+        label = "ACS AEM Commons - Dispatcher Flush Rules",
         description = "Facilitates the flushing of associated paths based on resources being replicated. "
                 + "Be careful to avoid infinite flush requests.",
         immediate = false,
