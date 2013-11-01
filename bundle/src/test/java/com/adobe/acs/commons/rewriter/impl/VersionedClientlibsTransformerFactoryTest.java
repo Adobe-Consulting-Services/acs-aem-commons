@@ -45,7 +45,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class VersionableClientlibsTransformerFactoryTest {
+public class VersionedClientlibsTransformerFactoryTest {
     @Mock
     private HtmlLibraryManager htmlLibraryManager;
 
@@ -56,7 +56,7 @@ public class VersionableClientlibsTransformerFactoryTest {
     private ContentHandler handler;
 
     @InjectMocks
-    private VersionableClientlibsTransformerFactory factory = new VersionableClientlibsTransformerFactory();
+    private VersionedClientlibsTransformerFactory factory = new VersionedClientlibsTransformerFactory();
 
     private Transformer transformer;
 
@@ -81,8 +81,6 @@ public class VersionableClientlibsTransformerFactoryTest {
     public void testNoop() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
-
-
 
         final AttributesImpl in = new AttributesImpl();
         in.addAttribute("", "href", "", "CDATA", PATH + ".css");

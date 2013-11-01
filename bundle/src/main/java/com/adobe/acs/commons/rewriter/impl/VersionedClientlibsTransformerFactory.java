@@ -38,18 +38,15 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
 @Component(
-        label = "ACS AEM Commons - Versionable Clientlibs (CSS/JS) Rewriter",
-        description = "Re-writes paths to CSS and JS clientlib includes to include the last modified timestamp as a "
-                + "selector.",
-        metatype = true)
+        label = "ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter",
+        description = "Re-writes paths to CSS and JS clientlibs to include the last modified timestamp as a "
+                + "selector; in the form: /path/to/clientlib.123456789.css")
 @Property(name = "pipeline.type",
-        value = "versionableclientlibs",
-        label = "Rewriter Pipeline Type",
-        propertyPrivate = true,
-        description = "Type identifier to be referenced in rewriter pipeline configuration.")
+        value = "versioned-clientlibs",
+        propertyPrivate = true)
 @Service
-public final class VersionableClientlibsTransformerFactory implements TransformerFactory {
-    private static final Logger log = LoggerFactory.getLogger(VersionableClientlibsTransformerFactory.class);
+public final class VersionedClientlibsTransformerFactory implements TransformerFactory {
+    private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);
 
     private static final String ATTR_JS_PATH = "src";
     private static final String ATTR_CSS_PATH = "href";
@@ -124,7 +121,7 @@ public final class VersionableClientlibsTransformerFactory implements Transforme
         if (htmlLibrary != null) {
             return htmlLibrary.getLibraryPath() + "." + htmlLibrary.getLastModified() + libraryType.extension;
         } else {
-            log.debug("Could not find HtmlLibrary fro path: {}", pathInfo.getResourcePath());
+            log.debug("Could not find HtmlLibrary at path: {}", pathInfo.getResourcePath());
             return null;
         }
     }
