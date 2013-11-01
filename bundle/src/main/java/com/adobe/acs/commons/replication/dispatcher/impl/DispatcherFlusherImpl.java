@@ -57,12 +57,19 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
     @Reference
     private AgentManager agentManager;
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final Map<Agent, ReplicationResult> flush(final ResourceResolver resourceResolver, final String... paths)
             throws ReplicationException {
         return this.flush(resourceResolver, ReplicationActionType.ACTIVATE, false, paths);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final Map<Agent, ReplicationResult> flush(final ResourceResolver resourceResolver,
                                                      final ReplicationActionType actionType,
@@ -91,6 +98,9 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
         return listener.getResults();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public final Agent[] getFlushAgents() {
         final List<Agent> flushAgents = new ArrayList<Agent>();
         final DispatcherFlushAgentFilter filter = new DispatcherFlushAgentFilter();

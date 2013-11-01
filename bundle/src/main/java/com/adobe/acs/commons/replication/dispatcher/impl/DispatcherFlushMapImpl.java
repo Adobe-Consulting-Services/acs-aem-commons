@@ -68,16 +68,19 @@ public class DispatcherFlushMapImpl implements Preprocessor {
     private static final String OPTION_DELETE = "DELETE";
 
     /* Flush Rules */
-    private static final String[] DEFAULT_FLUSH_RULES = {"/content/dam:/content/mysite/.*",
-            "/etc/designs:/content/mysite.*",
+    private static final String[] DEFAULT_FLUSH_RULES = {
+            "/content/dam/.*:/content",
+            "/etc/designs/*:/content",
             "/etc/packages/.*:/"
     };
+
     @Property(label = "Flush Rules",
             description = "Pattern to Path associations for flush rules. "
                     + "Format: <pattern-of-trigger-content>:<path-to-flush>",
             cardinality = Integer.MAX_VALUE,
-            value = { "/content/dam/.*:/content/mysite/en",
-                    "/etc/designs/.*:/content/mysite/en",
+            value = {
+                    "/content/dam/.*:/content",
+                    "/etc/designs/.*:/content",
                     "/etc/packages/.*:/"
             })
     private static final String PROP_FLUSH_RULES = "prop.flush-rules";
@@ -105,6 +108,9 @@ public class DispatcherFlushMapImpl implements Preprocessor {
     private Map<Pattern, String> flushRules = new LinkedHashMap<Pattern, String>();
     private ReplicationActionType replicationActionType = null;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void preprocess(final ReplicationAction replicationAction,
                                  final ReplicationOptions replicationOptions) throws ReplicationException {
@@ -175,12 +181,12 @@ public class DispatcherFlushMapImpl implements Preprocessor {
      *
      * @return true is a cyclic rule path has been detected for this OSGi configuration
      */
-    private boolean hasCyclicFlushRules(final Map<Pattern, String> flushRules) {
-        for (final Map.Entry<Pattern, String> entry : flushRules.entrySet()) {
+    private boolean hasCyclicFlushRules(final Map<Pattern, String> rules) {
+        for (final Map.Entry<Pattern, String> entry : rules.entrySet()) {
             List<Map.Entry<Pattern, String>> list = new ArrayList<Map.Entry<Pattern, String>>();
 
             list.add(entry);
-            if (this.findCyclicFlushRules(flushRules, entry, list)) {
+            if (this.findCyclicFlushRules(rules, entry, list)) {
                 return true;
             }
         }
@@ -197,10 +203,10 @@ public class DispatcherFlushMapImpl implements Preprocessor {
      * @param list   the "stack" of previous flush rule entries
      * @return true if a cyclic rule path has been detected in this OSGi configuration
      */
-    private boolean findCyclicFlushRules(final Map<Pattern, String> flushRules,
+    private boolean findCyclicFlushRules(final Map<Pattern, String> rules,
                                          final Map.Entry<Pattern, String> parent,
                                          List<Map.Entry<Pattern, String>> list) {
-        for (final Map.Entry<Pattern, String> child : flushRules.entrySet()) {
+        for (final Map.Entry<Pattern, String> child : rules.entrySet()) {
             final Pattern pattern = child.getKey();
             final Matcher m = pattern.matcher(parent.getValue());
 
@@ -211,7 +217,7 @@ public class DispatcherFlushMapImpl implements Preprocessor {
                 } else {
                     // Some other rule will flush based for a parent flush
                     list.add(child);
-                    return this.findCyclicFlushRules(flushRules, child, list);
+                    return this.findCyclicFlushRules(rules, child, list);
                 }
             }
         }
@@ -233,39 +239,41 @@ public class DispatcherFlushMapImpl implements Preprocessor {
     }
 
     /**
-     * Create Pattern-based flush rules map
+     * Create Pattern-based flush rules map.
      *
      * @param configuredRules String based flush rules from OSGi configuration
      * @return returns the configures flush rules, or an empty map if the rules are cyclic
      */
-    protected Map<Pattern, String> configureFlushRules(final Map<String, String> configuredRules) {
-        final Map<Pattern, String> flushRules = new LinkedHashMap<Pattern, String>();
+    private Map<Pattern, String> configureFlushRules(final Map<String, String> configuredRules) {
+        final Map<Pattern, String> rules = new LinkedHashMap<Pattern, String>();
 
         for (final Map.Entry<String, String> entry : configuredRules.entrySet()) {
             final Pattern pattern = Pattern.compile(entry.getKey());
-            flushRules.put(pattern, entry.getValue());
+            rules.put(pattern, entry.getValue());
             log.debug("Adding flush rule: {} => {}", pattern.pattern(), entry.getValue());
         }
 
-        if (this.hasCyclicFlushRules(flushRules)) {
+        if (this.hasCyclicFlushRules(rules)) {
             log.error("Configuration defines cyclic flush rules. Disabling this configuration for safety!");
             return new LinkedHashMap<Pattern, String>();
         } else {
-            return flushRules;
+            return rules;
         }
     }
 
     /**
-     * Derive the ReplicationActionType scheme to be used for Flushes
+     * Derive the ReplicationActionType to be used for Flushes.
+     *
      * @param replicationActionTypeName String name of ReplicationActionType to use
      * @return the ReplicationActionType to use, or null if the ReplicationActionType should be inherited from the
      * incoming ReplicationAction
      */
-    protected ReplicationActionType configureReplicationActionType(final String replicationActionTypeName) {
+    private ReplicationActionType configureReplicationActionType(final String replicationActionTypeName) {
         try {
-            final ReplicationActionType replicationActionType = ReplicationActionType.valueOf(replicationActionTypeName);
-            log.debug("Using replication action type: {}", replicationActionType.name());
-            return replicationActionType;
+            final ReplicationActionType repActionType =
+                    ReplicationActionType.valueOf(replicationActionTypeName);
+            log.debug("Using replication action type: {}", repActionType.name());
+            return repActionType;
         } catch (IllegalArgumentException ex) {
             log.debug("Using replication action type: {}", OPTION_INHERIT);
             return null;
