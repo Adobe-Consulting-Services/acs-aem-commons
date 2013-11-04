@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -90,12 +90,14 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
     }
 
     private boolean isCSS(final String elementName, final Attributes attrs) {
-        final String regex = "/\\S+\\" + LibraryType.CSS.extension + "$";
+        final String rel = attrs.getValue("", "rel");
+        final String type = attrs.getValue("", "type");
+        final String href = attrs.getValue("", "href");
 
         if (StringUtils.equals("link", elementName)
-                && this.hasValue(attrs, "rel", "stylesheet")
-                && this.hasValue(attrs, "type", CSS_TYPE)
-                && this.hasValue(attrs, "href", regex)) {
+                && StringUtils.equals(rel, "stylesheet")
+                && StringUtils.equals(type, CSS_TYPE)
+                && StringUtils.endsWith(href, LibraryType.CSS.extension)) {
             return true;
         }
 
@@ -103,13 +105,15 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
     }
 
     private boolean isJavaScript(final String elementName, final Attributes attrs) {
-        final String regex = "/\\S+\\" + LibraryType.JS.extension + "$";
+        final String type = attrs.getValue("", "type");
+        final String src = attrs.getValue("", "src");
 
         if (StringUtils.equals("script", elementName)
-                && this.hasValue(attrs, "type", JS_TYPE)
-                && this.hasValue(attrs, "src", regex)) {
+                && StringUtils.equals(type, JS_TYPE)
+                && StringUtils.endsWith(src, LibraryType.JS.extension)) {
             return true;
         }
+
         return false;
     }
 
@@ -124,12 +128,6 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
             log.debug("Could not find HtmlLibrary at path: {}", pathInfo.getResourcePath());
             return null;
         }
-    }
-
-    private boolean hasValue(final Attributes attributes, final String attributeName, final String regex) {
-        final String value = attributes.getValue("", attributeName);
-        if (value == null) { return false; }
-        return value.matches(regex);
     }
 
     private class VersionableClientlibsTransformer extends AbstractTransformer {
