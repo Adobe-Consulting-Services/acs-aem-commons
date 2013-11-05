@@ -21,8 +21,10 @@
 package com.adobe.acs.commons.replication.dispatcher;
 
 import com.day.cq.replication.Agent;
+import com.day.cq.replication.AgentConfig;
 import com.day.cq.replication.AgentFilter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +35,9 @@ public class DispatcherFlushAgentFilter implements AgentFilter {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushAgentFilter.class);
 
     public static final String SERIALIZATION_TYPE = "flush";
-    public static final String DISPATCHER_INVALIDATE_URI = "/dispatcher/invalidate.cache";
     public static final String HTTP = "http://";
     public static final String HTTPS = "https://";
+    public static final String CQ_ACTION_HEADER = "CQ-Action:";
 
     /**
      * Checks if the @agent is considered an active Flush agent (Serialization Type ~> Flush and is enabled).
@@ -47,6 +49,7 @@ public class DispatcherFlushAgentFilter implements AgentFilter {
     public final boolean isIncluded(final Agent agent) {
         return this.isFlushingAgent(agent)
             && this.isDispatcherTransportURI(agent)
+            && this.isDispatcherHeaders(agent)
             && this.isEnabled(agent);
     }
 
@@ -78,8 +81,27 @@ public class DispatcherFlushAgentFilter implements AgentFilter {
      */
     private boolean isDispatcherTransportURI(final Agent agent) {
         final String transportURI = agent.getConfiguration().getTransportURI();
+
         return (StringUtils.startsWith(transportURI, HTTP)
-                || StringUtils.startsWith(transportURI, HTTPS))
-                && StringUtils.endsWith(transportURI, DISPATCHER_INVALIDATE_URI);
+                || StringUtils.startsWith(transportURI, HTTPS));
+    }
+
+    /**
+     * Checks if the agent has a valid dispatcher headers.
+     *
+     * @param agent Agent to check
+     * @return true if the Agent's headers contain the proper values
+     */
+    private boolean isDispatcherHeaders(final Agent agent) {
+        final ValueMap properties = agent.getConfiguration().getProperties();
+        final String[] headers =  properties.get(AgentConfig.PROTOCOL_HTTP_HEADERS, new String[]{});
+
+        for(final String header : headers) {
+            if(StringUtils.startsWith(header, CQ_ACTION_HEADER)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
