@@ -33,6 +33,9 @@ public class DispatcherFlushAgentFilter implements AgentFilter {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushAgentFilter.class);
 
     public static final String SERIALIZATION_TYPE = "flush";
+    public static final String DISPATCHER_INVALIDATE_URI = "/dispatcher/invalidate.cache";
+    public static final String HTTP = "http://";
+    public static final String HTTPS = "https://";
 
     /**
      * Checks if the @agent is considered an active Flush agent (Serialization Type ~> Flush and is enabled).
@@ -42,16 +45,41 @@ public class DispatcherFlushAgentFilter implements AgentFilter {
      */
     @Override
     public final boolean isIncluded(final Agent agent) {
-        if (!StringUtils.equals(SERIALIZATION_TYPE, agent.getConfiguration().getSerializationType())) {
-            // Is not a Flush Agent
-            return false;
-        } else if (!agent.isEnabled()) {
-            // Is not enabled
-            log.info("Ignoring Dispatcher Flush agent [ {} ] because it is disabled.", agent.getId());
-            return false;
-        } else {
-            // Is a flush agent and is enabled
-            return true;
-        }
+        return this.isFlushingAgent(agent)
+            && this.isDispatcherTransportURI(agent)
+            && this.isEnabled(agent);
+    }
+
+    /**
+     * Checks if the agent is enabled.
+     *
+     * @param agent Agent to check
+     * @return true if the agent is enabled
+     */
+    private boolean isEnabled(final Agent agent) {
+        return agent.isEnabled();
+    }
+
+    /**
+     * Checks if the agent has a "flush" serialization type.
+     *
+     * @param agent Agent to check
+     * @return true if the Agent's serialization type is "flush"
+     */
+    private boolean isFlushingAgent(final Agent agent) {
+        return StringUtils.equals(SERIALIZATION_TYPE, agent.getConfiguration().getSerializationType());
+    }
+
+    /**
+     * Checks if the agent has a valid transport URI set.
+     *
+     * @param agent Agent to check
+     * @return true if the Agent's transport URI is in the proper form
+     */
+    private boolean isDispatcherTransportURI(final Agent agent) {
+        final String transportURI = agent.getConfiguration().getTransportURI();
+        return (StringUtils.startsWith(transportURI, HTTP)
+                || StringUtils.startsWith(transportURI, HTTPS))
+                && StringUtils.endsWith(transportURI, DISPATCHER_INVALIDATE_URI);
     }
 }

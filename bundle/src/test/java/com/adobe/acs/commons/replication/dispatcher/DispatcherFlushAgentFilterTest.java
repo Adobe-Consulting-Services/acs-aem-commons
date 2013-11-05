@@ -47,6 +47,7 @@ public class DispatcherFlushAgentFilterTest {
         final DispatcherFlushAgentFilter filter = new DispatcherFlushAgentFilter();
 
         when(agent.isEnabled()).thenReturn(true);
+        when(agentConfig.getTransportURI()).thenReturn("http://localhost:80/dispatcher/invalidate.cache");
         when(agentConfig.getSerializationType()).thenReturn("flush");
 
         final boolean expected = true;
@@ -60,6 +61,7 @@ public class DispatcherFlushAgentFilterTest {
         final DispatcherFlushAgentFilter filter = new DispatcherFlushAgentFilter();
 
         when(agent.isEnabled()).thenReturn(false);
+        when(agentConfig.getTransportURI()).thenReturn("https://localhost:80/dispatcher/invalidate.cache");
         when(agentConfig.getSerializationType()).thenReturn("flush");
 
         final boolean expected = false;
@@ -68,12 +70,12 @@ public class DispatcherFlushAgentFilterTest {
         Assert.assertEquals(expected, actual);
     }
 
-
     @Test
-    public void testIsIncluded_enabled_notflush() throws Exception {
+    public void testIsIncluded_notflush() throws Exception {
         final DispatcherFlushAgentFilter filter = new DispatcherFlushAgentFilter();
 
         when(agent.isEnabled()).thenReturn(true);
+        when(agentConfig.getTransportURI()).thenReturn("http://localhost:80/dispatcher/invalidate.cache");
         when(agentConfig.getSerializationType()).thenReturn("notflush");
 
         final boolean expected = false;
@@ -83,11 +85,12 @@ public class DispatcherFlushAgentFilterTest {
     }
 
     @Test
-    public void testIsIncluded_disabled_notflush() throws Exception {
+    public void testIsIncluded_enabled_invalidTransportURI() throws Exception {
         final DispatcherFlushAgentFilter filter = new DispatcherFlushAgentFilter();
 
-        when(agent.isEnabled()).thenReturn(false);
-        when(agentConfig.getSerializationType()).thenReturn("notflush");
+        when(agent.isEnabled()).thenReturn(true);
+        when(agentConfig.getTransportURI()).thenReturn("http://localhost:80/not/dispatcher");
+        when(agentConfig.getSerializationType()).thenReturn("flush");
 
         final boolean expected = false;
         final boolean actual = filter.isIncluded(agent);
