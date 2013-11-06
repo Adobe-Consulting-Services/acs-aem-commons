@@ -5,4 +5,7 @@
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/dam/video/mp3hq"/>
     <filter root="/etc/dam/video/ogghq"/>
+    <filter root="/etc/cloudservices/typekit">
+        <include pattern="/etc/cloudservices/typekit/jcr:content"/>
+    </filter>
 </workspaceFilter>
