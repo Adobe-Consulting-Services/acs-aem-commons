@@ -19,9 +19,9 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,11 +32,14 @@ import org.apache.sling.rewriter.Generator;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public final class XMLParserGenerator implements Generator {
 
     private final StringWriter writer;
+
+    private final PrintWriter printWriter;
 
     private final SAXParser saxParser;
 
@@ -48,21 +51,26 @@ public final class XMLParserGenerator implements Generator {
 
         saxParser = factory.newSAXParser();
         this.writer = new StringWriter();
+        this.printWriter = new PrintWriter(writer);
     }
 
     public void finished() throws IOException, SAXException {
-        this.saxParser.parse(new ByteArrayInputStream(this.writer.toString().getBytes("UTF-8")),
-                new ContentHandlerAdapter(contentHandler));
+        this.printWriter.flush();
+        final ContentHandlerAdapter handler = new ContentHandlerAdapter(contentHandler);
+        final String documentString = this.writer.toString();
+        if (!documentString.isEmpty()) {
+            final InputSource source = new InputSource(new StringReader(documentString));
+            this.saxParser.parse(source, handler);
+        }
     }
 
     public PrintWriter getWriter() {
-        return new PrintWriter(writer);
+        return printWriter;
     }
 
     public void init(ProcessingContext context, ProcessingComponentConfiguration config) throws IOException {
         // nothing to do
     }
-
 
     public void setContentHandler(ContentHandler handler) {
         this.contentHandler = handler;
