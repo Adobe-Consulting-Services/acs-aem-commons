@@ -173,4 +173,102 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         assertEquals(PATH + ".vbs", attributesCaptor.getValue().getValue(0));
     }
+
+
+    @Test
+    public void testJavaScriptClientLibraryWithRelativePath() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", "relative/script.js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals("relative/script.js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testJavaScriptClientLibraryWithSameSchemePath() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", "//example.com/same/scheme/script.js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals("//example.com/same/scheme/script.js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testCSSClientLibraryWithSameSchemePath() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", "//example.com/same/scheme/styles.css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals("//example.com/same/scheme/styles.css", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testJavaScriptClientLibraryWithDomainedPath() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", "http://www.example.com/same/scheme/script.js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals("http://www.example.com/same/scheme/script.js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testCSSClientLibraryWithSameDomainedPath() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", "https://example.com/same/scheme/styles.css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals("https://example.com/same/scheme/styles.css", attributesCaptor.getValue().getValue(0));
+    }
 }
