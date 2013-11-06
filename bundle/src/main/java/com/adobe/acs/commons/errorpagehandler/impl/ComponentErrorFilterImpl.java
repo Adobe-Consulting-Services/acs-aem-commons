@@ -50,7 +50,8 @@ import java.util.Map;
 
 @SlingFilter(
         label = "ACS AEM Commons - Component Error Handler Filter",
-        description = "Sample implementation of a Sling Filter",
+        description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
+                + "components based on WCM Modes (edit, preview, publish).",
         metatype = false,
         generateComponent = true,
         generateService = true,
@@ -98,7 +99,6 @@ public class ComponentErrorFilterImpl implements Filter {
 
         if (!(request instanceof SlingHttpServletRequest) ||
                 !(response instanceof SlingHttpServletResponse)) {
-            // Not a SlingHttpServletRequest/Response, so ignore.
             chain.doFilter(request, response);
             return;
         }
@@ -127,11 +127,14 @@ public class ComponentErrorFilterImpl implements Filter {
                                            final FilterChain chain,
                                            final String pathToHTML) throws IOException {
 
-        final WCMMode mode = WCMMode.fromRequest(slingRequest);
-        final Resource resource = slingRequest.getResource();
         final ResourceResolver resourceResolver = slingRequest.getResourceResolver();
 
-        log.debug("Component error for [ {} ] under {} mode.", resource.getPath(), mode.name());
+        if(log.isDebugEnabled()) {
+            final WCMMode mode = WCMMode.fromRequest(slingRequest);
+            final Resource resource = slingRequest.getResource();
+
+            log.debug("Component error for [ {} ] under {} mode.", resource.getPath(), mode.name());
+        }
 
         try {
             chain.doFilter(slingRequest, slingResponse);
@@ -167,7 +170,6 @@ public class ComponentErrorFilterImpl implements Filter {
     protected void activate(final Map<String, String> config) {
         editErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_EDIT_ERROR_HTML_PATH), DEFAULT_EDIT_ERROR_HTML_PATH);
         previewErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PREVIEW_ERROR_HTML_PATH), DEFAULT_PREVIEW_ERROR_HTML_PATH);
-
         publishErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PUBLISH_ERROR_HTML_PATH), DEFAULT_PUBLISH_ERROR_HTML_PATH);
     }
 }
