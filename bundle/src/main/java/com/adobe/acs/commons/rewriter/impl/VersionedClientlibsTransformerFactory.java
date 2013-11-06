@@ -97,6 +97,8 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
         if (StringUtils.equals("link", elementName)
                 && StringUtils.equals(rel, "stylesheet")
                 && StringUtils.equals(type, CSS_TYPE)
+                && StringUtils.startsWith(href, "/")
+                && !StringUtils.startsWith(href, "//")
                 && StringUtils.endsWith(href, LibraryType.CSS.extension)) {
             return true;
         }
@@ -110,6 +112,8 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
 
         if (StringUtils.equals("script", elementName)
                 && StringUtils.equals(type, JS_TYPE)
+                && StringUtils.startsWith(src, "/")
+                && !StringUtils.startsWith(src, "//")
                 && StringUtils.endsWith(src, LibraryType.JS.extension)) {
             return true;
         }
@@ -118,15 +122,22 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
     }
 
     private String getVersionedPath(final String originalPath, final LibraryType libraryType) {
-        final PathInfo pathInfo = new PathInfo(originalPath);
+        try {
+            final PathInfo pathInfo = new PathInfo(originalPath);
 
-        final HtmlLibrary htmlLibrary = htmlLibraryManager.getLibrary(libraryType, pathInfo.getResourcePath());
+            final HtmlLibrary htmlLibrary = htmlLibraryManager.getLibrary(libraryType, pathInfo.getResourcePath());
 
-        if (htmlLibrary != null) {
-            return htmlLibrary.getLibraryPath() + "." + htmlLibrary.getLastModified() + libraryType.extension;
-        } else {
-            log.debug("Could not find HtmlLibrary at path: {}", pathInfo.getResourcePath());
-            return null;
+            if (htmlLibrary != null) {
+                return htmlLibrary.getLibraryPath() + "." + htmlLibrary.getLastModified() + libraryType.extension;
+            } else {
+                log.debug("Could not find HtmlLibrary at path: {}", pathInfo.getResourcePath());
+                return null;
+            }
+        } catch(Exception ex) {
+            // Handle unexpected formats of the original path
+            log.error("Attempting to get a versioned path for [ {} ] but could not because of: {}", originalPath,
+                    ex.getMessage());
+            return originalPath;
         }
     }
 
