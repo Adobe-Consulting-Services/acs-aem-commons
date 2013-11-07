@@ -18,8 +18,48 @@
   ~ #L%
   -->
 
-<div style="background-color: #FFD3DB; padding: 1em;">
-    <h2>Error</h2>
-    <p>There was a problem rendering this component.</p>
-    <p>Please contact your application support staff.</p>
+<style>
+    .acs-commons-component-error-container {
+        color: #fff;
+        background-color: #FD6667;
+        border: solid 1px #C64340;
+        padding: 1em;
+    }
+
+    .acs-commons-component-error-box-title {
+        color: #fff;
+        font-size: 2em;
+        margin-bottom: .5em;
+    }
+
+    .acs-commons-component-error-box-text {
+        color: #fff;
+        margin-bottom: 1em;
+    }
+
+    /* Preview Styles (Handling Preview mode even without page refresh) */
+
+    .cq-wcm-preview .acs-commons-component-error-container {
+        color: #999;
+        background-color: transparent;
+        border: dashed 2px #ccc;
+        padding: 1em;
+    }
+
+    .cq-wcm-preview .acs-commons-component-error-box-title {
+        color: #999;
+        font-size: 2em;
+        margin-bottom: .5em;
+    }
+
+    .cq-wcm-preview .acs-commons-component-error-box-text {
+        color: #999;
+        margin-bottom: 1em;
+    }
+</style>
+
+<div class="acs-commons-component-error-container">
+    <div class="acs-commons-component-error-box-title">ATTENTION</div>
+    <p class="acs-commons-component-error-box-text">An error occurred while rendering this component.</p>
+    <p class="acs-commons-component-error-box-text">Please consult your application support team.</p>
 </div>
