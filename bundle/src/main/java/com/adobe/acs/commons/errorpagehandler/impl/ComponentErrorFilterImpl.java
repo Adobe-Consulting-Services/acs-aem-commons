@@ -26,10 +26,12 @@ import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingFilter;
-import org.apache.felix.scr.annotations.sling.SlingFilterScope;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -46,22 +48,47 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Map;
 
-@SlingFilter(
-        label = "ACS AEM Commons - Component Error Handler Filter",
+@Component(
+        label = "ACS AEM Commons - Component-Level Error Handler",
         description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
                 + "components based on WCM Modes (edit, preview, publish).",
-        metatype = false,
-        generateComponent = true,
-        generateService = true,
-        order = 1001,
-        scope = SlingFilterScope.COMPONENT)
+        policy = ConfigurationPolicy.REQUIRE,
+        metatype = true,
+        immediate = false
+)
+@Properties({
+    @Property(
+        name = "sling.filter.scope",
+        value = "component",
+        propertyPrivate =  true
+    ),
+    @Property(
+        name = "filter.order",
+        intValue = ComponentErrorFilterImpl.FILTER_ORDER,
+        propertyPrivate = true
+    )
+})
+@Service(javax.servlet.Filter.class)
 public class ComponentErrorFilterImpl implements Filter {
     private static final Logger log = LoggerFactory.getLogger(ComponentErrorFilterImpl.class.getName());
 
+    static final int FILTER_ORDER = 1001;
+
     @Reference
     private ComponentHelper componentHelper;
+
+    /* Edit Mode */
+
+    private static final boolean DEFAULT_EDIT_ENABLED = true;
+    private boolean editModeEnabled = DEFAULT_EDIT_ENABLED;
+    @Property(label = "Edit-Mode Error Handling",
+            description = "Enable handling of Edit-mode errors (EDIT, DESIGN, ANALYTICS)",
+            boolValue = DEFAULT_EDIT_ENABLED)
+    public static final String PROP_EDIT_ENABLED = "prop.edit-mode.enabled";
 
     private static final String DEFAULT_EDIT_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/errorpagehandler/components/edit.html";
@@ -69,8 +96,16 @@ public class ComponentErrorFilterImpl implements Filter {
     @Property(label = "Edit HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
             value = DEFAULT_EDIT_ERROR_HTML_PATH)
-    public static final String PROP_EDIT_ERROR_HTML_PATH = "prop.edit-error-html-path";
+    public static final String PROP_EDIT_ERROR_HTML_PATH = "prop.edit-mode.html-path";
 
+    /* Preview Mode */
+
+    private static final boolean DEFAULT_PREVIEW_ENABLED = false;
+    private boolean previewModeEnabled = DEFAULT_PREVIEW_ENABLED;
+    @Property(label = "Preview-Mode Error Handling",
+            description = "Enable handling of Edit-mode errors (PREVIEW and READ_ONLY)",
+            boolValue = DEFAULT_PREVIEW_ENABLED)
+    public static final String PROP_PREVIEW_ENABLED = "prop.preview-mode.enabled";
 
     private static final String DEFAULT_PREVIEW_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/errorpagehandler/components/preview.html";
@@ -78,16 +113,25 @@ public class ComponentErrorFilterImpl implements Filter {
     @Property(label = "Preview HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
             value = DEFAULT_PREVIEW_ERROR_HTML_PATH)
-    public static final String PROP_PREVIEW_ERROR_HTML_PATH = "prop.preview-error-html-path";
+    public static final String PROP_PREVIEW_ERROR_HTML_PATH = "prop.preview-mode.html-path";
 
     private static final String DEFAULT_PUBLISH_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/errorpagehandler/components/publish.html";
+
+    /* Publish Mode */
+
+    private static final boolean DEFAULT_PUBLISH_ENABLED = false;
+    private boolean publishModeEnabled = DEFAULT_PUBLISH_ENABLED;
+    @Property(label = "Publish-Mode Error Handling",
+            description = "Enable handling of Edit-mode errors (PREVIEW and READONLY)",
+            boolValue = DEFAULT_PUBLISH_ENABLED)
+    public static final String PROP_PUBLISH_ENABLED = "prop.publish-mode.enabled";
 
     private String publishErrorHTMLPath = DEFAULT_PUBLISH_ERROR_HTML_PATH;
     @Property(label = "Publish HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in DISABLED mode.",
             value = DEFAULT_PUBLISH_ERROR_HTML_PATH)
-    public static final String PROP_PUBLISH_ERROR_HTML_PATH = "prop.publish-error-html-path";
+    public static final String PROP_PUBLISH_ERROR_HTML_PATH = "prop.publish-mode.html-path";
 
 
     @Override
@@ -95,10 +139,10 @@ public class ComponentErrorFilterImpl implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-
-        if (!(request instanceof SlingHttpServletRequest) ||
-                !(response instanceof SlingHttpServletResponse)) {
+    public final void doFilter(ServletRequest request, ServletResponse response,
+                               FilterChain chain) throws IOException, ServletException {
+        if (!(request instanceof SlingHttpServletRequest)
+                || !(response instanceof SlingHttpServletResponse)) {
             chain.doFilter(request, response);
             return;
         }
@@ -107,18 +151,27 @@ public class ComponentErrorFilterImpl implements Filter {
         final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
 
         final ComponentContext componentContext = WCMUtils.getComponentContext(request);
-        final Resource resource = slingRequest.getResource();
 
         if (componentContext == null || componentContext.isRoot()) {
-            log.debug("ComponentContext is null or isRoot for: {}", resource.getPath());
             chain.doFilter(request, response);
-        } else if (componentHelper.isAuthoringMode(slingRequest)) {
+        } else if (editModeEnabled
+                && (componentHelper.isEditMode(slingRequest)
+                || componentHelper.isDesignMode(slingRequest)
+                || WCMMode.ANALYTICS.equals(WCMMode.fromRequest(slingRequest)))) {
+            // Edit Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, editErrorHTMLPath);
-        } else if (componentHelper.isPreviewMode(slingRequest)
-                || componentHelper.isReadOnlyMode(slingRequest)) {
+        } else if (previewModeEnabled
+                && (componentHelper.isPreviewMode(slingRequest)
+                || componentHelper.isReadOnlyMode(slingRequest))) {
+            // Preview Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, previewErrorHTMLPath);
-        } else {
+        } else if (publishModeEnabled
+                && componentHelper.isDisabledMode(slingRequest)) {
+            // Publish Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, publishErrorHTMLPath);
+        } else {
+            // Normal Behavior
+            chain.doFilter(request, response);
         }
     }
 
@@ -127,28 +180,41 @@ public class ComponentErrorFilterImpl implements Filter {
                                            final FilterChain chain,
                                            final String pathToHTML) throws IOException {
 
-        final ResourceResolver resourceResolver = slingRequest.getResourceResolver();
+        log.debug("Including resource with ACS AEM Commons Component Level Error Handling for: {}",
+                slingRequest.getResource().getPath());
 
-        if(log.isDebugEnabled()) {
-            final WCMMode mode = WCMMode.fromRequest(slingRequest);
-            final Resource resource = slingRequest.getResource();
-
-            log.debug("Component error for [ {} ] under {} mode.", resource.getPath(), mode.name());
-        }
+        final Resource resource = slingRequest.getResource();
 
         try {
             chain.doFilter(slingRequest, slingResponse);
-        } catch (ServletException e) {
-            this.writeErrorHTML(slingResponse, resourceResolver, pathToHTML);
-        } catch (SlingException e) {
-            this.writeErrorHTML(slingResponse, resourceResolver, pathToHTML);
-        } catch (Throwable e) {
-            this.writeErrorHTML(slingResponse, resourceResolver, pathToHTML);
+        } catch (final ServletException ex) {
+            this.handleError(slingResponse, resource, pathToHTML, ex);
+        } catch (final SlingException ex) {
+            this.handleError(slingResponse, resource, pathToHTML, ex);
+        } catch (final Throwable ex) {
+            this.handleError(slingResponse, resource, pathToHTML, ex);
         }
     }
 
-    private void writeErrorHTML(final SlingHttpServletResponse slingResponse, final ResourceResolver resourceResolver,
+    private void handleError(final SlingHttpServletResponse slingResponse, final Resource resource,
+                                final String pathToHTML, final Throwable ex) throws IOException {
+        this.logError(ex);
+        this.writeErrorHTML(slingResponse, resource, pathToHTML);
+    }
+
+    private void logError(final Throwable ex) {
+        final StringWriter stringWriter = new StringWriter();
+        ex.printStackTrace(new PrintWriter(stringWriter));
+        log.error(stringWriter.toString());
+    }
+
+    private void writeErrorHTML(final SlingHttpServletResponse slingResponse, final Resource resource,
                                 final String pathToHTML) throws IOException {
+        final ResourceResolver resourceResolver = resource.getResourceResolver();
+
+        log.info("ACS AEM Commons Component-Level Error Handling trapped error for: {}",
+                resource.getPath());
+
         slingResponse.getWriter().print(this.getHTML(resourceResolver, pathToHTML));
     }
 
@@ -163,13 +229,38 @@ public class ComponentErrorFilterImpl implements Filter {
     }
 
     @Override
-    public void destroy() {
+    public final void destroy() {
+        editModeEnabled = false;
+        previewModeEnabled = false;
+        publishModeEnabled = false;
     }
 
     @Activate
-    protected void activate(final Map<String, String> config) {
-        editErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_EDIT_ERROR_HTML_PATH), DEFAULT_EDIT_ERROR_HTML_PATH);
-        previewErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PREVIEW_ERROR_HTML_PATH), DEFAULT_PREVIEW_ERROR_HTML_PATH);
-        publishErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PUBLISH_ERROR_HTML_PATH), DEFAULT_PUBLISH_ERROR_HTML_PATH);
+    public final void activate(final Map<String, String> config) {
+        editModeEnabled = PropertiesUtil.toBoolean(config.get(PROP_EDIT_ENABLED),
+                DEFAULT_EDIT_ENABLED);
+        previewModeEnabled = PropertiesUtil.toBoolean(config.get(PROP_PREVIEW_ENABLED),
+                DEFAULT_PREVIEW_ENABLED);
+        publishModeEnabled = PropertiesUtil.toBoolean(config.get(PROP_PUBLISH_ENABLED),
+                DEFAULT_PUBLISH_ENABLED);
+
+        editErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_EDIT_ERROR_HTML_PATH),
+                DEFAULT_EDIT_ERROR_HTML_PATH);
+        previewErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PREVIEW_ERROR_HTML_PATH),
+                DEFAULT_PREVIEW_ERROR_HTML_PATH);
+        publishErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PUBLISH_ERROR_HTML_PATH),
+                DEFAULT_PUBLISH_ERROR_HTML_PATH);
+
+        log.info("Component Error Handling for Edit Modes: {} ~> {}",
+                editModeEnabled ? "Enabled" : "Disabled",
+                editErrorHTMLPath);
+
+        log.info("Component Error Handling for Preview Modes: {} ~> {}",
+                previewModeEnabled ? "Enabled" : "Disabled",
+                previewErrorHTMLPath);
+
+        log.info("Component Error Handling for Publish Modes: {} ~> {}",
+                publishModeEnabled ? "Enabled" : "Disabled",
+                publishErrorHTMLPath);
     }
 }
