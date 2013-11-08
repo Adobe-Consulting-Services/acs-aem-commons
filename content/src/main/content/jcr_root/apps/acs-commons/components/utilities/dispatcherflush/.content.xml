@@ -4,5 +4,5 @@
     jcr:description="Utility page for initiating forced dispatcher flush requests."
     jcr:primaryType="cq:Component"
     jcr:title="ACS Commons Dispatcher Flush"
-    sling:resourceSuperType="foundation/components/page"
+    sling:resourceSuperType="acs-commons/components/utilities/page"
     componentGroup=".hidden"/>

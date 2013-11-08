@@ -39,38 +39,36 @@
     boolean hasPaths = paths.length > 0;
 %>
 
-<div class="dispatcher-flush-config">
-    <h3>Flush Action</h3>
-    <ul>
-        <% if(StringUtils.equals("ACTIVATE", actionType)) { %>
-        <li>Invalidate Cache</li>
-        <% } else if(StringUtils.equals("DELETE", actionType)) { %>
-        <li>Delete Cache</li>
-        <% } else { %>
-        <li class="not-set">Flush method not set</li>
-        <% } %>
-    </ul>
+<% if(hasActionType && hasPaths && hasAgents) { %>
+<form action="<%= resource.getPath() %>.flush.html" method="post">
+    <input class="button" type="submit" value="Flush Paths on Dispatchers"/>
+</form>
+<% } %>
 
-    <h3>Paths to Flush</h3>
-    <ul>
-        <% if(!hasPaths) { %><li class="not-set">Dispatcher flush paths not set</li><% } %>
-        <% for(final String path : paths) { %>
-        <li><%= path %></li>
-        <% } %>
-    </ul>
-
-    <% if(hasPaths) { %>
-    <form action="<%= resource.getPath() %>.flush.html" method="post">
-        <input type="submit" value="Flush Paths"/>
-    </form>
+<h3>Flush Action</h3>
+<ul>
+    <% if(StringUtils.equals("ACTIVATE", actionType)) { %>
+    <li>Invalidate Cache</li>
+    <% } else if(StringUtils.equals("DELETE", actionType)) { %>
+    <li>Delete Cache</li>
+    <% } else { %>
+    <li class="not-set">Flush method not set</li>
     <% } %>
+</ul>
 
-    <h3>Active Dispatcher Flush Agents</h3>
-    <ul>
-        <% if(!hasAgents) { %><li class="not-set"><a href="/miscadmin#/etc/replication/agents.author" target="_blank">No active
-        Dispatcher Flush replication agents</a></li><% } %>
-        <% for(final Agent agent : flushAgents) { %>
-        <li><a href="<%= resourceResolver.map(agent.getConfiguration().getConfigPath()) %>.log.html" target="_target"><%= agent.getConfiguration().getName() %></a></li>
-        <% } %>
-    </ul>
-</div>
+<h3>Paths to Flush</h3>
+<ul>
+    <% if(!hasPaths) { %><li class="not-set">Dispatcher flush paths not set</li><% } %>
+    <% for(final String path : paths) { %>
+    <li><%= path %></li>
+    <% } %>
+</ul>
+
+<h3>Active Dispatcher Flush Agents</h3>
+<ul>
+    <% if(!hasAgents) { %><li class="not-set"><a href="/miscadmin#/etc/replication/agents.author" target="_blank">No active
+    Dispatcher Flush replication agents</a></li><% } %>
+    <% for(final Agent agent : flushAgents) { %>
+    <li><a href="<%= resourceResolver.map(agent.getConfiguration().getConfigPath()) %>.log.html" target="_target"><%= agent.getConfiguration().getName() %></a></li>
+    <% } %>
+</ul>
