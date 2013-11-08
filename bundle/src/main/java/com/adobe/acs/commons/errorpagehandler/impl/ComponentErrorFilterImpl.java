@@ -55,7 +55,7 @@ import java.util.Map;
 @Component(
         label = "ACS AEM Commons - Component-Level Error Handler",
         description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
-                + "components based on WCM Modes (edit, preview, publish).",
+                + "components based on WCM Mode collections (Edit, Preview, Publish).",
         policy = ConfigurationPolicy.REQUIRE,
         metatype = true,
         immediate = false
@@ -183,22 +183,23 @@ public class ComponentErrorFilterImpl implements Filter {
         log.debug("Including resource with ACS AEM Commons Component Level Error Handling for: {}",
                 slingRequest.getResource().getPath());
 
-        final Resource resource = slingRequest.getResource();
-
         try {
             chain.doFilter(slingRequest, slingResponse);
         } catch (final ServletException ex) {
-            this.handleError(slingResponse, resource, pathToHTML, ex);
+            this.handleError(slingResponse, slingRequest.getResource(), pathToHTML, ex);
         } catch (final SlingException ex) {
-            this.handleError(slingResponse, resource, pathToHTML, ex);
+            this.handleError(slingResponse, slingRequest.getResource(), pathToHTML, ex);
         } catch (final Throwable ex) {
-            this.handleError(slingResponse, resource, pathToHTML, ex);
+            this.handleError(slingResponse, slingRequest.getResource(), pathToHTML, ex);
         }
     }
 
     private void handleError(final SlingHttpServletResponse slingResponse, final Resource resource,
                                 final String pathToHTML, final Throwable ex) throws IOException {
+        // Log the error to the log files, so the exception is not lost
         this.logError(ex);
+
+        // Write the custom "pretty" error message out to the response
         this.writeErrorHTML(slingResponse, resource, pathToHTML);
     }
 
