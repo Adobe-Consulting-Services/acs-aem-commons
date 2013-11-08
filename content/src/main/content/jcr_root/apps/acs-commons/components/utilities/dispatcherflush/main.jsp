@@ -40,6 +40,8 @@
     /* Properties and Data */
     final Map<String, Agent> agents = agentManager.getAgents();
     final boolean result = StringUtils.isNotBlank((slingRequest.getRequestPathInfo().getSuffix()));
+    final boolean generalError =
+            StringUtils.equals("/replication-error", slingRequest.getRequestPathInfo().getSuffix());
 %>
 
 <h1>Dispatcher Flush</h1>
@@ -49,15 +51,22 @@
 <% if(result) { %>
 <div class="call-out">
     <p>
-        Your dispatcher flush requests have been issued with the following results.
+        Your dispatcher flush requests have been issued with the following results:
     </p>
+
+    <% if(generalError) { %>
+    <p>
+        An error occurred during replication. Possible issues include invalid flush paths or lack of active
+        dispatcher flush agents.
+    </p>
+    <% } %>
 
     <ul>
         <%
         boolean errors = false;
         int index = 0;
 
-        do {
+        while(!generalError) {
             final Agent agent = agents.get(PathInfoUtil.getSuffixSegment(slingRequest, index));
             final boolean status = StringUtils.equals("true", PathInfoUtil.getSuffixSegment(slingRequest, index + 1));
 
@@ -67,12 +76,12 @@
             %><li><a href="<%= resourceResolver.map(agent.getConfiguration().getConfigPath()) %>.html" target="_blank"><%= agent.getConfiguration().getName() %></a>: <%= status ? "Success" : "Error" %></li><%
 
             index += 2;
-        } while(true);
+        };
 
-        if(index == 0) { %>No Active Dispatcher Flush agents could be found for this run mode.<% } %>
+        if(index == 0 && !generalError) { %>No Active Dispatcher Flush agents could be found for this run mode.<% } %>
     </ul>
 
-    <% if(errors) { %>
+    <% if(errors || generalError) { %>
     <p>
         Please review your Dispatcher Flush Agent logs to ensure all replication requests were successfully processed.
     </p>

@@ -23,6 +23,7 @@
           com.day.cq.replication.Agent,
           com.day.cq.replication.ReplicationResult,
           com.day.cq.replication.ReplicationActionType,
+          com.day.cq.replication.ReplicationException,
           java.util.Map"%><%
 
     /* Services */
@@ -34,15 +35,19 @@
 
     String suffix = "";
 
-    if(paths.length > 0) {
-        final Map<Agent, ReplicationResult> results = dispatcherFlusher.flush(resourceResolver, replicationActionType, true, paths);
+    try {
+        if(paths.length > 0) {
+            final Map<Agent, ReplicationResult> results = dispatcherFlusher.flush(resourceResolver, replicationActionType, true, paths);
 
-        for(final Map.Entry<Agent, ReplicationResult> entry : results.entrySet()) {
-            final Agent agent = entry.getKey();
-            final ReplicationResult result = entry.getValue();
+            for(final Map.Entry<Agent, ReplicationResult> entry : results.entrySet()) {
+                final Agent agent = entry.getKey();
+                final ReplicationResult result = entry.getValue();
 
-            suffix = "/" + agent.getId() + "/" + (result.isSuccess() && result.getCode() == 200);
+                suffix = "/" + agent.getId() + "/" + (result.isSuccess() && result.getCode() == 200);
+            }
         }
+    } catch(ReplicationException ex) {
+        suffix += "/replication-error";
     }
 
     response.sendRedirect(currentPage.getPath() + ".html" + suffix);
