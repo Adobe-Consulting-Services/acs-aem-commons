@@ -28,6 +28,7 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 import javax.jcr.Session;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -145,6 +147,17 @@ public class DispatcherFlusherImplTest {
 
         when(agentConfig1.getSerializationType()).thenReturn("flush");
         when(agentConfig2.getSerializationType()).thenReturn("notflush");
+
+        when(agentConfig1.getTransportURI()).thenReturn("http://localhost/dispatcher/invalidate.cache");
+        when(agentConfig2.getTransportURI()).thenReturn("ftp://localhost/dispatcher/invalidate.cache");
+
+        Map<String, Object> tmp = new HashMap<String, Object>();
+        tmp.put(AgentConfig.PROTOCOL_HTTP_HEADERS, new String[] {"CQ-Action:{action}", "CQ-Handle:{path}",
+                "CQ-Path: {path}"});
+
+        when(agentConfig1.getProperties()).thenReturn(new ValueMapDecorator(tmp));
+        when(agentConfig2.getProperties()).thenReturn(new ValueMapDecorator(tmp));
+
 
         final Agent[] actual = dispatcherFlusher.getFlushAgents();
 

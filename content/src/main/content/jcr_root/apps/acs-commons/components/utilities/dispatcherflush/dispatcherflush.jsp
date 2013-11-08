@@ -1,36 +1,35 @@
 <%--
-  #%L
-  ACS AEM Commons Package
-  %%
-  Copyright (C) 2013 Adobe
-  %%
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  #L%
+  ~ #%L
+  ~ ACS AEM Commons Bundle
+  ~ %%
+  ~ Copyright (C) 2013 Adobe
+  ~ %%
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~ #L%
   --%>
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8"
-          import="org.apache.commons.lang3.StringEscapeUtils,
-                org.apache.commons.lang.StringUtils,
-                java.util.Map,
-    			com.adobe.acs.commons.util.TextUtil,
-    			com.adobe.acs.commons.util.PathInfoUtil,
-    			com.day.cq.replication.Agent,
+          import="com.adobe.acs.commons.util.PathInfoUtil,
+                com.adobe.acs.commons.util.TextUtil,
+                com.day.cq.replication.Agent,
     			com.day.cq.replication.AgentManager,
-    			com.day.cq.wcm.api.WCMMode"%><%
+    			com.day.cq.wcm.api.WCMMode,
+    			org.apache.commons.lang.StringUtils,
+    			org.apache.commons.lang3.StringEscapeUtils,
+    			java.util.Map"%><%
 
     /* Services */
     final AgentManager agentManager = sling.getService(AgentManager.class);
-
 
     /* Properties and Data */
     final WCMMode mode = WCMMode.fromRequest(slingRequest);
@@ -49,7 +48,7 @@
 
 <!DOCTYPE html>
     <head>
-        <title>CQ5 Design | <%= StringEscapeUtils.escapeHtml4(title) %></title>
+        <title>Dispatcher Flush | <%= StringEscapeUtils.escapeHtml4(title) %></title>
         <meta http-equiv="Content-Type" content="text/html; utf-8" />
 
         <script src="/libs/cq/ui/resources/cq-ui.js" type="text/javascript"></script>
@@ -57,7 +56,12 @@
     </head>
 
     <body class="dispatcher-flusher">
-        <h1><%= StringEscapeUtils.escapeHtml4(title) %></h1>
+        <h1>
+            Dispatcher Flush
+        </h1>
+        <h2>
+            <%= StringEscapeUtils.escapeHtml4(title) %>
+        </h2>
 
         <% if(result) { %>
         <div class="result-message">
