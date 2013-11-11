@@ -23,7 +23,7 @@
     jcr:description="A tool for the manual 'force flushing' of the Dispatcher cache"
     jcr:primaryType="cq:Template"
     jcr:title="Dispatcher Flush"
-    allowedPaths="[/etc/acs-commons/dispatcher-flush(/.*)?]"
+    allowedPaths="[/etc(/.*)?]"
     ranking="{Long}100">
     <jcr:content
         cq:designPath="/etc/designs/acs-commons"
