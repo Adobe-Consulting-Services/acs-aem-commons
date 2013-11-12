@@ -20,9 +20,11 @@
 
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushAgentFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentConfig;
+import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationOptions;
@@ -32,6 +34,7 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -59,83 +62,26 @@ public class DispatcherFlusherImplTest {
     @Mock
     private AgentManager agentManager;
 
+    final Agent agent1 = mock(Agent.class);
+    final Agent agent2 = mock(Agent.class);
+
+    final AgentConfig agentConfig1 = mock(AgentConfig.class);
+    final AgentConfig agentConfig2 = mock(AgentConfig.class);
+
     @InjectMocks
     private DispatcherFlusher dispatcherFlusher = new DispatcherFlusherImpl();
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-    }
 
-    @After
-    public void tearDown() throws Exception {
-        reset(replicator);
-        reset(agentManager);
-    }
+        when(agent1.getId()).thenReturn("Agent 1");
+        when(agent1.isEnabled()).thenReturn(true);
+        when(agent1.getConfiguration()).thenReturn(agentConfig1);
 
-    @Test
-    public void testName() throws Exception {
-
-    }
-
-    @Test
-    public void testFlush() throws Exception {
-        final ResourceResolver resourceResolver = mock(ResourceResolver.class);
-        final Session session = mock(Session.class);
-        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-
-        final String path1 = "/content/foo";
-        final String path2 = "/content/bar";
-
-       dispatcherFlusher.flush(resourceResolver, path1, path2);
-
-        verify(replicator, times(1)).replicate(eq(session), eq(ReplicationActionType.ACTIVATE), eq(path1),
-                any(ReplicationOptions.class));
-
-        verify(replicator, times(1)).replicate(eq(session), eq(ReplicationActionType.ACTIVATE), eq(path2),
-                any(ReplicationOptions.class));
-
-        verifyNoMoreInteractions(replicator);
-    }
-
-
-    @Test
-    public void testFlush_2() throws Exception {
-        final ResourceResolver resourceResolver = mock(ResourceResolver.class);
-        final Session session = mock(Session.class);
-        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-
-        final ReplicationActionType actionType = ReplicationActionType.DELETE;
-        final boolean synchronous = false;
-
-        final String path1 = "/content/foo";
-        final String path2 = "/content/bar";
-
-        dispatcherFlusher.flush(resourceResolver, actionType, synchronous, path1, path2);
-
-        verify(replicator, times(1)).replicate(eq(session), eq(actionType), eq(path1),
-                any(ReplicationOptions.class));
-
-        verify(replicator, times(1)).replicate(eq(session), eq(actionType), eq(path2),
-                any(ReplicationOptions.class));
-
-        verifyNoMoreInteractions(replicator);
-    }
-
-    @Test
-    public void testGetFlushAgents() throws Exception {
-        final Agent agent1 = mock(Agent.class);
-        final Agent agent2 = mock(Agent.class);
-
-        final AgentConfig agentConfig1 = mock(AgentConfig.class);
-        final AgentConfig agentConfig2 = mock(AgentConfig.class);
-
-        final Map<String, Agent> agents = mock(Map.class);
-        final Collection<Agent> agentValues = Arrays.asList(new Agent[]{ agent1, agent2 });
-
-        when(agentManager.getAgents()).thenReturn(agents);
-
-        when(agents.values()).thenReturn(agentValues);
+        when(agent2.getId()).thenReturn("Agent 2");
+        when(agent2.isEnabled()).thenReturn(true);
+        when(agent2.getConfiguration()).thenReturn(agentConfig2);
 
         when(agent1.getId()).thenReturn("Agent 1");
         when(agent1.isEnabled()).thenReturn(true);
@@ -157,9 +103,133 @@ public class DispatcherFlusherImplTest {
 
         when(agentConfig1.getProperties()).thenReturn(new ValueMapDecorator(tmp));
         when(agentConfig2.getProperties()).thenReturn(new ValueMapDecorator(tmp));
+    }
 
+    @After
+    public void tearDown() throws Exception {
+        reset(replicator);
+        reset(agentManager);
+        reset(agent1, agent2);
+        reset(agentConfig1, agentConfig2);
+    }
+
+    @Test
+    public void testName() throws Exception {
+
+    }
+
+    @Test
+    public void testFlush_replicatorAgent() throws Exception {
+        final ResourceResolver resourceResolver = mock(ResourceResolver.class);
+        final Session session = mock(Session.class);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+
+        final String path1 = "/content/foo";
+        final String path2 = "/content/bar";
+
+       dispatcherFlusher.flush(resourceResolver, path1, path2);
+
+        verify(replicator, times(1)).replicate(eq(session), eq(ReplicationActionType.ACTIVATE), eq(path1),
+                any(ReplicationOptions.class));
+
+        verify(replicator, times(1)).replicate(eq(session), eq(ReplicationActionType.ACTIVATE), eq(path2),
+                any(ReplicationOptions.class));
+
+        verifyNoMoreInteractions(replicator);
+    }
+
+
+    @Test
+    public void testFlush_replicatorAgent2() throws Exception {
+        final AgentFilter agentFilter = new DispatcherFlushAgentFilter();
+
+        final ResourceResolver resourceResolver = mock(ResourceResolver.class);
+        final Session session = mock(Session.class);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+
+        final ReplicationActionType actionType = ReplicationActionType.DELETE;
+        final boolean synchronous = false;
+
+        final String path1 = "/content/foo";
+        final String path2 = "/content/bar";
+
+        final ArgumentCaptor<ReplicationOptions> argument = ArgumentCaptor.forClass(ReplicationOptions.class);
+
+        dispatcherFlusher.flush(resourceResolver, actionType, synchronous, path1, path2);
+
+        verify(replicator, times(1)).replicate(eq(session), eq(actionType), eq(path1),
+                argument.capture());
+
+        assertEquals(DispatcherFlushAgentFilter.class, argument.getValue().getFilter().getClass());
+
+        verify(replicator, times(1)).replicate(eq(session), eq(actionType), eq(path2),
+                argument.capture());
+
+        assertEquals(DispatcherFlushAgentFilter.class, argument.getValue().getFilter().getClass());
+
+        verifyNoMoreInteractions(replicator);
+    }
+
+    @Test
+    public void testFlush_replicatorAgent3() throws Exception {
+        final AgentFilter agentFilter = AgentFilter.DEFAULT;
+        final ResourceResolver resourceResolver = mock(ResourceResolver.class);
+        final Session session = mock(Session.class);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+
+        final ReplicationActionType actionType = ReplicationActionType.DELETE;
+        final boolean synchronous = false;
+
+        final String path1 = "/content/foo";
+        final String path2 = "/content/bar";
+
+        final ArgumentCaptor<ReplicationOptions> argument = ArgumentCaptor.forClass(ReplicationOptions.class);
+
+        dispatcherFlusher.flush(resourceResolver, actionType, synchronous, agentFilter, path1,
+                path2);
+
+        verify(replicator, times(1)).replicate(eq(session), eq(actionType), eq(path1),
+                argument.capture());
+
+        assertEquals(agentFilter, argument.getValue().getFilter());
+
+        verify(replicator, times(1)).replicate(eq(session), eq(actionType), eq(path2),
+                any(ReplicationOptions.class));
+
+        assertEquals(agentFilter, argument.getValue().getFilter());
+
+        verifyNoMoreInteractions(replicator);
+    }
+
+
+    @Test
+    public void testGetFlushAgents() throws Exception {
+        final Map<String, Agent> agents = mock(Map.class);
+        final Collection<Agent> agentValues = Arrays.asList(new Agent[]{ agent1, agent2 });
+
+        when(agentManager.getAgents()).thenReturn(agents);
+
+        when(agents.values()).thenReturn(agentValues);
 
         final Agent[] actual = dispatcherFlusher.getFlushAgents();
+
+        assertEquals(1, actual.length);
+
+        assertEquals("Agent 1", actual[0].getId());
+    }
+
+
+    @Test
+    public void testGetAgents() throws Exception {
+        final Map<String, Agent> agents = mock(Map.class);
+        final Collection<Agent> agentValues = Arrays.asList(new Agent[]{ agent1, agent2 });
+
+        when(agentManager.getAgents()).thenReturn(agents);
+
+        when(agents.values()).thenReturn(agentValues);
+
+
+        final Agent[] actual = dispatcherFlusher.getAgents(new DispatcherFlushAgentFilter());
 
         assertEquals(1, actual.length);
 
