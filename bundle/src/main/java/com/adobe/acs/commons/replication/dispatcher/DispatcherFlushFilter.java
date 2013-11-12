@@ -34,6 +34,11 @@ import org.slf4j.LoggerFactory;
 public class DispatcherFlushFilter implements AgentFilter {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushFilter.class);
 
+    /**
+     * All: All Enablied Dispatcher Flush Agents.
+     * Hierarchical: "Normal" flush invalidation that effects entire content hierarchies.
+     * ResourceOnly: Targets agents with a CQ-Scope-Action of "Resource Only" defined.
+     */
     public static enum FlushType {
         All,
         Hierarchical,
@@ -48,10 +53,18 @@ public class DispatcherFlushFilter implements AgentFilter {
 
     private final FlushType flushType;
 
+    /**
+     * Default constructor; Same as: new DispatcherFlushFilter(FlushType.All);.
+     */
     public DispatcherFlushFilter() {
         this.flushType = FlushType.All;
     }
 
+    /**
+     * Targets a set of Dispatcher Flush agents based on the parameter flushType.
+     *
+     * @param flushType The type of Flush agents this Agent should target
+     */
     public DispatcherFlushFilter(final FlushType flushType) {
         this.flushType = flushType;
     }
@@ -64,11 +77,11 @@ public class DispatcherFlushFilter implements AgentFilter {
      */
     @Override
     public final boolean isIncluded(final Agent agent) {
-        if(FlushType.All.equals(this.flushType)) {
+        if (FlushType.All.equals(this.flushType)) {
             return this.isIncludedCommon(agent);
-        } else if(FlushType.Hierarchical.equals(this.flushType)) {
+        } else if (FlushType.Hierarchical.equals(this.flushType)) {
             return this.isIncludedHierarchical(agent);
-        } else if(FlushType.ResourceOnly.equals(this.flushType)) {
+        } else if (FlushType.ResourceOnly.equals(this.flushType)) {
             return this.isIncludedResourceOnly(agent);
         }
 
@@ -76,10 +89,10 @@ public class DispatcherFlushFilter implements AgentFilter {
     }
 
     /**
-     * Returns the Dispatcher FlushType this filter was created with
+     * Returns the Dispatcher FlushType this filter was created with.
      * @return this filter's dispatcher flushType
      */
-    public FlushType getFlushType() {
+    public final FlushType getFlushType() {
         return this.flushType;
     }
 
@@ -143,8 +156,8 @@ public class DispatcherFlushFilter implements AgentFilter {
         final ValueMap properties = agent.getConfiguration().getProperties();
         final String[] headers =  properties.get(AgentConfig.PROTOCOL_HTTP_HEADERS, new String[]{});
 
-        for(final String header : headers) {
-            if(StringUtils.startsWith(header, CQ_ACTION_HEADER)) {
+        for (final String header : headers) {
+            if (StringUtils.startsWith(header, CQ_ACTION_HEADER)) {
                 return true;
             }
         }
@@ -162,8 +175,8 @@ public class DispatcherFlushFilter implements AgentFilter {
         final ValueMap properties = agent.getConfiguration().getProperties();
         final String[] headers =  properties.get(AgentConfig.PROTOCOL_HTTP_HEADERS, new String[]{});
 
-        for(final String header : headers) {
-            if(StringUtils.equals(header, CQ_SCOPE_ACTION_HEADER)) {
+        for (final String header : headers) {
+            if (StringUtils.equals(header, CQ_SCOPE_ACTION_HEADER)) {
                 return true;
             }
         }

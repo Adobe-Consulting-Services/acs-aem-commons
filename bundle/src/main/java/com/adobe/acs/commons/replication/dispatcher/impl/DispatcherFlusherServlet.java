@@ -19,13 +19,13 @@
  */
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
+import com.day.cq.replication.Agent;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationException;
+import com.day.cq.replication.ReplicationResult;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -39,13 +39,11 @@ import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.io.JSONWriter;
 
-import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
-import com.day.cq.replication.Agent;
-import com.day.cq.replication.ReplicationActionType;
-import com.day.cq.replication.ReplicationException;
-import com.day.cq.replication.ReplicationResult;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 @SlingServlet(resourceTypes = "acs-commons/components/utilities/dispatcherflush/configuration",
@@ -56,7 +54,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private DispatcherFlusher dispatcherFlusher;
 
     @Override
-    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
+    protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         final Resource resource = request.getResource();
         final ResourceResolver resourceResolver = request.getResourceResolver();
@@ -114,11 +112,11 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private class FlushResult {
+    private final class FlushResult {
 
         private FlushResult(Agent agent, ReplicationResult result) {
             this.agentId = agent.getId();
-            this.success = result.isSuccess() && result.getCode() == 200;
+            this.success = result.isSuccess() && result.getCode() == SlingHttpServletResponse.SC_OK;
         }
 
         private final String agentId;

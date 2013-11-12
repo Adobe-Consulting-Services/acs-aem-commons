@@ -82,7 +82,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
 
     /* Flush Rules */
-    private static final String[] DEFAULT_HIERARCHICAL_FLUSH_RULES = { };
+    private static final String[] DEFAULT_HIERARCHICAL_FLUSH_RULES = {};
 
     @Property(label = "Flush Rules (Hierarchical)",
             description = "Pattern to Path associations for flush rules."
@@ -93,7 +93,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
 
     /* Flush Rules */
-    private static final String[] DEFAULT_RESOURCE_ONLY_FLUSH_RULES = { };
+    private static final String[] DEFAULT_RESOURCE_ONLY_FLUSH_RULES = {};
 
     @Property(label = "Flush Rules (ResourceOnly)",
             description = "Pattern to Path associations for flush rules. "
@@ -146,7 +146,8 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                     log.debug("Requesting hierarchical flush of associated path: {} ~> {}", path,
                             entry.getValue());
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
-                            new DispatcherFlushRulesFilter(DispatcherFlushFilter.FlushType.Hierarchical), entry.getValue());
+                            new DispatcherFlushRulesFilter(DispatcherFlushFilter.FlushType.Hierarchical),
+                            entry.getValue());
                 }
             }
 
@@ -158,7 +159,8 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 if (m.matches()) {
                     log.debug("Requesting ResourceOnly flush of associated path: {} ~> {}", path, entry.getValue());
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
-                            new DispatcherFlushRulesFilter(DispatcherFlushFilter.FlushType.ResourceOnly), entry.getValue());
+                            new DispatcherFlushRulesFilter(DispatcherFlushFilter.FlushType.ResourceOnly),
+                            entry.getValue());
                 }
             }
 
