@@ -56,7 +56,7 @@ public class DispatcherFlushFilterTest {
 
         tmp = new HashMap<String, Object>();
         tmp.put(AgentConfig.PROTOCOL_HTTP_HEADERS, new String[] {"CQ-Action:{action}", "CQ-Handle:{path}",
-                "CQ-Path: {path}", "CQ-Scope-Action: ResourceOnly"});
+                "CQ-Path: {path}", "CQ-Action-Scope: ResourceOnly"});
         resourceOnlyProperties = new ValueMapDecorator(tmp);
 
         tmp = new HashMap<String, Object>();

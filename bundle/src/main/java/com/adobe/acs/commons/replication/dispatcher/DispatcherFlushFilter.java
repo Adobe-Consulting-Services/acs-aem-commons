@@ -37,7 +37,7 @@ public class DispatcherFlushFilter implements AgentFilter {
     /**
      * All: All Enablied Dispatcher Flush Agents.
      * Hierarchical: "Normal" flush invalidation that effects entire content hierarchies.
-     * ResourceOnly: Targets agents with a CQ-Scope-Action of "Resource Only" defined.
+     * ResourceOnly: Targets agents with a CQ-Action-Scope of "Resource Only" defined.
      */
     public static enum FlushType {
         All,
@@ -49,7 +49,7 @@ public class DispatcherFlushFilter implements AgentFilter {
     public static final String HTTP = "http://";
     public static final String HTTPS = "https://";
     public static final String CQ_ACTION_HEADER = "CQ-Action:";
-    public static final String CQ_SCOPE_ACTION_HEADER = "CQ-Scope-Action: ResourceOnly";
+    public static final String CQ_SCOPE_ACTION_HEADER = "CQ-Action-Scope: ResourceOnly";
 
     private final FlushType flushType;
 
@@ -166,7 +166,7 @@ public class DispatcherFlushFilter implements AgentFilter {
     }
 
     /**
-     * Checks if the agent has valid CQ-Scope-Action: ResourceOnly header.
+     * Checks if the agent has valid CQ-Action-Scope: ResourceOnly header.
      *
      * @param agent Agent to check
      * @return true if the Agent's headers contain the expected values
