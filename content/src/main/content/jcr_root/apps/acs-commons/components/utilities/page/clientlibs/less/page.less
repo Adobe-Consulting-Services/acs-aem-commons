@@ -1,0 +1,125 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+.acs-commons {
+  h1, h2, em, strong, p, ul, {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  h1 {
+    border-width: 0;
+  }
+
+  h2 {
+    margin: 0 0 1.5em 0;
+    width: auto;
+  }
+
+  h3 {
+    padding: .25rem .5rem;
+  }
+
+  p {
+    margin-left: 1em;
+    width: auto;
+  }
+
+  ul {
+    list-style-position:inside;
+    list-style-type: disc;
+    margin-bottom: 1em;
+    width: auto;
+  }
+
+  ul li {
+    border-width: 0;
+    margin-left: 1em;
+    width: auto;
+  }
+
+  .not-set {
+    font-style: italic;
+  }
+
+  .call-out {
+    background-color: white;
+    border: solid 1px #CCC;
+    font-size: 1.1em;
+    margin: 0 0 1em 0;
+    padding: 1em 2em 0 2em;
+
+    p {
+      margin-left: 0;
+      margin-right: 0;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+ .button {
+    -moz-box-shadow:inset 0px 1px 0px 0px #f7c5c0;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #f7c5c0;
+    box-shadow:inset 0px 1px 0px 0px #f7c5c0;
+
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #fc8d83), color-stop(1, #e4685d));
+    background:-moz-linear-gradient(top, #fc8d83 5%, #e4685d 100%);
+    background:-webkit-linear-gradient(top, #fc8d83 5%, #e4685d 100%);
+    background:-o-linear-gradient(top, #fc8d83 5%, #e4685d 100%);
+    background:-ms-linear-gradient(top, #fc8d83 5%, #e4685d 100%);
+    background:linear-gradient(to bottom, #fc8d83 5%, #e4685d 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fc8d83', endColorstr='#e4685d',GradientType=0);
+
+    background-color:#fc8d83;
+
+    -moz-border-radius:7px;
+    -webkit-border-radius:7px;
+    border-radius:7px;
+
+    border:1px solid #d83526;
+
+    display:inline-block;
+    color:#ffffff;
+    font-size:13px;
+    font-weight:bold;
+    padding:6px 11px;
+    text-decoration:none;
+    margin: 1em 0 .5em 0;
+
+    text-shadow:0px 1px 0px #b23e35;
+
+    &:hover {
+      background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #e4685d), color-stop(1, #fc8d83));
+      background:-moz-linear-gradient(top, #e4685d 5%, #fc8d83 100%);
+      background:-webkit-linear-gradient(top, #e4685d 5%, #fc8d83 100%);
+      background:-o-linear-gradient(top, #e4685d 5%, #fc8d83 100%);
+      background:-ms-linear-gradient(top, #e4685d 5%, #fc8d83 100%);
+      background:linear-gradient(to bottom, #e4685d 5%, #fc8d83 100%);
+      filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#e4685d', endColorstr='#fc8d83',GradientType=0);
+
+      background-color:#e4685d;
+    }
+
+    &:active {
+      position:relative;
+      top:1px;
+    }
+  }
+}
