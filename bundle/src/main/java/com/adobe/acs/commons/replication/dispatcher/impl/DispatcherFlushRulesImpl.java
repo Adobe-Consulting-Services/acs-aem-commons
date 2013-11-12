@@ -53,7 +53,12 @@ import java.util.regex.Pattern;
 
 @Component(
         label = "ACS AEM Commons - Dispatcher Flush Rules",
-        description = "Facilitates the flushing of associated paths based on resources being replicated.",
+        description = "Facilitates the flushing of associated paths based on resources being replicated. "
+                + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent."
+                + "ResourceOnly flushes require Replication Flush Agents with the HTTP Header of "
+                + "'CQ-Action-Scope: ResourceOnly'."
+                + "Neither rule sets supports chaining; { /a/.*:/b/c -> /b/.*:/d/e }, due to dangerous conditions "
+                + "involving infinite flushing.",
         immediate = false,
         metatype = true,
         configurationFactory = true,
