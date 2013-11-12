@@ -27,20 +27,12 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationResult;
 import org.apache.sling.api.resource.ResourceResolver;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
  * Service used to issue Dispatcher Flush requests.
  */
 public interface DispatcherFlusher {
-
-    /**
-     *
-     */
-    enum ReplicationActionScope {
-        ResourceOnly;
-    }
 
     /**
      * Issue flush replication request.
@@ -67,7 +59,6 @@ public interface DispatcherFlusher {
     Map<Agent, ReplicationResult> flush(ResourceResolver resourceResolver, ReplicationActionType actionType,
                                                boolean synchronous, String... paths) throws ReplicationException;
 
-
     /**
      * Issue flush replication request.
      *
@@ -83,38 +74,6 @@ public interface DispatcherFlusher {
     Map<Agent, ReplicationResult> flush(ResourceResolver resourceResolver, ReplicationActionType actionType,
                                         boolean synchronous, AgentFilter agentFilter, String... paths) throws
             ReplicationException;
-
-    /**
-     * Issue flush replication request via direct synchronous HTTP Request
-     *
-     * @param actionType specifies the Replication Type that will be associated with the flush requests
-     *                   (ex. Activate, Deactivate, Delete)
-     * @param replicationActionScope Replication scope or null for no Action Scope
-     * @param paths list of resources to flush
-     * @return a map of the targeted flush agents and the result of the replication request
-     * @throws ReplicationException
-     * @throws IOException
-     */
-    Map<Agent, ReplicationResult> flush(final ReplicationActionType actionType,
-                                         final ReplicationActionScope replicationActionScope,
-                                         final String... paths) throws ReplicationException, IOException;
-
-    /**
-     * Issue flush replication request via direct synchronous HTTP Request
-     *
-     * @param actionType specifies the Replication Type that will be associated with the flush requests
-     *                   (ex. Activate, Deactivate, Delete)
-     * @param replicationActionScope Replication scope or null for no Action Scope
-     * @param agentFilter filter used to specify agents to flush
-     * @param paths list of resources to flush
-     * @return a map of the targeted flush agents and the result of the replication request
-     * @throws ReplicationException
-     * @throws IOException
-     */
-    Map<Agent, ReplicationResult> flush(final ReplicationActionType actionType,
-                                        final ReplicationActionScope replicationActionScope,
-                                        final AgentFilter agentFilter,
-                                        final String... paths) throws ReplicationException, IOException;
 
     /**
      * Get Replication Agents targeted by this service.

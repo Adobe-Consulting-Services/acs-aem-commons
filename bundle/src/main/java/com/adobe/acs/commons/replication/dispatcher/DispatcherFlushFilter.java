@@ -31,13 +31,30 @@ import org.slf4j.LoggerFactory;
 /**
  * Replication Agent Filter used to identify Flush agents.
  */
-public class DispatcherFlushAgentFilter implements AgentFilter {
-    private static final Logger log = LoggerFactory.getLogger(DispatcherFlushAgentFilter.class);
+public class DispatcherFlushFilter implements AgentFilter {
+    private static final Logger log = LoggerFactory.getLogger(DispatcherFlushFilter.class);
+
+    public static enum FlushType {
+        All,
+        Hierarchical,
+        ResourceOnly
+    }
 
     public static final String SERIALIZATION_TYPE = "flush";
     public static final String HTTP = "http://";
     public static final String HTTPS = "https://";
     public static final String CQ_ACTION_HEADER = "CQ-Action:";
+    public static final String CQ_SCOPE_ACTION_HEADER = "CQ-Scope-Action: ResourceOnly";
+
+    private final FlushType flushType;
+
+    public DispatcherFlushFilter() {
+        this.flushType = FlushType.All;
+    }
+
+    public DispatcherFlushFilter(final FlushType flushType) {
+        this.flushType = flushType;
+    }
 
     /**
      * Checks if the @agent is considered an active Flush agent (Serialization Type ~> Flush and is enabled).
@@ -47,10 +64,40 @@ public class DispatcherFlushAgentFilter implements AgentFilter {
      */
     @Override
     public final boolean isIncluded(final Agent agent) {
+        if(FlushType.All.equals(this.flushType)) {
+            return this.isIncludedCommon(agent);
+        } else if(FlushType.Hierarchical.equals(this.flushType)) {
+            return this.isIncludedHierarchical(agent);
+        } else if(FlushType.ResourceOnly.equals(this.flushType)) {
+            return this.isIncludedResourceOnly(agent);
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the Dispatcher FlushType this filter was created with
+     * @return this filter's dispatcher flushType
+     */
+    public FlushType getFlushType() {
+        return this.flushType;
+    }
+
+    private boolean isIncludedCommon(final Agent agent) {
         return this.isFlushingAgent(agent)
-            && this.isDispatcherTransportURI(agent)
-            && this.isDispatcherHeaders(agent)
-            && this.isEnabled(agent);
+                && this.isDispatcherTransportURI(agent)
+                && this.isDispatcherHeaders(agent)
+                && this.isEnabled(agent);
+    }
+
+    private boolean isIncludedHierarchical(final Agent agent) {
+        return this.isIncludedCommon(agent)
+                && !this.isResourceOnly(agent);
+    }
+
+    private boolean isIncludedResourceOnly(final Agent agent) {
+        return this.isIncludedCommon(agent)
+                && this.isResourceOnly(agent);
     }
 
     /**
@@ -98,6 +145,25 @@ public class DispatcherFlushAgentFilter implements AgentFilter {
 
         for(final String header : headers) {
             if(StringUtils.startsWith(header, CQ_ACTION_HEADER)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the agent has valid CQ-Scope-Action: ResourceOnly header.
+     *
+     * @param agent Agent to check
+     * @return true if the Agent's headers contain the expected values
+     */
+    private boolean isResourceOnly(final Agent agent) {
+        final ValueMap properties = agent.getConfiguration().getProperties();
+        final String[] headers =  properties.get(AgentConfig.PROTOCOL_HTTP_HEADERS, new String[]{});
+
+        for(final String header : headers) {
+            if(StringUtils.equals(header, CQ_SCOPE_ACTION_HEADER)) {
                 return true;
             }
         }

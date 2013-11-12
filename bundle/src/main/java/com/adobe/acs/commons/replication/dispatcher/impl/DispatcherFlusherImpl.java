@@ -20,10 +20,9 @@
 
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
-import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushAgentFilter;
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.day.cq.replication.Agent;
-import com.day.cq.replication.AgentConfig;
 import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.ReplicationActionType;
@@ -31,21 +30,15 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.ReplicationResult;
 import com.day.cq.replication.Replicator;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,8 +75,8 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
                                                      final ReplicationActionType actionType,
                                                      final boolean synchronous,
                                                      final String... paths) throws ReplicationException {
-        return this.flush(resourceResolver, ReplicationActionType.ACTIVATE, false, new DispatcherFlushAgentFilter(),
-                paths);
+        return this.flush(resourceResolver, actionType, false,
+                new DispatcherFlushFilter(DispatcherFlushFilter.FlushType.Hierarchical), paths);
     }
 
     /**
@@ -122,71 +115,8 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public final Map<Agent, ReplicationResult> flush(final ReplicationActionType actionType,
-                                                     final ReplicationActionScope replicationActionScope,
-                                                     final String... paths) throws ReplicationException, IOException {
-        return this.flush(actionType, replicationActionScope, new DispatcherFlushAgentFilter(), paths);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final Map<Agent, ReplicationResult> flush(final ReplicationActionType actionType,
-                      final ReplicationActionScope replicationActionScope, final AgentFilter agentFilter,
-                      final String... paths) throws ReplicationException, IOException {
-
-        final Map<Agent, ReplicationResult> results = new HashMap<Agent, ReplicationResult>();
-        final HttpClient client = new HttpClient();
-
-        for(final Agent agent : this.getFlushAgents()) {
-            final AgentConfig agentConfig = agent.getConfiguration();
-
-            for(final String path : paths) {
-
-                final PostMethod post = new PostMethod(agentConfig.getTransportURI());
-
-                post.setRequestHeader("CQ-Action", actionType.getName());
-                post.setRequestHeader("CQ-Handle", path);
-                post.setRequestHeader("CQ-Path", path);
-                if(replicationActionScope != null) {
-                    post.setRequestHeader("CQ-Action-Scope", replicationActionScope.name());
-                }
-                post.setRequestHeader("Content-length", String.valueOf(0));
-
-                if(log.isDebugEnabled()) {
-                    log.debug("--------------------------------------------------------------------------------");
-                    log.debug("Issuing Dispatcher Flush (via Direct HTTP Request) request to [ {} ] for [ {} ]",
-                            post.getURI(), path);
-                    for(final Header header : post.getRequestHeaders()) {
-                        log.debug(" > {} : {}", header.getName(), header.getValue());
-                    }
-                }
-
-                final int responseCode = client.executeMethod(post);
-
-                post.releaseConnection();
-
-                if(SlingHttpServletResponse.SC_OK == responseCode) {
-                    log.debug(" >> Result: OK");
-                    results.put(agent, ReplicationResult.OK);
-                } else {
-                    log.debug(" >> Result: {} - {}", responseCode, post.getResponseBodyAsString());
-                    log.error("Error occurred during Dispatcher Flush of [ {} ] at path [ {} ]", post.getURI(), path);
-                    results.put(agent, new ReplicationResult(false, responseCode, post.getResponseBodyAsString()));
-                }
-            }
-        }
-
-        return results;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public final Agent[] getFlushAgents() {
-        return this.getAgents(new DispatcherFlushAgentFilter());
+        return this.getAgents(new DispatcherFlushFilter());
     }
 
 
