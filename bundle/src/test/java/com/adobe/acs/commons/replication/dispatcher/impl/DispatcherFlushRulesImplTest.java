@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushAgentFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
@@ -48,6 +49,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 public class DispatcherFlushRulesImplTest {
@@ -55,13 +57,16 @@ public class DispatcherFlushRulesImplTest {
     private DispatcherFlusher dispatcherFlusher;
 
     @Spy
-    private Map<Pattern, String> flushRules = new LinkedHashMap<Pattern, String>();
+    private Map<Pattern, String> hierarchicalFlushRules = new LinkedHashMap<Pattern, String>();
+
+    @Spy
+    private Map<Pattern, String> resourceOnlyFlushRules = new LinkedHashMap<Pattern, String>();
 
     @Mock
     private ResourceResolverFactory resourceResolverFactory;
 
     @InjectMocks
-    private DispatcherFlushRulesImpl dispatcherFlushMap = new DispatcherFlushRulesImpl();
+    private DispatcherFlushRulesImpl dispatcherFlushRules = new DispatcherFlushRulesImpl();
 
     @Before
     public void setUp() throws Exception {
@@ -71,14 +76,16 @@ public class DispatcherFlushRulesImplTest {
 
     @After
     public void tearDown() throws Exception {
+        reset(resourceResolverFactory);
         reset(dispatcherFlusher);
-        reset(flushRules);
+        reset(hierarchicalFlushRules);
+        reset(resourceOnlyFlushRules);
     }
 
     @Test
     public void testConfigureReplicationActionType_ACTIVATE() throws Exception {
         final ReplicationActionType expected = ReplicationActionType.ACTIVATE;
-        final ReplicationActionType actual = dispatcherFlushMap.configureReplicationActionType("ACTIVATE");
+        final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("ACTIVATE");
 
         assertEquals(expected, actual);
     }
@@ -86,7 +93,7 @@ public class DispatcherFlushRulesImplTest {
     @Test
     public void testConfigureReplicationActionType_DELETE() throws Exception {
         final ReplicationActionType expected = ReplicationActionType.DELETE;
-        final ReplicationActionType actual = dispatcherFlushMap.configureReplicationActionType("DELETE");
+        final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("DELETE");
 
         assertEquals(expected, actual);
     }
@@ -94,7 +101,7 @@ public class DispatcherFlushRulesImplTest {
     @Test
     public void testConfigureReplicationActionType_DEACTIVATE() throws Exception {
         final ReplicationActionType expected = ReplicationActionType.DEACTIVATE;
-        final ReplicationActionType actual = dispatcherFlushMap.configureReplicationActionType("DEACTIVATE");
+        final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("DEACTIVATE");
 
         assertEquals(expected, actual);
     }
@@ -102,7 +109,7 @@ public class DispatcherFlushRulesImplTest {
     @Test
     public void testConfigureReplicationActionType_INHERIT() throws Exception {
         final ReplicationActionType expected = null;
-        final ReplicationActionType actual = dispatcherFlushMap.configureReplicationActionType("INHERIT");
+        final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("INHERIT");
 
         assertEquals(expected, actual);
     }
@@ -119,7 +126,7 @@ public class DispatcherFlushRulesImplTest {
         expected.put(Pattern.compile("/b/.*"), "/c");
         expected.put(Pattern.compile("/c/d/.*"), "/e/f");
 
-        final Map<Pattern, String> actual = dispatcherFlushMap.configureFlushRules(validFlushRules);
+        final Map<Pattern, String> actual = dispatcherFlushRules.configureFlushRules(validFlushRules);
 
         assertEquals(expected.size(), actual.size());
 
@@ -131,91 +138,90 @@ public class DispatcherFlushRulesImplTest {
     }
 
     @Test
-    public void testConfigureFlushRules_Cyclic() throws Exception {
-        final Map<String, String> cyclicFlushRules = new LinkedHashMap<String, String>();
-        cyclicFlushRules.put("/a/.*", "/b/page");
-        cyclicFlushRules.put("/b/.*", "/c/page");
-        cyclicFlushRules.put("/c/.*", "/a/page");
+    public void testPreprocess_notAccepts_ReplicationActionIsNull() throws Exception {
+        when(hierarchicalFlushRules.size()).thenReturn(9);
 
-        final Map<Pattern, String> actual = dispatcherFlushMap.configureFlushRules(cyclicFlushRules);
-
-        assertEquals(0, actual.size());
+        dispatcherFlushRules.preprocess(null, new ReplicationOptions());
+        verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class), anyBoolean(),
+                anyString());
     }
 
     @Test
-    public void testPreprocess_notAccepts_ReplicationActionIsNull() throws Exception {
-        when(flushRules.size()).thenReturn(9);
+    public void testPreprocess_notAccepts_ReplicationOptionsIsNull() throws Exception {
+        when(hierarchicalFlushRules.size()).thenReturn(9);
 
-        dispatcherFlushMap.preprocess(null, new ReplicationOptions());
+        dispatcherFlushRules.preprocess(new ReplicationAction(ReplicationActionType.ACTIVATE, "/content/foo"), null);
         verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class), anyBoolean(),
                 anyString());
     }
 
     @Test
     public void testPreprocess_notAccepts_ReplicationActionNoFlushRules() throws Exception {
-        when(flushRules.size()).thenReturn(0);
+        when(hierarchicalFlushRules.size()).thenReturn(0);
+        when(resourceOnlyFlushRules.size()).thenReturn(0);
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons");
 
-        dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
+        dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
         verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
                 anyBoolean(), anyString());
     }
 
+
     @Test
     public void testPreprocess_notAccepts_ReplicationActionPathEmpty() throws Exception {
-        when(flushRules.size()).thenReturn(9);
+        when(hierarchicalFlushRules.size()).thenReturn(9);
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("");
 
-        dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
+        dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
         verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
                 anyBoolean(), anyString());
     }
 
     @Test
     public void testPreprocess_notAccepts_ReplicationActionPathNull() throws Exception {
-        when(flushRules.size()).thenReturn(9);
+        when(hierarchicalFlushRules.size()).thenReturn(9);
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn(null);
 
-        dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
+        dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
         verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
                 anyBoolean(), anyString());
     }
 
     @Test
     public void testPreprocess_notAccepts_ReplicationActionTypeInternalPoll() throws Exception {
-        when(flushRules.size()).thenReturn(9);
+        when(hierarchicalFlushRules.size()).thenReturn(9);
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons");
         when(replicationAction.getType()).thenReturn(ReplicationActionType.INTERNAL_POLL);
 
-        dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
+        dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
         verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
                 anyBoolean(), anyString());
     }
 
     @Test
     public void testPreprocess_notAccepts_ReplicationActionTypeTest() throws Exception {
-        when(flushRules.size()).thenReturn(9);
+        when(hierarchicalFlushRules.size()).thenReturn(9);
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons");
         when(replicationAction.getType()).thenReturn(ReplicationActionType.TEST);
 
-        dispatcherFlushMap.preprocess(replicationAction, new ReplicationOptions());
+        dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
         verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), any(ReplicationActionType.class),
                 anyBoolean(), anyString());
     }
 
     @Test
     public void testPreprocess_notAccepts_NonMatchingPath() throws Exception {
-        flushRules.put(Pattern.compile("/content/foo.*"), "/content/target");
+        hierarchicalFlushRules.put(Pattern.compile("/content/foo.*"), "/content/target");
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons");
@@ -224,16 +230,19 @@ public class DispatcherFlushRulesImplTest {
         final ReplicationOptions replicationOptions = new ReplicationOptions();
         replicationOptions.setSynchronous(false);
 
-        dispatcherFlushMap.preprocess(replicationAction, replicationOptions);
+        dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
         verify(dispatcherFlusher, never()).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 eq("/content/acs-aem-commons"));
+
+
+
     }
 
     @Test
-    public void testPreprocess_success() throws Exception {
-        flushRules.put(Pattern.compile("/content/acs-aem-commons/.*"), "/content/target");
+    public void testPreprocess_success_hierarchical() throws Exception {
+        hierarchicalFlushRules.put(Pattern.compile("/content/acs-aem-commons/.*"), "/content/target");
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/page");
@@ -242,10 +251,62 @@ public class DispatcherFlushRulesImplTest {
         final ReplicationOptions replicationOptions = new ReplicationOptions();
         replicationOptions.setSynchronous(false);
 
-        dispatcherFlushMap.preprocess(replicationAction, replicationOptions);
+        dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
         verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
+                any(DispatcherFlushAgentFilter.class),
                 eq("/content/target"));
+
+        verifyNoMoreInteractions(dispatcherFlusher);
+    }
+
+    @Test
+    public void testPreprocess_success_resourceOnly() throws Exception {
+        resourceOnlyFlushRules.put(Pattern.compile("/content/acs-aem-commons/.*"), "/content/target");
+
+        final ReplicationAction replicationAction = mock(ReplicationAction.class);
+        when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/page");
+        when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
+
+        final ReplicationOptions replicationOptions = new ReplicationOptions();
+        replicationOptions.setSynchronous(false);
+
+        dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
+
+        verify(dispatcherFlusher, times(1)).flush(eq(ReplicationActionType.ACTIVATE),
+                eq(DispatcherFlusher.ReplicationActionScope.ResourceOnly),
+                any(DispatcherFlushAgentFilter.class),
+                eq("/content/target"));
+
+        verifyNoMoreInteractions(dispatcherFlusher);
+    }
+
+    @Test
+    public void testPreprocess_success_hierarchicalAndResourceOnly() throws Exception {
+        hierarchicalFlushRules.put(Pattern.compile("/content/.*"), "/content/hierarchical");
+        resourceOnlyFlushRules.put(Pattern.compile("/content/.*"), "/content/resource-only");
+
+        final ReplicationAction replicationAction = mock(ReplicationAction.class);
+        when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/page");
+        when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
+
+        final ReplicationOptions replicationOptions = new ReplicationOptions();
+        replicationOptions.setSynchronous(false);
+        replicationOptions.setFilter(new DispatcherFlushAgentFilter());
+
+        dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
+
+        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+                eq(false),
+                any(DispatcherFlushAgentFilter.class),
+                eq("/content/hierarchical"));
+
+        verify(dispatcherFlusher, times(1)).flush(eq(ReplicationActionType.ACTIVATE),
+                eq(DispatcherFlusher.ReplicationActionScope.ResourceOnly),
+                any(DispatcherFlushAgentFilter.class),
+                eq("/content/resource-only"));
+
+        verifyNoMoreInteractions(dispatcherFlusher);
     }
 }

@@ -82,7 +82,7 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
                                                      final ReplicationActionType actionType,
                                                      final boolean synchronous,
                                                      final String... paths) throws ReplicationException {
-        return this.flush(resourceResolver, ReplicationActionType.ACTIVATE, false, new DispatcherFlushAgentFilter(),
+        return this.flush(resourceResolver, actionType, false, new DispatcherFlushAgentFilter(),
                 paths);
     }
 
@@ -140,26 +140,28 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
         final Map<Agent, ReplicationResult> results = new HashMap<Agent, ReplicationResult>();
         final HttpClient client = new HttpClient();
 
-        for(final Agent agent : this.getFlushAgents()) {
+        for (final Agent agent : this.getFlushAgents()) {
+
+            // For each agent
             final AgentConfig agentConfig = agent.getConfiguration();
 
-            for(final String path : paths) {
-
+            for (final String path : paths) {
+                // For each path to flush
                 final PostMethod post = new PostMethod(agentConfig.getTransportURI());
 
                 post.setRequestHeader("CQ-Action", actionType.getName());
                 post.setRequestHeader("CQ-Handle", path);
                 post.setRequestHeader("CQ-Path", path);
-                if(replicationActionScope != null) {
+                if (replicationActionScope != null) {
                     post.setRequestHeader("CQ-Action-Scope", replicationActionScope.name());
                 }
                 post.setRequestHeader("Content-length", String.valueOf(0));
 
-                if(log.isDebugEnabled()) {
+                if (log.isDebugEnabled()) {
                     log.debug("--------------------------------------------------------------------------------");
                     log.debug("Issuing Dispatcher Flush (via Direct HTTP Request) request to [ {} ] for [ {} ]",
                             post.getURI(), path);
-                    for(final Header header : post.getRequestHeaders()) {
+                    for (final Header header : post.getRequestHeaders()) {
                         log.debug(" > {} : {}", header.getName(), header.getValue());
                     }
                 }
@@ -168,7 +170,7 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
 
                 post.releaseConnection();
 
-                if(SlingHttpServletResponse.SC_OK == responseCode) {
+                if (SlingHttpServletResponse.SC_OK == responseCode) {
                     log.debug(" >> Result: OK");
                     results.put(agent, ReplicationResult.OK);
                 } else {

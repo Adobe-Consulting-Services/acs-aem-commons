@@ -36,14 +36,14 @@ import java.util.Map;
 public interface DispatcherFlusher {
 
     /**
-     *
+     * Candidate values for CQ-Action-Scope HTTP Headers.
      */
     enum ReplicationActionScope {
         ResourceOnly;
     }
 
     /**
-     * Issue flush replication request.
+     * Issue flush replication request using Replication APIs/Agents.
      *
      * @param resourceResolver access into repository; Must have access to the resources to flush
      * @param paths list of resources to flush
@@ -54,7 +54,7 @@ public interface DispatcherFlusher {
             throws ReplicationException;
 
     /**
-     * Issue flush replication request.
+     * Issue flush replication request using Replication APIs/Agents.
      *
      * @param resourceResolver access into repository; Must have access to the resources to flush
      * @param actionType specifies the Replication Type that will be associated with the flush requests
@@ -69,7 +69,7 @@ public interface DispatcherFlusher {
 
 
     /**
-     * Issue flush replication request.
+     * Issue flush replication request using Replication APIs/Agents.
      *
      * @param resourceResolver access into repository; Must have access to the resources to flush
      * @param actionType specifies the Replication Type that will be associated with the flush requests
@@ -81,11 +81,11 @@ public interface DispatcherFlusher {
      * @throws ReplicationException
      */
     Map<Agent, ReplicationResult> flush(ResourceResolver resourceResolver, ReplicationActionType actionType,
-                                        boolean synchronous, AgentFilter agentFilter, String... paths) throws
-            ReplicationException;
+                                        boolean synchronous, AgentFilter agentFilter,
+                                        String... paths) throws ReplicationException;
 
     /**
-     * Issue flush replication request via direct synchronous HTTP Request
+     * Issue flush replication request via direct synchronous HTTP Request.
      *
      * @param actionType specifies the Replication Type that will be associated with the flush requests
      *                   (ex. Activate, Deactivate, Delete)
@@ -100,7 +100,7 @@ public interface DispatcherFlusher {
                                          final String... paths) throws ReplicationException, IOException;
 
     /**
-     * Issue flush replication request via direct synchronous HTTP Request
+     * Issue flush replication request via direct synchronous HTTP Request.
      *
      * @param actionType specifies the Replication Type that will be associated with the flush requests
      *                   (ex. Activate, Deactivate, Delete)
