@@ -75,8 +75,7 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
                                                      final ReplicationActionType actionType,
                                                      final boolean synchronous,
                                                      final String... paths) throws ReplicationException {
-        return this.flush(resourceResolver, actionType, false,
-                DispatcherFlushFilter.HIERARCHICAL, paths);
+        return this.flush(resourceResolver, actionType, synchronous, DispatcherFlushFilter.HIERARCHICAL, paths);
     }
 
     /**

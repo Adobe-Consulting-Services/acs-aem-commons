@@ -49,11 +49,11 @@ public class DispatcherFlushFilter implements AgentFilter {
     public static final DispatcherFlushFilter HIERARCHICAL = new DispatcherFlushFilter(FlushType.Hierarchical);
     public static final DispatcherFlushFilter RESOURCE_ONLY = new DispatcherFlushFilter(FlushType.ResourceOnly);
 
-    public static final String SERIALIZATION_TYPE = "flush";
-    public static final String HTTP = "http://";
-    public static final String HTTPS = "https://";
-    public static final String CQ_ACTION_HEADER = "CQ-Action:";
-    public static final String CQ_SCOPE_ACTION_HEADER = "CQ-Action-Scope: ResourceOnly";
+    private static final String SERIALIZATION_TYPE = "flush";
+    private static final String HTTP = "http://";
+    private static final String HTTPS = "https://";
+    private static final String CQ_ACTION_HEADER = "CQ-Action:";
+    private static final String CQ_SCOPE_ACTION_HEADER = "CQ-Action-Scope: ResourceOnly";
 
     private final FlushType flushType;
 
