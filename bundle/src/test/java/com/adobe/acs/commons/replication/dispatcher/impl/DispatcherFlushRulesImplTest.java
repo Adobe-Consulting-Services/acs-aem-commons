@@ -262,6 +262,8 @@ public class DispatcherFlushRulesImplTest {
                 eq("/content/target"));
 
         assertEquals(DispatcherFlushFilter.FlushType.Hierarchical, agentFilterCaptor.getValue().getFlushType());
+        // Private impl class; no access to test for instanceof
+        assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
 
         verifyNoMoreInteractions(dispatcherFlusher);
     }
@@ -288,6 +290,8 @@ public class DispatcherFlushRulesImplTest {
                 eq("/content/target"));
 
         assertEquals(DispatcherFlushFilter.FlushType.ResourceOnly, agentFilterCaptor.getValue().getFlushType());
+        // Private impl class; no access to test for instanceof
+        assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
 
         verifyNoMoreInteractions(dispatcherFlusher);
     }
@@ -316,6 +320,8 @@ public class DispatcherFlushRulesImplTest {
                 eq("/content/hierarchical"));
 
         assertEquals(DispatcherFlushFilter.FlushType.Hierarchical, agentFilterCaptor.getValue().getFlushType());
+        // Private impl class; no access to test for instanceof
+        assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
 
         verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
@@ -323,6 +329,8 @@ public class DispatcherFlushRulesImplTest {
                 eq("/content/resource-only"));
 
         assertEquals(DispatcherFlushFilter.FlushType.ResourceOnly, agentFilterCaptor.getValue().getFlushType());
+        // Private impl class; no access to test for instanceof
+        assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
 
         verifyNoMoreInteractions(dispatcherFlusher);
     }
