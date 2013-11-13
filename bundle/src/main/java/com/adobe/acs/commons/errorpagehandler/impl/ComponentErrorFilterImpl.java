@@ -37,6 +37,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +78,9 @@ public class ComponentErrorFilterImpl implements Filter {
     private static final Logger log = LoggerFactory.getLogger(ComponentErrorFilterImpl.class.getName());
 
     static final int FILTER_ORDER = 1001;
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     private ComponentHelper componentHelper;
@@ -211,19 +215,28 @@ public class ComponentErrorFilterImpl implements Filter {
 
     private void writeErrorHTML(final SlingHttpServletResponse slingResponse, final Resource resource,
                                 final String pathToHTML) throws IOException {
-        final ResourceResolver resourceResolver = resource.getResourceResolver();
-
         log.info("ACS AEM Commons Component-Level Error Handling trapped error for: {}",
                 resource.getPath());
 
-        slingResponse.getWriter().print(this.getHTML(resourceResolver, pathToHTML));
+        slingResponse.getWriter().print(this.getHTML(pathToHTML));
     }
 
-    private String getHTML(final ResourceResolver resourceResolver, final String path) {
+    private String getHTML(final String path) {
+        ResourceResolver resourceResolver = null;
+
         try {
+            // Component error renditions are typically stored under /apps as part of the application; and thus
+            // require elevated ACLs to work on Publish instances.
+            // ONLY use this admin resource resolver to get the component error HTML and then immediately close.
+            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+
             return ResourceDataUtil.getNTFileAsString(path, resourceResolver);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Could not get the component error HTML at [ {} ], using blank.", path);
+        } finally {
+            if(resourceResolver != null) {
+                resourceResolver.close();
+            }
         }
 
         return "";
