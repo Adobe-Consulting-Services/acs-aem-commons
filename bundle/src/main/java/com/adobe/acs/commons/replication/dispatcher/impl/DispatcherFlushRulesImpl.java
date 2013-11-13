@@ -151,8 +151,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                     log.debug("Requesting hierarchical flush of associated path: {} ~> {}", path,
                             entry.getValue());
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
-                            new DispatcherFlushRulesFilter(DispatcherFlushFilter.FlushType.Hierarchical),
-                            entry.getValue());
+                            DispatcherFlushFilter.HIERARCHICAL, entry.getValue());
                 }
             }
 
@@ -164,8 +163,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 if (m.matches()) {
                     log.debug("Requesting ResourceOnly flush of associated path: {} ~> {}", path, entry.getValue());
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
-                            new DispatcherFlushRulesFilter(DispatcherFlushFilter.FlushType.ResourceOnly),
-                            entry.getValue());
+                            DispatcherFlushFilter.RESOURCE_ONLY, entry.getValue());
                 }
             }
 

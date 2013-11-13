@@ -45,6 +45,10 @@ public class DispatcherFlushFilter implements AgentFilter {
         ResourceOnly
     }
 
+    public static final DispatcherFlushFilter ALL = new DispatcherFlushFilter(FlushType.All);
+    public static final DispatcherFlushFilter HIERARCHICAL = new DispatcherFlushFilter(FlushType.Hierarchical);
+    public static final DispatcherFlushFilter RESOURCE_ONLY = new DispatcherFlushFilter(FlushType.ResourceOnly);
+
     public static final String SERIALIZATION_TYPE = "flush";
     public static final String HTTP = "http://";
     public static final String HTTPS = "https://";
