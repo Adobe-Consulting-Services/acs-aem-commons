@@ -69,14 +69,16 @@ import java.util.Map;
     ),
     @Property(
         name = "filter.order",
-        intValue = ComponentErrorFilterImpl.FILTER_ORDER,
+        intValue = ComponentErrorHandlerImpl.FILTER_ORDER,
         propertyPrivate = true
     )
 })
 @Service(javax.servlet.Filter.class)
-public class ComponentErrorFilterImpl implements Filter {
-    private static final Logger log = LoggerFactory.getLogger(ComponentErrorFilterImpl.class.getName());
+public class ComponentErrorHandlerImpl implements Filter {
+    private static final Logger log = LoggerFactory.getLogger(ComponentErrorHandlerImpl.class.getName());
 
+    // Magic number pushes filter lower in the chain so it executes after the
+    // OOTB WCM Debug Filter
     static final int FILTER_ORDER = 1001;
 
     @Reference
@@ -89,10 +91,10 @@ public class ComponentErrorFilterImpl implements Filter {
 
     private static final boolean DEFAULT_EDIT_ENABLED = true;
     private boolean editModeEnabled = DEFAULT_EDIT_ENABLED;
-    @Property(label = "Edit-Mode Error Handling",
+    @Property(label = "Edit Error Handling",
             description = "Enable handling of Edit-mode errors (EDIT, DESIGN, ANALYTICS)",
             boolValue = DEFAULT_EDIT_ENABLED)
-    public static final String PROP_EDIT_ENABLED = "prop.edit-mode.enabled";
+    public static final String PROP_EDIT_ENABLED = "prop.edit.enabled";
 
     private static final String DEFAULT_EDIT_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/errorpagehandler/components/edit.html";
@@ -100,16 +102,16 @@ public class ComponentErrorFilterImpl implements Filter {
     @Property(label = "Edit HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
             value = DEFAULT_EDIT_ERROR_HTML_PATH)
-    public static final String PROP_EDIT_ERROR_HTML_PATH = "prop.edit-mode.html-path";
+    public static final String PROP_EDIT_ERROR_HTML_PATH = "prop.edit.html";
 
     /* Preview Mode */
 
     private static final boolean DEFAULT_PREVIEW_ENABLED = false;
     private boolean previewModeEnabled = DEFAULT_PREVIEW_ENABLED;
-    @Property(label = "Preview-Mode Error Handling",
+    @Property(label = "Preview Error Handling",
             description = "Enable handling of Edit-mode errors (PREVIEW and READ_ONLY)",
             boolValue = DEFAULT_PREVIEW_ENABLED)
-    public static final String PROP_PREVIEW_ENABLED = "prop.preview-mode.enabled";
+    public static final String PROP_PREVIEW_ENABLED = "prop.preview.enabled";
 
     private static final String DEFAULT_PREVIEW_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/errorpagehandler/components/preview.html";
@@ -117,7 +119,7 @@ public class ComponentErrorFilterImpl implements Filter {
     @Property(label = "Preview HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
             value = DEFAULT_PREVIEW_ERROR_HTML_PATH)
-    public static final String PROP_PREVIEW_ERROR_HTML_PATH = "prop.preview-mode.html-path";
+    public static final String PROP_PREVIEW_ERROR_HTML_PATH = "prop.preview.html";
 
     private static final String DEFAULT_PUBLISH_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/errorpagehandler/components/publish.html";
@@ -126,16 +128,16 @@ public class ComponentErrorFilterImpl implements Filter {
 
     private static final boolean DEFAULT_PUBLISH_ENABLED = false;
     private boolean publishModeEnabled = DEFAULT_PUBLISH_ENABLED;
-    @Property(label = "Publish-Mode Error Handling",
+    @Property(label = "Publish Error Handling",
             description = "Enable handling of Edit-mode errors (PREVIEW and READONLY)",
             boolValue = DEFAULT_PUBLISH_ENABLED)
-    public static final String PROP_PUBLISH_ENABLED = "prop.publish-mode.enabled";
+    public static final String PROP_PUBLISH_ENABLED = "prop.publish.enabled";
 
     private String publishErrorHTMLPath = DEFAULT_PUBLISH_ERROR_HTML_PATH;
     @Property(label = "Publish HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in DISABLED mode.",
             value = DEFAULT_PUBLISH_ERROR_HTML_PATH)
-    public static final String PROP_PUBLISH_ERROR_HTML_PATH = "prop.publish-mode.html-path";
+    public static final String PROP_PUBLISH_ERROR_HTML_PATH = "prop.publish.html";
 
 
     @Override

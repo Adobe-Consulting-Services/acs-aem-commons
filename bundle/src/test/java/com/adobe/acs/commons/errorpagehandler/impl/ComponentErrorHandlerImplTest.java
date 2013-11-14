@@ -48,7 +48,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ComponentErrorFilterImplTest {
+public class ComponentErrorHandlerImplTest {
     @Mock
     SlingHttpServletRequest request;
 
@@ -71,7 +71,7 @@ public class ComponentErrorFilterImplTest {
     ComponentHelper componentHelper;
 
     @InjectMocks
-    ComponentErrorFilterImpl filter = new ComponentErrorFilterImpl();
+    ComponentErrorHandlerImpl handler = new ComponentErrorHandlerImpl();
 
     @Before
     public void setUp() throws Exception {
@@ -90,7 +90,7 @@ public class ComponentErrorFilterImplTest {
 
     @Test
     public void testNullComponentContext() throws Exception {
-        filter.doFilter(request, response, chain);
+        handler.doFilter(request, response, chain);
 
         verify(chain, times(1)).doFilter(eq(request), eq(response));
         verify(responseWriter, never()).print(any(String.class));
@@ -101,7 +101,7 @@ public class ComponentErrorFilterImplTest {
     public void testRootComponentContext() throws Exception {
         when(componentContext.isRoot()).thenReturn(true);
 
-        filter.doFilter(request, response, chain);
+        handler.doFilter(request, response, chain);
 
         verify(chain, times(1)).doFilter(eq(request), eq(response));
         verify(responseWriter, never()).print(any(String.class));
@@ -111,7 +111,7 @@ public class ComponentErrorFilterImplTest {
     @Test
     public void testNoError() throws Exception {
 
-        filter.doFilter(request, response, chain);
+        handler.doFilter(request, response, chain);
 
         verify(chain, times(1)).doFilter(eq(request), eq(response));
         verify(responseWriter, never()).print(any(String.class));
@@ -125,7 +125,7 @@ public class ComponentErrorFilterImplTest {
 
         doThrow(new ServletException()).when(chain).doFilter(request, response);
 
-        filter.doFilter(request, response, chain);
+        handler.doFilter(request, response, chain);
 
         verify(responseWriter, times(1)).print(any(String.class));
         verifyNoMoreInteractions(responseWriter);
