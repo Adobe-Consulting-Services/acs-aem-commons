@@ -149,7 +149,10 @@ header .nav a:hover {
   padding-bottom: .25em;
 }
 .feature-doc img {
-  width: 100%;
+      width: auto;
+      margin: 0 auto;
+      display: block;
+      max-width: 900px;
 }
 .feature-doc pre code {
   font-size: 1em;
