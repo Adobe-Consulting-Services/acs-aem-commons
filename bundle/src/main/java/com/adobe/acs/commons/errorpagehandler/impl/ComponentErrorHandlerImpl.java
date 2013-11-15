@@ -25,14 +25,8 @@ import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.commons.WCMUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingException;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -42,15 +36,8 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Map;
 
 @Component(
@@ -58,8 +45,7 @@ import java.util.Map;
         description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
                 + "components based on WCM Mode collections (Edit, Preview, Publish).",
         policy = ConfigurationPolicy.REQUIRE,
-        metatype = true,
-        immediate = false
+        metatype = true
 )
 @Properties({
     @Property(
@@ -73,13 +59,14 @@ import java.util.Map;
         propertyPrivate = true
     )
 })
-@Service(javax.servlet.Filter.class)
+@Service
 public class ComponentErrorHandlerImpl implements Filter {
     private static final Logger log = LoggerFactory.getLogger(ComponentErrorHandlerImpl.class.getName());
 
     // Magic number pushes filter lower in the chain so it executes after the
     // OOTB WCM Debug Filter
     static final int FILTER_ORDER = 1001;
+    static final String BLANK_HTML = "/dev/null";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -191,11 +178,7 @@ public class ComponentErrorHandlerImpl implements Filter {
 
         try {
             chain.doFilter(slingRequest, slingResponse);
-        } catch (final ServletException ex) {
-            this.handleError(slingResponse, slingRequest.getResource(), pathToHTML, ex);
-        } catch (final SlingException ex) {
-            this.handleError(slingResponse, slingRequest.getResource(), pathToHTML, ex);
-        } catch (final Throwable ex) {
+        } catch (final Exception ex) {
             this.handleError(slingResponse, slingRequest.getResource(), pathToHTML, ex);
         }
     }
@@ -203,16 +186,10 @@ public class ComponentErrorHandlerImpl implements Filter {
     private void handleError(final SlingHttpServletResponse slingResponse, final Resource resource,
                                 final String pathToHTML, final Throwable ex) throws IOException {
         // Log the error to the log files, so the exception is not lost
-        this.logError(ex);
+        log.error(ex.getMessage(), ex);
 
         // Write the custom "pretty" error message out to the response
         this.writeErrorHTML(slingResponse, resource, pathToHTML);
-    }
-
-    private void logError(final Throwable ex) {
-        final StringWriter stringWriter = new StringWriter();
-        ex.printStackTrace(new PrintWriter(stringWriter));
-        log.error(stringWriter.toString());
     }
 
     private void writeErrorHTML(final SlingHttpServletResponse slingResponse, final Resource resource,
@@ -226,9 +203,14 @@ public class ComponentErrorHandlerImpl implements Filter {
     private String getHTML(final String path) {
         ResourceResolver resourceResolver = null;
 
+        // Handle blank HTML conditions first; Avoid looking in JCR for them.
+        if(StringUtils.isBlank(path) || StringUtils.equals(BLANK_HTML, path)) {
+            return "";
+        }
+
         try {
             // Component error renditions are typically stored under /apps as part of the application; and thus
-            // require elevated ACLs to work on Publish instances.
+            // requires elevated ACLs to work on Publish instances.
             // ONLY use this admin resource resolver to get the component error HTML and then immediately close.
             resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
