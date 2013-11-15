@@ -26,7 +26,13 @@ import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -36,7 +42,12 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
@@ -204,7 +215,7 @@ public class ComponentErrorHandlerImpl implements Filter {
         ResourceResolver resourceResolver = null;
 
         // Handle blank HTML conditions first; Avoid looking in JCR for them.
-        if(StringUtils.isBlank(path) || StringUtils.equals(BLANK_HTML, path)) {
+        if (StringUtils.isBlank(path) || StringUtils.equals(BLANK_HTML, path)) {
             return "";
         }
 
@@ -218,7 +229,7 @@ public class ComponentErrorHandlerImpl implements Filter {
         } catch (final Exception e) {
             log.error("Could not get the component error HTML at [ {} ], using blank.", path);
         } finally {
-            if(resourceResolver != null) {
+            if (resourceResolver != null) {
                 resourceResolver.close();
             }
         }
