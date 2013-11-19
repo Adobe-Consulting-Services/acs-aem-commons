@@ -95,7 +95,7 @@ public class ComponentErrorHandlerImpl implements Filter {
     public static final String PROP_EDIT_ENABLED = "prop.edit.enabled";
 
     private static final String DEFAULT_EDIT_ERROR_HTML_PATH =
-            "/apps/acs-commons/components/utilities/componenterrorhandler/edit.html";
+            "/apps/acs-commons/components/utilities/component-error-handler/edit.html";
     private String editErrorHTMLPath = DEFAULT_EDIT_ERROR_HTML_PATH;
     @Property(label = "Edit HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
@@ -112,7 +112,7 @@ public class ComponentErrorHandlerImpl implements Filter {
     public static final String PROP_PREVIEW_ENABLED = "prop.preview.enabled";
 
     private static final String DEFAULT_PREVIEW_ERROR_HTML_PATH =
-            "/apps/acs-commons/components/utilities/componenterrorhandler/preview.html";
+            "/apps/acs-commons/components/utilities/component-error-handler/preview.html";
     private String previewErrorHTMLPath = DEFAULT_PREVIEW_ERROR_HTML_PATH;
     @Property(label = "Preview HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
