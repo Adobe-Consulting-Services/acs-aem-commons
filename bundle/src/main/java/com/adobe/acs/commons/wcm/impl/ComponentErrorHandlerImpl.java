@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.errorpagehandler.impl;
+package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.acs.commons.wcm.ComponentHelper;
@@ -95,7 +95,7 @@ public class ComponentErrorHandlerImpl implements Filter {
     public static final String PROP_EDIT_ENABLED = "prop.edit.enabled";
 
     private static final String DEFAULT_EDIT_ERROR_HTML_PATH =
-            "/apps/acs-commons/components/utilities/errorpagehandler/components/edit.html";
+            "/apps/acs-commons/components/utilities/componenterrorhandler/edit.html";
     private String editErrorHTMLPath = DEFAULT_EDIT_ERROR_HTML_PATH;
     @Property(label = "Edit HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
@@ -112,15 +112,13 @@ public class ComponentErrorHandlerImpl implements Filter {
     public static final String PROP_PREVIEW_ENABLED = "prop.preview.enabled";
 
     private static final String DEFAULT_PREVIEW_ERROR_HTML_PATH =
-            "/apps/acs-commons/components/utilities/errorpagehandler/components/preview.html";
+            "/apps/acs-commons/components/utilities/componenterrorhandler/preview.html";
     private String previewErrorHTMLPath = DEFAULT_PREVIEW_ERROR_HTML_PATH;
     @Property(label = "Preview HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
             value = DEFAULT_PREVIEW_ERROR_HTML_PATH)
     public static final String PROP_PREVIEW_ERROR_HTML_PATH = "prop.preview.html";
 
-    private static final String DEFAULT_PUBLISH_ERROR_HTML_PATH =
-            "/apps/acs-commons/components/utilities/errorpagehandler/components/publish.html";
 
     /* Publish Mode */
 
@@ -131,6 +129,7 @@ public class ComponentErrorHandlerImpl implements Filter {
             boolValue = DEFAULT_PUBLISH_ENABLED)
     public static final String PROP_PUBLISH_ENABLED = "prop.publish.enabled";
 
+    private static final String DEFAULT_PUBLISH_ERROR_HTML_PATH =  BLANK_HTML;
     private String publishErrorHTMLPath = DEFAULT_PUBLISH_ERROR_HTML_PATH;
     @Property(label = "Publish HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in DISABLED mode.",

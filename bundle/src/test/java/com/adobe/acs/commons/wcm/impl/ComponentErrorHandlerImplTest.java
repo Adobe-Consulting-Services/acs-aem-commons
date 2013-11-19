@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.errorpagehandler.impl;
+package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.wcm.api.components.ComponentContext;
