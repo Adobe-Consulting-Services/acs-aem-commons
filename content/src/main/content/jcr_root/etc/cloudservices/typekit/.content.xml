@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:lastModified="{Date}2013-11-06T14:24:19.356-05:00"
+        cq:lastModifiedBy="admin"
+        cq:template="/libs/cq/cloudserviceconfigs/templates/servicepage"
+        jcr:description="Easily add Web Fonts to your site."
+        jcr:primaryType="cq:PageContent"
+        jcr:title="Typekit"
+        sling:resourceType="cq/cloudserviceconfigs/components/servicepage"
+        componentReference="acs-commons/components/utilities/typekit"
+        description="Easily add Web Fonts to your site."
+        serviceAdminUrl="http://typekit.com"
+        serviceUrl="http://typekit.com"
+        thumbnailPath="/apps/acs-commons/templates/utilities/typekit/thumbnail.png"/>
+</jcr:root>
