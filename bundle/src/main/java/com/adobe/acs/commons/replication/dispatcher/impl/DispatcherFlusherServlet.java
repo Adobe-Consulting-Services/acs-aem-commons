@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("serial")
-@SlingServlet(resourceTypes = "acs-commons/components/utilities/dispatcherflush/configuration",
+@SlingServlet(resourceTypes = "acs-commons/components/utilities/dispatcher-flush/configuration",
         selectors = "flush", methods = "POST")
 public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
