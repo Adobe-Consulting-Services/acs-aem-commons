@@ -56,8 +56,8 @@
 
     <% if(generalError) { %>
     <p>
-        An error occurred during replication. Possible issues include invalid flush paths or lack of active
-        dispatcher flush agents.
+        An error occurred during replication.
+        Possible issues include invalid flush paths or lack of active dispatcher flush agents.
     </p>
     <% } %>
 
@@ -78,7 +78,7 @@
             index += 2;
         };
 
-        if(index == 0 && !generalError) { %>No Active Dispatcher Flush agents could be found for this run mode.<% } %>
+        if(index == 0 && !generalError) { %>No active Dispatcher Flush agents could be found for this run mode.<% } %>
     </ul>
 
     <% if(errors || generalError) { %>
