@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Dialog"
+    xtype="dialog">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <general
+            jcr:primaryType="nt:unstructured"
+            title="Dynamic Tag Management Settings"
+            xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <header
+                    jcr:primaryType="cq:Widget"
+                    fieldLabel="Header script URL"
+                    name="./header"
+                    xtype="textfield"/>
+                <snippet
+                    jcr:primaryType="cq:Widget"
+                    fieldLabel="Snippet JavaScript Code"
+                    name="./footerCode"
+                    xtype="textarea"/>
+            </items>
+        </general>
+    </items>
+</jcr:root>
