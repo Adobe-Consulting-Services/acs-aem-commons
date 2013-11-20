@@ -17,7 +17,7 @@
   limitations under the License.
   #L%
   --%>
-<%@page session="false"%><%@page import="org.apache.sling.api.resource.Resource,
+<%@page session="false" import="org.apache.sling.api.resource.Resource,
                 org.apache.sling.api.resource.ValueMap,
                 org.apache.sling.api.resource.ResourceUtil,
                 com.day.cq.wcm.webservicesupport.Configuration,

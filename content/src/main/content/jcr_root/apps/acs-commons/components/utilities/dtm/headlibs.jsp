@@ -17,26 +17,30 @@
   limitations under the License.
   #L%
   --%>
-<%@page session="false"%><%@page import="org.apache.sling.api.resource.Resource,
+<%@page session="false" import="org.apache.log4j.Logger,
+				org.apache.sling.api.resource.Resource,
                 org.apache.sling.api.resource.ValueMap,
                 org.apache.sling.api.resource.ResourceUtil,
                 com.day.cq.wcm.webservicesupport.Configuration,
-                com.day.cq.wcm.webservicesupport.ConfigurationManager" %>
+                com.day.cq.wcm.webservicesupport.ConfigurationManager,
+                org.apache.commons.lang.StringUtils" %>
 <%@include file="/libs/foundation/global.jsp" %><%
-
 String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
-ConfigurationManager cfgMgr = (ConfigurationManager)sling.getService(ConfigurationManager.class);
+ConfigurationManager cfgMgr = sling.getService(ConfigurationManager.class);
+Logger logger = Logger.getLogger( "/apps/acs-commons/components/utilities/dtm/headlibs.jsp" );
 if(cfgMgr != null) {
     String header = null;
     Configuration cfg = cfgMgr.getConfiguration("dtm", services);
     if(cfg != null) {
-        header = cfg.get("header", null);
+        header = cfg.get("header", "");
     }
-
-    if(header != null) {
+    if(StringUtils.isNotBlank(header)) {
     %>
     <script type="text/javascript" src="<%=header%>">
     </script><%
+    }else{
+    	logger.info("Missing DTM Configuration"); 
     }
 }
+
 %>
