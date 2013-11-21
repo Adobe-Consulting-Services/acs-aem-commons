@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
-    <filter root="/apps/acs-commons"/>
+    <filter root="/apps/acs-commons">
+        <exclude pattern="/apps/acs-commons/components/utilities/designer/clientlibsmanager/clientlibs/less/generated/.*"/>
+    </filter>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/dam/video/mp3hq"/>
