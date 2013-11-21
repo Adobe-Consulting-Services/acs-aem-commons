@@ -10,12 +10,15 @@
             <items jcr:primaryType="cq:WidgetCollection">
                 <header
                     jcr:primaryType="cq:Widget"
-                    fieldLabel="Header script URL"
-                    name="./header"
+                    allowBlank="{Boolean}false"
+                    fieldLabel="Header Script URL"
+                    name="./headerUrl"
                     xtype="textfield"/>
                 <snippet
                     jcr:primaryType="cq:Widget"
-                    fieldLabel="Snippet JavaScript Code"
+                    allowBlank="{Boolean}false"
+                    defaultValue="_satellite.pageBottom();"
+                    fieldLabel="Footer JavaScript Snippet Code"
                     name="./footerCode"
                     xtype="textarea"/>
             </items>

@@ -27,19 +27,16 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
 ConfigurationManager cfgMgr = sling.getService(ConfigurationManager.class);
-Logger logger = Logger.getLogger( "/apps/acs-commons/components/utilities/dtm/headlibs.jsp" );
 if(cfgMgr != null) {
     String header = null;
     Configuration cfg = cfgMgr.getConfiguration("dtm", services);
     if(cfg != null) {
-        header = cfg.get("header", "");
+        header = cfg.get("headerUrl", "");
     }
     if(StringUtils.isNotBlank(header)) {
     %>
     <script type="text/javascript" src="<%=header%>">
     </script><%
-    }else{
-    	logger.info("Missing DTM Configuration"); 
     }
 }
 

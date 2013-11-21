@@ -25,7 +25,7 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 
 String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
-ConfigurationManager cfgMgr = (ConfigurationManager)sling.getService(ConfigurationManager.class);
+ConfigurationManager cfgMgr = sling.getService(ConfigurationManager.class);
 if(cfgMgr != null) {
     String footerCode = null;
     Configuration cfg = cfgMgr.getConfiguration("dtm", services);

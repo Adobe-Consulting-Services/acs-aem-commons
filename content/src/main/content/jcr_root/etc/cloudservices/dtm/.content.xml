@@ -5,10 +5,15 @@
         cq:lastModified="{Date}2011-09-26T13:32:27.764+02:00"
         cq:lastModifiedBy="admin"
         cq:template="/libs/cq/cloudserviceconfigs/templates/servicepage"
+        jcr:description="Focus on customer experiences. We'll take care of the code."
         jcr:primaryType="cq:PageContent"
-        jcr:title="DTM code snippets"
+        jcr:title="Adobe Dynamic Tag Manager"
         sling:resourceType="cq/cloudserviceconfigs/components/servicepage"
         componentReference="acs-commons/components/utilities/dtm"
+        description="Focus on customer experiences. We'll take care of the code."
         inclusionRank="{Long}300"
-        ranking="100"/>
+        ranking="100"
+        serviceAdminUrl="http://dtm.adobe.com"
+        serviceUrl="http://www.adobe.com/solutions/digital-marketing/dynamic-tag-management.html"
+        thumbnailPath="/apps/acs-commons/templates/utilities/dtm/thumbnail.png"/>
 </jcr:root>
