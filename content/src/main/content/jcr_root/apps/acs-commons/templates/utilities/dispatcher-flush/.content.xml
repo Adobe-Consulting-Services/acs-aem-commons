@@ -8,5 +8,5 @@
     <jcr:content
         cq:designPath="/etc/designs/acs-commons"
         jcr:primaryType="cq:PageContent"
-        sling:resourceType="acs-commons/components/utilities/dispatcherflush"/>
+        sling:resourceType="acs-commons/components/utilities/dispatcher-flush"/>
 </jcr:root>
