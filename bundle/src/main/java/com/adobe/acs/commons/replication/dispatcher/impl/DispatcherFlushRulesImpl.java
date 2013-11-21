@@ -57,8 +57,8 @@ import java.util.regex.Pattern;
                 + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent."
                 + "ResourceOnly flushes require Replication Flush Agents with the HTTP Header of "
                 + "'CQ-Action-Scope: ResourceOnly'."
-                + "Neither rule sets supports chaining; { /a/.*:/b/c -> /b/.*:/d/e }, due to dangerous conditions "
-                + "involving infinite flushing.",
+                + "Neither rule sets supports chaining; { /a/.*=/b/c -> /b/.*=/d/e }, "
+                + "due to dangerous cyclic conditions.",
         immediate = false,
         metatype = true,
         configurationFactory = true,
@@ -91,7 +91,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
     @Property(label = "Flush Rules (Hierarchical)",
             description = "Pattern to Path associations for flush rules."
-                    + "Format: <pattern-of-trigger-content>:<path-to-flush>",
+                    + "Format: <pattern-of-trigger-content>=<path-to-flush>",
             cardinality = Integer.MAX_VALUE,
             value = { })
     private static final String PROP_FLUSH_RULES = "prop.rules.hierarchical";
@@ -102,7 +102,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
     @Property(label = "Flush Rules (ResourceOnly)",
             description = "Pattern to Path associations for flush rules. "
-                    + "Format: <pattern-of-trigger-content>:<path-to-flush>",
+                    + "Format: <pattern-of-trigger-content>=<path-to-flush>",
             cardinality = Integer.MAX_VALUE,
             value = { })
     private static final String PROP_RESOURCE_ONLY_FLUSH_RULES = "prop.rules.resource-only";
@@ -225,14 +225,14 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         /* Flush Rules */
         this.hierarchicalFlushRules = this.configureFlushRules(OsgiPropertyUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES),
-                        DEFAULT_HIERARCHICAL_FLUSH_RULES), ":"));
+                        DEFAULT_HIERARCHICAL_FLUSH_RULES), "="));
 
         log.debug("Hierarchical flush rules: " + this.hierarchicalFlushRules);
 
         /* ResourceOnly Flush Rules */
         this.resourceOnlyFlushRules = this.configureFlushRules(OsgiPropertyUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_ONLY_FLUSH_RULES),
-                        DEFAULT_RESOURCE_ONLY_FLUSH_RULES), ":"));
+                        DEFAULT_RESOURCE_ONLY_FLUSH_RULES), "="));
 
         log.debug("ResourceOnly flush rules: " + this.resourceOnlyFlushRules);
     }
