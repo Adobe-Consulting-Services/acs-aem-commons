@@ -10,6 +10,9 @@
     <filter root="/etc/cloudservices/typekit">
         <include pattern="/etc/cloudservices/typekit/jcr:content"/>
     </filter>
+    <filter root="/etc/cloudservices/dtm">
+        <include pattern="/etc/cloudservices/dtm/jcr:content"/>
+    </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?" />
     </filter>
