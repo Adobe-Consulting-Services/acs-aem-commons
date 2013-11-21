@@ -65,7 +65,7 @@
     <% } %>
 </ul>
 
-<h3>Active Dispatcher Flush Agents</h3>
+<h3>Active Dispatcher Flush Agents (excludes Resource Only agents)</h3>
 <ul>
     <% if(!hasAgents) { %><li class="not-set"><a href="/miscadmin#/etc/replication/agents.author" target="_blank">No active
     Dispatcher Flush replication agents</a></li><% } %>
