@@ -3,7 +3,7 @@ layout: feature
 title: Versioned Clientlibs
 description: Set your TTLs on Clientlib JS/CSS to infinity and beyond!
 date: 2013-10-01 23:39:29
-thumbnail: /images/verisoned-clientlibs/thumbnail.png
+thumbnail: /images/versioned-clientlibs/thumbnail.png
 categories: features
 tags: new
 ---
@@ -23,13 +23,9 @@ The URIs to clienlibs will be rewritten in the format `/path/to/clientlib.last-m
 This re-writer does **NOT** support
 
 * URIs embedded in CSS or JavaScript, including: background-images, web fonts, etc. 
-* Relative URIs 
-	* etc/clientlibs/mysite/styles.css
-* URIs including a scheme
-	* http://example.com/etc/clientlibs/mysite/styles.css
-	* //example.com/etc/clientlibs/mysite/styles.css
-* URIs to non-AEM HtmlClientLibrary resources
-	* /etc/designs/mysite.css
+* Relative URIs, e.g. `etc/clientlibs/mysite/styles.css`
+* URIs including a scheme, e.g. `http://example.com/etc/clientlibs/mysite/styles.css` and `//example.com/etc/clientlibs/mysite/styles.css`
+* URIs to non-AEM HtmlClientLibrary resources, e.g. `/etc/designs/mysite.css`
  
 ## Rewriter Configuration Node
 

@@ -6,6 +6,9 @@ com.adobe.acs.commons.forms
 com.adobe.acs.commons.forms.components
 com.adobe.acs.commons.forms.helpers
 com.adobe.acs.commons.genericlists
+com.adobe.acs.commons.replication.dispatcher
+com.adobe.acs.commons.rewriter
+com.adobe.acs.commons.twitter
 com.adobe.acs.commons.util
 com.adobe.acs.commons.wcm
 com.adobe.acs.commons.wcm.tags.wcmmode

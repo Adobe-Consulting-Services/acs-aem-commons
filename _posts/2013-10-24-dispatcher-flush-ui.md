@@ -2,7 +2,7 @@
 layout: feature
 title: Dispatcher Flush UI
 description: The convience of flushing by yourself!
-date: 2013-10-01 23:39:29
+date: 2013-10-02 23:39:29
 thumbnail: /images/dispatcher-flush-ui/thumbnail.png
 categories: features
 tags: new

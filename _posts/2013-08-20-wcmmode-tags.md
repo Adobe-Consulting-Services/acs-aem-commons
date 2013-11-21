@@ -6,7 +6,6 @@ date: 2013-08-20 23:39:29
 thumbnail: /images/wcmmode/thumbnail.png
 categories: features
 initial-release: 1.0.0
-tags: new
 ---
 
 

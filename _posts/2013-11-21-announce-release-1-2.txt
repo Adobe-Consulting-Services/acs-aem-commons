@@ -1,0 +1,8 @@
+---
+layout: feature
+title: Release 1.2.0 now available!
+description: New features include a Component Error Handler, Twitter4J integration, Dispatcher Flushing features, Typekit and Adobe Dynamic Tag Manager Cloud Services, and Rewriter Transformers for Client Libraries
+date: 2013-11-21 10:39:29
+thumbnail: /images/default/thumbnail.png
+categories: news
+---

@@ -2,7 +2,7 @@
 layout: feature
 title: Dispatcher Flush Rules
 description: Statlevels cramping your flushes?
-date: 2013-10-23 23:39:29
+date: 2013-10-01 23:39:29
 thumbnail: /images/dispatcher-flush-rules/thumbnail.png
 categories: features
 tags: new
