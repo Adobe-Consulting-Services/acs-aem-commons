@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:description="DTM JavaScript snippet configuration"
+    jcr:primaryType="cq:Template"
+    jcr:title="Adobe Dynamic Tag Manager Configuration"
+    sling:resourceSuperType="cq/cloudserviceconfigs/templates/configpage"
+    allowedChildren="[/apps/acs-commons/templates/dtm]"
+    allowedPaths="[/etc/cloudservices/dtm(/.*)?]"
+    ranking="{Long}100">
+    <jcr:content
+        cq:cloudservicename="dtm"
+        jcr:primaryType="cq:PageContent"
+        sling:resourceType="acs-commons/components/utilities/dtmpage"
+        thumbnailPath="/apps/acs-commons/templates/utilities/dtm/thumbnail.png"/>
+</jcr:root>
