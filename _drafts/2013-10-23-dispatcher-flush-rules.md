@@ -1,7 +1,7 @@
 ---
 layout: feature
 title: Dispatcher Flush Rules
-description: Stat files cramping your flushes?
+description: Statlevels cramping your flushes?
 date: 2013-10-23 23:39:29
 thumbnail: /images/dispatcher-flush-rules/thumbnail.png
 categories: features
@@ -32,9 +32,9 @@ Defines the ReplicationActionType to use when issuing the chained replications.
  
 ##### prop.rules.hierarchical
 
-Defines the flush mappings in the format
+Defines the flush mappings in the format (the delimiter is `=`).
 
-	regex-of-replicating-resource:absolute-path-flush
+	regex-of-replicating-resource=absolute-path-flush
 
 used for "normal" dispatcher hierarchy (stat file)base flushing.
 
@@ -43,21 +43,21 @@ used for "normal" dispatcher hierarchy (stat file)base flushing.
 To flush all pages under `/content/mysite` when an new DAM `png` or `jpg` is replicated use
 
 	prop.rules.hierarchical=[
-		"/content/dam/.*\.png:/content/mysite"
-		"/content/dam/.*\.jpg:/content/mysite"
+		"/content/dam/.*\.png=/content/mysite"
+		"/content/dam/.*\.jpg=/content/mysite"
 	]
 
 or more succinctly
 
 	prop.rules.hierarchical=[
-		"/content/dam/.*\.(png|jpg):/content/mysite"
+		"/content/dam/.*\.(png|jpg)=/content/mysite"
 	]
 
 #### prop.rules.resource-only
 
 Defines the flush mappings in the (same as hierarchical) format
 
-	regex-of-replicating-resource:absolute-path-flush
+	regex-of-replicating-resource=absolute-path-flush
 
 used to initiate "ResourceOnly" dispatcher flush requests.
 
@@ -76,7 +76,7 @@ These Flush Agents should also be configured as `Ignore Default`
     xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="sling:OsgiConfig"
     prop.replication-action-type="INHERIT|ACTIVATE|DELETE"
-    prop.rules.hierarchical="[regex:abs-path,regex2:abs-path2]"
+    prop.rules.hierarchical="[regex=abs-path,regex2=abs-path2]"
     prop.rules.resource-only="[]"
 	/>
 {% endhighlight %}  
@@ -101,7 +101,7 @@ Delete the entire cache when a new package is activated.
     xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="sling:OsgiConfig"
     prop.flush-type="DELETE"
-    prop.rules.hierarchical="[/etc/packages/.*\.zip:/]"
+    prop.rules.hierarchical="[/etc/packages/.*\.zip=/]"
     prop.rules.resource-only="[]"
     />
 {% endhighlight %}     
