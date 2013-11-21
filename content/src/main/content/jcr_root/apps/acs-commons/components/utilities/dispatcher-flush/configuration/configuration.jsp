@@ -21,13 +21,14 @@
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8"
         import="com.day.cq.replication.Agent,
-        org.apache.commons.lang.StringUtils"%><%
+        org.apache.commons.lang.StringUtils,
+        com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter"%><%
 
     /* Services */
     final DispatcherFlusher dispatcherFlusher = sling.getService(DispatcherFlusher.class);
 
     /* Agents */
-    final Agent[] flushAgents = dispatcherFlusher.getFlushAgents();
+    final Agent[] flushAgents = dispatcherFlusher.getAgents(DispatcherFlushFilter.HIERARCHICAL);
     boolean hasAgents = flushAgents.length > 0;
 
     /* Flush Action */
