@@ -1,6 +1,6 @@
 ---
 layout: feature
-title: Versioned Clientlibs
+title: Versioned ClientLibs
 description: Set your TTLs on Clientlib JS/CSS to infinity and beyond!
 date: 2013-10-01 23:39:29
 thumbnail: /images/versioned-clientlibs/thumbnail.png
@@ -10,13 +10,13 @@ tags: new
 
 ## Purpose
 
-Allow CSS and JavaScript served via AEM Clientlibs to be cached client-side with long TTLs.
+Allow CSS and JavaScript served via AEM ClientLibs to be cached client-side with long TTLs.
 
 ## How to Use
 
 Add a Sling rewriter configuration node (example below) that includes the `versioned-clientlibs` transformer type to you project. 
 
-The URIs to clienlibs will be rewritten in the format `/path/to/clientlib.last-modified-timestamp.js`
+The URIs to clientlibs will be rewritten in the format `/path/to/clientlib.last-modified-timestamp.js`
 
 ### Note
 
