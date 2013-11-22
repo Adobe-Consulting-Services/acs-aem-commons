@@ -22,6 +22,7 @@ package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter.FlushType;
 import com.adobe.acs.commons.util.OsgiPropertyUtil;
 import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.Preprocessor;
@@ -29,6 +30,7 @@ import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -70,6 +72,10 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
     private static final String OPTION_INHERIT = "INHERIT";
     private static final String OPTION_ACTIVATE = "ACTIVATE";
     private static final String OPTION_DELETE = "DELETE";
+    
+
+    private static final DispatcherFlushFilter HIERARCHICAL_FILTER = new DispatcherFlushRulesFilter(FlushType.Hierarchical);
+    private static final DispatcherFlushFilter RESOURCE_ONLY_FILTER = new DispatcherFlushRulesFilter(FlushType.ResourceOnly);
 
     /* Replication Action Type Property */
 
@@ -151,7 +157,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                     log.debug("Requesting hierarchical flush of associated path: {} ~> {}", path,
                             entry.getValue());
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
-                            new DispatcherFlushRulesFilter(DispatcherFlushFilter.FlushType.Hierarchical),
+                            HIERARCHICAL_FILTER,
                             entry.getValue());
                 }
             }
@@ -164,7 +170,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 if (m.matches()) {
                     log.debug("Requesting ResourceOnly flush of associated path: {} ~> {}", path, entry.getValue());
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
-                            new DispatcherFlushRulesFilter(DispatcherFlushFilter.FlushType.ResourceOnly),
+                            RESOURCE_ONLY_FILTER,
                             entry.getValue());
                 }
             }
@@ -282,7 +288,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
     }
 
     /* Implementation Class used to track and prevent cyclic replications */
-    protected final class DispatcherFlushRulesFilter extends DispatcherFlushFilter {
+    protected static final class DispatcherFlushRulesFilter extends DispatcherFlushFilter {
         public DispatcherFlushRulesFilter(final FlushType flushType) {
             super(flushType);
         }
