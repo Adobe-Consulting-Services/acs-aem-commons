@@ -1,7 +1,7 @@
 ---
 layout: feature
 title: Versioned ClientLibs
-description: Set your TTLs on Clientlib JS/CSS to infinity and beyond!
+description: Set TTLs on ClientLib JS/CSS to infinity and beyond!
 date: 2013-10-01 23:39:29
 thumbnail: /images/versioned-clientlibs/thumbnail.png
 categories: features
