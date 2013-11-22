@@ -1,7 +1,7 @@
 ---
 layout: feature
 title: Dispatcher Flush UI
-description: The convience of flushing by yourself!
+description: The conveniece of flushing by yourself
 date: 2013-10-02 23:39:29
 thumbnail: /images/dispatcher-flush-ui/thumbnail.png
 categories: features
@@ -10,7 +10,7 @@ tags: new
 
 ## Purpose
 
-Allow authors (or "super authors") to flush parts of the dispatcher cache manually without the invovlement of IT Operations.
+Allow AEM authors (or "super authors") to flush parts of the dispatcher cache manually without the invovlement of IT Operations.
 
 ## How to Use
 
