@@ -22,6 +22,8 @@ package com.adobe.acs.commons.errorpagehandler.impl;
 import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.PathInfo;
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
+import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
@@ -31,6 +33,7 @@ import com.day.cq.search.eval.TypePredicateEvaluator;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.NameConstants;
+
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -55,6 +58,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.ServletException;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
@@ -129,12 +133,12 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param errorResource
      * @return
      */
-    @Override
     public String findErrorPage(SlingHttpServletRequest request, Resource errorResource) {
         if (!isEnabled()) { return null; }
 
         Resource page = null;
         final ResourceResolver resourceResolver = errorResource.getResourceResolver();
+        final String errorResourcePath = errorResource.getPath();
 
         final boolean isError = this.getStatusCode(request) >= SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
@@ -144,30 +148,34 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         // Try to find the closest real parent for the requested resource
         final Resource parent = findFirstRealParentOrSelf(errorResource);
 
-        final SortedMap<String, String> errorPagesMap = getErrorPagesMap(resourceResolver);
+        final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(parent);
+        String errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
 
-        if (!errorPagesMap.isEmpty()) {
-            // Get the best-matching Errors Path for this particular Request
-            final String errorsPath = this.getErrorPagesPath(parent, errorPagesMap);
-
-            if(StringUtils.isNotBlank(errorsPath)) {
-                log.debug("Best matching errors path for request is: {}", errorsPath);
-
-                // Search for CQ Page for specific servlet named Page (404, 500, Throwable, etc.)
-                SearchResult result = executeQuery(resourceResolver, pageName);
-                List<String> errorPaths = filterResults(errorsPath, result);
-
-                // Return the first existing match
-                for (String errorPath : errorPaths) {
-                    page = getResource(resourceResolver, errorPath);
-                    if(page != null) { break; }
+        // could not find inherited property
+        if (errorsPath == null) {
+            for (final Map.Entry<String, String> mapPage : pathMap.entrySet()) {
+                if (errorResourcePath.startsWith(mapPage.getKey())) {
+                    if (mapPage.getValue().startsWith("/")) {
+                        errorsPath = mapPage.getValue();
+                    } else {
+                        errorsPath = mapPage.getKey() + "/" + mapPage.getValue();
+                    }
+                    break;
                 }
+            }
+        }
 
-                // No error-specific page could be found, use the "default" error page
-                // for the Root content path
-                if(page == null && StringUtils.isNotBlank(errorsPath)) {
-                    page = resourceResolver.resolve(errorsPath);
-                }
+
+        if(StringUtils.isNotBlank(errorsPath)) {
+            log.debug("Best matching errors path for request is: {}", errorsPath);
+
+            String errorPath = errorsPath + "/" + pageName;
+            page = getResource(resourceResolver, errorPath);
+
+            // No error-specific page could be found, use the "default" error page
+            // for the Root content path
+            if(page == null && StringUtils.isNotBlank(errorsPath)) {
+                page = resourceResolver.resolve(errorsPath);
             }
         }
 
@@ -189,34 +197,6 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
 
     /**
-     * Create the query for finding candidate cq:Pages
-     *
-     * @param resourceResolver
-     * @param pageNames
-     * @return
-     */
-    private SearchResult executeQuery(ResourceResolver resourceResolver, String... pageNames) {
-        final Session session = resourceResolver.adaptTo(Session.class);
-        final Map<String, String> map = new HashMap<String, String>();
-        if(pageNames == null) { pageNames = new String[]{}; }
-
-        // Construct query builder query
-        map.put(TypePredicateEvaluator.TYPE, "cq:Page");
-
-        if(pageNames.length == 1) {
-            map.put(NodenamePredicateEvaluator.NODENAME, escapeNodeName(pageNames[0]));
-        } else if(pageNames.length > 1) {
-            map.put("group.p.or", "true");
-            for(int i = 0; i < pageNames.length; i++) {
-                map.put("group." + String.valueOf(i) + "_" + NodenamePredicateEvaluator.NODENAME, escapeNodeName(pageNames[i]));
-            }
-        }
-
-        final Query query = queryBuilder.createQuery(PredicateGroup.create(map), session);
-        return query.getResult();
-    }
-
-    /**
      * Gets the resource object for the provided path.
      *
      * Performs checks to ensure resource exists and is accessible to user.
@@ -236,36 +216,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         return null;
     }
 
-    /**
-     * Filter query results
-     *
-     * @param rootPath
-     * @param result
-     * @return list of resource paths of candidate error pages
-     */
-    private List<String> filterResults(String rootPath, SearchResult result) {
-        final List<Node> nodes = IteratorUtils.toList(result.getNodes());
-        final List<String> resultPaths = new ArrayList<String>();
-        if(StringUtils.isBlank(rootPath)) { return resultPaths; }
-
-        // Filter results by the searchResource path; All valid results' paths should begin
-        // with searchResource.getPath()
-        for(Node node : nodes) {
-            if(node == null) { continue; }
-            try {
-                // Make sure all query results under or equals to the current Search Resource
-                if(StringUtils.equals(node.getPath(), rootPath) ||
-                    StringUtils.startsWith(node.getPath(), rootPath.concat("/"))) {
-                    resultPaths.add(node.getPath());
-                }
-            } catch(RepositoryException ex) {
-                log.warn("Could not get path for node. {}", ex.getMessage());
-                // continue
-            }
-        }
-
-        return resultPaths;
-    }
+    
 
     /** HTTP Request Data Retrieval Methods **/
 
@@ -326,38 +277,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
 
-    private SortedMap<String, String> getErrorPagesMap(ResourceResolver resourceResolver) {
-        final Session session = resourceResolver.adaptTo(Session.class);
-        Map<String, String> map = new HashMap<String, String>();
-        SortedMap<String, String> authoredMap =  new TreeMap<String, String>(new StringLengthComparator());
-
-        // Construct query builder query
-        map.put(TypePredicateEvaluator.TYPE, NameConstants.NT_PAGE);
-        map.put(JcrPropertyPredicateEvaluator.PROPERTY, JcrConstants.JCR_CONTENT + "/" + ERROR_PAGE_PROPERTY);
-        map.put(JcrPropertyPredicateEvaluator.PROPERTY + "." + JcrPropertyPredicateEvaluator.OPERATION, JcrPropertyPredicateEvaluator.OP_EXISTS);
-        map.put("p.limit", "0");
-
-        final Query query = queryBuilder.createQuery(PredicateGroup.create(map), session);
-
-        for(final Hit hit : query.getResult().getHits()) {
-            try {
-                final Resource contentResource = hit.getResource().getChild(JcrConstants.JCR_CONTENT);
-                final ValueMap properties = contentResource.adaptTo(ValueMap.class);
-                final String errorPagePath = properties.get(ERROR_PAGE_PROPERTY, String.class);
-
-                if(StringUtils.isBlank(errorPagePath)) { continue; }
-
-                final Resource errorPageResource = resourceResolver.resolve(errorPagePath);
-                if(errorPageResource != null && !ResourceUtil.isNonExistingResource(errorPageResource)) {
-                    authoredMap.put(hit.getPath(), errorPagePath);
-                }
-            } catch (RepositoryException ex) {
-                log.error("Could not resolve hit to a valid resource");
-            }
-        }
-
-        return mergeMaps(authoredMap, this.pathMap);
-    }
+    
 
     /** OSGi Component Property Getters/Setters **/
 
@@ -398,15 +318,6 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Get the sorted Search Paths
-     *
-     * @return
-     */
-    private List<String> getRootPaths(Map<String, String> errorPagesMap) {
-        return Arrays.asList(errorPagesMap.keySet().toArray(new String[errorPagesMap.size()]));
-    }
-
-    /**
      * Gets the Error Pages Path for the provided content root path
      *
      * @param rootPath
@@ -419,32 +330,6 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Find the Error page search path that best contains the provided resource
-     *
-     * @param resource
-     * @return
-     */
-    private String getErrorPagesPath(Resource resource, SortedMap<String, String> errorPagesMap) {
-        // Path to evaluate against Root paths
-        final String path = resource.getPath();
-        final ResourceResolver resourceResolver = resource.getResourceResolver();
-
-        for(final String rootPath : this.getRootPaths(errorPagesMap)) {
-            if(StringUtils.equals(path, rootPath) ||
-                    StringUtils.startsWith(path, rootPath.concat("/"))) {
-
-                final String errorPagePath = getErrorPagesPath(rootPath, errorPagesMap);
-
-                Resource errorPageResource = getResource(resourceResolver, errorPagePath);
-                if(errorPageResource != null && !ResourceUtil.isNonExistingResource(errorPageResource)) {
-                    return errorPageResource.getPath();
-                }
-            }
-        }
-        return null;
     }
 
     /**
@@ -504,19 +389,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
 
-    /**
-     * Escapes JCR node names for search; Especially important for nodes that start with numbers
-     *
-     * @param name
-     * @return
-     */
-    private String escapeNodeName(String name) {
-        name = StringUtils.stripToNull(name);
-        if (name == null) {
-            return "";
-        }
-        return name;
-    }
+    
 
 
     /** Script Support Methods **/
@@ -607,7 +480,6 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param request
      * @return
      */
-    @Override
     public String getRequestProgress(SlingHttpServletRequest request) {
         StringWriter stringWriter = new StringWriter();
         if (request != null) {
@@ -626,7 +498,6 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param response
      * @param statusCode
      */
-    @Override
     public void resetRequestAndResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, int statusCode) {
         // Clear client libraries
         // TODO: Replace with proper API call is HtmlLibraryManager provides one in the future; Currently this is our only option.
@@ -636,36 +507,6 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         response.reset();
         response.setContentType("text/html");
         response.setStatus(statusCode);
-    }
-
-    /**
-     * Merge two Maps together. In the event of any key collisions the Master map wins
-     *
-     * Any blank value keys are dropped from the final Map
-     *
-     * Map is sorted by value (String) length
-     *
-     * @param master
-     * @param slave
-     * @return
-     */
-    private SortedMap<String, String> mergeMaps(SortedMap<String, String> master, SortedMap<String, String> slave) {
-        SortedMap<String, String> map = new TreeMap<String, String>(new StringLengthComparator());
-
-        for (final Map.Entry<String, String> masterEntry : master.entrySet()) {
-            if (StringUtils.isNotBlank(masterEntry.getValue())) {
-                map.put(masterEntry.getKey(), masterEntry.getValue());
-            }
-        }
-
-        for (final Map.Entry<String, String> slaveEntry : slave.entrySet()) {
-            if (master.containsKey(slaveEntry.getKey())) { continue; }
-            if (StringUtils.isNotBlank(slaveEntry.getValue())) {
-                map.put(slaveEntry.getKey(), slaveEntry.getValue());
-            }
-        }
-
-        return map;
     }
 
     /**
