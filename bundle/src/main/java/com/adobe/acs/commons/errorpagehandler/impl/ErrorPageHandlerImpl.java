@@ -155,11 +155,7 @@ public class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         if (errorsPath == null) {
             for (final Map.Entry<String, String> mapPage : pathMap.entrySet()) {
                 if (errorResourcePath.startsWith(mapPage.getKey())) {
-                    if (mapPage.getValue().startsWith("/")) {
-                        errorsPath = mapPage.getValue();
-                    } else {
-                        errorsPath = mapPage.getKey() + "/" + mapPage.getValue();
-                    }
+                    errorsPath = mapPage.getValue();
                     break;
                 }
             }
