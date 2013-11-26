@@ -34,8 +34,8 @@
         <crx.port>4502</crx.port>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-            <license.licenseName>apache_v2</license.licenseName>
-            <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
+        <license.licenseName>apache_v2</license.licenseName>
+        <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
     </properties>
 
     <build>

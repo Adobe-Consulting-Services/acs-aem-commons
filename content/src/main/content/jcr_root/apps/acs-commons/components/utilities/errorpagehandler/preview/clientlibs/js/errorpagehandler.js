@@ -17,7 +17,8 @@
  * limitations under the License.
  * #L%
  */
-;$(function() {
+ /*global CQ: false */
+$(function() {
     $('#error-page-handler .toggle').click(function() {
         var $this = $(this),
         $section = $this.closest('.section');
