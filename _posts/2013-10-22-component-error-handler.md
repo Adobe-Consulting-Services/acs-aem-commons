@@ -24,11 +24,11 @@ Create a new `sling:OsgiConfig` node for each logical flush rule set. A good pra
     xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="sling:OsgiConfig"
     prop.edit.enabled="{Boolean}true"
-    prop.edit.html="/apps/../edit.html"
+    prop.edit.html="/apps/acs-commons/components/utilities/component-error-handler/edit.html"
     prop.preview.enabled="{Boolean}false"
-    prop.preview.html="/apps/../edit.html"
+    prop.preview.html="/apps/acs-commons/components/utilities/component-error-handler/preview.html"
     prop.publish.enabled="{Boolean}false"
-    prop.publish.html="/apps/../publish.html"
+    prop.publish.html="/dev/null"
 	/>
 {% endhighlight %}  
 
