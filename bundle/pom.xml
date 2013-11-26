@@ -363,13 +363,14 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>cobertura-maven-plugin</artifactId>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <phase>test</phase>
+                                <id>default-report</id>
+                                <phase>prepare-package</phase>
                                 <goals>
-                                    <goal>cobertura</goal>
+                                    <goal>report</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -382,13 +383,14 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>cobertura-maven-plugin</artifactId>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <phase>test</phase>
+                                <id>default-report</id>
+                                <phase>prepare-package</phase>
                                 <goals>
-                                    <goal>cobertura</goal>
+                                    <goal>report</goal>
                                 </goals>
                             </execution>
                         </executions>
