@@ -54,9 +54,10 @@ import java.util.Map;
 @Component(label = "ACS AEM Commons - Abstract POST Form Helper",
         description = "Abstract Form Helper. Do not use directly; "
                 + "instead use the PostRedirectGetFormHelper or ForwardAsGetFormHelper.",
+        componentAbstract = true,
         metatype = false)
 @Service(value = PostFormHelper.class)
-public class PostFormHelperImpl implements PostFormHelper {
+public abstract class PostFormHelperImpl implements PostFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostFormHelperImpl.class);
 
     static final String[] FORM_INPUTS = {FORM_NAME_INPUT, FORM_RESOURCE_INPUT};
@@ -66,7 +67,6 @@ public class PostFormHelperImpl implements PostFormHelper {
 
     @Reference
     private XSSAPI xss;
-
 
     private static final String DEFAULT_SUFFIX = "/submit/form";
 
@@ -78,10 +78,7 @@ public class PostFormHelperImpl implements PostFormHelper {
     private static final String PROP_SUFFIX = "prop.form-suffix";
 
     @Override
-    public Form getForm(String formName, SlingHttpServletRequest request) {
-        throw new UnsupportedOperationException("Do not call AbstractFormHelper.getForm(..) direct. "
-                 + "This is an abstract service.");
-    }
+    public abstract Form getForm(String formName, SlingHttpServletRequest request);
 
     @Override
     public String getFormInputsHTML(final Form form, final String... keys) {
@@ -136,44 +133,34 @@ public class PostFormHelperImpl implements PostFormHelper {
     }
 
     @Override
-    public void renderForm(Form form, String path, SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
-        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
-    }
+    public abstract void renderForm(Form form, String path, SlingHttpServletRequest request,
+                                    SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException;
 
     @Override
-    public void renderForm(Form form, Page page, SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
-        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
-    }
+    public abstract void renderForm(Form form, Page page, SlingHttpServletRequest request,
+                                    SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException;
 
     @Override
-    public void renderForm(Form form, Resource resource, SlingHttpServletRequest request,
-                           SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
-        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
-    }
+    public abstract void renderForm(Form form, Resource resource, SlingHttpServletRequest request,
+                                    SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException;
 
     @Override
-    public void renderOtherForm(Form form, String path, String selectors, SlingHttpServletRequest request,
-                                SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
-        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
-    }
+    public abstract void renderOtherForm(Form form, String path, String selectors, SlingHttpServletRequest request,
+                                         SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException;
 
     @Override
-    public void renderOtherForm(Form form, Page page, String selectors, SlingHttpServletRequest request,
-                                SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
-        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
-    }
+    public abstract void renderOtherForm(Form form, Page page, String selectors, SlingHttpServletRequest request,
+                                         SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException;
 
     @Override
-    public void renderOtherForm(Form form, Resource resource, String selectors, SlingHttpServletRequest request,
-                                SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
-        throw new UnsupportedOperationException("Use a specific Forms implementation helper.");
-    }
+    public abstract void renderOtherForm(Form form, Resource resource, String selectors,
+                                         SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException;
 
     @Override
     public String getAction(final Resource resource) {
