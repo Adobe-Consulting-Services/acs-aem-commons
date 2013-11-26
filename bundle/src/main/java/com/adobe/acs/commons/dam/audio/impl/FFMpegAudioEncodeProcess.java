@@ -90,7 +90,8 @@ public final class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
                     }
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
-                    log.error("processAudio: failed creating audio from profile [{}]: {}", videoProfile, e.getMessage());
+                    log.error("processAudio: failed creating audio from profile [{}]: {}",
+                            videoProfile, e.getMessage());
                 } finally {
                     IOUtils.closeQuietly(fis);
                     try {

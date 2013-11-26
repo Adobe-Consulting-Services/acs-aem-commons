@@ -38,7 +38,7 @@ import com.day.image.Layer;
 @Component(metatype = false)
 @Service
 @Property(name = "process.label", value = "Matte Rendition")
-public class MatteRenditionProcess extends AbstractRenditionModifyingProcess {
+public final class MatteRenditionProcess extends AbstractRenditionModifyingProcess {
 
     private static final Logger log = LoggerFactory.getLogger(MatteRenditionProcess.class);
 
@@ -132,8 +132,8 @@ public class MatteRenditionProcess extends AbstractRenditionModifyingProcess {
 
     private Integer[] getDimension(String dimensions) {
         if (dimensions != null) {
-            String splits[] = dimensions.split(":");
-            Integer d[] = new Integer[2];
+            String[] splits = dimensions.split(":");
+            Integer[] d = new Integer[2];
             d[0] = Integer.valueOf(splits[0]);
             d[1] = Integer.valueOf(splits[1]);
             return d;

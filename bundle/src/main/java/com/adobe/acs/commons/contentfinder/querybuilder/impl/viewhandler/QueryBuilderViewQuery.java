@@ -65,7 +65,7 @@ public final class QueryBuilderViewQuery implements ViewQuery {
     }
 
     /**
-     * ViewQuery integration
+     * ViewQuery integration.
      *
      * @param hit
      * @return

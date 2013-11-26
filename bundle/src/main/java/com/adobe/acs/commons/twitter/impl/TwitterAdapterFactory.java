@@ -51,7 +51,7 @@ import com.day.cq.wcm.webservicesupport.ConfigurationManager;
                 "com.day.cq.wcm.webservicesupport.Configuration" }),
         @Property(name = AdapterFactory.ADAPTER_CLASSES, value = { "twitter4j.Twitter",
                 "com.adobe.acs.commons.twitter.TwitterClient" }) })
-public class TwitterAdapterFactory implements AdapterFactory {
+public final class TwitterAdapterFactory implements AdapterFactory {
 
     private static final String CLOUD_SERVICE_NAME = "twitterconnect";
 

@@ -36,13 +36,15 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ContentFinderHitBuilder {
-    private ContentFinderHitBuilder() {}
-    
+public final class ContentFinderHitBuilder {
+
+    private ContentFinderHitBuilder() {
+    }
+
     private static final int ELLIPSE_LENGTH = 3;
-    
+
     private static final int MAX_EXCERPT_LENGTH = 32;
-    
+
     private static final String DAM_THUMBNAIL = "cq5dam.thumbnail.48.48.png";
 
     /**
@@ -53,9 +55,9 @@ public class ContentFinderHitBuilder {
      * 2) an Asset
      * 3) Other
      *
-     * @param hit
-     * @return
-     * @throws RepositoryException
+     * @param hit a hit
+     * @return a result object
+     * @throws RepositoryException if something goes wrong
      */
     public static Map<String, Object> buildGenericResult(final Hit hit) throws RepositoryException {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
@@ -89,7 +91,8 @@ public class ContentFinderHitBuilder {
      * @return
      * @throws javax.jcr.RepositoryException
      */
-    private static Map<String, Object> addPageData(final Hit hit, Map<String, Object> map) throws RepositoryException {
+    private static Map<String, Object> addPageData(final Hit hit, Map<String, Object> map)
+            throws RepositoryException {
         final Resource resource = hit.getResource();
 
         final Page page = resource.adaptTo(Page.class);
@@ -107,9 +110,9 @@ public class ContentFinderHitBuilder {
 
         // Excerpt
         String excerpt = hit.getExcerpt();
-        if(StringUtils.isBlank(hit.getExcerpt())) {
+        if (StringUtils.isBlank(hit.getExcerpt())) {
             excerpt = StringUtils.stripToEmpty(page.getDescription());
-            if(excerpt.length() > MAX_EXCERPT_LENGTH) {
+            if (excerpt.length() > MAX_EXCERPT_LENGTH) {
                 excerpt = StringUtils.substring(excerpt, 0, (MAX_EXCERPT_LENGTH - ELLIPSE_LENGTH)) + "...";
             }
         }
@@ -131,7 +134,8 @@ public class ContentFinderHitBuilder {
      * @return
      * @throws javax.jcr.RepositoryException
      */
-    private static Map<String, Object> addAssetData(final Hit hit, Map<String, Object> map) throws RepositoryException {
+    private static Map<String, Object> addAssetData(final Hit hit, Map<String, Object> map)
+            throws RepositoryException {
         final Resource resource = hit.getResource();
         final Asset asset = DamUtil.resolveToAsset(resource);
 
@@ -143,9 +147,9 @@ public class ContentFinderHitBuilder {
 
         // Excerpt
         String excerpt = hit.getExcerpt();
-        if(StringUtils.isBlank(hit.getExcerpt())) {
+        if (StringUtils.isBlank(hit.getExcerpt())) {
             excerpt = StringUtils.stripToEmpty(asset.getMetadataValue(DamConstants.DC_DESCRIPTION));
-            if(excerpt.length() > MAX_EXCERPT_LENGTH) {
+            if (excerpt.length() > MAX_EXCERPT_LENGTH) {
                 excerpt = StringUtils.substring(excerpt, 0, (MAX_EXCERPT_LENGTH - ELLIPSE_LENGTH)) + "...";
             }
         }
@@ -161,7 +165,6 @@ public class ContentFinderHitBuilder {
         return map;
     }
 
-
     /**
      * Derives and adds Other (non-Page, non-Asset) related information to the map representing the hit.
      *
@@ -170,7 +173,8 @@ public class ContentFinderHitBuilder {
      * @return
      * @throws javax.jcr.RepositoryException
      */
-    private static Map<String, Object> addOtherData(final Hit hit, Map<String, Object> map) throws RepositoryException {
+    private static Map<String, Object> addOtherData(final Hit hit, Map<String, Object> map)
+            throws RepositoryException {
         final Resource resource = hit.getResource();
 
         map.put("title", resource.getName());
@@ -182,7 +186,7 @@ public class ContentFinderHitBuilder {
     }
 
     /**
-     * Get the last modified date for an Asset
+     * Get the last modified date for an Asset.
      *
      * @param asset
      * @return
@@ -256,7 +260,6 @@ public class ContentFinderHitBuilder {
         }
         return original.getSize();
     }
-
 
     /**
      * Get the timestamp for the last change to the thumbnail.

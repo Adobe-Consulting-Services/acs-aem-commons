@@ -41,12 +41,13 @@ import com.adobe.acs.commons.rewriter.AbstractTransformer;
 import com.adobe.acs.commons.util.OsgiPropertyUtil;
 
 /**
- * Rewriter pipeline component which 
+ * Rewriter pipeline component which rewrites static references.
  *
  */
 @Component(
         label = "ACS AEM Commons - Static Reference Rewriter",
-        description = "Rewriter pipeline component which rewrites host name on static references for cookie-less domain support",
+        description = "Rewriter pipeline component which rewrites host name on static references " +
+                "for cookie-less domain support",
         metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Property(name = "pipeline.type", label = "Rewriter Pipeline Type",

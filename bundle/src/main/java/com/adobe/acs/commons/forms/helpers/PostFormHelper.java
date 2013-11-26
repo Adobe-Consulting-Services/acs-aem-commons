@@ -25,6 +25,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
  * Used to register the PostFormHelper as an OSGi Service
  */
 public interface PostFormHelper extends FormHelper {
-    public String getSuffix();
-    public boolean hasValidSuffix(SlingHttpServletRequest request);
+    String getSuffix();
+    boolean hasValidSuffix(SlingHttpServletRequest request);
 }

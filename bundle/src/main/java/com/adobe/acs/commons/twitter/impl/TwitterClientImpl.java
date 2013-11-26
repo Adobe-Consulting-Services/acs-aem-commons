@@ -24,7 +24,7 @@ import twitter4j.Twitter;
 import com.adobe.acs.commons.twitter.TwitterClient;
 import com.day.cq.wcm.webservicesupport.Configuration;
 
-public class TwitterClientImpl implements TwitterClient {
+public final class TwitterClientImpl implements TwitterClient {
 
     private final Twitter twitter;
 

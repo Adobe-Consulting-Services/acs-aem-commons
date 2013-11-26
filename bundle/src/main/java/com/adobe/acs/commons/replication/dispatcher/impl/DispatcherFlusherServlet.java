@@ -112,7 +112,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private final class FlushResult {
+    private static final class FlushResult {
 
         private FlushResult(Agent agent, ReplicationResult result) {
             this.agentId = agent.getId();

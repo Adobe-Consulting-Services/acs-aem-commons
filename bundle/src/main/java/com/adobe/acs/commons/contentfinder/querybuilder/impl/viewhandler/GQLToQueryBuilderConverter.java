@@ -35,6 +35,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 public final class GQLToQueryBuilderConverter {
+
+    private GQLToQueryBuilderConverter() {
+    }
+
     private static final Logger log = LoggerFactory.getLogger(GQLToQueryBuilderConverter.class);
 
     public static final String DELIMITER = ContentFinderConstants.DELIMITER;
@@ -72,10 +76,9 @@ public final class GQLToQueryBuilderConverter {
      * @return
      */
     public static boolean convertToQueryBuilder(final SlingHttpServletRequest request) {
-        return (has(request, ContentFinderConstants.CONVERT_TO_QUERYBUILDER_KEY) &&
-                ContentFinderConstants.CONVERT_TO_QUERYBUILDER_VALUE.equals(get(request, ContentFinderConstants.CONVERT_TO_QUERYBUILDER_KEY)));
+        return (has(request, ContentFinderConstants.CONVERT_TO_QUERYBUILDER_KEY) && ContentFinderConstants.CONVERT_TO_QUERYBUILDER_VALUE
+                .equals(get(request, ContentFinderConstants.CONVERT_TO_QUERYBUILDER_KEY)));
     }
-
 
     public static Map<String, String> addPath(final SlingHttpServletRequest request, Map<String, String> map) {
         if (has(request, CF_PATH)) {
@@ -103,7 +106,8 @@ public final class GQLToQueryBuilderConverter {
         return map;
     }
 
-    public static Map<String, String> addOrder(final SlingHttpServletRequest request, Map<String, String> map, final String queryString) {
+    public static Map<String, String> addOrder(final SlingHttpServletRequest request, Map<String, String> map,
+            final String queryString) {
         if (has(request, CF_ORDER)) {
 
             int count = 1;
@@ -151,7 +155,6 @@ public final class GQLToQueryBuilderConverter {
         return map;
     }
 
-
     public static Map<String, String> addMimeType(final SlingHttpServletRequest request, Map<String, String> map) {
         final boolean isAsset = isAsset(get(request, CF_TYPE));
         final String prefix = getPropertyPrefix(request);
@@ -164,7 +167,6 @@ public final class GQLToQueryBuilderConverter {
 
         return map;
     }
-
 
     public static Map<String, String> addTags(final SlingHttpServletRequest request, Map<String, String> map) {
         if (has(request, CF_TAGS)) {
@@ -194,9 +196,8 @@ public final class GQLToQueryBuilderConverter {
         return map;
     }
 
-
-    public static Map<String, String> addFulltext(final SlingHttpServletRequest request,
-                                                  Map<String, String> map, final String queryString) {
+    public static Map<String, String> addFulltext(final SlingHttpServletRequest request, Map<String, String> map,
+            final String queryString) {
         if (StringUtils.isNotBlank(queryString)) {
             final String groupId = GROUP_FULLTEXT + "_group";
 
@@ -206,7 +207,8 @@ public final class GQLToQueryBuilderConverter {
         return map;
     }
 
-    public static Map<String, String> addLimitAndOffset(final SlingHttpServletRequest request, Map<String, String> map) {
+    public static Map<String, String> addLimitAndOffset(final SlingHttpServletRequest request,
+            Map<String, String> map) {
         if (has(request, CF_LIMIT)) {
             // Both limits and offsets are computed from CF's limit field X..Y
             final String offset = String.valueOf(getOffset(request));
@@ -221,16 +223,16 @@ public final class GQLToQueryBuilderConverter {
         return map;
     }
 
-
-    public static Map<String, String> addProperty(final SlingHttpServletRequest request, Map<String, String> map, final String requestKey, final int count) {
+    public static Map<String, String> addProperty(final SlingHttpServletRequest request, Map<String, String> map,
+            final String requestKey, final int count) {
         if (!ArrayUtils.contains(ContentFinderConstants.PROPERTY_BLACKLIST, requestKey)) {
-            map = putProperty(request, map, requestKey, JcrPropertyPredicateEvaluator.PROPERTY, (GROUP_PROPERTY_USERDEFINED + count), true);
+            map = putProperty(request, map, requestKey, JcrPropertyPredicateEvaluator.PROPERTY,
+                    (GROUP_PROPERTY_USERDEFINED + count), true);
         } else {
             log.debug("Rejecting property [ {} ] due to blacklist match", requestKey);
         }
         return map;
     }
-
 
     public static boolean isValidProperty(final String key) {
         return (!ArrayUtils.contains(ContentFinderConstants.PROPERTY_BLACKLIST, key));
@@ -298,11 +300,13 @@ public final class GQLToQueryBuilderConverter {
      * @param or
      * @return
      */
-    public static Map<String, String> put(SlingHttpServletRequest request, Map<String, String> map, String predicate, int group, boolean or) {
+    public static Map<String, String> put(SlingHttpServletRequest request, Map<String, String> map,
+            String predicate, int group, boolean or) {
         return putAll(map, predicate, getAll(request, predicate), group, or);
     }
 
-    public static Map<String, String> put(SlingHttpServletRequest request, Map<String, String> map, String requestKey, String predicate, int group, boolean or) {
+    public static Map<String, String> put(SlingHttpServletRequest request, Map<String, String> map,
+            String requestKey, String predicate, int group, boolean or) {
         return putAll(map, predicate, getAll(request, requestKey), group, or);
     }
 
@@ -317,11 +321,12 @@ public final class GQLToQueryBuilderConverter {
      * @param or
      * @return
      */
-    public static Map<String, String> putProperty(SlingHttpServletRequest request, Map<String, String> map, String requestKey, String predicate, int group, boolean or) {
+    public static Map<String, String> putProperty(SlingHttpServletRequest request, Map<String, String> map,
+            String requestKey, String predicate, int group, boolean or) {
         // putAll(map, "property", "jcr:titke", "value", [x,y,z], 10, true)
-        return putAll(map, predicate, requestKey, JcrPropertyPredicateEvaluator.VALUE, getAll(request, requestKey), group, or);
+        return putAll(map, predicate, requestKey, JcrPropertyPredicateEvaluator.VALUE,
+                getAll(request, requestKey), group, or);
     }
-
 
     /**
      * Helper method for adding comma delimited values into a Query Builder predicate
@@ -333,7 +338,8 @@ public final class GQLToQueryBuilderConverter {
      * @param or
      * @return
      */
-    public static Map<String, String> putAll(Map<String, String> map, String predicate, String[] values, int group, boolean or) {
+    public static Map<String, String> putAll(Map<String, String> map, String predicate, String[] values,
+            int group, boolean or) {
         final String groupId = String.valueOf(group) + "_group";
         int count = 1;
 
@@ -349,7 +355,6 @@ public final class GQLToQueryBuilderConverter {
         return map;
     }
 
-
     /**
      * @param map
      * @param predicateValue  => jcr:title
@@ -360,7 +365,8 @@ public final class GQLToQueryBuilderConverter {
      * @param or              => true/false
      * @return
      */
-    public static Map<String, String> putAll(Map<String, String> map, String predicate, String predicateValue, String predicateSuffix, String[] values, int group, boolean or) {
+    public static Map<String, String> putAll(Map<String, String> map, String predicate, String predicateValue,
+            String predicateSuffix, String[] values, int group, boolean or) {
         final String groupId = String.valueOf(group) + "_group";
 
         map.put(groupId + "." + predicate, predicateValue);
@@ -377,7 +383,6 @@ public final class GQLToQueryBuilderConverter {
 
         return map;
     }
-
 
     /**
      * Checks of the query param node type is that of a CQ Page

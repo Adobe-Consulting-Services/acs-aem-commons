@@ -133,7 +133,7 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
                 log.debug("Could not find HtmlLibrary at path: {}", pathInfo.getResourcePath());
                 return null;
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             // Handle unexpected formats of the original path
             log.error("Attempting to get a versioned path for [ {} ] but could not because of: {}", originalPath,
                     ex.getMessage());

@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.errorpagehandler;
 
-import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -30,7 +29,7 @@ import org.apache.sling.api.resource.Resource;
  * This service is used via the ACS-AEM-Commons error page handler implementation to create author-able error pages.
  */
 public interface ErrorPageHandlerService {
-    public static final int DEFAULT_STATUS_CODE = SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    int DEFAULT_STATUS_CODE = SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
     /**
      * Determines if this Service is "enabled". If it has been configured to be "Disabled" the Service still exists however it should not be used.
@@ -38,7 +37,7 @@ public interface ErrorPageHandlerService {
      *
      * @return true is the Service should be considered enabled
      */
-    public boolean isEnabled();
+    boolean isEnabled();
 
     /**
      * Find the JCR full path to the most appropriate Error Page
@@ -47,7 +46,7 @@ public interface ErrorPageHandlerService {
      * @param errorResource
      * @return
      */
-    public String findErrorPage(SlingHttpServletRequest request, Resource errorResource);
+    String findErrorPage(SlingHttpServletRequest request, Resource errorResource);
 
     /**
      * Get Error Status Code from Request or Default (500) if no status code can be found
@@ -55,7 +54,7 @@ public interface ErrorPageHandlerService {
      * @param request
      * @return
      */
-    public int getStatusCode(SlingHttpServletRequest request);
+    int getStatusCode(SlingHttpServletRequest request);
 
     /**
      * Get the Error Page's name (all lowercase) that should be used to render the page for this error.
@@ -65,8 +64,7 @@ public interface ErrorPageHandlerService {
      * @param request
      * @return
      */
-    public String getErrorPageName(SlingHttpServletRequest request);
-
+    String getErrorPageName(SlingHttpServletRequest request);
 
     /**
      * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies .
@@ -76,7 +74,7 @@ public interface ErrorPageHandlerService {
      * @param request
      * @param response
      */
-    public void doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response);
+    void doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response);
 
     /**
      * Returns the Exception Message (Stacktrace) from the Request
@@ -84,7 +82,7 @@ public interface ErrorPageHandlerService {
      * @param request
      * @return
      */
-    public String getException(SlingHttpServletRequest request);
+    String getException(SlingHttpServletRequest request);
 
     /**
      * Returns a String representation of the RequestProgress trace
@@ -92,7 +90,7 @@ public interface ErrorPageHandlerService {
      * @param request
      * @return
      */
-    public String getRequestProgress(SlingHttpServletRequest request);
+    String getRequestProgress(SlingHttpServletRequest request);
 
     /**
      * Reset response attributes to support printing out a new page (rather than one that potentially errored out).
@@ -103,5 +101,5 @@ public interface ErrorPageHandlerService {
      * @param response
      * @param statusCode
      */
-    public void resetRequestAndResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, int statusCode);
+    void resetRequestAndResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, int statusCode);
 }

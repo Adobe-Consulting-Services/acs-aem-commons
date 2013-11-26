@@ -59,7 +59,8 @@ public final class QueryBuilderViewHandler extends ViewHandler {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
 
     @Override
-    protected ViewQuery createQuery(SlingHttpServletRequest slingRequest, Session session, String queryString) throws Exception {
+    protected ViewQuery createQuery(SlingHttpServletRequest slingRequest, Session session,
+            String queryString) throws Exception {
         final ResourceResolver resolver = slingRequest.getResourceResolver();
         final QueryBuilder qb = resolver.adaptTo(QueryBuilder.class);
         Map<String, String> map;
@@ -93,7 +94,7 @@ public final class QueryBuilderViewHandler extends ViewHandler {
             // Skip known content finder parameters that are unused for QueryBuilder
             if (!ArrayUtils.contains(ContentFinderConstants.QUERYBUILDER_BLACKLIST, key)) {
                 final String val = request.getParameter(key);
-                if(StringUtils.isNotBlank(val)) {
+                if (StringUtils.isNotBlank(val)) {
                     map.put(key, val);
                 }
             } else {
@@ -108,7 +109,8 @@ public final class QueryBuilderViewHandler extends ViewHandler {
     }
 
 
-    private Map<String, String> convertToQueryBuilderParams(final SlingHttpServletRequest request, final String queryString) {
+    private Map<String, String> convertToQueryBuilderParams(final SlingHttpServletRequest request,
+            final String queryString) {
         Map<String, String> map = new LinkedHashMap<String, String>();
 
         int userDefinedPropertyCount = 0;

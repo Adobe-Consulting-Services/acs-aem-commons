@@ -52,9 +52,9 @@ import com.day.image.Layer;
 @Service
 @Property(name = "process.label", value = "Add Watermark to Rendition")
 public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess {
-    
+
     private static ConcurrentMap<String, Object> watermarkLogCache = new ConcurrentHashMap<String, Object>();
-    
+
     private static void logMissingWatermark(final String path) {
         if (watermarkLogCache.putIfAbsent(path, new Object()) == null) {
             log.warn("Watermark path {} is not found.", path);

@@ -31,15 +31,15 @@ import com.day.cq.wcm.webservicesupport.Configuration;
  * 
  * Note that these clients always use only Application authentication.
  */
-public interface TwitterClient{
-    
+public interface TwitterClient {
+
     /**
      * Get the Cloud Service Configuration from which this client was created.
      * 
      * @return the service configuration
      */
     Configuration getServiceConfiguration();
-    
+
     /**
      * Get the Twitter4j client.
      * 
