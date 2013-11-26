@@ -22,8 +22,10 @@ package com.adobe.acs.commons.forms.helpers.impl;
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.ForwardAsGetFormHelper;
+import com.adobe.acs.commons.forms.helpers.PostFormHelper;
 import com.adobe.acs.commons.forms.helpers.impl.synthetics.SyntheticSlingHttpServletGetRequest;
 import com.day.cq.wcm.api.Page;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -35,11 +37,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 
 @Component(label = "ACS AEM Commons - Forward Form Manager", description = "Internal Forward-as-GET Form Helper", enabled = true, metatype = true, immediate = false, inherit = true)
-@Service(value = { FormHelper.class, ForwardAsGetFormHelper.class })
-public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements ForwardAsGetFormHelper {
+@Service
+public final class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements ForwardAsGetFormHelper, PostFormHelper, FormHelper {
     private static final Logger log = LoggerFactory.getLogger(ForwardAsGetFormHelperImpl.class);
     private static final String CQ_PAGE_RESOURCE_TYPE = "cq/Page";
 
