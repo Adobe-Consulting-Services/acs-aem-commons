@@ -81,7 +81,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
     public abstract Form getForm(String formName, SlingHttpServletRequest request);
 
     @Override
-    public String getFormInputsHTML(final Form form, final String... keys) {
+    public final String getFormInputsHTML(final Form form, final String... keys) {
         // The form objects data and errors should be xssProtected before being passed into this method
         StringBuffer html = new StringBuffer();
 
@@ -103,12 +103,12 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
     }
 
     @Override
-    public String getAction(final String path) {
+    public final String getAction(final String path) {
         return getAction(path, null);
     }
 
     @Override
-    public String getAction(final String path, final String formSelector) {
+    public final String getAction(final String path, final String formSelector) {
         String actionPath = path;
 
         ResourceResolver adminResourceResolver = null;
@@ -163,27 +163,27 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
             throws IOException, ServletException, JSONException;
 
     @Override
-    public String getAction(final Resource resource) {
+    public final String getAction(final Resource resource) {
         return getAction(resource.getPath());
     }
 
     @Override
-    public String getAction(final Resource resource, final String formSelector) {
+    public final String getAction(final Resource resource, final String formSelector) {
         return getAction(resource.getPath(), formSelector);
     }
 
     @Override
-    public String getAction(final Page page) {
+    public final String getAction(final Page page) {
         return getAction(page.getPath());
     }
 
     @Override
-    public String getAction(final Page page, final String formSelector) {
+    public final String getAction(final Page page, final String formSelector) {
         return getAction(page.getPath(), formSelector);
     }
 
     @Override
-    public String getSuffix() {
+    public final String getSuffix() {
         return this.suffix;
     }
 
@@ -194,7 +194,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param request
      * @return
      */
-    protected boolean doHandlePost(final String formName, final SlingHttpServletRequest request) {
+    protected final boolean doHandlePost(final String formName, final SlingHttpServletRequest request) {
         if (StringUtils.equalsIgnoreCase("POST", request.getMethod())) {
             // Form should have a hidden input with the name this.getLookupKey(..) and value formName
             return StringUtils.equals(formName, request.getParameter(this.getPostLookupKey(formName)));
@@ -210,7 +210,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param request
      * @return
      */
-    protected Form getPostForm(final String formName,
+    protected final Form getPostForm(final String formName,
                                final SlingHttpServletRequest request) {
         final Map<String, String> map = new HashMap<String, String>();
 
@@ -254,7 +254,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param formName
      * @return
      */
-    protected String getPostLookupKey(final String formName) {
+    protected final String getPostLookupKey(final String formName) {
         // This may change; keeping as method call to ease future refactoring
         return FORM_NAME_INPUT;
     }
@@ -265,7 +265,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param form
      * @return
      */
-    protected Form clean(final Form form) {
+    protected final Form clean(final Form form) {
         final Map<String, String> map = form.getData();
         final Map<String, String> cleanedMap = new HashMap<String, String>();
 
@@ -284,7 +284,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param form
      * @return
      */
-    protected Form getProtectedForm(final Form form) {
+    protected final Form getProtectedForm(final Form form) {
         return new Form(form.getName(),
                 form.getResourcePath(),
                 this.getProtectedData(form.getData()),
@@ -297,7 +297,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param data
      * @return
      */
-    protected Map<String, String> getProtectedData(final Map<String, String> data) {
+    protected final Map<String, String> getProtectedData(final Map<String, String> data) {
         final Map<String, String> protectedData = new HashMap<String, String>();
 
         // Protect data for HTML Attributes
@@ -314,7 +314,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param errors
      * @return
      */
-    protected Map<String, String> getProtectedErrors(final Map<String, String> errors) {
+    protected final Map<String, String> getProtectedErrors(final Map<String, String> errors) {
         final Map<String, String> protectedErrors = new HashMap<String, String>();
 
         // Protect data for HTML
@@ -326,7 +326,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
     }
 
 
-    public boolean hasValidSuffix(final SlingHttpServletRequest slingRequest) {
+    public final boolean hasValidSuffix(final SlingHttpServletRequest slingRequest) {
         final String requestSuffix = slingRequest.getRequestPathInfo().getSuffix();
         if (StringUtils.equals(requestSuffix, this.getSuffix())
                 || StringUtils.startsWith(requestSuffix, this.getSuffix() + "/")) {
@@ -342,7 +342,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param slingRequest
      * @return
      */
-    public String getFormSelector(final SlingHttpServletRequest slingRequest) {
+    public final String getFormSelector(final SlingHttpServletRequest slingRequest) {
         final String requestSuffix = slingRequest.getRequestPathInfo().getSuffix();
         if (StringUtils.equals(requestSuffix, this.getSuffix())
                 || !StringUtils.startsWith(requestSuffix, this.getSuffix() + "/")) {
@@ -364,7 +364,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param unencoded
      * @return
      */
-    protected String encode(String unencoded) {
+    protected final String encode(String unencoded) {
         if (StringUtils.isBlank(unencoded)) {
             return "";
         }
@@ -382,7 +382,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
      * @param encoded
      * @return
      */
-    protected String decode(String encoded) {
+    protected final String decode(String encoded) {
         if (StringUtils.isBlank(encoded)) {
             return "";
         }
@@ -395,7 +395,7 @@ public abstract class PostFormHelperImpl implements PostFormHelper {
     }
 
     @Activate
-    protected void activate(final Map<String, String> properties) {
+    protected final void activate(final Map<String, String> properties) {
         this.suffix = PropertiesUtil.toString(properties.get(PROP_SUFFIX), DEFAULT_SUFFIX);
         if (StringUtils.isBlank(this.suffix)) {
             // No whitespace please
