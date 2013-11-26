@@ -14,7 +14,7 @@ Gracefully handle erring components with custom views. Edit, Preview and Publish
 
 ## How to Use
 
-Create a new `sling:OsgiConfig` node for each logical flush rule set. A good practice is to create a "global" configuration and separate configurations per "site".
+Create a new `sling:OsgiConfig` to define how each view should be handled. To leverage the ACS AEM Commons OOTB views use the `sling:OsgiConfig` node defined below. This configuration will be used globally across all sites and pages on the AEM instance. 
 
     /apps/myapp/config/com.adobe.acs.errorpagehandler.impl.ComponentErrorHandlerImpl
 
@@ -32,12 +32,8 @@ Create a new `sling:OsgiConfig` node for each logical flush rule set. A good pra
 	/>
 {% endhighlight %}  
 
-
-Create HTML snippets pointed to by the `prop.*.html` OSGi Config properties.
+You can also create HTML snippets pointed to by the `prop.*.html` OSGi Config properties to fully custom experience. 
 
 * Different views can be configured to point to the same HTML file
-* CSS can be added inline to the HTML files to provide a particular aesthetic.
-* To hide erring components point to an empty HTML file.
-
-
-      
+* CSS can be added inline to the HTML files to provide a particular aesthetic
+* To hide erring component set the path to "/dev/null" or ""
