@@ -60,11 +60,11 @@ import java.io.IOException;
         )
 })
 @Service
-public class FormsPostRedirectGetSlingFilterImpl implements Filter {
-    private static final Logger log = LoggerFactory.getLogger(FormsPostRedirectGetSlingFilterImpl.class);
+public class FormsPostRedirectGetFilterImpl implements Filter {
+    private static final Logger log = LoggerFactory.getLogger(FormsPostRedirectGetFilterImpl.class);
 
     private static final String REQUEST_ATTR_PREVIOUSLY_PROCESSED =
-            FormsPostRedirectGetSlingFilterImpl.class.getName() + "__Previously_Processed";
+            FormsPostRedirectGetFilterImpl.class.getName() + "__Previously_Processed";
 
     @Reference
     private PostFormHelper formHelper;

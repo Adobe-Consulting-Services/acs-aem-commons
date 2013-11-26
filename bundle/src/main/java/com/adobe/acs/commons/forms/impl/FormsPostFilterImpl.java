@@ -63,8 +63,8 @@ import java.io.IOException;
 })
 @Service
 
-public class FormsPostSlingFilterImpl implements javax.servlet.Filter {
-    private static final Logger log = LoggerFactory.getLogger(FormsPostSlingFilterImpl.class);
+public class FormsPostFilterImpl implements javax.servlet.Filter {
+    private static final Logger log = LoggerFactory.getLogger(FormsPostFilterImpl.class);
 
     @Reference
     private PostFormHelper formHelper;
