@@ -34,10 +34,13 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.request.RequestParameterMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.json.jcr.JsonItemWriter;
@@ -83,6 +86,8 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
     @Property(value = DEFAULT_ROOT_PATH)
     private static final String PROP_ROOT_PATH = "root.path";
 
+    private static final String EXTERNAL_STYLESHEETS_PROPERTY = "externalStyleSheets";
+
     private String rootPath;
 
     private JSONObject createEmptyRTE(String rteName) throws JSONException {
@@ -116,7 +121,7 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
                 return;
             }
 
-            writeConfigResource(root, rteName, true, response);
+            writeConfigResource(root, rteName, true, request, response);
         } catch (JSONException e) {
             throw new ServletException(e);
         }
@@ -167,13 +172,35 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
     }
 
     private void writeConfigResource(Resource resource, String rteName, boolean isDefault,
-            SlingHttpServletResponse response) throws IOException, JSONException, ServletException {
+            SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, JSONException, ServletException {
         JSONObject widget = createEmptyRTE(rteName);
 
         // these two size properties seem to be necessary to get the size correct
         // in a component dialog
         widget.put("width", RTE_WIDTH);
         widget.put("height", RTE_HEIGHT);
+        
+        RequestParameterMap map = request.getRequestParameterMap();
+        for (Map.Entry<String, RequestParameter[]> entry : map.entrySet()) {
+            String key = entry.getKey();
+            RequestParameter[] params = entry.getValue();
+            if (params != null) {
+                if (params.length > 1 ||
+                        EXTERNAL_STYLESHEETS_PROPERTY.equals(key)) {
+                    JSONArray arr = new JSONArray();
+                    for (int i = 0; i < params.length; i++) {
+                        arr.put(params[i].getString());
+                    }
+                    widget.put(key, arr);
+                } else if (params.length == 1) {
+                    widget.put(key, params[0].getString());
+                }
+            }
+        }
+
+        if (widget.has("fieldLabel")) {
+            widget.remove("hideLabel");
+        }
 
         JSONObject config = toJSONObject(resource);
 
@@ -230,7 +257,7 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
                     }
                     if (config != null) {
                         try {
-                            writeConfigResource(config, rteName, isDefault, response);
+                            writeConfigResource(config, rteName, isDefault, request, response);
                         } catch (JSONException e) {
                             throw new ServletException(e);
                         }
