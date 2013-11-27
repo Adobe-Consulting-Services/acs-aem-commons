@@ -70,19 +70,19 @@ header {
 	border-bottom: solid 1px @color3;
 	border-top: solid 1px #000;
 	color: #fff;
-	min-height: 35rem;
-	padding-top: 7rem;
+	min-height: 20rem;
+	padding-top: 2rem;
 	text-align: center;
 
 	h1 {
-		font-size: 5em;
+		font-size: 3em;
 		font-weight: 200;
 		color: @color2;
 		text-shadow: @color-highlight 0px 1px 0px;
 	}
 
 	.lead {
-		font-size: 2.5em;
+		font-size: 1.5em;
 		font-weight: 200;
 		color: #fff;
 		line-height: 1em;
@@ -101,7 +101,6 @@ header {
 .striation {
 	padding: 2rem;	
 }
-
 
 .striation-light {
 	.striation;
@@ -185,11 +184,14 @@ header {
 		padding-bottom: .25em;
 	}
 
-	img {
-    	width: auto;
+	.img-wrapper {
     	margin: 0 auto;
+		max-width: 900px;
+	}
+
+	img {
     	display: block;
-      	max-width: 900px;    	
+      	max-width: 100%;    	
 	}
 
 	pre code {
@@ -204,6 +206,10 @@ header {
 	
 	dd {
 		margin-left: 2em;
+	}
+
+	code {
+		whitespace: normal;
 	}
 }
 
@@ -222,8 +228,9 @@ pre {
 	border-color: #eee;
 	padding: 1.5rem 2rem;
 
-	code {
+	code {		
 		.code-block;
+		background-color: transparent;
 		border: 0;
 	}
 }
@@ -254,4 +261,45 @@ footer {
       border-bottom-width: inherit;
       border-bottom-style: inherit;
    }
+}
+
+
+@screen-sm: 460px;
+@screen-md: 992px;
+@screen-lg: 1200px;
+
+/* Media Selectors */
+@media (min-width: @screen-sm) {
+	#jumbotron {
+		min-height: 25rem;
+		padding-top: 5rem;
+		
+		h1 {
+			font-size: 4em;		
+		}
+		
+		.lead {
+			font-size: 2em;		
+		}
+	}
+}
+
+@media (min-width: @screen-md) {
+	#jumbotron {
+		min-height: 32rem;
+		padding-top: 7rem;
+		
+		h1 {
+			font-size: 5em;		
+		}
+
+		.lead {
+			font-size: 2.5em;		
+		}
+
+	}
+}
+
+@media (min-width: @screen-lg) {
+	
 }

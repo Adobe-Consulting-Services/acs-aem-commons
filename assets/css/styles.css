@@ -55,18 +55,18 @@ header .nav a:hover {
   border-bottom: solid 1px #c13300;
   border-top: solid 1px #000;
   color: #fff;
-  min-height: 35rem;
-  padding-top: 7rem;
+  min-height: 20rem;
+  padding-top: 2rem;
   text-align: center;
 }
 #jumbotron h1 {
-  font-size: 5em;
+  font-size: 3em;
   font-weight: 200;
   color: #a72c00;
   text-shadow: #ffac8e 0px 1px 0px;
 }
 #jumbotron .lead {
-  font-size: 2.5em;
+  font-size: 1.5em;
   font-weight: 200;
   color: #fff;
   line-height: 1em;
@@ -148,11 +148,13 @@ header .nav a:hover {
   border-bottom: dotted 1px #ccc;
   padding-bottom: .25em;
 }
-.feature-doc img {
-  width: auto;
+.feature-doc .img-wrapper {
   margin: 0 auto;
-  display: block;
   max-width: 900px;
+}
+.feature-doc img {
+  display: block;
+  max-width: 100%;
 }
 .feature-doc pre code {
   font-size: 1em;
@@ -164,6 +166,9 @@ header .nav a:hover {
 }
 .feature-doc dd {
   margin-left: 2em;
+}
+.feature-doc code {
+  whitespace: normal;
 }
 /* Inline Code */
 code {
@@ -183,6 +188,7 @@ pre code {
   background-color: #f7f7f7;
   border-radius: 0;
   font-family: Courier, serif;
+  background-color: transparent;
   border: 0;
 }
 /* Footer */
@@ -204,4 +210,32 @@ footer {
 .news li:last-child {
   border-bottom-width: inherit;
   border-bottom-style: inherit;
+}
+/* Media Selectors */
+@media (min-width: 460px) {
+  #jumbotron {
+    min-height: 25rem;
+    padding-top: 5rem;
+  }
+  #jumbotron h1 {
+    font-size: 4em;
+  }
+  #jumbotron .lead {
+    font-size: 2em;
+  }
+}
+@media (min-width: 992px) {
+  #jumbotron {
+    min-height: 32rem;
+    padding-top: 7rem;
+  }
+  #jumbotron h1 {
+    font-size: 5em;
+  }
+  #jumbotron .lead {
+    font-size: 2.5em;
+  }
+}
+@media (min-width: 1200px) {
+  
 }
