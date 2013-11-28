@@ -44,7 +44,7 @@ import java.io.IOException;
         description = "Forward-as-GET Form Helper",
         metatype = true,
         inherit = true)
-@Property(name = Constants.SERVICE_RANKING, intValue = 1000)
+@Property(name = Constants.SERVICE_RANKING, intValue = FormHelper.SERVICE_RANKING_FORWARD_AS_GET)
 @Service(value = { FormHelper.class, ForwardAsGetFormHelper.class })
 public class ForwardAsGetFormHelperImpl extends BaseFormHelperImpl implements ForwardAsGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(ForwardAsGetFormHelperImpl.class);
