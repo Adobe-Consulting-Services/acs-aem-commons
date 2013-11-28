@@ -66,7 +66,7 @@ public class FormsPostRedirectGetFilterImpl implements Filter {
     private static final String REQUEST_ATTR_PREVIOUSLY_PROCESSED =
             FormsPostRedirectGetFilterImpl.class.getName() + "__Previously_Processed";
 
-    @Reference
+    @Reference(target = "(service.pid=com.adobe.acs.commons.forms.helpers.impl.BaseFormHelperImpl)")
     private PostFormHelper formHelper;
 
     @Override
@@ -122,13 +122,13 @@ public class FormsPostRedirectGetFilterImpl implements Filter {
         options.setReplaceSuffix(slingRequest.getRequestPathInfo().getSuffix());
 
         if (log.isDebugEnabled()) {
-            log.debug("Post-Redirect-Get Form Filter; Internal forward to resource: {} ",
+            log.debug("POST-Redirect-GET Form Filter; Internal forward to resource: {} ",
                     slingRequest.getResource());
-            log.debug("Post-Redirect-Get Form Filter; Internal forward to path: {} ",
+            log.debug("POST-Redirect-GET Form Filter; Internal forward to path: {} ",
                     slingRequest.getResource().getPath());
-            log.debug("Post-Redirect-Get Filter; Internal forward w/ replace selectors: {} ",
+            log.debug("POST-Redirect-GET Filter; Internal forward w/ replace selectors: {} ",
                     options.getReplaceSelectors());
-            log.debug("Post-Redirect-Get Filter; Internal forward w/ suffix: {} ",
+            log.debug("POST-Redirect-GET Filter; Internal forward w/ suffix: {} ",
                     options.getReplaceSuffix());
         }
 

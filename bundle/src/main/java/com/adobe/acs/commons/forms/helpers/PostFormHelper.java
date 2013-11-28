@@ -22,9 +22,38 @@ package com.adobe.acs.commons.forms.helpers;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
- * Used to register the PostFormHelper as an OSGi Service
+ * Common helper used for internal routing of POST form submissions
+ *
+ * Attention: It is likely you want to use the ForwardAsGetFormHelper or the PostRedirectGetFormHelper instead.
  */
-public interface PostFormHelper extends FormHelper {
-    public String getSuffix();
-    public boolean hasValidSuffix(SlingHttpServletRequest request);
+public interface PostFormHelper {
+    String FORM_RESOURCE_INPUT = FormHelper.FORM_RESOURCE_INPUT;
+    String FORM_NAME_INPUT = FormHelper.FORM_NAME_INPUT;
+
+    /**
+     * Gets the Form Selector for the form POST request.
+     *
+     * Attention: It is likely you want to use the ForwardAsGetFormHelper or the PostRedirectGetFormHelper instead.
+     *
+     * @param slingRequest the SlingRequest obj
+     * @return returns the selector as a String
+     */
+    String getFormSelector(final SlingHttpServletRequest slingRequest);
+
+    /**
+     * Gets the suffix to look for to identify ACS AEM Commons form submissions.
+     *
+     * @return returns the Suffix
+     */
+    String getSuffix();
+
+    /**
+     * Checks if the Request has a suffix that matches  the suffix registered to identify ACS AEM Commons form
+     * submissions (and returned by .getSuffix()).
+     *
+     * @param slingRequest the SlingRequest obj
+     *
+     * @return true if the Request's suffix matches the suffix registered to identify ACS AEM Commons form submissions
+     */
+    boolean hasValidSuffix(SlingHttpServletRequest slingRequest);
 }

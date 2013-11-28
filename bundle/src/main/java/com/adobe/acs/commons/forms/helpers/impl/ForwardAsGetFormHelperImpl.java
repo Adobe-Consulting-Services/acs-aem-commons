@@ -26,12 +26,14 @@ import com.adobe.acs.commons.forms.helpers.impl.synthetics.SyntheticSlingHttpSer
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +44,9 @@ import java.io.IOException;
         description = "Forward-as-GET Form Helper",
         metatype = true,
         inherit = true)
+@Property(name = Constants.SERVICE_RANKING, intValue = 1000)
 @Service(value = { FormHelper.class, ForwardAsGetFormHelper.class })
-public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements ForwardAsGetFormHelper {
+public class ForwardAsGetFormHelperImpl extends BaseFormHelperImpl implements ForwardAsGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(ForwardAsGetFormHelperImpl.class);
 
     private static final String CQ_PAGE_RESOURCE_TYPE = "cq/Page";

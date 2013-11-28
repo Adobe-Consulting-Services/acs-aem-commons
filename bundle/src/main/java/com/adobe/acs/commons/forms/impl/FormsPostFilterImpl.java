@@ -66,7 +66,7 @@ import java.io.IOException;
 public class FormsPostFilterImpl implements javax.servlet.Filter {
     private static final Logger log = LoggerFactory.getLogger(FormsPostFilterImpl.class);
 
-    @Reference
+    @Reference(target = "(service.pid=com.adobe.acs.commons.forms.helpers.impl.BaseFormHelperImpl)")
     private PostFormHelper formHelper;
 
     @Override

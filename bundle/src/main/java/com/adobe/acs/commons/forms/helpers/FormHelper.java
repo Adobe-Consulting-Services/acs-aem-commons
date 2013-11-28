@@ -30,11 +30,15 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 public interface FormHelper {
-    static final String EXTENSION = ".html";
+    String EXTENSION = ".html";
 
-    static final String DEFAULT_FORM_SELECTOR = "post";
-    static final String FORM_NAME_INPUT = ":form";
-    static final String FORM_RESOURCE_INPUT = ":formResource";
+    String DEFAULT_FORM_SELECTOR = "post";
+    String FORM_NAME_INPUT = ":form";
+    String FORM_RESOURCE_INPUT = ":formResource";
+
+    int SERVICE_RANKING_FORWARD_AS_GET = 1000;
+    int SERVICE_RANKING_POST_REDIRECT_GET = 500;
+    int SERVICE_RANKING_BASE = Integer.MIN_VALUE;
 
     /**
 	 * Gets the From from either the POST Requests parameters or the GET

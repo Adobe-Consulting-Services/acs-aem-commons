@@ -26,12 +26,14 @@ import com.adobe.acs.commons.util.TypeUtil;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +47,9 @@ import java.util.Map;
         description = "POST-Redirect-GET Form Helper",
         metatype = false,
         inherit = true)
+@Property(name = Constants.SERVICE_RANKING, intValue = FormHelper.SERVICE_RANKING_POST_REDIRECT_GET)
 @Service(value = { FormHelper.class, PostRedirectGetFormHelper.class })
-public class PostRedirectGetFormHelperImpl extends PostFormHelperImpl implements PostRedirectGetFormHelper {
+public class PostRedirectGetFormHelperImpl extends BaseFormHelperImpl implements PostRedirectGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetFormHelperImpl.class);
 
     @Override
