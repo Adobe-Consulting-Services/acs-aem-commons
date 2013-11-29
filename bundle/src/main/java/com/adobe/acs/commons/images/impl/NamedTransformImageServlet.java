@@ -36,7 +36,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -59,22 +58,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component(
         label = "ACS AEM Commons - Named Transform Image Servlet",
         description = "Transform images programatically by applying a named transform to the requested Image.",
-        metatype = true,
-        policy = ConfigurationPolicy.REQUIRE
+        metatype = true
 )
 @Properties({
     @Property(
+        label = "Resource Types",
+        description = "Resource Types and Node Types to bind this servlet to.",
         name = "sling.servlet.resourceTypes",
         value = { "nt/file", "nt/resource", "dam/Asset", "cq/Page", "cq/PageContent", "nt/unstructured",
                 "foundation/components/image", "foundation/components/parbase", "foundation/components/page" },
-        propertyPrivate = true
+        propertyPrivate = false
     ),
     @Property(
+            label = "Extension",
+            description = "",
             name = "sling.servlet.extensions",
             value = { "transform" },
             propertyPrivate = true
@@ -89,7 +92,14 @@ import java.util.regex.Pattern;
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
     private final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
+    private static final Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
+
     private static final int SYSTEM_MAX_DIMENSION = 50000;
+    private static final int FULL_ROTATION_IN_DEGREES = 360;
+
+    private static final double IMAGE_GIF_MAX_QUALITY = 255;
+    private static final double IMAGE_MAX_QUALITY = 1.0;
+
     private static final String DEFAULT_ROTATION = "0";
 
     private static final String MIME_TYPE_GIF = "image/gif";
@@ -142,14 +152,19 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             return false;
         }
 
-        final String transformName = PathInfoUtil.getSuffixSegment(request, 0);
+        final String transformName = PathInfoUtil.getFirstSuffixSegment(request);
         if (!this.namedTransformsMap.keySet().contains(transformName)) {
+            return false;
+        }
+
+        final String lastSuffix = PathInfoUtil.getLastSuffixSegment(request);
+        final Matcher matcher = LAST_SUFFIX_PATTERN.matcher(lastSuffix);
+        if(!matcher.matches()) {
             return false;
         }
 
         return true;
     }
-
 
     /**
      * Writes the transformed image to the response.
@@ -187,8 +202,10 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         // Transform the image
         this.applyTransforms(image, layer);
 
+        final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
         response.setContentType(mimeType);
-        layer.write(mimeType, mimeType.equals(MIME_TYPE_GIF) ? 255 : 1.0, response.getOutputStream());
+
+        layer.write(mimeType, quality, response.getOutputStream());
 
         response.flushBuffer();
     }
@@ -384,7 +401,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 return DEFAULT_ROTATION;
             }
 
-            final long r = Long.parseLong(rotate) % 360;
+            final long r = Long.parseLong(rotate) % FULL_ROTATION_IN_DEGREES;
 
             return String.valueOf(r);
 
@@ -412,7 +429,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         this.namedTransformsMap = OsgiPropertyUtil.toMap(PropertiesUtil.toStringArray(
                 properties.get(PROP_NAMED_TRANSFORMS), new String[]{}), ":");
 
-        log.info("Named Images Transforms");
+        log.info("Named Images Transforms: {}", this.namedTransformsMap.size());
         for (final Map.Entry<String, String> entry : this.namedTransformsMap.entrySet()) {
             log.info("{} ~> {}", entry.getKey(), entry.getValue());
         }
