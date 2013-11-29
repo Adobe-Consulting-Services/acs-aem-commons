@@ -19,11 +19,10 @@
  */
 package com.adobe.acs.commons.forms.impl;
 
+import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
-import com.adobe.acs.commons.forms.helpers.PostFormHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -43,11 +42,10 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 
 @Component(
-        label = "ACS AEM Commons - Forms Filter - Forms POST-Handler",
+        label = "ACS AEM Commons - Forms - Forms POST-Handler Filter",
         description = "Request Filter that handles some internal routing of ACS-AEM-Commons Form POST requests "
                 + "to Page URIs.",
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
+        metatype = false
 )
 @Properties({
         @Property(
@@ -66,8 +64,8 @@ import java.io.IOException;
 public class FormsPostFilterImpl implements javax.servlet.Filter {
     private static final Logger log = LoggerFactory.getLogger(FormsPostFilterImpl.class);
 
-    @Reference(target = "(service.pid=com.adobe.acs.commons.forms.helpers.impl.BaseFormHelperImpl)")
-    private PostFormHelper formHelper;
+    @Reference
+    private FormsRouter routingHandler;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -96,7 +94,7 @@ public class FormsPostFilterImpl implements javax.servlet.Filter {
          */
 
         if (!StringUtils.equals("POST", slingRequest.getMethod())
-                || !formHelper.hasValidSuffix(slingRequest)) {
+                || !routingHandler.hasValidSuffix(slingRequest)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
@@ -107,7 +105,7 @@ public class FormsPostFilterImpl implements javax.servlet.Filter {
             return;
         }
 
-        String formSelector = formHelper.getFormSelector(slingRequest);
+        String formSelector = routingHandler.getFormSelector(slingRequest);
         if (formSelector == null) {
             formSelector = FormHelper.DEFAULT_FORM_SELECTOR;
         }

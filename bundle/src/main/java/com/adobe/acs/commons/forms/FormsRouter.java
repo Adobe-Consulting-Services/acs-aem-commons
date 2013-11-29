@@ -17,23 +17,20 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.forms.helpers;
+package com.adobe.acs.commons.forms;
 
+import com.adobe.acs.commons.forms.helpers.FormHelper;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
- * Common helper used for internal routing of POST form submissions
- *
- * Attention: It is likely you want to use the ForwardAsGetFormHelper or the PostRedirectGetFormHelper instead.
+ * Internal routing used for internal routing of POST form submissions in the Filters.
  */
-public interface PostFormHelper {
+public interface FormsRouter {
     String FORM_RESOURCE_INPUT = FormHelper.FORM_RESOURCE_INPUT;
     String FORM_NAME_INPUT = FormHelper.FORM_NAME_INPUT;
 
     /**
      * Gets the Form Selector for the form POST request.
-     *
-     * Attention: It is likely you want to use the ForwardAsGetFormHelper or the PostRedirectGetFormHelper instead.
      *
      * @param slingRequest the SlingRequest obj
      * @return returns the selector as a String

@@ -43,13 +43,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component(label = "ACS AEM Commons - POST-Redirect-GET Form Helper",
+@Component(label = "ACS AEM Commons - Forms - POST-Redirect-GET Form Helper",
         description = "POST-Redirect-GET Form Helper",
         metatype = false,
         inherit = true)
-@Property(name = Constants.SERVICE_RANKING, intValue = FormHelper.SERVICE_RANKING_POST_REDIRECT_GET)
+@Property(label = "Service Ranking",
+        name = Constants.SERVICE_RANKING,
+        intValue = FormHelper.SERVICE_RANKING_POST_REDIRECT_GET)
 @Service(value = { FormHelper.class, PostRedirectGetFormHelper.class })
-public class PostRedirectGetFormHelperImpl extends BaseFormHelperImpl implements PostRedirectGetFormHelper {
+public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implements PostRedirectGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetFormHelperImpl.class);
 
     @Override

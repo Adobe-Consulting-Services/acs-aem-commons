@@ -20,18 +20,15 @@
 package com.adobe.acs.commons.forms.helpers.impl;
 
 import com.adobe.acs.commons.forms.Form;
+import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
-import com.adobe.acs.commons.forms.helpers.PostFormHelper;
-import com.adobe.acs.commons.util.PathInfoUtil;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
@@ -39,7 +36,6 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,17 +44,21 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component(label = "ACS AEM Commons - Base POST Form Helper",
-        description = "Base Form Helper. Do not use directly outside of direct implementation via PostFormHelper; "
-                + "instead use PostRedirectGetFormHelper or ForwardAsGetFormHelper.",
-        immediate = false,
-        metatype = false)
-@Property(name = Constants.SERVICE_RANKING, intValue = FormHelper.SERVICE_RANKING_BASE)
-@Service(value = PostFormHelper.class)
-public class BaseFormHelperImpl implements PostFormHelper {
-    private static final Logger log = LoggerFactory.getLogger(BaseFormHelperImpl.class);
+@Component(label = "ACS AEM Commons - Forms - Abstract Form Helper",
+        description = "Abstract Form Helper. This provides common behaviors for handling POST-behaviors of the "
+        + "ACS AEM Commons Forms implementation.",
+        metatype = false,
+        componentAbstract = true)
+@Property(name = Constants.SERVICE_RANKING,
+        intValue = FormHelper.SERVICE_RANKING_BASE,
+        propertyPrivate = true)
+public abstract class AbstractFormHelperImpl {
+    private static final Logger log = LoggerFactory.getLogger(AbstractFormHelperImpl.class);
 
-    static final String[] FORM_INPUTS = {FORM_NAME_INPUT, FORM_RESOURCE_INPUT};
+    static final String[] FORM_INPUTS = {FormHelper.FORM_NAME_INPUT, FormHelper.FORM_RESOURCE_INPUT};
+
+    @Reference
+    private FormsRouter formsRouter;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -66,25 +66,15 @@ public class BaseFormHelperImpl implements PostFormHelper {
     @Reference
     private XSSAPI xss;
 
-    private static final String DEFAULT_SUFFIX = "/submit/form";
-
-    private String suffix = DEFAULT_SUFFIX;
-
-    @Property(label = "Suffix",
-            description = "Forward-as-GET Request Suffix used to identify Forward-as-GET POST Request",
-            value = DEFAULT_SUFFIX)
-    private static final String PROP_SUFFIX = "prop.form-suffix";
-
-
     public final String getFormInputsHTML(final Form form, final String... keys) {
         // The form objects data and errors should be xssProtected before being passed into this method
         StringBuffer html = new StringBuffer();
 
-        html.append("<input type=\"hidden\" name=\"").append(FORM_NAME_INPUT).append("\" value=\"")
+        html.append("<input type=\"hidden\" name=\"").append(FormHelper.FORM_NAME_INPUT).append("\" value=\"")
                 .append(xss.encodeForHTMLAttr(form.getName())).append("\"/>\n");
 
         final String resourcePath = form.getResourcePath();
-        html.append("<input type=\"hidden\" name=\"").append(FORM_RESOURCE_INPUT).append("\" value=\"")
+        html.append("<input type=\"hidden\" name=\"").append(FormHelper.FORM_RESOURCE_INPUT).append("\" value=\"")
                 .append(xss.encodeForHTMLAttr(resourcePath)).append("\"/>\n");
 
         for (final String key : keys) {
@@ -141,10 +131,8 @@ public class BaseFormHelperImpl implements PostFormHelper {
         return actionPath;
     }
 
-
-    @Override
     public final String getSuffix() {
-        return this.suffix;
+        return formsRouter.getSuffix();
     }
 
     /**
@@ -191,7 +179,6 @@ public class BaseFormHelperImpl implements PostFormHelper {
                 log.debug("Adding to form data: {} ~> {}", key, values[0].toString());
                 map.put(key, values[0].getString());
             } else {
-                // TODO: Handle multi-value parameter values;
                 // Requires support for transporting them and re-writing them back into HTML Form on error
                 for (final RequestParameter value : values) {
                     // Use the first non-blank value, or use the last value (which will be blank or not-blank)
@@ -216,7 +203,7 @@ public class BaseFormHelperImpl implements PostFormHelper {
      */
     protected final String getPostLookupKey(final String formName) {
         // This may change; keeping as method call to ease future refactoring
-        return FORM_NAME_INPUT;
+        return FormHelper.FORM_NAME_INPUT;
     }
 
     /**
@@ -287,13 +274,7 @@ public class BaseFormHelperImpl implements PostFormHelper {
 
 
     public final boolean hasValidSuffix(final SlingHttpServletRequest slingRequest) {
-        final String requestSuffix = slingRequest.getRequestPathInfo().getSuffix();
-        if (StringUtils.equals(requestSuffix, this.getSuffix())
-                || StringUtils.startsWith(requestSuffix, this.getSuffix() + "/")) {
-            return true;
-        }
-
-        return false;
+        return formsRouter.hasValidSuffix(slingRequest);
     }
 
     /**
@@ -303,19 +284,7 @@ public class BaseFormHelperImpl implements PostFormHelper {
      * @return
      */
     public final String getFormSelector(final SlingHttpServletRequest slingRequest) {
-        final String requestSuffix = slingRequest.getRequestPathInfo().getSuffix();
-        if (StringUtils.equals(requestSuffix, this.getSuffix())
-                || !StringUtils.startsWith(requestSuffix, this.getSuffix() + "/")) {
-            return null;
-        }
-
-        final int segments = StringUtils.split(this.getSuffix(), '/').length;
-        if (segments < 1) {
-            return null;
-        }
-
-        final String formSelector = PathInfoUtil.getSuffixSegment(slingRequest, segments);
-        return StringUtils.stripToNull(formSelector);
+        return formsRouter.getFormSelector(slingRequest);
     }
 
     /**
@@ -351,15 +320,6 @@ public class BaseFormHelperImpl implements PostFormHelper {
             return java.net.URLDecoder.decode((encoded), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             return encoded;
-        }
-    }
-
-    @Activate
-    protected final void activate(final Map<String, String> properties) {
-        this.suffix = PropertiesUtil.toString(properties.get(PROP_SUFFIX), DEFAULT_SUFFIX);
-        if (StringUtils.isBlank(this.suffix)) {
-            // No whitespace please
-            this.suffix = DEFAULT_SUFFIX;
         }
     }
 }
