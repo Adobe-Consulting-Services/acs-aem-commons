@@ -24,6 +24,7 @@ import com.adobe.acs.commons.util.OsgiPropertyUtil;
 import com.adobe.acs.commons.util.PathInfoUtil;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.ImageResource;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.commons.util.DamUtil;
@@ -54,9 +55,8 @@ import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -92,6 +92,12 @@ import java.util.regex.Pattern;
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
     private final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
+    private enum Transforms {
+        RESIZE,
+        ROTATE,
+        CROP
+    }
+
     private static final Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
 
     private static final int SYSTEM_MAX_DIMENSION = 50000;
@@ -116,7 +122,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     /* Named Transforms */
 
     @Property(label = "Named Transforms",
-            description = "my-name:/width/X/height/Y/rotate/Z/crop/A/B/C/D",
+            description = "Transform in the format [ transform-name:/width/X/height/Y/rotate/Z/crop/X1,Y1,X2,Y2 ]"
+            + " Order of transform rules dictates order of application (RESIZE (w/h), ROTATE (rotate), CROP (crop))",
             cardinality = Integer.MAX_VALUE,
             value = { })
     private static final String PROP_NAMED_TRANSFORMS = "prop.named-transforms";
@@ -126,7 +133,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
     @Property(label = "Asset Rendition Picker Regex",
-            description = "Regex to select the Rendition to transform when directly transforming a DAM Asset.",
+            description = "Regex to select the Rendition to transform when directly transforming a DAM Asset."
+                    + " [ Default: cq5dam.web.(.*) ]",
             value = DEFAULT_ASSET_RENDITION_PICKER_REGEX)
     private static final String PROP_ASSET_RENDITION_PICKER_REGEX = "prop.asset-rendition-picker-regex";
     private static RenditionPatternPicker renditionPatternPicker =
@@ -187,7 +195,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final String width = parseTransform(transform, KEY_WIDTH);
         final String height = parseTransform(transform, KEY_HEIGHT);
         final String rotate = scrubRotate(parseTransform(transform, KEY_ROTATE));
-        final String crop = parseTransform(transform, KEY_CROP, 4, ",");
+        final String crop = parseTransform(transform, KEY_CROP);
+
+        final LinkedList<Transforms> order = getOrder(transform);
 
         log.debug("width: {}", width);
         log.debug("height: {}", height);
@@ -200,7 +210,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final String mimeType = this.getMimeType(image);
 
         // Transform the image
-        this.applyTransforms(image, layer);
+        this.applyTransforms(image, layer, order);
 
         final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
         response.setContentType(mimeType);
@@ -208,6 +218,33 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         layer.write(mimeType, quality, response.getOutputStream());
 
         response.flushBuffer();
+    }
+
+    private LinkedList<Transforms> getOrder(final String transformStr) {
+        final LinkedList<Transforms> order = new LinkedList<Transforms>();
+
+        final String[] transforms = StringUtils.split(transformStr, "/");
+
+        for(final String key : transforms) {
+            if(!order.contains(Transforms.RESIZE)
+                    && (StringUtils.equals(key, KEY_WIDTH) || StringUtils.equals(key, KEY_HEIGHT))) {
+                order.add(Transforms.RESIZE);
+            } if(!order.contains(Transforms.ROTATE)
+                    && (StringUtils.equals(key, KEY_ROTATE))) {
+                order.add(Transforms.ROTATE);
+            } else if(!order.contains(Transforms.CROP)
+                    && (StringUtils.equals(key, KEY_CROP))) {
+                order.add(Transforms.CROP);
+            }
+        }
+
+        if(order.isEmpty()) {
+            order.add(Transforms.RESIZE);
+            order.add(Transforms.CROP);
+            order.add(Transforms.ROTATE);
+        }
+
+        return order;
     }
 
     private Image resolveImage(final SlingHttpServletRequest request) {
@@ -235,7 +272,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             image.set(Image.PN_REFERENCE, renditionResource.getPath());
             return image;
 
-        } else if (DamUtil.isRendition(resource)) {
+        } else if (DamUtil.isRendition(resource)
+                || ResourceUtil.isA(resource, JcrConstants.NT_FILE)
+                || ResourceUtil.isA(resource, JcrConstants.NT_RESOURCE)) {
             // For renditions; use the requested rendition
             final Image image = new Image(resource);
             image.set(Image.PN_REFERENCE, resource.getPath());
@@ -261,10 +300,18 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @param layer the image's layer
      * @return true if any transformations were processed
      */
-    private boolean applyTransforms(final Image image, final Layer layer) {
-        boolean modified = image.crop(layer) != null;
-        modified |= image.rotate(layer) != null;
-        modified |= image.resize(layer) != null;
+    private boolean applyTransforms(final Image image, final Layer layer, final LinkedList<Transforms> order) {
+        boolean modified = false;
+
+        for(final Transforms transform : order) {
+            if(Transforms.RESIZE.equals(transform)) {
+                modified = image.resize(layer) != null;
+            } else if(Transforms.CROP.equals(transform)) {
+                modified = image.crop(layer) != null;
+            } else if(Transforms.ROTATE.equals(transform)) {
+                modified = image.rotate(layer) != null;
+            }
+        }
 
         return modified;
     }
@@ -341,50 +388,15 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return layer;
     }
 
-    /**
-     * Wrapper method for parseTransform(String suffix, String key, int size, String delimiter).
-     * <p/>
-     * Passes
-     * size: 0
-     * delimiter: null
-     *
-     * @param suffix
-     * @param key
-     * @return
-     */
-    private String parseTransform(final String suffix, final String key) {
-        return parseTransform(suffix, key, 1, null);
-    }
+    private String parseTransform(final String transformStr, final String key) {
+        final String[] transforms = StringUtils.split(transformStr, "/");
 
-    /**
-     * Get key/values from the suffix string.
-     *
-     * @param suffix    Suffix string (foo/bar/pets/cat/dog/nuts.bolts)
-     * @param key       Suffix segment to treat as the key
-     * @param size      Number of suffix value segments after the key segment to return
-     * @param delimiter Delimiter used to join the value segments
-     * @return "true" if key exists and size = 0, segment value is key exists and size = 1,
-     * joined segment values using delimiter if key exists and size > 1
-     */
-    private String parseTransform(final String suffix, final String key, final int size, String delimiter) {
-        final String[] suffixes = StringUtils.split(suffix, "/");
-
-        final int index = ArrayUtils.indexOf(suffixes, key);
-        if (index < 0 || (index + size) >= suffixes.length) {
+        final int index = ArrayUtils.indexOf(transforms, key);
+        if (index < 0 || (index + 1) >= transforms.length) {
             return null;
         }
 
-        if (size < 1) {
-            return String.valueOf(true);
-        }
-
-        final List<String> result = new ArrayList<String>();
-        for (int i = index + 1; i <= index + size; i++) {
-            result.add(suffixes[i]);
-        }
-
-        delimiter = StringUtils.isBlank(delimiter) ? "" : delimiter;
-        return StringUtils.join(result, delimiter);
+        return transforms[index + 1];
     }
 
     /**
