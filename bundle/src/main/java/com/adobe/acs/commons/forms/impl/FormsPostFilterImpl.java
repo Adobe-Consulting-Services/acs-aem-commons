@@ -19,12 +19,14 @@
  */
 package com.adobe.acs.commons.forms.impl;
 
+import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
-import com.adobe.acs.commons.forms.helpers.PostFormHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingFilter;
-import org.apache.felix.scr.annotations.sling.SlingFilterScope;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
@@ -32,31 +34,48 @@ import org.apache.sling.api.request.RequestParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.*;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 
-@SlingFilter(
-        label = "ACS AEM Commons - Forms POST-Handler Filter",
-        description = "Request Filter that handles some internal routing of ACS-AEM-Commons Form POST requests to Page URIs.",
-        metatype = false,
-        generateComponent = true,
-        generateService = true,
-        order = 0,
-        scope = SlingFilterScope.REQUEST)
-public class FormsPostSlingFilterImpl implements javax.servlet.Filter {
-    private static final Logger log = LoggerFactory.getLogger(FormsPostSlingFilterImpl.class);
+@Component(
+        label = "ACS AEM Commons - Forms - Forms POST-Handler Filter",
+        description = "Request Filter that handles some internal routing of ACS-AEM-Commons Form POST requests "
+                + "to Page URIs.",
+        metatype = false
+)
+@Properties({
+        @Property(
+                name = "sling.filter.scope",
+                value = "request",
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "filter.order",
+                intValue = 0,
+                propertyPrivate = true
+        )
+})
+@Service
+
+public class FormsPostFilterImpl implements javax.servlet.Filter {
+    private static final Logger log = LoggerFactory.getLogger(FormsPostFilterImpl.class);
 
     @Reference
-    private PostFormHelper formHelper;
+    private FormsRouter routingHandler;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if(!(servletRequest instanceof  SlingHttpServletRequest) ||
-                !(servletResponse instanceof SlingHttpServletResponse)) {
+    public final void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
+                          FilterChain filterChain) throws IOException, ServletException {
+        if (!(servletRequest instanceof SlingHttpServletRequest)
+                || !(servletResponse instanceof SlingHttpServletResponse)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
@@ -74,20 +93,20 @@ public class FormsPostSlingFilterImpl implements javax.servlet.Filter {
          *  - Must contain Form Resource Query Parameter
          */
 
-        if(!StringUtils.equals("POST", slingRequest.getMethod()) ||
-                !formHelper.hasValidSuffix(slingRequest)) {
+        if (!StringUtils.equals("POST", slingRequest.getMethod())
+                || !routingHandler.hasValidSuffix(slingRequest)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
         final String formResource = this.getParameter(slingRequest, FormHelper.FORM_RESOURCE_INPUT);
-        if(formResource == null || slingRequest.getResourceResolver().resolve(formResource) == null) {
+        if (formResource == null || slingRequest.getResourceResolver().resolve(formResource) == null) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
-        String formSelector = formHelper.getFormSelector(slingRequest);
-        if(formSelector == null) {
+        String formSelector = routingHandler.getFormSelector(slingRequest);
+        if (formSelector == null) {
             formSelector = FormHelper.DEFAULT_FORM_SELECTOR;
         }
 
@@ -96,7 +115,7 @@ public class FormsPostSlingFilterImpl implements javax.servlet.Filter {
         options.setReplaceSelectors(formSelector);
         options.setReplaceSuffix(slingRequest.getRequestPathInfo().getSuffix());
 
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Form Filter; Internal forward to path: {} ", formResource);
             log.debug("Form Filter; Internal forward w/ replace selectors: {} ", options.getReplaceSelectors());
             log.debug("Form Filter; Internal forward w/ suffix: {} ", options.getReplaceSuffix());
@@ -112,7 +131,9 @@ public class FormsPostSlingFilterImpl implements javax.servlet.Filter {
     private String getParameter(SlingHttpServletRequest slingRequest, String param) {
         final RequestParameter requestParameter =
                 slingRequest.getRequestParameter(param);
-        if(requestParameter == null) { return null; }
+        if (requestParameter == null) {
+            return null;
+        }
         return StringUtils.stripToNull(requestParameter.getString());
     }
 }
