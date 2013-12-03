@@ -20,9 +20,10 @@
 
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
-import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushAgentFilter;
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.day.cq.replication.Agent;
+import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
@@ -57,7 +58,6 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
     @Reference
     private AgentManager agentManager;
 
-
     /**
      * {@inheritDoc}
      */
@@ -75,10 +75,22 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
                                                      final ReplicationActionType actionType,
                                                      final boolean synchronous,
                                                      final String... paths) throws ReplicationException {
+        return this.flush(resourceResolver, actionType, synchronous, DispatcherFlushFilter.HIERARCHICAL, paths);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Map<Agent, ReplicationResult> flush(final ResourceResolver resourceResolver,
+                                                     final ReplicationActionType actionType,
+                                                     final boolean synchronous,
+                                                     final AgentFilter agentFilter,
+                                                     final String... paths) throws ReplicationException {
         final ReplicationOptions options = new ReplicationOptions();
         final ReplicationResultListener listener = new ReplicationResultListener();
 
-        options.setFilter(new DispatcherFlushAgentFilter());
+        options.setFilter(agentFilter);
         options.setSynchronous(synchronous);
         options.setSuppressStatusUpdate(true);
         options.setSuppressVersions(true);
@@ -86,9 +98,10 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
 
         for (final String path : paths) {
             if (log.isDebugEnabled()) {
-                log.debug("Issuing Dispatcher Flush request for: {}", path);
-                log.debug("  > Synchronous: {}", options.isSynchronous());
-                log.debug("  > Replication Action Type: {}", actionType.name());
+                log.debug("--------------------------------------------------------------------------------");
+                log.debug("Issuing Dispatcher Flush (via AEM Replication API) request for: {}", path);
+                log.debug(" > Synchronous: {}", options.isSynchronous());
+                log.debug(" > Replication Action Type: {}", actionType.name());
             }
 
             replicator.replicate(resourceResolver.adaptTo(Session.class),
@@ -102,11 +115,18 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
      * {@inheritDoc}
      */
     public final Agent[] getFlushAgents() {
+        return this.getAgents(new DispatcherFlushFilter());
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public final Agent[] getAgents(final AgentFilter agentFilter) {
         final List<Agent> flushAgents = new ArrayList<Agent>();
-        final DispatcherFlushAgentFilter filter = new DispatcherFlushAgentFilter();
 
         for (final Agent agent : agentManager.getAgents().values()) {
-            if (filter.isIncluded(agent)) {
+            if (agentFilter.isIncluded(agent)) {
                 flushAgents.add(agent);
             }
         }

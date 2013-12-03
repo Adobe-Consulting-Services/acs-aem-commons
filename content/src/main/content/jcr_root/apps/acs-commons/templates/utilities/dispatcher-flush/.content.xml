@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:description="Utility page for defining configurations for, and initiating forced dispatcher flushes."
+    jcr:primaryType="cq:Template"
+    jcr:title="Dispatcher Flush"
+    allowedPaths="[/etc/acs-commons/dispatcher-flush(/.*)?,/etc/dispatcher-flush(/.*)?,/etc/replication(/.*)?]"
+    ranking="{Long}100">
+    <jcr:content
+        cq:designPath="/etc/designs/acs-commons"
+        jcr:primaryType="cq:PageContent"
+        sling:resourceType="acs-commons/components/utilities/dispatcher-flush"/>
+</jcr:root>

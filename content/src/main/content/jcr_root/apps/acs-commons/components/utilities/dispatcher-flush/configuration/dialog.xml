@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="cq:Dialog"
     activeTab="0"
     title="Dispatcher Flush Configuration"
@@ -11,23 +11,23 @@
             xtype="panel">
             <items jcr:primaryType="cq:WidgetCollection">
                 <replicationactiontype
-                        jcr:primaryType="cq:Widget"
-                        fieldLabel="Flush method"
-                        fieldDescription="Dispatcher flush method. This effects how cached files are effected (invalidate or delete)."
-                        defaultValue="ACTIVATE"
-                        value="ACTIVATE"
-                        name="./replicationActionType"
-                        type="select"
-                        xtype="selection">
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="ACTIVATE"
+                    fieldDescription="Dispatcher flush method. This effects how cached files are effected (invalidate or delete)."
+                    fieldLabel="Flush method"
+                    name="./replicationActionType"
+                    type="select"
+                    value="ACTIVATE"
+                    xtype="selection">
                     <options jcr:primaryType="cq:WidgetCollection">
                         <activate
-                                jcr:primaryType="nt:unstructured"
-                                text="Invalidate Cache"
-                                value="ACTIVATE"/>
+                            jcr:primaryType="nt:unstructured"
+                            text="Invalidate Cache"
+                            value="ACTIVATE"/>
                         <delete
-                                jcr:primaryType="nt:unstructured"
-                                text="Delete Cache"
-                                value="DELETE"/>
+                            jcr:primaryType="nt:unstructured"
+                            text="Delete Cache"
+                            value="DELETE"/>
                     </options>
                 </replicationactiontype>
                 <paths
@@ -38,9 +38,9 @@
                     xtype="multifield">
                     <fieldConfig
                         jcr:primaryType="cq:Widget"
-                        showTitlesInTree="{Boolean}false"
-                        rootPath="/"
                         predicate="[hierarchy]"
+                        rootPath="/"
+                        showTitlesInTree="{Boolean}false"
                         xtype="pathfield"/>
                 </paths>
             </items>

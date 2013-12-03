@@ -25,27 +25,37 @@ import com.adobe.acs.commons.forms.helpers.ForwardAsGetFormHelper;
 import com.adobe.acs.commons.forms.helpers.impl.synthetics.SyntheticSlingHttpServletGetRequest;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
 
-@Component(label = "ACS AEM Commons - Forward Form Manager", description = "Internal Forward-as-GET Form Helper", enabled = true, metatype = true, immediate = false, inherit = true)
+@Component(label = "ACS AEM Commons - Forms - Forward-as-GET Form Helper",
+        description = "Forward-as-GET Form Helper",
+        metatype = false,
+        inherit = true)
+@Property(label = "Service Ranking",
+        name = Constants.SERVICE_RANKING,
+        intValue = FormHelper.SERVICE_RANKING_FORWARD_AS_GET)
 @Service(value = { FormHelper.class, ForwardAsGetFormHelper.class })
-public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements ForwardAsGetFormHelper {
+public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implements ForwardAsGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(ForwardAsGetFormHelperImpl.class);
+
     private static final String CQ_PAGE_RESOURCE_TYPE = "cq/Page";
 
     @Override
-    public Form getForm(final String formName, final SlingHttpServletRequest request) {
-        if(this.doHandlePost(formName, request)) {
+    public final Form getForm(final String formName, final SlingHttpServletRequest request) {
+        if (this.doHandlePost(formName, request)) {
             // Read the request from the POST parameters
             return this.getPostForm(formName, request);
         } else {
@@ -61,7 +71,7 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
     }
 
     @Override
-    public void forwardAsGet(final Form form, final Page page,
+    public final void forwardAsGet(final Form form, final Page page,
                              final SlingHttpServletRequest request,
                              final SlingHttpServletResponse response) throws ServletException, IOException {
 
@@ -74,7 +84,7 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
     }
 
     @Override
-    public void forwardAsGet(final Form form, final Page page,
+    public final void forwardAsGet(final Form form, final Page page,
                              final SlingHttpServletRequest request,
                              final SlingHttpServletResponse response,
                              final RequestDispatcherOptions options) throws ServletException, IOException {
@@ -88,7 +98,7 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
 
 
     @Override
-    public void forwardAsGet(final Form form, final Resource resource,
+    public final void forwardAsGet(final Form form, final Resource resource,
                              final SlingHttpServletRequest request,
                              final SlingHttpServletResponse response) throws ServletException, IOException {
 
@@ -98,7 +108,7 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
     }
 
     @Override
-    public void forwardAsGet(final Form form, final Resource resource,
+    public final void forwardAsGet(final Form form, final Resource resource,
                              final SlingHttpServletRequest request,
                              final SlingHttpServletResponse response,
                              final RequestDispatcherOptions options) throws ServletException, IOException {
@@ -109,7 +119,7 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
     }
 
     @Override
-    public void forwardAsGet(final Form form, final String path,
+    public final void forwardAsGet(final Form form, final String path,
                              final SlingHttpServletRequest request,
                              final SlingHttpServletResponse response,
                              final RequestDispatcherOptions options) throws ServletException, IOException {
@@ -118,7 +128,7 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
 
         final SlingHttpServletRequest syntheticRequest = new SyntheticSlingHttpServletGetRequest(request);
 
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Forwarding as GET to path: {} ", path);
             log.debug("Forwarding as GET w/ replace selectors: {} ", options.getReplaceSelectors());
             log.debug("Forwarding as GET w/ add selectors: {} ", options.getAddSelectors());
@@ -130,30 +140,39 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
     }
 
     @Override
-    public void renderForm(final Form form, final Page page, final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+    public final void renderForm(final Form form, final Page page, final SlingHttpServletRequest request,
+                            final SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException {
         final String formSelector = this.getFormSelector(request);
 
-        this.renderOtherForm(form, page, formSelector, request, response);    }
+        this.renderOtherForm(form, page, formSelector, request, response);
+    }
 
     @Override
-    public void renderForm(final Form form, final Resource resource, final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+    public final void renderForm(final Form form, final Resource resource, final SlingHttpServletRequest request,
+                            final SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException {
         final String formSelector = this.getFormSelector(request);
 
         this.renderOtherForm(form, resource, formSelector, request, response);
     }
 
     @Override
-    public void renderForm(final Form form, final String path, final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+    public final void renderForm(final Form form, final String path, final SlingHttpServletRequest request,
+                            final SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException {
         final String formSelector = this.getFormSelector(request);
 
         this.renderOtherForm(form, path, formSelector, request, response);
     }
 
     @Override
-    public void renderOtherForm(final Form form, final String path, final String formSelector, final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+    public final void renderOtherForm(final Form form, final String path, final String formSelector,
+                                 final SlingHttpServletRequest request, final SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException {
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
 
-        if(StringUtils.isNotBlank(formSelector)) {
+        if (StringUtils.isNotBlank(formSelector)) {
             options.setReplaceSelectors(formSelector);
         }
 
@@ -161,10 +180,12 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
     }
 
     @Override
-    public void renderOtherForm(final Form form, final Page page, final String formSelector, final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+    public final void renderOtherForm(final Form form, final Page page, final String formSelector,
+                                 final SlingHttpServletRequest request, final SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException {
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
 
-        if(StringUtils.isNotBlank(formSelector)) {
+        if (StringUtils.isNotBlank(formSelector)) {
             options.setReplaceSelectors(formSelector);
         }
 
@@ -172,10 +193,12 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
     }
 
     @Override
-    public void renderOtherForm(final Form form, final Resource resource, final String formSelector, final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException, ServletException, JSONException {
+    public final void renderOtherForm(final Form form, final Resource resource, final String formSelector,
+                                final SlingHttpServletRequest request, final SlingHttpServletResponse response)
+            throws IOException, ServletException, JSONException {
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
 
-        if(StringUtils.isNotBlank(formSelector)) {
+        if (StringUtils.isNotBlank(formSelector)) {
             options.setReplaceSelectors(formSelector);
         }
 
@@ -184,23 +207,23 @@ public class ForwardAsGetFormHelperImpl extends PostFormHelperImpl implements Fo
 
 
     /**
-     * Gets the Key used to look up the Form from the Request Attributes used to transport Forward-as-GET Forrms
+     * Gets the Key used to look up the Form from the Request Attributes used to transport Forward-as-GET Forms.
      *
      * @param formName
      * @return
      */
-    protected String getLookupKey(final String formName) {
+    protected final String getLookupKey(final String formName) {
         return REQUEST_ATTR_FORM_KEY + formName;
     }
 
     /**
-     * Persists the Form obj to the Request via Request Attribute
+     * Persists the Form obj to the Request via Request Attribute.
      *
      * @param request
      * @param form
      */
-    protected void setRequestAttrForm(final SlingHttpServletRequest request,
-                                    final Form form) {
+    protected final void setRequestAttrForm(final SlingHttpServletRequest request,
+                                      final Form form) {
         final String key = this.getLookupKey(form.getName());
         request.setAttribute(key, form);
     }
