@@ -36,14 +36,10 @@ public interface FormHelper {
     String FORM_NAME_INPUT = ":form";
     String FORM_RESOURCE_INPUT = ":formResource";
 
-    int SERVICE_RANKING_FORWARD_AS_GET = 1000;
-    int SERVICE_RANKING_POST_REDIRECT_GET = 500;
-    int SERVICE_RANKING_BASE = Integer.MIN_VALUE;
-
     /**
      * Gets the From from either the POST Requests parameters or the GET
      * request's (synthetic) attributes.
-     *
+     * 
      * @param formName
      * @param request
      * @return
@@ -53,7 +49,7 @@ public interface FormHelper {
     /**
      * Returns a series of hidden fields used to persist multi-page form data
      * between forms.
-     *
+     * 
      * @param form
      * @param keys
      * @return
@@ -62,7 +58,7 @@ public interface FormHelper {
     String getFormInputsHTML(Form form, String... keys);
 
     /**
-     * Gets the Form Selector for the form POST request.
+     * Gets the Form Selector for the form POST request
      *
      * @param slingRequest
      * @return
@@ -71,7 +67,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided resource's path
-     * <p/>
+     *
      * Appends ".post.html" to the resource's path.
      *
      * @param resource
@@ -81,7 +77,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided resource's path
-     * <p/>
+     *
      * Appends ".html/<suffix>" to the resource's path.
      *
      * @param resource
@@ -92,7 +88,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided page's path
-     * <p/>
+     *
      * Appends ".html/<suffix>/<formSelector>" to the page's path.
      *
      * @param page
@@ -102,7 +98,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided page's path
-     * <p/>
+     *
      * Appends ".html/<suffix>/<formSelector>" to the page's path.
      *
      * @param page
@@ -113,7 +109,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided path
-     * <p/>
+     *
      * Appends ".html/<suffix>" to the path.
      *
      * @param path
@@ -123,7 +119,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided path
-     * <p/>
+     *
      * Appends ".html/<suffix>/<formSelector>" to the path.
      *
      * @param path
@@ -134,9 +130,8 @@ public interface FormHelper {
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
-     * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
-     * in the implementing FormHelper
+     *
+     *  - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet) in the implementing FormHelper
      *
      * @param form
      * @param path
@@ -146,16 +141,15 @@ public interface FormHelper {
      * @throws ServletException
      * @throws JSONException
      */
-    void renderForm(Form form, String path, SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+    void renderForm(Form form, String path, SlingHttpServletRequest request,
+            SlingHttpServletResponse response) throws IOException, ServletException, JSONException;
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
-     * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
-     * in the implementing FormHelper
      *
-     * @param form
+     *  - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet) in the implementing FormHelper
+     *
+     *  @param form
      * @param page
      * @param request
      * @param response
@@ -163,13 +157,14 @@ public interface FormHelper {
      * @throws ServletException
      * @throws JSONException
      */
-    void renderForm(Form form, Page page, SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+    void
+            renderForm(Form form, Page page, SlingHttpServletRequest request, SlingHttpServletResponse response)
+                    throws IOException, ServletException, JSONException;
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
-     * - Wraps implementing `.renderForm(..)` method (sendRedirect or forwardAsGet) in the implementing FormHelper
+     *
+     *  - Wraps implementing `.renderForm(..)` method (sendRedirect or forwardAsGet) in the implementing FormHelper
      *
      * @param form
      * @param resource
@@ -179,14 +174,13 @@ public interface FormHelper {
      * @throws ServletException
      * @throws JSONException
      */
-    void renderForm(Form form, Resource resource, SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+    void renderForm(Form form, Resource resource, SlingHttpServletRequest request,
+            SlingHttpServletResponse response) throws IOException, ServletException, JSONException;
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
-     * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
-     * in the implementing FormHelper
+     *
+     *  - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet) in the implementing FormHelper
      *
      * @param form
      * @param path
@@ -197,16 +191,14 @@ public interface FormHelper {
      * @throws JSONException
      */
     void renderOtherForm(Form form, String path, String selectors, SlingHttpServletRequest request,
-                         SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+            SlingHttpServletResponse response) throws IOException, ServletException, JSONException;
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
-     * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
-     * in the implementing FormHelper
      *
-     * @param form
+     *  - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet) in the implementing FormHelper
+     *
+     *  @param form
      * @param page
      * @param request
      * @param response
@@ -215,15 +207,12 @@ public interface FormHelper {
      * @throws JSONException
      */
     void renderOtherForm(Form form, Page page, String selectors, SlingHttpServletRequest request,
-                         SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
-
+            SlingHttpServletResponse response) throws IOException, ServletException, JSONException;
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
-     * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
-     * in the implementing FormHelper
+     *
+     *  - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet) in the implementing FormHelper
      *
      * @param form
      * @param resource
@@ -234,7 +223,6 @@ public interface FormHelper {
      * @throws JSONException
      */
     void renderOtherForm(Form form, Resource resource, String selectors, SlingHttpServletRequest request,
-                         SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+            SlingHttpServletResponse response) throws IOException, ServletException, JSONException;
 
 }
