@@ -51,7 +51,7 @@ public class FormsRouterImpl implements FormsRouter {
             description = "HTTP Request Suffix used to identify ACS AEM Commons Forms POST Requests and route them "
                     + "appropriately. [ Default: /submit/form ]",
             value = DEFAULT_SUFFIX)
-    private static final String PROP_SUFFIX = "prop.form-suffix";
+    private static final String PROP_SUFFIX = "suffix";
 
 
     /**
