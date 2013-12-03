@@ -65,7 +65,7 @@ public class FormsPostRedirectGetFilterImpl implements Filter {
             FormsPostRedirectGetFilterImpl.class.getName() + "__Previously_Processed";
 
     @Reference
-    private FormsRouter routingHandler;
+    private FormsRouter formsRouter;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -95,13 +95,13 @@ public class FormsPostRedirectGetFilterImpl implements Filter {
          */
 
         if (!StringUtils.equals("GET", slingRequest.getMethod())
-                || !routingHandler.hasValidSuffix(slingRequest)) {
+                || !formsRouter.hasValidSuffix(slingRequest)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
         /* Ensure there is a valid form selector as part of Query Params */
-        final String formSelector = routingHandler.getFormSelector(slingRequest);
+        final String formSelector = formsRouter.getFormSelector(slingRequest);
         if (formSelector == null) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;

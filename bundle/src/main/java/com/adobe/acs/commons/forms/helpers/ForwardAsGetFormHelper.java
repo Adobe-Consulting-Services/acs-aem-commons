@@ -33,7 +33,7 @@ import java.io.IOException;
  * Interface used for working with ACS-AEM-Commons forms.
  */
 public interface ForwardAsGetFormHelper extends FormHelper {
-    String REQUEST_ATTR_FORM_KEY = ForwardAsGetFormHelper.class.getName() + "__Form_";
+    public final String REQUEST_ATTR_FORM_KEY = ForwardAsGetFormHelper.class.getName() + "__Form_";
 
     /**
      * Creates the action URL when posting to a Page (non AJAX call)
@@ -41,7 +41,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
      * @param page
      * @return
      */
-    String getAction(Page page);
+    public String getAction(Page page);
 
     /**
      * Creates a synthetic GET request that can be used in the context of a real
@@ -58,7 +58,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
      * @throws javax.servlet.ServletException
      * @throws java.io.IOException
      */
-    void forwardAsGet(Form form, Resource resource,
+    public void forwardAsGet(Form form, Resource resource,
                              SlingHttpServletRequest request,
                              SlingHttpServletResponse response,
                              RequestDispatcherOptions options) throws ServletException, IOException;
@@ -79,7 +79,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
      * @throws ServletException
      * @throws IOException
      */
-    void forwardAsGet(Form form, Resource resource,
+    public void forwardAsGet(Form form, Resource resource,
                              SlingHttpServletRequest request,
                              SlingHttpServletResponse response) throws ServletException, IOException;
 
@@ -99,7 +99,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
      * @throws ServletException
      * @throws IOException
      */
-    void forwardAsGet(Form form, Page page,
+    public void forwardAsGet(Form form, Page page,
                              SlingHttpServletRequest request,
                              SlingHttpServletResponse response) throws ServletException, IOException;
 
@@ -117,7 +117,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
      * @throws ServletException
      * @throws IOException
      */
-    void forwardAsGet(Form form, Page page,
+    public void forwardAsGet(Form form, Page page,
                              SlingHttpServletRequest request,
                              SlingHttpServletResponse response,
                              RequestDispatcherOptions options) throws ServletException, IOException;
@@ -140,7 +140,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
      * @throws ServletException
      * @throws IOException
      */
-    void forwardAsGet(Form form, String path,
+    public void forwardAsGet(Form form, String path,
                              SlingHttpServletRequest request,
                              SlingHttpServletResponse response,
                              RequestDispatcherOptions options) throws ServletException, IOException;

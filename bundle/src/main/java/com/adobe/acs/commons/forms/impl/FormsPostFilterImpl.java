@@ -65,7 +65,7 @@ public class FormsPostFilterImpl implements javax.servlet.Filter {
     private static final Logger log = LoggerFactory.getLogger(FormsPostFilterImpl.class);
 
     @Reference
-    private FormsRouter routingHandler;
+    private FormsRouter formsRouter;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -94,7 +94,7 @@ public class FormsPostFilterImpl implements javax.servlet.Filter {
          */
 
         if (!StringUtils.equals("POST", slingRequest.getMethod())
-                || !routingHandler.hasValidSuffix(slingRequest)) {
+                || !formsRouter.hasValidSuffix(slingRequest)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
@@ -105,7 +105,7 @@ public class FormsPostFilterImpl implements javax.servlet.Filter {
             return;
         }
 
-        String formSelector = routingHandler.getFormSelector(slingRequest);
+        String formSelector = formsRouter.getFormSelector(slingRequest);
         if (formSelector == null) {
             formSelector = FormHelper.DEFAULT_FORM_SELECTOR;
         }
