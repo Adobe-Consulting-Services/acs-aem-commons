@@ -30,7 +30,7 @@ if(errorPageHandlerService != null && errorPageHandlerService.isEnabled()) {
 
     if(path != null) {
         slingResponse.setStatus(404);
-        sling.include(path);
+        errorPageHandlerService.includeUsingGET(slingRequest, slingResponse, path);
         return;
     }
 }

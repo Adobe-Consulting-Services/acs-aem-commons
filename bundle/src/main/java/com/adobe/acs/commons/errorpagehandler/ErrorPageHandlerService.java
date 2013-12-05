@@ -102,4 +102,14 @@ public interface ErrorPageHandlerService {
      * @param statusCode
      */
     void resetRequestAndResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, int statusCode);
+
+    /**
+     * Include the path, forcing the request method to be GET. This method will silently
+     * swallow exceptions.
+     * 
+     * @param request the request
+     * @param response the response
+     * @param path the path
+     */
+    void includeUsingGET(SlingHttpServletRequest request, SlingHttpServletResponse response, String path);
 }

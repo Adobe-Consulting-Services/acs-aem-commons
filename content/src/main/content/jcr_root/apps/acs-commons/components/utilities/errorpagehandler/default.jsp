@@ -45,7 +45,7 @@ if(errorPageHandlerService != null && errorPageHandlerService.isEnabled()) {
 
         if(path != null) {
             errorPageHandlerService.resetRequestAndResponse(slingRequest, slingResponse, status);
-            sling.include(path);
+            errorPageHandlerService.includeUsingGET(slingRequest, slingResponse, path);
             return;
         }
     }

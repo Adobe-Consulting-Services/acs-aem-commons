@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
@@ -28,7 +29,9 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -41,10 +44,13 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.SlingIOException;
+import org.apache.sling.api.SlingServletException;
 import org.apache.sling.api.request.RequestProgressTracker;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.auth.core.AuthUtil;
 import org.apache.sling.commons.auth.Authenticator;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -593,6 +599,31 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         }
 
         return sortedMap;
+    }
+
+    public void includeUsingGET(final SlingHttpServletRequest request, final SlingHttpServletResponse response, final String path) {
+        final RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+
+        if (dispatcher != null) {
+            try {
+                dispatcher.include(new GetRequest(request), response);
+            } catch (Exception e) {
+                log.debug("Exception swallowed while including error page", e);
+            }
+        }
+    }
+    
+    private static class GetRequest extends SlingHttpServletRequestWrapper {
+
+        public GetRequest(SlingHttpServletRequest wrappedRequest) {
+            super(wrappedRequest);
+        }
+
+        @Override
+        public String getMethod() {
+            return "GET";
+        }
+
     }
 
 }
