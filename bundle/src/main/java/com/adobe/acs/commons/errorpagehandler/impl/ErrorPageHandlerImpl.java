@@ -19,20 +19,12 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequestWrapper;
-
+import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
+import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.day.cq.commons.PathInfo;
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
+import com.day.cq.commons.inherit.InheritanceValueMap;
+import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -44,8 +36,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.SlingIOException;
-import org.apache.sling.api.SlingServletException;
 import org.apache.sling.api.request.RequestProgressTracker;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -58,12 +48,16 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.day.cq.commons.PathInfo;
-import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
-import com.day.cq.commons.inherit.InheritanceValueMap;
-import com.day.cq.search.QueryBuilder;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 @Component(
         label = "ACS AEM Commons - Error Page Handler",
@@ -149,19 +143,26 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Get error page name to look for based on the error code/name
         final String pageName = getErrorPageName(request);
+        String errorsPath = null;
 
         // Try to find the closest real parent for the requested resource
         final Resource parent = findFirstRealParentOrSelf(errorResource);
+        if(parent != null) {
+            // Get content resource of the page
+            final Resource parentContentResource = parent.getChild("jcr:content");
 
-        final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(parent);
-        String errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
+            if(parentContentResource != null) {
+                final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(parentContentResource);
+                errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
 
-        // could not find inherited property
-        if (errorsPath == null) {
-            for (final Map.Entry<String, String> mapPage : pathMap.entrySet()) {
-                if (errorResourcePath.startsWith(mapPage.getKey())) {
-                    errorsPath = mapPage.getValue();
-                    break;
+                // could not find inherited property
+                if (errorsPath == null) {
+                    for (final Map.Entry<String, String> mapPage : pathMap.entrySet()) {
+                        if (errorResourcePath.startsWith(mapPage.getKey())) {
+                            errorsPath = mapPage.getValue();
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -612,7 +613,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             }
         }
     }
-    
+
     private static class GetRequest extends SlingHttpServletRequestWrapper {
 
         public GetRequest(SlingHttpServletRequest wrappedRequest) {
