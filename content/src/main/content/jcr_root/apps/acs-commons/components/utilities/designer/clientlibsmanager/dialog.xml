@@ -1,64 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:Dialog"
-    activeTab="0"
     title="Designer - ClientLibs Manager"
-    xtype="tabpanel">
-    <items jcr:primaryType="cq:WidgetCollection">
-        <tab1
-            jcr:primaryType="cq:Widget"
-            title="ClientLibs"
-            xtype="panel">
-            <items jcr:primaryType="cq:WidgetCollection">
-                <head-libs
-                    jcr:primaryType="cq:Widget"
-                    collapsed="{Boolean}false"
-                    collapsible="{Boolean}false"
-                    title="Head ClientLibs"
-                    xtype="dialogfieldset">
-                    <items jcr:primaryType="cq:WidgetCollection">
-                        <css
-                            jcr:primaryType="cq:Widget"
-                            fieldDescription="Click the '+' to add a new CSS ClientLib"
-                            fieldLabel="CSS"
-                            name="./head/css"
-                            xtype="multifield">
-                            <fieldConfig
+    width="{Long}600"
+    xtype="dialog">
+    <items
+        jcr:primaryType="cq:Widget"
+        xtype="tabpanel">
+        <items jcr:primaryType="cq:WidgetCollection">
+            <tab1
+                jcr:primaryType="cq:Panel"
+                title="ClientLibs">
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <head-libs
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}false"
+                        title="Head ClientLibs"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <css
                                 jcr:primaryType="cq:Widget"
-                                xtype="textfield"/>
-                        </css>
-                        <js
-                            jcr:primaryType="cq:Widget"
-                            fieldDescription="Click the '+' to add a new JavaScript ClientLib"
-                            fieldLabel="JavaScript"
-                            name="./head/js"
-                            xtype="multifield">
-                            <fieldConfig
+                                fieldDescription="Click the '+' to add a new CSS ClientLib"
+                                fieldLabel="CSS"
+                                name="./head/css"
+                                xtype="multifield">
+                                <fieldConfig
+                                    jcr:primaryType="cq:Widget"
+                                    options="/apps/acs-commons/components/utilities/designer/clientlibsmanager/options.css.json"
+                                    type="select"
+                                    xtype="selection"/>
+                            </css>
+                            <js
                                 jcr:primaryType="cq:Widget"
-                                xtype="textfield"/>
-                        </js>
-                    </items>
-                </head-libs>
-                <body-libs
-                    jcr:primaryType="cq:Widget"
-                    collapsed="{Boolean}false"
-                    collapsible="{Boolean}false"
-                    title="Body ClientLibs"
-                    xtype="dialogfieldset">
-                    <items jcr:primaryType="cq:WidgetCollection">
-                        <js
-                            jcr:primaryType="cq:Widget"
-                            fieldDescription="Click the '+' to add a new JavaScript ClientLib"
-                            fieldLabel="JavaScript"
-                            name="./body/js"
-                            xtype="multifield">
-                            <fieldConfig
+                                fieldDescription="Click the '+' to add a new JavaScript ClientLib"
+                                fieldLabel="JavaScript"
+                                name="./head/js"
+                                xtype="multifield">
+                                <fieldConfig
+                                    jcr:primaryType="cq:Widget"
+                                    options="/apps/acs-commons/components/utilities/designer/clientlibsmanager/options.js.json"
+                                    type="select"
+                                    xtype="selection"/>
+                            </js>
+                        </items>
+                    </head-libs>
+                    <body-libs
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}false"
+                        title="Body ClientLibs"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <js
                                 jcr:primaryType="cq:Widget"
-                                xtype="textfield"/>
-                        </js>
-                    </items>
-                </body-libs>
-            </items>
-        </tab1>
+                                fieldDescription="Click the '+' to add a new JavaScript ClientLib"
+                                fieldLabel="JavaScript"
+                                name="./body/js"
+                                xtype="multifield">
+                                <fieldConfig
+                                    jcr:primaryType="cq:Widget"
+                                    options="/apps/acs-commons/components/utilities/designer/clientlibsmanager/options.js.json"
+                                    type="select"
+                                    xtype="selection"/>
+                            </js>
+                        </items>
+                    </body-libs>
+                </items>
+            </tab1>
+        </items>
     </items>
 </jcr:root>
