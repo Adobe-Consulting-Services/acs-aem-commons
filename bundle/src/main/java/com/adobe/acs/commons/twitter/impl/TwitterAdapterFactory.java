@@ -19,12 +19,7 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
@@ -44,14 +39,12 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.webservicesupport.ConfigurationConstants;
 import com.day.cq.wcm.webservicesupport.ConfigurationManager;
 
-@Component
-@Service
-@Properties({
-        @Property(name = AdapterFactory.ADAPTABLE_CLASSES, value = { "com.day.cq.wcm.api.Page",
-                "com.day.cq.wcm.webservicesupport.Configuration" }),
-        @Property(name = AdapterFactory.ADAPTER_CLASSES, value = { "twitter4j.Twitter",
-                "com.adobe.acs.commons.twitter.TwitterClient" }) })
 public final class TwitterAdapterFactory implements AdapterFactory {
+    
+    public TwitterAdapterFactory(ConfigurationManager cfgMgr) {
+        this.configurationManager = cfgMgr;
+        this.factory = new TwitterFactory(buildConfiguration());
+    }
 
     private static final String CLOUD_SERVICE_NAME = "twitterconnect";
 
@@ -129,11 +122,6 @@ public final class TwitterAdapterFactory implements AdapterFactory {
         final com.day.cq.wcm.webservicesupport.Configuration cfg = configurationManager.getConfiguration(
                 CLOUD_SERVICE_NAME, services);
         return cfg;
-    }
-
-    @Activate
-    protected void activate() {
-        this.factory = new TwitterFactory(buildConfiguration());
     }
 
 }
