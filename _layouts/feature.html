@@ -9,6 +9,8 @@ layout: base
                     {{ page.title }}
                     {% if page.tags contains 'new' %}
                     <span class="new">New!</span>
+                    {% elsif page.tags contains 'updated' %}
+                    <span class="updated">Updated</span>
                     {% endif %}
                 </h1>
                 
