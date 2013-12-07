@@ -51,6 +51,11 @@
                             <artifactId>acs-aem-commons-bundle</artifactId>
                             <target>/apps/acs-commons/install</target>
                         </embedded>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>acs-aem-commons-bundle-twitter</artifactId>
+                            <target>/apps/acs-commons/install</target>
+                        </embedded>
                     </embeddeds>
                     <targetURL>http://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
@@ -91,6 +96,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-bundle-twitter</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
