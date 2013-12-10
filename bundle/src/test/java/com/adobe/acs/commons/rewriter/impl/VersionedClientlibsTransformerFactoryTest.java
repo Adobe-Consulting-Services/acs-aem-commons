@@ -117,6 +117,26 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
+    public void testMinifiedCSSClientLibrary() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PATH + ".min.css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(PATH + ".min.123.css", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
     public void testJavaScriptClientLibrary() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
@@ -133,6 +153,25 @@ public class VersionedClientlibsTransformerFactoryTest {
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".123.js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testMinifiedJavaScriptClientLibrary() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", PATH + ".min.js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(PATH + ".min.123.js", attributesCaptor.getValue().getValue(0));
     }
 
     @Test

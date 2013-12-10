@@ -128,7 +128,18 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
             final HtmlLibrary htmlLibrary = htmlLibraryManager.getLibrary(libraryType, pathInfo.getResourcePath());
 
             if (htmlLibrary != null) {
-                return htmlLibrary.getLibraryPath() + "." + htmlLibrary.getLastModified() + libraryType.extension;
+                StringBuilder builder = new StringBuilder();
+                builder.append(htmlLibrary.getLibraryPath());
+                builder.append(".");
+
+                String selector = pathInfo.getSelectorString();
+                if (selector != null) {
+                    builder.append(selector).append(".");
+                }
+                builder.append(htmlLibrary.getLastModified());
+                builder.append(libraryType.extension);
+
+                return builder.toString();
             } else {
                 log.debug("Could not find HtmlLibrary at path: {}", pathInfo.getResourcePath());
                 return null;
