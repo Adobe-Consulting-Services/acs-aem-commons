@@ -17,6 +17,7 @@
     <artifactId>acs-aem-commons-bundle</artifactId>
     <packaging>bundle</packaging>
     <name>ACS AEM Commons Bundle</name>
+    <description>Main ACS AEM Commons OSGi Bundle. Includes commons utilities.</description>
 
     <!-- ====================================================================== -->
     <!-- B U I L D D E F I N I T I O N -->
@@ -48,11 +49,6 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
-                        <Import-Package>
-                            twitter4j;resolution:=optional,
-                            twitter4j.*;resolution:=optional,
-                            *
-                         </Import-Package>
                         <Include-Resource>
                             {maven-resources},
                             META-INF/wcmmode.tld=target/classes/META-INF/wcmmode.tld,
@@ -302,12 +298,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.day.cq.wcm</groupId>
-            <artifactId>cq-wcm-webservice-support</artifactId>
-            <version>5.6.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.adobe.granite</groupId>
             <artifactId>com.adobe.granite.replication.core</artifactId>
             <version>5.5.8</version>
@@ -349,12 +339,6 @@
                     <groupId>javax.servlet.jsp</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.twitter4j</groupId>
-            <artifactId>twitter4j-core</artifactId>
-            <version>3.0.5</version>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 
