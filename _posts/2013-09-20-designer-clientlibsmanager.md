@@ -6,6 +6,7 @@ date: 2013-09-20 23:39:29
 thumbnail: /images/designer-clientlibsmanager/thumbnail.png
 categories: features
 initial-release: 1.0.0
+tags: updated
 ---
 
 ## Purpose

@@ -109,8 +109,29 @@ header .nav a:hover {
   font-weight: 200;
   margin-bottom: 4rem;
 }
+.features .feature .banner {
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: top left;
+  width: 119px;
+  height: 119px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 .features .feature .new {
-  background-image: url('../images/new-light.png');
+  background-image: url('../images/new-banner.png');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: top left;
+  width: 119px;
+  height: 119px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.features .feature .updated {
+  background-image: url('../images/updated-banner.png');
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: top left;
@@ -127,8 +148,27 @@ header .nav a:hover {
 .feature-doc h1 {
   margin-top: 2em;
 }
+.feature-doc h1 .badge {
+  color: #FFF;
+  padding: .25em .5em;
+  border-radius: 5px;
+  margin-left: 10px;
+  font-size: .7em;
+  position: relative;
+  top: -0.1em;
+}
 .feature-doc h1 .new {
   background-color: #f44100;
+  color: #FFF;
+  padding: .25em .5em;
+  border-radius: 5px;
+  margin-left: 10px;
+  font-size: .7em;
+  position: relative;
+  top: -0.1em;
+}
+.feature-doc h1 .updated {
+  background-color: #1876a8;
   color: #FFF;
   padding: .25em .5em;
   border-radius: 5px;
