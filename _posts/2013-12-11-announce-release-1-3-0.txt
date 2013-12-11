@@ -1,7 +1,7 @@
 ---
 layout: feature
 title: Release 1.3.0 now available!
-description: New feature: XSS JSP Functions. Bug fixes to versioned client libraries.
+description: New feature XSS JSP Functions. Bug fixes to versioned client libraries.
 date: 2013-12-11 10:39:29
 thumbnail: /images/default/thumbnail.png
 categories: news
