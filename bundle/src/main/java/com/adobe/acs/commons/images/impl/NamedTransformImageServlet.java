@@ -20,10 +20,9 @@
 package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.dam.RenditionPatternPicker;
-import com.adobe.acs.commons.util.OsgiPropertyUtil;
+import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.PathInfoUtil;
 import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.day.cq.commons.ImageResource;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
@@ -33,13 +32,14 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.foundation.Image;
 import com.day.image.Layer;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -56,7 +56,6 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,46 +87,29 @@ import java.util.regex.Pattern;
             propertyPrivate = true
     )
 })
+@Reference(
+        name = "namedImageTransformers",
+        referenceInterface = NamedImageTransformer.class,
+        policy = ReferencePolicy.DYNAMIC,
+        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
+)
 @Service(Servlet.class)
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
     private final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
-    private enum Transforms {
-        RESIZE,
-        ROTATE,
-        CROP
-    }
-
     private static final Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
-
-    private static final int SYSTEM_MAX_DIMENSION = 50000;
-    private static final int FULL_ROTATION_IN_DEGREES = 360;
 
     private static final double IMAGE_GIF_MAX_QUALITY = 255;
     private static final double IMAGE_MAX_QUALITY = 1.0;
 
-    private static final String DEFAULT_ROTATION = "0";
-
     private static final String MIME_TYPE_GIF = "image/gif";
     private static final String MIME_TYPE_PNG = "image/png";
 
-    private static final String KEY_WIDTH = "width";
-    private static final String KEY_HEIGHT = "height";
-    private static final String KEY_ROTATE = "rotate";
-    private static final String KEY_CROP = "crop";
+    private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();
 
     @Reference
     private ComponentHelper componentHelper;
 
-    /* Named Transforms */
-
-    @Property(label = "Named Transforms",
-            description = "Transform in the format [ transform-name:/width/X/height/Y/rotate/Z/crop/X1,Y1,X2,Y2 ]"
-            + " Order of transform rules dictates order of application (RESIZE (w/h), ROTATE (rotate), CROP (crop))",
-            cardinality = Integer.MAX_VALUE,
-            value = { })
-    private static final String PROP_NAMED_TRANSFORMS = "prop.named-transforms";
-    private Map<String, String> namedTransformsMap = new HashMap<String, String>();
 
     /* Asset Rendition Pattern Picker */
 
@@ -161,7 +143,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
 
         final String transformName = PathInfoUtil.getFirstSuffixSegment(request);
-        if (!this.namedTransformsMap.keySet().contains(transformName)) {
+        if (!this.namedImageTransformers.keySet().contains(transformName)) {
             return false;
         }
 
@@ -187,30 +169,18 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             ServletException, IOException {
 
         final String transformName = PathInfoUtil.getSuffixSegment(request, 0);
-        final String transform = this.namedTransformsMap.get(transformName);
+        final NamedImageTransformer namedImageTransformer = this.namedImageTransformers.get(transformName);
 
-        log.debug("Named image transform of: {}", request.getResource().getPath());
-        log.debug("{} ~> {}", transformName, transform);
-
-        final String width = parseTransform(transform, KEY_WIDTH);
-        final String height = parseTransform(transform, KEY_HEIGHT);
-        final String rotate = scrubRotate(parseTransform(transform, KEY_ROTATE));
-        final String crop = parseTransform(transform, KEY_CROP);
-
-        final LinkedList<Transforms> order = getOrder(transform);
-
-        log.debug("width: {}", width);
-        log.debug("height: {}", height);
-        log.debug("rotate: {}", rotate);
-        log.debug("crop: {}", crop);
-
-        final Image image = this.applyImageProperties(this.resolveImage(request), width, height, crop, rotate);
-
+        final Image image = this.resolveImage(request);
         final Layer layer = this.getLayer(image);
         final String mimeType = this.getMimeType(image);
 
         // Transform the image
-        this.applyTransforms(image, layer, order);
+        try {
+            namedImageTransformer.transform(layer);
+        } catch (RepositoryException e) {
+            throw new ServletException(e);
+        }
 
         final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
         response.setContentType(mimeType);
@@ -220,32 +190,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         response.flushBuffer();
     }
 
-    private LinkedList<Transforms> getOrder(final String transformStr) {
-        final LinkedList<Transforms> order = new LinkedList<Transforms>();
 
-        final String[] transforms = StringUtils.split(transformStr, "/");
-
-        for(final String key : transforms) {
-            if(!order.contains(Transforms.RESIZE)
-                    && (StringUtils.equals(key, KEY_WIDTH) || StringUtils.equals(key, KEY_HEIGHT))) {
-                order.add(Transforms.RESIZE);
-            } if(!order.contains(Transforms.ROTATE)
-                    && (StringUtils.equals(key, KEY_ROTATE))) {
-                order.add(Transforms.ROTATE);
-            } else if(!order.contains(Transforms.CROP)
-                    && (StringUtils.equals(key, KEY_CROP))) {
-                order.add(Transforms.CROP);
-            }
-        }
-
-        if(order.isEmpty()) {
-            order.add(Transforms.RESIZE);
-            order.add(Transforms.CROP);
-            order.add(Transforms.ROTATE);
-        }
-
-        return order;
-    }
 
     private Image resolveImage(final SlingHttpServletRequest request) {
         final Resource resource = request.getResource();
@@ -293,28 +238,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return new Image(resource);
     }
 
-    /**
-     * Apply the transforms initialized on the image.
-     *
-     * @param image the image w the transformations
-     * @param layer the image's layer
-     * @return true if any transformations were processed
-     */
-    private boolean applyTransforms(final Image image, final Layer layer, final LinkedList<Transforms> order) {
-        boolean modified = false;
-
-        for(final Transforms transform : order) {
-            if(Transforms.RESIZE.equals(transform)) {
-                modified = image.resize(layer) != null;
-            } else if(Transforms.CROP.equals(transform)) {
-                modified = image.crop(layer) != null;
-            } else if(Transforms.ROTATE.equals(transform)) {
-                modified = image.rotate(layer) != null;
-            }
-        }
-
-        return modified;
-    }
 
     /**
      * Gets the mimeType of the image.
@@ -330,40 +253,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
     }
 
-    /**
-     * Set the transformation properties on the Image.
-     *
-     * @param image The Image to manipulate
-     * @param width The width to transform the image to; or null to ignore
-     * @param height The height to transform the image to; or null to ignore
-     * @param crop The crop coordinates to apply to the image; or null to ignore
-     * @param rotate The rotation to apply to the image; or null to ignore
-     * @return
-     */
-    private Image applyImageProperties(final Image image, final String width, final String height,
-                                       final String crop, final String rotate)  {
-        if (StringUtils.isNotBlank(width)) {
-            image.set(ImageResource.PN_WIDTH, width);
-        }
-
-        if (StringUtils.isNotBlank(height)) {
-            image.set(ImageResource.PN_HEIGHT, height);
-        }
-
-        if (StringUtils.isNotBlank(rotate)) {
-            image.set(ImageResource.PN_IMAGE_ROTATE, rotate);
-        }
-
-        if (StringUtils.isNotBlank(crop)) {
-            image.set(ImageResource.PN_IMAGE_CROP, crop);
-        }
-
-        // Cowardly refusing to resize images past an already enormous size
-        image.set(Image.PN_MAX_WIDTH, String.valueOf(SYSTEM_MAX_DIMENSION));
-        image.set(Image.PN_MAX_HEIGHT, String.valueOf(SYSTEM_MAX_DIMENSION));
-
-        return image;
-    }
 
     /**
      * Gets the Image layer allowing or manipulations.
@@ -388,42 +277,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return layer;
     }
 
-    private String parseTransform(final String transformStr, final String key) {
-        final String[] transforms = StringUtils.split(transformStr, "/");
-
-        final int index = ArrayUtils.indexOf(transforms, key);
-        if (index < 0 || (index + 1) >= transforms.length) {
-            return null;
-        }
-
-        return transforms[index + 1];
-    }
-
-    /**
-     * Validates and normalizes rotation parameter.
-     * <p/>
-     * This normalized values to exist between -360 and 360.
-     *
-     * @param rotate
-     * @return
-     */
-    private String scrubRotate(final String rotate) {
-        try {
-            if (StringUtils.isBlank(rotate)) {
-                return DEFAULT_ROTATION;
-            }
-
-            final long r = Long.parseLong(rotate) % FULL_ROTATION_IN_DEGREES;
-
-            return String.valueOf(r);
-
-          } catch (Exception ex) {
-            // Error occurred parsing rotate value, use the DEFAULT_ROTATION
-            // which forces the image to render using 0 rotation
-            return DEFAULT_ROTATION;
-        }
-    }
-
 
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
@@ -437,13 +290,21 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                     DEFAULT_ASSET_RENDITION_PICKER_REGEX);
             renditionPatternPicker = new RenditionPatternPicker(DEFAULT_ASSET_RENDITION_PICKER_REGEX);
         }
+    }
 
-        this.namedTransformsMap = OsgiPropertyUtil.toMap(PropertiesUtil.toStringArray(
-                properties.get(PROP_NAMED_TRANSFORMS), new String[]{}), ":");
+    // Bind
+    protected void bindNamedImageTransformers(final NamedImageTransformer service, final Map<Object, Object> props) {
+        final String type = PropertiesUtil.toString(props.get(NamedImageTransformer.PROP_NAME), null);
+        if (type != null) {
+            this.namedImageTransformers.put(type, service);
+        }
+    }
 
-        log.info("Named Images Transforms: {}", this.namedTransformsMap.size());
-        for (final Map.Entry<String, String> entry : this.namedTransformsMap.entrySet()) {
-            log.info("{} ~> {}", entry.getKey(), entry.getValue());
+    // Unbind
+    protected void unbindNamedImageTransformers(final NamedImageTransformer service, final Map<Object, Object> props) {
+        final String type = PropertiesUtil.toString(props.get(NamedImageTransformer.PROP_NAME), null);
+        if (type != null) {
+            this.namedImageTransformers.remove(type);
         }
     }
 }
