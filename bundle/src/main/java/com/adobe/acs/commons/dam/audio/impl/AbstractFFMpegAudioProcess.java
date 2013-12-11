@@ -165,7 +165,7 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
     }
 
     protected final File getWorkingDir() throws IOException {
-        if (!workingDir.mkdir()) {
+        if (!workingDir.exists() && !workingDir.mkdir()) {
             throw new IOException("Working directory could not be created.");
         }
         return workingDir;
