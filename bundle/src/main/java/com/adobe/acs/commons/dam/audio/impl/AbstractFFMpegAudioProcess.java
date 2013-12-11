@@ -164,8 +164,10 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
         return locator;
     }
 
-    protected final File getWorkingDir() {
-        workingDir.mkdir();
+    protected final File getWorkingDir() throws IOException {
+        if (!workingDir.mkdir()) {
+            throw new IOException("Working directory could not be created.");
+        }
         return workingDir;
     }
 
@@ -213,12 +215,16 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
      * 
      * @return a temporary directory
      */
-    protected final File createTempDir(File parentDir) {
+    protected final File createTempDir(File parentDir) throws IOException {
         File tempDir = null;
         try {
             tempDir = File.createTempFile("cqdam", null, parentDir);
-            tempDir.delete();
-            tempDir.mkdir();
+            if (!tempDir.delete()) {
+                throw new IOException("Unable to delete temp directory.");
+            }
+            if (!tempDir.mkdir()) {
+                throw new IOException("Unable to create temp directory.");
+            }
         } catch (IOException e) {
             log.warn("could not create temp directory in the [{}] with the exception", parentDir, e);
         }

@@ -334,7 +334,7 @@
                             <execution>
                                 <phase>package</phase>
                                 <goals>
-                                    <goal>findbugs</goal>
+                                    <goal>check</goal>
                                 </goals>
                             </execution>
                         </executions>

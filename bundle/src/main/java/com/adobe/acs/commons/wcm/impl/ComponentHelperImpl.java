@@ -152,31 +152,31 @@ public final class ComponentHelperImpl implements ComponentHelper {
             return "<!-- Edit Mode Placeholder is specified as: " + editType.getName() + " -->";
         }
 
-        String html = "<div class=\"wcm-edit-mode " + CSS_EDIT_MODE + "\">";
+        StringBuilder html = new StringBuilder("<div class=\"wcm-edit-mode " + CSS_EDIT_MODE + "\">");
 
         if (component == null) {
-            html += getCssStyle();
-            html += "Could not resolve CQ Component type.";
+            html.append(getCssStyle());
+            html.append("Could not resolve CQ Component type.");
         } else if (ComponentEditType.NOICON.equals(editType) || ComponentEditType.NONE.equals(editType)) {
             final String title = StringUtils.capitalize(component.getTitle());
 
-            html += getCssStyle();
-            html += "<dl>";
-            html += "<dt>" + title + " Component</dt>";
+            html.append(getCssStyle());
+            html.append("<dl>");
+            html.append("<dt>" + title + " Component</dt>");
 
             if (component.isEditable()) {
-                html += "<dd>Double click or Right click to Edit</dd>";
+                html.append("<dd>Double click or Right click to Edit</dd>");
             }
 
             if (component.isDesignable()) {
-                html += "<dd>Switch to Design mode and click the Edit button</dd>";
+                html.append("<dd>Switch to Design mode and click the Edit button</dd>");
             }
 
             if (!component.isEditable() && !component.isDesignable()) {
-                html += "<dd>The component cannot be directly authored</dd>";
+                html.append("<dd>The component cannot be directly authored</dd>");
             }
 
-            html += "</dl>";
+            html.append("</dl>");
         } else if (ComponentEditType.DROPTARGETS.equals(editType)) {
             // Use DropTargets
             ComponentEditConfig editConfig = component.getEditConfig();
@@ -187,25 +187,26 @@ public final class ComponentHelperImpl implements ComponentHelper {
                 for (final Map.Entry<String, DropTarget> entry : dropTargets.entrySet()) {
                     final DropTarget dropTarget = entry.getValue();
 
-                    html += "<img src=\"/libs/cq/ui/resources/0.gif\"" + " "
-                            + "class=\"" + dropTarget.getId() + " " + getWCMEditType(dropTarget).getCssClass() + "\""
-                            + " " + "alt=\"Drop Target: " + dropTarget.getName() + "\"" + " "
-                            + "title=\"Drop Target: " + dropTarget.getName() + "\"" + "/>";
+                    html.append("<img src=\"/libs/cq/ui/resources/0.gif\" ");
+                    html.append("class=\"").append(dropTarget.getId());
+                    html.append(" ").append(getWCMEditType(dropTarget).getCssClass()).append("\" ");
+                    html.append("alt=\"Drop Target: ").append(dropTarget.getName()).append("\" ");
+                    html.append("title=\"Drop Target: ").append(dropTarget.getName()).append("\"/>");
                 }
             }
         } else {
             final String title = StringUtils.capitalize(component.getTitle());
 
             // Use specified EditType
-            html += "<img src=\"/libs/cq/ui/resources/0.gif\"" + " "
-                    + "class=\"" + editType.getCssClass() + "\""
-                    + " " + "alt=\"" + title + "\"" + " "
-                    + "title=\"" + title + "\"" + "/>";
+            html.append("<img src=\"/libs/cq/ui/resources/0.gif\" ");
+            html.append("class=\"").append(editType.getCssClass()).append("\" alt=\"");
+            html.append(title).append("\" ");
+            html.append("title=\"").append(title).append("\"/>");
         }
 
-        html += "</div>";
+        html.append("</div>");
 
-        return html;
+        return html.toString();
     }
 
     public String getDDEditBlock(SlingHttpServletRequest request, String name, boolean... isConfigured) {
