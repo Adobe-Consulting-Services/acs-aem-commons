@@ -21,6 +21,13 @@
                     fieldLabel="Footer JavaScript Snippet Code"
                     name="./footerCode"
                     xtype="textarea"/>
+                <debugMode
+                    jcr:primaryType="cq:Widget"
+                    fieldLabel="Enable Debug Mode?"
+                    inputValue="true"
+                    name="./debugMode"
+                    type="checkbox"
+                    xtype="selection"/>
             </items>
         </general>
     </items>

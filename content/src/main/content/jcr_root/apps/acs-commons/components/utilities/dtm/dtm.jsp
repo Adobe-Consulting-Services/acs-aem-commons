@@ -28,15 +28,18 @@ String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new St
 ConfigurationManager cfgMgr = sling.getService(ConfigurationManager.class);
 if(cfgMgr != null) {
     String footerCode = null;
+    boolean debugMode = false;
     Configuration cfg = cfgMgr.getConfiguration("dtm", services);
     if(cfg != null) {
         footerCode = cfg.get("footerCode", null);
+        debugMode = cfg.get("debugMode", false);
     }
 
     if(footerCode != null) {
     %>
     <script type="text/javascript">
     <%= footerCode %>
+    <% if (debugMode) { %>_satellite.setDebug(true);<% } %>
     </script><%
     }
 }

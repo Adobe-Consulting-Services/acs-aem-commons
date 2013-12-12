@@ -26,6 +26,7 @@
     <ul>
         <li><div class="li-bullet"><strong>Header Script URL: </strong><br><%= xssAPI.encodeForHTML(properties.get("headerUrl", "")).replaceAll("\\&\\#xa;","<br>") %></div></li>
         <li><div class="li-bullet"><strong>JavaScript Footer Snippet: </strong><br><%= xssAPI.encodeForHTML(properties.get("footerCode", "")).replaceAll("\\&\\#xa;","<br>") %></div></li>
+        <li><div class="li-bullet"><strong>Debug Mode: </strong><br><%= properties.get("debugMode", false) %></div></li>
     </ul>
 </div>
 
