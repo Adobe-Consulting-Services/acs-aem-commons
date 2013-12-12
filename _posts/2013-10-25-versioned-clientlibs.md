@@ -43,3 +43,13 @@ This re-writer does **NOT** support
     serializerType="htmlwriter"
     transformerTypes="[linkchecker,versioned-clientlibs]"/>
 {% endhighlight %}        
+
+## Apache Configuration
+
+To configure Apache to send the right header to set a long TTL:
+
+{% highlight apache %}
+SetEnvIf Request_URI "(\.min)?\.[1-9][0-9]+\.js" long_expires=true
+SetEnvIf Request_URI "(\.min)?\.[1-9][0-9]+\.css" long_expires=true
+Header set Cache-Control max-age=2592000 env=long_expires 
+{% endhighlight %}   
