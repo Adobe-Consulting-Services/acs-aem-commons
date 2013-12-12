@@ -38,6 +38,7 @@
     </c:forEach>
         <cq:include script="partials/fallback.jsp"/>
 </audio>
+<cq:include script="partials/analytics.jsp"/>
             </c:when>
             <c:otherwise>
                 <cq:include script="partials/fallback.jsp"/>
