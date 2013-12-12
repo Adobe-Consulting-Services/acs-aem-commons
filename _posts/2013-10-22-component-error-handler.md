@@ -6,6 +6,7 @@ date: 2013-10-23 23:39:29
 thumbnail: /images/component-error-handler/thumbnail.png
 categories: features
 tags: new
+initial-release: 1.2.0
 ---
 
 ## Purpose
