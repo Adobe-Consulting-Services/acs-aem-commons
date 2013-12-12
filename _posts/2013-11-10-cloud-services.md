@@ -6,6 +6,7 @@ date: 2013-11-10 23:39:29
 thumbnail: /images/cloud-services/thumbnail.png
 categories: features
 tags: new
+initial-release: 1.2.0
 ---
 
 ### Currently only supported in AEM 5.6.1+
