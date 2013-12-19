@@ -15,7 +15,7 @@ In the `<dependencies>` section of your _pom.xml_ file, add this:
     <dependency>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons-content</artifactId>
-        <version>1.3.0</version>
+        <version>1.4.0</version>
         <type>content-package</type>
     </dependency>
 {% endhighlight %}
