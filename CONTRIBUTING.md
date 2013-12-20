@@ -12,6 +12,8 @@ Here are some of the ways you can contribute to ACS AEM Commons:
 
 New code contributions should be primarily made using GitHub pull requests. This involves you creating a personal fork of the project, adding your new code to a branch in your fork, and then triggering a pull request using the GitHub web UI (it's easier than it sounds). A pull request is both a technical process (to get the code from your branch into the main repository) and a framework for performing code reviews.
 
+In many cases, it is worth having a discussion with the community before investing serious time in development. For these cases, create an issue of type "feature review" with a description of the problem you are trying to solve.
+
 Bug fixes and minor updates should just be made in the shared repository itself. Of course, you can create a pull request for these types of changes, but doing a pull request just to fix a typo in JavaDoc is a bit heavyweight.
 
 There's a good guide to performing pull requests at [https://help.github.com/articles/using-pull-requests](https://help.github.com/articles/using-pull-requests). In the terms used in that article, we use both the **Fork & Pull** and the **Shared Repository Model**.
@@ -20,6 +22,7 @@ There's a good guide to performing pull requests at [https://help.github.com/art
 
 * Run Maven build by running `mvn -Panalysis clean install` to run the static analysis checks.
 * Ensure license is applied correctly by running `mvn license:update-file-header`
+* Add JUnit test for Java code. Our coverage ratio isn't great, but we don't want it to get worse.
 * More stuff TBD
 
 ## Participating in Code Reviews
