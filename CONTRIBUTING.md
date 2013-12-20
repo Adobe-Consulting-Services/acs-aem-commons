@@ -14,7 +14,7 @@ New code contributions should be primarily made using GitHub pull requests. This
 
 In many cases, it is worth having a discussion with the community before investing serious time in development. For these cases, create an issue of type "feature review" with a description of the problem you are trying to solve.
 
-Bug fixes and minor updates should just be made in the shared repository itself. Of course, you can create a pull request for these types of changes, but doing a pull request just to fix a typo in JavaDoc is a bit heavyweight.
+If you already have commit rights, bug fixes and minor updates should just be made in the shared repository itself.
 
 There's a good guide to performing pull requests at [https://help.github.com/articles/using-pull-requests](https://help.github.com/articles/using-pull-requests). In the terms used in that article, we use both the **Fork & Pull** and the **Shared Repository Model**.
 
