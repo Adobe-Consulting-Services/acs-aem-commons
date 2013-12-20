@@ -12,7 +12,20 @@ Here are some of the ways you can contribute to ACS AEM Commons:
 
 New code contributions should be primarily made using GitHub pull requests. This involves you creating a personal fork of the project, adding your new code to a branch in your fork, and then triggering a pull request using the GitHub web UI (it's easier than it sounds). A pull request is both a technical process (to get the code from your branch into the main repository) and a framework for performing code reviews.
 
-In many cases, it is worth having a discussion with the community before investing serious time in development. For these cases, create an issue of type "feature review" with a description of the problem you are trying to solve.
+The branch naming conventions in your fork should follow projects name conventions.
+
+*For new features:*
+
+* **feature/**meaningful-feature-name
+  * ex. `feature/component-error-handler`
+
+*For defects:*
+
+* **defect/**feature-name/short-name-of-problem-being-fixed
+  * ex. `defect/error-page-handler/parent-page-lookup`
+
+
+In many cases, it is worth having a discussion with the community before investing serious time in development. For these cases, create a [GitHub issue](https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues) of type "feature review" with a description of the problem you are trying to solve.
 
 If you already have commit rights, bug fixes and minor updates should just be made in the shared repository itself.
 
@@ -20,10 +33,14 @@ There's a good guide to performing pull requests at [https://help.github.com/art
 
 ### Before Contributing Code
 
+The best pull request are small and focused. Don't try to change the world in one pull request. And while the focus of this project is reusability, that doesn't mean that every option under the sun needs to be available. Stick to the 80/20 rule and provide a way to extend for that extra 20% on a project.
+
 * Run Maven build by running `mvn -Panalysis clean install` to run the static analysis checks.
 * Ensure license is applied correctly by running `mvn license:update-file-header`
 * Add JUnit test for Java code. Our coverage ratio isn't great, but we don't want it to get worse.
-* More stuff TBD
+* Until explicitly enabled, features should be invisible to AEM users and excluded from any execution stack.
+  * OSGi Services automatically registered as part of the stack should be annotated w `policy = ConfigurationPolicy.REQUIRE`. *Common candidates include (but not limited to): Filters, Scheduled Services, Event Listeners and Authentication handlers.*
+  * Ex. Until a OSGi Configuration is added for the feature "Component Error Handler", this Sling Filter will remain inactive making it impossible to effect Request processing.
 
 ## Participating in Code Reviews
 
