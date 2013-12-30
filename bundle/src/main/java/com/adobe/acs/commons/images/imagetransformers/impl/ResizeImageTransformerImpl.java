@@ -22,13 +22,17 @@ package com.adobe.acs.commons.images.imagetransformers.impl;
 
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 @Component(
         label = "ACS AEM Commons - Image Transformer - Resize",
@@ -48,11 +52,19 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
     static final String TYPE = "resize";
 
-    private static final int SYSTEM_MAX_DIMENSION = 50000;
-
     private static final String KEY_WIDTH = "width";
+    private static final String KEY_WIDTH_ALIAS = "w";
 
     private static final String KEY_HEIGHT = "height";
+    private static final String KEY_HEIGHT_ALIAS = "h";
+
+
+    private static final int DEFAULT_MAX_DIMENSION = 50000;
+    private int maxDimension = DEFAULT_MAX_DIMENSION;
+    @Property(label = "Max dimension in px",
+            description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
+            intValue = DEFAULT_MAX_DIMENSION)
+    public static final String PROP_MAX_DIMENSION = "max-dimension";
 
     @Override
     public Layer transform(final Layer layer, final ValueMap properties) {
@@ -63,15 +75,15 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
         log.debug("Transforming with [ {} ]", TYPE);
 
-        int width = properties.get(KEY_WIDTH, 0);
-        int height = properties.get(KEY_HEIGHT, 0);
+        int width = properties.get(KEY_WIDTH, properties.get(KEY_WIDTH_ALIAS, 0));
+        int height = properties.get(KEY_HEIGHT, properties.get(KEY_HEIGHT_ALIAS, 0));
 
-        if (width > SYSTEM_MAX_DIMENSION) {
-            width = SYSTEM_MAX_DIMENSION;
+        if (width > maxDimension) {
+            width = maxDimension;
         }
 
-        if (height > SYSTEM_MAX_DIMENSION) {
-            height = SYSTEM_MAX_DIMENSION;
+        if (height > maxDimension) {
+            height = maxDimension;
         }
 
         if (width < 1 && height < 1) {
@@ -88,5 +100,11 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
         layer.resize(width, height);
 
         return layer;
+    }
+
+
+    @Activate
+    protected void activate(final Map<String, String> config) {
+        maxDimension = PropertiesUtil.toInteger(config.get(PROP_MAX_DIMENSION), DEFAULT_MAX_DIMENSION);
     }
 }

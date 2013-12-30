@@ -47,8 +47,10 @@ public class AdjustImageTransformerImpl implements ImageTransformer {
     static final String TYPE = "adjust";
 
     private static final String KEY_BRIGHTNESS = "brightness";
+    private static final String KEY_BRIGHTNESS_ALIAS = "b";
 
     private static final String KEY_CONTRAST = "contrast";
+    private static final String KEY_CONTRAST_ALIAS = "c";
 
     @Override
     public Layer transform(final Layer layer, final ValueMap properties) {
@@ -59,8 +61,8 @@ public class AdjustImageTransformerImpl implements ImageTransformer {
 
         log.debug("Transforming with [ {} ]", TYPE);
 
-        int brightness = properties.get(KEY_BRIGHTNESS, 0);
-        float contrast = properties.get(KEY_CONTRAST, 1F);
+        int brightness = properties.get(KEY_BRIGHTNESS, properties.get(KEY_BRIGHTNESS_ALIAS, 0));
+        float contrast = properties.get(KEY_CONTRAST, properties.get(KEY_CONTRAST_ALIAS, 1F));
 
         layer.adjust(brightness, contrast);
 
