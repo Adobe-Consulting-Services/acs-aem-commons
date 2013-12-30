@@ -19,13 +19,20 @@
  */
 package com.adobe.acs.commons.util;
 
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -112,6 +119,28 @@ public class TypeUtilTest {
 
         assertEquals(expResult, actual);
     }
+
+    @Test
+    public void testToValueMap() throws JSONException {
+        final Map<String, String> stringMap = new LinkedHashMap<String, String>();
+        stringMap.put("one", "uno");
+        stringMap.put("two", "dos");
+        stringMap.put("three", "tres");
+
+        final Map<String, Object> objectMap = new LinkedHashMap<String, Object>();
+        objectMap.put("one", "uno");
+        objectMap.put("two", "dos");
+        objectMap.put("three", "tres");
+
+        final ValueMap expResult = new ValueMapDecorator(objectMap);
+        final ValueMap actual = TypeUtil.toValueMap(stringMap);
+
+        assertEquals(expResult.size(), actual.size());
+        assertEquals(expResult.get("one", "expected"), actual.get("one", "actual"));
+        assertEquals(expResult.get("two", "expected"), actual.get("two", "actual"));
+        assertEquals(expResult.get("three", "expected"), actual.get("three", "actual"));
+    }
+
 
     @Test
     public void testGetType_Double() {
