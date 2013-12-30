@@ -51,7 +51,7 @@ public class CropImageTransformerImpl implements ImageTransformer {
 
     private static final String KEY_BOUNDS = "bounds";
 
-    private static final String KEY_SMART_BOUNDING = "smartbounding";
+    private static final String KEY_SMART_BOUNDING = "smart";
 
     @Override
     public Layer transform(final Layer layer, final ValueMap properties) {
