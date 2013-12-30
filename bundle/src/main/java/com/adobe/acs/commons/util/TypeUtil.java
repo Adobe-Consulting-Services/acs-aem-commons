@@ -112,7 +112,7 @@ public class TypeUtil {
 
     /**
      * Determines the type of the parameter object
-     * 
+     *
      * TODO - review this method
      *
      * @param object
