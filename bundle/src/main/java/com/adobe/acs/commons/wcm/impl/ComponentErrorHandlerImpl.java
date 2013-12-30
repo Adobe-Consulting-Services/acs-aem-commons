@@ -39,7 +39,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,12 +137,12 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
             value = DEFAULT_PUBLISH_ERROR_HTML_PATH)
     public static final String PROP_PUBLISH_ERROR_HTML_PATH = "publish.html";
 
-
+    /* Suppressed Resource Types */
 
     private static final String[] DEFAULT_SUPPRESSED_RESOURCE_TYPES =  new String[] {};
     private String[] suppressedResourceTypes = DEFAULT_SUPPRESSED_RESOURCE_TYPES;
     @Property(label = "Suppressed Resource Types",
-            description = "",
+            description = "Resource types this Filter will ignore during Sling Includes.",
             cardinality = Integer.MAX_VALUE,
             value = {})
     public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress-resource-types";
@@ -195,7 +194,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
                                            final FilterChain chain,
                                            final String pathToHTML) throws IOException {
 
-        log.debug("Including resource with ACS AEM Commons Component Level Error Handling for: {}",
+        log.debug("Including resource with ACS AEM Commons Component-Level Error Handling for: {}",
                 slingRequest.getResource().getPath());
 
         try {
@@ -248,7 +247,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         return "";
     }
 
-    private boolean accepts(final ServletRequest request, final ServletResponse response) {
+    protected final boolean accepts(final ServletRequest request, final ServletResponse response) {
         // Ensure we are dealing with Sling Requests/Responses
         if (!(request instanceof SlingHttpServletRequest)
                 || !(response instanceof SlingHttpServletResponse)) {
@@ -264,7 +263,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         // Check to make sure the SlingRequest's resource isn't in the suppress list
         final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
         for(final String suppressedResourceType : suppressedResourceTypes) {
-            if(ResourceUtil.isA(slingRequest.getResource(), suppressedResourceType)) {
+            if(slingRequest.getResource().isResourceType(suppressedResourceType)) {
                 return false;
             }
         }
