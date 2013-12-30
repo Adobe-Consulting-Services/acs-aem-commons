@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.ResourceDataUtil;
+import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.ComponentContext;
@@ -38,6 +39,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +73,7 @@ import java.util.Map;
     )
 })
 @Service
-public class ComponentErrorHandlerImpl implements Filter {
+public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter {
     private static final Logger log = LoggerFactory.getLogger(ComponentErrorHandlerImpl.class.getName());
 
     // Magic number pushes filter lower in the chain so it executes after the
@@ -137,6 +139,16 @@ public class ComponentErrorHandlerImpl implements Filter {
     public static final String PROP_PUBLISH_ERROR_HTML_PATH = "prop.publish.html";
 
 
+
+    private static final String[] DEFAULT_SUPPRESSED_RESOURCE_TYPES =  new String[] {};
+    private String[] suppressedResourceTypes = DEFAULT_SUPPRESSED_RESOURCE_TYPES;
+    @Property(label = "Suppressed Resource Types",
+            description = "",
+            cardinality = Integer.MAX_VALUE,
+            value = {})
+    public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress-resource-types";
+
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -144,14 +156,14 @@ public class ComponentErrorHandlerImpl implements Filter {
     @Override
     public final void doFilter(ServletRequest request, ServletResponse response,
                                FilterChain chain) throws IOException, ServletException {
-        if (!(request instanceof SlingHttpServletRequest)
-                || !(response instanceof SlingHttpServletResponse)) {
+
+        if (!this.accept(request, response)) {
             chain.doFilter(request, response);
             return;
         }
 
-        final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
         final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
+        final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
 
         final ComponentContext componentContext = WCMUtils.getComponentContext(request);
 
@@ -236,6 +248,30 @@ public class ComponentErrorHandlerImpl implements Filter {
         return "";
     }
 
+    private boolean accept(final ServletRequest request, final ServletResponse response) {
+        // Ensure we are dealing with Sling Requests/Responses
+        if (!(request instanceof SlingHttpServletRequest)
+                || !(response instanceof SlingHttpServletResponse)) {
+            return false;
+        }
+
+        // Check to make sure the suppress key has not been added to the request
+        if(request.getAttribute(SUPPRESS_ATTR) != null) {
+            // Suppress key is detected, skip handling
+            return false;
+        }
+
+        // Check to make sure the SlingRequest's resource isn't in the suppress list
+        final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
+        for(final String suppressedResourceType : suppressedResourceTypes) {
+            if(ResourceUtil.isA(slingRequest.getResource(), suppressedResourceType)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     @Override
     public final void destroy() {
         editModeEnabled = false;
@@ -245,19 +281,27 @@ public class ComponentErrorHandlerImpl implements Filter {
 
     @Activate
     public final void activate(final Map<String, String> config) {
+        String LEGACY_PROP = "prop.";
+
         editModeEnabled = PropertiesUtil.toBoolean(config.get(PROP_EDIT_ENABLED),
-                DEFAULT_EDIT_ENABLED);
+                PropertiesUtil.toBoolean(config.get(LEGACY_PROP + PROP_EDIT_ENABLED), DEFAULT_EDIT_ENABLED));
+
         previewModeEnabled = PropertiesUtil.toBoolean(config.get(PROP_PREVIEW_ENABLED),
-                DEFAULT_PREVIEW_ENABLED);
+                PropertiesUtil.toBoolean(config.get(LEGACY_PROP + PROP_PREVIEW_ENABLED), DEFAULT_PREVIEW_ENABLED));
+
         publishModeEnabled = PropertiesUtil.toBoolean(config.get(PROP_PUBLISH_ENABLED),
-                DEFAULT_PUBLISH_ENABLED);
+                PropertiesUtil.toBoolean(config.get(LEGACY_PROP + PROP_PUBLISH_ENABLED), DEFAULT_PUBLISH_ENABLED));
+
 
         editErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_EDIT_ERROR_HTML_PATH),
-                DEFAULT_EDIT_ERROR_HTML_PATH);
+                PropertiesUtil.toString(config.get(LEGACY_PROP + PROP_EDIT_ERROR_HTML_PATH), DEFAULT_EDIT_ERROR_HTML_PATH));
+
         previewErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PREVIEW_ERROR_HTML_PATH),
-                DEFAULT_PREVIEW_ERROR_HTML_PATH);
+                PropertiesUtil.toString(config.get(LEGACY_PROP + PROP_PREVIEW_ERROR_HTML_PATH), DEFAULT_PREVIEW_ERROR_HTML_PATH));
+
         publishErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PUBLISH_ERROR_HTML_PATH),
-                DEFAULT_PUBLISH_ERROR_HTML_PATH);
+                PropertiesUtil.toString(config.get(LEGACY_PROP + PROP_PUBLISH_ERROR_HTML_PATH), DEFAULT_PUBLISH_ERROR_HTML_PATH));
+
 
         log.info("Component Error Handling for Edit Modes: {} ~> {}",
                 editModeEnabled ? "Enabled" : "Disabled",
@@ -270,5 +314,13 @@ public class ComponentErrorHandlerImpl implements Filter {
         log.info("Component Error Handling for Publish Modes: {} ~> {}",
                 publishModeEnabled ? "Enabled" : "Disabled",
                 publishErrorHTMLPath);
+
+        suppressedResourceTypes = PropertiesUtil.toStringArray(config.get(PROP_SUPPRESSED_RESOURCE_TYPES),
+                DEFAULT_SUPPRESSED_RESOURCE_TYPES);
+
+        log.info("Suppressed Resource Types:");
+        for(final String tmp : suppressedResourceTypes) {
+            log.info(" > {}", tmp);
+        }
     }
 }

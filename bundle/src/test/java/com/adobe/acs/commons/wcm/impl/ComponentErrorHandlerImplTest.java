@@ -36,6 +36,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -77,15 +79,40 @@ public class ComponentErrorHandlerImplTest {
     public void setUp() throws Exception {
         when(request.getAttribute("com.day.cq.wcm.componentcontext")).thenReturn(componentContext);
         when(request.getResource()).thenReturn(resource);
+
         when(resource.getPath()).thenReturn("/content/test");
+        when(resource.getResourceType()).thenReturn("acs-commons/test/demo");
 
         when(response.getWriter()).thenReturn(responseWriter);
     }
 
-
     @After
     public void tearDown() throws Exception {
         reset(request, response, responseWriter, chain, resource, componentContext, componentHelper);
+    }
+
+    @Test
+    public void testAccept_suppressAttribute() throws Exception {
+        when(request.getAttribute(ComponentErrorHandlerImpl.SUPPRESS_KEY)).thenReturn(true);
+        handler.doFilter(request, response, chain);
+
+        verify(chain, times(1)).doFilter(eq(request), eq(response));
+        verify(responseWriter, never()).print(any(String.class));
+        verifyNoMoreInteractions(chain);
+    }
+
+    @Test
+    public void testAccept_suppressResourceType() throws Exception {
+        final Map<String, String> config = new HashMap<String, String>();
+        config.put("suppress-resource-types", "acs-commons/test/demo");
+
+        handler.activate(config);
+
+        handler.doFilter(request, response, chain);
+
+        verify(chain, times(1)).doFilter(eq(request), eq(response));
+        verify(responseWriter, never()).print(any(String.class));
+        verifyNoMoreInteractions(chain);
     }
 
     @Test
