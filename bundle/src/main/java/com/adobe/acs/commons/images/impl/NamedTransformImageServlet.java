@@ -66,26 +66,26 @@ import java.util.regex.Pattern;
         metatype = true
 )
 @Properties({
-    @Property(
-        label = "Resource Types",
-        description = "Resource Types and Node Types to bind this servlet to.",
-        name = "sling.servlet.resourceTypes",
-        value = { "nt/file", "nt/resource", "dam/Asset", "cq/Page", "cq/PageContent", "nt/unstructured",
-                "foundation/components/image", "foundation/components/parbase", "foundation/components/page" },
-        propertyPrivate = false
-    ),
-    @Property(
-            label = "Extension",
-            description = "",
-            name = "sling.servlet.extensions",
-            value = { "transform" },
-            propertyPrivate = true
-    ),
-    @Property(
-            name = "sling.servlet.methods",
-            value = { "GET" },
-            propertyPrivate = true
-    )
+        @Property(
+                label = "Resource Types",
+                description = "Resource Types and Node Types to bind this servlet to.",
+                name = "sling.servlet.resourceTypes",
+                value = { "nt/file", "nt/resource", "dam/Asset", "cq/Page", "cq/PageContent", "nt/unstructured",
+                        "foundation/components/image", "foundation/components/parbase", "foundation/components/page" },
+                propertyPrivate = false
+        ),
+        @Property(
+                label = "Extension",
+                description = "",
+                name = "sling.servlet.extensions",
+                value = { "transform" },
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "sling.servlet.methods",
+                value = { "GET" },
+                propertyPrivate = true
+        )
 })
 @Reference(
         name = "namedImageTransformers",
@@ -100,9 +100,11 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     private static final Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
 
     private static final double IMAGE_GIF_MAX_QUALITY = 255;
+
     private static final double IMAGE_MAX_QUALITY = 1.0;
 
     private static final String MIME_TYPE_GIF = "image/gif";
+
     private static final String MIME_TYPE_PNG = "image/png";
 
     private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();
@@ -114,11 +116,13 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     /* Asset Rendition Pattern Picker */
 
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
+
     @Property(label = "Asset Rendition Picker Regex",
             description = "Regex to select the Rendition to transform when directly transforming a DAM Asset."
                     + " [ Default: cq5dam.web.(.*) ]",
             value = DEFAULT_ASSET_RENDITION_PICKER_REGEX)
     private static final String PROP_ASSET_RENDITION_PICKER_REGEX = "prop.asset-rendition-picker-regex";
+
     private static RenditionPatternPicker renditionPatternPicker =
             new RenditionPatternPicker(Pattern.compile(DEFAULT_ASSET_RENDITION_PICKER_REGEX));
 
@@ -149,7 +153,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         final String lastSuffix = PathInfoUtil.getLastSuffixSegment(request);
         final Matcher matcher = LAST_SUFFIX_PATTERN.matcher(lastSuffix);
-        if(!matcher.matches()) {
+        if (!matcher.matches()) {
             return false;
         }
 
@@ -159,7 +163,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     /**
      * Writes the transformed image to the response.
      *
-     * @param request SlingRequest object
+     * @param request  SlingRequest object
      * @param response SlingResponse object
      * @throws ServletException
      * @throws IOException
@@ -191,8 +195,13 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     }
 
 
-
-    private Image resolveImage(final SlingHttpServletRequest request) {
+    /**
+     * Intelligently determines how to find the Image based on the associated SlingRequest
+     *
+     * @param request the SlingRequest Obj
+     * @return the Image object configured w the info of where the image to render is stored in CRX
+     */
+    protected final Image resolveImage(final SlingHttpServletRequest request) {
         final Resource resource = request.getResource();
 
         final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
@@ -253,7 +262,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
     }
 
-
     /**
      * Gets the Image layer allowing or manipulations.
      *
@@ -277,7 +285,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return layer;
     }
 
-
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
         final String regex = PropertiesUtil.toString(properties.get(PROP_ASSET_RENDITION_PICKER_REGEX),
@@ -292,7 +299,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
     }
 
-    // Bind
+    // Bind NamedImageTransformers
     protected void bindNamedImageTransformers(final NamedImageTransformer service, final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get(NamedImageTransformer.PROP_NAME), null);
         if (type != null) {
@@ -300,7 +307,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
     }
 
-    // Unbind
+    // Unbind NamedImageTransformers
     protected void unbindNamedImageTransformers(final NamedImageTransformer service, final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get(NamedImageTransformer.PROP_NAME), null);
         if (type != null) {

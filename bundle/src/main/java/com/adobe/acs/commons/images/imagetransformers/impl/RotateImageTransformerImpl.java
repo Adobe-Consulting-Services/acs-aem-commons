@@ -50,8 +50,10 @@ public class RotateImageTransformerImpl implements ImageTransformer {
 
     @Override
     public Layer transform(final Layer layer, final ValueMap properties) {
-        if(properties == null || properties.isEmpty()) {
+        if (properties == null || properties.isEmpty()) {
             log.warn("Transform [ {} ] requires parameters.", TYPE);
+
+            return layer;
         }
 
         log.debug("Transforming with [ {} ]", TYPE);

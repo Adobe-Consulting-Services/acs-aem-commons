@@ -49,12 +49,14 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
     static final String TYPE = "resize";
 
     private static final int SYSTEM_MAX_DIMENSION = 50000;
+
     private static final String KEY_WIDTH = "width";
+
     private static final String KEY_HEIGHT = "height";
 
     @Override
     public Layer transform(final Layer layer, final ValueMap properties) {
-        if(properties == null || properties.isEmpty()) {
+        if (properties == null || properties.isEmpty()) {
             log.warn("Transform [ {} ] requires parameters.", TYPE);
             return layer;
         }
@@ -64,22 +66,22 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
         int width = properties.get(KEY_WIDTH, 0);
         int height = properties.get(KEY_HEIGHT, 0);
 
-        if(width > SYSTEM_MAX_DIMENSION) {
+        if (width > SYSTEM_MAX_DIMENSION) {
             width = SYSTEM_MAX_DIMENSION;
         }
 
-        if(height > SYSTEM_MAX_DIMENSION) {
+        if (height > SYSTEM_MAX_DIMENSION) {
             height = SYSTEM_MAX_DIMENSION;
         }
 
-        if(width < 1 && height < 1) {
+        if (width < 1 && height < 1) {
             width = layer.getWidth();
             height = layer.getHeight();
-        } else if(width < 1) {
-            final float aspect =  (float)height / layer.getHeight();
-            width =  Math.round(layer.getWidth() * aspect);
+        } else if (width < 1) {
+            final float aspect = (float) height / layer.getHeight();
+            width = Math.round(layer.getWidth() * aspect);
         } else if (height < 1) {
-            final float aspect =  (float)width / layer.getWidth();
+            final float aspect = (float) width / layer.getWidth();
             height = Math.round(layer.getHeight() * aspect);
         }
 

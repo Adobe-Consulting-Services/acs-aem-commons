@@ -47,11 +47,12 @@ public class AdjustImageTransformerImpl implements ImageTransformer {
     static final String TYPE = "adjust";
 
     private static final String KEY_BRIGHTNESS = "brightness";
+
     private static final String KEY_CONTRAST = "contrast";
 
     @Override
     public Layer transform(final Layer layer, final ValueMap properties) {
-        if(properties == null || properties.isEmpty()) {
+        if (properties == null || properties.isEmpty()) {
             log.warn("Transform [ {} ] requires parameters.", TYPE);
             return layer;
         }
