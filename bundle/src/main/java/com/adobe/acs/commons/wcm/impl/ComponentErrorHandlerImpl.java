@@ -94,7 +94,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     @Property(label = "Edit Error Handling",
             description = "Enable handling of Edit-mode errors (EDIT, DESIGN, ANALYTICS)",
             boolValue = DEFAULT_EDIT_ENABLED)
-    public static final String PROP_EDIT_ENABLED = "prop.edit.enabled";
+    public static final String PROP_EDIT_ENABLED = "edit.enabled";
 
     private static final String DEFAULT_EDIT_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/component-error-handler/edit.html";
@@ -102,7 +102,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     @Property(label = "Edit HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
             value = DEFAULT_EDIT_ERROR_HTML_PATH)
-    public static final String PROP_EDIT_ERROR_HTML_PATH = "prop.edit.html";
+    public static final String PROP_EDIT_ERROR_HTML_PATH = "edit.html";
 
     /* Preview Mode */
 
@@ -111,7 +111,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     @Property(label = "Preview Error Handling",
             description = "Enable handling of Edit-mode errors (PREVIEW and READ_ONLY)",
             boolValue = DEFAULT_PREVIEW_ENABLED)
-    public static final String PROP_PREVIEW_ENABLED = "prop.preview.enabled";
+    public static final String PROP_PREVIEW_ENABLED = "preview.enabled";
 
     private static final String DEFAULT_PREVIEW_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/component-error-handler/preview.html";
@@ -119,7 +119,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     @Property(label = "Preview HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
             value = DEFAULT_PREVIEW_ERROR_HTML_PATH)
-    public static final String PROP_PREVIEW_ERROR_HTML_PATH = "prop.preview.html";
+    public static final String PROP_PREVIEW_ERROR_HTML_PATH = "preview.html";
 
 
     /* Publish Mode */
@@ -129,14 +129,14 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     @Property(label = "Publish Error Handling",
             description = "Enable handling of Edit-mode errors (PREVIEW and READONLY)",
             boolValue = DEFAULT_PUBLISH_ENABLED)
-    public static final String PROP_PUBLISH_ENABLED = "prop.publish.enabled";
+    public static final String PROP_PUBLISH_ENABLED = "publish.enabled";
 
     private static final String DEFAULT_PUBLISH_ERROR_HTML_PATH =  BLANK_HTML;
     private String publishErrorHTMLPath = DEFAULT_PUBLISH_ERROR_HTML_PATH;
     @Property(label = "Publish HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in DISABLED mode.",
             value = DEFAULT_PUBLISH_ERROR_HTML_PATH)
-    public static final String PROP_PUBLISH_ERROR_HTML_PATH = "prop.publish.html";
+    public static final String PROP_PUBLISH_ERROR_HTML_PATH = "publish.html";
 
 
 
@@ -157,7 +157,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     public final void doFilter(ServletRequest request, ServletResponse response,
                                FilterChain chain) throws IOException, ServletException {
 
-        if (!this.accept(request, response)) {
+        if (!this.accepts(request, response)) {
             chain.doFilter(request, response);
             return;
         }
@@ -248,7 +248,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         return "";
     }
 
-    private boolean accept(final ServletRequest request, final ServletResponse response) {
+    private boolean accepts(final ServletRequest request, final ServletResponse response) {
         // Ensure we are dealing with Sling Requests/Responses
         if (!(request instanceof SlingHttpServletRequest)
                 || !(response instanceof SlingHttpServletResponse)) {
