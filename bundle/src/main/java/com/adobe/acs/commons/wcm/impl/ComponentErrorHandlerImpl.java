@@ -60,16 +60,16 @@ import java.util.Map;
         metatype = true
 )
 @Properties({
-    @Property(
-        name = "sling.filter.scope",
-        value = "component",
-        propertyPrivate =  true
-    ),
-    @Property(
-        name = "filter.order",
-        intValue = ComponentErrorHandlerImpl.FILTER_ORDER,
-        propertyPrivate = true
-    )
+        @Property(
+                name = "sling.filter.scope",
+                value = "component",
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "filter.order",
+                intValue = ComponentErrorHandlerImpl.FILTER_ORDER,
+                propertyPrivate = true
+        )
 })
 @Service
 public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter {
@@ -78,6 +78,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     // Magic number pushes filter lower in the chain so it executes after the
     // OOTB WCM Debug Filter
     static final int FILTER_ORDER = 1001;
+
     static final String BLANK_HTML = "/dev/null";
 
     @Reference
@@ -89,7 +90,9 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     /* Edit Mode */
 
     private static final boolean DEFAULT_EDIT_ENABLED = true;
+
     private boolean editModeEnabled = DEFAULT_EDIT_ENABLED;
+
     @Property(label = "Edit Error Handling",
             description = "Enable handling of Edit-mode errors (EDIT, DESIGN, ANALYTICS)",
             boolValue = DEFAULT_EDIT_ENABLED)
@@ -97,7 +100,9 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private static final String DEFAULT_EDIT_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/component-error-handler/edit.html";
+
     private String editErrorHTMLPath = DEFAULT_EDIT_ERROR_HTML_PATH;
+
     @Property(label = "Edit HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
             value = DEFAULT_EDIT_ERROR_HTML_PATH)
@@ -106,7 +111,9 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     /* Preview Mode */
 
     private static final boolean DEFAULT_PREVIEW_ENABLED = false;
+
     private boolean previewModeEnabled = DEFAULT_PREVIEW_ENABLED;
+
     @Property(label = "Preview Error Handling",
             description = "Enable handling of Edit-mode errors (PREVIEW and READ_ONLY)",
             boolValue = DEFAULT_PREVIEW_ENABLED)
@@ -114,7 +121,9 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private static final String DEFAULT_PREVIEW_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/component-error-handler/preview.html";
+
     private String previewErrorHTMLPath = DEFAULT_PREVIEW_ERROR_HTML_PATH;
+
     @Property(label = "Preview HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
             value = DEFAULT_PREVIEW_ERROR_HTML_PATH)
@@ -124,14 +133,18 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     /* Publish Mode */
 
     private static final boolean DEFAULT_PUBLISH_ENABLED = false;
+
     private boolean publishModeEnabled = DEFAULT_PUBLISH_ENABLED;
+
     @Property(label = "Publish Error Handling",
             description = "Enable handling of Edit-mode errors (PREVIEW and READONLY)",
             boolValue = DEFAULT_PUBLISH_ENABLED)
     public static final String PROP_PUBLISH_ENABLED = "publish.enabled";
 
-    private static final String DEFAULT_PUBLISH_ERROR_HTML_PATH =  BLANK_HTML;
+    private static final String DEFAULT_PUBLISH_ERROR_HTML_PATH = BLANK_HTML;
+
     private String publishErrorHTMLPath = DEFAULT_PUBLISH_ERROR_HTML_PATH;
+
     @Property(label = "Publish HTML Error Path",
             description = "Path to html file in JCR use to display an erring component in DISABLED mode.",
             value = DEFAULT_PUBLISH_ERROR_HTML_PATH)
@@ -139,12 +152,14 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     /* Suppressed Resource Types */
 
-    private static final String[] DEFAULT_SUPPRESSED_RESOURCE_TYPES =  new String[] {};
+    private static final String[] DEFAULT_SUPPRESSED_RESOURCE_TYPES = new String[]{};
+
     private String[] suppressedResourceTypes = DEFAULT_SUPPRESSED_RESOURCE_TYPES;
+
     @Property(label = "Suppressed Resource Types",
             description = "Resource types this Filter will ignore during Sling Includes.",
             cardinality = Integer.MAX_VALUE,
-            value = {})
+            value = { })
     public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress-resource-types";
 
 
@@ -205,7 +220,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     }
 
     private void handleError(final SlingHttpServletResponse slingResponse, final Resource resource,
-                                final String pathToHTML, final Throwable ex) throws IOException {
+                             final String pathToHTML, final Throwable ex) throws IOException {
         // Log the error to the log files, so the exception is not lost
         log.error(ex.getMessage(), ex);
 
@@ -255,15 +270,15 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         }
 
         // Check to make sure the suppress key has not been added to the request
-        if(request.getAttribute(SUPPRESS_ATTR) != null) {
+        if (request.getAttribute(SUPPRESS_ATTR) != null) {
             // Suppress key is detected, skip handling
             return false;
         }
 
         // Check to make sure the SlingRequest's resource isn't in the suppress list
         final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
-        for(final String suppressedResourceType : suppressedResourceTypes) {
-            if(slingRequest.getResource().isResourceType(suppressedResourceType)) {
+        for (final String suppressedResourceType : suppressedResourceTypes) {
+            if (slingRequest.getResource().isResourceType(suppressedResourceType)) {
                 return false;
             }
         }
@@ -280,26 +295,32 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     @Activate
     public final void activate(final Map<String, String> config) {
-        String LEGACY_PROP = "prop.";
+        final String legacyPrefix = "prop.";
 
         editModeEnabled = PropertiesUtil.toBoolean(config.get(PROP_EDIT_ENABLED),
-                PropertiesUtil.toBoolean(config.get(LEGACY_PROP + PROP_EDIT_ENABLED), DEFAULT_EDIT_ENABLED));
+                PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_EDIT_ENABLED),
+                        DEFAULT_EDIT_ENABLED));
 
         previewModeEnabled = PropertiesUtil.toBoolean(config.get(PROP_PREVIEW_ENABLED),
-                PropertiesUtil.toBoolean(config.get(LEGACY_PROP + PROP_PREVIEW_ENABLED), DEFAULT_PREVIEW_ENABLED));
+                PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_PREVIEW_ENABLED),
+                        DEFAULT_PREVIEW_ENABLED));
 
         publishModeEnabled = PropertiesUtil.toBoolean(config.get(PROP_PUBLISH_ENABLED),
-                PropertiesUtil.toBoolean(config.get(LEGACY_PROP + PROP_PUBLISH_ENABLED), DEFAULT_PUBLISH_ENABLED));
+                PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_PUBLISH_ENABLED),
+                        DEFAULT_PUBLISH_ENABLED));
 
 
         editErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_EDIT_ERROR_HTML_PATH),
-                PropertiesUtil.toString(config.get(LEGACY_PROP + PROP_EDIT_ERROR_HTML_PATH), DEFAULT_EDIT_ERROR_HTML_PATH));
+                PropertiesUtil.toString(config.get(legacyPrefix + PROP_EDIT_ERROR_HTML_PATH),
+                        DEFAULT_EDIT_ERROR_HTML_PATH));
 
         previewErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PREVIEW_ERROR_HTML_PATH),
-                PropertiesUtil.toString(config.get(LEGACY_PROP + PROP_PREVIEW_ERROR_HTML_PATH), DEFAULT_PREVIEW_ERROR_HTML_PATH));
+                PropertiesUtil.toString(config.get(legacyPrefix + PROP_PREVIEW_ERROR_HTML_PATH),
+                        DEFAULT_PREVIEW_ERROR_HTML_PATH));
 
         publishErrorHTMLPath = PropertiesUtil.toString(config.get(PROP_PUBLISH_ERROR_HTML_PATH),
-                PropertiesUtil.toString(config.get(LEGACY_PROP + PROP_PUBLISH_ERROR_HTML_PATH), DEFAULT_PUBLISH_ERROR_HTML_PATH));
+                PropertiesUtil.toString(config.get(legacyPrefix + PROP_PUBLISH_ERROR_HTML_PATH),
+                        DEFAULT_PUBLISH_ERROR_HTML_PATH));
 
 
         log.info("Component Error Handling for Edit Modes: {} ~> {}",
@@ -318,8 +339,18 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
                 DEFAULT_SUPPRESSED_RESOURCE_TYPES);
 
         log.info("Suppressed Resource Types:");
-        for(final String tmp : suppressedResourceTypes) {
+        for (final String tmp : suppressedResourceTypes) {
             log.info(" > {}", tmp);
         }
+    }
+
+    @Override
+    public final void suppressComponentErrorHandling(final SlingHttpServletRequest request) {
+        request.setAttribute(SUPPRESS_ATTR, true);
+    }
+
+    @Override
+    public final void allowComponentErrorHandling(final SlingHttpServletRequest request) {
+        request.removeAttribute(SUPPRESS_ATTR);
     }
 }

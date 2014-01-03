@@ -20,11 +20,29 @@
 
 package com.adobe.acs.commons.wcm;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+
 public interface ComponentErrorHandler {
     /**
      * When attribute is set on the Request causes Component Error Handler implementation to be skipped.
      *
      * Ex: request.setAttribute(SUPPRESS_ATTR, true);
      */
-    static final String SUPPRESS_ATTR = "com.adobe.acs.commons.wcm.component-error-handler.suppress";
+    String SUPPRESS_ATTR = "com.adobe.acs.commons.wcm.component-error-handler.suppress";
+
+    /**
+     * Suppress component error handling for the Request.
+     *
+     * @param request Sling Request object
+     */
+    void suppressComponentErrorHandling(SlingHttpServletRequest request);
+
+    /**
+     * Allow component error handling for the Request.
+     * Only useful after suppressComponentErrorHandling has been previously called.
+     *
+     * @param request Sling Request obj
+     */
+    void allowComponentErrorHandling(SlingHttpServletRequest request);
+
 }
