@@ -115,10 +115,10 @@ public class ReplicatePageVersionConsolePlugin extends HttpServlet {
         		+ ""
         		+ "</div>"
         		+ "<form name=\"replicateversion\" method=\"post\" id=\"frmVersion\">");
-        pw.println("Enter the Base site root Path example (/content/&lt;yourpath&gt;) (If no path given / is selected..ex., /content/geometrixx): ");
+        pw.println("Enter the Base site root Path example (/content/&lt;yourpath&gt;) (If no path given ,search won't happen..ex., /content/geometrixx): ");
         pw.println("<input type=\"text\" name=\"root\" id=\"root\" style=\"width:200px\">");
         pw.println("<br/>");
-        pw.println("Enter the Base site dam assets Path example (/content/dam/&lt;yourpath&gt;) (If no path given / is selected..ex., /content/dam/geometrixx): ");
+        pw.println("Enter the Base site dam assets Path example (/content/dam/&lt;yourpath&gt;) (If no path given , search won't happen..ex., /content/dam/geometrixx): ");
         pw.println("<input type=\"text\" name=\"rootdam\" id=\"rootdam\" style=\"width:200px\">");
         pw.println("<br/>");
         pw.println("Enter the time at which you want the versions(the format should be 2012-04-29,00:00:00");
