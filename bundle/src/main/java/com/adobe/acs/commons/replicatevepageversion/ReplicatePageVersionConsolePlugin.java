@@ -67,10 +67,10 @@ import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.NameConstants;
 
-@Component(policy = ConfigurationPolicy.REQUIRE)
+@Component()
 @Service(javax.servlet.Servlet.class)
 @Properties({
-    @Property(name="felix.webconsole.label", value="replicatepageversion"),
+    @Property(name="felix.webconsole.label", value="Replicate Page Version"),
     @Property(name="felix.webconsole.title", value="replicatepageversion"),
     @Property(name="felix.webconsole.category", value="Sling")
 })
@@ -111,10 +111,10 @@ public class ReplicatePageVersionConsolePlugin extends HttpServlet {
         		+ ""
         		+ "</div>"
         		+ "<form name=\"replicateversion\" method=\"post\" id=\"frmVersion\">");
-        pw.println("Enter the Base site root Path example (/content/<yourpath>) (If no path given / is selected..ex., /content/geometrixx): ");
+        pw.println("Enter the Base site root Path example (/content/&lt;yourpath&gt;) (If no path given / is selected..ex., /content/geometrixx): ");
         pw.println("<input type=\"text\" name=\"root\" id=\"root\" style=\"width:200px\">");
         pw.println("<br/>");
-        pw.println("Enter the Base site dam assets Path example (/content/dam/<yourpath>) (If no path given / is selected..ex., /content/dam/geometrixx): ");
+        pw.println("Enter the Base site dam assets Path example (/content/dam/&lt;yourpath&gt;) (If no path given / is selected..ex., /content/dam/geometrixx): ");
         pw.println("<input type=\"text\" name=\"rootdam\" id=\"rootdam\" style=\"width:200px\">");
         pw.println("<br/>");
         pw.println("Enter the time at which you want the versions(the format should be 2012-04-29,00:00:00");
