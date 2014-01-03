@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -70,8 +71,8 @@ import com.day.cq.wcm.api.NameConstants;
 @Component()
 @Service(javax.servlet.Servlet.class)
 @Properties({
-    @Property(name="felix.webconsole.label", value="Replicate Page Version"),
-    @Property(name="felix.webconsole.title", value="replicatepageversion"),
+    @Property(name="felix.webconsole.label", value="replicatepageversion"),
+    @Property(name="felix.webconsole.title", value="Replicate Page Version"),
     @Property(name="felix.webconsole.category", value="Sling")
 })
 public class ReplicatePageVersionConsolePlugin extends HttpServlet {
@@ -99,6 +100,10 @@ public class ReplicatePageVersionConsolePlugin extends HttpServlet {
 		}
     }
     
+    @Deactivate
+    protected void deActivate(ComponentContext ctx ){
+    	resolver.close();
+    }
 
     
     @Override
