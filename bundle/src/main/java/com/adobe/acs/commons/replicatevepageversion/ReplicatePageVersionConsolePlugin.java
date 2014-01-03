@@ -172,13 +172,13 @@ public class ReplicatePageVersionConsolePlugin extends HttpServlet {
 		     	if(svm.pageRoot!=null){
 		    	 resourceIterator=getResourcesIterator(svm.pageRoot,PAGE);
 		    	
-					replicateResource(resourceIterator, agent, date);
+					replicateResource(resourceIterator, agent, date,svm);
 				
 		     	}
 		     	if(svm.assetRoot!=null){
 		       	resourceIterator=getResourcesIterator(svm.assetRoot,ASSET);
 		      
-					replicateResource(resourceIterator, agent, date);
+					replicateResource(resourceIterator, agent, date,svm);
 				
 		     	}
 			}
@@ -295,7 +295,7 @@ public class ReplicatePageVersionConsolePlugin extends HttpServlet {
  * @throws RepositoryException 
  * @throws ReplicationException 
   */
- private void replicateResource(Iterator<Resource> resourceIterator,String agent,Date date) throws RepositoryException, ReplicationException{
+ private void replicateResource(Iterator<Resource> resourceIterator,String agent,Date date,SiteVersionMetaData svm) throws RepositoryException, ReplicationException{
 	 Session session=resolver.adaptTo(Session.class);
    	Resource resource=null;
    	Version v=null;
@@ -304,7 +304,9 @@ public class ReplicatePageVersionConsolePlugin extends HttpServlet {
    	AgentIdFilter agentFilter=new AgentIdFilter(agent);
    	opts.setFilter(agentFilter);
    	while(resourceIterator.hasNext()){
+   		
    		resource=resourceIterator.next();
+   		
    		v=getAppropriateVersion(resource, date, session);
    		if(v==null){
    			continue;
@@ -325,7 +327,7 @@ public class ReplicatePageVersionConsolePlugin extends HttpServlet {
   */
  private String getNormalizedPath(String path){
 	 String root=path;
-	 if(root==null){
+	 if(root==null ||"".equals(root)){
 		 return null;
 	 }
 	   while (root.endsWith("/")) {
