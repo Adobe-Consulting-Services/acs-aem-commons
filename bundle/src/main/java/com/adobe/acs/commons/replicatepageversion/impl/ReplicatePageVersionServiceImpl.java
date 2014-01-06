@@ -216,6 +216,15 @@ public class ReplicatePageVersionServiceImpl implements
                     Version v = iter.nextVersion();
                     versions.add(v);
                 }
+            }else if(node.isNodeType(JcrConstants.MIX_VERSIONABLE)){
+                VersionIterator iter = session.getWorkspace()
+                        .getVersionManager()
+                        .getVersionHistory(node.getPath())
+                        .getAllVersions();
+                while (iter.hasNext()) {
+                    Version v = iter.nextVersion();
+                    versions.add(v);
+                }
             }
         }
 
