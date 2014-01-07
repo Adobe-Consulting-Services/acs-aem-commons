@@ -341,6 +341,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.day.jcr.vault</groupId>
+            <artifactId>com.day.jcr.vault</artifactId>
+            <version>2.4.32</version>
+        </dependency>
     </dependencies>
 
     <profiles>
