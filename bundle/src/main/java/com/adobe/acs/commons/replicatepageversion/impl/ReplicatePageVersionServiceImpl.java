@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2014 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.replicatepageversion.impl;
 
 import java.util.ArrayList;
@@ -78,8 +97,9 @@ public class ReplicatePageVersionServiceImpl implements
     }
 
     @Override
-    public final JSONObject locateVersionAndReplicateResource(ResourceResolver resolver,
-            String pageRoot, String assetRoot, String agent, Date date) {
+    public final JSONObject locateVersionAndReplicateResource(
+            ResourceResolver resolver, String pageRoot, String assetRoot,
+            String agent, Date date) {
         JSONObject obj = new JSONObject();
         List<Resource> resources = null;
         Iterator<Resource> resourceIterator = null;
@@ -118,8 +138,10 @@ public class ReplicatePageVersionServiceImpl implements
 
         return obj;
     }
+
     @Override
-    public final List<Resource> getResources(ResourceResolver resolver, String root) {
+    public final List<Resource> getResources(ResourceResolver resolver,
+            String root) {
 
         Resource res = resolver.getResource(root);
         List<Resource> resources = new ArrayList<Resource>();
@@ -219,10 +241,9 @@ public class ReplicatePageVersionServiceImpl implements
                     Version v = iter.nextVersion();
                     versions.add(v);
                 }
-            }else if(node.isNodeType(JcrConstants.MIX_VERSIONABLE)){
+            } else if (node.isNodeType(JcrConstants.MIX_VERSIONABLE)) {
                 VersionIterator iter = session.getWorkspace()
-                        .getVersionManager()
-                        .getVersionHistory(node.getPath())
+                        .getVersionManager().getVersionHistory(node.getPath())
                         .getAllVersions();
                 while (iter.hasNext()) {
                     Version v = iter.nextVersion();
