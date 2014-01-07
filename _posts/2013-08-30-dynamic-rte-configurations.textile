@@ -60,7 +60,7 @@ The Rich Text widgets provided by this configuration mechanism are, by default, 
 * @height@ - set to 316
 * @hideLabel@ - set to true
 
-If you want to alter the configuration, this is done through passing query parameters. If a @fieldLabel@ parameter is passed, the @hideLabel@ option will be automatically removed. See examples below.
+If you want to alter the configuration, this is done through passing query parameters. However, due to the way the @slingscriptinclude@ xtype works, you need to add an extension *after* the query parameter. If a @fieldLabel@ parameter is passed, the @hideLabel@ option will be automatically removed. See examples below.
 
 h3. Examples
 
@@ -87,16 +87,16 @@ h4. To load the "default" configuration for a field named "text" with a field la
 {
     "jcr:primaryType" : "cq:Widget",
     "xtype" : "slingscriptinclude",
-    "script" : "rte.default.text.json.jsp?fieldLabel=Text"
+    "script" : "rte.default.text.json?fieldLabel=Text.jsp"
 }
 {% endhighlight %}
 
 
-h4. To load the "default" configuration for a field named "text" with a custom stylesheet. Note that in this particular case, the @jsp@ extension is removed from the @script@ value.
+h4. To load the "default" configuration for a field named "text" with a custom stylesheet.
 {% highlight json %}
 {
     "jcr:primaryType" : "cq:Widget",
     "xtype" : "slingscriptinclude",
-    "script" : "rte.default.text.json?externalStyleSheets=/etc/clientlibs/myco/source/mine.css"
+    "script" : "rte.default.text.json?externalStyleSheets=/etc/clientlibs/myco/source/mine.css.jsp"
 }
 {% endhighlight %}
