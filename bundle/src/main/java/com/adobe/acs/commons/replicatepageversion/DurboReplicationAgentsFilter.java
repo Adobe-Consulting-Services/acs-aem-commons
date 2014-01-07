@@ -19,7 +19,7 @@ public class DurboReplicationAgentsFilter implements AgentFilter {
      */
     public final boolean isIncluded(Agent agent) {
 
-        return isDurbo(agent) && isNotReverReplicationAgent(agent)
+        return isDurbo(agent) && isNotReverseReplicationAgent(agent)
                 && isEnabled(agent) && isNotLocal(agent);
     }
 
@@ -28,7 +28,7 @@ public class DurboReplicationAgentsFilter implements AgentFilter {
                 .getSerializationType());
     }
 
-    private boolean isNotReverReplicationAgent(Agent agent) {
+    private boolean isNotReverseReplicationAgent(Agent agent) {
         return !REVERSE_REPLICATION.equals(agent.getConfiguration()
                 .getProperties().get("reverseReplication", String.class));
     }

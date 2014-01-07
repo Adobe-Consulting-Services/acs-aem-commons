@@ -67,7 +67,8 @@ public class ReplicatePageVersionServiceImpl implements
         return agents;
     }
 
-    private Agent getAgent(String agentId) {
+    @Override
+    public final Agent getAgent(String agentId) {
         for (Agent agent : agentManager.getAgents().values()) {
             if (agent.getId().equals(agentId)) {
                 return agent;
@@ -77,7 +78,7 @@ public class ReplicatePageVersionServiceImpl implements
     }
 
     @Override
-    public final JSONObject locateVersionAndResource(ResourceResolver resolver,
+    public final JSONObject locateVersionAndReplicateResource(ResourceResolver resolver,
             String pageRoot, String assetRoot, String agent, Date date) {
         JSONObject obj = new JSONObject();
         List<Resource> resources = null;
@@ -117,8 +118,8 @@ public class ReplicatePageVersionServiceImpl implements
 
         return obj;
     }
-
-    private List<Resource> getResources(ResourceResolver resolver, String root) {
+    @Override
+    public final List<Resource> getResources(ResourceResolver resolver, String root) {
 
         Resource res = resolver.getResource(root);
         List<Resource> resources = new ArrayList<Resource>();
@@ -143,7 +144,8 @@ public class ReplicatePageVersionServiceImpl implements
         }
     }
 
-    private void replicateResource(ResourceResolver resolver,
+    @Override
+    public final void replicateResource(ResourceResolver resolver,
             Iterator<Resource> resourceIterator, String agent, Date date)
             throws RepositoryException, ReplicationException {
         Session session = resolver.adaptTo(Session.class);
@@ -171,7 +173,7 @@ public class ReplicatePageVersionServiceImpl implements
         }
     }
 
-    private Version getAppropriateVersion(Resource resource, Date date,
+    public final Version getAppropriateVersion(Resource resource, Date date,
             Session session) throws RepositoryException {
         Calendar cal = GregorianCalendar.getInstance();
         cal.setTime(date);
@@ -200,7 +202,8 @@ public class ReplicatePageVersionServiceImpl implements
 
     }
 
-    private List<Version> findAllVersions(String path, Session session)
+    @Override
+    public final List<Version> findAllVersions(String path, Session session)
             throws RepositoryException {
         List<Version> versions = new ArrayList<Version>();
 

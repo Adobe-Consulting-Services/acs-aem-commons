@@ -43,7 +43,7 @@ public class ReplicatePageVersionServlet extends SlingAllMethodsServlet {
             boolean error = false;
 
             if (!obj.has("error")) {
-                obj = rps.locateVersionAndResource(req.getResourceResolver(),
+                obj = rps.locateVersionAndReplicateResource(req.getResourceResolver(),
                         pageRoot, assetRoot, agent, date);
             } else {
                 error = true;
