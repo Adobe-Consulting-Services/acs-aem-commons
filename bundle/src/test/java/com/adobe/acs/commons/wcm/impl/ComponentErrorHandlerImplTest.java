@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
+import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.wcm.api.components.ComponentContext;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -31,12 +32,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -70,6 +75,7 @@ public class ComponentErrorHandlerImplTest {
     @Mock
     ComponentHelper componentHelper;
 
+    @Spy
     @InjectMocks
     ComponentErrorHandlerImpl handler = new ComponentErrorHandlerImpl();
 
@@ -77,15 +83,36 @@ public class ComponentErrorHandlerImplTest {
     public void setUp() throws Exception {
         when(request.getAttribute("com.day.cq.wcm.componentcontext")).thenReturn(componentContext);
         when(request.getResource()).thenReturn(resource);
+
         when(resource.getPath()).thenReturn("/content/test");
+        when(resource.getResourceType()).thenReturn("acs-commons/test/demo");
+        when(resource.isResourceType("acs-commons/test/demo")).thenReturn(true);
 
         when(response.getWriter()).thenReturn(responseWriter);
     }
 
-
     @After
     public void tearDown() throws Exception {
         reset(request, response, responseWriter, chain, resource, componentContext, componentHelper);
+    }
+
+    @Test
+    public void testAccepts_suppressAttribute() throws Exception {
+        when(request.getAttribute(ComponentErrorHandler.SUPPRESS_ATTR)).thenReturn(true);
+
+        final boolean result = handler.accepts(request, response);
+        assertFalse(result);
+    }
+
+    @Test
+    public void testAccepts_suppressResourceTypes() throws Exception {
+        final Map<String, String> config = new HashMap<String, String>();
+        config.put("suppress-resource-types", "acs-commons/test/demo");
+
+        handler.activate(config);
+
+        final boolean result = handler.accepts(request, response);
+        assertFalse(result);
     }
 
     @Test
