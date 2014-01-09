@@ -22,6 +22,8 @@ package com.adobe.acs.commons.replicatepageversion.impl;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -52,32 +54,34 @@ public class ReplicatePageVersionServlet extends SlingAllMethodsServlet {
     public final void doPost(SlingHttpServletRequest req,
             SlingHttpServletResponse res) throws ServletException, IOException {
         log.info("in do post - ReplicatePageVersionServlet ");
-        String pageRoot = getNormalizedPath(req.getParameter("pathPage"));
-        String assetRoot = getNormalizedPath(req.getParameter("pathAsset"));
+        String[] rootPaths = req.getParameterValues("rootPaths");
         Date date = getDate(req.getParameter("datetimecal"));
-        String agent = req.getParameter("cmbAgent");
+        String[] agents = req.getParameterValues("cmbAgent");
+
+
         JSONObject obj = null;
+
         try {
-            obj = validate(pageRoot, assetRoot, agent, date);
+            obj = validate(rootPaths, agents, date);
             boolean error = false;
 
             if (!obj.has("error")) {
-                obj = rps.locateVersionAndReplicateResource(req.getResourceResolver(),
-                        pageRoot, assetRoot, agent, date);
+                Map<String, String> response = rps.locateVersionAndReplicateResource(
+                        req.getResourceResolver(), rootPaths, agents, date);
+                obj = convertToJson(response);
+
             } else {
                 error = true;
             }
 
             if (error) {
-                if (obj == null) {
-                    obj = new JSONObject();
-                }
+              
 
                 try {
                     obj.put("error", "System Error.");
                     obj.put("status", "error");
                 } catch (JSONException e) {
-                   log.error("exception occured", e);
+                    log.error("exception occured", e);
                 }
             }
         } catch (JSONException ex) {
@@ -100,46 +104,42 @@ public class ReplicatePageVersionServlet extends SlingAllMethodsServlet {
         }
     }
 
+    private JSONObject convertToJson(Map<String, String> map) throws JSONException {
+        JSONObject obj = new JSONObject();
+        for (Iterator<Map.Entry<String, String>> iter=map.entrySet().iterator();iter.hasNext();) {
+            obj.put(iter.next().getKey(), iter.next().getValue());
+        }
+        return obj;
+    }
     /**
      * 
      * @param svm
      * @return
      * @throws JSONException
      */
-    private JSONObject validate(String pageRoot, String assetRoot,
-            String agent, Date date) throws JSONException {
+    private JSONObject validate(String[] rootPaths, String[] agents, Date date)
+            throws JSONException {
         JSONObject obj = new JSONObject();
-        if ((pageRoot == null || "".equals(pageRoot)) && assetRoot == null
-                || "".equals(assetRoot)) {
-            obj.put("error",
-                    "both pages root path and assets root path cannot be null");
+        if (rootPaths == null || rootPaths.length == 0) {
+            obj.put("error", "Select a root path");
             return obj;
         }
+        for (int k = 0; k < rootPaths.length; k++) {
+            if (rootPaths[k] == null || "".equals(rootPaths[k])) {
+                obj.put("error", "Root paths cannot be empty.");
+                return obj;
+            }
+        }
+
         if (date == null) {
             obj.put("error", "Enter the time at which you want the versions");
             return obj;
         }
-        if (agent == null || "".equals(agent)) {
-            obj.put("error", "Enter the agent id");
+        if (agents == null || agents.length == 0) {
+            obj.put("error", "Select the appropriate agents");
             return obj;
         }
         return obj;
-    }
-
-    private String getNormalizedPath(String path) {
-        String root = path;
-        if (root == null || "".equals(root)) {
-            return null;
-        }
-        while (root.endsWith("/")) {
-            root = root.substring(0, root.length() - 1);
-        }
-
-        if (root.length() == 0) {
-            root = "/";
-        }
-
-        return root;
     }
 
     private Date getDate(String datetime) {

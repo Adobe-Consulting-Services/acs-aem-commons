@@ -1,153 +1,163 @@
-<%@ page contentType="text/html"
-             pageEncoding="utf-8"
-			 import="com.day.cq.i18n.I18n,com.day.cq.widget.HtmlLibraryManager,com.adobe.acs.commons.replicatepageversion.ReplicatePageVersionService,com.day.cq.replication.Agent" %>
-			 <%@include file="/libs/foundation/global.jsp"%>
+<%--
+  #%L
+  ACS AEM Commons Package
+  %%
+  Copyright (C) 2013 - 2014 Adobe
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  --%>
+<%@ page contentType="text/html" pageEncoding="utf-8"
+    import="com.day.cq.i18n.I18n,com.day.cq.widget.HtmlLibraryManager,com.day.cq.replication.AgentManager,
+ java.util.Collection,com.day.cq.replication.Agent"%>
+<%@include file="/libs/foundation/global.jsp"%>
 <%
-     I18n i18n = new I18n(slingRequest);
-final ReplicatePageVersionService rpvs=sling.getService(ReplicatePageVersionService.class);
+    I18n i18n = new I18n(slingRequest);
+    final AgentManager agentManager = sling
+            .getService(AgentManager.class);
+    Collection<Agent> agents = agentManager.getAgents().values();
 %>
 
-	<h1><%= i18n.get("Replicate Earlier Versions") %></h1>
-        <div id="errmsg" style="display:none;background-color: #EFCDC7"></div>
-	<form target="treeProgress"  method="POST" id="activateearlierversion" name="activateearlierversion">
-    <input type="hidden" id="pathPage" name="pathPage" value="/content">
-	<input type="hidden" id="pathAsset" name="pathAsset" value="/content/dam">
-        <input type="hidden" id="cal" name="cal" value="">
-    <table class="form">
-        <tr>
-            <td><label for="fakePathFieldPages"><%= i18n.get("Pages root Path") %>:</label></td>
-            <td><div id="fakePathPages">&nbsp;</div><br>
-                <small><%= i18n.get("Select root path of the site") %></small>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="fakePathFieldAssets"><%= i18n.get("Assets root Path") %>:</label></td>
-            <td><div id="fakePathAssets">&nbsp;</div><br>
-                <small><%= i18n.get("Select root path of the site assets") %></small>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="datetimecal"><%= i18n.get("Enter the date time") %>:</label></td>
-            <td><div id="datetimecal">&nbsp;</div><br>
+<h1><%=i18n.get("Replicate Earlier Versions")%></h1>
+<div id="container"
+    style="position: relative; left: 100px; width: 600px;">
+    <div id="errmsg" style="display: none; background-color: #EFCDC7"></div>
+    <form target="treeProgress" method="POST"
+        id="activateearlierversion" name="activateearlierversion">
 
-            </td>
-        </tr>
-        <tr>
-            <td><label for="agentId"><%= i18n.get("Replication Agent") %>:</label></td>
-            <td><select id="cmbAgent" name="cmbAgent">
-                <option value="">Select Agent</option>
-                <%
-        for (final Agent agent : rpvs.getAgents()) {
-        %>
-                <option value="<%=agent.getId()%>"><%=agent.getConfiguration().getName()%></option>
-                <%
-    }
-        %>
-                </select><br>
-
-            </td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>
-                
-                <input type="button" value="<%= i18n.get("Replicate") %>" id="btnReplicate" name="btnReplicate">
-            </td>
-        </tr>
-    </table>
+        <input type="hidden" id="cal" name="cal" value=""> <label
+            for="multifieldpaths"><%=i18n.get("Root Paths")%>:</label>
         <div id="CQ"></div>
-</form><br>
-<div id="replicationqueue"></div>
-        <script>
-            // provide a path selector field with a repository browse dialog
-            CQ.Ext.onReady(function() {
-                $("#btnReplicate").click(function(){
-                    var msg="Please Wait.......";
-                    $("#replicationqueue").html(msg);
-                    $.post("/bin/replicatepageversion",$("#activateearlierversion").serialize(),function(data){
+        <label for="datetimecal"><%=i18n.get("Enter the date time")%>:</label>
+        <div id="datetimecal">&nbsp;</div>
+        <div style="margin-top: 20px">
+            <label for="agentId"><%=i18n
+                    .get("Replication Agent(you can select more than one)")%>:</label>
+        </div>
+        <div>
+            <select id="cmbAgent" name="cmbAgent"
+                size="<%=agents.size() %>" multiple>
 
-                        var resp=data;
+                <%
+                    for (final Agent agent : agents) {
+                        if (agent.isEnabled() && agent.isValid()) {
+                %>
+                <option
+                    style="width:<%=agent.getConfiguration().getName().length() * 7%>px"
+                    value="<%=agent.getId()%>"><%=agent.getConfiguration().getName()%></option>
 
-					if(resp.status=='error'){
-                        $("#replicationqueue").html('');
-                        alert(resp.error);
-                        $("#errmsg").html(resp.error);
-                        $("#errmsg").css("display","block");
-                        $("#replicationqueue").html('');                        
-                    }else{
-                        $("#errmsg").html("");
-                        $("#errmsg").css("display","none");
-                        var lnk="<a href='"+resp.agentPath+".html' target='_new' >View Replication Queue</a><br/><a href='"+resp.agentPath+".log.html' target='_new' >View Replication Log</a>";
-                        $("#replicationqueue").html(lnk);
+                <%
                     }
-                    });
-                });
-                 var pathPage = new CQ.form.PathField({
-                    renderTo: "CQ",
-//                    "content": "/content",
-                    rootPath: "/content",
-                    predicate: "hierarchy",
-                    hideTrigger: false,
-                    showTitlesInTree: false,
-                    name: "fakePathFieldPages",
-                    value: "/content",
-                    width: 400,
-                    listeners: {
-                        render: function() {
-                            this.wrap.anchorTo("fakePathPages", "tl");
-                        },
-                        change: function (fld, newValue, oldValue) {
-                            document.getElementById("pathPage").value = newValue;
-                        },
-                        dialogselect: function(fld, newValue) {
-                            document.getElementById("pathPage").value = newValue;
-                        }
                     }
-                });
-              var pathAsset = new CQ.form.PathField({
-                    //"applyTo": "path",
-                    renderTo: "CQ",
-                  //                    "content": "/content/dam",
-                    rootPath: "/content/dam",
-                    predicate: "hierarchy",
-                    hideTrigger: false,
-                    showTitlesInTree: false,
-                    name: "fakePathFieldAssets",
-                  value: "/content/dam",
-                    width: 400,
-                    listeners: {
-                        render: function() {
-                            this.wrap.anchorTo("fakePathAssets", "tl");
-                        },
-                        change: function (fld, newValue, oldValue) {
-                            document.getElementById("pathAsset").value = newValue;
-                        },
-                        dialogselect: function(fld, newValue) {
-                            document.getElementById("pathAsset").value = newValue;
-                        }
-                    }
-                });	
+                %>
+            </select>
+            <%
+                for (final Agent agent : agentManager.getAgents().values()) {
+                    if (agent.isEnabled() && agent.isValid()) {
+            %>
+            <input type="hidden" id="<%=agent.getId()%>"
+                value="<%=resourceResolver.map(agent.getConfiguration()
+                            .getConfigPath())%>" />
+            <%
+                }
+                }
+            %>
+        </div>
 
-                       var cal= new CQ.form.DateTime({
-                    "renderTo":"CQ",
-            "dateWidth": 100,
-            "hideTime": false,
-            "name": "datetimecal",
-            "allowBlank": false,
-            "hiddenFormat": "Y-m-d,H:i:s",
-            "listeners": {
-render: function() {
-                            this.wrap.anchorTo("datetimecal", "tl");
-                        },
-                   change: function (fld, newValue, oldValue) {
+        <div style="margin-top: 20px">
+            <input type="button" value="<%=i18n.get("Replicate")%>"
+                id="btnReplicate" name="btnReplicate">
+        </div>
 
+    </form>
+    <br>
+    <div id="replicationqueueMsg"></div>
+    <div id="replicationqueueStatus" style="margin-top: 20px"></div>
+</div>
+<script>
+	CQ.Ext.onReady(function() {
+		$("#btnReplicate").click(
+				function() {
+					var msg = "Process initiated.......";
+					$("#replicationqueueMsg").html(msg);
+					$("#errmsg").html("");
+					$("#errmsg").css("display", "none");
+					var agentList = "<ul>";
+					$("#cmbAgent option:selected").each(
+							function() {
 
-                        },
-                        dialogselect: function(fld, newValue) {
+								agentList += "<h3>" + $(this).text()
+										+ "</h3><li><a href='"
+										+ $("#" + $(this).val()).val()
+										+ ".log.html' target='_new'>" + "log"
+										+ "</a></li>";
+								agentList += "<li><a href='"
+										+ $("#" + $(this).val()).val()
+										+ ".html' target='_new'>"
+										+ "replication queue"
+										+ "</a></li><br/>";
 
-                           
-                        }
-            }
-        });
-            });
-        </script>
+							});
+					$("#replicationqueueStatus").html(agentList);
+					$.post("/bin/replicatepageversion", $(
+							"#activateearlierversion").serialize(), function(
+							resp) {
+						if (data == undefined || data.status == 'error') {
+							$("#errmsg").html(resp.error);
+							$("#errmsg").css("display", "block");
+							$("#replicationqueueMsg").html('');
+							$("#replicationqueueStatus").html('');
+						} else {
+							msg = "Replication in progress";
+							$("#replicationqueueMsg").html(msg);
+						}
+
+					});
+
+				});
+
+		var mmfield = new CQ.form.MultiField({
+
+			renderTo : "CQ",
+
+			"fieldLabel" : "Root Paths",
+			width : "400px",
+			name : "rootPaths",
+			"fieldConfig" : {
+				"allowBlank" : "false",
+				predicate : "hierarchy",
+				"xtype" : "pathfield"
+			}
+		});
+
+		var cal = new CQ.form.DateTime({
+			"renderTo" : "CQ",
+			"dateWidth" : 100,
+			"hideTime" : false,
+			"name" : "datetimecal",
+			"allowBlank" : false,
+			"hiddenFormat" : "Y-m-d,H:i:s",
+			"listeners" : {
+				render : function() {
+					this.wrap.anchorTo("datetimecal", "tl");
+				},
+				change : function(fld, newValue, oldValue) {
+
+				},
+				dialogselect : function(fld, newValue) {
+
+				}
+			}
+		});
+	});
+</script>
