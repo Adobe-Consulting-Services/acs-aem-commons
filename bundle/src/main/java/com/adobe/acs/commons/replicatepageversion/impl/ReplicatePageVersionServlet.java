@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 
@@ -106,8 +107,14 @@ public class ReplicatePageVersionServlet extends SlingAllMethodsServlet {
 
     private JSONObject convertToJson(Map<String, String> map) throws JSONException {
         JSONObject obj = new JSONObject();
+        try{
         for (Iterator<Map.Entry<String, String>> iter=map.entrySet().iterator();iter.hasNext();) {
-            obj.put(iter.next().getKey(), iter.next().getValue());
+            Entry<String,String> entry = iter.next();
+            obj.put(entry.getKey(), entry.getValue());
+            entry=null;
+        }
+        } catch(Exception e){
+            e.printStackTrace();
         }
         return obj;
     }

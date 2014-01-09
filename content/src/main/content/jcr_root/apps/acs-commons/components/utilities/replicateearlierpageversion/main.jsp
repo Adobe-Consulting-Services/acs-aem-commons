@@ -99,7 +99,7 @@
 								agentList += "<h3>" + $(this).text()
 										+ "</h3><li><a href='"
 										+ $("#" + $(this).val()).val()
-										+ ".log.html' target='_new'>" + "log"
+										+ ".log.html#end' target='_new'>" + "log"
 										+ "</a></li>";
 								agentList += "<li><a href='"
 										+ $("#" + $(this).val()).val()
@@ -112,7 +112,7 @@
 					$.post("/bin/replicatepageversion", $(
 							"#activateearlierversion").serialize(), function(
 							resp) {
-						if (data == undefined || data.status == 'error') {
+						if (rest == undefined || rest.status == 'error') {
 							$("#errmsg").html(resp.error);
 							$("#errmsg").css("display", "block");
 							$("#replicationqueueMsg").html('');
