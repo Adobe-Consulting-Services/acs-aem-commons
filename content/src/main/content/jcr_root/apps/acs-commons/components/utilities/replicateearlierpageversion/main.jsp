@@ -32,12 +32,13 @@
 <div id="container"
     style="position: relative; left: 100px; width: 600px;">
     <div id="errmsg" style="display: none; background-color: #EFCDC7"></div>
-    <form target="treeProgress" method="POST"
-        id="activateearlierversion" name="activateearlierversion">
 
-        <input type="hidden" id="cal" name="cal" value=""> <label
+
+         <label
             for="multifieldpaths"><%=i18n.get("Root Paths")%>:</label>
         <div id="CQ"></div>
+
+            <input type="hidden" id="cal" name="cal" value="">
         <label for="datetimecal"><%=i18n.get("Enter the date time")%>:</label>
         <div id="datetimecal">&nbsp;</div>
         <div style="margin-top: 20px">
@@ -79,7 +80,6 @@
                 id="btnReplicate" name="btnReplicate">
         </div>
 
-    </form>
     <br>
     <div id="replicationqueueMsg"></div>
     <div id="replicationqueueStatus" style="margin-top: 20px"></div>
@@ -109,10 +109,10 @@
 
 							});
 					$("#replicationqueueStatus").html(agentList);
-					$.post("/bin/replicatepageversion", $(
-							"#activateearlierversion").serialize(), function(
+                   
+                    $.post("/bin/replicatepageversion",buildRequestParams(), function(
 							resp) {
-						if (rest == undefined || rest.status == 'error') {
+						if (resp == undefined || resp.status == 'error') {
 							$("#errmsg").html(resp.error);
 							$("#errmsg").css("display", "block");
 							$("#replicationqueueMsg").html('');
@@ -122,7 +122,7 @@
 							$("#replicationqueueMsg").html(msg);
 						}
 
-					});
+});
 
 				});
 
@@ -159,5 +159,17 @@
 				}
 			}
 		});
+        function buildRequestParams(){
+            var params="";
+            $("input[name='rootPaths']").each(function(i,value){
+params+="rootPaths="+escape($(this).val())+"&";
+            });
+            params+="datetimecal="+escape($("input[name='datetimecal']").get(0).value);
+            $('#cmbAgent option:selected').each(function(){
+
+                 params+="&cmbAgent="+escape($(this).val());
+            });
+return params;
+        }
 	});
 </script>
