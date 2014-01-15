@@ -122,15 +122,17 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
             // ACL Handling
             packageDefinitionProperties.put(JcrPackageDefinition.PN_AC_HANDLING,
-                    properties.get(PACKAGE_ACL_HANDLING, AccessControlHandling.OVERWRITE).toString());
+                    properties.get(PACKAGE_ACL_HANDLING, AccessControlHandling.OVERWRITE.toString()));
 
             // Package Description
             packageDefinitionProperties.put(
                     JcrPackageDefinition.PN_DESCRIPTION, properties.get(PACKAGE_DESCRIPTION, DEFAULT_PACKAGE_DESCRIPTION));
 
             if(preview) {
+                // Handle preview mode
                 response.getWriter().print(packageHelper.getPreviewJSON(repPolicyResources));
             } else if(repPolicyResources == null || repPolicyResources.isEmpty()) {
+                // Do not create empty packages; This will only clutter up CRX Package Manager
                 response.getWriter().print(packageHelper.getErrorJSON("Refusing to create a package with no filter "
                         + "set rules."));
             } else {

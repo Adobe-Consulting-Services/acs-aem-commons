@@ -66,6 +66,7 @@
                         type="select"
                         xtype="selection">
                     <options jcr:primaryType="cq:WidgetCollection">
+                        <!-- Clear and Ignore do not make sense for this tool -->
                         <overwrite
                                 jcr:primaryType="nt:unstructured"
                                 text="Overwrite"
@@ -74,10 +75,10 @@
                                 jcr:primaryType="nt:unstructured"
                                 text="Merge"
                                 value="Merge"/>
-                        <clear
+                        <mergePreserve
                                 jcr:primaryType="nt:unstructured"
-                                text="Clear"
-                                value="Clear"/>
+                                text="MergePreserve"
+                                value="MergePreserve"/>
                     </options>
                 </packageACLHandling>
                 <conflictResolution
