@@ -3,7 +3,7 @@
   ~ #%L
   ~ ACS AEM Commons Bundle
   ~ %%
-  ~ Copyright (C) 2013 Adobe
+  ~ Copyright (C) 2014 Adobe
   ~ %%
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,10 +19,8 @@
   ~ #L%
   -->
 
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-    cq:defaultView="html"
-    jcr:description="Utility page for packaging ACL nodes."
-    jcr:primaryType="cq:Component"
-    jcr:title="ACS Commons - ACL Packaging"
-    sling:resourceSuperType="acs-commons/components/utilities/page"
-    componentGroup=".hidden"/>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    cq:actions="[text:ACL Packager Configuration,-,edit]"
+    cq:disableTargeting="true"
+    cq:layout="editbar"
+    jcr:primaryType="cq:EditConfig"/>

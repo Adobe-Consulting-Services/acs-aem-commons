@@ -2,7 +2,7 @@
   ~ #%L
   ~ ACS AEM Commons Bundle
   ~ %%
-  ~ Copyright (C) 2014 Adobe
+  ~ Copyright (C) 2013 Adobe
   ~ %%
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,22 +19,13 @@
   --%>
 
 <%@include file="/libs/foundation/global.jsp"%><%
-%><%@page session="false" contentType="text/html" pageEncoding="utf-8"
-          import="com.adobe.acs.commons.util.PathInfoUtil,
-                com.adobe.granite.xss.XSSAPI,
-    			org.apache.commons.lang.StringUtils,
-                com.adobe.acs.commons.util.TextUtil,
-    			java.util.Map"%><%
-
-    /* Page Properties */
-    final String pageTitle = TextUtil.getFirstNonEmpty(
-            currentPage.getPageTitle(),
-            currentPage.getTitle(),
-            currentPage.getName());
+%><%@page session="false" contentType="text/html" pageEncoding="utf-8" %><%
+    final String actionURI = resourceResolver.map(currentPage.getContentResource().getPath() + ".package.json");
 %>
 
-<h1>ACL Packaging</h1>
+<hr/>
 
-<h2><%= xssAPI.encodeForHTML(pageTitle) %></h2>
-
-<cq:include path="configuration" resourceType="<%= component.getPath() + "/configuration" %>"/>
+<form id="packager-form" method="post" action="<%= xssAPI.encodeForHTMLAttr(actionURI) %>">
+    <input class="button" name="preview" type="submit" value="Preview"/>
+    <input class="button" name="create" type="submit" value="Create Package"/>
+</form>

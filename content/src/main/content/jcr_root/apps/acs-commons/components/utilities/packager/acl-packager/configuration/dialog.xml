@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ #%L
+  ~ ACS AEM Commons Bundle
+  ~ %%
+  ~ Copyright (C) 2014 Adobe
+  ~ %%
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~ #L%
+  -->
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Dialog"
+    activeTab="0"
+    title="ACL Packager Configuration"
+    xtype="tabpanel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <tab1
+            jcr:primaryType="cq:Widget"
+            title="ACL Packager Configuration"
+            xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <packageName
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Package name"
+                        fieldDescription="Name of the package to created. [ Default: acls ]"
+                        name="./packageName"
+                        defaultValue="acls"
+                        xtype="textfield"/>
+                <packageGroupName
+                        jcr:primaryType="cq:Widget"
+                        fieldDescription="Package group to assign this package to. [ Default: ACLs ]"
+                        fieldLabel="Package group name"
+                        name="./packageGroupName"
+                        defaultValue="ACLs"
+                        xtype="textfield"/>
+                <packageVersion
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Package version"
+                        fieldDescription="Package version to assign this package. This value is ignored is Conflict Resolution is set to IncrementValue. [ Default: 1.0.0 ]"
+                        name="./packageVersion"
+                        defaultValue="1.0.0"
+                        xtype="textfield"/>
+                <packageDescription
+                        jcr:primaryType="cq:Widget"
+                        fieldDescription="Package description. Enter the purpose and scope of this package for future reference."
+                        fieldLabel="Package description"
+                        name="./packageDescription"
+                        defaultValue="ACL Package initially defined by a ACS AEM Commons - ACL Packager configuration."
+                        xtype="textarea"/>
+                <packageACLHandling
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Package ACL handling"
+                        fieldDescription="Dictates how package's ACLs will be installed on target systems. [ Default: Overwrite ]"
+                        defaultValue="Overwrite"
+                        name="./packageACLHandling"
+                        type="select"
+                        xtype="selection">
+                    <options jcr:primaryType="cq:WidgetCollection">
+                        <overwrite
+                                jcr:primaryType="nt:unstructured"
+                                text="Overwrite"
+                                value="Overwrite"/>
+                        <merge
+                                jcr:primaryType="nt:unstructured"
+                                text="Merge"
+                                value="Merge"/>
+                        <clear
+                                jcr:primaryType="nt:unstructured"
+                                text="Clear"
+                                value="Clear"/>
+                    </options>
+                </packageACLHandling>
+                <conflictResolution
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Conflict resolution"
+                        fieldDescription="Determines how package creation will be handled in the event of an existing package of the same Package group, name and version. [ Default: IncrementVersion ]"
+                        defaultValue="IncrementVersion"
+                        name="./conflictResolution"
+                        type="select"
+                        xtype="selection">
+                    <options jcr:primaryType="cq:WidgetCollection">
+                        <replace
+                                jcr:primaryType="nt:unstructured"
+                                text="Replace"
+                                value="Replace"/>
+                        <incrementVersion
+                                jcr:primaryType="nt:unstructured"
+                                text="Increment Version"
+                                value="IncrementVersion"/>
+                        <none
+                                jcr:primaryType="nt:unstructured"
+                                text="None"
+                                value="None"/>
+                    </options>
+                </conflictResolution>
+                <principalNames
+                    jcr:primaryType="cq:Widget"
+                    fieldDescription="Click the '+' to add a new principal. Only ACLs that include ACEs for these principals will be included.&lt;br/&gt;Remove all entries for all principals."
+                    fieldLabel="Principal names"
+                    name="./principalNames"
+                    xtype="multifield">
+                    <fieldConfig
+                        allowBlank="{Boolean}false"
+                        displayField="principal"
+                        jcr:primaryType="cq:Widget"
+                        xtype="authselection"/>
+                </principalNames>
+                <includePatterns
+                        jcr:primaryType="cq:Widget"
+                        fieldDescription="Click the '+' to add a new include pattern. Only paths that match an include pattern will be included.&lt;br/&gt;Remove all entries for all paths."
+                        fieldLabel="Include patterns"
+                        defaultValue="[/content/.*,/etc/.*]"
+                        name="./includePatterns"
+                        xtype="multifield">
+                    <fieldConfig
+                            jcr:primaryType="cq:Widget"
+                            xtype="textfield"/>
+                </includePatterns>
+            </items>
+        </tab1>
+    </items>
+</jcr:root>
