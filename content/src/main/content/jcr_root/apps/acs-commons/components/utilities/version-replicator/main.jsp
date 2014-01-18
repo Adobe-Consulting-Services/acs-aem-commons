@@ -109,8 +109,7 @@ function() {
                             });
                     $("#replicationqueueStatus").html(agentList);
 
-                    $.post("<%=currentPage.getPath()%>
-    .replicateversion.html",
+                    $.post("<%=currentPage.getPath()%>.replicateversion.html",
                                                     buildRequestParams(),
                                                     function(resp) {
                                                         if (resp == undefined
@@ -127,7 +126,7 @@ function() {
                                                                     "#replicationqueueStatus")
                                                                     .html('');
                                                         } else {
-                                                            msg = "Replication in progress";
+                                                            msg = "Replication has been triggered";
                                                             $(
                                                                     "#replicationqueueMsg")
                                                                     .html(msg);

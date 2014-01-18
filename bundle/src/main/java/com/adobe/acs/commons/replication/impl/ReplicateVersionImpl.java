@@ -83,12 +83,11 @@ public class ReplicateVersionImpl implements
                 for (int k = 0; k < rootPaths.length; k++) {
                     List<Resource>    resources = getResources(resolver,
                             getNormalizedPath(rootPaths[k]));
-                    Iterator<Resource> resourceIterator = resources.iterator();
 
-                    replicateResource(resolver, resourceIterator, agents, date);
+
+                    replicateResource(resolver, resources, agents, date);
 
                     resources = null;
-                    resourceIterator = null;
                 }
 
             }
@@ -133,14 +132,16 @@ public class ReplicateVersionImpl implements
             return;
         }
         resources.add(res);
-        Iterator<Resource> iter = resolver.listChildren(res);
-        for (Resource resChild = iter.next(); iter.hasNext();) {
+
+        for (Iterator<Resource> iter = resolver.listChildren(res); iter.hasNext();) {
+            Resource resChild = iter.next();
             buildResourceList(resolver, resChild, resources);
+            resChild = null;
         }
     }
 
     private void replicateResource(ResourceResolver resolver,
-            Iterator<Resource> resourceIterator, String[] agents, Date date)
+            List<Resource> resources, String[] agents, Date date)
             throws RepositoryException, ReplicationException {
 
 
@@ -150,7 +151,7 @@ public class ReplicateVersionImpl implements
         AgentIdFilter agentFilter = new AgentIdFilter(agents);
         opts.setFilter(agentFilter);
         Session session = resolver.adaptTo(Session.class);
-        for (Resource resource = resourceIterator.next(); resourceIterator.hasNext();) {
+        for (Resource resource : resources) {
           Version  v = getAppropriateVersion(resource, date, session);
             if (v == null) {
                 continue;
@@ -214,11 +215,13 @@ public class ReplicateVersionImpl implements
 
     private List<Version> getVersions(String nodePath, Session session) throws RepositoryException {
         List<Version> versions = new ArrayList<Version>();
-        VersionIterator iter = session.getWorkspace()
+
+        for (VersionIterator iter = session.getWorkspace()
                 .getVersionManager().getVersionHistory(nodePath)
-                .getAllVersions();
-        for (Version v = iter.nextVersion(); iter.hasNext();) {
+                .getAllVersions(); iter.hasNext();) {
+            Version v = iter.nextVersion();
             versions.add(v);
+            v = null;
         }
 
         return versions;
