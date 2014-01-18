@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.replicatepageversion.impl;
+package com.adobe.acs.commons.replication.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -41,11 +41,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.replicatepageversion.ReplicatePageVersionService;
+import com.adobe.acs.commons.replication.ReplicateVersion;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.replication.AgentIdFilter;
 import com.day.cq.replication.ReplicationActionType;
@@ -60,54 +59,54 @@ import com.day.cq.wcm.api.NameConstants;
                 + "specific replication agent", immediate = false,
         metatype = false)
 @Service
-public class ReplicatePageVersionServiceImpl implements
-        ReplicatePageVersionService {
+public class ReplicateVersionImpl implements
+        ReplicateVersion {
 
     private static final Logger log = LoggerFactory
-            .getLogger(ReplicatePageVersionServiceImpl.class);
+            .getLogger(ReplicateVersionImpl.class);
 
     @Reference
     private Replicator replicator;
 
     @Override
-    public final Map<String, String> locateVersionAndReplicateResource(
+    public final Map<String, ReplicationTriggerStatus> replicate(
             ResourceResolver resolver, String[] rootPaths, String[] agents,
             Date date) {
-        Map<String, String> map = new HashMap<String, String>();
-        List<Resource> resources = null;
-        Iterator<Resource> resourceIterator = null;
+        Map<String, ReplicationTriggerStatus> map = new HashMap<String, ReplicationTriggerStatus>();
+
+
         boolean error = false;
-        String message = "";
+
         try {
             if (rootPaths != null && rootPaths.length > 0) {
 
                 for (int k = 0; k < rootPaths.length; k++) {
-                    resources = getResources(resolver,
+                    List<Resource>    resources = getResources(resolver,
                             getNormalizedPath(rootPaths[k]));
-                    resourceIterator = resources.iterator();
+                    Iterator<Resource> resourceIterator = resources.iterator();
 
                     replicateResource(resolver, resourceIterator, agents, date);
 
                     resources = null;
+                    resourceIterator = null;
                 }
 
             }
 
-            map.put("status", "replicated");
+            map.put("status", new ReplicationTriggerStatus("replicated"));
 
         } catch (RepositoryException e) {
             error = true;
             log.error("replication failed", e);
-            message = e.getMessage();
+
         } catch (ReplicationException e) {
             error = true;
             log.error("replication failed", e);
-            message = e.getMessage();
+
         } finally {
             if (error) {
 
-                map.put("error", message);
-                map.put("status", "error");
+                map.put("status",  new ReplicationTriggerStatus("error"));
 
             }
         }
@@ -130,31 +129,29 @@ public class ReplicatePageVersionServiceImpl implements
     private void buildResourceList(ResourceResolver resolver, Resource res,
             List<Resource> resources) throws RepositoryException {
         Node node = res.adaptTo(Node.class);
-        if (!node.isNodeType("nt:hierarchyNode")) {
+        if (!node.isNodeType(JcrConstants.NT_HIERARCHYNODE)) {
             return;
         }
         resources.add(res);
         Iterator<Resource> iter = resolver.listChildren(res);
-        while (iter.hasNext()) {
-            buildResourceList(resolver, iter.next(), resources);
+        for (Resource resChild = iter.next(); iter.hasNext();) {
+            buildResourceList(resolver, resChild, resources);
         }
     }
 
     private void replicateResource(ResourceResolver resolver,
             Iterator<Resource> resourceIterator, String[] agents, Date date)
             throws RepositoryException, ReplicationException {
-        Session session = resolver.adaptTo(Session.class);
-        Resource resource = null;
-        Version v = null;
+
+
+
         ReplicationOptions opts = new ReplicationOptions();
 
         AgentIdFilter agentFilter = new AgentIdFilter(agents);
         opts.setFilter(agentFilter);
-        while (resourceIterator.hasNext()) {
-
-            resource = resourceIterator.next();
-
-            v = getAppropriateVersion(resource, date, session);
+        Session session = resolver.adaptTo(Session.class);
+        for (Resource resource = resourceIterator.next(); resourceIterator.hasNext();) {
+          Version  v = getAppropriateVersion(resource, date, session);
             if (v == null) {
                 continue;
             }
@@ -164,14 +161,14 @@ public class ReplicatePageVersionServiceImpl implements
             replicator.replicate(session, ReplicationActionType.ACTIVATE,
                     resource.getPath(), opts);
             log.info("replicating  path:" + resource.getPath());
-
+            v = null;
         }
+
     }
 
     private Version getAppropriateVersion(Resource resource, Date date,
             Session session) throws RepositoryException {
-        Calendar cal = GregorianCalendar.getInstance();
-        cal.setTime(date);
+
         String path = resource.getPath();
         List<Version> versions = findAllVersions(path, session);
         Collections.sort(versions, new Comparator<Version>() {
@@ -183,7 +180,8 @@ public class ReplicatePageVersionServiceImpl implements
                 }
             }
         });
-
+        Calendar cal = GregorianCalendar.getInstance();
+        cal.setTime(date);
         for (Version v : versions) {
             try {
                 if (v.getCreated().compareTo(cal) < 1) {
@@ -205,28 +203,26 @@ public class ReplicatePageVersionServiceImpl implements
         if (node.hasNode(NameConstants.NN_CONTENT)) {
             Node contentNode = node.getNode(NameConstants.NN_CONTENT);
             if (contentNode.isNodeType(JcrConstants.MIX_VERSIONABLE)) {
-                VersionIterator iter = session.getWorkspace()
-                        .getVersionManager()
-                        .getVersionHistory(contentNode.getPath())
-                        .getAllVersions();
-                while (iter.hasNext()) {
-                    Version v = iter.nextVersion();
-                    versions.add(v);
-                }
+                versions =   getVersions(contentNode.getPath(), session);
             } else if (node.isNodeType(JcrConstants.MIX_VERSIONABLE)) {
-                VersionIterator iter = session.getWorkspace()
-                        .getVersionManager().getVersionHistory(node.getPath())
-                        .getAllVersions();
-                while (iter.hasNext()) {
-                    Version v = iter.nextVersion();
-                    versions.add(v);
-                }
+                versions = getVersions(path, session);
             }
         }
 
         return versions;
     }
 
+    private List<Version> getVersions(String nodePath, Session session) throws RepositoryException {
+        List<Version> versions = new ArrayList<Version>();
+        VersionIterator iter = session.getWorkspace()
+                .getVersionManager().getVersionHistory(nodePath)
+                .getAllVersions();
+        for (Version v = iter.nextVersion(); iter.hasNext();) {
+            versions.add(v);
+        }
+
+        return versions;
+    }
     private String getNormalizedPath(String path) {
         String root = path;
         if (root == null || "".equals(root)) {

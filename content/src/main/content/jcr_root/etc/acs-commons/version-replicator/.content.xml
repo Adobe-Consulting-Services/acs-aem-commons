@@ -3,6 +3,6 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="cq:PageContent"
-        jcr:title="Replicate Earlier Version"
-        sling:resourceType="acs-commons/components/utilities/replicateearlierpageversion"/>
+        jcr:title="Version Replicator"
+        sling:resourceType="acs-commons/components/utilities/version-replicator"/>
 </jcr:root>

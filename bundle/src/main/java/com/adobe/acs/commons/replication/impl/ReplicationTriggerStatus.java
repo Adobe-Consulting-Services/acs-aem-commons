@@ -17,17 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.replicatepageversion;
+package com.adobe.acs.commons.replication.impl;
 
-import java.util.Date;
-import java.util.Map;
+import java.io.Serializable;
 
-import org.apache.sling.api.resource.ResourceResolver;
-
-public interface ReplicatePageVersionService {
-
-    Map<String, String> locateVersionAndReplicateResource(
-            ResourceResolver resolver, String[] rootPaths, String[] agent,
-            Date date);
+public class ReplicationTriggerStatus implements Serializable {
+/**
+     * 
+     */
+    private static final long serialVersionUID = -8010928082483334879L;
+private final String status;
+public ReplicationTriggerStatus(String status) {
+    this.status = status;
+}
+public final String getStatus() {
+    return status;
+}
 
 }

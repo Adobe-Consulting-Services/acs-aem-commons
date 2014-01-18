@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.replicatepageversion.impl;
+package com.adobe.acs.commons.replication.impl;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -38,45 +38,48 @@ import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.replicatepageversion.ReplicatePageVersionService;
+import com.adobe.acs.commons.replication.ReplicateVersion;
 
 @SuppressWarnings("serial")
-@SlingServlet(paths = "/bin/replicatepageversion", methods = "POST",
+@SlingServlet(resourceTypes = "acs-commons/components/utilities/version-replicator",
+selectors = "replicateversion", methods = "POST",
         generateComponent = true)
-public class ReplicatePageVersionServlet extends SlingAllMethodsServlet {
+public class ReplicateVersionServlet extends SlingAllMethodsServlet {
 
     private static final Logger log = LoggerFactory
-            .getLogger(ReplicatePageVersionServlet.class);
+            .getLogger(ReplicateVersionServlet.class);
 
     @Reference
-    private ReplicatePageVersionService rps;
+    private ReplicateVersion replicateVersion;
 
     @Override
     public final void doPost(SlingHttpServletRequest req,
             SlingHttpServletResponse res) throws ServletException, IOException {
         log.info("in do post - ReplicatePageVersionServlet ");
-        String[] rootPaths = req.getParameterValues("rootPaths");
-        Date date = getDate(req.getParameter("datetimecal"));
-        String[] agents = req.getParameterValues("cmbAgent");
 
 
         JSONObject obj = null;
 
+
         try {
+            String[] rootPaths = req.getParameterValues("rootPaths");
+            Date date = getDate(req.getParameter("datetimecal"));
+            String[] agents = req.getParameterValues("cmbAgent");
+
             obj = validate(rootPaths, agents, date);
             boolean error = false;
 
             if (!obj.has("error")) {
-                Map<String, String> response = rps.locateVersionAndReplicateResource(
+                Map<String, ReplicationTriggerStatus> response = replicateVersion.replicate(
                         req.getResourceResolver(), rootPaths, agents, date);
-                obj = convertToJson(response);
+                obj = convertResponseToJson(response);
 
             } else {
                 error = true;
             }
 
             if (error) {
-              
+
 
                 try {
                     obj.put("error", "System Error.");
@@ -105,16 +108,16 @@ public class ReplicatePageVersionServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private JSONObject convertToJson(Map<String, String> map) throws JSONException {
+    private JSONObject convertResponseToJson(Map<String, ReplicationTriggerStatus> map) throws JSONException {
         JSONObject obj = new JSONObject();
-        try{
-        for (Iterator<Map.Entry<String, String>> iter=map.entrySet().iterator();iter.hasNext();) {
-            Entry<String,String> entry = iter.next();
-            obj.put(entry.getKey(), entry.getValue());
-            entry=null;
+        try {
+        for (Iterator<Map.Entry<String, ReplicationTriggerStatus>> iter = map.entrySet().iterator(); iter.hasNext();) {
+            Entry<String, ReplicationTriggerStatus> entry = iter.next();
+            obj.put(entry.getKey(), ((ReplicationTriggerStatus) entry.getValue()).getStatus());
+            entry = null;
         }
-        } catch(Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+           log.error("Error serializing response to json", e);
         }
         return obj;
     }
@@ -152,7 +155,8 @@ public class ReplicatePageVersionServlet extends SlingAllMethodsServlet {
     private Date getDate(String datetime) {
         Date date = null;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd,hh:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+
             date = sdf.parse(datetime);
         } catch (Exception e) {
             log.error("exception occured", e);
