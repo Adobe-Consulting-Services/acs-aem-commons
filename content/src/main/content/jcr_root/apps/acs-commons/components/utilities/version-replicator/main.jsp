@@ -156,7 +156,7 @@ function() {
                     "hideTime" : false,
                     "name" : "datetimecal",
                     "allowBlank" : false,
-                    "hiddenFormat" : "Y-m-d\\TH:i:s",
+                    "hiddenFormat" : "Y-m-d\\TH:i:s a",
                     "listeners" : {
                         render : function() {
                             this.wrap.anchorTo("datetimecal", "tl");

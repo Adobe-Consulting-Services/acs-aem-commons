@@ -155,7 +155,7 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
     private Date getDate(String datetime) {
         Date date = null;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss aa");
 
             date = sdf.parse(datetime);
         } catch (Exception e) {
