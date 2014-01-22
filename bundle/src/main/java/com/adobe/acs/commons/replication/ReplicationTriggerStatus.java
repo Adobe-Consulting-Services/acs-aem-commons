@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.replication.impl;
+package com.adobe.acs.commons.replication;
 
 import java.io.Serializable;
 
