@@ -27,6 +27,7 @@ This re-writer does **NOT** support
 * Relative URIs, e.g. `etc/clientlibs/mysite/styles.css`
 * URIs including a scheme, e.g. `http://example.com/etc/clientlibs/mysite/styles.css` and `//example.com/etc/clientlibs/mysite/styles.css`
 * URIs to non-AEM HtmlClientLibrary resources, e.g. `/etc/designs/mysite.css`
+* Tags contained in conditional comments.
  
 ## Rewriter Configuration Node
 
