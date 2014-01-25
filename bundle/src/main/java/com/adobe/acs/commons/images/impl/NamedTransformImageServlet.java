@@ -47,10 +47,12 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.servlets.OptingServlet;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -96,6 +98,9 @@ import java.util.regex.Pattern;
 @Service(Servlet.class)
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
     private final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
+
+    @Reference
+    private MimeTypeService mimeTypeService;
 
     private static final Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
 
@@ -177,7 +182,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         final Image image = this.resolveImage(request);
         final Layer layer = this.getLayer(image);
-        final String mimeType = this.getMimeType(image);
+        final String mimeType = this.getMimeType(request, image);
 
         // Transform the image
         try {
@@ -193,7 +198,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         response.flushBuffer();
     }
-
 
     /**
      * Intelligently determines how to find the Image based on the associated SlingRequest
@@ -247,18 +251,31 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return new Image(resource);
     }
 
-
     /**
      * Gets the mimeType of the image.
+     * - The last segments suffix is looked at first and used
+     * - if the last suffix segment's "extension" is .orig or .original then use the underlying resources mimeType
+     * - else look up the mimetype to use based on this "extension"
+     * - default to the resource's mimetype if the requested mimetype by extension is not supported.
      *
      * @param image the image to get the mimeType for
      * @return the string representation of the image's mimeType
      */
-    private String getMimeType(final Image image) {
-        try {
-            return image.getMimeType();
-        } catch (final RepositoryException e) {
-            return MIME_TYPE_PNG;
+    private String getMimeType(final SlingHttpServletRequest request, final Image image) {
+        final String lastSuffix = PathInfoUtil.getLastSuffixSegment(request);
+
+        final String mimeType = mimeTypeService.getMimeType(lastSuffix);
+
+        if(!StringUtils.endsWithIgnoreCase(lastSuffix, ".orig")
+            && !StringUtils.endsWithIgnoreCase(lastSuffix, ".original")
+            && (ImageIO.getImageWritersByMIMEType(mimeType).hasNext())) {
+            return mimeType;
+        } else {
+            try {
+                return image.getMimeType();
+            } catch (final RepositoryException e) {
+                return MIME_TYPE_PNG;
+            }
         }
     }
 
@@ -293,7 +310,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             renditionPatternPicker = new RenditionPatternPicker(regex);
             log.info("Asset Rendition Pattern Picker: {}", regex);
         } catch (Exception ex) {
-            log.error("Error creating RenditionPatternPicker with regex [ {} ], defaultin to [ {} ]", regex,
+            log.error("Error creating RenditionPatternPicker with regex [ {} ], defaulting to [ {} ]", regex,
                     DEFAULT_ASSET_RENDITION_PICKER_REGEX);
             renditionPatternPicker = new RenditionPatternPicker(DEFAULT_ASSET_RENDITION_PICKER_REGEX);
         }

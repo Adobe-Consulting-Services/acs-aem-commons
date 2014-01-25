@@ -59,11 +59,20 @@ public class NamedTransformImageServletTest {
     @InjectMocks
     private NamedTransformImageServlet servlet;
 
+    private MockSlingHttpServletRequest mockRequest;
+
     @Before
     public void setUp() throws Exception {
         servlet = new NamedTransformImageServlet();
 
         namedImageTransformers.put(TEST_TRANSFORM_NAME, mockNamedImageTransformer);
+
+        mockRequest = new MockSlingHttpServletRequest(
+                "/path",
+                "",
+                "transform",
+                TEST_TRANSFORM_NAME + "/" + new Random().nextInt() + "/image.png",
+                "");
 
         MockitoAnnotations.initMocks(this);
     }
@@ -75,14 +84,7 @@ public class NamedTransformImageServletTest {
 
     @Test
     public void testAccepts() throws Exception {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(
-                "/path",
-                "",
-                "transform",
-                TEST_TRANSFORM_NAME + "/" + new Random().nextInt() + "/image.png",
-                "");
-
-        final boolean result = servlet.accepts(request);
+        final boolean result = servlet.accepts(mockRequest);
 
         assertTrue(result);
     }
@@ -114,4 +116,6 @@ public class NamedTransformImageServletTest {
 
         assertFalse(result);
     }
+
+    /* Testing for resolveImage requires too much orchestration/mocking to be useful */
 }
