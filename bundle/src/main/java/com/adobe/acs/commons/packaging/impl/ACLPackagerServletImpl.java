@@ -56,7 +56,8 @@ import java.util.regex.Pattern;
 
 @SlingServlet(
         label = "ACS AEM Commons - ACL Packager Servlet",
-        description = "End point used to create ACL CRX packages.",
+        description = "Servlet end-point used to create ACL CRX packages based on the underlying resource's "
+                + "configuration.",
         methods = { "POST" },
         resourceTypes = { "acs-commons/components/utilities/packager/acl-packager" },
         selectors = { "package" },
@@ -169,7 +170,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
     private ValueMap getProperties(final SlingHttpServletRequest request) {
         if (request.getResource().getChild("configuration") == null) {
-            log.warn("configuration node could not be found for: {}", request.getResource());
+            log.warn("ACL Packager Configuration node could not be found for: {}", request.getResource());
             return new ValueMapDecorator(new HashMap<String, Object>());
         } else {
             return request.getResource().getChild("configuration").adaptTo(ValueMap.class);
@@ -198,7 +199,6 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
             if (this.isIncluded(repPolicy, includePatterns)) {
                 log.debug("Included by pattern [ {} ]", repPolicy.getPath());
             } else {
-                //log.debug("Excluded by pattern [ {} ]", repPolicy.getPath());
                 continue;
             }
 
