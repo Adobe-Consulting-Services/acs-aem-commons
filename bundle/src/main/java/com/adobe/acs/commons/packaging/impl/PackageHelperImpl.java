@@ -47,10 +47,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -132,12 +132,12 @@ public class PackageHelperImpl implements PackageHelper {
         if (packageGroupNode == null) {
             return configVersion;
         } else {
-            final Iterator<Node> children = packageGroupNode.getNodes();
+            final NodeIterator children = packageGroupNode.getNodes();
             Version latestVersion = configVersion;
             boolean configVersionEligible = true;
 
             while (children.hasNext()) {
-                final Node child = children.next();
+                final Node child = children.nextNode();
 
                 final JcrPackage jcrPackage = jcrPackageManager.open(child, true);
                 if(!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
