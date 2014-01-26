@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
 
 @SlingServlet(
         label = "ACS AEM Commons - ACL Packager Servlet",
-        description = "...",
+        description = "End point used to create ACL CRX packages.",
         methods = { "POST" },
         resourceTypes = { "acs-commons/components/utilities/packager/acl-packager" },
         selectors = { "package" },
