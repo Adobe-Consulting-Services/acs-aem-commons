@@ -93,7 +93,7 @@ public class PackageHelperImpl implements PackageHelper {
                 resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
                 thumbnailResource = resourceResolver.getResource(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH);
 
-                if(thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE)) {
+                if (thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE)) {
                     log.warn("Cannot find a specific OR a default package icon; no package icon will be used.");
                 }
             }
@@ -108,7 +108,7 @@ public class PackageHelperImpl implements PackageHelper {
         } catch (LoginException e) {
             log.error("Could not add a default package thumbnail: {}", e.getMessage());
         } finally {
-            if(resourceResolver != null) {
+            if (resourceResolver != null) {
                 resourceResolver.close();
             }
         }
@@ -118,8 +118,8 @@ public class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public final Version getNextVersion(final JcrPackageManager jcrPackageManager,
-                                       final String groupName, final String name,
-                                       final String version) throws RepositoryException {
+                                        final String groupName, final String name,
+                                        final String version) throws RepositoryException {
         final Node packageRoot = jcrPackageManager.getPackageRoot(false);
         final Version configVersion = Version.create(version);
 
@@ -140,7 +140,7 @@ public class PackageHelperImpl implements PackageHelper {
                 final Node child = children.nextNode();
 
                 final JcrPackage jcrPackage = jcrPackageManager.open(child, true);
-                if(!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
+                if (!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
                     // Name mismatch - so just skip
                     continue;
                 }
@@ -160,7 +160,7 @@ public class PackageHelperImpl implements PackageHelper {
             }
 
             log.debug("Current latest version: {}", latestVersion.toString());
-            if(configVersionEligible && latestVersion.equals(configVersion)) {
+            if (configVersionEligible && latestVersion.equals(configVersion)) {
                 // If the config-specified version is newer than any existing package, jump to the config version
                 return configVersion;
             } else {
@@ -179,23 +179,24 @@ public class PackageHelperImpl implements PackageHelper {
     }
 
     private Version normalizeVersion(final Version version) {
-        final String normalizedSegments[] = version.getNormalizedSegments();
-        final String segments[] = new String[3];
+        final int numVersionSegments = 3;
+        final String[] normalizedSegments = version.getNormalizedSegments();
+        final String[] segments = new String[numVersionSegments];
 
 
-        if(normalizedSegments.length <= 0) {
+        if (normalizedSegments.length <= 0) {
             segments[0] = "1";
         } else {
             segments[0] = normalizedSegments[0];
         }
 
-        if(normalizedSegments.length <= 1) {
+        if (normalizedSegments.length <= 1) {
             segments[1] = "0";
         } else {
             segments[1] = normalizedSegments[1];
         }
 
-        if(normalizedSegments.length <= 2) {
+        if (normalizedSegments.length <= 2) {
             segments[2] = "0";
         } else {
             segments[2] = normalizedSegments[2];
@@ -210,24 +211,24 @@ public class PackageHelperImpl implements PackageHelper {
     public final void removePackage(final JcrPackageManager jcrPackageManager,
                                     final String groupName, final String name,
                                     final String version) throws RepositoryException {
-            final PackageId packageId = new PackageId(groupName, name, version);
-            final JcrPackage jcrPackage = jcrPackageManager.open(packageId);
+        final PackageId packageId = new PackageId(groupName, name, version);
+        final JcrPackage jcrPackage = jcrPackageManager.open(packageId);
 
-            if (jcrPackage != null && jcrPackage.getNode() != null) {
-                jcrPackage.getNode().remove();
-                jcrPackage.getNode().getSession().save();
-            } else {
-                log.debug("Nothing to remove at: ", packageId.getInstallationPath());
-            }
+        if (jcrPackage != null && jcrPackage.getNode() != null) {
+            jcrPackage.getNode().remove();
+            jcrPackage.getNode().getSession().save();
+        } else {
+            log.debug("Nothing to remove at: ", packageId.getInstallationPath());
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public JcrPackage createPackage(final Set<Resource> resources, final Session session,
-                                     final String groupName, final String name, String version,
-                                     final ConflictResolution conflictResolution,
-                                     final Map<String, String> packageDefinitionProperties)
+    public final JcrPackage createPackage(final Set<Resource> resources, final Session session,
+                                    final String groupName, final String name, String version,
+                                    final ConflictResolution conflictResolution,
+                                    final Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException {
 
         final JcrPackageManager jcrPackageManager = packaging.getPackageManager(session);
@@ -248,7 +249,7 @@ public class PackageHelperImpl implements PackageHelper {
 
         jcrPackageDefinition.setFilter(workspaceFilter, true);
 
-        for(final Map.Entry<String, String> entry: packageDefinitionProperties.entrySet()) {
+        for (final Map.Entry<String, String> entry : packageDefinitionProperties.entrySet()) {
             jcrPackageDefinition.set(entry.getKey(), entry.getValue(), false);
         }
 
@@ -268,7 +269,7 @@ public class PackageHelperImpl implements PackageHelper {
         json.put("filterSets", new JSONArray());
 
         final List<PathFilterSet> filterSets = jcrPackage.getDefinition().getMetaInf().getFilter().getFilterSets();
-        for(final FilterSet filterSet : filterSets) {
+        for (final FilterSet filterSet : filterSets) {
             final JSONObject jsonFilterSet = new JSONObject();
             jsonFilterSet.put("importMode", filterSet.getImportMode().name());
             jsonFilterSet.put("rootPath", filterSet.getRoot());
@@ -289,7 +290,7 @@ public class PackageHelperImpl implements PackageHelper {
         json.put("path", "Not applicable (Preview)");
         json.put("filterSets", new JSONArray());
 
-        for(final Resource resource : resources) {
+        for (final Resource resource : resources) {
             final JSONObject tmp = new JSONObject();
             tmp.put("importMode", "Not applicable (Preview)");
             tmp.put("rootPath", resource.getPath());

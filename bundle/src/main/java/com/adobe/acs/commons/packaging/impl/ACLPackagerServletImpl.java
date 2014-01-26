@@ -114,8 +114,8 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
         final ValueMap properties = this.getProperties(request);
 
         final Set<Resource> repPolicyResources = this.findResources(request.getResourceResolver(),
-                Arrays.asList(properties.get(PRINCIPAL_NAMES, new String[]{ })),
-                this.toPatterns(Arrays.asList(properties.get(INCLUDE_PATTERNS, new String[]{ }))));
+                Arrays.asList(properties.get(PRINCIPAL_NAMES, new String[]{})),
+                this.toPatterns(Arrays.asList(properties.get(INCLUDE_PATTERNS, new String[]{}))));
 
         try {
             final Map<String, String> packageDefinitionProperties = new HashMap<String, String>();
@@ -126,12 +126,13 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
             // Package Description
             packageDefinitionProperties.put(
-                    JcrPackageDefinition.PN_DESCRIPTION, properties.get(PACKAGE_DESCRIPTION, DEFAULT_PACKAGE_DESCRIPTION));
+                    JcrPackageDefinition.PN_DESCRIPTION,
+                    properties.get(PACKAGE_DESCRIPTION, DEFAULT_PACKAGE_DESCRIPTION));
 
-            if(preview) {
+            if (preview) {
                 // Handle preview mode
                 response.getWriter().print(packageHelper.getPreviewJSON(repPolicyResources));
-            } else if(repPolicyResources == null || repPolicyResources.isEmpty()) {
+            } else if (repPolicyResources == null || repPolicyResources.isEmpty()) {
                 // Do not create empty packages; This will only clutter up CRX Package Manager
                 response.getWriter().print(packageHelper.getErrorJSON("Refusing to create a package with no filter "
                         + "set rules."));
@@ -147,7 +148,8 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
                         packageDefinitionProperties);
 
                 // Add thumbnail to the package definition
-                packageHelper.addThumbnail(jcrPackage, request.getResourceResolver().getResource(ACL_PACKAGE_THUMBNAIL_RESOURCE_PATH));
+                packageHelper.addThumbnail(jcrPackage,
+                        request.getResourceResolver().getResource(ACL_PACKAGE_THUMBNAIL_RESOURCE_PATH));
 
                 log.debug("Successfully created JCR package");
                 response.getWriter().print(
@@ -166,7 +168,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
     }
 
     private ValueMap getProperties(final SlingHttpServletRequest request) {
-        if(request.getResource().getChild("configuration") == null) {
+        if (request.getResource().getChild("configuration") == null) {
             log.warn("configuration node could not be found for: {}", request.getResource());
             return new ValueMapDecorator(new HashMap<String, Object>());
         } else {
@@ -181,7 +183,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
      * @param principalNames   Principal Names to filter rep:ACE nodes with; Only rep:ACE nodes with children
      *                         with rep:principalNames in this list will be returned
      * @return Set (ordered by path) of rep:ACE nodes who hold permissions for at least one Principal
-     *         enumerated in principleNames
+     * enumerated in principleNames
      */
     private Set<Resource> findResources(final ResourceResolver resourceResolver,
                                         final List<String> principalNames,
@@ -223,15 +225,15 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
     /**
      * Determines if the resource's path matches any of the include patterns
-     *
+     * <p/>
      * If includePatterns is null or empty all resources are expected to be included.
      *
-     * @param resource the resource whose path to evaluate
+     * @param resource        the resource whose path to evaluate
      * @param includePatterns a list of include patterns (regex)
      * @return true if the resource's path matches any of the include patterns
      */
     private boolean isIncluded(final Resource resource, final List<Pattern> includePatterns) {
-        if(includePatterns == null || includePatterns.isEmpty()) {
+        if (includePatterns == null || includePatterns.isEmpty()) {
             return true;
         }
 
@@ -246,7 +248,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
     }
 
     /**
-     * Compiles a list of string patterns into a list of Pattern objects
+     * Compiles a list of string patterns into a list of Pattern objects.
      *
      * @param data List of strings to compile into patterns
      * @return a list of patterns
@@ -254,12 +256,12 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
     private static List<Pattern> toPatterns(final List<String> data) {
         final List<Pattern> patterns = new ArrayList<Pattern>();
 
-        for(final String item : data) {
+        for (final String item : data) {
             patterns.add(Pattern.compile(item));
         }
 
-        if(log.isDebugEnabled()) {
-            for(final Pattern pattern : patterns) {
+        if (log.isDebugEnabled()) {
+            for (final Pattern pattern : patterns) {
                 log.debug("Compiled pattern: {}", pattern.toString());
             }
         }
@@ -268,7 +270,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
     }
 
     /**
-     * Compares and sorts resources alphabetically (descending) by path
+     * Compares and sorts resources alphabetically (descending) by path.
      */
     private static Comparator<Resource> resourceComparator = new Comparator<Resource>() {
         public int compare(Resource r1, Resource r2) {

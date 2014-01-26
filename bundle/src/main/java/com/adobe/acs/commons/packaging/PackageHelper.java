@@ -34,15 +34,15 @@ import java.util.Set;
 
 public interface PackageHelper {
     /**
-     * JCR Path to default ACS thumbnail resource
+     * JCR Path to default ACS thumbnail resource.
      */
     String DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH =
             "/apps/acs-commons/components/utilities/packager/definition/package-thumbnail.png";
 
     /**
-     *  None: If conflicting package exists; fail to create a new package
-     *  Replace: If a conflicting package exists; remove that package and create a new w updated params
-     *  IncrementVersion: If a conflict package exists; increment the package minor version to the next free minor
+     *  None: If conflicting package exists; fail to create a new package.
+     *  Replace: If a conflicting package exists; remove that package and create a new w updated params.
+     *  IncrementVersion: If a conflict package exists; increment the package minor version to the next free minor.
      */
     enum ConflictResolution {
         None,
@@ -117,7 +117,7 @@ public interface PackageHelper {
             throws IOException, RepositoryException;
 
     /**
-     * Returns the JSON to return in the event of a successful packaging
+     * Returns the JSON to return in the event of a successful packaging.
      *
      * @param jcrPackage the successfully created jcr package
      * @return a string representation of JSON to write to response
@@ -126,7 +126,7 @@ public interface PackageHelper {
 
 
     /**
-     * Returns the JSON to return reporting what the packager definition will include for filterSet roots
+     * Returns the JSON to return reporting what the packager definition will include for filterSet roots.
      *
      * @param resources the resources that represent the filterSet roots
      * @return a string representation of JSON to write to response
@@ -136,7 +136,7 @@ public interface PackageHelper {
 
 
     /**
-     * Returns the JSON to return in the event of an unsuccessful packaging
+     * Returns the JSON to return in the event of an unsuccessful packaging.
      *
      * @param msg the error message to display
      * @return a string representation of JSON to write to response
