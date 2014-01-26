@@ -200,7 +200,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     }
 
     /**
-     * Intelligently determines how to find the Image based on the associated SlingRequest
+     * Intelligently determines how to find the Image based on the associated SlingRequest.
      *
      * @param request the SlingRequest Obj
      * @return the Image object configured w the info of where the image to render is stored in CRX
@@ -266,7 +266,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         final String mimeType = mimeTypeService.getMimeType(lastSuffix);
 
-        if(!StringUtils.endsWithIgnoreCase(lastSuffix, ".orig")
+        if (!StringUtils.endsWithIgnoreCase(lastSuffix, ".orig")
             && !StringUtils.endsWithIgnoreCase(lastSuffix, ".original")
             && (ImageIO.getImageWritersByMIMEType(mimeType).hasNext())) {
             return mimeType;
@@ -280,7 +280,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     }
 
     /**
-     * Gets the Image layer allowing or manipulations.
+     * Gets the Image layer.
      *
      * @param image The Image to get the layer from
      * @return the image's Layer
@@ -316,16 +316,16 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
     }
 
-    // Bind NamedImageTransformers
-    protected void bindNamedImageTransformers(final NamedImageTransformer service, final Map<Object, Object> props) {
+    protected final void bindNamedImageTransformers(final NamedImageTransformer service,
+                                                    final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get(NamedImageTransformer.PROP_NAME), null);
         if (type != null) {
             this.namedImageTransformers.put(type, service);
         }
     }
 
-    // Unbind NamedImageTransformers
-    protected void unbindNamedImageTransformers(final NamedImageTransformer service, final Map<Object, Object> props) {
+    protected final void unbindNamedImageTransformers(final NamedImageTransformer service,
+                                                      final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get(NamedImageTransformer.PROP_NAME), null);
         if (type != null) {
             this.namedImageTransformers.remove(type);

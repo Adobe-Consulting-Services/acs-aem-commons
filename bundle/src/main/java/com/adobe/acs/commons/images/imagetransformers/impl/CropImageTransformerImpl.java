@@ -31,10 +31,10 @@ import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.Rectangle;
 
 @Component(
-        label = "ACS AEM Commons - Image Transformer - Crop"
+        label = "ACS AEM Commons - Image Transformer - Crop with Smart-Bounding"
 )
 @Properties({
         @Property(
@@ -53,8 +53,10 @@ public class CropImageTransformerImpl implements ImageTransformer {
 
     private static final String KEY_SMART_BOUNDING = "smart";
 
+    private static final int NUM_BOUNDS_PARAMS= 4;
+
     @Override
-    public Layer transform(final Layer layer, final ValueMap properties) {
+    public final Layer transform(final Layer layer, final ValueMap properties) {
         if (properties == null || properties.isEmpty()) {
             log.warn("Transform [ {} ] requires parameters.", TYPE);
             return layer;
@@ -65,7 +67,7 @@ public class CropImageTransformerImpl implements ImageTransformer {
         final boolean smartBounding = properties.get(KEY_SMART_BOUNDING, true);
         final String[] bounds = StringUtils.split(properties.get(KEY_BOUNDS, ""), ",");
 
-        if (bounds.length == 4) {
+        if (bounds.length == NUM_BOUNDS_PARAMS) {
             int x = Integer.parseInt(bounds[0]);
             int y = Integer.parseInt(bounds[1]);
 
@@ -95,7 +97,7 @@ public class CropImageTransformerImpl implements ImageTransformer {
         return layer;
     }
 
-    public final Rectangle getSmartBounds(int x, int y, int width, int height, int layerWidth, int layerHeight) {
+    private final Rectangle getSmartBounds(int x, int y, int width, int height, int layerWidth, int layerHeight) {
         final Rectangle rectangle = new Rectangle();
 
         final int x2 = x + width;
@@ -125,7 +127,8 @@ public class CropImageTransformerImpl implements ImageTransformer {
         return rectangle;
     }
 
-    private Rectangle constrainByHeight(final int x, final int y, final int width, final int height, final int layerHeight, final int y2) {
+    private Rectangle constrainByHeight(final int x, final int y, final int width, final int height,
+                                        final int layerHeight, final int y2) {
         final Rectangle rectangle = new Rectangle();
 
         // Compute amount of overflow for y (that requires clipping)
@@ -141,7 +144,8 @@ public class CropImageTransformerImpl implements ImageTransformer {
         return rectangle;
     }
 
-    private Rectangle constrainByWidth(final int x, final int y, final int width, final int height, final int layerWidth, final int x2) {
+    private Rectangle constrainByWidth(final int x, final int y, final int width, final int height,
+                                       final int layerWidth, final int x2) {
         final Rectangle rectangle = new Rectangle();
 
         // Compute amount of overflow for x (that requires clipping)

@@ -67,7 +67,7 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
     public static final String PROP_MAX_DIMENSION = "max-dimension";
 
     @Override
-    public Layer transform(final Layer layer, final ValueMap properties) {
+    public final Layer transform(final Layer layer, final ValueMap properties) {
         if (properties == null || properties.isEmpty()) {
             log.warn("Transform [ {} ] requires parameters.", TYPE);
             return layer;
@@ -104,7 +104,7 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
 
     @Activate
-    protected void activate(final Map<String, String> config) {
+    protected final void activate(final Map<String, String> config) {
         maxDimension = PropertiesUtil.toInteger(config.get(PROP_MAX_DIMENSION), DEFAULT_MAX_DIMENSION);
     }
 }

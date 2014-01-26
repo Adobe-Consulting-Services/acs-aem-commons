@@ -47,7 +47,8 @@ import java.util.Map;
 
 @Component(
         label = "ACS AEM Commons - Named Image Transformer Factory",
-        description = "",
+        description = "Instances of this factory define registered Named Image transfomers which are comprised of "
+                + "ordered, parameterized image transformers.",
         configurationFactory = true,
         metatype = true
 )
@@ -78,7 +79,7 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
 
     /* Image Transform Configurations */
     @Property(label = "Image Transformers",
-            description = "Transform in the format [ image-transfomer-type:key1=val1&key2=val2 ]"
+            description = "Transform in the format [ image-transformer-type:key1=val1&key2=val2 ]"
                     + " Order of transform rules dictates order of application.",
             cardinality = Integer.MAX_VALUE,
             value = { })
@@ -88,12 +89,9 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
 
 
     /**
-     * @param layer
-     * @return
-     * @throws IOException
-     * @throws RepositoryException
+     * @inheritDoc
      */
-    public Layer transform(Layer layer) throws IOException, RepositoryException {
+    public final Layer transform(Layer layer) throws IOException, RepositoryException {
 
         for (final String type : this.transforms.keySet()) {
             final ImageTransformer imageTransformer = this.imageTransformers.get(type);
@@ -116,7 +114,7 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
         log.info("Registering Named Image Transfomer: {}", this.transformName);
 
         final Map<String, String> map = OsgiPropertyUtil.toMap(PropertiesUtil.toStringArray(
-                properties.get(PROP_TRANSFORMS), new String[]{ }), ":", true, null);
+                properties.get(PROP_TRANSFORMS), new String[]{}), ":", true, null);
 
 
         for (final Map.Entry<String, String> entry : map.entrySet()) {
@@ -135,16 +133,14 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
         }
     }
 
-    // Bind
-    protected void bindImageTransformers(final ImageTransformer service, final Map<Object, Object> props) {
+    protected final void bindImageTransformers(final ImageTransformer service, final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get(ImageTransformer.PROP_TYPE), null);
         if (type != null) {
             imageTransformers.put(type, service);
         }
     }
 
-    // Unbind
-    protected void unbindImageTransformers(final ImageTransformer service, final Map<Object, Object> props) {
+    protected final void unbindImageTransformers(final ImageTransformer service, final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get(ImageTransformer.PROP_TYPE), null);
         if (type != null) {
             imageTransformers.remove(type);

@@ -26,7 +26,20 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 
 public interface NamedImageTransformer {
+    /**
+     * The OSGi config property used to identify the named transform.
+     */
     String PROP_NAME = "name";
 
+    /**
+     * Transforms the param layer using all the parameterized image transformers defined in this instances OSGi
+     * configuration.
+     *
+     * @param layer the image layer to transform
+     * @return the transform image layer; or if no modifications are possible (invalid named transforms/named
+     * transform parameters) the layer unmodified
+     * @throws IOException
+     * @throws RepositoryException
+     */
     Layer transform(Layer layer) throws IOException, RepositoryException;
 }

@@ -49,7 +49,7 @@ public class RotateImageTransformerImpl implements ImageTransformer {
     private static final String KEY_DEGREES = "degrees";
 
     @Override
-    public Layer transform(final Layer layer, final ValueMap properties) {
+    public final Layer transform(final Layer layer, final ValueMap properties) {
         if (properties == null || properties.isEmpty()) {
             log.warn("Transform [ {} ] requires parameters.", TYPE);
 

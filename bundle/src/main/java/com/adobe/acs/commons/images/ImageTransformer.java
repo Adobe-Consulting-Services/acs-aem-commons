@@ -24,7 +24,17 @@ import com.day.image.Layer;
 import org.apache.sling.api.resource.ValueMap;
 
 public interface ImageTransformer {
+    /**
+     * OSGi Property used to identify the ImageTransformer.
+     */
     String PROP_TYPE = "type";
 
+    /**
+     * Transform the provided layer using the transformation parameters provided in properties.
+     *
+     * @param layer the image layer to transform
+     * @param properties transformation parameters
+     * @return the transformered layer; or if layer could not be transformed (invalid properties) the layer unmodified
+     */
     Layer transform(Layer layer, ValueMap properties);
 }

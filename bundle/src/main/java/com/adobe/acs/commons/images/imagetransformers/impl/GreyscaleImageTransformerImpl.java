@@ -47,7 +47,7 @@ public class GreyscaleImageTransformerImpl implements ImageTransformer {
     static final String TYPE = "greyscale";
 
     @Override
-    public Layer transform(final Layer layer, final ValueMap properties) {
+    public final Layer transform(final Layer layer, final ValueMap properties) {
         log.debug("Transforming with [ {} ]", TYPE);
 
         layer.grayscale();

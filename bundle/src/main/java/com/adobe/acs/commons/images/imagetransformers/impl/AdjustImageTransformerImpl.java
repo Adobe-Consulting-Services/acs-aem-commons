@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(
-        label = "ACS AEM Commons - Image Transformer - Resize"
+        label = "ACS AEM Commons - Image Transformer - Adjust Brightness and Contrast"
 )
 @Properties({
         @Property(
@@ -53,7 +53,7 @@ public class AdjustImageTransformerImpl implements ImageTransformer {
     private static final String KEY_CONTRAST_ALIAS = "c";
 
     @Override
-    public Layer transform(final Layer layer, final ValueMap properties) {
+    public final Layer transform(final Layer layer, final ValueMap properties) {
         if (properties == null || properties.isEmpty()) {
             log.warn("Transform [ {} ] requires parameters.", TYPE);
             return layer;
