@@ -15,5 +15,6 @@
     </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?" />
+        <include pattern="/etc/acs-commons/version-replicator(.*)?" />
     </filter>
 </workspaceFilter>
