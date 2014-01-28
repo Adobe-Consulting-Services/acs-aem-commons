@@ -109,7 +109,7 @@ function() {
                             });
                     $("#replicationqueueStatus").html(agentList);
 
-                    $.post("<%=currentPage.getPath()%>.replicateversion.html",
+                    $.post("<%=currentPage.getPath()%>/_jcr_content.replicateversion.html",
                                                     buildRequestParams(),
                                                     function(resp) {
                                                         if (resp == undefined
