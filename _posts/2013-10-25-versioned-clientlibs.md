@@ -31,6 +31,10 @@ This re-writer does **NOT** support
  
 ## Rewriter Configuration Node
 
+The easiest way to configure the rewriter pipline is just to copy `/libs/cq/config/rewriter/default` to a path inside your application, e.g. `/apps/myapp/config/rewriter/versioned-clientlibs`. Note that the configuration node *must* be inside a four-level path that ends in `config/rewriter`.
+
+To validate that your configuration was successful, look at the Sling Rewriter tab in the OSGi Web Console.
+
 	/apps/myapp/config/rewriter/versioned-clientlibs.xml
 
 {% highlight xml %}
