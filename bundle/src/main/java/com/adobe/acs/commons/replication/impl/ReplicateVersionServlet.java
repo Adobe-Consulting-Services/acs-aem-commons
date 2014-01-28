@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.replication.ReplicateVersion;
+import com.adobe.acs.commons.replication.ReplicationTriggerStatus;
 
 @SuppressWarnings("serial")
 @SlingServlet(resourceTypes = "acs-commons/components/utilities/version-replicator",

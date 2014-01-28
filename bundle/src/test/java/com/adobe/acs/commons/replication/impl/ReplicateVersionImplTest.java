@@ -50,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.adobe.acs.commons.replication.ReplicateVersion;
+import com.adobe.acs.commons.replication.ReplicationTriggerStatus;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.Replicator;

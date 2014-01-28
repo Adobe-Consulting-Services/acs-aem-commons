@@ -23,8 +23,6 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.sling.api.resource.ResourceResolver;
-
-import com.adobe.acs.commons.replication.impl.ReplicationTriggerStatus;
 /**
  * Service used to identify the latest version of the entire resource tree of the specified resources at the date specified and
  *  issue replication request to the agents specified.

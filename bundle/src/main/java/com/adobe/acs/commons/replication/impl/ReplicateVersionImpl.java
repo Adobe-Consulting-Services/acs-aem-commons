@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.replication.ReplicateVersion;
+import com.adobe.acs.commons.replication.ReplicationTriggerStatus;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.replication.AgentIdFilter;
 import com.day.cq.replication.ReplicationActionType;
