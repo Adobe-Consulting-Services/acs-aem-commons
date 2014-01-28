@@ -28,7 +28,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 
 import javax.jcr.Node;
 import javax.jcr.Session;
@@ -50,7 +50,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.adobe.acs.commons.replication.ReplicateVersion;
-import com.adobe.acs.commons.replication.ReplicationTriggerStatus;
+import com.adobe.acs.commons.replication.ReplicationResult;
+import com.adobe.acs.commons.replication.ReplicationResult.Status;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.Replicator;
@@ -131,8 +132,10 @@ public class ReplicateVersionImplTest {
         when(res1.adaptTo(Node.class)).thenReturn(node1);
         when(res2.adaptTo(Node.class)).thenReturn(node1);
         when(node1.isNodeType("nt:hierarchyNode")).thenReturn(false);
-        Map<String, ReplicationTriggerStatus> map = rpvs.replicate(resourceResolver, rootPaths, agents, date);
-        Assert.assertEquals("replicated", map.get("status").getStatus());
+        List<ReplicationResult> list = rpvs.replicate(resourceResolver, rootPaths, agents, date);
+        Assert.assertEquals("/content/geometrixx/en", list.get(0).getPath());
+        Assert.assertEquals(Status.replicated, list.get(0).getStatus());
+        Assert.assertEquals("version1", list.get(0).getVersion());
     }
     private Date getDate(String datetime) throws Exception {
 

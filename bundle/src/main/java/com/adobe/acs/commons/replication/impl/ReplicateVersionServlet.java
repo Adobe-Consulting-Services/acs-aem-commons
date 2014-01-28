@@ -22,9 +22,7 @@ package com.adobe.acs.commons.replication.impl;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
@@ -33,13 +31,14 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.replication.ReplicateVersion;
-import com.adobe.acs.commons.replication.ReplicationTriggerStatus;
+import com.adobe.acs.commons.replication.ReplicationResult;
 
 @SuppressWarnings("serial")
 @SlingServlet(resourceTypes = "acs-commons/components/utilities/version-replicator",
@@ -71,17 +70,17 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
             boolean error = false;
 
             if (!obj.has("error")) {
-                Map<String, ReplicationTriggerStatus> response = replicateVersion.replicate(
+                List<ReplicationResult> response = replicateVersion.replicate(
                         req.getResourceResolver(), rootPaths, agents, date);
-                obj = convertResponseToJson(response);
+                JSONArray arr = convertResponseToJson(response);
+                obj = new JSONObject();
+                obj.put("result", arr);
 
             } else {
                 error = true;
             }
 
             if (error) {
-
-
                 try {
                     obj.put("error", "System Error.");
                     obj.put("status", "error");
@@ -109,18 +108,17 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private JSONObject convertResponseToJson(Map<String, ReplicationTriggerStatus> map) throws JSONException {
-        JSONObject obj = new JSONObject();
-        try {
-        for (Iterator<Map.Entry<String, ReplicationTriggerStatus>> iter = map.entrySet().iterator(); iter.hasNext();) {
-            Entry<String, ReplicationTriggerStatus> entry = iter.next();
-            obj.put(entry.getKey(), ((ReplicationTriggerStatus) entry.getValue()).getStatus());
-            entry = null;
+    private JSONArray convertResponseToJson(List<ReplicationResult> list) throws JSONException {
+        JSONArray arr = new JSONArray();
+        for (ReplicationResult result : list) {
+            JSONObject resultObject = new JSONObject();
+            resultObject.put("path", result.getPath());
+            resultObject.put("status", result.getStatus().name());
+            resultObject.put("version", result.getVersion());
+
+            arr.put(resultObject);
         }
-        } catch (Exception e) {
-           log.error("Error serializing response to json", e);
-        }
-        return obj;
+        return arr;
     }
     /**
      * 

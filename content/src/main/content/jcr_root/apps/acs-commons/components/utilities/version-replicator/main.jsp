@@ -85,6 +85,15 @@
 </div>
 <script>
 CQ.Ext.onReady(function() {
+    var resultTmpl = new CQ.Ext.XTemplate(
+        'Replication has been triggered',
+        '<ul>',
+        '<tpl for="result">',
+        '<li>{path} {status} {version}</li>',
+        '</tpl>',
+        '</ul>'
+    );
+    
 $("#btnReplicate").click(
 function() {
                     var msg = "Process initiated.......";
@@ -126,7 +135,7 @@ function() {
                                                                     "#replicationqueueStatus")
                                                                     .html('');
                                                         } else {
-                                                            msg = "Replication has been triggered";
+                                                            msg = resultTmpl.apply(resp);
                                                             $(
                                                                     "#replicationqueueMsg")
                                                                     .html(msg);

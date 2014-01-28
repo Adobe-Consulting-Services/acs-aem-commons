@@ -25,10 +25,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -45,7 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.replication.ReplicateVersion;
-import com.adobe.acs.commons.replication.ReplicationTriggerStatus;
+import com.adobe.acs.commons.replication.ReplicationResult;
+import com.adobe.acs.commons.replication.ReplicationResult.Status;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.replication.AgentIdFilter;
 import com.day.cq.replication.ReplicationActionType;
@@ -70,48 +69,26 @@ public class ReplicateVersionImpl implements
     private Replicator replicator;
 
     @Override
-    public final Map<String, ReplicationTriggerStatus> replicate(
+    public final List<ReplicationResult> replicate(
             ResourceResolver resolver, String[] rootPaths, String[] agents,
             Date date) {
-        Map<String, ReplicationTriggerStatus> map = new HashMap<String, ReplicationTriggerStatus>();
+        List<ReplicationResult> list = new ArrayList<ReplicationResult>();
 
+            if (rootPaths != null) {
+                for (String rootPath : rootPaths) {
+                    String normalizedPath = getNormalizedPath(rootPath);
+                    List<Resource> resources = getResources(resolver, normalizedPath);
+                    
+                    List<ReplicationResult> resultsForPath = 
+                            replicateResource(resolver, resources, agents, date);
+                    list.addAll(resultsForPath);
 
-        boolean error = false;
-
-        try {
-            if (rootPaths != null && rootPaths.length > 0) {
-
-                for (int k = 0; k < rootPaths.length; k++) {
-                    List<Resource>    resources = getResources(resolver,
-                            getNormalizedPath(rootPaths[k]));
-
-
-                    replicateResource(resolver, resources, agents, date);
-
-                    resources = null;
                 }
 
             }
 
-            map.put("status", new ReplicationTriggerStatus("replicated"));
 
-        } catch (RepositoryException e) {
-            error = true;
-            log.error("replication failed", e);
-
-        } catch (ReplicationException e) {
-            error = true;
-            log.error("replication failed", e);
-
-        } finally {
-            if (error) {
-
-                map.put("status",  new ReplicationTriggerStatus("error"));
-
-            }
-        }
-
-        return map;
+        return list;
     }
 
     private List<Resource> getResources(ResourceResolver resolver, String root) {
@@ -141,11 +118,9 @@ public class ReplicateVersionImpl implements
         }
     }
 
-    private void replicateResource(ResourceResolver resolver,
-            List<Resource> resources, String[] agents, Date date)
-            throws RepositoryException, ReplicationException {
-
-
+    private List<ReplicationResult> replicateResource(ResourceResolver resolver,
+            List<Resource> resources, String[] agents, Date date) {
+        List<ReplicationResult> results = new ArrayList<ReplicationResult>();
 
         ReplicationOptions opts = new ReplicationOptions();
 
@@ -153,19 +128,31 @@ public class ReplicateVersionImpl implements
         opts.setFilter(agentFilter);
         Session session = resolver.adaptTo(Session.class);
         for (Resource resource : resources) {
-          Version  v = getAppropriateVersion(resource, date, session);
-            if (v == null) {
-                continue;
+            String path = resource.getPath();
+            try {
+                Version v = getAppropriateVersion(resource, date, session);
+                if (v == null) {
+                    results.add(new ReplicationResult(path, Status.not_replicated));
+                    continue;
+                }
+
+                String versionName = v.getName();
+                opts.setRevision(versionName);
+
+                replicator.replicate(session, ReplicationActionType.ACTIVATE, path, opts);
+
+                results.add(new ReplicationResult(path, Status.replicated, versionName));
+
+            } catch (RepositoryException e) {
+                results.add(new ReplicationResult(path, Status.error));
+                log.error("Exception while replicating version of " + path, e);
+            } catch (ReplicationException e) {
+                results.add(new ReplicationResult(path, Status.error));
+                log.error("Exception while replicating version of " + path, e);
             }
-
-            opts.setRevision(v.getName());
-
-            replicator.replicate(session, ReplicationActionType.ACTIVATE,
-                    resource.getPath(), opts);
-            log.info("replicating  path:" + resource.getPath());
-            v = null;
         }
 
+        return results;
     }
 
     private Version getAppropriateVersion(Resource resource, Date date,

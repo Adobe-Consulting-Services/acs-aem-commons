@@ -20,27 +20,27 @@
 package com.adobe.acs.commons.replication;
 
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 import org.apache.sling.api.resource.ResourceResolver;
+
 /**
  * Service used to identify the latest version of the entire resource tree of the specified resources at the date specified and
  *  issue replication request to the agents specified.
  */
 public interface ReplicateVersion {
-    /**
-     * identifies the latest version of the entire resource tree of the specified resources at the date specified and
-     *   issue replication request to the  specified agents
-     * @param resolver
-     * @param rootPaths
-     * @param agent
-     * @param date
-     * @return
-     */
-    Map<String, ReplicationTriggerStatus> replicate(
-            ResourceResolver resolver, String[] rootPaths, String[] agent,
-            Date date);
-    
 
+    /**
+     * Identifies the latest version of the entire resource tree of the specified resources at the date specified and
+     *   issue replication request to the  specified agents.
+     * @param resolver the resource resolver
+     * @param rootPaths one or more paths to replicate, recursively
+     * @param agents one or more agent ids
+     * @param date the date from which to replicate
+     * @return a list of status objects
+     */
+    List<ReplicationResult> replicate(
+            ResourceResolver resolver, String[] rootPaths, String[] agents,
+            Date date);
 
 }
