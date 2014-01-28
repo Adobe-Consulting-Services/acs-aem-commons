@@ -45,6 +45,8 @@ This re-writer does **NOT** support
     transformerTypes="[linkchecker,versioned-clientlibs]"/>
 {% endhighlight %}        
 
+> Other transformers may or may not be necessary. Please refer to the default configuration at `/libs/cq/config/rewriter/default` to see the default set of transformers.
+
 ## Apache Configuration
 
 To configure Apache to send the right header to set a long TTL:
