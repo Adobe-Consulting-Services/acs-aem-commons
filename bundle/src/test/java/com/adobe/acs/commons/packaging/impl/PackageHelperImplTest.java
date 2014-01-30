@@ -20,11 +20,20 @@
 
 package com.adobe.acs.commons.packaging.impl;
 
+import com.day.jcr.vault.fs.api.PathFilterSet;
+import com.day.jcr.vault.fs.api.WorkspaceFilter;
+import com.day.jcr.vault.fs.config.MetaInf;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.PackageId;
 import com.day.jcr.vault.packaging.Version;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.json.JSONArray;
+import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.commons.testing.sling.MockResource;
+import org.apache.sling.commons.testing.sling.MockResourceResolver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +44,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -78,10 +92,26 @@ public class PackageHelperImplTest {
     JcrPackageDefinition packageTwoDef;
 
     @Mock
+    MetaInf packageOneMetaInf;
+
+    @Mock
+    MetaInf packageTwoMetaInf;
+
+    @Mock
+    WorkspaceFilter packageOneFilter;
+
+    @Mock
+    WorkspaceFilter packageTwoFilter;
+
+    @Mock
     PackageId packageOneID;
 
     @Mock
     PackageId packageTwoID;
+
+    List<PathFilterSet> packageOneFilterSets;
+    List<PathFilterSet> packageTwoFilterSets;
+
 
     final String packageGroup = "testGroup";
     final String packageName = "testPackageName";
@@ -91,6 +121,11 @@ public class PackageHelperImplTest {
 
     @Before
     public void setUp() throws Exception {
+        packageOneFilterSets = new ArrayList<PathFilterSet>();
+        packageTwoFilterSets = new ArrayList<PathFilterSet>();
+
+
+
         when(jcrPackageManager.getPackageRoot(false)).thenReturn(packageRoot);
 
         when(packageRoot.hasNode(packageGroup)).thenReturn(true);
@@ -111,15 +146,31 @@ public class PackageHelperImplTest {
         when(packageOneDef.getId()).thenReturn(packageOneID);
         when(packageTwoDef.getId()).thenReturn(packageTwoID);
 
+        when(packageOneDef.getMetaInf()).thenReturn(packageOneMetaInf);
+        when(packageTwoDef.getMetaInf()).thenReturn(packageTwoMetaInf);
+
+        when(packageOneMetaInf.getFilter()).thenReturn(packageOneFilter);
+        when(packageTwoMetaInf.getFilter()).thenReturn(packageTwoFilter);
+
+        when(packageOneFilter.getFilterSets()).thenReturn(packageOneFilterSets);
+        when(packageTwoFilter.getFilterSets()).thenReturn(packageTwoFilterSets);
+
         when(packageOne.getNode()).thenReturn(packageOneNode);
         when(packageTwo.getNode()).thenReturn(packageTwoNode);
+
+        when(packageOneNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-" +
+                packageOneVersion + ".zip");
+        when(packageTwoNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-" +
+                packageTwoVersion + ".zip");
 
         when(packageOneID.getName()).thenReturn(packageName);
         when(packageTwoID.getName()).thenReturn(packageName);
 
         when(packageOneID.getVersion()).thenReturn(Version.create(packageOneVersion));
         when(packageTwoID.getVersion()).thenReturn(Version.create(packageTwoVersion));
+
     }
+
 
     @After
     public void tearDown() throws Exception {
@@ -170,15 +221,54 @@ public class PackageHelperImplTest {
 
     @Test
     public void testGetSuccessJSON() throws Exception {
+        final String actual = packageHelper.getSuccessJSON(packageOne);
+
+        final JSONObject json = new JSONObject(actual);
+
+        assertEquals("success", json.getString("status"));
+        assertEquals("/etc/packages/testGroup/testPackageName-1.0.0.zip", json.getString("path"));
+
+        //assertEquals("filterSets", json.getJSONArray("filterSets"));
     }
 
     @Test
     public void testGetPreviewJSON() throws Exception {
+        final MockResourceResolver resourceResolver = new MockResourceResolver();
+        final Set<Resource> resources = new HashSet<Resource>();
 
+        resources.add(new MockResource(resourceResolver, "/a/b/c", ""));
+        resources.add(new MockResource(resourceResolver, "/d/e/f", ""));
+        resources.add(new MockResource(resourceResolver, "/g/h/i", ""));
+
+        final String actual = packageHelper.getPreviewJSON(resources);
+        final JSONObject json = new JSONObject(actual);
+
+        assertEquals("preview", json.getString("status"));
+        assertEquals("Not applicable (Preview)", json.getString("path"));
+
+        final String[] expectedFilterSets = new String[]{
+                "/a/b/c",
+                "/d/e/f",
+                "/g/h/i"
+        };
+
+        JSONArray actualArray = json.getJSONArray("filterSets");
+        for(int i = 0; i < actualArray.length(); i++) {
+            JSONObject tmp = actualArray.getJSONObject(i);
+            assertTrue(ArrayUtils.contains(expectedFilterSets, tmp.get("rootPath")));
+        }
+
+        assertEquals(expectedFilterSets.length, actualArray.length());
     }
 
     @Test
     public void testGetErrorJSON() throws Exception {
+        final String expectedMessage = "This is a test error message!";
+        final String actual = packageHelper.getErrorJSON(expectedMessage);
 
+        final JSONObject json = new JSONObject(actual);
+
+        assertEquals("error", json.getString("status"));
+        assertEquals(expectedMessage, json.getString("msg"));
     }
 }
