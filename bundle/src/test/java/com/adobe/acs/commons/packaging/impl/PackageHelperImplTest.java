@@ -139,12 +139,10 @@ public class PackageHelperImplTest {
     List<PathFilterSet> packageOneFilterSets;
     List<PathFilterSet> packageTwoFilterSets;
 
-
     final String packageGroup = "testGroup";
     final String packageName = "testPackageName";
     final String packageOneVersion = "1.0.0";
     final String packageTwoVersion = "2.0.0";
-
 
     @Before
     public void setUp() throws Exception {
@@ -199,13 +197,12 @@ public class PackageHelperImplTest {
 
         when(packageOneID.getVersion()).thenReturn(Version.create(packageOneVersion));
         when(packageTwoID.getVersion()).thenReturn(Version.create(packageTwoVersion));
-
     }
 
 
     @After
     public void tearDown() throws Exception {
-        reset(jcrPackageManager, packageRoot, packageGroupRoot, packageOneNode, packageTwoNode,
+        reset(packaging, session, jcrPackageManager, packageRoot, packageGroupRoot, packageOneNode, packageTwoNode,
                 packageOne, packageTwo, packageOneDef, packageTwoDef, packageOneDefNode, packageTwoDefNode,
                 packageOneID, packageTwoID);
     }
@@ -283,8 +280,6 @@ public class PackageHelperImplTest {
 
         assertEquals("success", json.getString("status"));
         assertEquals("/etc/packages/testGroup/testPackageName-1.0.0.zip", json.getString("path"));
-
-        //assertEquals("filterSets", json.getJSONArray("filterSets"));
     }
 
     @Test
