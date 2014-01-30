@@ -20,6 +20,8 @@
 
 package com.adobe.acs.commons.packaging.impl;
 
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.day.cq.commons.jcr.JcrUtil;
 import com.day.jcr.vault.fs.api.PathFilterSet;
 import com.day.jcr.vault.fs.api.WorkspaceFilter;
 import com.day.jcr.vault.fs.config.MetaInf;
@@ -27,9 +29,11 @@ import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.PackageId;
+import com.day.jcr.vault.packaging.Packaging;
 import com.day.jcr.vault.packaging.Version;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.testing.sling.MockResource;
@@ -38,31 +42,45 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(JcrUtil.class)
 public class PackageHelperImplTest {
-    final PackageHelperImpl packageHelper = new PackageHelperImpl();
+    @Mock
+    Packaging packaging;
+
+    @Mock
+    Session session;
 
     @Mock
     JcrPackageManager jcrPackageManager;
+
+    @Mock
+    ResourceResolverFactory resourceResolverFactory;
 
     @Mock
     Node packageRoot;
@@ -92,6 +110,12 @@ public class PackageHelperImplTest {
     JcrPackageDefinition packageTwoDef;
 
     @Mock
+    Node packageOneDefNode;
+
+    @Mock
+    Node packageTwoDefNode;
+
+    @Mock
     MetaInf packageOneMetaInf;
 
     @Mock
@@ -109,6 +133,9 @@ public class PackageHelperImplTest {
     @Mock
     PackageId packageTwoID;
 
+    @InjectMocks
+    final PackageHelperImpl packageHelper = new PackageHelperImpl();
+
     List<PathFilterSet> packageOneFilterSets;
     List<PathFilterSet> packageTwoFilterSets;
 
@@ -121,10 +148,11 @@ public class PackageHelperImplTest {
 
     @Before
     public void setUp() throws Exception {
+
         packageOneFilterSets = new ArrayList<PathFilterSet>();
         packageTwoFilterSets = new ArrayList<PathFilterSet>();
 
-
+        when(packaging.getPackageManager(any(Session.class))).thenReturn(jcrPackageManager);
 
         when(jcrPackageManager.getPackageRoot(false)).thenReturn(packageRoot);
 
@@ -145,6 +173,9 @@ public class PackageHelperImplTest {
 
         when(packageOneDef.getId()).thenReturn(packageOneID);
         when(packageTwoDef.getId()).thenReturn(packageTwoID);
+
+        when(packageOneDef.getNode()).thenReturn(packageOneDefNode);
+        when(packageTwoDef.getNode()).thenReturn(packageTwoDefNode);
 
         when(packageOneDef.getMetaInf()).thenReturn(packageOneMetaInf);
         when(packageTwoDef.getMetaInf()).thenReturn(packageTwoMetaInf);
@@ -175,12 +206,27 @@ public class PackageHelperImplTest {
     @After
     public void tearDown() throws Exception {
         reset(jcrPackageManager, packageRoot, packageGroupRoot, packageOneNode, packageTwoNode,
-                packageOne, packageTwo, packageOneDef, packageTwoDef, packageOneID, packageTwoID);
+                packageOne, packageTwo, packageOneDef, packageTwoDef, packageOneDefNode, packageTwoDefNode,
+                packageOneID, packageTwoID);
     }
 
     @Test
     public void testAddThumbnail() throws Exception {
+        PowerMockito.mockStatic(JcrUtil.class);
 
+        Resource thumbnailResource = mock(Resource.class);
+        Node thumbnailNode = mock(Node.class);
+
+        when(thumbnailResource.adaptTo(Node.class)).thenReturn(thumbnailNode);
+        when(thumbnailResource.isResourceType("nt:file")).thenReturn(true);
+
+        when(packageOneDefNode.getSession()).thenReturn(mock(Session.class));
+
+        packageHelper.addThumbnail(packageOne, thumbnailResource);
+
+        // Verification
+        PowerMockito.verifyStatic(times(1));
+        JcrUtil.copy(thumbnailNode, packageOneDefNode, "thumbnail.png");
     }
 
     @Test
@@ -217,6 +263,16 @@ public class PackageHelperImplTest {
     @Test
     public void testCreatePackage() throws Exception {
 
+        Map<String, String> properties = new HashMap<String, String>();
+        Set<Resource> resources = new HashSet<Resource>();
+
+        when(jcrPackageManager.create(packageGroup, packageName, packageOneVersion)).thenReturn(packageOne);
+
+        packageHelper.createPackage(resources, session, packageGroup, packageName, packageOneVersion,
+                PackageHelper.ConflictResolution.None, properties);
+
+        // Verify the session was saved, creating the package
+        verify(session, times(1)).save();
     }
 
     @Test
