@@ -1,18 +1,28 @@
-/** from http://experience-aem.blogspot.in/2013/09/aem-cq-56-multifield-panel.html writen by Sreekanth Choudry Nalabotu
-Todo - This has to be separated out from column control component and saved in the location specific to cq widgets.
- **/
-var AEMCommonsClientLib = AEMCommonsClientLib || {};
+/** Source code from http://experience-aem.blogspot.in/2013/09/aem-cq-56-multifield-panel.html writen by Sreekanth Choudry Nalabotu
+This is the exact implementation by Sreekanth
 
-AEMCommonsClientLib.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
+ **/
+ /*global CQ: false, ACS: false */
+CQ.Ext.ns("ACS.CQ");
+/**
+ * @class ACS.CQ.MultiFieldPanel
+ * @extends CQ.form.Panel
+ * <p>The MultiFieldPanel widget is a drop-in replacement for the normal multi fieldwidget with the additional functionality of being able to configure multiple fields 
+ * </p>
+ * @constructor
+ * Creates a new MultiFieldPanel.
+ * @param {Object} config The config object
+ */
+ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
     panelValue: '',
 
     constructor: function(config){
         config = config || {};
-        AEMCommonsClientLib.MultiFieldPanel.superclass.constructor.call(this, config);
+        ACS.CQ.MultiFieldPanel.superclass.constructor.call(this, config);
     },
 
     initComponent: function () {
-        AEMCommonsClientLib.MultiFieldPanel.superclass.initComponent.call(this);
+        ACS.CQ.MultiFieldPanel.superclass.initComponent.call(this);
 
         this.panelValue = new CQ.Ext.form.Hidden({
             name: this.name
@@ -35,7 +45,7 @@ AEMCommonsClientLib.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
         var pData = {};
 
         this.items.each(function(i){
-            if(i.xtype == "label" || i.xtype == "hidden" || !i.hasOwnProperty("dName")){
+            if(i.xtype === "label" || i.xtype === "hidden" || !i.hasOwnProperty("dName")){
                 return;
             }
 
@@ -51,7 +61,7 @@ AEMCommonsClientLib.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
         var pData = JSON.parse(value);
 
         this.items.each(function(i){
-            if(i.xtype == "label" || i.xtype == "hidden" || !i.hasOwnProperty("dName")){
+            if(i.xtype === "label" || i.xtype === "hidden" || !i.hasOwnProperty("dName")){
                 return;
             }
 
@@ -72,4 +82,4 @@ AEMCommonsClientLib.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
     }
 });
 
-CQ.Ext.reg("multifieldpanel", AEMCommonsClientLib.MultiFieldPanel);
+CQ.Ext.reg("multifieldpanel", ACS.CQ.MultiFieldPanel);	

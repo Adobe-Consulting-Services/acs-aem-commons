@@ -7,3 +7,4 @@ predicates/PathPropertyPredicate.js
 predicates/SelectionPredicate.js
 DDPathField.js
 polyfill_composite_field_processParentRecord.js
+multipanel.js

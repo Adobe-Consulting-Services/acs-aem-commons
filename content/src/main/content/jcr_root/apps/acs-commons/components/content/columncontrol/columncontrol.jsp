@@ -1,5 +1,5 @@
 <%@ page import="org.apache.sling.commons.json.JSONObject" %>
-<%@ page import="java.io.PrintWriter" %>
+<%@ page import="java.io.PrintWriter,com.day.cq.wcm.api.WCMMode" %>
 <%@include file="/libs/foundation/global.jsp" %>
 <%@page session="false" %>
 
@@ -8,6 +8,7 @@
 
 
     <%
+   
         try {
             Property property = null;
 
@@ -30,11 +31,11 @@ int index=1;
                     obj = new JSONObject(val.getString());
                     String path=obj.getString("pathName");
                     if(path==null ||"".equals(path)){
-						path="path"+index;
+                        path="path"+index;
                     }
                     request.setAttribute("path",path);
     %>
-    <div class="colctrl_<%= obj.get("cols") %>" style="border:1px red solid; ">
+    <div class="colctrl_<%= obj.get("cols") %>" >
         <cq:include path="${path}" resourceType="foundation/components/parsys" />
     </div>
 

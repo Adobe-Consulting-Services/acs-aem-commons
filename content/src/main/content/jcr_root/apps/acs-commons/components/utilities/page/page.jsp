@@ -48,7 +48,7 @@
         <meta name="description" content="<%= xss.encodeForHTML(pageDescription) %>">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <cq:includeClientLib css="cq.wcm.edit,acs-commons.utilities.page"/>
+        <cq:includeClientLib css="cq.wcm.edit,acs-commons.utilities.page,acs-commons.components"/>
         <script src="/libs/cq/ui/resources/cq-ui.js" type="text/javascript"></script>
         <cq:includeClientLib js="cq.wcm.edit,acs-commons.utilities.page"/>
 

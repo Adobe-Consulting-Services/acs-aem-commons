@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:lastModified="{Date}2014-01-31T17:10:55.887+05:30"
+        cq:lastModifiedBy="admin"
+        jcr:primaryType="cq:PageContent"
+        jcr:title="Version Replicator"
+        sling:resourceType="acs-commons/components/utilities/colctrl">
+        <path
+            jcr:lastModified="{Date}2014-01-31T17:10:55.884+05:30"
+            jcr:lastModifiedBy="admin"
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="acs-commons/components/utilities/columncontrol"
+            columns="[{&quot;cols&quot;:&quot;22&quot;\,&quot;pathName&quot;:&quot;&quot;},{&quot;cols&quot;:&quot;33&quot;\,&quot;pathName&quot;:&quot;&quot;},{&quot;cols&quot;:&quot;45&quot;\,&quot;pathName&quot;:&quot;&quot;}]"/>
+    </jcr:content>
+</jcr:root>
