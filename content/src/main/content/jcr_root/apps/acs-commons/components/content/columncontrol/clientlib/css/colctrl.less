@@ -1,0 +1,60 @@
+.acs-commons {
+/*
+Taken from twitter bootstrap for the row class.
+*/
+ @grid-gutter-width:3px;
+.clearfix() {
+  &:before,
+  &:after {
+    content: " "; // 1
+    display: table; // 2
+  }
+  &:after {
+    clear: both;
+  }
+}
+    .make-row(@gutter: @grid-gutter-width) {
+  margin-left:  (@gutter / -2);
+  margin-right: (@gutter / -2);
+  .clearfix();
+}
+    .row {
+  .make-row();
+}
+/**
+This is responsive. 
+ToDo add media queries and allow to style it differently for other device sizes.
+
+
+
+**/
+/**
+@numOfDivisionsOfContainer -  This variable will divide the container div by that many divisions.
+For example, we have taken @numOfDivisionsOfContainer as 100.This would mean, if a columns' width is set as 50, then it will have 50% width of the container.
+This value can take any number.
+This basically loops and creates that many number of classes
+**/
+    @numOfDivisionsOfContainer: 100;
+
+.loopingClass (@index) when (@index <= @numOfDivisionsOfContainer) {
+
+	(~".colctrl_@{index}") {
+
+             position: relative;
+             min-height: 1px;
+             padding-left:  (@grid-gutter-width / 2);
+      		padding-right: (@grid-gutter-width / 2);
+             width: percentage((@index / @numOfDivisionsOfContainer))-.35;
+            float:left;
+
+	}
+
+	// next iteration
+	.loopingClass(@index + 1);
+}
+
+
+// "call" the loopingClass the first time with highest value
+.loopingClass (1);
+
+}

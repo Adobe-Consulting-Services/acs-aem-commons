@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    title="Multi Field"
+    xtype="dialog">
+    <items
+        jcr:primaryType="cq:Widget"
+        xtype="tabpanel">
+        <items jcr:primaryType="cq:WidgetCollection">
+            <tab1
+                jcr:primaryType="cq:Panel"
+                title="Add">
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <map
+                        jcr:primaryType="cq:Widget"
+                        hideLabel="false"
+                        name="./columns"
+                        title="Columns"
+                        xtype="multifield">
+                        <fieldConfig
+                            jcr:primaryType="cq:Widget"
+                            border="true"
+                            hideLabel="true"
+                            layout="form"
+                            padding="10px"
+                            width="1000"
+                            xtype="multifieldpanel">
+                            <items jcr:primaryType="cq:WidgetCollection">
+                                <cols
+                                    jcr:primaryType="cq:Widget"
+                                    dName="cols"
+                                    fieldDescription="Enter width in percentage"
+                                    fieldLabel="Column width in percentage"
+                                    width="60"
+                                    xtype="textfield"/>
+                                <path
+                                    jcr:primaryType="cq:Widget"
+                                    dName="pathName"
+                                    fieldDescription="The path value should be unique"
+                                    fieldLabel="Path name for parsys"
+                                    width="60"
+                                    xtype="textfield"/>
+                            </items>
+                        </fieldConfig>
+                    </map>
+                </items>
+            </tab1>
+        </items>
+    </items>
+</jcr:root>
