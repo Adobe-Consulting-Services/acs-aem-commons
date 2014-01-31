@@ -148,6 +148,10 @@ public class PackageHelperImplTest {
     public void setUp() throws Exception {
 
         packageOneFilterSets = new ArrayList<PathFilterSet>();
+        packageOneFilterSets.add(new PathFilterSet("/a/b/c"));
+        packageOneFilterSets.add(new PathFilterSet("/d/e/f"));
+        packageOneFilterSets.add(new PathFilterSet("/g/h/i"));
+
         packageTwoFilterSets = new ArrayList<PathFilterSet>();
 
         when(packaging.getPackageManager(any(Session.class))).thenReturn(jcrPackageManager);
@@ -202,9 +206,26 @@ public class PackageHelperImplTest {
 
     @After
     public void tearDown() throws Exception {
-        reset(packaging, session, jcrPackageManager, packageRoot, packageGroupRoot, packageOneNode, packageTwoNode,
-                packageOne, packageTwo, packageOneDef, packageTwoDef, packageOneDefNode, packageTwoDefNode,
-                packageOneID, packageTwoID);
+        reset(packaging,
+                session,
+                resourceResolverFactory,
+                jcrPackageManager,
+                packageRoot,
+                packageGroupRoot,
+                packageOneNode,
+                packageTwoNode,
+                packageOne,
+                packageTwo,
+                packageOneDef,
+                packageTwoDef,
+                packageOneDefNode,
+                packageTwoDefNode,
+                packageOneMetaInf,
+                packageTwoMetaInf,
+                packageOneFilter,
+                packageTwoFilter,
+                packageOneID,
+                packageTwoID);
     }
 
     @Test
@@ -274,12 +295,27 @@ public class PackageHelperImplTest {
 
     @Test
     public void testGetSuccessJSON() throws Exception {
+
         final String actual = packageHelper.getSuccessJSON(packageOne);
 
         final JSONObject json = new JSONObject(actual);
 
         assertEquals("success", json.getString("status"));
         assertEquals("/etc/packages/testGroup/testPackageName-1.0.0.zip", json.getString("path"));
+
+        final String[] expectedFilterSets = new String[]{
+                "/a/b/c",
+                "/d/e/f",
+                "/g/h/i"
+        };
+
+        JSONArray actualArray = json.getJSONArray("filterSets");
+        for(int i = 0; i < actualArray.length(); i++) {
+            JSONObject tmp = actualArray.getJSONObject(i);
+            assertTrue(ArrayUtils.contains(expectedFilterSets, tmp.get("rootPath")));
+        }
+
+        assertEquals(expectedFilterSets.length, actualArray.length());
     }
 
     @Test
@@ -290,6 +326,7 @@ public class PackageHelperImplTest {
         resources.add(new MockResource(resourceResolver, "/a/b/c", ""));
         resources.add(new MockResource(resourceResolver, "/d/e/f", ""));
         resources.add(new MockResource(resourceResolver, "/g/h/i", ""));
+
 
         final String actual = packageHelper.getPreviewJSON(resources);
         final JSONObject json = new JSONObject(actual);
