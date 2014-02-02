@@ -1,6 +1,6 @@
-.acs-commons {
+
 /*
-Taken from twitter bootstrap for the row class.
+ from twitter bootstrap for the row class. added box sizing to the clearfix to allow cells render side by side
 */
  @grid-gutter-width:3px;
 .clearfix() {
@@ -8,6 +8,9 @@ Taken from twitter bootstrap for the row class.
   &:after {
     content: " "; // 1
     display: table; // 2
+    -webkit-box-sizing: border-box;
+-moz-box-sizing: border-box;
+box-sizing: border-box;
   }
   &:after {
     clear: both;
@@ -18,14 +21,12 @@ Taken from twitter bootstrap for the row class.
   margin-right: (@gutter / -2);
   .clearfix();
 }
-    .row {
+    .acs-commons-resp-colctrl-row {
   .make-row();
 }
 /**
 This is responsive. 
 ToDo add media queries and allow to style it differently for other device sizes.
-
-
 
 **/
 /**
@@ -42,12 +43,16 @@ This basically loops and creates that many number of classes
 .loopingClass (@index) when (@index > 0) {
 
 
-    (~".colctrl_@{index}") {
+    (~".acs-commons-resp-colctrl-col-@{index}") {
         position: relative;
         min-height: 1px;
         padding-left:  (@grid-gutter-width / 2);
         padding-right: (@grid-gutter-width / 2);
-        width: percentage((@index / @numOfDivisionsOfContainer))-.20;
+        width: percentage((@index / @numOfDivisionsOfContainer));
+      //box sizing will allow the cells render side by side and will stop the right columns from moving to the next line
+         -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
         float:left;
     }
 
@@ -60,4 +65,3 @@ This basically loops and creates that many number of classes
 
 
 .loopingClass (@numOfDivisionsOfContainer);
-}

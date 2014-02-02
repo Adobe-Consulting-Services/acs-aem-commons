@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="cq:Dialog"
-    title="Multi Field"
+    title="Multi-Column Control"
+    width="600"
     xtype="dialog">
     <items
         jcr:primaryType="cq:Widget"
@@ -9,36 +10,42 @@
         <items jcr:primaryType="cq:WidgetCollection">
             <tab1
                 jcr:primaryType="cq:Panel"
-                title="Add">
+                title="Columns">
                 <items jcr:primaryType="cq:WidgetCollection">
                     <map
                         jcr:primaryType="cq:Widget"
                         hideLabel="false"
                         name="./columns"
-                        title="Columns"
+                        title="Add Column"
                         xtype="multifield">
                         <fieldConfig
                             jcr:primaryType="cq:Widget"
+                            bodyStyle="border-bottom:solid 1px #ccc"
                             border="true"
-                            hideLabel="true"
+                            hideLabel="false"
                             layout="form"
                             padding="10px"
-                            width="1000"
                             xtype="multifieldpanel">
                             <items jcr:primaryType="cq:WidgetCollection">
                                 <cols
                                     jcr:primaryType="cq:Widget"
-                                    dName="cols"
-                                    fieldDescription="Enter width in percentage"
-                                    fieldLabel="Column width in percentage"
-                                    width="60"
-                                    xtype="textfield"/>
+                                    dName="width"
+                                    fieldDescription="Column width as a percent."
+                                    fieldLabel="Column width (percent)"
+                                    hideLabel="true"
+                                    labelStyle="display:inline"
+                                    maxValue="100"
+                                    minValue="1"
+                                    required="true"
+                                    xtype="numberfield"/>
                                 <path
                                     jcr:primaryType="cq:Widget"
                                     dName="pathName"
-                                    fieldDescription="The path value should be unique"
-                                    fieldLabel="Path name for parsys"
-                                    width="60"
+                                    fieldDescription="This value should be unique between columns. This value will not be displayed to end users."
+                                    fieldLabel="Column name"
+                                    hideLabel="false"
+                                    labelStyle="display:inline"
+                                    required="true"
                                     xtype="textfield"/>
                             </items>
                         </fieldConfig>
@@ -47,4 +54,7 @@
             </tab1>
         </items>
     </items>
+    <listeners
+        jcr:primaryType="nt:unstructured"
+        beforesubmit="function(dialog){&#xa;&#x9;var widthArray = dialog.findByType(&quot;numberfield&quot;);&#xa;&#x9;var maxwidth=100;&#xa;&#x9;var width=0;&#xa;&#x9;for(i=0;i&lt;widthArray.length;i++){&#xa;&#x9;&#x9;width+=widthArray[i].getValue();&#xa;&#x9;}&#xa;&#x9;if(width>maxwidth){&#xa;&#x9;CQ.Ext.Msg.show({title:'Validation Error',msg:'Total width of all columns should not be more than 100 percent!',buttons:CQ.Ext.MessageBox.OK,icon:CQ.Ext.MessageBox.ERROR});&#xa;&#x9;return false;&#xa;&#x9;}&#xa;}"/>
 </jcr:root>

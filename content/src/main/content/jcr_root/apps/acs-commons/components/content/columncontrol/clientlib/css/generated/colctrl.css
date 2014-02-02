@@ -1,0 +1,826 @@
+/*
+Taken from twitter bootstrap for the row class.
+*/
+.acs-commons-resp-colctrl-row {
+  margin-left: -1.5px;
+  margin-right: -1.5px;
+}
+.acs-commons-resp-colctrl-row:before,
+.acs-commons-resp-colctrl-row:after {
+  content: " ";
+  display: table;
+}
+.acs-commons-resp-colctrl-row:after {
+  clear: both;
+}
+/**
+This is responsive. 
+ToDo add media queries and allow to style it differently for other device sizes.
+
+**/
+/**
+@numOfDivisionsOfContainer -  This variable will divide the container div by that many divisions.
+For example, we have taken @numOfDivisionsOfContainer as 100.This would mean, if a columns' width is set as 50, then it will have 50% width of the container.
+This value can take any number.
+This basically loops and creates that many number of classes
+**/
+.acs-commons-resp-colctrl-col-100 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 99.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-99 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 98.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-98 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 97.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-97 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 96.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-96 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 95.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-95 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 94.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-94 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 93.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-93 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 92.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-92 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 91.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-91 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 90.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-90 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 89.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-89 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 88.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-88 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 87.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-87 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 86.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-86 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 85.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-85 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 84.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-84 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 83.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-83 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 82.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-82 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 81.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-81 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 80.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-80 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 79.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-79 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 78.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-78 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 77.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-77 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 76.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-76 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 75.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-75 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 74.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-74 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 73.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-73 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 72.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-72 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 71.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-71 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 70.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-70 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 69.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-69 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 68.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-68 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 67.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-67 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 66.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-66 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 65.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-65 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 64.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-64 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 63.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-63 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 62.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-62 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 61.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-61 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 60.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-60 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 59.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-59 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 58.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-58 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 57.54999999999999%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-57 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 56.54999999999999%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-56 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 55.550000000000004%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-55 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 54.550000000000004%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-54 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 53.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-53 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 52.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-52 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 51.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-51 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 50.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-50 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 49.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-49 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 48.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-48 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 47.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-47 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 46.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-46 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 45.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-45 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 44.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-44 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 43.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-43 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 42.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-42 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 41.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-41 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 40.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-40 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 39.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-39 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 38.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-38 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 37.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-37 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 36.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-36 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 35.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-35 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 34.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-34 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 33.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-33 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 32.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-32 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 31.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-31 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 30.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-30 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 29.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-29 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 28.549999999999997%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-28 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 27.550000000000004%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-27 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 26.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-26 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 25.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-25 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 24.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-24 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 23.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-23 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 22.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-22 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 21.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-21 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 20.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-20 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 19.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-19 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 18.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-18 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 17.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-17 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 16.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-16 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 15.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-15 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 14.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-14 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 13.550000000000002%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-13 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 12.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-12 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 11.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-11 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 10.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-10 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 9.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-9 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 8.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-8 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 7.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-7 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 6.550000000000001%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-6 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 5.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-5 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 4.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-4 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 3.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-3 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 2.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-2 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 1.55%;
+  float: left;
+}
+.acs-commons-resp-colctrl-col-1 {
+  position: relative;
+  min-height: 1px;
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  width: 0.55%;
+  float: left;
+}
