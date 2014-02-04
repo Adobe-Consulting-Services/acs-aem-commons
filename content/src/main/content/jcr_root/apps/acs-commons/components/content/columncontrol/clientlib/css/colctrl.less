@@ -1,28 +1,13 @@
-
-/*
- from twitter bootstrap for the row class. added box sizing to the clearfix 
-*/
- @grid-gutter-width:3px;
-.clearfix() {
-  &:before,
-  &:after {
-    content: " "; // 1
-    display: table; // 2
+.acs-commons-resp-colctrl-row {
+      margin-left:  -0px;
+  margin-right: -0px;
     -webkit-box-sizing: border-box;
 -moz-box-sizing: border-box;
 box-sizing: border-box;
-  }
-  &:after {
-    clear: both;
-  }
+
 }
-    .make-row(@gutter: @grid-gutter-width) {
-  margin-left:  (@gutter / -2);
-  margin-right: (@gutter / -2);
-  .clearfix();
-}
-    .acs-commons-resp-colctrl-row {
-  .make-row();
+.acs-commons-resp-colctrl-row:after {
+   clear: both;
 }
 /**
 This is responsive. 
@@ -35,7 +20,7 @@ For example, we have taken @numOfDivisionsOfContainer as 100.This would mean, if
 This value can take any number.
 This basically loops and creates that many number of classes
 **/
- 
+
  @numOfDivisionsOfContainer: 100;
 
 // helper class, will never show up in resulting css
@@ -46,10 +31,10 @@ This basically loops and creates that many number of classes
     (~".acs-commons-resp-colctrl-col-@{index}") {
         position: relative;
         min-height: 1px;
-        padding-left:  (@grid-gutter-width / 2);
-        padding-right: (@grid-gutter-width / 2);
+        padding-left:  1px;
+        padding-right: 1px;
         width: percentage((@index / @numOfDivisionsOfContainer));
-         -webkit-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
         -moz-box-sizing: border-box;
         box-sizing: border-box;
         float:left;
