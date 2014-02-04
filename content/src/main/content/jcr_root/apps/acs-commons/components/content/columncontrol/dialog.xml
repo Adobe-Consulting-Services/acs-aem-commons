@@ -16,6 +16,7 @@
                         jcr:primaryType="cq:Widget"
                         hideLabel="false"
                         name="./columns"
+                        orderable="{Boolean}false"
                         title="Add Column"
                         xtype="multifield">
                         <fieldConfig
@@ -38,15 +39,6 @@
                                     minValue="1"
                                     required="true"
                                     xtype="numberfield"/>
-                                <path
-                                    jcr:primaryType="cq:Widget"
-                                    dName="pathName"
-                                    fieldDescription="This value should be unique between columns. This value will not be displayed to end users."
-                                    fieldLabel="Column name"
-                                    hideLabel="false"
-                                    labelStyle="display:inline"
-                                    required="true"
-                                    xtype="textfield"/>
                             </items>
                         </fieldConfig>
                     </map>
