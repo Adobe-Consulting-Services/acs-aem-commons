@@ -86,6 +86,11 @@ public class MultiFieldSmartImage extends AbstractImageServlet {
 
         String rUri = req.getRequestURI();
         String selImage = rUri.substring(rUri.lastIndexOf("/"));
+
+        if(selImage.contains(".")){
+            selImage = selImage.substring(0, selImage.indexOf("."));
+        }
+
         Resource resource = req.getResourceResolver().getResource(children.next().getPath() + selImage);
 
         if(resource == null){

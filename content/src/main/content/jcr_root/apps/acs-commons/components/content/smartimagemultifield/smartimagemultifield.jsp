@@ -44,7 +44,7 @@
         for(int i = 0; i < array.length(); i++){
             img = new Image(resource);
             img.setItemName(Image.PN_REFERENCE, "imageReference");
-            img.setSuffix(String.valueOf(array.get(i)));
+            img.setSuffix(String.valueOf(array.get(i)) + ".png");
             img.setSelector("img");
 
             src = img.getSrc();
