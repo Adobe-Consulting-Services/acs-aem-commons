@@ -22,17 +22,16 @@
 <%@ page import="java.util.Iterator" %>
 <%@ page import="com.day.cq.wcm.foundation.Image" %>
 <%@ page import="org.apache.sling.commons.json.JSONArray" %>
+<%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %>
 
 <%
     Iterator<Resource> children = resource.listChildren();
 
     if(!children.hasNext()){
 %>
-        <br><br>
-
-        Double-Click to add Images
-
-        <br><br>
+        <wcmmode:edit>
+            Double-Click to add Images
+        </wcmmode:edit>
 <%
     }else{
         Resource imagesResource = children.next();

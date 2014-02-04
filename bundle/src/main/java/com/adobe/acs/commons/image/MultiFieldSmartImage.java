@@ -17,14 +17,18 @@
  * limitations under the License.
  * #L%
  */
-package apps.acs_002dcommons.components.content.smartimagemultifield;
+package com.adobe.acs.commons.image;
+
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.Property;
 import javax.servlet.http.HttpServletResponse;
 
 import com.day.cq.wcm.foundation.Image;
@@ -39,15 +43,41 @@ import org.apache.sling.api.resource.Resource;
  * Servlet to return image binary data for multifield smart images. Expects resource path
  * like /content/multi-image/_jcr_content/par/smartimagemultifield.img.png/image-3
  */
-public class img_GET extends AbstractImageServlet {
+@Component
+@Service(javax.servlet.Servlet.class)
+@Properties({
+    @Property(name = "sling.servlet.resourceTypes", value = "acs-commons/components/content/smartimagemultifield"),
+    @Property(name = "sling.servlet.selector", value = "img"),
+    @Property(name = "sling.servlet.methods", value = "GET"),
+    @Property(name = "service.description", value = "MultiField Smart Image binary response generator")
+})
+public class MultiFieldSmartImage extends AbstractImageServlet {
 
+    /**
+     * Placeholder method
+     *
+     * @param c the convenience context
+     * @return
+     * @throws RepositoryException
+     * @throws IOException
+     */
     protected Layer createLayer(ImageContext c)
             throws RepositoryException, IOException {
         return null;
     }
 
+    /**
+     * Output the image binaries
+     *
+     * @param req
+     * @param resp
+     * @param c
+     * @param layer layer
+     * @throws IOException
+     * @throws RepositoryException
+     */
     protected void writeLayer(SlingHttpServletRequest req, SlingHttpServletResponse resp, ImageContext c, Layer layer)
-            throws IOException, RepositoryException {
+                                    throws IOException, RepositoryException {
         Iterator<Resource> children = c.resource.listChildren();
 
         if(!children.hasNext()){
@@ -89,7 +119,7 @@ public class img_GET extends AbstractImageServlet {
             resp.setContentType(c.requestImageType);
             layer.write(c.requestImageType, 1.0, resp.getOutputStream());
         } else {
-            Property data = image.getData();
+            javax.jcr.Property data = image.getData();
             InputStream in = data.getStream();
             resp.setContentLength((int) data.getLength());
             String contentType = image.getMimeType();
