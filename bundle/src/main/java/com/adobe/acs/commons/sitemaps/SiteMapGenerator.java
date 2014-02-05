@@ -21,7 +21,17 @@ package com.adobe.acs.commons.sitemaps;
 
 import org.apache.sling.api.resource.ResourceResolver;
 import org.w3c.dom.Document;
-
+/**
+ * service factory. One config each for every site.
+ * set root path,domain name and a boolean to consider navigation filter while genrating sitemap
+ *
+ */
 public interface SiteMapGenerator {
+    /**
+     * generate XML of the sitemap.
+     * 
+     * @param resolver
+     * @return
+     */
 	Document getSiteMap(ResourceResolver resolver);
 }
