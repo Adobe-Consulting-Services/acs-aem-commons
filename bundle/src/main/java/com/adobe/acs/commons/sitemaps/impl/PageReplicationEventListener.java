@@ -72,7 +72,7 @@ public class PageReplicationEventListener implements EventHandler {
             final Map<String, Object> props) {
         synchronized (this.siteMapGenerators) {
             this.siteMapGenerators.remove(PropertiesUtil.toString(
-                    props.get("com.acs.sitemap.domain"),"localhost:4502"));
+                    props.get("com.acs.sitemap.siterootpath"),"/content/geometrixx/en"));
         }
     }
     
