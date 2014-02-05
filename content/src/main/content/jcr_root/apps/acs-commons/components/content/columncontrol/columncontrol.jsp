@@ -19,9 +19,9 @@
   --%>
 <%@include file="/libs/foundation/global.jsp" %>
 <%@page session="false" %>
-<%@ taglib prefix="mfp" uri="http://www.adobe.com/consulting/acs-aem-commons/mfp" %>
+<%@ taglib prefix="mpf" uri="http://www.adobe.com/consulting/acs-aem-commons/mpf" %>
 <%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %>
-<c:set var="columns" value="${mfp:getMultiPanelFieldValues(resource, 'columns')}"/>
+<c:set var="columns" value="${mpf:getMultiPanelFieldValues(resource, 'columns')}"/>
 <c:choose>
     <c:when test="${empty columns}">
          <wcmmode:edit>You need to specify the columns.</wcmmode:edit>
