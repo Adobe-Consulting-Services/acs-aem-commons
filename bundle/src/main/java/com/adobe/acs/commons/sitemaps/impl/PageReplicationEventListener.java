@@ -1,0 +1,104 @@
+package com.adobe.acs.commons.sitemaps.impl;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
+import com.adobe.acs.commons.sitemaps.SiteMapGenerator;
+import com.day.cq.replication.ReplicationAction;
+import com.day.cq.replication.ReplicationException;
+@Component(label = "page replication event listener to clear sitemap cache", immediate=true,policy=ConfigurationPolicy.REQUIRE)
+@Service
+@Properties({
+    @Property(name = "event.topics", value = ReplicationAction.EVENT_TOPIC)})
+public class PageReplicationEventListener implements EventHandler {
+    private static final Logger log = LoggerFactory
+            .getLogger(PageReplicationEventListener.class);
+    @Reference(name = "siteMapGenerators", referenceInterface = SiteMapGenerator.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    private final Map<String, SiteMapGenerator> siteMapGenerators = new TreeMap<String, SiteMapGenerator>();
+   
+    protected void bindSiteMapGenerators(
+            final SiteMapGenerator siteMapGenerator,
+            final Map<String, Object> props) {
+        synchronized (this.siteMapGenerators) {
+            this.siteMapGenerators.put(PropertiesUtil.toString(
+                    props.get("com.acs.sitemap.siterootpath"), "/content/geometrixx/en"),
+                    siteMapGenerator);
+        }
+    }
+
+    protected void unbindSiteMapGenerators(
+            final SiteMapGenerator siteMapGenerator,
+            final Map<String, Object> props) {
+        synchronized (this.siteMapGenerators) {
+            this.siteMapGenerators.remove(PropertiesUtil.toString(
+                    props.get("com.acs.sitemap.domain"),"localhost:4502"));
+        }
+    }
+    
+    @Reference
+    private DispatcherFlusher dispatcherFlusher;
+    
+    @Reference
+    private ResourceResolverFactory resolverFactory;
+    
+    @Override
+    public void handleEvent(Event event) {
+        ReplicationAction action = ReplicationAction.fromEvent(event);
+        String[] paths = action.getPaths();
+        //in case same replication action has multiple sites
+        Set<String> tobeFlushedDomains =  new HashSet<String>();
+        for(String path :paths){
+            for(String key : siteMapGenerators.keySet()){
+                if(path.startsWith(key) &&!tobeFlushedDomains.contains(key)){
+                   tobeFlushedDomains.add(key);
+                }
+            }
+        }
+        for(String key : tobeFlushedDomains){
+            flushSiteMapXml(action);
+        }
+        
+    }
+    private void flushSiteMapXml(ReplicationAction action){
+        ResourceResolver resolver = getResolver(action.getUserId());
+        try {
+            dispatcherFlusher.flush(resolver, action.getType(), false, DispatcherFlushFilter.RESOURCE_ONLY, "/sitemap");
+        } catch (ReplicationException e) {
+           log.error(e.getMessage(),e);
+        }
+    }
+    private ResourceResolver getResolver(String userId){
+        try {        
+        HashMap<String, Object> authInfo = new HashMap<String, Object>();
+        authInfo.put(ResourceResolverFactory.USER_IMPERSONATION, userId);
+        return resolverFactory.getAdministrativeResourceResolver(authInfo);
+        
+    } catch (LoginException e) {
+       log.error(e.getMessage(),e);
+    } 
+    return null;
+    }
+
+}
