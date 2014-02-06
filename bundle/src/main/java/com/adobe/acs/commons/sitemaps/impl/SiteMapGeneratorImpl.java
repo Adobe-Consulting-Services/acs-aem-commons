@@ -91,8 +91,7 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
     private Document generateWebSiteMap(ResourceResolver resolver, Iterator<SiteMap.LinkElement> linksIterator) {
         Document siteMapDocument = createSiteMapDocument();
         Element urlSetElement = createUrlSetElement(siteMapDocument);
-        while(linksIterator.hasNext()
-                ){
+        while(linksIterator.hasNext()){
             SiteMap.LinkElement linkElement =  linksIterator.next();
             urlSetElement.appendChild(createUrlElement(resolver, linkElement , siteMapDocument));
         }

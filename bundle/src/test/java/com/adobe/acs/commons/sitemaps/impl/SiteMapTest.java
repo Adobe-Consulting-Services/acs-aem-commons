@@ -20,22 +20,16 @@
 
 package com.adobe.acs.commons.sitemaps.impl;
 
-import static org.mockito.Mockito.mock;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 import static junit.framework.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
-
-import junit.framework.Assert;
 
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
