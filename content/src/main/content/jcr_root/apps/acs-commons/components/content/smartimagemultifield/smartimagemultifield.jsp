@@ -42,7 +42,7 @@
         JSONArray array = new JSONArray(order);
 %>
         <!--
-        Logic from this fantastic slideshow example http://jonraasch.com/blog/a-simple-jquery-slideshow
+        Logic from this fantastic slide show example http://jonraasch.com/blog/a-simple-jquery-slideshow
         -->
 
         <style>
