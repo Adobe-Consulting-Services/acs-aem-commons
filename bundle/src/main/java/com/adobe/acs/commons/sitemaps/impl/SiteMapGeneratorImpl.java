@@ -84,10 +84,7 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
        Document siteMap = generateWebSiteMap(resolver,linksIterator);
        return siteMap;
     }
-    public Document getSiteMapOfPublishedPages(ResourceResolver resolver){
-        
-        return null;
-    }
+    
     private Document generateWebSiteMap(ResourceResolver resolver, Iterator<SiteMap.LinkElement> linksIterator) {
         Document siteMapDocument = createSiteMapDocument();
         Element urlSetElement = createUrlSetElement(siteMapDocument);
