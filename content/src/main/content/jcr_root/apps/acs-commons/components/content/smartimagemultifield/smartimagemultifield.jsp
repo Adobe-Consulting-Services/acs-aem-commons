@@ -40,7 +40,58 @@
 
         Image img = null; String src = null;
         JSONArray array = new JSONArray(order);
+%>
+        <!--
+        Logic from this fantastic slideshow example http://jonraasch.com/blog/a-simple-jquery-slideshow
+        -->
 
+        <style>
+            #imagemultifieldslideshow {
+                position:relative;
+                height:350px;
+            }
+
+            #imagemultifieldslideshow IMG {
+                position:absolute;
+                top:0;
+                left:0;
+                z-index:8;
+            }
+
+            #imagemultifieldslideshow IMG.active {
+                z-index:10;
+            }
+
+            #imagemultifieldslideshow IMG.last-active {
+                z-index:9;
+            }
+        </style>
+
+        <script>
+            function slideSwitch() {
+                var $active = $('#imagemultifieldslideshow IMG.active');
+
+                if ( $active.length == 0 ){
+                    $active = $('#imagemultifieldslideshow IMG:last');
+                }
+
+                var $next =  $active.next().length ? $active.next() : $('#imagemultifieldslideshow IMG:first');
+
+                $active.addClass('last-active');
+
+                $next.css({ opacity: 0.0 } ).addClass('active')
+                        .animate({opacity: 1.0}, 1000, function() {
+                            $active.removeClass('active last-active');
+                        });
+            }
+
+            $(function() {
+                setInterval( "slideSwitch()", 2000 );
+            });
+        </script>
+
+        <div id="imagemultifieldslideshow">
+<%
         for(int i = 0; i < array.length(); i++){
             img = new Image(resource);
             img.setItemName(Image.PN_REFERENCE, "imageReference");
@@ -49,8 +100,11 @@
 
             src = img.getSrc();
 %>
-            <img src='<%=src%>'/><br><br>
+            <img src='<%=src%>' <%= ( i == 0) ? "class='active'" : ""%> />
 <%
         }
+%>
+        </div>
+<%
     }
 %>
