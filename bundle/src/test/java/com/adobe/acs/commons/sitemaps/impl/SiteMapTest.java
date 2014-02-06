@@ -21,11 +21,15 @@
 package com.adobe.acs.commons.sitemaps.impl;
 
 import static junit.framework.Assert.assertNotNull;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,7 +63,6 @@ public class SiteMapTest {
         final Page pageChild1 = mock(Page.class);
         PageFilter filter = new PageFilter();
         boolean considerPageFilter = false;
-        boolean donotConsiderPageFilter = true;
         SiteMap siteMap = new SiteMap(page, filter, considerPageFilter);
         
         Page[] childPages = new Page[1];
@@ -73,12 +76,27 @@ public class SiteMapTest {
         ValueMap map1 = new ValueMapDecorator(map);
         when(page.adaptTo(ValueMap.class)).thenReturn(map1);
         when(pageChild1.adaptTo(ValueMap.class)).thenReturn(map1);
-        when(page.getLastModified()).thenReturn(GregorianCalendar.getInstance());
-        when(pageChild1.getLastModified()).thenReturn(GregorianCalendar.getInstance());
+        Calendar cal =GregorianCalendar.getInstance();
+        when(page.getLastModified()).thenReturn(cal);
+        when(pageChild1.getLastModified()).thenReturn(cal);
         when(page.getPath()).thenReturn("/content/geometrixx/en");
         when(pageChild1.getPath()).thenReturn("/content/geometrixx/en/social");
         Iterator<SiteMap.LinkElement> linksIter =  siteMap.iterator();
+        SiteMap.LinkElement[] ale = new SiteMap.LinkElement[2];
+        ale[0] = new SiteMap.LinkElement("/content/geometrixx/en", getDateAsString(cal.getTime(),"yyyy-MM-dd'T'hh:mm:ss XXX"), "daily", "0.5");
+        ale[1] = new SiteMap.LinkElement("/content/geometrixx/en/social", getDateAsString(cal.getTime(),"yyyy-MM-dd'T'hh:mm:ss XXX"), "daily", "0.5");
+        Iterator<SiteMap.LinkElement> expected = Arrays.asList(ale).iterator();
        assertNotNull(linksIter);
-       
     }
+    private String getDateAsString(Date date,String format) {
+        String dateStr = "";
+         try {
+             SimpleDateFormat sdf = new SimpleDateFormat(format);
+           
+             dateStr = sdf.format(date);
+         } catch (Exception e) {
+            
+         }
+         return dateStr;
+     }
 }

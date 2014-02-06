@@ -59,18 +59,18 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
     private static final String XML_NS_ATTR_KEY="xmlns";
     private static final String XML_NS_ATTR_VAL="http://www.sitemaps.org/schemas/sitemap/0.9";
     
-    @Property(name =SiteMapConstants.SITE_ROOT_PATH, label="Root Path", description="Site Root path for sitemap", propertyPrivate = false, value = "/content")
+    @Property(name =SiteMapConstants.SITE_ROOT_PATH, label="Root Path", description="Site Root path for sitemap", propertyPrivate = false, value = "/content/geometrixx/en")
     public static final String SITE_ROOT_PATH = SiteMapConstants.SITE_ROOT_PATH;
     
-    @Property(name = SiteMapConstants.DOMAIN_NAME,label="Domain Name", description="Domain Name of site", propertyPrivate = false, value = "www.google.com")
+    @Property(name = SiteMapConstants.DOMAIN_NAME,label="Domain Name", description="Domain Name of site", propertyPrivate = false, value = "localhost")
     public static final String DOMAIN_NAME = SiteMapConstants.DOMAIN_NAME;
 
     @Property(name = SiteMapGeneratorImpl.CONSIDER_IS_HIDE_IN_NAVIGATION_FILTER_ENABLED, boolValue = true, label = "Consider is Hide in Navigation Page Filter", description = "Check to enable the page navigation filter")
     public static final String CONSIDER_IS_HIDE_IN_NAVIGATION_FILTER_ENABLED="considerishideinnavigationfilter.enabled";
     
-    private String siteRootPath;
-    private String domainName;
-    private boolean considerPageFilter;
+    private String siteRootPath = "/content/geometrixx/en";
+    private String domainName = "localhost";
+    private boolean considerPageFilter = false;
     
     
 
