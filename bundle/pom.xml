@@ -164,6 +164,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.day.cq.wcm</groupId>
+            <artifactId>cq-wcm-foundation</artifactId>
+            <version>5.6.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.day.cq.dam</groupId>
             <artifactId>cq-dam-api</artifactId>
             <version>5.5.0</version>
