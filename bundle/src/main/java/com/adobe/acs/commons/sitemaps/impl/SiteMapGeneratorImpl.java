@@ -28,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -46,7 +47,7 @@ import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
 @SuppressWarnings("serial")
-@Component(metatype = true, configurationFactory=true, label = "ACS sitemap Generator")
+@Component(metatype = true, configurationFactory=true, label = "ACS sitemap Generator",policy=ConfigurationPolicy.REQUIRE)
 @Service
 public class SiteMapGeneratorImpl implements SiteMapGenerator {
     private static final Logger log = LoggerFactory
@@ -70,6 +71,8 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
     private String siteRootPath;
     private String domainName;
     private boolean considerPageFilter;
+    
+    
 
 
     @Reference

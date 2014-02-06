@@ -50,7 +50,7 @@ import com.day.cq.replication.ReplicationException;
 @Component(label = "page replication event listener to clear sitemap cache", immediate=true,policy=ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
-    @Property(name = "event.topics", value = ReplicationAction.EVENT_TOPIC)})
+    @Property(name = "event.topics", value = ReplicationAction.EVENT_TOPIC , propertyPrivate = true)})
 public class PageReplicationEventListener implements EventHandler {
     private static final Logger log = LoggerFactory
             .getLogger(PageReplicationEventListener.class);
