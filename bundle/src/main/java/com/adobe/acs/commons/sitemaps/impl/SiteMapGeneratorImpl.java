@@ -58,12 +58,11 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
     private static final String XML_NS_ATTR_KEY="xmlns";
     private static final String XML_NS_ATTR_VAL="http://www.sitemaps.org/schemas/sitemap/0.9";
     
+    @Property(name =SiteMapConstants.SITE_ROOT_PATH, label="Root Path", description="Site Root path for sitemap", propertyPrivate = false, value = "/content")
+    public static final String SITE_ROOT_PATH = SiteMapConstants.SITE_ROOT_PATH;
     
-    @Property(name =SiteMapGeneratorImpl.SITE_ROOT_PATH, label="Root Path", description="Site Root path for sitemap", propertyPrivate = false, value = "/content")
-    public static final String SITE_ROOT_PATH = "com.acs.sitemap.siterootpath";
-    
-    @Property(name = SiteMapGeneratorImpl.DOMAIN_NAME,label="Domain Name", description="Domain Name of site", propertyPrivate = false, value = "www.google.com")
-    public static final String DOMAIN_NAME = "com.acs.sitemap.domain";
+    @Property(name = SiteMapConstants.DOMAIN_NAME,label="Domain Name", description="Domain Name of site", propertyPrivate = false, value = "www.google.com")
+    public static final String DOMAIN_NAME = SiteMapConstants.DOMAIN_NAME;
 
     @Property(name = SiteMapGeneratorImpl.CONSIDER_IS_HIDE_IN_NAVIGATION_FILTER_ENABLED, boolValue = true, label = "Consider is Hide in Navigation Page Filter", description = "Check to enable the page navigation filter")
     public static final String CONSIDER_IS_HIDE_IN_NAVIGATION_FILTER_ENABLED="considerishideinnavigationfilter.enabled";
@@ -72,18 +71,10 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
     private String domainName;
     private boolean considerPageFilter;
 
+
     @Reference
     private Externalizer externalizer;
 
-    
-    @Activate
-    @Modified
-    protected void activate( final Map<String, Object> properties ){
-        siteRootPath = PropertiesUtil.toString(properties.get(SITE_ROOT_PATH),"");
-        domainName = PropertiesUtil.toString(properties.get(DOMAIN_NAME),"");
-        considerPageFilter=PropertiesUtil.toBoolean(properties.get(CONSIDER_IS_HIDE_IN_NAVIGATION_FILTER_ENABLED),false);
-     }
-    
     @Override
     public Document getSiteMap(ResourceResolver resolver){
         PageManager pageManager = resolver.adaptTo(PageManager.class);
@@ -93,10 +84,15 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
        Document siteMap = generateWebSiteMap(resolver,linksIterator);
        return siteMap;
     }
+    public Document getSiteMapOfPublishedPages(ResourceResolver resolver){
+        
+        return null;
+    }
     private Document generateWebSiteMap(ResourceResolver resolver, Iterator<SiteMap.LinkElement> linksIterator) {
         Document siteMapDocument = createSiteMapDocument();
         Element urlSetElement = createUrlSetElement(siteMapDocument);
-        while(linksIterator.hasNext()){
+        while(linksIterator.hasNext()
+                ){
             SiteMap.LinkElement linkElement =  linksIterator.next();
             urlSetElement.appendChild(createUrlElement(resolver, linkElement , siteMapDocument));
         }
@@ -154,5 +150,18 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
         }
         
     }
+    
+
+    
+    @Activate
+    @Modified
+    protected void activate( final Map<String, Object> properties ){
+        siteRootPath = PropertiesUtil.toString(properties.get(SITE_ROOT_PATH),"");
+        domainName = PropertiesUtil.toString(properties.get(DOMAIN_NAME),"");
+        considerPageFilter=PropertiesUtil.toBoolean(properties.get(CONSIDER_IS_HIDE_IN_NAVIGATION_FILTER_ENABLED),false);
+    }
+    
+
+    
 }
 

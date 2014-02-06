@@ -34,4 +34,5 @@ public interface SiteMapGenerator {
      * @return
      */
 	Document getSiteMap(ResourceResolver resolver);
+
 }

@@ -62,7 +62,7 @@ public class PageReplicationEventListener implements EventHandler {
             final Map<String, Object> props) {
         synchronized (this.siteMapGenerators) {
             this.siteMapGenerators.put(PropertiesUtil.toString(
-                    props.get("com.acs.sitemap.siterootpath"), "/content/geometrixx/en"),
+                    props.get(SiteMapConstants.SITE_ROOT_PATH), "/content/geometrixx/en"),
                     siteMapGenerator);
         }
     }
@@ -72,7 +72,7 @@ public class PageReplicationEventListener implements EventHandler {
             final Map<String, Object> props) {
         synchronized (this.siteMapGenerators) {
             this.siteMapGenerators.remove(PropertiesUtil.toString(
-                    props.get("com.acs.sitemap.siterootpath"),"/content/geometrixx/en"));
+                    props.get(SiteMapConstants.SITE_ROOT_PATH),"/content/geometrixx/en"));
         }
     }
     
@@ -87,6 +87,14 @@ public class PageReplicationEventListener implements EventHandler {
         ReplicationAction action = ReplicationAction.fromEvent(event);
         String[] paths = action.getPaths();
         //in case same replication action has multiple sites
+        Set<String> tobeFlushedDomains = getListOfDomains(paths, action);
+        for(String key : tobeFlushedDomains){
+            flushSiteMapXml(action);
+        }
+        
+    }
+
+    private Set<String> getListOfDomains(String[] paths , ReplicationAction action){
         Set<String> tobeFlushedDomains =  new HashSet<String>();
         for(String path :paths){
             for(String key : siteMapGenerators.keySet()){
@@ -95,11 +103,9 @@ public class PageReplicationEventListener implements EventHandler {
                 }
             }
         }
-        for(String key : tobeFlushedDomains){
-            flushSiteMapXml(action);
-        }
-        
+        return tobeFlushedDomains;
     }
+    
     private void flushSiteMapXml(ReplicationAction action){
         ResourceResolver resolver = getResolver(action.getUserId());
         try {

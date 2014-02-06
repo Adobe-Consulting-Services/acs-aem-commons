@@ -70,7 +70,7 @@ public class SiteMapGeneratorServlet extends SlingSafeMethodsServlet {
             final Map<String, Object> props) {
         synchronized (this.siteMapGenerators) {
             this.siteMapGenerators.put(PropertiesUtil.toString(
-                    props.get("com.acs.sitemap.domain"), "localhost:4502"),
+                    props.get(SiteMapConstants.DOMAIN_NAME), "localhost:4502"),
                     siteMapGenerator);
         }
     }
@@ -80,7 +80,7 @@ public class SiteMapGeneratorServlet extends SlingSafeMethodsServlet {
             final Map<String, Object> props) {
         synchronized (this.siteMapGenerators) {
             this.siteMapGenerators.remove(PropertiesUtil.toString(
-                    props.get("com.acs.sitemap.domain"),"localhost:4502"));
+                    props.get(SiteMapConstants.DOMAIN_NAME),"localhost:4502"));
         }
     }
 
