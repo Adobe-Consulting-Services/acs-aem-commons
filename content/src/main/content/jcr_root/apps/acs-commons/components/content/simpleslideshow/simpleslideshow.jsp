@@ -30,7 +30,7 @@
     if(!children.hasNext()){
 %>
         <wcmmode:edit>
-            Double-Click to add Images
+            Double - Click to add Images
         </wcmmode:edit>
 <%
     }else{
