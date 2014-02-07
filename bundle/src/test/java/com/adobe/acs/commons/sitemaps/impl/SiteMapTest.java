@@ -74,8 +74,8 @@ public class SiteMapTest {
         Map<String, Object> map =  new HashMap<String, Object>();
         map.put("priority", "0.5");
         ValueMap map1 = new ValueMapDecorator(map);
-        when(page.adaptTo(ValueMap.class)).thenReturn(map1);
-        when(pageChild1.adaptTo(ValueMap.class)).thenReturn(map1);
+        when(page.getProperties()).thenReturn(map1);
+        when(pageChild1.getProperties()).thenReturn(map1);
         Calendar cal =GregorianCalendar.getInstance();
         when(page.getLastModified()).thenReturn(cal);
         when(pageChild1.getLastModified()).thenReturn(cal);

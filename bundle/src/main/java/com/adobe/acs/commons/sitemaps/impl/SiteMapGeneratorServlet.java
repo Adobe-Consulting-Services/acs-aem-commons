@@ -53,9 +53,9 @@ import com.adobe.acs.commons.sitemaps.SiteMapGenerator;
 @Component(metatype = true, label = "ACS sitemap xml servlet")
 @Service
 @Properties({
-        @Property(name = "sling.servlet.paths", value = "/bin/acs/sitemap"),
-        @Property(name = "sling.servlet.methods", value = "GET"),
-        @Property(name = "sling.servlet.extensions", value = "xml") })
+        @Property(name = "sling.servlet.paths", value = SiteMapConstants.SERVLET_PATH),
+        @Property(name = "sling.servlet.methods", value = SiteMapConstants.SERVLET_REQUEST_METHOD),
+        @Property(name = "sling.servlet.extensions", value = SiteMapConstants.SERVLET_URL_EXTENSION) })
 public class SiteMapGeneratorServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory
             .getLogger(SiteMapGeneratorServlet.class);

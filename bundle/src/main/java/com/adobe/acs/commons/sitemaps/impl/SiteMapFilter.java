@@ -19,6 +19,11 @@
  */
 package com.adobe.acs.commons.sitemaps.impl;
 
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.SERVLET_PATH;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.SERVLET_REQUEST_METHOD;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.SERVLET_URL_EXTENSION;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.SITEMAP_REQUEST_URL;
+
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -31,29 +36,33 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.scr.annotations.sling.SlingFilter;
-import org.apache.felix.scr.annotations.sling.SlingFilterScope;
-@SlingFilter(
-        scope = SlingFilterScope.REQUEST,
-        description = "ACS Sitemap redirection filter",
-        order = -5000,
-        metatype = false
-        )
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+
+@Component(label = "ACS AEM Commons - Sitemap Redirection Filter", description = "ACS AEM Commons -  Sitemap redirection filter" , policy = ConfigurationPolicy.REQUIRE)
+@Service(Filter.class)
+@Properties({
+        @Property(name = "filter.scope", value = "REQUEST", propertyPrivate = true),
+        @Property(name = "filter.order", intValue = -5000, propertyPrivate = true)
+})
 public class SiteMapFilter implements Filter {
 
     @Override
     public void destroy() {
-        // TODO Auto-generated method stub
         
     }
 
+    
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
             FilterChain chain) throws IOException, ServletException {
       HttpServletRequest request = (HttpServletRequest) servletRequest;
-      if("GET".equals(request.getMethod())&&request.getRequestURI().equals("/sitemap.xml")){
+      if(isSiteMapRequested(request)){
          HttpServletResponse response = (HttpServletResponse) servletResponse;
-         RequestDispatcher dispatcher = request.getRequestDispatcher("/bin/acs/sitemap.xml");
+         RequestDispatcher dispatcher = request.getRequestDispatcher(getSiteMapServletURL());
          dispatcher.forward(request, response);
       }else{
           chain.doFilter(servletRequest , servletResponse);
@@ -62,8 +71,13 @@ public class SiteMapFilter implements Filter {
 
     @Override
     public void init(FilterConfig arg0) throws ServletException {
-        // TODO Auto-generated method stub
         
     }
 
+    private boolean isSiteMapRequested(HttpServletRequest request){
+        return (SERVLET_REQUEST_METHOD.equals(request.getMethod())&&request.getRequestURI().equals(SITEMAP_REQUEST_URL));
+    }
+    private String getSiteMapServletURL(){
+        return SERVLET_PATH+"."+SERVLET_URL_EXTENSION;
+    }
 }

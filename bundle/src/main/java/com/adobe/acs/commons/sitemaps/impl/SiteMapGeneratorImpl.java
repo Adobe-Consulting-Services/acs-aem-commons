@@ -19,6 +19,13 @@
  */
 package com.adobe.acs.commons.sitemaps.impl;
 
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.PRIORITY;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.SITEMAP_XML_CHANGE_FREQ;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.SITEMAP_XML_LAST_MODIFIED_DATE;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.SITEMAP_XML_LOC;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.SITEMAP_XML_URL;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.SITEMAP_XML_URLSET;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -47,7 +54,7 @@ import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
 @SuppressWarnings("serial")
-@Component(metatype = true, configurationFactory=true, label = "ACS sitemap Generator",policy=ConfigurationPolicy.REQUIRE)
+@Component(metatype = true, configurationFactory=true, label = "ACS AEM Commons - Sitemap Generator" ,policy=ConfigurationPolicy.REQUIRE)
 @Service
 public class SiteMapGeneratorImpl implements SiteMapGenerator {
     private static final Logger log = LoggerFactory
@@ -100,7 +107,7 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
     }
     
     private Element createUrlElement(ResourceResolver resolver, SiteMap.LinkElement linkElement, Document siteMapDocument){
-        Element url = createElement("url", siteMapDocument);
+        Element url = createElement(SITEMAP_XML_URL, siteMapDocument);
         url.appendChild(createLocElement(externalizer.externalLink(resolver,domainName,linkElement.getLink()), siteMapDocument));
         url.appendChild(createLastmodElement(linkElement.getLastModifiedDate(), siteMapDocument));
         url.appendChild(createFrequencyElement(linkElement.getUpdationFreq(), siteMapDocument));
@@ -108,27 +115,27 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
         return url;
     }
     private Element createLastmodElement(String lastModDate, Document siteMapDocument){
-        Element lastmodEl = createElement("lastmod", siteMapDocument);
+        Element lastmodEl = createElement(SITEMAP_XML_LAST_MODIFIED_DATE, siteMapDocument);
         lastmodEl.appendChild(siteMapDocument.createTextNode(lastModDate));
         return lastmodEl;
     }
     private Element createFrequencyElement(String updationFrequency, Document siteMapDocument){
-        Element freq = createElement("changefreq", siteMapDocument);
+        Element freq = createElement(SITEMAP_XML_CHANGE_FREQ, siteMapDocument);
         freq.appendChild(siteMapDocument.createTextNode(updationFrequency));
         return freq;
     }
     private Element createPriorityElement(String priority, Document siteMapDocument){
-        Element priEl = createElement("priority", siteMapDocument);
+        Element priEl = createElement(PRIORITY, siteMapDocument);
         priEl.appendChild(siteMapDocument.createTextNode(priority));
         return priEl;
     }
     private Element createLocElement(String link, Document siteMapDocument){
-        Element loc = createElement("loc", siteMapDocument);
+        Element loc = createElement(SITEMAP_XML_LOC, siteMapDocument);
         loc.appendChild(siteMapDocument.createTextNode(link));
         return loc;
     }
     private Element createUrlSetElement(Document siteMapDocument){
-        Element urlSet = createElement("urlset", siteMapDocument);
+        Element urlSet = createElement(SITEMAP_XML_URLSET, siteMapDocument);
         urlSet.setAttribute(XML_NS_ATTR_XSI_KEY,XML_NS_ATTR_XSI_VAL);
         urlSet.setAttribute(XML_SCHEMA_LOC_ATTR_KEY,XML_SCHEMA_LOC_ATTR_VAL);
         urlSet.setAttribute(XML_NS_ATTR_KEY,XML_NS_ATTR_VAL);
@@ -146,8 +153,7 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
         } catch (ParserConfigurationException e) {
             log.error(e.getMessage(),e);
            return null;
-        }
-        
+        }        
     }
     
 

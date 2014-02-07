@@ -304,7 +304,12 @@
             <version>5.5.8</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.event</artifactId>
+            <version>3.1.5-R1485539</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.apache.sling</groupId>

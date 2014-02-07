@@ -30,6 +30,13 @@ import org.apache.sling.api.resource.ValueMap;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.DEFAULT_DATE_FORMAT;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.PAGE_PROP_UPD_FREQ;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.PRIORITY;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.PAGE_PROP_PRIORITY_DEFAULT;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.PAGE_PROP_UPD_FREQ_DEFAULT;
+import static com.adobe.acs.commons.sitemaps.impl.SiteMapConstants.DEFAULT_LINK_EXTENSION;
+
 public class SiteMap implements Iterable<SiteMap.LinkElement> {
 
     private final Page page;
@@ -61,23 +68,17 @@ public class SiteMap implements Iterable<SiteMap.LinkElement> {
         return rootPage.listChildren();
     }
     private SiteMap.LinkElement getSiteMapLinkElement(Page page){
-        ValueMap map = page.adaptTo(ValueMap.class);
-        String updationFreq = map.get("updationFreq", "daily");
-        String priority = map.get("priority","0.5");
-        String lastModifiedDate = getDateAsString( page.getLastModified().getTime(), "yyyy-MM-dd'T'hh:mm:ss XXX");
+        ValueMap map = page.getProperties();
+        String updationFreq = map.get(PAGE_PROP_UPD_FREQ, PAGE_PROP_UPD_FREQ_DEFAULT);
+        String priority = map.get(PRIORITY,PAGE_PROP_PRIORITY_DEFAULT);
+        String lastModifiedDate = getDateAsString( page.getLastModified().getTime(), DEFAULT_DATE_FORMAT);
 
-        return new SiteMap.LinkElement(page.getPath()+".html", lastModifiedDate, updationFreq, priority);
+        return new SiteMap.LinkElement(page.getPath()+"."+DEFAULT_LINK_EXTENSION, lastModifiedDate, updationFreq, priority);
     }
     private String getDateAsString(Date date,String format) {
-           String dateStr = "";
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat(format);
-              
-                dateStr = sdf.format(date);
-            } catch (Exception e) {
-               
-            }
-            return dateStr;
+           
+           return new SimpleDateFormat(format).format(date);
+     
         }
  static class LinkElement{
     private String link;

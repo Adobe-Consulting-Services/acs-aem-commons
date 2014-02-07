@@ -19,10 +19,10 @@
  */
 package com.adobe.acs.commons.sitemaps.impl;
 
+import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static junit.framework.Assert.assertEquals;
 
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -35,9 +35,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -84,8 +81,8 @@ public class SiteMapGeneratorImplTest {
         map.put("priority", "0.5");
         ValueMap map1 = new ValueMapDecorator(map);
         Calendar cal = GregorianCalendar.getInstance();
-        when(page.adaptTo(ValueMap.class)).thenReturn(map1);
-        when(pageChild1.adaptTo(ValueMap.class)).thenReturn(map1);
+        when(page.getProperties()).thenReturn(map1);
+        when(pageChild1.getProperties()).thenReturn(map1);
         when(page.getLastModified()).thenReturn(cal);
         when(pageChild1.getLastModified()).thenReturn(cal);
         when(page.getPath()).thenReturn("/content/geometrixx/en");
