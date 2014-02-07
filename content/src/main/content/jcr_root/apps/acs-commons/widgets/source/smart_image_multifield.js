@@ -50,6 +50,7 @@
  *                          fileReferenceParameter="./imageReference"
  *                          height="250"
  *                          mapParameter="./imageMap"
+ *                          imageSlingResourceType="/libs/foundation/components/logo"
  *                          name="./image"
  *                          rotateParameter="./imageRotate"
  *                          sizeLimit="100"
@@ -102,6 +103,11 @@ ACS.CQ.form.ImageMultiField.Panel = CQ.Ext.extend(CQ.Ext.Panel, {
             toolDef.transferFieldName = imageName + toolDef.transferFieldName.substr(1);
             toolDef.transferField.name = toolDef.transferFieldName;
         });
+
+        this.add(new CQ.Ext.form.Hidden({
+            name: image.name + "/sling:resourceType",
+            value: image.imageSlingResourceType
+        }));
     },
 
     setValue: function (record) {

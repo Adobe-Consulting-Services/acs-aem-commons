@@ -2,7 +2,7 @@
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:Dialog"
     activeTab="{Long}0"
-    title="Multi Image"
+    title="Slide Show Images"
     xtype="tabpanel">
     <items jcr:primaryType="cq:WidgetCollection">
         <basic
@@ -30,6 +30,7 @@
                                 ddGroups="[media]"
                                 fileNameParameter="./imageName"
                                 fileReferenceParameter="./imageReference"
+                                imageSlingResourceType="/libs/foundation/components/logo"
                                 height="250"
                                 mapParameter="./imageMap"
                                 name="./image"
