@@ -41,6 +41,9 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
@@ -65,6 +68,11 @@ public class SiteMapGeneratorServlet extends SlingSafeMethodsServlet {
 
     private TransformerFactory transformerFactory ;
     
+    @Reference
+    private ResourceResolverFactory resolverFactory;
+    
+    private ResourceResolver anonymousResolver;
+    
     protected void bindSiteMapGenerators(
             final SiteMapGenerator siteMapGenerator,
             final Map<String, Object> props) {
@@ -87,7 +95,7 @@ public class SiteMapGeneratorServlet extends SlingSafeMethodsServlet {
     protected void doGet(SlingHttpServletRequest request,
             SlingHttpServletResponse response) {
         String currentDomain = request.getHeader("Host");
-       Document siteMapDocument = this.siteMapGenerators.get(currentDomain).getSiteMap(request.getResourceResolver());
+       Document siteMapDocument = this.siteMapGenerators.get(currentDomain).getSiteMap(anonymousResolver);
        printSiteMap(siteMapDocument, response);
     }
     
@@ -117,6 +125,13 @@ public class SiteMapGeneratorServlet extends SlingSafeMethodsServlet {
     protected void activate( final Map<String, Object> properties ){
      
         transformerFactory = TransformerFactory.newInstance();
+        try {
+            anonymousResolver = resolverFactory.getResourceResolver(null);
+        } catch (LoginException e) {
+            log.error(e.getMessage(),e);
+        }
       
     }
+    
+    
 }
