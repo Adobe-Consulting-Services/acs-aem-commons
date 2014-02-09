@@ -18,10 +18,10 @@
  * #L%
  */
 
-package com.adobe.acs.commons.configuration.impl;
+package com.adobe.acs.commons.configuration.osgi.impl;
 
-import com.adobe.acs.commons.configuration.OsgiConfigConstants;
-import com.adobe.acs.commons.configuration.OsgiConfigHelper;
+import com.adobe.acs.commons.configuration.osgi.OsgiConfigConstants;
+import com.adobe.acs.commons.configuration.osgi.OsgiConfigHelper;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 
 @Component(label = "ACS AEM Commons - OSGi Config Helper",
-        description = "Helper utility in support of managing Sling Osgi Configurations",
+        description = "Helper utility in support of managing Sling OSGi Configurations.",
         metatype = false)
 @Service
 public class OsgiConfigHelperImpl implements OsgiConfigHelper {
@@ -42,11 +42,11 @@ public class OsgiConfigHelperImpl implements OsgiConfigHelper {
     /**
      * {@inheritDoc}
      */
-    public final String getPID(final Resource resource)  {
+    public final String getPID(final Resource resource) {
         final ValueMap properties = resource.adaptTo(ValueMap.class);
         final String pid = properties.get(OsgiConfigConstants.PN_PID, String.class);
 
-        if(StringUtils.isBlank(pid)) {
+        if (StringUtils.isBlank(pid)) {
             log.error("Resource [ {} ] must have non-blank property for: {}",
                     resource.getPath(), OsgiConfigConstants.PN_PID);
             return null;
@@ -54,9 +54,9 @@ public class OsgiConfigHelperImpl implements OsgiConfigHelper {
 
         final String configurationType = properties.get(
                 OsgiConfigConstants.PN_CONFIGURATION_TYPE,
-                OsgiConfigConstants.ConfigurationType.SINGLE.name());
+                OsgiConfigConstants.OsgiConfigurationType.SINGLE.name());
 
-        if(StringUtils.equalsIgnoreCase(OsgiConfigConstants.ConfigurationType.FACTORY.name(),
+        if (StringUtils.equalsIgnoreCase(OsgiConfigConstants.OsgiConfigurationType.FACTORY.name(),
                 configurationType)) {
             return pid + "-" + DigestUtils.md5Hex(resource.getPath());
         } else {
@@ -67,13 +67,13 @@ public class OsgiConfigHelperImpl implements OsgiConfigHelper {
     /**
      * {@inheritDoc}
      */
-    public boolean hasRequiredProperties(final Resource resource,
-                                          final String[] requiredProperties) {
+    public final boolean hasRequiredProperties(final Resource resource,
+                                         final String[] requiredProperties) {
         final ValueMap properties = resource.adaptTo(ValueMap.class);
 
-        for(final String requiredProperty : requiredProperties) {
+        for (final String requiredProperty : requiredProperties) {
             final String tmp = properties.get(requiredProperty, String.class);
-            if(StringUtils.isBlank(tmp)) {
+            if (StringUtils.isBlank(tmp)) {
                 return false;
             }
         }

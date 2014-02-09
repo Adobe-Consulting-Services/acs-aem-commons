@@ -20,9 +20,8 @@
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8"
         import="org.apache.commons.lang.StringUtils,
-                org.apache.commons.codec.digest.DigestUtils,
-                com.adobe.acs.commons.configuration.OsgiConfigHelper,
-                com.adobe.acs.commons.configuration.OsgiConfigConstants"%><%
+                com.adobe.acs.commons.configuration.osgi.OsgiConfigHelper,
+                com.adobe.acs.commons.configuration.osgi.OsgiConfigConstants"%><%
 
     /* Services */
     final OsgiConfigHelper osgiConfigHelper = sling.getService(OsgiConfigHelper.class);
@@ -40,7 +39,7 @@
     Dispatcher Flush Rule Configuration
     <span style="float:right;">[ <a
         href="http://adobe-consulting-services.github.io/acs-aem-commons/features/dispatcher-flush-rules.html"
-         target="_blank">Documenation</a> ]</span>
+         target="_blank">Documentation</a> ]</span>
 </h3>
 
 <p>

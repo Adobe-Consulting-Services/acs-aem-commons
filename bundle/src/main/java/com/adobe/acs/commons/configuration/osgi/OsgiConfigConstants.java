@@ -18,11 +18,11 @@
  * #L%
  */
 
-package com.adobe.acs.commons.configuration;
+package com.adobe.acs.commons.configuration.osgi;
 
 
-public class OsgiConfigConstants {
-    public static enum ConfigurationType {
+public final class OsgiConfigConstants {
+    public static enum OsgiConfigurationType {
         SINGLE,
         FACTORY
     }
@@ -32,4 +32,8 @@ public class OsgiConfigConstants {
     public static final String PN_CONFIGURATION_TYPE = "acs.configurationType";
     public static final String PN_TARGET_CONFIG = "acs.targetConfig";
     public static final String PN_PID = "acs.pid";
+    public static final String NT_SLING_OSGICONFIG = "sling:OsgiConfig";
+
+    private OsgiConfigConstants() {
+    }
 }

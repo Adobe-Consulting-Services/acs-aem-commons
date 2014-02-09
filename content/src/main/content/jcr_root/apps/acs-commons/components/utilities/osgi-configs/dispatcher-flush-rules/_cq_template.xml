@@ -23,5 +23,5 @@
         jcr:primaryType="sling:OsgiConfig"
         acs.pid="com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlushRulesImpl"
         acs.configurationType="factory"
-        acs.requiredProperties="[]"
+        acs.requiredProperties="[replication-action-type]"
         />

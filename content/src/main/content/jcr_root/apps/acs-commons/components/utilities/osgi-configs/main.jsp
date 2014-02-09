@@ -21,7 +21,7 @@
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8"
           import="com.adobe.acs.commons.util.TextUtil,
-                  com.adobe.acs.commons.configuration.OsgiConfigConstants"%><%
+                  com.adobe.acs.commons.configuration.osgi.OsgiConfigConstants"%><%
 
     /* Page Properties */
     final String pageTitle = TextUtil.getFirstNonEmpty(
@@ -36,7 +36,8 @@
 
 <h4>
     Config folder:
-    <%= currentPage.getProperties().get(OsgiConfigConstants.PN_TARGET_CONFIG, "") %>
+    <%= currentPage.getProperties().get(OsgiConfigConstants.PN_TARGET_CONFIG,
+            "Configure in Page Properties") %>
 </h4>
 
 <cq:include path="par" resourceType="foundation/components/parsys"/>

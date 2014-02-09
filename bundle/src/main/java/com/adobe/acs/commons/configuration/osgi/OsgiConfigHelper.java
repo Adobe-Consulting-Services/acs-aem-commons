@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.configuration;
+package com.adobe.acs.commons.configuration.osgi;
 
 import org.apache.sling.api.resource.Resource;
 
