@@ -26,7 +26,7 @@
         <target-config
                 jcr:primaryType="cq:Widget"
                 name="./acs.targetConfig"
-                fieldLabel="Target config folder"
+                fieldLabel="Config folder"
                 fieldDescription="Absolute path to config folder to place OSGi configs."
                 rootPath="/apps"
                 predicate="hierarchyNotFile"

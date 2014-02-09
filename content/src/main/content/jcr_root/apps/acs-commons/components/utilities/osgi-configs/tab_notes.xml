@@ -26,9 +26,10 @@
     <items jcr:primaryType="cq:WidgetCollection">
         <notes
                 jcr:primaryType="cq:Widget"
-                name="./jcr:description"
+                name="./acs.README"
                 fieldLabel="Notes"
                 fieldDescription=""
+                height="{Long}200"
                 xtype="textarea"/>
     </items>
 </jcr:root>

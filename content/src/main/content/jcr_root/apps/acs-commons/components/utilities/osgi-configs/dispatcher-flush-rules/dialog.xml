@@ -34,14 +34,15 @@
                         jcr:primaryType="cq:Widget"
                         fieldLabel="Replication action type"
                         fieldDescription=""
-                        defaultValue=""
-                        name="./prop.replication-action-type"
+                        defaultValue="INHERIT"
+                        allowBlank="{Boolean}false"
+                        name="./replication-action-type"
                         type="select"
                         xtype="selection">
                     <options jcr:primaryType="cq:WidgetCollection">
                         <inherit
                                 jcr:primaryType="nt:unstructured"
-                                text="Inherit"
+                                text="Inherit (from originating replication event)"
                                 value="INHERIT"/>
                         <activate
                                 jcr:primaryType="nt:unstructured"
@@ -58,7 +59,7 @@
                     jcr:primaryType="cq:Widget"
                     fieldDescription="Click the '+' to add a new flush rule"
                     fieldLabel="Hierarchical Rules"
-                    name="./prop.rules.hierarchical"
+                    name="./rules.hierarchical"
                     xtype="multifield">
                     <fieldConfig
                         jcr:primaryType="cq:Widget"
@@ -69,7 +70,7 @@
                         jcr:primaryType="cq:Widget"
                         fieldDescription="Click the '+' to add a new flush rule"
                         fieldLabel="Resource Only Rules"
-                        name="./prop.rules.resource-only"
+                        name="./rules.resource-only"
                         xtype="multifield">
                     <fieldConfig
                             jcr:primaryType="cq:Widget"

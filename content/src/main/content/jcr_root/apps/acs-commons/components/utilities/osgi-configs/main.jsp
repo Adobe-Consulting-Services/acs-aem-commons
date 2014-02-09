@@ -20,7 +20,8 @@
 
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8"
-          import="com.adobe.acs.commons.util.TextUtil"%><%
+          import="com.adobe.acs.commons.util.TextUtil,
+                  com.adobe.acs.commons.configuration.OsgiConfigConstants"%><%
 
     /* Page Properties */
     final String pageTitle = TextUtil.getFirstNonEmpty(
@@ -29,10 +30,13 @@
             currentPage.getName());
 %>
 
-<h1>Dispatcher Flush Rules</h1>
+<h1>OSGi Configuration</h1>
 
 <h2><%= xssAPI.encodeForHTML(pageTitle) %></h2>
 
-<p>Saving to: <%= currentPage.getProperties().get("acs.targetConfig", "") %></p>
+<h4>
+    Config folder:
+    <%= currentPage.getProperties().get(OsgiConfigConstants.PN_TARGET_CONFIG, "") %>
+</h4>
 
 <cq:include path="par" resourceType="foundation/components/parsys"/>

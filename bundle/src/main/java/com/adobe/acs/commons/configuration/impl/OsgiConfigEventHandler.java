@@ -20,15 +20,23 @@
 
 package com.adobe.acs.commons.configuration.impl;
 
-
+import com.adobe.acs.commons.configuration.OsgiConfigConstants;
+import com.adobe.acs.commons.configuration.OsgiConfigHelper;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
-import org.apache.sling.api.resource.*;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.event.jobs.JobProcessor;
 import org.apache.sling.event.jobs.JobUtil;
 import org.osgi.service.event.Event;
@@ -65,13 +73,9 @@ import javax.jcr.Session;
 public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
     private static final Logger log = LoggerFactory.getLogger(OsgiConfigEventHandler.class);
 
-    private static final String PN_REQUIRED_PROPERTIES = "acs.requiredProperties";
-    private static final String PN_CONFIGURATION_SRC = "acs.configurationSrc";
-    private static final String PN_CONFIGURATION_TYPE = "acs.configurationType";
-    private static final String PN_TARGET_CONFIG = "acs.targetConfig";
-    private static final String PN_PID = "acs.pid";
+    @Reference
+    private OsgiConfigHelper osgiConfigiHelper;
 
-    // EventAdmin is used to manually trigger other events
     @Reference
     private EventAdmin eventAdmin;
 
@@ -79,13 +83,13 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
     private ResourceResolverFactory resourceResolverFactory;
 
     @Override
-    public void handleEvent(Event event) {
+    public final void handleEvent(Event event) {
         JobUtil.processJob(event, this);
         return;
     }
 
     @Override
-    public boolean process(final Event event) {
+    public final boolean process(final Event event) {
         // Resource path "undergoing" the event
         final String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
 
@@ -107,7 +111,7 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
 
             final Session session = resourceResolver.adaptTo(Session.class);
 
-            final String targetPath = page.getProperties().get(PN_TARGET_CONFIG, String.class);
+            final String targetPath = page.getProperties().get(OsgiConfigConstants.PN_TARGET_CONFIG, String.class);
 
             /* Page is not configured to support Osgi Configuring */
             if(StringUtils.isBlank(targetPath)) { return true; }
@@ -122,7 +126,7 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
 
                 for(final Resource child : targetResource.getChildren()) {
                     final ValueMap properties = child.adaptTo(ValueMap.class);
-                    final String src = properties.get(PN_CONFIGURATION_SRC, String.class);
+                    final String src = properties.get(OsgiConfigConstants.PN_CONFIGURATION_SRC, String.class);
 
                     if(StringUtils.equals(src, path)) {
                         log.debug("Deleting OSGi Config at: {}", child.getPath());
@@ -138,41 +142,38 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
 
                 final Resource resource = resourceResolver.getResource(path);
                 final ValueMap properties = resource.adaptTo(ValueMap.class);
-                final String osgiConfigPid = properties.get(PN_PID, String.class);
 
-                final String configurationType = properties.get(PN_CONFIGURATION_TYPE, "single");
-
-                if(StringUtils.isBlank(osgiConfigPid)) {
-                    log.debug("Ignoring. {} property not set for {}", PN_PID, path);
+                if(StringUtils.isBlank(properties.get(OsgiConfigConstants.PN_PID, String.class))) {
+                    log.debug("Ignoring. {} property not set for {}", OsgiConfigConstants.PN_PID, path);
                     return true;
-                } else if(!this.hasRequiredProperties(resource,
-                        properties.get(PN_REQUIRED_PROPERTIES, new String[]{}))) {
+                } else if(!osgiConfigiHelper.hasRequiredProperties(resource,
+                        properties.get(OsgiConfigConstants.PN_REQUIRED_PROPERTIES, new String[]{ }))) {
                     log.debug("Missing required properties {}", path);
                     return true;
                 }
 
                 log.debug("Creating/updating OSGi Config at [ {} ] from [ {} ]",
-                        targetPath + "/" + osgiConfigPid,
-                        path + this.getPostFixPath(path, configurationType));
+                        targetPath + "/" + osgiConfigiHelper.getPID(resource),
+                        path);
 
                 final Node node = JcrUtil.copy(session.getNode(path),
                         session.getNode(targetPath),
-                        osgiConfigPid + this.getPostFixPath(path, configurationType));
+                        osgiConfigiHelper.getPID(resource));
 
-                JcrUtil.setProperty(node, PN_CONFIGURATION_SRC, path);
+                JcrUtil.setProperty(node, OsgiConfigConstants.PN_CONFIGURATION_SRC, path);
 
                 // Remove unnecessary properties from the "real" sling:OsgiConfig node
                 JcrUtil.setProperty(node, "sling:resourceType", null);
-                JcrUtil.setProperty(node, PN_REQUIRED_PROPERTIES, null);
-                JcrUtil.setProperty(node, PN_CONFIGURATION_TYPE, null);
-                JcrUtil.setProperty(node, PN_PID, null);
+                JcrUtil.setProperty(node, OsgiConfigConstants.PN_CONFIGURATION_TYPE, null);
+                JcrUtil.setProperty(node, OsgiConfigConstants.PN_PID, null);
+
+                // Going directly to node as JCRUtil does not handle removal of String[] properties as expected
+                node.setProperty(OsgiConfigConstants.PN_REQUIRED_PROPERTIES, (String[])null);
 
                 session.save();
             }
-
         } catch (LoginException e) {
             log.error(e.getMessage());
-            e.printStackTrace();
         } catch (PathNotFoundException e) {
             log.error(e.getMessage());
         } catch (RepositoryException e) {
@@ -184,28 +185,6 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
         }
 
         // Only return false if job processing failed and the job should be rescheduled
-        return true;
-    }
-
-    private String getPostFixPath(final String path, final String configurationType) {
-        if(StringUtils.equalsIgnoreCase("factory", configurationType)) {
-            return "-" + DigestUtils.md5Hex(path);
-        } else {
-            return "";
-        }
-    }
-
-    private boolean hasRequiredProperties(final Resource resource,
-                                          final String[] requiredProperties) {
-        final ValueMap properties = resource.adaptTo(ValueMap.class);
-
-        for(final String requiredProperty : requiredProperties) {
-            final String tmp = properties.get(requiredProperty, String.class);
-            if(StringUtils.isBlank(tmp)) {
-                return false;
-            }
-        }
-
         return true;
     }
 }

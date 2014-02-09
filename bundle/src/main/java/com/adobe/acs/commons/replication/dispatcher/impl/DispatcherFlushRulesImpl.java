@@ -89,7 +89,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                     @PropertyOption(name = OPTION_ACTIVATE, value = "Invalidate Cache"),
                     @PropertyOption(name = OPTION_DELETE, value = "Delete Cache")
             })
-    private static final String PROP_REPLICATION_ACTION_TYPE_NAME = "prop.replication-action-type";
+    private static final String PROP_REPLICATION_ACTION_TYPE_NAME = "replication-action-type";
 
 
     /* Flush Rules */
@@ -100,7 +100,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                     + "Format: <pattern-of-trigger-content>=<path-to-flush>",
             cardinality = Integer.MAX_VALUE,
             value = { })
-    private static final String PROP_FLUSH_RULES = "prop.rules.hierarchical";
+    private static final String PROP_FLUSH_RULES = "rules.hierarchical";
 
 
     /* Flush Rules */
@@ -111,7 +111,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                     + "Format: <pattern-of-trigger-content>=<path-to-flush>",
             cardinality = Integer.MAX_VALUE,
             value = { })
-    private static final String PROP_RESOURCE_ONLY_FLUSH_RULES = "prop.rules.resource-only";
+    private static final String PROP_RESOURCE_ONLY_FLUSH_RULES = "rules.resource-only";
 
     @Reference
     private DispatcherFlusher dispatcherFlusher;
@@ -223,22 +223,29 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
+        final String legacyPrefix = "prop.";
+
+
+
         /* Replication Action Type */
         this.replicationActionType = this.configureReplicationActionType(
                 PropertiesUtil.toString(properties.get(PROP_REPLICATION_ACTION_TYPE_NAME),
-                        DEFAULT_REPLICATION_ACTION_TYPE_NAME));
+                        PropertiesUtil.toString(properties.get(legacyPrefix + PROP_REPLICATION_ACTION_TYPE_NAME),
+                                DEFAULT_REPLICATION_ACTION_TYPE_NAME)));
 
         /* Flush Rules */
         this.hierarchicalFlushRules = this.configureFlushRules(OsgiPropertyUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES),
-                        DEFAULT_HIERARCHICAL_FLUSH_RULES), "="));
+                        PropertiesUtil.toStringArray(properties.get(legacyPrefix + PROP_FLUSH_RULES),
+                                DEFAULT_HIERARCHICAL_FLUSH_RULES)), "="));
 
         log.debug("Hierarchical flush rules: " + this.hierarchicalFlushRules);
 
         /* ResourceOnly Flush Rules */
         this.resourceOnlyFlushRules = this.configureFlushRules(OsgiPropertyUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_ONLY_FLUSH_RULES),
-                        DEFAULT_RESOURCE_ONLY_FLUSH_RULES), "="));
+                        PropertiesUtil.toStringArray(properties.get(legacyPrefix + PROP_RESOURCE_ONLY_FLUSH_RULES),
+                                DEFAULT_RESOURCE_ONLY_FLUSH_RULES)), "="));
 
         log.debug("ResourceOnly flush rules: " + this.resourceOnlyFlushRules);
     }
