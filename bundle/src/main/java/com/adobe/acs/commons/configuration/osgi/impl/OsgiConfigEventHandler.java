@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2014 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package com.adobe.acs.commons.configuration.osgi.impl;
 import com.adobe.acs.commons.configuration.osgi.OsgiConfigConstants;
 import com.adobe.acs.commons.configuration.osgi.OsgiConfigHelper;
 import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.jcrclustersupport.ClusterAware;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
@@ -84,7 +85,7 @@ import java.util.Map;
         )
 })
 @Service
-public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
+public class OsgiConfigEventHandler implements JobProcessor, EventHandler, ClusterAware {
     private static final Logger log = LoggerFactory.getLogger(OsgiConfigEventHandler.class);
 
     @Reference
@@ -108,10 +109,14 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
             boolValue = DEFAULT_PROCESS_ON_ACTIVATE)
     public static final String PROP_PROCESS_ON_ACTIVATE = "process.on-activate";
 
+    private boolean isMaster = false;
 
     @Override
     public final void handleEvent(Event event) {
-        JobUtil.processJob(event, this);
+        if(this.isMaster) {
+            // Only process the job on master instances
+            JobUtil.processJob(event, this);
+        }
         return;
     }
 
@@ -236,7 +241,12 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
         processOnActivate = PropertiesUtil.toBoolean(config.get(PROP_PROCESS_ON_ACTIVATE),
                 DEFAULT_PROCESS_ON_ACTIVATE);
 
-        if(processOnActivate) {
+        if(!this.isMaster) {
+            log.info("Non-master instance. Do not run process on activate routine.");
+
+            return;
+        } else if(processOnActivate) {
+
             log.info("Processing any existing author-able OSGi Configurations on activation under: {}", searchPath);
 
             final Map<String, String> map = new HashMap<String, String>();
@@ -277,5 +287,15 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler {
                 }
             }
         }
+    }
+
+    @Override
+    public void bindRepository(final String respositoryID, final String clusterID, final boolean isMaster) {
+        this.isMaster = isMaster;
+    }
+
+    @Override
+    public void unbindRepository() {
+        this.isMaster = false;
     }
 }
