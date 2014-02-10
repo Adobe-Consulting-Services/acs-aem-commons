@@ -22,7 +22,6 @@ First, add the taglib declaration:
 
 ### Functions
 
-
 * `xss:encodeForHTML(XSSAPI, String)`
 * `xss:encodeForHTMLAttr(XSSAPI, String)`
 * `xss:encodeForJSString(XSSAPI, String)`
@@ -32,4 +31,11 @@ First, add the taglib declaration:
 * `xss:getValidInteger(XSSAPI, String, int)`
 * `xss:getValidJSToken(XSSAPI, String, String)`
 
+
 See JavaDoc of [XSSAPI](http://dev.day.com/docs/en/cq/current/javadoc/com/adobe/granite/xss/XSSAPI.html) for more details. Also see the [XSS Cheat Sheet](https://dev.day.com/content/docs/en/cq/current/developing/securitychecklist/_jcr_content/par/download/file.res/xss_cheat_sheet.pdf).
+
+### Example
+
+    <%@include file="/libs/foundation/global.jsp"%><%
+    %><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %>
+    ${xss:encodeForHTMLAttr(xssAPI, 'hi"')}

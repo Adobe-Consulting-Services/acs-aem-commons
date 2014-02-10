@@ -63,7 +63,7 @@ Then create the overlay for the default.jsp
 {% highlight xml %}
 <errorpages
     jcr:primaryType="cq:Widget"
-    path="/apps/acs-commons/components/utilities/errorpagehandler/dialog/errorpages"
+    path="/apps/acs-commons/components/utilities/errorpagehandler/dialog/errorpages.infinity.json"
     xtype="cqinclude"/>
 {% endhighlight %}
 
