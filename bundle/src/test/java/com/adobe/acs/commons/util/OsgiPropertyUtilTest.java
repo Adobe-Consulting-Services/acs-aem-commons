@@ -105,6 +105,7 @@ public class OsgiPropertyUtilTest {
         assertEquals(expResult, result);
     }
 
+
     /**
      * Test of toMap method, of class OsgiPropertyUtil.
      */
@@ -178,6 +179,66 @@ public class OsgiPropertyUtilTest {
         expResult.put("key3", "value3");
 
         Map result = OsgiPropertyUtil.toMap(values, separator);
+        assertEquals(expResult, result);
+    }
+
+
+
+
+
+
+    /**
+     * Test of toMap method, of class OsgiPropertyUtil.
+     */
+    @Test
+    public void testToMap_allowValuelessKeys() {
+        String[] values = {"key1:value1", "key2:value2", "key3:value3"};
+        String separator = ":";
+        Map expResult = new HashMap<String, String>();
+        expResult.put("key1", "value1");
+        expResult.put("key2", "value2");
+        expResult.put("key3", "value3");
+
+        Map result = OsgiPropertyUtil.toMap(values, separator, true, "testing-default");
+        assertEquals(expResult, result);
+    }
+
+
+    @Test
+    public void testToMapWithOnlyKey_allowValuelessKeys() {
+        String[] values = {"key1:value1", "key2:", "key3:value3"};
+        String separator = ":";
+        Map expResult = new HashMap<String, String>();
+        expResult.put("key1", "value1");
+        expResult.put("key2", "testing-default");
+        expResult.put("key3", "value3");
+
+        Map result = OsgiPropertyUtil.toMap(values, separator, true, "testing-default");
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testToMapWithOnlyKey_allowValuelessKeys_missingSeparator() {
+        String[] values = {"key1:value1", "key2", "key3:value3"};
+        String separator = ":";
+        Map expResult = new HashMap<String, String>();
+        expResult.put("key1", "value1");
+        expResult.put("key2", "testing-default");
+        expResult.put("key3", "value3");
+
+        Map result = OsgiPropertyUtil.toMap(values, separator, true, "testing-default");
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testToMapWithOnlyValue_allowValuelessKeys() {
+        String[] values = {"key1:value1", ":value2", "key3:value3"};
+        String separator = ":";
+        Map expResult = new HashMap<String, String>();
+        expResult.put("key1", "value1");
+        expResult.put("key3", "value3");
+
+        Map result = OsgiPropertyUtil.toMap(values, separator, true, "testing-default");
         assertEquals(expResult, result);
     }
 }
