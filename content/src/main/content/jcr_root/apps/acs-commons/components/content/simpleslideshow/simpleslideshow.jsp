@@ -24,6 +24,8 @@
 <%@ page import="org.apache.sling.commons.json.JSONArray" %>
 <%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %>
 
+<cq:includeClientLib categories="acs-commons.components.simpleslideshow"/>
+
 <%
     Iterator<Resource> children = resource.listChildren();
 
@@ -41,65 +43,21 @@
         Image img = null; String src = null;
         JSONArray array = new JSONArray(order);
 %>
-        <!--
-        Logic from this fantastic slide show example http://jonraasch.com/blog/a-simple-jquery-slideshow
-        -->
-
-        <style>
-            #imagemultifieldslideshow {
-                position:relative;
-                height:350px;
-            }
-
-            #imagemultifieldslideshow IMG {
-                position:absolute;
-                top:0;
-                left:0;
-                z-index:8;
-            }
-
-            #imagemultifieldslideshow IMG.active {
-                z-index:10;
-            }
-
-            #imagemultifieldslideshow IMG.last-active {
-                z-index:9;
-            }
-        </style>
-
-        <script>
-            function slideSwitch() {
-                var $active = $('#imagemultifieldslideshow IMG.active');
-
-                if ( $active.length == 0 ){
-                    $active = $('#imagemultifieldslideshow IMG:last');
-                }
-
-                var $next =  $active.next().length ? $active.next() : $('#imagemultifieldslideshow IMG:first');
-
-                $active.addClass('last-active');
-
-                $next.css({ opacity: 0.0 } ).addClass('active')
-                        .animate({opacity: 1.0}, 1000, function() {
-                            $active.removeClass('active last-active');
-                        });
-            }
-
-            $(function() {
-                setInterval( "slideSwitch()", 2000 );
-            });
-        </script>
-
-        <div id="imagemultifieldslideshow">
+        <div class="image_multifield_slideshow">
 <%
+        Resource imgResource;
+
         for(int i = 0; i < array.length(); i++){
-            img = new Image(imagesResource.getChild(String.valueOf(array.get(i))));
+            imgResource = imagesResource.getChild(String.valueOf(array.get(i)));
+
+            img = new Image(imgResource);
             img.setItemName(Image.PN_REFERENCE, "imageReference");
             img.setSelector("img");
+            img.setAlt(imgResource.getName());
 
             src = img.getSrc();
 %>
-            <img src='<%=src%>' <%= ( i == 0) ? "class='active'" : ""%> />
+            <img src="<%=src%>" <%= ( i == 0) ? "class=\"active\"" : ""%> alt="<%= img.getAlt() %>"/>
 <%
         }
 %>
