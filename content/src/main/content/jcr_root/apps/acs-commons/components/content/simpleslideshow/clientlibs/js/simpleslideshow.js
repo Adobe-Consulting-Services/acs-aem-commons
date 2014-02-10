@@ -19,7 +19,7 @@
  */
 
 /*
- Base Logic from this fantastic slide show example http://jonraasch.com/blog/a-simple-jquery-slideshow
+ Base Logic from this fantastic slide show, http://jonraasch.com/blog/a-simple-jquery-slideshow
 */
 
 var SimpleSlideShow = SimpleSlideShow || {};
