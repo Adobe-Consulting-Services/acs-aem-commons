@@ -53,7 +53,7 @@ import org.w3c.dom.Document;
 import com.adobe.acs.commons.sitemaps.SiteMapGenerator;
 
 @SuppressWarnings("serial")
-@Component(metatype = true, label = "ACS sitemap xml servlet")
+@Component(metatype = false, label = "ACS sitemap xml servlet")
 @Service
 @Properties({
         @Property(name = "sling.servlet.paths", value = SiteMapConstants.SERVLET_PATH),
@@ -95,6 +95,7 @@ public class SiteMapGeneratorServlet extends SlingSafeMethodsServlet {
     protected void doGet(SlingHttpServletRequest request,
             SlingHttpServletResponse response) {
         String currentDomain = request.getHeader("Host");
+  
        Document siteMapDocument = this.siteMapGenerators.get(currentDomain).getSiteMap(anonymousResolver);
        printSiteMap(siteMapDocument, response);
     }

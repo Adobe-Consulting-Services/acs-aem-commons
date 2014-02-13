@@ -40,9 +40,12 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 
-@Component(label = "ACS AEM Commons - Sitemap Redirection Filter", description = "ACS AEM Commons -  Sitemap redirection filter" , policy = ConfigurationPolicy.REQUIRE)
+import com.adobe.acs.commons.sitemaps.SiteMapGenerator;
+
+@Component(label = "ACS AEM Commons - Sitemap Redirection Filter", description = "ACS AEM Commons -  Sitemap redirection filter")
 @Service(Filter.class)
 @Properties({
         @Property(name = "filter.scope", value = "REQUEST", propertyPrivate = true),
@@ -50,6 +53,9 @@ import org.apache.felix.scr.annotations.Service;
 })
 public class SiteMapFilter implements Filter {
 
+    @Reference
+    private SiteMapGenerator siteMapGenerator;
+    
     @Override
     public void destroy() {
         

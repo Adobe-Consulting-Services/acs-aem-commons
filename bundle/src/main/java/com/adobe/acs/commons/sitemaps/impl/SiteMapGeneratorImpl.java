@@ -40,6 +40,7 @@ import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
@@ -88,7 +89,9 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
     @Override
     public Document getSiteMap(ResourceResolver resolver){
         PageManager pageManager = resolver.adaptTo(PageManager.class);
+       
         Page rootPage = pageManager.getPage(siteRootPath);
+        assert rootPage !=null;
         PageFilter pageFilter = new PageFilter();
        Iterator<SiteMap.LinkElement> linksIterator = new SiteMap(rootPage, pageFilter, considerPageFilter).iterator();
        Document siteMap = generateWebSiteMap(resolver,linksIterator);
@@ -155,9 +158,7 @@ public class SiteMapGeneratorImpl implements SiteMapGenerator {
            return null;
         }        
     }
-    
-
-    
+ 
     @Activate
     @Modified
     protected void activate( final Map<String, Object> properties ){

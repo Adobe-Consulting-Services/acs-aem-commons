@@ -21,8 +21,8 @@ package com.adobe.acs.commons.sitemaps.impl;
 
 public class SiteMapConstants {
 
-    public static final String SITE_ROOT_PATH = "com.acs.sitemap.siterootpath";
-    public static final String DOMAIN_NAME = "com.acs.sitemap.domain";
+    public static final String SITE_ROOT_PATH = "siterootpath";
+    public static final String DOMAIN_NAME = "domainname";
     public static final String SERVLET_PATH = "/bin/acs/sitemap";
     public static final String SERVLET_URL_EXTENSION = "xml";
     public static final String SERVLET_REQUEST_METHOD = "GET";

@@ -31,7 +31,7 @@
     <!-- ====================================================================== -->
     <properties>
         <crx.host>localhost</crx.host>
-        <crx.port>4502</crx.port>
+        <crx.port>4503</crx.port>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <license.licenseName>apache_v2</license.licenseName>
