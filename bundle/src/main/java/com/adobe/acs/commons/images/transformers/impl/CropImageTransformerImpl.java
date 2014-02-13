@@ -45,7 +45,7 @@ import java.awt.Rectangle;
 })
 @Service
 public class CropImageTransformerImpl implements ImageTransformer {
-    private final Logger log = LoggerFactory.getLogger(CropImageTransformerImpl.class);
+    private static  final Logger log = LoggerFactory.getLogger(CropImageTransformerImpl.class);
 
     static final String TYPE = "crop";
 
@@ -85,12 +85,10 @@ public class CropImageTransformerImpl implements ImageTransformer {
 
             layer.crop(rectangle);
 
-            if (smartBounding) {
-                if (layer.getWidth() != width || layer.getHeight() != height) {
-                    log.debug("SmartBounding resulted in an image of an incorrect size (based on crop params). "
-                            + "resizing to: [ width: {}, height: {} ]", width, height);
-                    layer.resize(width, height);
-                }
+            if (smartBounding && layer.getWidth() != width || layer.getHeight() != height) {
+                log.debug("SmartBounding resulted in an image of an incorrect size (based on crop params). "
+                        + "resizing to: [ width: {}, height: {} ]", width, height);
+                layer.resize(width, height);
             }
         }
 

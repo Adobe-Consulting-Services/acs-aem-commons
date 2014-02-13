@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 })
 @Service
 public class RotateImageTransformerImpl implements ImageTransformer {
-    private final Logger log = LoggerFactory.getLogger(RotateImageTransformerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RotateImageTransformerImpl.class);
 
     static final String TYPE = "rotate";
 

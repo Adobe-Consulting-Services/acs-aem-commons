@@ -48,7 +48,7 @@ import java.util.Map;
 })
 @Service
 public class ResizeImageTransformerImpl implements ImageTransformer {
-    private final Logger log = LoggerFactory.getLogger(ResizeImageTransformerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ResizeImageTransformerImpl.class);
 
     static final String TYPE = "resize";
 

@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 })
 @Service
 public class GreyscaleImageTransformerImpl implements ImageTransformer {
-    private final Logger log = LoggerFactory.getLogger(GreyscaleImageTransformerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(GreyscaleImageTransformerImpl.class);
 
     static final String TYPE = "greyscale";
 

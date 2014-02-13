@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 })
 @Service
 public class AdjustImageTransformerImpl implements ImageTransformer {
-    private final Logger log = LoggerFactory.getLogger(AdjustImageTransformerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AdjustImageTransformerImpl.class);
 
     static final String TYPE = "adjust";
 

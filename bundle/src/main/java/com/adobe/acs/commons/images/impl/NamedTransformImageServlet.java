@@ -96,7 +96,7 @@ import java.util.regex.Pattern;
 )
 @Service(Servlet.class)
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
-    private final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
     @Reference
     private MimeTypeService mimeTypeService;

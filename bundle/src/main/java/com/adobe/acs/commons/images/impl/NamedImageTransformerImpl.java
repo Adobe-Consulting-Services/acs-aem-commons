@@ -60,7 +60,7 @@ import java.util.Map;
 )
 @Service
 public class NamedImageTransformerImpl implements NamedImageTransformer {
-    private final Logger log = LoggerFactory.getLogger(NamedImageTransformerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(NamedImageTransformerImpl.class);
 
     private Map<String, ImageTransformer> imageTransformers = new HashMap<String, ImageTransformer>();
 
