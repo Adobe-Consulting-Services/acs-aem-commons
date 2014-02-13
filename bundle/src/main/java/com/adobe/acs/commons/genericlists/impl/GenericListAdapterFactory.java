@@ -35,7 +35,7 @@ import com.day.cq.wcm.api.Page;
 @Component
 @Service
 @Properties({ @Property(name = AdapterFactory.ADAPTABLE_CLASSES, value = "com.day.cq.wcm.api.Page"),
-        @Property(name = AdapterFactory.ADAPTER_CLASSES, value = "com.adobe.acs.fordmedia.lists.GenericList") })
+        @Property(name = AdapterFactory.ADAPTER_CLASSES, value = "com.adobe.acs.commons.genericlists.GenericList") })
 public class GenericListAdapterFactory implements AdapterFactory {
 
     @SuppressWarnings("unchecked")

@@ -19,12 +19,9 @@
  */
 package com.adobe.acs.commons.dam.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.imageio.IIOException;
 import javax.jcr.Session;
 
 import org.apache.felix.scr.annotations.Component;
@@ -82,15 +79,9 @@ public final class AddWatermarkToRenditionProcess extends AbstractRenditionModif
             ResourceResolver resolver = getResourceResolver(session);
             Resource resource = resolver.getResource(path);
             if (resource != null) {
-                InputStream inStream = resource.adaptTo(InputStream.class);
-                if (inStream != null) {
-                    try {
-                        return new Layer(inStream);
-                    } catch (IIOException e) {
-                        log.warn("Unable to load image layer from " + path, e);
-                    } catch (IOException e) {
-                        log.warn("Unable to load image layer from " + path, e);
-                    }
+                Layer layer = resource.adaptTo(Layer.class);
+                if (layer != null) {
+                    return layer;
                 } else {
                     logInvalidWatermark(path);
                 }

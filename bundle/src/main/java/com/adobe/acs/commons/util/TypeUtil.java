@@ -21,6 +21,8 @@ package com.adobe.acs.commons.util;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.joda.time.format.ISODateTimeFormat;
@@ -31,6 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -109,7 +112,7 @@ public class TypeUtil {
 
     /**
      * Determines the type of the parameter object
-     * 
+     *
      * TODO - review this method
      *
      * @param object
@@ -189,5 +192,21 @@ public class TypeUtil {
 
         Method method = klass.getMethod(methodName);
         return (String) method.invoke(obj);
+    }
+
+    /**
+     * Transforms a Map of <String, ?> into a ValueMap
+     *
+     * @param map
+     * @return a ValueMap of the parameter map
+     */
+    public static ValueMap toValueMap(final Map<String, ?> map) {
+        final Map<String, Object> objectMap = new LinkedHashMap<String, Object>(map.size());
+
+        for(final Map.Entry<String, ?> entry : map.entrySet()) {
+            objectMap.put(entry.getKey(), entry.getValue());
+        }
+
+        return new ValueMapDecorator(objectMap);
     }
 }
