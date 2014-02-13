@@ -32,6 +32,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Helper interface for dynamic package creation.
+ */
 public interface PackageHelper {
     /**
      * JCR Path to default ACS thumbnail resource.
