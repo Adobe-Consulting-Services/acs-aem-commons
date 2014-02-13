@@ -201,10 +201,10 @@ public class TypeUtil {
      * @return a ValueMap of the parameter map
      */
     public static ValueMap toValueMap(final Map<String, ?> map) {
-        final Map<String, Object> objectMap = new LinkedHashMap<String, Object>();
+        final Map<String, Object> objectMap = new LinkedHashMap<String, Object>(map.size());
 
-        for(final Map.Entry entry : map.entrySet()) {
-            objectMap.put((String)entry.getKey(), (Object)entry.getValue());
+        for(final Map.Entry<String, ?> entry : map.entrySet()) {
+            objectMap.put(entry.getKey(), entry.getValue());
         }
 
         return new ValueMapDecorator(objectMap);
