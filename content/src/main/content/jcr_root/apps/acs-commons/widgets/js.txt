@@ -6,4 +6,5 @@ predicates/AuthorizablePredicate.js
 predicates/PathPropertyPredicate.js
 predicates/SelectionPredicate.js
 DDPathField.js
+smart_image_multifield.js
 polyfill_composite_field_processParentRecord.js

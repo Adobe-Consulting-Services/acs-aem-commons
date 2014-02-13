@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    activeTab="{Long}0"
+    title="Slide Show Images"
+    xtype="tabpanel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <basic
+            jcr:primaryType="cq:Widget"
+            title="Images"
+            xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <images
+                    jcr:primaryType="cq:Widget"
+                    border="false"
+                    hideLabel="true"
+                    name="./images"
+                    xtype="imagemultifield">
+                    <fieldConfig
+                        jcr:primaryType="cq:Widget"
+                        border="false"
+                        hideLabel="true"
+                        layout="form"
+                        padding="10px 0 0 100px"
+                        xtype="imagemultifieldpanel">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <image
+                                jcr:primaryType="cq:Widget"
+                                cropParameter="./imageCrop"
+                                ddGroups="[media]"
+                                fileNameParameter="./imageName"
+                                fileReferenceParameter="./imageReference"
+                                imageSlingResourceType="/libs/foundation/components/logo"
+                                height="250"
+                                mapParameter="./imageMap"
+                                name="./image"
+                                rotateParameter="./imageRotate"
+                                sizeLimit="100"
+                                xtype="imagemultifieldsmartimage"/>
+                        </items>
+                    </fieldConfig>
+                </images>
+            </items>
+        </basic>
+    </items>
+</jcr:root>
