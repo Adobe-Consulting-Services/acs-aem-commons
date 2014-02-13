@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.images.imagetransformers.impl;
+package com.adobe.acs.commons.images.transformers.impl;
 
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
@@ -31,36 +31,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(
-        label = "ACS AEM Commons - Image Transformer - Rotate"
+        label = "ACS AEM Commons - Image Transformer - Adjust Brightness and Contrast"
 )
 @Properties({
         @Property(
                 name = ImageTransformer.PROP_TYPE,
-                value = RotateImageTransformerImpl.TYPE,
+                value = AdjustImageTransformerImpl.TYPE,
                 propertyPrivate = true
         )
 })
 @Service
-public class RotateImageTransformerImpl implements ImageTransformer {
-    private final Logger log = LoggerFactory.getLogger(RotateImageTransformerImpl.class);
+public class AdjustImageTransformerImpl implements ImageTransformer {
+    private final Logger log = LoggerFactory.getLogger(AdjustImageTransformerImpl.class);
 
-    static final String TYPE = "rotate";
+    static final String TYPE = "adjust";
 
-    private static final String KEY_DEGREES = "degrees";
+    private static final String KEY_BRIGHTNESS = "brightness";
+    private static final String KEY_BRIGHTNESS_ALIAS = "b";
+
+    private static final String KEY_CONTRAST = "contrast";
+    private static final String KEY_CONTRAST_ALIAS = "c";
 
     @Override
     public final Layer transform(final Layer layer, final ValueMap properties) {
         if (properties == null || properties.isEmpty()) {
             log.warn("Transform [ {} ] requires parameters.", TYPE);
-
             return layer;
         }
 
         log.debug("Transforming with [ {} ]", TYPE);
 
-        int degrees = properties.get(KEY_DEGREES, 0) % 360;
+        int brightness = properties.get(KEY_BRIGHTNESS, properties.get(KEY_BRIGHTNESS_ALIAS, 0));
+        float contrast = properties.get(KEY_CONTRAST, properties.get(KEY_CONTRAST_ALIAS, 1F));
 
-        layer.rotate(degrees);
+        layer.adjust(brightness, contrast);
 
         return layer;
     }
