@@ -22,7 +22,6 @@ package com.adobe.acs.commons.images.impl;
 import com.adobe.acs.commons.dam.RenditionPatternPicker;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.PathInfoUtil;
-import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
@@ -114,8 +113,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();
 
-    @Reference
-    private ComponentHelper componentHelper;
+    
 
 
     /* Asset Rendition Pattern Picker */
