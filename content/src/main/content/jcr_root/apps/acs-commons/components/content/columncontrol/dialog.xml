@@ -12,41 +12,34 @@
                 jcr:primaryType="cq:Panel"
                 title="Columns">
                 <items jcr:primaryType="cq:WidgetCollection">
-                    <map
+                    <columns
                         jcr:primaryType="cq:Widget"
-                        hideLabel="false"
+                        fieldDescription="Column widths as a percent. Must add up to 100."
+                        fieldLabel="Column Widths"
                         name="./columns"
                         orderable="{Boolean}false"
-                        title="Add Column"
                         xtype="multifield">
                         <fieldConfig
                             jcr:primaryType="cq:Widget"
-                            bodyStyle="border-bottom:solid 1px #ccc"
-                            border="true"
-                            hideLabel="false"
-                            layout="form"
-                            padding="10px"
-                                    dName="width"
-                                    fieldDescription="Column width as a percent."
-                                    fieldLabel="Column width (percent)"
-                                    labelStyle="display:inline"
-                                    maxValue="100"
-                                    minValue="1"
-                                    required="true"
-                                    xtype="numberfield"
-                        
-                        />
-                    </map>
+                            maxValue="100"
+                            minValue="1"
+                            xtype="numberfield"/>
+                    </columns>
+                    <typehint
+                        jcr:primaryType="cq:Widget"
+                        ignoreValue="{Boolean}true"
+                        name="./columns@TypeHint"
+                        value="Long[]"
+                        xtype="hidden"/>
                     <label
                         jcr:primaryType="cq:Widget"
-                        fieldDescription=" Removing columns does not delete their contained content. Be sure to remove all components from a column before deleting it."
-                        fieldLabel="NOTE"
-                        xtype="label"/>                    
+                        text="NOTE: Removing columns does not delete their contained content. Be sure to remove all components from a column before deleting it."
+                        xtype="static"/>
                 </items>
             </tab1>
         </items>
     </items>
     <listeners
         jcr:primaryType="nt:unstructured"
-        beforesubmit="function(dialog){&#xa;&#x9;var widthArray = dialog.findByType(&quot;numberfield&quot;);&#xa;&#x9;var maxwidth=100;&#xa;&#x9;var width=0;&#xa;&#x9;for(i=0;i&lt;widthArray.length;i++){&#xa;&#x9;&#x9;width+=widthArray[i].getValue();&#xa;&#x9;}&#xa;&#x9;if(width>maxwidth){&#xa;&#x9;CQ.Ext.Msg.show({title:'Validation Error',msg:'Total width of all columns should not be more than 100 percent!',buttons:CQ.Ext.MessageBox.OK,icon:CQ.Ext.MessageBox.ERROR});&#xa;&#x9;return false;&#xa;&#x9;}&#xa;}"/>
+        beforesubmit="function(dialog){ return ACS.CQ.ColumnControl.validateDialog(dialog); }"/>
 </jcr:root>

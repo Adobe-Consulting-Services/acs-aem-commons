@@ -20,69 +20,59 @@
 
 package com.adobe.acs.commons.multipanelfield;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MultiPanelFieldFunctionsTest {
 
+    @Mock
+    private Resource resource;
+
     @Before
     public void setUp() throws Exception {
-
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("single", "{\"a\":\"b\"}");
+        map.put("multiple", new String[] { "{\"a\":\"b\"}", "{\"c\":\"d\"}" });
+        ValueMap vm = new ValueMapDecorator(map);
+        when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
     }
 
     @Test
-    public void testGetMultiPanelFieldValues() throws Exception {
-        Resource resource = mock(Resource.class);
-        ValueMap valueMap = mock(ValueMap.class);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
-        when(valueMap.containsKey("columns")).thenReturn(true);
-        when(valueMap.containsKey("columns1")).thenReturn(false);
-        when(valueMap.containsKey("columns2")).thenReturn(true);
-        when(valueMap.get("columns", new String[0])).thenReturn(
-                new String[] { "{\"a\":\"b\"}" });
-        when(valueMap.get("columns2", new String[0])).thenReturn(
-                new String[] { "a=b" });
-        List<Map<String, String>> actual = MultiPanelFieldFunctions
-                .getMultiPanelFieldValues(resource, "columns");
+    public void testSingleObject() {
+        List<Map<String, String>> actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource, "single");
         assertEquals(1, actual.size());
         assertEquals(true, actual.get(0).containsKey("a"));
         assertEquals("b", actual.get(0).get("a"));
-        actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource,
-                "columns1");
-        assertEquals(true, actual == null);
-        actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource,
-                "columns2");
-        assertEquals(true, actual == null);
     }
-    
 
     @Test
-    public void testGetMultiFieldValues() throws Exception {
-        Resource resource = mock(Resource.class);
-        ValueMap valueMap = mock(ValueMap.class);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
-        when(valueMap.containsKey("columns")).thenReturn(true);
-
-        when(valueMap.get("columns", new String[0])).thenReturn(
-                new String[] { "a","b" });
-
-        List< String> actual = MultiPanelFieldFunctions
-                .getMultiFieldValues(resource, "columns");
+    public void testMultipleObject() {
+        List<Map<String, String>> actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource, "multiple");
         assertEquals(2, actual.size());
-        assertEquals(true, actual.get(0).equals("a"));
-        assertEquals("b", actual.get(1));
-       
+        assertEquals(true, actual.get(0).containsKey("a"));
+        assertEquals("b", actual.get(0).get("a"));
+        assertEquals(true, actual.get(1).containsKey("c"));
+        assertEquals("d", actual.get(1).get("c"));
+    }
+
+    @Test
+    public void testKeyWhichDoesntExist() {
+        List<Map<String, String>> actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource,
+                "non-existing");
+        assertEquals(0, actual.size());
     }
 }

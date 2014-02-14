@@ -2,6 +2,6 @@
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     cq:actions="[text:Column Control,editannotate,delete]"
     cq:dialogMode="floating"
-    cq:layout="editbar"
     cq:disableTargeting="{Boolean}true"
+    cq:layout="editbar"
     jcr:primaryType="cq:EditConfig"/>

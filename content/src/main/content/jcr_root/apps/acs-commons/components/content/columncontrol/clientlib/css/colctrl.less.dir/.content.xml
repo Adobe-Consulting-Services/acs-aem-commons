@@ -3,6 +3,6 @@
     jcr:primaryType="nt:file">
     <jcr:content
         jcr:lastModifiedBy="admin"
-        jcr:mimeType="application/octet-stream"
+        jcr:mimeType="text/plain"
         jcr:primaryType="nt:resource"/>
 </jcr:root>

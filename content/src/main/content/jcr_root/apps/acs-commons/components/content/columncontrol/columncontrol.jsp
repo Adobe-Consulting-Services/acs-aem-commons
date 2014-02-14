@@ -2,7 +2,7 @@
   #%L
   ACS AEM Commons Package
   %%
-  Copyright (C) 2013 - 2014 Adobe
+  Copyright (C) 2014 Adobe
   %%
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,26 +18,18 @@
   #L%
   --%>
 <%@include file="/libs/foundation/global.jsp" %>
-<%@page session="false" %>
-<%@ taglib prefix="mpf" uri="http://www.adobe.com/consulting/acs-aem-commons/mpf" %>
 <%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %>
-<c:set var="columns" value="${mpf:getMultiFieldValues(resource, 'columns')}"/>
+<wcmmode:edit><cq:includeClientLib categories="acs-commons.columncontrol.widgets"/></wcmmode:edit>
+<c:set var="columns" value="${properties.columns}"/>
 <c:choose>
     <c:when test="${empty columns}">
-         <wcmmode:edit>You need to specify the columns.</wcmmode:edit>
+        <wcmmode:edit>You need to specify the column widths.</wcmmode:edit>
     </c:when>
     <c:otherwise>
-      <c:forEach items="${columns}" var="column" varStatus="status">
-          <div class="acs-commons-resp-colctrl-col-${column}" >
-              <cq:include path="par${status.count}" resourceType="foundation/components/parsys" />
-          </div>
-      </c:forEach>
-     </c:otherwise>
+        <c:forEach items="${columns}" var="column" varStatus="status">
+            <div class="acs-commons-resp-colctrl-col-${column}" >
+                  <cq:include path="par${status.count}" resourceType="foundation/components/parsys" />
+            </div>
+        </c:forEach>
+    </c:otherwise>
 </c:choose>
-
-
-
-
-
-
-

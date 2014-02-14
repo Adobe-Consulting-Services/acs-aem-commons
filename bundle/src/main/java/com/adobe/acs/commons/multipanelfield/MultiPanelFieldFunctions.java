@@ -20,8 +20,6 @@
 package com.adobe.acs.commons.multipanelfield;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,44 +34,47 @@ import org.slf4j.LoggerFactory;
 
 import tldgen.Function;
 
+/**
+ * JSP functions for working with MultiPanelField widget.
+ */
 public class MultiPanelFieldFunctions {
-     private static final Logger log = LoggerFactory.getLogger(MultiPanelFieldFunctions.class);
+    private static final Logger log = LoggerFactory.getLogger(MultiPanelFieldFunctions.class);
+
+    /**
+     * Extract the value of a MultiPanelField property into a list of maps. Will never return
+     * a null map, but may return an empty one. Invalid property values are logged and skipped.
+     * 
+     * @param resource the resource
+     * @param name the property name
+     * @return a list of maps.
+     */
     @Function
-public static List<Map<String,String>> getMultiPanelFieldValues(Resource resource , String name ){
+    public static List<Map<String, String>> getMultiPanelFieldValues(Resource resource, String name) {
         ValueMap map = resource.adaptTo(ValueMap.class);
-        List<Map<String,String>> columnsList =  null;
-        try {
-        if(map.containsKey(name)){
-            columnsList = new ArrayList<Map<String,String>>();
-            String[] columns =  map.get(name,new String[0]);
-            for(String column : columns){
-                
-                    JSONObject columnJSON =  new JSONObject(column);
-                    Map<String,String> columnMap = new HashMap<String, String>();
-                    for(Iterator<String> iter = columnJSON.keys();iter.hasNext();){
+        List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+        if (map.containsKey(name)) {
+            String[] values = map.get(name, new String[0]);
+            for (String value : values) {
+
+                try {
+                    JSONObject parsed = new JSONObject(value);
+                    Map<String, String> columnMap = new HashMap<String, String>();
+                    for (Iterator<String> iter = parsed.keys(); iter.hasNext();) {
                         String key = iter.next();
-                        String value = columnJSON.getString(key);
-                        columnMap.put(key, value);
+                        String innerValue = parsed.getString(key);
+                        columnMap.put(key, innerValue);
                     }
-                    
-                    columnsList.add(columnMap);
-                
+
+                    results.add(columnMap);
+
+                } catch (JSONException e) {
+                    log.error(
+                            String.format("Unable to parse JSON in %s property of %s", name, resource.getPath()),
+                            e);
+                }
+
             }
         }
-        } catch (JSONException e) {
-            log.error("error",e);
-        return null;
-        }
-    return columnsList;
-}
-       @Function
-    public static List<String> getMultiFieldValues(Resource resource , String name ){
-               ValueMap map = resource.adaptTo(ValueMap.class);
-                  if(map.containsKey(name)){
-                   String[] columns =  map.get(name,new String[0]);
-                  return Arrays.asList(columns);
-               }
-              
-           return Collections.EMPTY_LIST;
-       }
+        return results;
+    }
 }
