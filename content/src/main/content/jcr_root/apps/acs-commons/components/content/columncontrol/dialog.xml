@@ -37,6 +37,11 @@
                         
                         />
                     </map>
+                    <label
+                        jcr:primaryType="cq:Widget"
+                        fieldDescription=" Removing columns does not delete their contained content. Be sure to remove all components from a column before deleting it."
+                        fieldLabel="NOTE"
+                        xtype="label"/>                    
                 </items>
             </tab1>
         </items>
