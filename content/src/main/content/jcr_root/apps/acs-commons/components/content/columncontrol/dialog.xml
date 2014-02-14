@@ -26,21 +26,16 @@
                             hideLabel="false"
                             layout="form"
                             padding="10px"
-                            xtype="multifieldpanel">
-                            <items jcr:primaryType="cq:WidgetCollection">
-                                <cols
-                                    jcr:primaryType="cq:Widget"
                                     dName="width"
                                     fieldDescription="Column width as a percent."
                                     fieldLabel="Column width (percent)"
-                                    hideLabel="true"
                                     labelStyle="display:inline"
                                     maxValue="100"
                                     minValue="1"
                                     required="true"
-                                    xtype="numberfield"/>
-                            </items>
-                        </fieldConfig>
+                                    xtype="numberfield"
+                        
+                        />
                     </map>
                 </items>
             </tab1>

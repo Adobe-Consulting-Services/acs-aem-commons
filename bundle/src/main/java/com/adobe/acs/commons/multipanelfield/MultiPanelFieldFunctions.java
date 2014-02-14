@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.multipanelfield;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -64,4 +66,14 @@ public static List<Map<String,String>> getMultiPanelFieldValues(Resource resourc
 		}
 	return columnsList;
 }
+	   @Function
+	   public static List<String> getMultiFieldValues(Resource resource , String name ){
+	           ValueMap map = resource.adaptTo(ValueMap.class);
+	              if(map.containsKey(name)){
+	               String[] columns =  map.get(name,new String[0]);
+	              return Arrays.asList(columns);
+	           }
+	          
+	       return Collections.EMPTY_LIST;
+	   }
 }
