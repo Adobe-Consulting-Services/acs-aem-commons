@@ -21,14 +21,14 @@
 <%@page session="false" %>
 <%@ taglib prefix="mpf" uri="http://www.adobe.com/consulting/acs-aem-commons/mpf" %>
 <%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %>
-<c:set var="columns" value="${mpf:getMultiPanelFieldValues(resource, 'columns')}"/>
+<c:set var="columns" value="${mpf:getMultiFieldValues(resource, 'columns')}"/>
 <c:choose>
     <c:when test="${empty columns}">
          <wcmmode:edit>You need to specify the columns.</wcmmode:edit>
     </c:when>
     <c:otherwise>
       <c:forEach items="${columns}" var="column" varStatus="status">
-          <div class="acs-commons-resp-colctrl-col-${column.width}" >
+          <div class="acs-commons-resp-colctrl-col-${column}" >
               <cq:include path="par${status.count}" resourceType="foundation/components/parsys" />
           </div>
       </c:forEach>

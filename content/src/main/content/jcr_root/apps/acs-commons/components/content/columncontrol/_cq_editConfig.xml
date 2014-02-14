@@ -3,4 +3,5 @@
     cq:actions="[text:Column Control,editannotate,delete]"
     cq:dialogMode="floating"
     cq:layout="editbar"
+    cq:disableTargeting="{Boolean}true"
     jcr:primaryType="cq:EditConfig"/>

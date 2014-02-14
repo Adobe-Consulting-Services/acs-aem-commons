@@ -26,22 +26,22 @@
                             hideLabel="false"
                             layout="form"
                             padding="10px"
-                            xtype="multifieldpanel">
-                            <items jcr:primaryType="cq:WidgetCollection">
-                                <cols
-                                    jcr:primaryType="cq:Widget"
                                     dName="width"
                                     fieldDescription="Column width as a percent."
                                     fieldLabel="Column width (percent)"
-                                    hideLabel="true"
                                     labelStyle="display:inline"
                                     maxValue="100"
                                     minValue="1"
                                     required="true"
-                                    xtype="numberfield"/>
-                            </items>
-                        </fieldConfig>
+                                    xtype="numberfield"
+                        
+                        />
                     </map>
+                    <label
+                        jcr:primaryType="cq:Widget"
+                        fieldDescription=" Removing columns does not delete their contained content. Be sure to remove all components from a column before deleting it."
+                        fieldLabel="NOTE"
+                        xtype="label"/>                    
                 </items>
             </tab1>
         </items>
