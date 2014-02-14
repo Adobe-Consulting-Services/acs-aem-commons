@@ -66,4 +66,23 @@ public class MultiPanelFieldFunctionsTest {
                 "columns2");
         assertEquals(true, actual == null);
     }
+    
+
+    @Test
+    public void testGetMultiFieldValues() throws Exception {
+        Resource resource = mock(Resource.class);
+        ValueMap valueMap = mock(ValueMap.class);
+        when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
+        when(valueMap.containsKey("columns")).thenReturn(true);
+
+        when(valueMap.get("columns", new String[0])).thenReturn(
+                new String[] { "a","b" });
+
+        List< String> actual = MultiPanelFieldFunctions
+                .getMultiFieldValues(resource, "columns");
+        assertEquals(2, actual.size());
+        assertEquals(true, actual.get(0).equals("a"));
+        assertEquals("b", actual.get(1));
+       
+    }
 }
