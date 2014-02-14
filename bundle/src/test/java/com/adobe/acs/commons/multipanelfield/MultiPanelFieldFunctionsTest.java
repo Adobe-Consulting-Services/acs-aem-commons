@@ -37,30 +37,33 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class MultiPanelFieldFunctionsTest {
 
-
     @Before
     public void setUp() throws Exception {
-      
-       
+
     }
 
     @Test
     public void testGetMultiPanelFieldValues() throws Exception {
-    	Resource resource = mock(Resource.class);
-    	ValueMap valueMap = mock(ValueMap.class);
-    	 when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
-    	 when(valueMap.containsKey("columns")).thenReturn(true);
-    	 when(valueMap.containsKey("columns1")).thenReturn(false);
-    	 when(valueMap.containsKey("columns2")).thenReturn(true);
-    	 when(valueMap.get("columns",new String[0])).thenReturn(new String[]{"{\"a\":\"b\"}"});
-    	 when(valueMap.get("columns2",new String[0])).thenReturn(new String[]{"a=b"});
-    	 List<Map<String, String>> actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource, "columns");
-    	 assertEquals(1, actual.size());
-    	 assertEquals(true, actual.get(0).containsKey("a"));
-    	 assertEquals("b", actual.get(0).get("a"));
-    	 actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource, "columns1");
-    	 assertEquals(true, actual==null);
-    	 actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource, "columns2");
-    	 assertEquals(true, actual==null);
+        Resource resource = mock(Resource.class);
+        ValueMap valueMap = mock(ValueMap.class);
+        when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
+        when(valueMap.containsKey("columns")).thenReturn(true);
+        when(valueMap.containsKey("columns1")).thenReturn(false);
+        when(valueMap.containsKey("columns2")).thenReturn(true);
+        when(valueMap.get("columns", new String[0])).thenReturn(
+                new String[] { "{\"a\":\"b\"}" });
+        when(valueMap.get("columns2", new String[0])).thenReturn(
+                new String[] { "a=b" });
+        List<Map<String, String>> actual = MultiPanelFieldFunctions
+                .getMultiPanelFieldValues(resource, "columns");
+        assertEquals(1, actual.size());
+        assertEquals(true, actual.get(0).containsKey("a"));
+        assertEquals("b", actual.get(0).get("a"));
+        actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource,
+                "columns1");
+        assertEquals(true, actual == null);
+        actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource,
+                "columns2");
+        assertEquals(true, actual == null);
     }
 }
