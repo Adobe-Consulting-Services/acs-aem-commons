@@ -57,7 +57,7 @@ import java.util.Set;
 
 @Component(
         label = "ACS AEM Commons - Package Helper",
-        description = "..."
+        description = "Helper utility for creating CRX Packages and using the ACS AEM Commons packager. "
 )
 @Service
 public class PackageHelperImpl implements PackageHelper {
@@ -92,17 +92,17 @@ public class PackageHelperImpl implements PackageHelper {
                 log.debug("Using default ACS AEM Commons packager package icon.");
                 resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
                 thumbnailResource = resourceResolver.getResource(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH);
-
-                if (thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE)) {
-                    log.warn("Cannot find a specific OR a default package icon; no package icon will be used.");
-                }
             }
 
-            final Node srcNode = thumbnailResource.adaptTo(Node.class);
-            final Node dstParentNode = jcrPackage.getDefinition().getNode();
+            if (thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE)) {
+                log.warn("Cannot find a specific OR a default package icon; no package icon will be used.");
+            } else {
+                final Node srcNode = thumbnailResource.adaptTo(Node.class);
+                final Node dstParentNode = jcrPackage.getDefinition().getNode();
 
-            JcrUtil.copy(srcNode, dstParentNode, NN_THUMBNAIL);
-            dstParentNode.getSession().save();
+                JcrUtil.copy(srcNode, dstParentNode, NN_THUMBNAIL);
+                dstParentNode.getSession().save();
+            }
         } catch (RepositoryException e) {
             log.error("Could not add package thumbnail: {}", e.getMessage());
         } catch (LoginException e) {
@@ -226,9 +226,9 @@ public class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public final JcrPackage createPackage(final Set<Resource> resources, final Session session,
-                                    final String groupName, final String name, String version,
-                                    final ConflictResolution conflictResolution,
-                                    final Map<String, String> packageDefinitionProperties)
+                                          final String groupName, final String name, String version,
+                                          final ConflictResolution conflictResolution,
+                                          final Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException {
 
         final JcrPackageManager jcrPackageManager = packaging.getPackageManager(session);
