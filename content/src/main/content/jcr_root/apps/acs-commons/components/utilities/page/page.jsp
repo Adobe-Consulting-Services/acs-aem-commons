@@ -56,7 +56,7 @@
     </head>
 
     <body>
-        <div class="acs-commons">
+        <div id="acs-commons" class="acs-commons">
             <cq:include script="main.jsp"/>
         </div>
     </body>
