@@ -20,13 +20,11 @@
 package com.adobe.acs.commons.util;
 
 import com.day.cq.commons.TidyJSONWriter;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import com.day.cq.wcm.api.NameConstants;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,28 +45,17 @@ import java.io.IOException;
  * already in use already
  */
 
-@Component(
+@SlingServlet(
         label = "ACS AEM Commons - Unique Vanity Path Checker",
         description = "Checks if the entered vanity path is already in use",
         metatype = false,
-        immediate = false)
-@Service
-@Properties({
-        @Property(
-                name = "sling.servlet.paths",
-                value = "/bin/wcm/duplicateVanityCheck",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "sling.servlet.methods",
-                value = "GET",
-                propertyPrivate = true
-        )
-})
+        paths = { "/bin/wcm/duplicateVanityCheck" },
+        methods = { "GET" }
+)
 
-public class VanityDuplicateCheck extends SlingAllMethodsServlet{
+public class VanityDuplicateCheck extends SlingSafeMethodsServlet{
 
-    private static final Logger logger = LoggerFactory.getLogger(VanityDuplicateCheck.class);
+    private static final Logger log = LoggerFactory.getLogger(VanityDuplicateCheck.class);
 
     /**
      * Overriden doGet method, runs a query to see if the vanity URL entered by the user in already in use.
@@ -84,18 +71,18 @@ public class VanityDuplicateCheck extends SlingAllMethodsServlet{
             Session session = request.getResourceResolver().adaptTo(Session.class);
             final String vanityPath = request.getParameter("vanityPath");
             final String pagePath = request.getParameter("pagePath");
-            //logger.debug("vanity path parameter passed is {}", vanityPath);
-            //logger.debug("page path parameter passed is {}", pagePath);
+            //log.debug("vanity path parameter passed is {}", vanityPath);
+            //log.debug("page path parameter passed is {}", pagePath);
             try {
                 QueryManager qm = session.getWorkspace().getQueryManager();
-                String xpath = "//element(*)[sling:vanityPath='"+ vanityPath + "']";
-                //logger.debug("xpath is {}", xpath);
+                String xpath = "//element(*)[" + NameConstants.PN_SLING_VANITY_PATH + "='"+ vanityPath + "']";
+                //log.debug("xpath is {}", xpath);
 
                 Query query = qm.createQuery(xpath, Query.XPATH);
-                logger.debug("Xpath Query Statement is {}", query.getStatement());
+                log.debug("Xpath Query Statement is {}", query.getStatement());
                 QueryResult result = query.execute();
                 NodeIterator nodes = result.getNodes();
-                //logger.debug("result is ", result.getNodes().toString());
+                //log.debug("result is ", result.getNodes().toString());
 
                 TidyJSONWriter tidyJSONWriter = new TidyJSONWriter(response.getWriter());
 
@@ -103,21 +90,19 @@ public class VanityDuplicateCheck extends SlingAllMethodsServlet{
 
                 tidyJSONWriter.key("vanitypaths").array();
 
-                response.setContentType("text/html");
-
                 while (nodes.hasNext()) {
                     Node node = nodes.nextNode();
-                    //logger.debug("Node path is {}", node.getPath());
-                    //logger.debug("Page path is {}", pagePath);
-                    if(node != null && node.getPath().contains("/content"))
+                    //log.debug("Node path is {}", node.getPath());
+                    //log.debug("Page path is {}", pagePath);
+                    if(node != null && node.getPath().startsWith("/content"))
                     {
                         // check whether the path of the page where the vanity path is defined matches the dialog's path
                         // which means that the vanity path is legal.
                         if(node.getPath().equals(pagePath))
                         {
                             //do not add that to the list
-                            //logger.debug("Node path is {}", node.getPath());
-                            //logger.debug("Page path is {}", pagePath);
+                            //log.debug("Node path is {}", node.getPath());
+                            //log.debug("Page path is {}", pagePath);
                         } else {
                             tidyJSONWriter.value(node.getPath());
                         }
@@ -131,10 +116,10 @@ public class VanityDuplicateCheck extends SlingAllMethodsServlet{
                 response.setCharacterEncoding("UTF-8");
             }
             catch(RepositoryException re){
-                logger.error( "Error in doGet", re );
+                log.error( "Error in doGet", re );
             }
         } catch (JSONException e) {
-            logger.error( "Error in doGet", e );
+            log.error( "Error in doGet", e );
         }
     }
 
