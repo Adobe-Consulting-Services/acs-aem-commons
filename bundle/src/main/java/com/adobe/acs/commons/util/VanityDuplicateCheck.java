@@ -47,11 +47,23 @@ import java.io.IOException;
  * already in use already
  */
 
-@Component(metatype = false)
+@Component(
+        label = "ACS AEM Commons - Unique Vanity Path Checker",
+        description = "Checks if the entered vanity path is already in use",
+        metatype = false,
+        immediate = false)
 @Service
 @Properties({
-        @Property(name = "sling.servlet.paths", value = "/bin/wcm/duplicateVanityCheck"),
-        @Property(name = "sling.servlet.methods", value = "GET")
+        @Property(
+                name = "sling.servlet.paths",
+                value = "/bin/wcm/duplicateVanityCheck",
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "sling.servlet.methods",
+                value = "GET",
+                propertyPrivate = true
+        )
 })
 
 public class VanityDuplicateCheck extends SlingAllMethodsServlet{
