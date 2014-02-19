@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("serial")
 @Component(
         label = "ACS AEM Commons - Delegating Servlet",
         description = "Delegating Servlet enabling the unobtrusive delegate of Resource Types.",

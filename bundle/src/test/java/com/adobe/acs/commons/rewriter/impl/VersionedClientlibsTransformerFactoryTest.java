@@ -61,11 +61,13 @@ public class VersionedClientlibsTransformerFactoryTest {
     private Transformer transformer;
 
     private final String PATH = "/etc/clientlibs/test";
+    private final String FAKE_STREAM_CHECKSUM="fcadcfb01c1367e9e5b7f2e6d455ba8f";
 
     @Before
     public void setUp() throws Exception {
         when(htmlLibrary.getLibraryPath()).thenReturn(PATH);
-        when(htmlLibrary.getLastModified()).thenReturn(123L);
+        when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings".getBytes()));
+        //when(htmlLibrary.getLastModified()).thenReturn(123L);
 
         transformer = factory.createTransformer();
         transformer.setContentHandler(handler);
@@ -113,7 +115,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
                 attributesCaptor.capture());
 
-        assertEquals(PATH + ".123.css", attributesCaptor.getValue().getValue(0));
+        assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
     }
 
     @Test
@@ -133,7 +135,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
                 attributesCaptor.capture());
 
-        assertEquals(PATH + ".min.123.css", attributesCaptor.getValue().getValue(0));
+        assertEquals(PATH + ".min."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
     }
 
     @Test
@@ -152,7 +154,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
                 attributesCaptor.capture());
 
-        assertEquals(PATH + ".123.js", attributesCaptor.getValue().getValue(0));
+        assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
     }
 
     @Test
@@ -171,7 +173,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
                 attributesCaptor.capture());
 
-        assertEquals(PATH + ".min.123.js", attributesCaptor.getValue().getValue(0));
+        assertEquals(PATH + ".min."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
     }
 
     @Test

@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>1.4.1-SNAPSHOT</version>
+        <version>1.4.3-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -49,6 +49,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle-twitter</Bundle-SymbolicName>
+                        <Import-Package>twitter4j*;version="[3.0.5,4)",*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

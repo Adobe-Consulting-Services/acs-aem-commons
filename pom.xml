@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -419,7 +419,7 @@
      -->
     <repositories>
         <repository>
-            <id>adobe</id>
+            <id>adobe-public-releases</id>
             <name>Adobe Public Repository</name>
             <url>http://repo.adobe.com/nexus/content/groups/public/</url>
             <layout>default</layout>
@@ -427,7 +427,7 @@
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>adobe</id>
+            <id>adobe-public-releases</id>
             <name>Adobe Public Repository</name>
             <url>http://repo.adobe.com/nexus/content/groups/public/</url>
             <layout>default</layout>

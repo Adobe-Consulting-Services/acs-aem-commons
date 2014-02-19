@@ -59,11 +59,33 @@ public class OsgiPropertyUtil {
     /**
      * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;
      *
+     * If a value is missing from a key/value pair, the entry is rejected. To keep valueless keys used the
+     * overloaded version of this function with allowValuelessKeys = true
+     *
      * @param values    Array of key/value pairs in the format => [ a<separator>b, x<separator>y ] ... ex. ["dog:woof", "cat:meow"]
      * @param separator separator between the values
      * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => "meow"
      */
     public static Map<String, String> toMap(final String[] values, final String separator) {
+        return toMap(values, separator, false, null);
+    }
+
+    /**
+     * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;
+     *
+     * If a value is missing from a key/value pair, the entry is rejected only if allowValuelessKyes is false.
+     * To keep the valueless keys pass in allowValuelessKeys => true
+     *
+     * *
+     * @param values Array of key/value pairs in the format => [ a<separator>b, x<separator>y ] ... ex. ["dog:woof", "cat:meow"]
+     * @param separator separator between the values
+     * @param allowValuelessKeys true is keys are allowed without associated values
+     * @param defaultValue default value to use if a value for a key is not present and allowValuelessKeys is true
+     * @return
+     */
+    public static Map<String, String> toMap(final String[] values, final String separator,
+                                            final boolean allowValuelessKeys, final String defaultValue) {
+
         final Map<String, String> map = new LinkedHashMap<String, String>();
 
         if (values == null || values.length < 1) {
@@ -72,7 +94,15 @@ public class OsgiPropertyUtil {
 
         for (final String value : values) {
             final String[] tmp = StringUtils.split(value, separator);
-            if (tmp.length == 2) {
+
+            if(tmp.length == 1 && allowValuelessKeys) {
+                if(StringUtils.startsWith(value, separator)) {
+                    // Skip keyless values
+                    continue;
+                }
+
+                map.put(tmp[0], defaultValue);
+            } else if (tmp.length == 2) {
                 map.put(tmp[0], tmp[1]);
             }
         }

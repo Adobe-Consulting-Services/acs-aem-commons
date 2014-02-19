@@ -22,6 +22,7 @@ package com.adobe.acs.commons.util;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
 import org.junit.*;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -131,6 +132,44 @@ public class PathInfoUtilTest {
 
         String expResult = "super/simple";
         String result = PathInfoUtil.getSuffix(request);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testGetSuffixSegments() {
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test", "html", "super/simple", "cpu=i7&ghz=2.4");
+
+        String[] expResult = new String[] { "super", "simple" };
+        String[] result = PathInfoUtil.getSuffixSegments(request);
+        assertArrayEquals(expResult, result);
+    }
+
+    @Test
+    public void testGetSuffixSegments_empty() {
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test", "html", "", "cpu=i7&ghz=2.4");
+
+        String[] expResult = new String[] { };
+        String[] result = PathInfoUtil.getSuffixSegments(request);
+        assertArrayEquals(expResult, result);
+    }
+
+    @Test
+    public void testGetFirstSuffixSegments() {
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test",
+                "html", "first/second", "cpu=i7&ghz=2.4");
+
+        String expResult = "first";
+        String result = PathInfoUtil.getFirstSuffixSegment(request);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testGetLastSuffixSegments() {
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test",
+                "html", "first/second/third", "cpu=i7&ghz=2.4");
+
+        String expResult = "third";
+        String result = PathInfoUtil.getLastSuffixSegment(request);
         assertEquals(expResult, result);
     }
 }

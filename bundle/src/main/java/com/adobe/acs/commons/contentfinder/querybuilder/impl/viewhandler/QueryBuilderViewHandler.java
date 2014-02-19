@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("serial")
 @Component(
         label = "ACS AEM Commons - GQL to Querybuilder View Handler",
         description = "Leverage Querybuilder to run ContentFinder queries",

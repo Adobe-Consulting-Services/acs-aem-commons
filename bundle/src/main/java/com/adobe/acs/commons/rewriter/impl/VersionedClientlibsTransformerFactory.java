@@ -24,6 +24,7 @@ import com.day.cq.commons.PathInfo;
 import com.day.cq.widget.HtmlLibrary;
 import com.day.cq.widget.HtmlLibraryManager;
 import com.day.cq.widget.LibraryType;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -39,7 +40,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 @Component(
         label = "ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter",
-        description = "Re-writes paths to CSS and JS clientlibs to include the last modified timestamp as a "
+        description = "Re-writes paths to CSS and JS clientlibs to include the md5 checksum as a "
                 + "selector; in the form: /path/to/clientlib.123456789.css")
 @Property(name = "pipeline.type",
         value = "versioned-clientlibs",
@@ -136,7 +137,7 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
                 if (selector != null) {
                     builder.append(selector).append(".");
                 }
-                builder.append(htmlLibrary.getLastModified());
+                builder.append(DigestUtils.md5Hex(htmlLibrary.getInputStream()));
                 builder.append(libraryType.extension);
 
                 return builder.toString();
