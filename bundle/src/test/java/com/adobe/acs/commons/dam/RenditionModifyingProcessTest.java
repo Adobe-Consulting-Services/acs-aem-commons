@@ -22,7 +22,6 @@ package com.adobe.acs.commons.dam;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import javax.jcr.Session;
@@ -170,37 +169,6 @@ public class RenditionModifyingProcessTest {
 
         verify(harness, times(1)).processLayer(any(Layer.class), eq(rendition), eq(workflowSession), any(String[].class));
         verify(harness, times(1)).saveImage(eq(asset), eq(rendition), any(Layer.class), eq("image/png"), eq(0.6));
-    }
-
-    static class TestRenditionModifyingProcess extends AbstractRenditionModifyingProcess {
-
-        private TestHarness harness;
-
-        @Override
-        protected String getTempFileSpecifier() {
-            return this.harness.getTempFileSpecifier();
-        }
-
-        @Override
-        protected Layer processLayer(Layer layer, Rendition rendition, WorkflowSession workflowSession, String[] args) {
-            return this.harness.processLayer(layer, rendition, workflowSession, args);
-        }
-
-        @Override
-        void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality)
-                throws IOException {
-            this.harness.saveImage(asset, toReplace, layer, mimetype, quality);
-        }
-
-    }
-
-    static interface TestHarness {
-        String getTempFileSpecifier();
-
-        Layer processLayer(Layer layer, Rendition rendition, WorkflowSession workflowSession, String[] args);
-
-        void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality)
-                throws IOException;
     }
 
 }
