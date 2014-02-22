@@ -17,7 +17,7 @@ Gracefully handle erring components with custom views. Edit, Preview and Publish
 
 Create a new `sling:OsgiConfig` to define how each view should be handled. To leverage the ACS AEM Commons OOTB views use the `sling:OsgiConfig` node defined below. This configuration will be used globally across all sites and pages on the AEM instance. 
 
-    /apps/myapp/config/com.adobe.acs.errorpagehandler.impl.ComponentErrorHandlerImpl
+    /apps/myapp/config/com.adobe.acs.commons.wcm.impl.ComponentErrorHandlerImpl
 
 {% highlight xml %}
 <?xml version="1.0" encoding="UTF-8"?>
