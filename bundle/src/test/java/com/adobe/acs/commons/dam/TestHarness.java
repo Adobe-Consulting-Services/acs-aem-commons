@@ -26,7 +26,7 @@ import com.day.cq.dam.api.Rendition;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.image.Layer;
 
-interface TestHarness {
+public interface TestHarness {
     String getTempFileSpecifier();
 
     Layer processLayer(Layer layer, Rendition rendition, WorkflowSession workflowSession, String[] args);

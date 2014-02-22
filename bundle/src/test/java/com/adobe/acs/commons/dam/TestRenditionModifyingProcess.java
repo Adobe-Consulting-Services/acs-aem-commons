@@ -26,7 +26,7 @@ import com.day.cq.dam.api.Rendition;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.image.Layer;
 
-class TestRenditionModifyingProcess extends AbstractRenditionModifyingProcess {
+public class TestRenditionModifyingProcess extends AbstractRenditionModifyingProcess {
 
     private TestHarness harness;
 
