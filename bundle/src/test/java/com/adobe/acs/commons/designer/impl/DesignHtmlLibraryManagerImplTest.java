@@ -220,17 +220,4 @@ public class DesignHtmlLibraryManagerImplTest {
         }
     }
 
-    /**
-     * Mockito doesn't like varargs yet.
-     * @see https://code.google.com/p/mockito/issues/detail?id=372
-     *
-     */
-    interface NonVarArgsHtmlLibraryManager {
-
-        void writeJsInclude(SlingHttpServletRequest request, Writer out, String[] categories);
-
-        void writeCssInclude(SlingHttpServletRequest request, Writer out, String[] categories);
-        
-    }
-
 }

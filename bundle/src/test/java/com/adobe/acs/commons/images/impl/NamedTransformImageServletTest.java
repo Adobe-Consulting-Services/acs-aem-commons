@@ -21,7 +21,6 @@
 package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.images.NamedImageTransformer;
-import com.day.image.Layer;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
 import org.junit.After;
 import org.junit.Before;
@@ -32,8 +31,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.jcr.RepositoryException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -46,12 +43,7 @@ public class NamedTransformImageServletTest {
     final String TEST_TRANSFORM_NAME = "test";
 
     @Spy
-    private NamedImageTransformer mockNamedImageTransformer = new NamedImageTransformer() {
-        @Override
-        public Layer transform(final Layer layer) throws IOException, RepositoryException {
-            return layer;
-        }
-    };
+    private NamedImageTransformer mockNamedImageTransformer = new StaticNamedImageTransformer();
 
     @Spy
     private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();;
