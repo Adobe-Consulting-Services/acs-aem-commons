@@ -45,12 +45,12 @@ Path to the workflow: /etc/workflow/models/dam/update_asset.html
 	* Check the Handler Advance option
 	* Two arguments are required
 		1. renditionName: The name of the rendition to modify like “original”
-		2. watermark: The repository path of the watermark like “/content/dam/geometrixx/icons/target.png/jcr:content/renditions/original/jcr:content”
+		2. watermark: The repository path of the watermark like “/content/dam/geometrixx/icons/target.png/jcr:content/renditions/original”
 
 	![image]({{ site.baseurl }}/images/dam-workflow-processes/3.png)
 
         * A full configuration example might have all the following:
-           quality:90,watermark:/content/dam/geometrixx/icons/cube_molecule_preferences.png/jcr:content/renditions/original,renditionName:cq5dam.web.1280.1280
+           watermark:/content/dam/geometrixx/icons/draft.png/jcr:content/renditions/original,renditionName:cq5dam.web.1280.1280
 
 *  Click OK and make sure to click “Save” of the workflow.
 
