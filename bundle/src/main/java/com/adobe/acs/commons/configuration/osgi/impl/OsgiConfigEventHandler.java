@@ -88,6 +88,9 @@ import java.util.Map;
 public class OsgiConfigEventHandler implements JobProcessor, EventHandler, ClusterAware {
     private static final Logger log = LoggerFactory.getLogger(OsgiConfigEventHandler.class);
 
+    private static final String SEARCH_PATH = "/etc";
+
+
     @Reference
     private OsgiConfigHelper osgiConfigHelper;
 
@@ -232,66 +235,65 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler, Clust
         return true;
     }
 
-    @Activate
-    protected void activate(final Map<String, Object> config) {
-        log.debug("Activating OSGi Config Event Handler");
+    private void processAll(final String searchPath) {
+        log.info("Processing any existing author-able OSGi Configurations on activation under: {}", searchPath);
 
-        final String searchPath = "/etc";
+        final Map<String, String> map = new HashMap<String, String>();
+        map.put("path", searchPath);
+        map.put("type", OsgiConfigConstants.NT_SLING_OSGICONFIG);
+        map.put("property", OsgiConfigConstants.PN_PID);
+        map.put("property.operation", "exists");
 
-        processOnActivate = PropertiesUtil.toBoolean(config.get(PROP_PROCESS_ON_ACTIVATE),
-                DEFAULT_PROCESS_ON_ACTIVATE);
+        map.put("p.offset", "0");
+        map.put("p.limit", "-1");
 
-        if(!this.isMaster) {
-            log.info("Non-master instance. Do not run process on activate routine.");
+        ResourceResolver resourceResolver = null;
+        try {
+            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final Session adminSession = resourceResolver.adaptTo(Session.class);
 
-            return;
-        } else if(processOnActivate) {
+            final Query query = queryBuilder.createQuery(PredicateGroup.create(map), adminSession);
 
-            log.info("Processing any existing author-able OSGi Configurations on activation under: {}", searchPath);
+            final SearchResult result = query.getResult();
 
-            final Map<String, String> map = new HashMap<String, String>();
-            map.put("path", searchPath);
-            map.put("type", OsgiConfigConstants.NT_SLING_OSGICONFIG);
-            map.put("property", OsgiConfigConstants.PN_PID);
-            map.put("property.operation", "exists");
-
-            map.put("p.offset", "0");
-            map.put("p.limit", "-1");
-
-            ResourceResolver resourceResolver = null;
-            try {
-                resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                final Session adminSession = resourceResolver.adaptTo(Session.class);
-
-                final Query query = queryBuilder.createQuery(PredicateGroup.create(map), adminSession);
-
-                final SearchResult result = query.getResult();
-
-                for (final Hit hit : result.getHits()) {
-                    // Use topic "Added" as it is unknown if this was a modification or add.
-                    // Add and modified are handled the same; so selection of add over modified is arbitrary.
-                    // It is known this is not a Delete event since the resource exists.
-                    // Delete events are not handled by the activate process.
-                    if(this.manageOsgiConfigs(hit.getPath(),
-                            org.apache.sling.api.SlingConstants.TOPIC_RESOURCE_ADDED)) {
-                        log.info("(Re)Registered configuration for {}", hit.getPath());
-                    }
+            for (final Hit hit : result.getHits()) {
+                // Use topic "Added" as it is unknown if this was a modification or add.
+                // Add and modified are handled the same; so selection of add over modified is arbitrary.
+                // It is known this is not a Delete event since the resource exists.
+                // Delete events are not handled by the activate process.
+                if(this.manageOsgiConfigs(hit.getPath(),
+                        SlingConstants.TOPIC_RESOURCE_ADDED)) {
+                    log.info("(Re)Registered configuration for {}", hit.getPath());
                 }
-            } catch (LoginException e) {
-                log.error(e.getMessage());
-            } catch (RepositoryException e) {
-                log.error(e.getMessage());
-            } finally {
-                if (resourceResolver != null) {
-                    resourceResolver.close();
-                }
+            }
+        } catch (LoginException e) {
+            log.error(e.getMessage());
+        } catch (RepositoryException e) {
+            log.error(e.getMessage());
+        } finally {
+            if (resourceResolver != null) {
+                resourceResolver.close();
             }
         }
     }
 
+    @Activate
+    protected void activate(final Map<String, Object> config) {
+        log.debug("Activating OSGi Config Event Handler");
+
+        this.processOnActivate = PropertiesUtil.toBoolean(config.get(PROP_PROCESS_ON_ACTIVATE),
+                DEFAULT_PROCESS_ON_ACTIVATE);
+    }
+
     @Override
     public void bindRepository(final String respositoryID, final String clusterID, final boolean isMaster) {
+        log.debug("Setting isMaster state to: {}", isMaster);
+
         this.isMaster = isMaster;
+
+        if(this.isMaster && this.processOnActivate) {
+            this.processAll(SEARCH_PATH);
+        }
     }
 
     @Override
