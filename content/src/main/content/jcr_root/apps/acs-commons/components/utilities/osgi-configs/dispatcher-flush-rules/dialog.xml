@@ -57,7 +57,7 @@
 
                 <hierarchical
                     jcr:primaryType="cq:Widget"
-                    fieldDescription="Click the '+' to add a new flush rule"
+                    fieldDescription="Click the '+' to add a new flush rule.&lt;br/&gt;Expected format: pattern-of-trigger-content=abs-path-to-flush"
                     fieldLabel="Hierarchical Rules"
                     name="./rules.hierarchical"
                     xtype="multifield">
@@ -68,7 +68,7 @@
 
                 <resource-only
                         jcr:primaryType="cq:Widget"
-                        fieldDescription="Click the '+' to add a new flush rule"
+                        fieldDescription="Click the '+' to add a new flush rule.&lt;br/&gt;Expected format: pattern-of-trigger-content=abs-path-to-flush"
                         fieldLabel="Resource Only Rules"
                         name="./rules.resource-only"
                         xtype="multifield">
