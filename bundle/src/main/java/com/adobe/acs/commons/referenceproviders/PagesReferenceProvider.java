@@ -39,7 +39,9 @@ import org.apache.sling.api.resource.ValueMap;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.reference.Reference;
 import com.day.cq.wcm.api.reference.ReferenceProvider;
-@Component
+@Component(label = "ACS AEM Commons - Pages Reference Provider",
+description = "Reference provider that searches for  pages referenced inside any given page resource",
+metatype = false)
 @Service(ReferenceProvider.class)
 public class PagesReferenceProvider implements ReferenceProvider {
 
