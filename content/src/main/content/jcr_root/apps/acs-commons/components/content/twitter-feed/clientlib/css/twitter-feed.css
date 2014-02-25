@@ -1,13 +1,10 @@
 
-/********** 
-**twitter feed - loops thorugh a vaierty of tweets via JSON feed**
-***********/
 .az-twitterFeed.row{margin-bottom: 30px; position: relative;}
 .az-twitterFeed.row .columns{padding-left: 12%; padding-right: 12%;}
 .az-twitterFeed.row .columns hr{height: 1px; margin-bottom: 0; font-size: 1px; color: #e5e5e5; background-color: #e5e5e5; border: none; outline: none;}
 .az-twitterFeed.row .columns img{margin: 15px 15px 0 0; float: left;}
-.az-twitterFeed.row .columns .jta-tweet-list{min-height: 50px; margin: 25px 0 0 0; padding: 0;}
-.az-twitterFeed.row .columns .jta-tweet-list li{margin: 0; padding: 0; display: none; list-style-type: none; list-style-image: none; font-family: SlateProBold; font-size: .85em; color: #000; text-align: center;}
+.az-twitterFeed.row .columns .jta-tweet-list{min-height: 50px; margin: 17px 0 0 0; padding: 0;}
+.az-twitterFeed.row .columns .jta-tweet-list li{margin: 0; padding: 0; display: none; list-style-type: none; list-style-image: none; font-family: Helvetica, Arial, sans-serif; font-weight: bold; font-size: 1.0em; color: #000;}
 .az-twitterFeed.row .columns .jta-tweet-list li:first-child{display: block;}
 .az-twitterFeed.row .columns .jta-tweet-list li a{text-decoration: underline; color: #000;}
 @media only screen and (max-width: 1025px){

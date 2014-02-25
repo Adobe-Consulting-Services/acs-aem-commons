@@ -49,13 +49,14 @@ public class TwitterFeedSchedulerTest {
 	}
 
 	@Test
-	public void testDefaultInstanceBehaviour() {
-		assertFalse(scheduler.getIsMasterInstance());
+	public void testDefaultInstanceBehaviour() throws NoSuchFieldException {
+		boolean isMaster = (Boolean)PrivateAccessor.getField(scheduler, "isMaster");
+		assertFalse(isMaster);
 	}
 
 	@Test
 	public void test_GivenItsMasterInstance_WhenRunIsInvoked_ThenCallsService() throws Exception {
-		PrivateAccessor.setField(scheduler, "isMasterInstance", true);
+		scheduler.bindRepository("", "", true);
 		scheduler.run();
 		verify(twitterFeedService).refreshTwitterFeed(resourceResolver, twitterComponentPaths);
 
@@ -63,7 +64,7 @@ public class TwitterFeedSchedulerTest {
 
 	@Test
 	public void test_GivenItsMasterInstance_WhenRunIsInvoked_ThenFinallyResourceResolverGetsClosed() throws Exception {
-		PrivateAccessor.setField(scheduler, "isMasterInstance", true);
+		scheduler.bindRepository("", "", true);
 		scheduler.run();
 		verify(resourceResolver).close();
 

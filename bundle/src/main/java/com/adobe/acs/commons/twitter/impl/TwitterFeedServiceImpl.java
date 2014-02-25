@@ -66,7 +66,7 @@ public class TwitterFeedServiceImpl implements TwitterFeedService {
 
 		List<Resource> twitterResources = findTwitterResources(resourceResolver, twitterComponentPaths);
 
-		Map<String, List<String>> usernameTweetsMap = loadTwitterFeedsForUserName(resourceResolver, twitterResources);
+		Map<String, List<String>> usernameTweetsMap = loadTwitterFeedsForResources(resourceResolver, twitterResources);
 
 		updateTwitterFeedOnResources(resourceResolver, twitterResources, usernameTweetsMap);
 
@@ -113,7 +113,7 @@ public class TwitterFeedServiceImpl implements TwitterFeedService {
 		return hits;
 	}
 
-	private Map<String, List<String>> loadTwitterFeedsForUserName(ResourceResolver resourceResolver,
+	private Map<String, List<String>> loadTwitterFeedsForResources(ResourceResolver resourceResolver,
 			List<Resource> twitterResources) throws RepositoryException {
 
 		Map<String, List<String>> usernameTweetsMap = new HashMap<String, List<String>>();
@@ -210,9 +210,7 @@ public class TwitterFeedServiceImpl implements TwitterFeedService {
 			Map<String, List<String>> usernameTweetsMap) throws RepositoryException {
 
 		for (Resource twitterResource : twitterResources) {
-
 			updateAndReplicateTwitterFeedOnResource(twitterResource, usernameTweetsMap, resourceResolver);
-
 		}
 
 	}

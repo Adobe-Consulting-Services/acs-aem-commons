@@ -1,13 +1,11 @@
 $(function() {
 
 	function twitterFeed() {
-		var tweetIndex = 1;
-		var tweetNum = $('.az-twitterFeed .columns .jta-tweet-list .jta-tweet-list-item').length - 1;
+		var tweetIndex = 1,
+			$items = $('.jta-tweet-list-item'),
+		    tweetNum = $items.length - 1;
 		setInterval(function() {
-			$('.az-twitterFeed .columns .jta-tweet-list .jta-tweet-list-item')
-					.hide();
-			$('.az-twitterFeed .columns .jta-tweet-list .jta-tweet-list-item')
-					.eq(tweetIndex).fadeIn();
+			$items.hide().eq(tweetIndex).fadeIn();
 			if (tweetIndex < tweetNum) {
 				tweetIndex++;
 			} else {
@@ -16,5 +14,5 @@ $(function() {
 		}, 10000);
 	}
 	
-	$(document).twitterFeed();
+	twitterFeed();
 });

@@ -16,18 +16,16 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.day.cq.jcrclustersupport.ClusterAware;
+import com.adobe.acs.commons.util.RunnableOnMaster;
 
 @Component(immediate = true, metatype = true, label = "ACS AEM Commons - Twitter Feed Refresh Scheduler", policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties(value = {
 		@Property(name = "scheduler.expression", value = "0 0/15 * * * ?", label = "Twitter Feed Refresh interval (Quartz Cron Expression)"),
 		@Property(name = "scheduler.concurrent", boolValue = false, propertyPrivate = true) })
-public class TwitterFeedScheduler implements Runnable, ClusterAware {
+public class TwitterFeedScheduler extends RunnableOnMaster {
 
 	private Logger LOGGER = LoggerFactory.getLogger(TwitterFeedScheduler.class);
-
-	private Boolean isMasterInstance = Boolean.FALSE;
 
 	@Reference
 	private ResourceResolverFactory resourceResolverFactory;
@@ -48,52 +46,25 @@ public class TwitterFeedScheduler implements Runnable, ClusterAware {
 
 	}
 
-	// @Override
-	// public void handleTopologyEvent(TopologyEvent event) {
-	// if (event.getType() == TopologyEvent.Type.TOPOLOGY_CHANGED
-	// || event.getType() == TopologyEvent.Type.TOPOLOGY_INIT) {
-	//
-	// isMasterInstance = event.getNewView().getLocalInstance().isLeader();
-	// LOGGER.info("############### isMaster Instance:" + isMasterInstance);
-	// }
-	//
-	// }
-
 	@Override
-	public void bindRepository(String repositoryId, String clusterId, boolean isMaster) {
-		isMasterInstance = isMaster;
-	}
-
-	public void unbindRepository() {
-
-	}
-
-	public Boolean getIsMasterInstance() {
-		return isMasterInstance;
-	}
-
-	@Override
-	public void run() {
+	public void runOnMaster() {
 
 		ResourceResolver resourceResolver = null;
 
-		if (isMasterInstance) {
-			try {
-				LOGGER.info("Master Instance, Running ACS AEM Commons Twitter Feed Scheduler");
+		try {
+			LOGGER.info("Master Instance, Running ACS AEM Commons Twitter Feed Scheduler");
 
-				resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+			resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
-				twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
+			twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
 
-			} catch (Exception e) {
-				LOGGER.error("Exception while running TwitterFeedScheduler, details", e);
-			} finally {
-				if (resourceResolver != null) {
-					resourceResolver.close();
-					resourceResolver = null;
-				}
+		} catch (Exception e) {
+			LOGGER.error("Exception while running TwitterFeedScheduler, details", e);
+		} finally {
+			if (resourceResolver != null) {
+				resourceResolver.close();
+				resourceResolver = null;
 			}
-
 		}
 
 	}

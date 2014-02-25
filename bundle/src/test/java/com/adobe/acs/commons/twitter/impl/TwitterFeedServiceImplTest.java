@@ -10,6 +10,10 @@ import java.util.Map;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.ValueFormatException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.version.VersionException;
 
 import junitx.util.PrivateAccessor;
 
@@ -41,7 +45,7 @@ import com.day.cq.wcm.webservicesupport.ConfigurationManager;
 public class TwitterFeedServiceImplTest {
 
 	private TwitterFeedService twitterFeedService;
-	
+
 	@Mock
 	private Logger LOGGER;
 
@@ -182,34 +186,18 @@ public class TwitterFeedServiceImplTest {
 	public void test_GivenThereAreSameUserNameTwitterResources_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsCalledOnce()
 			throws RepositoryException {
 
-		Resource twitterResource1 = mock(Resource.class);
-
-		Node twitterResourceNode1 = new MockNode("");
-		twitterResourceNode1.setProperty("username", "sachinmali");
-
-		hits.add(new HitStub(twitterResource1));
-		when(searchResult.getHits()).thenReturn(hits);
-		when(pageManager.getContainingPage(twitterResource1)).thenReturn(page);
-		when(twitterResource1.adaptTo(Node.class)).thenReturn(twitterResourceNode1);
+		mockAndSetBehaviourOnTwitterResource("sachinmali");
 
 		twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
 
 		verify(twitterOAuthCommunicator, times(1)).getTweetsAsList(any(TwitterConfiguration.class));
 	}
-	
+
 	@Test
 	public void test_GivenThereAreDifferentUserNameTwitterResources_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsCalledSeparately()
 			throws RepositoryException {
 
-		Resource twitterResource1 = mock(Resource.class);
-
-		Node twitterResourceNode1 = new MockNode("");
-		twitterResourceNode1.setProperty("username", "justinedelson");
-
-		hits.add(new HitStub(twitterResource1));
-		when(searchResult.getHits()).thenReturn(hits);
-		when(pageManager.getContainingPage(twitterResource1)).thenReturn(page);
-		when(twitterResource1.adaptTo(Node.class)).thenReturn(twitterResourceNode1);
+		mockAndSetBehaviourOnTwitterResource("justinedelson");
 
 		twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
 
@@ -222,6 +210,19 @@ public class TwitterFeedServiceImplTest {
 		twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
 
 		verify(twitterOAuthCommunicator).getTweetsAsList(any(TwitterConfiguration.class));
+	}
+
+	private void mockAndSetBehaviourOnTwitterResource(String username) throws ValueFormatException, VersionException, LockException,
+			ConstraintViolationException, RepositoryException {
+		Resource twitterResource1 = mock(Resource.class);
+
+		Node twitterResourceNode1 = new MockNode("");
+		twitterResourceNode1.setProperty("username", username);
+
+		hits.add(new HitStub(twitterResource1));
+		when(searchResult.getHits()).thenReturn(hits);
+		when(pageManager.getContainingPage(twitterResource1)).thenReturn(page);
+		when(twitterResource1.adaptTo(Node.class)).thenReturn(twitterResourceNode1);
 	}
 
 	class HitStub implements Hit {
