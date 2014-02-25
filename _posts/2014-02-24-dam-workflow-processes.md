@@ -24,10 +24,10 @@ Abstract asset workflow which performs some action on a particular rendition (wh
 ## Add Watermark to a rendition
 
 ### Purpose:
-This process adds the watermark to the rendition.
+This process overlays the named watermark image onto the named rendition in the lower left corner.  Currently, only one position is supported (lower left).  Future enhancements may include the ability to add custom text (e.g. "Private"), text/image rotation, opacity, flexible image placement (i.e. topleft,bottomright,topright,center) and exact placement.
 
 ### How to Use
-Update the DAM Update Asset workflow to add a custom process step in the end.
+Update the DAM Update Asset workflow and add a custom process step at the end.
 
 Path to the workflow: /etc/workflow/models/dam/update_asset.html
 
@@ -50,8 +50,11 @@ Path to the workflow: /etc/workflow/models/dam/update_asset.html
 	![image]({{ site.baseurl }}/images/dam-workflow-processes/3.png)
 
         * A full configuration example might have all the following:
+
            watermark:/content/dam/geometrixx/icons/draft.png/jcr:content/renditions/original,renditionName:cq5dam.web.1280.1280
 
-*  Click OK and make sure to click “Save” of the workflow.
+           This places the draft.png image in the lower left of the 1280x1280 rendition of any image file loaded into the DAM.
+
+*  Click OK and then “Save” the workflow.
 
 
