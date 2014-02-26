@@ -45,6 +45,7 @@ public class TwitterFeedScheduler extends RunnableOnMaster {
 		twitterComponentPaths = PropertiesUtil.toStringArray(props.get(TWITTER_COMPONENT_PATHS));
 
 	}
+	
 
 	@Override
 	public void runOnMaster() {
