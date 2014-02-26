@@ -17,179 +17,111 @@
   limitations under the License.
   #L%
   --%>
-<%@ page contentType="text/html" pageEncoding="utf-8"
-    import="com.day.cq.i18n.I18n,com.day.cq.widget.HtmlLibraryManager,com.day.cq.replication.AgentManager,
- java.util.Collection,com.day.cq.replication.Agent"%>
-<%@include file="/libs/foundation/global.jsp"%>
-<%
-    I18n i18n = new I18n(slingRequest);
-    final AgentManager agentManager = sling
-            .getService(AgentManager.class);
-    Collection<Agent> agents = agentManager.getAgents().values();
+<%@include file="/libs/foundation/global.jsp" %><%
+%><%@ page contentType="text/html" pageEncoding="utf-8" session="false"
+         import="com.day.cq.i18n.I18n,
+                 com.day.cq.widget.HtmlLibraryManager,
+                 com.day.cq.replication.AgentManager,
+                 java.util.Collection,
+                 com.day.cq.replication.Agent"
+%><%
+
+    final I18n i18n = new I18n(slingRequest);
+    final AgentManager agentManager = sling.getService(AgentManager.class);
+    final Collection<Agent> agents = agentManager.getAgents().values();
+    final String action = resourceResolver.map(currentPage.getContentResource().getPath())
+            + ".replicateversion.json";
 %>
 
-<h1><%=i18n.get("Replicate Earlier Versions")%></h1>
-<div id="container"
-    style="position: relative; left: 100px; width: 600px;">
-    <div id="errmsg" style="display: none; background-color: #EFCDC7"></div>
+<h1>
+    <%= i18n.get("Version Replication") %>
+</h1>
 
-
-    <label for="multifieldpaths"><%=i18n.get("Root Paths")%>:</label>
-    <div id="CQ"></div>
-
-    <input type="hidden" id="cal" name="cal" value=""> <label
-        for="datetimecal"><%=i18n.get("Enter the date time")%>:</label>
-    <div id="datetimecal">&nbsp;</div>
-    <div style="margin-top: 20px">
-        <label for="agentId"><%=i18n
-                    .get("Replication Agent(you can select more than one)")%>:</label>
-    </div>
-    <div>
-        <select id="cmbAgent" name="cmbAgent" size="<%=agents.size()%>"
-            multiple>
-
-            <%
-                for (final Agent agent : agents) {
-                    if (agent.isEnabled() && agent.isValid()) {
-            %>
-            <option
-                style="width:<%=agent.getConfiguration().getName().length() * 7%>px"
-                value="<%=agent.getId()%>"><%=agent.getConfiguration().getName()%></option>
-
-            <%
-                }
-                }
-            %>
-        </select>
-        <%
-            for (final Agent agent : agentManager.getAgents().values()) {
-                if (agent.isEnabled() && agent.isValid()) {
-        %>
-        <input type="hidden" id="<%=agent.getId()%>"
-            value="<%=resourceResolver.map(agent.getConfiguration()
-                            .getConfigPath())%>" />
-        <%
-            }
-            }
-        %>
-    </div>
-
-    <div style="margin-top: 20px">
-        <input type="button" value="<%=i18n.get("Replicate")%>"
-            id="btnReplicate" name="btnReplicate">
-    </div>
-
-    <br>
-    <div id="replicationqueueMsg"></div>
-    <div id="replicationqueueStatus" style="margin-top: 20px"></div>
+<%-- Error Message Notification --%>
+<div id="error-message" class="notification hidden">
+    <h4>An error occurred. Please correct and try again.</h4>
+    <ul><li class="message"></li></ul>
 </div>
-<script>
-CQ.Ext.onReady(function() {
-    var resultTmpl = new CQ.Ext.XTemplate(
-        'Replication has been triggered',
-        '<ul>',
-        '<tpl for="result">',
-        '<li>{path} {status} {version}</li>',
-        '</tpl>',
-        '</ul>'
-    );
-    
-$("#btnReplicate").click(
-function() {
-                    var msg = "Process initiated.......";
-                    $("#replicationqueueMsg").html(msg);
-                    $("#errmsg").html("");
-                    $("#errmsg").css("display", "none");
-                    var agentList = "<ul>";
-                    $("#cmbAgent option:selected").each(
-                            function() {
 
-                                agentList += "<h3>" + $(this).text()
-                                        + "</h3><li><a href='"
-                                        + $("#" + $(this).val()).val()
-                                        + ".log.html#end' target='_new'>" + "log"
-                                        + "</a></li>";
-                                agentList += "<li><a href='"
-                                        + $("#" + $(this).val()).val()
-                                        + ".html' target='_new'>"
-                                        + "replication queue"
-                                        + "</a></li><br/>";
+<%-- Result Notifications --%>
+<div id="results" class="notification hidden">
+    <div id="replication-agents-info">
+        <h2>Your replication request has been submitted.</h2>
+        <p>This request may take some time to complete. Please review the Replication agent logs and
+            configurations the complete replication status does not appear below shortly.</p>
+        <div class="message"></div>
+    </div>
+    <div id="replication-queue-message"></div>
+</div>
 
-                            });
-                    $("#replicationqueueStatus").html(agentList);
+<div style="width: 650px">
 
-                    $.post("<%=currentPage.getPath()%>/_jcr_content.replicateversion.html",
-                                                    buildRequestParams(),
-                                                    function(resp) {
-                                                        if (resp == undefined
-                                                                || resp.status == 'error') {
-                                                            $("#errmsg").html(
-                                                                    resp.error);
-                                                            $("#errmsg").css(
-                                                                    "display",
-                                                                    "block");
-                                                            $(
-                                                                    "#replicationqueueMsg")
-                                                                    .html('');
-                                                            $(
-                                                                    "#replicationqueueStatus")
-                                                                    .html('');
-                                                        } else {
-                                                            msg = resultTmpl.apply(resp);
-                                                            $(
-                                                                    "#replicationqueueMsg")
-                                                                    .html(msg);
-                                                        }
+    <%-- Inline Form of CQ Widgets and normal HTML inputs --%>
+    <div class="cq-inline-form" data-action="<%= action %>">
 
-                                                    });
+        <%-- CQ Widgets --%>
+        <div id="CQ" class="cq-widget-form">
+            <%-- Root Paths --%>
+            <div class="field-row">
+                <label for="multifieldpaths">
+                    <%=i18n.get("Root paths")%>
+                </label>
 
-                                });
+                <p class="field-instructions">
+                    Select the root paths to replicate. Resource versions matching the specified date &amp; time
+                    will be replicated.
+                </p>
 
-                var mmfield = new CQ.form.MultiField({
+                <%-- Container to inject ExtJS Widgets into --%>
+                <div id="cq-inject-rootpaths"></div>
+            </div>
 
-                    renderTo : "CQ",
+            <%-- Date and Time --%>
+            <div class="field-row">
 
-                    "fieldLabel" : "Root Paths",
-                    width : "400px",
-                    name : "rootPaths",
-                    "fieldConfig" : {
-                        "allowBlank" : "false",
-                        predicate : "hierarchy",
-                        "xtype" : "pathfield"
+                <label for="datetimecal">
+                    <%=i18n.get("Version date &amp; time")%>
+                </label>
+
+                <p class="field-instructions">
+                    Select the date and time used to derive the correct resource version to replicate.
+                </p>
+
+                <div id="cq-inject-datetime"></div>
+            </div>
+        </div>
+
+        <%-- Replication Agents --%>
+        <div class="field-row">
+            <label for="agentId">
+                <%= i18n.get("Replication agents") %>
+            </label>
+
+            <p class="field-instructions">
+                Select 1 or more replication agents target for this replication.
+            </p>
+
+            <select id="cmbAgent" name="cmbAgent" multiple size="<%= agents.size() %>">
+                <% for (final Agent agent : agents) {
+                    if (agent.isEnabled() && agent.isValid()) {
+                        %><option
+                                value="<%= agent.getId() %>"
+                                data-agent-path="<%= resourceResolver.map(agent.getConfiguration().getConfigPath()) %>">
+                            <%= agent.getConfiguration().getName() %>
+                        </option><%
                     }
-                });
+                } %>
+            </select>
+        </div>
 
-                var cal = new CQ.form.DateTime({
-                    "renderTo" : "CQ",
-                    "dateWidth" : 100,
-                    "hideTime" : false,
-                    "name" : "datetimecal",
-                    "allowBlank" : false,
-                    "hiddenFormat" : "Y-m-d\\TH:i:s a",
-                    "listeners" : {
-                        render : function() {
-                            this.wrap.anchorTo("datetimecal", "tl");
-                        },
-                        change : function(fld, newValue, oldValue) {
+        <%-- Submit button --%>
+        <div class="field-row">
+            <input type="submit"
+                   id="submit-button"
+                   class="button"
+                   value="<%= i18n.get("Replicate Versions") %>"/>
+        </div>
+    </div>
+</div>
 
-                        },
-                        dialogselect : function(fld, newValue) {
-
-                        }
-                    }
-                });
-                function buildRequestParams() {
-                    var params = "";
-                    $("input[name='rootPaths']").each(function(i, value) {
-                        params += "rootPaths=" + escape($(this).val()) + "&";
-                    });
-                    params += "datetimecal="
-                            + escape($("input[name='datetimecal']").get(0).value);
-                    $('#cmbAgent option:selected').each(function() {
-
-                        params += "&cmbAgent=" + escape($(this).val());
-                    });
-                    return params;
-                }
-            });
-</script>
+<cq:includeClientLib js="acs-commons.utilities.version-replicator"/>

@@ -18,6 +18,7 @@
  * #L%
  */
 
+#acs-commons,
 .acs-commons {
   padding-bottom: 2em;
 
@@ -132,6 +133,46 @@
     &:active {
       position:relative;
       top:1px;
+    }
+  }
+
+ .cq-inline-form {
+    label {
+      color: #666;
+      display: block;
+      margin: 1.25rem 0 .25rem 0;
+      font-size: .8rem;
+      font-weight: bold;
+    }
+
+    .field-instructions {
+      color: #666;
+      display: block;
+      font-size: .75rem;
+      margin: .5rem 0 .4rem 0;
+    }
+
+    select {
+      color: #666;
+      font-size: .8rem;
+      padding: .25rem;
+      border: solid 1px #ccc;
+    }
+
+    #CQ .x-panel-body {
+      border-width: 0;
+      background-color: transparent;
+    }
+
+    #CQ .x-window-body .x-panel-body {
+     background-color: #fff;
+    }
+
+    #CQ .cq-multifield-toolbar {
+      border-width: 1px;
+      background-color: #fff;
+      padding: .25rem;
+      margin: auto 0;
     }
   }
 }
