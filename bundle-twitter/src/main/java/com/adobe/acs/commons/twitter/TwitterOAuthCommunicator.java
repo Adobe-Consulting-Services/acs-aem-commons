@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Twitter Support Bundle
+ * %%
+ * Copyright (C) 2013 - 2014 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.twitter;
 
 import java.util.ArrayList;
@@ -15,70 +34,75 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterOAuthCommunicator {
 
-	private Logger LOGGER = LoggerFactory.getLogger(TwitterOAuthCommunicator.class);
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(TwitterOAuthCommunicator.class);
 
-	private TwitterFactory twitterFactory;
+    private TwitterFactory twitterFactory;
 
-	private Twitter twitter;
+    private Twitter twitter;
 
-	public TwitterOAuthCommunicator() {
-		init();
-	}
+    public TwitterOAuthCommunicator() {
+        init();
+    }
 
-	private void init() {
-		ConfigurationBuilder configurationBuilder = getConfigurationBuilder();
+    private void init() {
+        ConfigurationBuilder configurationBuilder = getConfigurationBuilder();
 
-		twitterFactory = new TwitterFactory(configurationBuilder.build());
-	}
+        twitterFactory = new TwitterFactory(configurationBuilder.build());
+    }
 
-	private ConfigurationBuilder getConfigurationBuilder() {
-		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-		configurationBuilder.setUseSSL(true);
-		configurationBuilder.setApplicationOnlyAuthEnabled(true);
-		return configurationBuilder;
-	}
+    private ConfigurationBuilder getConfigurationBuilder() {
+        ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.setUseSSL(true);
+        configurationBuilder.setApplicationOnlyAuthEnabled(true);
+        return configurationBuilder;
+    }
 
-	public List<String> getTweetsAsList(TwitterConfiguration twitterConfiguration) {
+    public List<String> getTweetsAsList(
+            TwitterConfiguration twitterConfiguration) {
 
-		String userName = twitterConfiguration.getUsername();
+        String userName = twitterConfiguration.getUsername();
 
-		List<String> tweetsList = new ArrayList<String>();
+        List<String> tweetsList = new ArrayList<String>();
 
-		twitter = twitterFactory.getInstance();
+        twitter = twitterFactory.getInstance();
 
-		twitter.setOAuthConsumer(twitterConfiguration.getConsumerKey(), twitterConfiguration.getConsumerSecret());
+        twitter.setOAuthConsumer(twitterConfiguration.getConsumerKey(),
+                twitterConfiguration.getConsumerSecret());
 
-		try {
+        try {
 
-			LOGGER.info("Loading Twitter time line for user {}", userName);
+            LOGGER.info("Loading Twitter time line for user {}", userName);
 
-			twitter.getOAuth2Token();
-			List<Status> statuses = twitter.getUserTimeline(userName);
+            twitter.getOAuth2Token();
+            List<Status> statuses = twitter.getUserTimeline(userName);
 
-			if (statuses != null && statuses.size() > 0) {
-				for (Status status : statuses) {
-					tweetsList.add(processTweet(status));
-				}
+            if (statuses != null && statuses.size() > 0) {
+                for (Status status : statuses) {
+                    tweetsList.add(processTweet(status));
+                }
 
-			}
+            }
 
-		} catch (TwitterException te) {
-			LOGGER.error("Error occured while fetching tweets for user:" + userName, te);
-		}
+        } catch (TwitterException te) {
+            LOGGER.error("Error occured while fetching tweets for user:"
+                    + userName, te);
+        }
 
-		return tweetsList;
-	}
+        return tweetsList;
+    }
 
-	private String processTweet(Status status) {
-		String tweet = status.getText();
+    private String processTweet(Status status) {
+        String tweet = status.getText();
 
-		for (URLEntity entity : status.getURLEntities()) {
-			String url = "<a target=\"_blank\" href=\"" + entity.getURL() + "\">" + entity.getURL() + "</a>";
-			tweet = tweet.replace(entity.getURL(), url);
-		}
+        for (URLEntity entity : status.getURLEntities()) {
+            String url = "<a target=\"_blank\" href=\"" + entity.getURL()
+                    + "\">" + entity.getURL() + "</a>";
+            tweet = tweet.replace(entity.getURL(), url);
+        }
 
-		return tweet;
+        return tweet;
 
-	}
+    }
 
 }

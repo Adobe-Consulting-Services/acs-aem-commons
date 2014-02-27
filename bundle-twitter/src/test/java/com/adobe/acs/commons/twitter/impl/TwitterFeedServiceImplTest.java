@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Twitter Support Bundle
+ * %%
+ * Copyright (C) 2013 - 2014 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.twitter.impl;
 
 import static org.mockito.Matchers.*;
@@ -25,7 +44,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
 
 import com.adobe.acs.commons.twitter.TwitterConfiguration;
 import com.adobe.acs.commons.twitter.TwitterFeedService;
@@ -44,234 +62,257 @@ import com.day.cq.wcm.webservicesupport.ConfigurationManager;
 @RunWith(MockitoJUnitRunner.class)
 public class TwitterFeedServiceImplTest {
 
-	private TwitterFeedService twitterFeedService;
+    private TwitterFeedService twitterFeedService;
 
-	@Mock
-	private Logger LOGGER;
+    @Mock
+    private TwitterOAuthCommunicator twitterOAuthCommunicator;
 
-	@Mock
-	private TwitterOAuthCommunicator twitterOAuthCommunicator;
+    @Mock
+    private ConfigurationManager configurationManager;
 
-	@Mock
-	private ConfigurationManager configurationManager;
+    @Mock
+    private Configuration configuration;
 
-	@Mock
-	private Configuration configuration;
+    @Mock
+    private ResourceResolver resourceResolver;
 
-	@Mock
-	private ResourceResolver resourceResolver;
+    @Mock
+    private QueryBuilder queryBuilder;
 
-	@Mock
-	private QueryBuilder queryBuilder;
+    @Mock
+    private Session session;
 
-	@Mock
-	private Session session;
+    @Mock
+    private Query query;
 
-	@Mock
-	private Query query;
+    @Mock
+    private SearchResult searchResult;
 
-	@Mock
-	private SearchResult searchResult;
+    @Mock
+    private Resource twitterResource;
 
-	@Mock
-	private Resource twitterResource;
+    @Mock
+    private Resource contentResource;
 
-	@Mock
-	private Resource contentResource;
+    @Mock
+    private PageManager pageManager;
 
-	@Mock
-	private PageManager pageManager;
+    @Mock
+    private Page page;
 
-	@Mock
-	private Page page;
+    private String[] twitterComponentPaths = { "acs-commons//components//content//twitter-feed" };
 
-	private String[] twitterComponentPaths = { "acs-commons//components//content//twitter-feed" };
+    private List<Hit> hits = new ArrayList<Hit>();
 
-	private List<Hit> hits = new ArrayList<Hit>();
+    private Node twitterConfigNode;
 
-	private Node twitterConfigNode;
+    private Node twitterResourceNode;
 
-	private Node twitterResourceNode;
+    @Before
+    public void setUp() throws Exception {
+        twitterFeedService = new TwitterFeedServiceImpl();
 
-	@Before
-	public void setUp() throws Exception {
-		twitterFeedService = new TwitterFeedServiceImpl();
+        populate();
 
-		populate();
+        PrivateAccessor.setField(twitterFeedService,
+                "twitterOAuthCommunicator", twitterOAuthCommunicator);
+        PrivateAccessor.setField(twitterFeedService, "configurationManager",
+                configurationManager);
 
-		PrivateAccessor.setField(twitterFeedService, "twitterOAuthCommunicator", twitterOAuthCommunicator);
-		PrivateAccessor.setField(twitterFeedService, "configurationManager", configurationManager);
-		PrivateAccessor.setField(twitterFeedService, "LOGGER", LOGGER);
+        when(
+                configurationManager.getConfiguration(anyString(),
+                        any(String[].class))).thenReturn(configuration);
+        when(configuration.getContentResource()).thenReturn(contentResource);
+        when(contentResource.adaptTo(Node.class)).thenReturn(twitterConfigNode);
 
-		when(configurationManager.getConfiguration(anyString(), any(String[].class))).thenReturn(configuration);
-		when(configuration.getContentResource()).thenReturn(contentResource);
-		when(contentResource.adaptTo(Node.class)).thenReturn(twitterConfigNode);
+        when(resourceResolver.adaptTo(QueryBuilder.class)).thenReturn(
+                queryBuilder);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+        when(resourceResolver.adaptTo(PageManager.class)).thenReturn(
+                pageManager);
 
-		when(resourceResolver.adaptTo(QueryBuilder.class)).thenReturn(queryBuilder);
-		when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-		when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
+        when(
+                queryBuilder.createQuery(any(PredicateGroup.class),
+                        any(Session.class))).thenReturn(query);
+        when(query.getResult()).thenReturn(searchResult);
+        when(searchResult.getHits()).thenReturn(hits);
+        when(pageManager.getContainingPage(twitterResource)).thenReturn(page);
 
-		when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).thenReturn(query);
-		when(query.getResult()).thenReturn(searchResult);
-		when(searchResult.getHits()).thenReturn(hits);
-		when(pageManager.getContainingPage(twitterResource)).thenReturn(page);
+        when(twitterResource.adaptTo(Node.class)).thenReturn(
+                twitterResourceNode);
 
-		when(twitterResource.adaptTo(Node.class)).thenReturn(twitterResourceNode);
+    }
 
-	}
+    private void populate() throws RepositoryException {
 
-	private void populate() throws RepositoryException {
+        populateTwitterConfigNode();
 
-		populateTwitterConfigNode();
+        populateTwitterResourceNode();
 
-		populateTwitterResourceNode();
+        hits.add(new HitStub(twitterResource));
 
-		hits.add(new HitStub(twitterResource));
+    }
 
-	}
+    private void populateTwitterConfigNode() throws RepositoryException {
 
-	private void populateTwitterConfigNode() throws RepositoryException {
+        Node[] nodes = new Node[1];
 
-		Node[] nodes = new Node[1];
+        MockNode firstNode = new MockNode("");
+        firstNode.setProperty("oauth.client.id", "123");
+        firstNode.setProperty("oauth.client.secret", "xyz");
+        nodes[0] = firstNode;
 
-		MockNode firstNode = new MockNode("");
-		firstNode.setProperty("oauth.client.id", "123");
-		firstNode.setProperty("oauth.client.secret", "xyz");
-		nodes[0] = firstNode;
+        twitterConfigNode = new MockNode(nodes);
+    }
 
-		twitterConfigNode = new MockNode(nodes);
-	}
+    private void populateTwitterResourceNode() throws RepositoryException {
+        twitterResourceNode = new MockNode("");
+        twitterResourceNode.setProperty("username", "sachinmali");
 
-	private void populateTwitterResourceNode() throws RepositoryException {
-		twitterResourceNode = new MockNode("");
-		twitterResourceNode.setProperty("username", "sachinmali");
+    }
 
-	}
+    @Test
+    public void test_GivenThereAreNoTwitterResources_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsNotCalled()
+            throws RepositoryException {
 
-	@Test
-	public void test_GivenThereAreNoTwitterResources_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsNotCalled()
-			throws RepositoryException {
+        when(searchResult.getHits()).thenReturn(null);
 
-		when(searchResult.getHits()).thenReturn(null);
+        twitterFeedService.refreshTwitterFeed(resourceResolver,
+                twitterComponentPaths);
 
-		twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
+        verify(twitterOAuthCommunicator, never()).getTweetsAsList(
+                any(TwitterConfiguration.class));
+    }
 
-		verify(twitterOAuthCommunicator, never()).getTweetsAsList(any(TwitterConfiguration.class));
-	}
+    @Test
+    public void test_GivenThereIsNoTwitterCloudConfiguration_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsNotCalled()
+            throws RepositoryException {
 
-	@Test
-	public void test_GivenThereIsNoTwitterCloudConfiguration_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsNotCalled()
-			throws RepositoryException {
+        when(
+                configurationManager.getConfiguration(anyString(),
+                        any(String[].class))).thenReturn(null);
 
-		when(configurationManager.getConfiguration(anyString(), any(String[].class))).thenReturn(null);
+        twitterFeedService.refreshTwitterFeed(resourceResolver,
+                twitterComponentPaths);
 
-		twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
+        verify(twitterOAuthCommunicator, never()).getTweetsAsList(
+                any(TwitterConfiguration.class));
+    }
 
-		verify(twitterOAuthCommunicator, never()).getTweetsAsList(any(TwitterConfiguration.class));
-	}
+    @Test
+    public void test_GivenThereIsInvalidTwitterCloudConfiguration_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsNotCalled()
+            throws RepositoryException {
 
-	@Test
-	public void test_GivenThereIsInvalidTwitterCloudConfiguration_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsNotCalled()
-			throws RepositoryException {
+        twitterResourceNode = new MockNode("");
+        when(twitterResource.adaptTo(Node.class)).thenReturn(
+                twitterResourceNode);
 
-		twitterResourceNode = new MockNode("");
-		when(twitterResource.adaptTo(Node.class)).thenReturn(twitterResourceNode);
+        twitterFeedService.refreshTwitterFeed(resourceResolver,
+                twitterComponentPaths);
 
-		twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
+        verify(twitterOAuthCommunicator, never()).getTweetsAsList(
+                any(TwitterConfiguration.class));
+    }
 
-		verify(twitterOAuthCommunicator, never()).getTweetsAsList(any(TwitterConfiguration.class));
-	}
+    @Test
+    public void test_GivenThereAreSameUserNameTwitterResources_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsCalledOnce()
+            throws RepositoryException {
 
-	@Test
-	public void test_GivenThereAreSameUserNameTwitterResources_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsCalledOnce()
-			throws RepositoryException {
+        mockAndSetBehaviourOnTwitterResource("sachinmali");
 
-		mockAndSetBehaviourOnTwitterResource("sachinmali");
+        twitterFeedService.refreshTwitterFeed(resourceResolver,
+                twitterComponentPaths);
 
-		twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
+        verify(twitterOAuthCommunicator, times(1)).getTweetsAsList(
+                any(TwitterConfiguration.class));
+    }
 
-		verify(twitterOAuthCommunicator, times(1)).getTweetsAsList(any(TwitterConfiguration.class));
-	}
+    @Test
+    public void test_GivenThereAreDifferentUserNameTwitterResources_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsCalledSeparately()
+            throws RepositoryException {
 
-	@Test
-	public void test_GivenThereAreDifferentUserNameTwitterResources_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsCalledSeparately()
-			throws RepositoryException {
+        mockAndSetBehaviourOnTwitterResource("justinedelson");
 
-		mockAndSetBehaviourOnTwitterResource("justinedelson");
+        twitterFeedService.refreshTwitterFeed(resourceResolver,
+                twitterComponentPaths);
 
-		twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
+        verify(twitterOAuthCommunicator, times(2)).getTweetsAsList(
+                any(TwitterConfiguration.class));
+    }
 
-		verify(twitterOAuthCommunicator, times(2)).getTweetsAsList(any(TwitterConfiguration.class));
-	}
+    @Test
+    public void test_GivenHappyScenario_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsCalled()
+            throws RepositoryException {
 
-	@Test
-	public void test_GivenHappyScenario_WhenRefreshTwitterFeedInvoked_ThenGetTweetsAsListIsCalled() throws RepositoryException {
+        twitterFeedService.refreshTwitterFeed(resourceResolver,
+                twitterComponentPaths);
 
-		twitterFeedService.refreshTwitterFeed(resourceResolver, twitterComponentPaths);
+        verify(twitterOAuthCommunicator).getTweetsAsList(
+                any(TwitterConfiguration.class));
+    }
 
-		verify(twitterOAuthCommunicator).getTweetsAsList(any(TwitterConfiguration.class));
-	}
+    private void mockAndSetBehaviourOnTwitterResource(String username)
+            throws ValueFormatException, VersionException, LockException,
+            ConstraintViolationException, RepositoryException {
+        Resource twitterResource1 = mock(Resource.class);
 
-	private void mockAndSetBehaviourOnTwitterResource(String username) throws ValueFormatException, VersionException, LockException,
-			ConstraintViolationException, RepositoryException {
-		Resource twitterResource1 = mock(Resource.class);
+        Node twitterResourceNode1 = new MockNode("");
+        twitterResourceNode1.setProperty("username", username);
 
-		Node twitterResourceNode1 = new MockNode("");
-		twitterResourceNode1.setProperty("username", username);
+        hits.add(new HitStub(twitterResource1));
+        when(searchResult.getHits()).thenReturn(hits);
+        when(pageManager.getContainingPage(twitterResource1)).thenReturn(page);
+        when(twitterResource1.adaptTo(Node.class)).thenReturn(
+                twitterResourceNode1);
+    }
 
-		hits.add(new HitStub(twitterResource1));
-		when(searchResult.getHits()).thenReturn(hits);
-		when(pageManager.getContainingPage(twitterResource1)).thenReturn(page);
-		when(twitterResource1.adaptTo(Node.class)).thenReturn(twitterResourceNode1);
-	}
+    class HitStub implements Hit {
 
-	class HitStub implements Hit {
+        private Resource resource;
 
-		private Resource resource;
+        public HitStub(Resource resource) {
+            this.resource = resource;
+        }
 
-		public HitStub(Resource resource) {
-			this.resource = resource;
-		}
+        @Override
+        public String getExcerpt() throws RepositoryException {
+            return null;
+        }
 
-		@Override
-		public String getExcerpt() throws RepositoryException {
-			return null;
-		}
+        @Override
+        public Map<String, String> getExcerpts() throws RepositoryException {
+            return null;
+        }
 
-		@Override
-		public Map<String, String> getExcerpts() throws RepositoryException {
-			return null;
-		}
+        @Override
+        public long getIndex() {
+            return 0;
+        }
 
-		@Override
-		public long getIndex() {
-			return 0;
-		}
+        @Override
+        public Node getNode() throws RepositoryException {
+            return null;
+        }
 
-		@Override
-		public Node getNode() throws RepositoryException {
-			return null;
-		}
+        @Override
+        public String getPath() throws RepositoryException {
+            return null;
+        }
 
-		@Override
-		public String getPath() throws RepositoryException {
-			return null;
-		}
+        @Override
+        public ValueMap getProperties() throws RepositoryException {
+            return null;
+        }
 
-		@Override
-		public ValueMap getProperties() throws RepositoryException {
-			return null;
-		}
+        @Override
+        public Resource getResource() throws RepositoryException {
+            return resource;
+        }
 
-		@Override
-		public Resource getResource() throws RepositoryException {
-			return resource;
-		}
+        @Override
+        public String getTitle() throws RepositoryException {
+            return null;
+        }
 
-		@Override
-		public String getTitle() throws RepositoryException {
-			return null;
-		}
-
-	}
+    }
 }
