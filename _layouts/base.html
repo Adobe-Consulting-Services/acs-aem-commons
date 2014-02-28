@@ -12,9 +12,10 @@
     
         <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/bootstrap/bootstrap.min.css">
         <link rel="stylesheet" href="{{ site.baseurl }}/assets/fonts/source-sans/stylesheet.css">
-        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/prettify.css">        
-        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/syntax.css">        
-        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/styles.css">        
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/prettify.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/syntax.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/styles.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/bigfoot-default.css">
         <link rel="shortcut icon" href="{{ site.baseurl }}/assets/images/favicon.ico">
         <link rel="canonical" href="http://adobe-consulting-services.github.io{{ site.baseurl }}{{ page.url }}" />
     </head>
@@ -58,7 +59,11 @@
         <script src="{{ site.baseurl }}/assets/js/jquery.js"></script>
         <script src="{{ site.baseurl }}/assets/js/prettify.js"></script>
         <script src="{{ site.baseurl }}/assets/js/bootstrap/bootstrap.min.js"></script>
+        <script src="{{ site.baseurl }}/assets/js/bigfoot.min.js"></script>
         <script src="{{ site.baseurl }}/assets/js/acs-aem-commons.js"></script>
  
+        <script type="text/javascript">
+            $.bigfoot();
+        </script>
     </body>
 </html>
