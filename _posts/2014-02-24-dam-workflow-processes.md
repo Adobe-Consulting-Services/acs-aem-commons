@@ -58,3 +58,45 @@ Path to the workflow: /etc/workflow/models/dam/update_asset.html
 *  Click OK and then “Save” the workflow.
 
 
+## Add Matte finish to a rendition
+
+### Purpose:
+This process applies matte finish to the image. Both the horizontal and the vertical position along with the area(dimension) to be applied can be configured via parameter.
+
+### How to Use
+Update the DAM Update Asset workflow and add a custom process step at the end.
+
+Path to the workflow: /etc/workflow/models/dam/update_asset.html
+
+*   	Open the DAM Update Asset workflow
+* 	At the end insert a new Process step, Workflow/Process Step
+
+![image]({{ site.baseurl }}/images/dam-workflow-processes/1.png)
+
+*  	Edit the Process Step
+	* Title: Matte Rendition
+	* On the Process tab, select “Matte Rendition” from the Process drop down
+
+	![image]({{ site.baseurl }}/images/dam-workflow-processes/select-matte-finish.jpg)
+
+	* Check the Handler Advance option
+	* Five arguments are required
+
+	bgcolor:231231231,dimension:1280:1280,vpos:top,hpos:left,renditionName:cq5dam.web.1280.1280
+		1. bgcolor: The background color you want to apply to the rendition
+		2. dimension: dimention of the image size
+		3. vpos: starting vertical position, the options are "top, bottom, middle"
+		4. hpos: horizontal start position , the otions are "left, right, center"
+		5. renditionName: The name of the rendition to modify like "cq5dam.web.1280.1280"
+
+	![image]({{ site.baseurl }}/images/dam-workflow-processes/matte-finish-params.jpg)
+
+        * A full configuration example might have all the following:
+
+           bgcolor:231231231,dimension:1280:1280,vpos:top,hpos:left,renditionName:cq5dam.web.1280.1280
+
+          
+
+*  Click OK and then “Save” the workflow.
+
+
