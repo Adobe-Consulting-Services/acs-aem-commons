@@ -1,0 +1,145 @@
+#tabNav, .tabContainer {
+    position:relative;
+    max-width: 1004px;
+    width: 100%;
+    height: 100%;
+    margin-bottom: 0px;
+    clear: both;
+    
+}
+#tabNav ul.tabs {
+    list-style-type: none;
+    overflow: hidden;
+    height: auto;
+}
+#tabNav ul.tabs li, .tabLabelItems {
+    float: left;
+    margin-right: 1px;  
+
+}
+h1.tabctrl-title {
+    display:none;
+}
+#tabNav ul li a, #tabNav ul li a:visited, .tabLabelItem > a, .tabLabelItem > a:visited  {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #333;
+    padding: 6px 19px 5px 19px;
+    text-transform: uppercase;
+    font-size: 12px;
+    text-decoration: none;
+    background-color: #d9d9d7;
+    display: block;
+    background-image: url(../images/tab_05.png);
+    background-repeat: repeat-x;
+    background-position: center bottom;
+        border-top-width: 1px;
+    border-right-width: 1px;
+    border-left-width: 1px;
+    border-top-style: solid;
+    border-right-style: solid;
+    border-left-style: solid;
+    border-top-color: #fff;
+    border-right-color: #fff;
+    border-left-color: #fff;
+}
+
+#tabNav ul.tabs li a:hover, .tabLabelItem > a:hover {
+    background-color: #d2d2d1;
+    background-image: url(../images/tab-hover_03.png);
+    background-repeat: repeat-x;
+    background-position: center bottom;
+    text-decoration:none;
+}
+/*add .tabLabelItems.tabOn  */
+#tabNav ul.tabs li.active a, .tabs > li.active > a, .tabLabelItem > a.active, .tabLabelItem a:active, .tabLabelItems.tabOn div.tabLabelItem a {
+    background-color: #ffffff;
+    background-image: none;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-left-width: 1px;
+    border-top-style: solid;
+    border-right-style: solid;
+    border-left-style: solid;
+    border-top-color: #efefef;
+    border-right-color: #e4e3e3;
+    border-left-color: #e4e3e3;
+    border-bottom-width: 10px;
+    border-bottom-style: solid;
+    border-bottom-color: #ffffff;
+}
+.tabBodies {
+    margin-top: 20px;
+}
+
+#tabNav ul.tabs ul li {
+    display: inline;
+    color: #226196;
+    border: none;
+}
+ul.submenu {
+    display:none;
+    }
+
+#tabNav ul.tabs li:hover ul.submenu  {
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    padding: 4px 0px;
+    overflow: hidden;
+    border-bottom: 1px solid #ccc;
+}
+#tabNav ul.tabs li ul.submenu li a, #tabNav ul.tabs li ul.submenu li a:visited {
+    display: inline;
+    color: #226196;
+    padding: 2px 16px;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-right-color: #226196;
+    margin-bottom: 8px;
+    background: none;
+    text-transform: none;
+}
+#tabNav ul.tabs li:hover ul {
+    display:block;
+    overflow:hidden;
+}
+
+
+.tabLeft{
+        position:relative;        
+        float:left;
+      /*  border-right: 3px solid #D2D4D6; */
+      
+        width: 100%;
+    }
+ /*    .tabRight{
+        position:relative;        
+        float:right;       
+        width: 33%;    
+    }
+    .tabRightRelated > h1{
+    font-size: 18px;
+    color: #666666;
+    margin-top: 12px;
+    }
+    .tabRightRelated > ul{    
+        list-style-type: none;
+        margin: 0px 0px 0px -39px;
+    }
+    .tabRightVideo{
+        position:relative;        
+        border: 1px solid #D2D4D6;
+        width: 300px; 
+        height: 220px;
+    } 
+    */   
+
+    #main.notabs .apm_wrapper .tabContainer{
+    border-bottom: 1px solid #CCCCCC;
+}   
+#main.notabs .apm_wrapper .tabContainer .tabBodies {
+    margin-top: -10px;
+}   
+#main.notabs .apm_wrapper .tabContainer .tabBodies .tabBodyContainer .tabLeft{
+    margin-top: 20px;
+}

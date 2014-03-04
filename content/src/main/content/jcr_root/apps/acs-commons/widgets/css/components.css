@@ -1,0 +1,35 @@
+.extjstraining {
+
+}
+
+.extjstraining .properties {
+    height:37px;
+    overflow:hidden;
+    border:solid black 1px;
+    background-color:#eee;
+}
+
+.extjstraining .properties.open {
+    height:auto;
+}
+
+.extjstraining .properties h4 {
+    cursor:pointer;
+    margin:10px 20px;
+}
+
+.extjstraining .properties h4 span {
+    color:black;
+}
+
+.extjstraining .properties ul {
+    margin:0 0 20px 0;
+}
+
+.extjstraining .properties li.system {
+    color:darkgray;
+}
+
+#CQ .x-html-editor-tb .x-edit-inserttext {
+    background: url(../css/my_icon.png) center no-repeat !important;
+}
