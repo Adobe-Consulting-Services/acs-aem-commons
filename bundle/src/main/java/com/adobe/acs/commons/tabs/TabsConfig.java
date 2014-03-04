@@ -135,13 +135,6 @@ public class TabsConfig<E> extends Configurator
 
                         Value value = valueFactory.createValue(vanityPath);
                         stringArray.add(value.getString());
-
-                        //if (vanityPath.startsWith("/content/compuware"))
-                        //{
-                        //    vanityPath = vanityPath.replaceAll("/content/compuware", "");
-                        //    value = valueFactory.createValue(vanityPath);
-                        //    stringArray.add(value.getString());
-                        //}
                     }
                     if (currentSelector.equalsIgnoreCase(valueMap.get(ResourceConstants.SELECTOR, "")))
                     {
