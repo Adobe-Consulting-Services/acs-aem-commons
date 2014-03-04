@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Dialog"
+    warnIfModified="{Boolean}false"
+    xtype="dialog">
+    <listeners
+        jcr:primaryType="nt:unstructured"
+        beforeshow="function(dialog){Ejst.x2.manageTabs(dialog.items.get(0));}"/>
+    <items
+        jcr:primaryType="cq:Widget"
+        xtype="tabpanel">
+        <items jcr:primaryType="cq:WidgetCollection">
+            <selection
+                jcr:primaryType="cq:Panel"
+                title="General">
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <selection
+                        jcr:primaryType="cq:Widget"
+                        defaultValue="Select the Tab"
+                        fieldDescription="Select Tab for configuration"
+                        fieldLabel="Selection"
+                        name="./selection"
+                        type="select"
+                        xtype="selection">
+                        <listeners
+                            jcr:primaryType="nt:unstructured"
+                            loadcontent="function(field,rec,path){Ejst.x2.showTab(field);}"
+                            selectionchanged="function(field,value){Ejst.x2.showTab(field);}"/>
+                        <options jcr:primaryType="cq:WidgetCollection">
+                            <v1
+                                jcr:primaryType="nt:unstructured"
+                                text="Tab 1"
+                                value="tab1"/>
+                            <v2
+                                jcr:primaryType="nt:unstructured"
+                                text="Tab 2"
+                                value="tab2"/>
+                            <v3
+                                jcr:primaryType="nt:unstructured"
+                                text="Tab 3"
+                                value="tab3"/>
+                            <v4
+                                jcr:primaryType="nt:unstructured"
+                                text="Tab 4"
+                                value="tab4"/>
+                            <v5
+                                jcr:primaryType="nt:unstructured"
+                                text="Tab 5"
+                                value="tab5"/>
+                            <v6
+                                jcr:primaryType="nt:unstructured"
+                                text="Tab 6"
+                                value="tab6"/>
+                            <v7
+                                jcr:primaryType="nt:unstructured"
+                                text="Tab 7"
+                                value="tab7"/>
+                        </options>
+                    </selection>
+                    <bannermode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}false"
+                        hidden="{Boolean}false"
+                        title="Banner options"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <classselection
+                                jcr:primaryType="cq:Widget"
+                                defaultValue="Select the Style"
+                                fieldDescription="Select style container for fake tabs"
+                                fieldLabel="Selection"
+                                name="./cssClassName"
+                                type="select"
+                                xtype="selection">
+                                <options jcr:primaryType="cq:WidgetCollection">
+                                    <v1
+                                        jcr:primaryType="nt:unstructured"
+                                        text="Default Style"
+                                        value=""/>
+                                    <v2
+                                        jcr:primaryType="nt:unstructured"
+                                        text="Overlay Style"
+                                        value="overlay"/>
+                                </options>
+                            </classselection>
+                        </items>
+                    </bannermode>
+                </items>
+            </selection>
+            <first
+                jcr:primaryType="cq:Panel"
+                title="Tab 1 (Configuration)">
+                <listeners
+                    jcr:primaryType="nt:unstructured"
+                    render="function(tab){Ejst.x2.hideTab(tab);}"/>
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <basicmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Basic"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text1
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Name"
+                                name="./tab1/tabName"
+                                xtype="textfield"/>
+                            <text2
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Selector"
+                                name="./tab1/selector"
+                                xtype="textfield"/>
+                        </items>
+                    </basicmode>
+                    <expertmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}true"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Advanced"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text3
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Tags"
+                                name="./tab1/tags"
+                                xtype="tags"/>
+                            <text4
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Title"
+                                name="./tab1/title"
+                                xtype="textfield"/>
+                            <text5
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Description"
+                                name="./tab1/description"
+                                xtype="textfield"/>
+                        </items>
+                    </expertmode>
+                </items>
+            </first>
+            <second
+                jcr:primaryType="cq:Panel"
+                title="Tab 2 (Configuration)">
+                <listeners
+                    jcr:primaryType="nt:unstructured"
+                    render="function(tab){Ejst.x2.hideTab(tab);}"/>
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <basicmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Basic"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text1
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Name"
+                                name="./tab2/tabName"
+                                xtype="textfield"/>
+                            <text2
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Selector"
+                                name="./tab2/selector"
+                                xtype="textfield"/>
+                        </items>
+                    </basicmode>
+                    <expertmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}true"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Advanced"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text3
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Tags"
+                                name="./tab2/tags"
+                                xtype="tags"/>
+                            <text4
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Title"
+                                name="./tab2/title"
+                                xtype="textfield"/>
+                            <text5
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Description"
+                                name="./tab2/description"
+                                xtype="textfield"/>
+                        </items>
+                    </expertmode>
+                </items>
+            </second>
+            <third
+                jcr:primaryType="cq:Panel"
+                title="Tab 3 (Configuration)">
+                <listeners
+                    jcr:primaryType="nt:unstructured"
+                    render="function(tab){Ejst.x2.hideTab(tab);}"/>
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <basicmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Basic"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text1
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Name"
+                                name="./tab3/tabName"
+                                xtype="textfield"/>
+                            <text2
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Selector"
+                                name="./tab3/selector"
+                                xtype="textfield"/>
+                        </items>
+                    </basicmode>
+                    <expertmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}true"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Advanced"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text3
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Tags"
+                                name="./tab3/tags"
+                                xtype="tags"/>
+                            <text4
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Title"
+                                name="./tab3/title"
+                                xtype="textfield"/>
+                            <text5
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Description"
+                                name="./tab3/description"
+                                xtype="textfield"/>
+                        </items>
+                    </expertmode>
+                </items>
+            </third>
+            <fourth
+                jcr:primaryType="cq:Panel"
+                title="Tab 4 (Configuration)">
+                <listeners
+                    jcr:primaryType="nt:unstructured"
+                    render="function(tab){Ejst.x2.hideTab(tab);}"/>
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <basicmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Basic"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text1
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Name"
+                                name="./tab4/tabName"
+                                xtype="textfield"/>
+                            <text2
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Selector"
+                                name="./tab4/selector"
+                                xtype="textfield"/>
+                        </items>
+                    </basicmode>
+                    <expertmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}true"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Advanced"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text3
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Tags"
+                                name="./tab4/tags"
+                                xtype="tags"/>
+                            <text4
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Title"
+                                name="./tab4/title"
+                                xtype="textfield"/>
+                            <text5
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Description"
+                                name="./tab4/description"
+                                xtype="textfield"/>
+                        </items>
+                    </expertmode>
+                </items>
+            </fourth>
+            <fifth
+                jcr:primaryType="cq:Panel"
+                title="Tab 5 (Configuration)">
+                <listeners
+                    jcr:primaryType="nt:unstructured"
+                    render="function(tab){Ejst.x2.hideTab(tab);}"/>
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <basicmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Basic"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text1
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Name"
+                                name="./tab5/tabName"
+                                xtype="textfield"/>
+                            <text2
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Selector"
+                                name="./tab5/selector"
+                                xtype="textfield"/>
+                        </items>
+                    </basicmode>
+                    <expertmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}true"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Advanced"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text3
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Tags"
+                                name="./tab5/tags"
+                                xtype="tags"/>
+                            <text4
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Title"
+                                name="./tab5/title"
+                                xtype="textfield"/>
+                            <text5
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Description"
+                                name="./tab5/description"
+                                xtype="textfield"/>
+                        </items>
+                    </expertmode>
+                </items>
+            </fifth>
+            <sixth
+                jcr:primaryType="cq:Panel"
+                title="Tab 6 (Configuration)">
+                <listeners
+                    jcr:primaryType="nt:unstructured"
+                    render="function(tab){Ejst.x2.hideTab(tab);}"/>
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <basicmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Basic"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text1
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Name"
+                                name="./tab6/tabName"
+                                xtype="textfield"/>
+                            <text2
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Selector"
+                                name="./tab6/selector"
+                                xtype="textfield"/>
+                        </items>
+                    </basicmode>
+                    <expertmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}true"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Advanced"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text3
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Tags"
+                                name="./tab6/tags"
+                                xtype="tags"/>
+                            <text4
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Title"
+                                name="./tab6/title"
+                                xtype="textfield"/>
+                            <text5
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Description"
+                                name="./tab6/description"
+                                xtype="textfield"/>
+                        </items>
+                    </expertmode>
+                </items>
+            </sixth>
+            <seventh
+                jcr:primaryType="cq:Panel"
+                title="Tab 7 (Configuration)">
+                <listeners
+                    jcr:primaryType="nt:unstructured"
+                    render="function(tab){Ejst.x2.hideTab(tab);}"/>
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <basicmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Basic"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text1
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Name"
+                                name="./tab7/tabName"
+                                xtype="textfield"/>
+                            <text2
+                                jcr:primaryType="cq:Widget"
+                                allowBlank="true"
+                                fieldLabel="Tab Selector"
+                                name="./tab7/selector"
+                                xtype="textfield"/>
+                        </items>
+                    </basicmode>
+                    <expertmode
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}true"
+                        collapsible="{Boolean}true"
+                        hidden="{Boolean}false"
+                        title="Advanced"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <text3
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Tags"
+                                name="./tab7/tags"
+                                xtype="tags"/>
+                            <text4
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Title"
+                                name="./tab7/title"
+                                xtype="textfield"/>
+                            <text5
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Page Description"
+                                name="./tab7/description"
+                                xtype="textfield"/>
+                        </items>
+                    </expertmode>
+                </items>
+            </seventh>
+        </items>
+    </items>
+</jcr:root>
