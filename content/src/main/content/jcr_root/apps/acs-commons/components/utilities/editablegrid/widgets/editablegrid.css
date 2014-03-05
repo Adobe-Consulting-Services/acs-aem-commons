@@ -1,0 +1,12 @@
+#CQ .deleted-row.x-grid3-row-selected .x-grid3-cell-inner {
+text-decoration:line-through;
+}
+
+ #CQ .deleted-row{
+ background-color: red;
+ text-decoration:line-through;
+ }
+ #CQ .deleted-row .x-grid3-cell-inner {
+text-decoration:line-through;
+
+}
