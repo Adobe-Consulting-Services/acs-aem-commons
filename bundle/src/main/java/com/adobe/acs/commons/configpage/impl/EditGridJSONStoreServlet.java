@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.servlet.ServletException;
 
 import org.apache.felix.scr.annotations.Reference;
@@ -75,10 +76,11 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
         response.setCharacterEncoding("utf-8");
         final JSONWriter writer = new JSONWriter(response.getWriter());
 
-        Resource gridResource = getGridResource(request.getResource());
+      
         ResourceResolver resolver = request.getResourceResolver();
 
         try {
+            Resource gridResource = getGridResource(request.getResource());
             int iLen =0;
             writer.object();
             
@@ -112,6 +114,9 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
          
         } catch (JSONException e) {
             response.reset();
+            log.error(e.getMessage(), e);
+            throw new ServletException("Unable to produce JSON", e);
+        } catch (GridOperationFailedException e) {
             log.error(e.getMessage(), e);
             throw new ServletException("Unable to produce JSON", e);
         } 
@@ -171,7 +176,17 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
         throw new GridOperationNotValidException(
                 "Grid Operation in the selector is not valid");
     }
-    private Resource getGridResource(Resource contentResource) {
+    private Resource getGridResource(Resource contentResource) throws GridOperationFailedException {
+        if(contentResource.getChild("grid")==null){
+            try {
+                //this is needed when we use the grid as a component and not as a page. thsi will allow you to drag and drop this 
+                // at any location
+                JcrUtils.getOrAddNode(contentResource.adaptTo(Node.class), "grid", JcrConstants.NT_UNSTRUCTURED);
+               contentResource.getResourceResolver().adaptTo(Session.class).save();
+            } catch (RepositoryException e) {
+            throw new GridOperationFailedException("could not create grid node");
+            }
+        }
         return contentResource.getChild("grid");
     }
     private List<Map<String,String>> getModifiedRowsFromRequest(SlingHttpServletRequest request) throws IOException, GridOperationFailedException{
