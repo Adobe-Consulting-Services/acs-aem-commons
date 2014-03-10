@@ -1,6 +1,7 @@
 #base=source
 
 add_multifield_limit.js
+configcreatepagedialog.js
 create_namespace.js
 predicates/AuthorizablePredicate.js
 predicates/PathPropertyPredicate.js
