@@ -3,6 +3,5 @@
     jcr:description="Editable Grid"
     jcr:primaryType="cq:Component"
     jcr:title="Editable Grid"
-    sling:resourceSuperType="foundation/components/parbase"
 	cq:defaultView="html"
-    componentGroup="General"/>
+    componentGroup="hidden"/>

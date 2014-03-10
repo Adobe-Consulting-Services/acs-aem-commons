@@ -12,7 +12,17 @@
                 jcr:primaryType="cq:Panel"
                 title="Columns">
                 <items jcr:primaryType="cq:WidgetCollection">
-                  
+                    <gridcolumns
+                        jcr:primaryType="cq:Widget"
+                        fieldDescription="Column Names"
+                        fieldLabel="Column Name"
+                        name="./gridcolumns"
+                        orderable="{Boolean}true"
+                        xtype="multifield">
+                        <fieldConfig
+                            jcr:primaryType="cq:Widget"
+                            xtype="textfield"/>
+                    </gridcolumns>                  
                 </items>
             </tab1>
         </items>
