@@ -12,7 +12,7 @@ import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 
 import com.adobe.acs.commons.configpage.Configurations;
-import com.adobe.acs.commons.genericlists.GenericList;
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.wcm.api.Page;
 @Component
 @Service
@@ -34,7 +34,8 @@ public class ConfigurationsAdapterFactory implements AdapterFactory {
             return null;
         }
         final Page page = (Page) obj;
-        String configPage = page.getProperties().get("configPage", "/etc/acs-commons/config/testgrid/testchild");
+        HierarchyNodeInheritanceValueMap hvm = new HierarchyNodeInheritanceValueMap(page.getContentResource());
+        String configPage = hvm.getInherited("configPage", "/etc/acs-commons/config/testgrid/testchild");
       if(!"".equals(configPage)){
           Resource configResource   = page.getContentResource().getResourceResolver().resolve(configPage+"/"+JcrConstants.JCR_CONTENT+"/grid");
         return new ConfigurationsImpl(configResource);
