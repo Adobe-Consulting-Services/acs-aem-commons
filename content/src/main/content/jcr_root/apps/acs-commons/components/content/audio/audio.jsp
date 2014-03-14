@@ -46,6 +46,7 @@
         </c:choose>
     </c:when>
     <c:otherwise>
-        <div class="<%= DropTarget.CSS_CLASS_PREFIX + "audio" + (WCMMode.fromRequest(request) == WCMMode.EDIT ? " cq-video-placeholder" : "") %>"></div>
+        <img class="<%= DropTarget.CSS_CLASS_PREFIX + "audio" + (WCMMode.fromRequest(request) == WCMMode.EDIT ?
+         " cq-audio-placeholder cq-block-placeholder" : "") %>" src="/etc/designs/default/0.gif"/>
     </c:otherwise>
 </c:choose>
