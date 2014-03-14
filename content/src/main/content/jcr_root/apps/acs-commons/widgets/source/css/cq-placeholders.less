@@ -23,49 +23,60 @@
 <img class="cq-image-placeholder cq-block-placeholder" src="/etc/designs/default/0.gif"/>
 */
 
-@cq-block-base-height: 192px;
+@cq-block-placeholder-base-height: 192px;
 
-img.cq-block-placeholder,
-img.cq-block-sm-placeholder,
-img.cq-block-lg-placeholder {
-    border: 2px dashed #cccccc;
-    margin: 2px 0;
-    width: 100%;
-    -webkit-box-sizing: border-box; /* Safari/Chrome, WebKit */
-    -moz-box-sizing: border-box;    /* Firefox, Gecko */
-    box-sizing: border-box;
+.cq-placeholder-base() {
+  width: 74px;
+  height: 74px;
+  border: 2px dashed #CCC;
 }
 
-img.cq-block-sm-placeholder {
-    min-height: ( @cq-block-base-height / 2 );
-    max-height: ( @cq-block-base-height / 2 );
-    height: ( @cq-block-base-height / 2 );
-}
+/* Body added for +1 specificity of cq-block-*-placeholder rules for height/width */
+body {
+  .cq-block-placeholder,
+  .cq-block-sm-placeholder,
+  .cq-block-lg-placeholder {
+      border: 2px dashed #cccccc;
+      margin: 2px 0;
+      width: 100%;
+      -webkit-box-sizing: border-box; /* Safari/Chrome, WebKit */
+      -moz-box-sizing: border-box;    /* Firefox, Gecko */
+      box-sizing: border-box;
+  }
 
-img.cq-block-placeholder {
-    min-height: @cq-block-base-height;
-    max-height: @cq-block-base-height;
-    height: @cq-block-base-height;
-}
+  .cq-block-sm-placeholder {
+      min-height: ( @cq-block-placeholder-base-height / 2 );
+      max-height: ( @cq-block-placeholder-base-height / 2 );
+      height: ( @cq-block-placeholder-base-height / 2 );
+  }
 
-img.cq-block-lg-placeholder {
-    min-height: ( @cq-block-base-height * 2 );
-    max-height: ( @cq-block-base-height * 2 );
-    height: ( @cq-block-base-height * 2 );
-}
+  .cq-block-placeholder {
+      min-height: @cq-block-placeholder-base-height;
+      max-height: @cq-block-placeholder-base-height;
+      height: @cq-block-placeholder-base-height;
+  }
 
-img.cq-block-placeholder-off,
-img.cq-block-sm-placeholder-off,
-img.cq-block-lg-placeholder-off {
-    display: none;
+  .cq-block-lg-placeholder {
+      min-height: ( @cq-block-placeholder-base-height * 2 );
+      max-height: ( @cq-block-placeholder-base-height * 2 );
+      height: ( @cq-block-placeholder-base-height * 2 );
+  }
+
+  .cq-block-placeholder-off,
+  .cq-block-sm-placeholder-off,
+  .cq-block-lg-placeholder-off {
+      display: none;
+  }
 }
 
 /* Custom placeholders */
 
-img.cq-ad-placeholder {
+.cq-ad-placeholder {
+  .cq-placeholder-base;
   background: url("../images/placeholders/cq-ad-placeholder.png" ) no-repeat scroll 50% 50%;
 }
 
-img.cq-audio-placeholder {
+.cq-audio-placeholder {
+  .cq-placeholder-base;
   background: url("../images/placeholders/cq-audio-placeholder.png" ) no-repeat scroll 50% 50%;
 }
