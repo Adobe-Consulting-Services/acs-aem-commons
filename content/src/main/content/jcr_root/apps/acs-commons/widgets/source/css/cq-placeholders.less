@@ -1,0 +1,82 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2014 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
+/*
+<img class="cq-image-placeholder cq-block-placeholder" src="/etc/designs/default/0.gif"/>
+*/
+
+@cq-block-placeholder-base-height: 192px;
+
+.cq-placeholder-base() {
+  width: 74px;
+  height: 74px;
+  border: 2px dashed #CCC;
+}
+
+/* Body added for +1 specificity of cq-block-*-placeholder rules for height/width */
+body {
+  .cq-block-placeholder,
+  .cq-block-sm-placeholder,
+  .cq-block-lg-placeholder {
+      border: 2px dashed #cccccc;
+      margin: 2px 0;
+      width: 100%;
+      -webkit-box-sizing: border-box; /* Safari/Chrome, WebKit */
+      -moz-box-sizing: border-box;    /* Firefox, Gecko */
+      box-sizing: border-box;
+  }
+
+  .cq-block-sm-placeholder {
+      min-height: ( @cq-block-placeholder-base-height / 2 );
+      max-height: ( @cq-block-placeholder-base-height / 2 );
+      height: ( @cq-block-placeholder-base-height / 2 );
+  }
+
+  .cq-block-placeholder {
+      min-height: @cq-block-placeholder-base-height;
+      max-height: @cq-block-placeholder-base-height;
+      height: @cq-block-placeholder-base-height;
+  }
+
+  .cq-block-lg-placeholder {
+      min-height: ( @cq-block-placeholder-base-height * 2 );
+      max-height: ( @cq-block-placeholder-base-height * 2 );
+      height: ( @cq-block-placeholder-base-height * 2 );
+  }
+
+  .cq-block-placeholder-off,
+  .cq-block-sm-placeholder-off,
+  .cq-block-lg-placeholder-off {
+      display: none;
+  }
+}
+
+/* Custom placeholders */
+
+.cq-ad-placeholder {
+  .cq-placeholder-base;
+  background: url("../images/placeholders/cq-ad-placeholder.png" ) no-repeat scroll 50% 50%;
+}
+
+.cq-audio-placeholder {
+  .cq-placeholder-base;
+  background: url("../images/placeholders/cq-audio-placeholder.png" ) no-repeat scroll 50% 50%;
+}

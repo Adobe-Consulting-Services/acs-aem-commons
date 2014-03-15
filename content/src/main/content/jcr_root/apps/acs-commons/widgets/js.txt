@@ -1,4 +1,4 @@
-#base=source
+#base=source/js
 
 add_multifield_limit.js
 create_namespace.js
