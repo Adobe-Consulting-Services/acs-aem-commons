@@ -17,7 +17,7 @@ Define simple, yet powerful, rules for targetted flushing of files cached by Dis
 
 Create a new `sling:OsgiConfig` node for each logical flush rule set. A good practice is to create a "global" configuration and separate configurations per "site".
 
-    /apps/myapp/config/com.adobe.acs.replication.dispatcher.impl.DispatcherFlushRulesImpl-SomeFriendlyName
+    /apps/myapp/config/com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlushRulesImpl-SomeFriendlyName
 
 ### OSGi Config Properties
 
@@ -94,7 +94,7 @@ Dispatcher Flush Rules work from AEM 5.6 Publish Servers as well. Simple configu
 
 Delete the entire cache when a new package is activated.  
 
-    /apps/myapp/config/com.adobe.acs.replication.dispatcher.impl.DispatcherFlushRulesImpl-global
+    /apps/myapp/config/com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlushRulesImpl-global
 
 {% highlight xml %}
 <?xml version="1.0" encoding="UTF-8"?>
