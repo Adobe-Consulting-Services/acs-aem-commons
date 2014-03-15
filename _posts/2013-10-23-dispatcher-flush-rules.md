@@ -101,7 +101,7 @@ Delete the entire cache when a new package is activated.
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
     xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="sling:OsgiConfig"
-    prop.flush-type="DELETE"
+    prop.replication-action-type="DELETE"
     prop.rules.hierarchical="[/etc/packages/.*\.zip=/]"
     prop.rules.resource-only="[]"
     />
