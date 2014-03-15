@@ -41,6 +41,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -102,6 +103,29 @@ public class ComponentErrorHandlerImplTest {
 
         final boolean result = handler.accepts(request, response);
         assertFalse(result);
+    }
+
+    @Test
+    public void testAccepts_suppressAttribute_selfSuppression() throws Exception {
+
+        when(request.getAttribute(ComponentErrorHandler.SUPPRESS_ATTR)).thenReturn(false, true);
+        when(componentContext.isRoot()).thenReturn(false);
+        when(componentHelper.isEditMode(request)).thenReturn(true);
+
+        doThrow(new ServletException()).when(chain).doFilter(request, response);
+
+        boolean expectedResult = true;
+        boolean result = !expectedResult;
+
+        try {
+            handler.doFilter(request, response, chain);
+        } catch(ServletException ex) {
+            result = true;
+        }
+
+        assertEquals(expectedResult, result);
+        verify(responseWriter,never()).print(any(String.class));
+        verifyNoMoreInteractions(responseWriter);
     }
 
     @Test

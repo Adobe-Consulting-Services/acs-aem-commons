@@ -207,15 +207,40 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     private void doFilterWithErrorHandling(final SlingHttpServletRequest slingRequest,
                                            final SlingHttpServletResponse slingResponse,
                                            final FilterChain chain,
-                                           final String pathToHTML) throws IOException {
+                                           final String pathToHTML) throws ServletException, IOException {
 
-        log.debug("Including resource with ACS AEM Commons Component-Level Error Handling for: {}",
-                slingRequest.getResource().getPath());
+        final boolean suppress = this.isComponentErrorHandlingSuppressed(slingRequest);
+
+        if (suppress) {
+            log.debug("Suppressing component error handling for: {}", slingRequest.getResource().getPath());
+        }
 
         try {
             chain.doFilter(slingRequest, slingResponse);
         } catch (final Exception ex) {
-            this.handleError(slingResponse, slingRequest.getResource(), pathToHTML, ex);
+            if (this.isComponentErrorHandlingSuppressed(slingRequest)) {
+                // Allows disabling from within an inclusion.
+                // This is checked before the suppression is reset to the "pre-inclusion" state
+                log.debug("Suppressed component error handling for: {}",
+                        slingRequest.getResource().getPath());
+
+                throw new ServletException(ex);
+            } else {
+                // Handle error using the Component Error Handler HTML
+                this.handleError(slingResponse, slingRequest.getResource(), pathToHTML, ex);
+            }
+        } finally {
+            // Re/set component error handling suppression to its pre-include state.
+            if (suppress) {
+                // Continue suppressing future includes even if turned off from WITHIN the inclusion chain
+                this.suppressComponentErrorHandling(slingRequest);
+            } else if (this.isComponentErrorHandlingSuppressed(slingRequest)) {
+                // If suppression was set from WITHIN the inclusion chain, turn it off
+                log.debug("Removing suppression component error handling at: {}",
+                        slingRequest.getResource().getPath());
+
+                this.allowComponentErrorHandling(slingRequest);
+            }
         }
     }
 
@@ -270,8 +295,9 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         }
 
         // Check to make sure the suppress key has not been added to the request
-        if (request.getAttribute(SUPPRESS_ATTR) != null) {
+        if (this.isComponentErrorHandlingSuppressed(request)) {
             // Suppress key is detected, skip handling
+
             return false;
         }
 
@@ -352,5 +378,15 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     @Override
     public final void allowComponentErrorHandling(final SlingHttpServletRequest request) {
         request.removeAttribute(SUPPRESS_ATTR);
+    }
+
+    private boolean isComponentErrorHandlingSuppressed(final ServletRequest request) {
+        final Boolean suppress = (Boolean) request.getAttribute(SUPPRESS_ATTR);
+
+        if (suppress != null) {
+            return suppress.booleanValue();
+        } else {
+            return false;
+        }
     }
 }
