@@ -75,14 +75,14 @@ ACS.CQ.form.ImageMultiField.Panel = CQ.Ext.extend(CQ.Ext.Panel, {
             image = this.find('xtype', 'imagemultifieldsmartimage')[0],
             imageName = multifield.nextImageName,
             changeParams = ["cropParameter", "fileNameParameter","fileReferenceParameter",
-                                "mapParameter","rotateParameter" ];
+                "mapParameter","rotateParameter" ];
 
         if(!imageName){
             imageName = image.name;
 
-            if(!imageName){
+            if (!imageName) {
                 imageName = "demo";
-            }else if(imageName.indexOf("./") === 0){
+            } else if(imageName.indexOf("./") === 0) {
                 imageName = imageName.substr(2); //get rid of ./
             }
 
