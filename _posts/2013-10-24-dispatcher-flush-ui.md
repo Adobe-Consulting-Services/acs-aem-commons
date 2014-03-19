@@ -5,7 +5,6 @@ description: The conveniece of flushing by yourself
 date: 2013-10-02 23:39:29
 thumbnail: /images/dispatcher-flush-ui/thumbnail.png
 categories: features
-tags: new
 initial-release: 1.2.0
 ---
 

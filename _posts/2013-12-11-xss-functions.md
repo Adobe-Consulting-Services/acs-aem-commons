@@ -6,7 +6,6 @@ date: 2013-12-11 23:39:29
 thumbnail: /images/xssfunctions/thumbnail.png
 categories: features
 initial-release: 1.3.0
-tags: new
 ---
 
 
