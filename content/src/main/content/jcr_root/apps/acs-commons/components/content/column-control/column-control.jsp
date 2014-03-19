@@ -27,7 +27,7 @@
     </c:when>
     <c:otherwise>
         <c:forEach items="${columns}" var="column" varStatus="status">
-            <div class="acs-commons-resp-colctrl-col-${column}" >
+            <div class="acs-commons-resp-colctrl-col acs-commons-resp-colctrl-col-${column}" >
                   <cq:include path="par${status.count}" resourceType="foundation/components/parsys" />
             </div>
         </c:forEach>
