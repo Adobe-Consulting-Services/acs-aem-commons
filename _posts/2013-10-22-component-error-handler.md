@@ -44,4 +44,7 @@ You can also create HTML snippets pointed to by the `prop.*.html` OSGi Config pr
 As of version 1.5.0, there are two mechanisms for suppressing the component error handler:
 
 * A list of resource types can be set using the `suppress-resource-types` OSGi property.
-* The request attribute `com.adobe.acs.commons.wcm.component-error-handler.suppress` can be set to a non-null value.
+* The request attribute `com.adobe.acs.commons.wcm.component-error-handler.suppress` can be set to the boolean `true`.
+	* Request attribute suppression prevents component error handling in two ways
+		1. Errors occurring within the context of the include which sets the suppression request attribute will be supressess (allowing a component to suppress itself).
+		2. Errors occuring in any include after the suppression request attribute is set, UNTIL the suppression request attribute it removed/set to false, will be suppressed.
