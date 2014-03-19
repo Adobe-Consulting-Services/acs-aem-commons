@@ -79,6 +79,7 @@ public class SiteMapServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
+        response.setContentType(request.getResponseContentType());
         ResourceResolver resourceResolver = request.getResourceResolver();
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         Page page = pageManager.getContainingPage(request.getResource());
