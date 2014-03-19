@@ -38,3 +38,10 @@ You can also create HTML snippets pointed to by the `prop.*.html` OSGi Config pr
 * Different views can be configured to point to the same HTML file
 * CSS can be added inline to the HTML files to provide a particular aesthetic
 * To hide erring component set the path to "/dev/null" or ""
+
+## Suppression (Since 1.5.0)
+
+As of version 1.5.0, there are two mechanisms for suppressing the component error handler:
+
+* A list of resource types can be set using the `suppress-resource-types` OSGi property.
+* The request attribute `com.adobe.acs.commons.wcm.component-error-handler.suppress` can be set to a non-null value.
