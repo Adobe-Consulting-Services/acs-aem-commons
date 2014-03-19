@@ -1,16 +1,4 @@
 <%--
-
-  Definition List component.
-
-  Definition List composed of terms and definitions.
-
---%><%
-%><%@include file="/libs/foundation/global.jsp"%><%
-%><%@page session="false" %><%
-%><%
-	// TODO add you code here
-%>
-<%--
   #%L
   ACS AEM Commons Package
   %%
