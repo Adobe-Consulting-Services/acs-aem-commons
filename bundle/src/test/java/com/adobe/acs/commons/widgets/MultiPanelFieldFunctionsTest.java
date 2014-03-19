@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.multipanelfield;
+package com.adobe.acs.commons.widgets;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -35,6 +35,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.adobe.acs.commons.widgets.MultiPanelFieldFunctions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MultiPanelFieldFunctionsTest {

@@ -61,7 +61,7 @@
                             META-INF/dhlm.tld=target/classes/META-INF/dhlm.tld,
                             META-INF/xss.tld=target/classes/META-INF/xss.tld,
                             META-INF/dam.tld=target/classes/META-INF/dam.tld,
-                            META-INF/mpf.tld=target/classes/META-INF/mpf.tld
+                            META-INF/widgets.tld=target/classes/META-INF/widgets.tld
                         </Include-Resource>
                     </instructions>
                 </configuration>

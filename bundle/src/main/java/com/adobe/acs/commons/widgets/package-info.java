@@ -18,8 +18,8 @@
  * #L%
  */
 /**
- * multipanelfield utility JSP Functions.
+ * JSP Functions for working with custom widgets.
  */
 @aQute.bnd.annotation.Version("1.0.0")
-@tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/mpf", descriptorFile = "mpf.tld")
-package com.adobe.acs.commons.multipanelfield;
+@tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/widgets", descriptorFile = "widgets.tld")
+package com.adobe.acs.commons.widgets;

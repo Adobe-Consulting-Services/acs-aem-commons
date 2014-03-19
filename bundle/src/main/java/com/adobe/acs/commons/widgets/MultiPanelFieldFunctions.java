@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.multipanelfield;
+package com.adobe.acs.commons.widgets;
 
 import java.util.ArrayList;
 import java.util.HashMap;
