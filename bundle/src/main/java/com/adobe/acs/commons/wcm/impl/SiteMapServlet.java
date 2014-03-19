@@ -46,11 +46,12 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(metatype = true, label = "ACS AEM Commons Site Map Servlet", description = "Site Map Servlet",
+@Component(metatype = true, label = "ACS AEM Commons - Site Map Servlet", description = "Site Map Servlet",
         configurationFactory = true)
 @Service
 @SuppressWarnings("serial")
-@Properties({ @Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY),
+@Properties({ @Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY,
+        label = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components."),
         @Property(name = "sling.servlet.selectors", value = "sitemap", propertyPrivate = true),
         @Property(name = "sling.servlet.extensions", value = "xml", propertyPrivate = true),
         @Property(name = "sling.servlet.methods", value = "GET", propertyPrivate = true) })
