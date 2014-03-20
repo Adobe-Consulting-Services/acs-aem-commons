@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.configuration.osgi;
+package com.adobe.acs.commons.configuration.osgi.impl;
 
 
 public final class OsgiConfigConstants {
@@ -32,7 +32,7 @@ public final class OsgiConfigConstants {
     public static final String PN_CONFIGURATION_TYPE = "acs.configurationType";
     public static final String PN_TARGET_CONFIG = "acs.targetConfig";
     public static final String PN_PID = "acs.pid";
-    public static final String NT_SLING_OSGICONFIG = "sling:OsgiConfig";
+    public static final String NT_SLING_OSGI_CONFIG = "sling:OsgiConfig";
 
     private OsgiConfigConstants() {
     }

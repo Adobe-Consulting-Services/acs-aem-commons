@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.configuration.osgi.impl;
 
-import com.adobe.acs.commons.configuration.osgi.OsgiConfigConstants;
 import com.adobe.acs.commons.configuration.osgi.OsgiConfigHelper;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;

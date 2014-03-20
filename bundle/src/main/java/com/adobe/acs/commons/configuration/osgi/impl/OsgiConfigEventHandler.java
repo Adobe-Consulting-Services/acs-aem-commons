@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.configuration.osgi.impl;
 
-import com.adobe.acs.commons.configuration.osgi.OsgiConfigConstants;
 import com.adobe.acs.commons.configuration.osgi.OsgiConfigHelper;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.jcrclustersupport.ClusterAware;
@@ -141,7 +140,7 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler, Clust
 
             if (!StringUtils.equals(topic, SlingConstants.TOPIC_RESOURCE_REMOVED)
                     && !StringUtils.equals(resourceResolver.getResource(path).adaptTo(ValueMap.class)
-                    .get(JcrConstants.JCR_PRIMARYTYPE, String.class), OsgiConfigConstants.NT_SLING_OSGICONFIG)) {
+                    .get(JcrConstants.JCR_PRIMARYTYPE, String.class), OsgiConfigConstants.NT_SLING_OSGI_CONFIG)) {
                 // Add or config event, but resource type is no sling:OsgiConfig
                 return false;
             }
@@ -240,7 +239,7 @@ public class OsgiConfigEventHandler implements JobProcessor, EventHandler, Clust
 
         final Map<String, String> map = new HashMap<String, String>();
         map.put("path", searchPath);
-        map.put("type", OsgiConfigConstants.NT_SLING_OSGICONFIG);
+        map.put("type", OsgiConfigConstants.NT_SLING_OSGI_CONFIG);
         map.put("property", OsgiConfigConstants.PN_PID);
         map.put("property.operation", "exists");
 

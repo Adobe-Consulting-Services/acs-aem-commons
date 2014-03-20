@@ -20,8 +20,7 @@
 
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8"
-          import="com.adobe.acs.commons.util.TextUtil,
-                  com.adobe.acs.commons.configuration.osgi.OsgiConfigConstants"%><%
+          import="com.adobe.acs.commons.util.TextUtil"%><%
 
     /* Page Properties */
     final String pageTitle = TextUtil.getFirstNonEmpty(
@@ -36,7 +35,7 @@
 
 <h4>
     Config folder:
-    <%= currentPage.getProperties().get(OsgiConfigConstants.PN_TARGET_CONFIG,
+    <%= currentPage.getProperties().get("acs.targetConfig",
             "Configure in Page Properties") %>
 </h4>
 

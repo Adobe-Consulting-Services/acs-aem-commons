@@ -21,7 +21,7 @@
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8"
         import="org.apache.commons.lang.StringUtils,
                 com.adobe.acs.commons.configuration.osgi.OsgiConfigHelper,
-                com.adobe.acs.commons.configuration.osgi.OsgiConfigConstants"%><%
+                com.adobe.acs.commons.configuration.osgi.impl.OsgiConfigConstants"%><%
 
     /* Services */
     final OsgiConfigHelper osgiConfigHelper = sling.getService(OsgiConfigHelper.class);
