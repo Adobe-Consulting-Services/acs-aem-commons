@@ -35,13 +35,13 @@ import org.slf4j.LoggerFactory;
 import tldgen.Function;
 
 /**
- * JSP functions for working with MultiPanelField widget.
+ * JSP functions for working with MultiFieldPanel widget.
  */
-public class MultiPanelFieldFunctions {
-    private static final Logger log = LoggerFactory.getLogger(MultiPanelFieldFunctions.class);
+public class MultiFieldPanelFunctions {
+    private static final Logger log = LoggerFactory.getLogger(MultiFieldPanelFunctions.class);
 
     /**
-     * Extract the value of a MultiPanelField property into a list of maps. Will never return
+     * Extract the value of a MultiFieldPanel property into a list of maps. Will never return
      * a null map, but may return an empty one. Invalid property values are logged and skipped.
      * 
      * @param resource the resource
@@ -49,7 +49,7 @@ public class MultiPanelFieldFunctions {
      * @return a list of maps.
      */
     @Function
-    public static List<Map<String, String>> getMultiPanelFieldValues(Resource resource, String name) {
+    public static List<Map<String, String>> getMultiFieldPanelValues(Resource resource, String name) {
         ValueMap map = resource.adaptTo(ValueMap.class);
         List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         if (map.containsKey(name)) {

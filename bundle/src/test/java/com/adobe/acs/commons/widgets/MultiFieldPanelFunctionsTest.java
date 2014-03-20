@@ -36,10 +36,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.widgets.MultiPanelFieldFunctions;
+import com.adobe.acs.commons.widgets.MultiFieldPanelFunctions;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MultiPanelFieldFunctionsTest {
+public class MultiFieldPanelFunctionsTest {
 
     @Mock
     private Resource resource;
@@ -55,7 +55,7 @@ public class MultiPanelFieldFunctionsTest {
 
     @Test
     public void testSingleObject() {
-        List<Map<String, String>> actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource, "single");
+        List<Map<String, String>> actual = MultiFieldPanelFunctions.getMultiFieldPanelValues(resource, "single");
         assertEquals(1, actual.size());
         assertEquals(true, actual.get(0).containsKey("a"));
         assertEquals("b", actual.get(0).get("a"));
@@ -63,7 +63,7 @@ public class MultiPanelFieldFunctionsTest {
 
     @Test
     public void testMultipleObject() {
-        List<Map<String, String>> actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource, "multiple");
+        List<Map<String, String>> actual = MultiFieldPanelFunctions.getMultiFieldPanelValues(resource, "multiple");
         assertEquals(2, actual.size());
         assertEquals(true, actual.get(0).containsKey("a"));
         assertEquals("b", actual.get(0).get("a"));
@@ -73,7 +73,7 @@ public class MultiPanelFieldFunctionsTest {
 
     @Test
     public void testKeyWhichDoesntExist() {
-        List<Map<String, String>> actual = MultiPanelFieldFunctions.getMultiPanelFieldValues(resource,
+        List<Map<String, String>> actual = MultiFieldPanelFunctions.getMultiPanelFieldValues(resource,
                 "non-existing");
         assertEquals(0, actual.size());
     }
