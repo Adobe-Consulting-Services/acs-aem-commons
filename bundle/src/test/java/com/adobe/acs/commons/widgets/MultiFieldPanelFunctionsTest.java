@@ -73,7 +73,7 @@ public class MultiFieldPanelFunctionsTest {
 
     @Test
     public void testKeyWhichDoesntExist() {
-        List<Map<String, String>> actual = MultiFieldPanelFunctions.getMultiPanelFieldValues(resource,
+        List<Map<String, String>> actual = MultiFieldPanelFunctions.getMultiFieldPanelValues(resource,
                 "non-existing");
         assertEquals(0, actual.size());
     }
