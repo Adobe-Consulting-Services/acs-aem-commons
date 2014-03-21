@@ -9,7 +9,7 @@
             propertyName="./image/fileReference">
             <parameters
                 jcr:primaryType="nt:unstructured"
-                sling:resourceType="foundation/components/textimage">
+                sling:resourceType="acs-commons/components/content/generic-text-image">
                 <image
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="foundation/components/image"

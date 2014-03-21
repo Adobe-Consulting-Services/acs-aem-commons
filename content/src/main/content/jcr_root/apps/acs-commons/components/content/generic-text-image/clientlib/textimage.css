@@ -17,14 +17,12 @@
  * limitations under the License.
  * #L%
  */
- div.generic-text-image div.image {
+div.generic-text-image div.image {
     float: left;
-    margin: 0 8px 8px 0;
-}
-div.generic-text-image.image_left div.image {
+    margin: 0 0.5em 0.5em 0;
 }
 
 div.generic-text-image.image_right div.image {
-    float: right !important;
-    margin: 0 0 8px 8px !important;
+    float: right;
+    margin: 0 0 0.5em 0.5em;
 }
