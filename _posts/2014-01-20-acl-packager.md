@@ -1,9 +1,9 @@
 ---
 layout: feature
 title: ACL Packager
-description: Easily zip up access control entries.
+description: Easily zip up access control entries
 date: 2014-01-20 23:39:29
-thumbnail: /images/default/thumbnail.png
+thumbnail: /images/acl-packager/thumbnail.png
 categories: features
 initial-release: 1.5.0
 tags: new

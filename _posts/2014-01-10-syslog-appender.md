@@ -1,9 +1,9 @@
 ---
 layout: feature
 title: Syslog Integration
-description: Send log messages to remote systems.
+description: Send log messages to remote systems
 date: 2014-01-10 23:39:29
-thumbnail: /images/default/thumbnail.png
+thumbnail: /images/syslog/thumbnail.png
 categories: features
 initial-release: 1.5.0
 tags: new
