@@ -24,7 +24,7 @@
 <c:set var="definitions" value="${widgets:getMultiFieldPanelValues(resource, 'definitions')}"/>
 <c:choose>
     <c:when test="${empty definitions}">
-        <wcmmode:edit><img class="cq-ad-placeholder cq-block-placeholder" src="/etc/designs/default/0.gif"/></wcmmode:edit>
+        <wcmmode:edit><img class="cq-dl-placeholder cq-block-placeholder" src="/etc/designs/default/0.gif"/></wcmmode:edit>
     </c:when>
     <c:otherwise>
         <dl>
