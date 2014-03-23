@@ -3,7 +3,7 @@ layout: feature
 title: LinkedIn Scribe Integration
 description: Ease LinkedIn integration needs
 date: 2013-07-25 23:39:29
-thumbnail: /images/default/thumbnail.png
+thumbnail: /images/linkedin-scribe/thumbnail.png
 categories: features
 tags: new
 ---
