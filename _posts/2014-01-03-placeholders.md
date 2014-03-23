@@ -66,4 +66,25 @@ Note that sizes can be used with the standard placeholder classes as well:
 
 ## Sample
 
+{% highlight html %}
+<img class="cq-audio-placeholder cq-block-sm-placeholder" src="/etc/designs/default/0.gif"/>
+<img class="cq-ad-placeholder cq-block-placeholder" src="/etc/designs/default/0.gif"/>
+<img class="cq-carousel-placeholder cq-block-lg-placeholder" src="/etc/designs/default/0.gif"/>
+{% endhighlight %}
+
+Yields the following ..
+
 ![Sample Placeholderes]({{ site.baseurl }}/images/placeholders/sample.png)
+
+
+## Notes
+
+**Drag and Drop** can be easily added to these placeholders via the extra CSS class `cq-dd-<drop-target name>` where `drop-target name` matches the `cq:EditConfig` dropTarget node name.
+
+{% highlight html %}
+<img class="cq-audio-placeholder cq-block-sm-placeholder cq-dd-audio" src="/etc/designs/default/0.gif"/>
+<img class="cq-image-placeholder cq-block-lg-placeholder cq-dd-image" src="/etc/designs/default/0.gif"/>
+{% endhighlight %}
+
+
+
