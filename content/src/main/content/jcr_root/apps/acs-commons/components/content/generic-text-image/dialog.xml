@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:TabPanel"
+    activeTab="{Long}0"
+    xtype="tabpanel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <tab1
+            jcr:primaryType="cq:Widget"
+            anchor="100%"
+            title="Text"
+            xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <text
+                    jcr:primaryType="cq:Widget"
+                    script="rte.textimage.json?addElementQuery=div[class=&quot;text&quot;].jsp"
+                    xtype="slingscriptinclude"/>
+                <richFlag
+                    jcr:primaryType="cq:Widget"
+                    ignoreData="{Boolean}true"
+                    name="./textIsRich"
+                    value="true"
+                    xtype="hidden"/>
+            </items>
+        </tab1>
+        <tab2
+            jcr:primaryType="cq:Widget"
+            path="/libs/foundation/components/textimage/dialog/items/tab2.infinity.json"
+            xtype="cqinclude"/>
+        <tab3
+            jcr:primaryType="cq:Widget"
+            path="/libs/foundation/components/textimage/dialog/items/tab3.infinity.json"
+            xtype="cqinclude"/>
+        <tab4
+            jcr:primaryType="cq:Widget"
+            xtype="componentstyles"/>
+    </items>
+</jcr:root>
