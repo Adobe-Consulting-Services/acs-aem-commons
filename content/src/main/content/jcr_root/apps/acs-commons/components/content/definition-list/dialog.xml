@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    title="Definition List"
+    width="600"
+    xtype="dialog">
+    <items
+        jcr:primaryType="cq:Widget"
+        xtype="tabpanel">
+        <items jcr:primaryType="cq:WidgetCollection">
+            <tab1
+                jcr:primaryType="cq:Panel"
+                title="Definitions">
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <definitions
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Definitions"
+                        name="./definitions"
+                        orderable="{Boolean}true"
+                        xtype="multifield">
+                        <fieldConfig
+                            jcr:primaryType="cq:Widget"
+                            xtype="multifieldpanel">
+                            <items jcr:primaryType="cq:WidgetCollection">
+                                <term
+                                    jcr:primaryType="cq:Widget"
+                                    fieldLabel="Term"
+                                    key="term"
+                                    width="250"
+                                    xtype="textfield"/>
+                                <definition
+                                    jcr:primaryType="cq:Widget"
+                                    fieldLabel="Definition"
+                                    key="definition"
+                                    width="250"
+                                    xtype="textarea"/>
+                            </items>
+                        </fieldConfig>
+                    </definitions>
+                    <typehint
+                        jcr:primaryType="cq:Widget"
+                        ignoreValue="{Boolean}true"
+                        name="./definitions@TypeHint"
+                        value="String[]"
+                        xtype="hidden"/>
+                </items>
+            </tab1>
+        </items>
+    </items>
+</jcr:root>
