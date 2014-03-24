@@ -329,6 +329,12 @@
             <version>1.0.13</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.models.api</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

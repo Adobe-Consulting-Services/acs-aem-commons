@@ -1,0 +1,274 @@
+package com.adobe.acs.commons.models.injectors;
+
+import com.adobe.granite.xss.XSSAPI;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.components.ComponentContext;
+import com.day.cq.wcm.api.designer.Design;
+import com.day.cq.wcm.api.designer.Designer;
+import com.day.cq.wcm.api.designer.Style;
+import com.day.cq.wcm.commons.WCMUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.models.spi.DisposalCallbackRegistry;
+import org.apache.sling.models.spi.Injector;
+import org.osgi.framework.Constants;
+
+import javax.jcr.Session;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Type;
+
+/**
+ * Sling Models Injector which injects the Adobe AEM objects defined in
+ * <a href="http://dev.day.com/docs/en/cq/current/howto/taglib.html#%3Ccq:defineObjects%3E">&lt;cq:defineObjects/&gt;</a>
+ * <p>
+ * the following objects can be injected:
+ * <ul>
+ * <li> resource the current resource
+ * <li> resourceResolver the current resource resolver
+ *
+ * <li> componentContext component context of this request
+ *
+ * <li> pageManager page manager
+ * <li> currentPage containing page addressed by the request
+ * <li> resourcePage containing page of the addressed resource
+ *
+ * <li> designer the designer
+ * <li> currentDesign design of the addressed resource
+ * <li> resourceDesign design of the addressed resource
+ *
+ * <li> currentStyle style addressed by the request
+ * <li> session the current session
+ * <li> xssApi cross site scripting provider for the current request
+ * </ul>
+ */
+@Component
+@Service
+//SERVICE_RANKING of this service should be lower than the ranking of the OsgiServiceInjector (5000),
+//otherwise the generic XSSAPI service would be injected from Osgi instead of the pre-configured from the current request.
+@Property(name = Constants.SERVICE_RANKING, intValue = 4500)
+public class DefineObjectsInjector implements Injector {
+
+    private static final String COM_DAY_CQ_WCM_TAGS_DEFINE_OBJECTS_TAG = "com.day.cq.wcm.tags.DefineObjectsTag";
+
+    @Override
+    public String getName() {
+        return "define-objects";
+    }
+
+    @Override
+    public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element, DisposalCallbackRegistry callbackRegistry) {
+        ObjectType nameEnum = ObjectType.fromString(name);
+
+        switch(nameEnum) {
+            case RESOURCE:
+                return getResource(adaptable);
+            case RECOURCE_RESOLVER:
+                return getResourceResolver(adaptable);
+            case COMPONENT_CONTEXT:
+                return getComponentContext(adaptable);
+            case PAGE_MANAGER:
+                return getPageManager(adaptable);
+            case CURRENT_PAGE:
+                return getCurrentPage(adaptable);
+            case RESOURCE_PAGE:
+                return getResourcePage(adaptable);
+            case DESIGNER:
+                return getDesigner(adaptable);
+            case CURRENT_DESIGN:
+                return getCurrentDesign(adaptable);
+            case RESOURCE_DESIGN:
+                return getResourceDesign(adaptable);
+            case CURRENT_STYLE:
+                return getCurrentStyle(adaptable);
+            case SESSION:
+                return getSession(adaptable);
+            case XSS_API:
+                return getXssApi(adaptable);
+        }
+
+        return null;
+    }
+
+    // --- private stuff --
+
+    /**
+     *
+     * @param adaptable Either a SlingHttpServletRequest or a Resource
+     * @return the Resource
+     */
+    private Resource getResource(Object adaptable) {
+        if(adaptable instanceof SlingHttpServletRequest) {
+            ((SlingHttpServletRequest)adaptable).getResource();
+        }
+        if(adaptable instanceof Resource) {
+            return (Resource)adaptable;
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param adaptable Either a SlingHttpServletRequest or a Resource
+     * @return the ResourceResolver
+     */
+    private ResourceResolver getResourceResolver(Object adaptable) {
+        if(adaptable instanceof SlingHttpServletRequest) {
+            ((SlingHttpServletRequest)adaptable).getResourceResolver();
+        }
+        if(adaptable instanceof Resource) {
+            return ((Resource)adaptable).getResourceResolver();
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param adaptable Either a SlingHttpServletRequest or a Resource
+     * @return the PageManager
+     */
+    private PageManager getPageManager(Object adaptable) {
+        return getResourceResolver(adaptable).adaptTo(PageManager.class);
+    }
+
+    /**
+     *
+     * @param adaptable Either a SlingHttpServletRequest or a Resource
+     * @return the Designer
+     */
+    private Designer getDesigner(Object adaptable) {
+        return getResourceResolver(adaptable).adaptTo(Designer.class);
+    }
+
+    /**
+     *
+     * @param adaptable a SlingHttpServletRequest
+     * @return the ComponentContext if the adaptable was a SlingHttpServletRequest, or null otherwise
+     */
+    private ComponentContext getComponentContext(Object adaptable) {
+        if(adaptable instanceof SlingHttpServletRequest) {
+            SlingHttpServletRequest request = ((SlingHttpServletRequest)adaptable);
+
+            return WCMUtils.getComponentContext(request);
+        }
+        // ComponentContext is not reachable from Resource
+
+        return null;
+    }
+
+    /**
+     *
+     * @param adaptable Either a SlingHttpServletRequest or a Resource
+     * @return the Page containing the Resource
+     */
+    private Page getResourcePage(Object adaptable) {
+        PageManager pageManager = getPageManager(adaptable);
+        Resource resource = getResource(adaptable);
+
+        return pageManager.getContainingPage(resource);
+    }
+
+    /**
+     *
+     * @param adaptable a SlingHttpServletRequest
+     * @return the current Page if the adaptable was a SlingHttpServletRequest, null otherwise
+     */
+    private Page getCurrentPage(Object adaptable) {
+        ComponentContext context = getComponentContext(adaptable);
+
+        return (context == null) ? null : context.getPage();
+    }
+
+    /**
+     *
+     * @param adaptable a SlingHttpServletRequest
+     * @return the current Design if the adaptable was a SlingHttpServletRequest, the default Design otherwise
+     */
+    private Design getCurrentDesign(Object adaptable) {
+        Page currentPage = getCurrentPage(adaptable);
+
+        return getDesigner(adaptable).getDesign(currentPage);
+    }
+
+    /**
+     *
+     * @param adaptable a SlingHttpServletRequest
+     * @return the current Page if the adaptable was a SlingHttpServletRequest, null otherwise
+     */
+    private Design getResourceDesign(Object adaptable) {
+        Page resourcePage = getResourcePage(adaptable);
+        Designer designer = getDesigner(adaptable);
+
+        if(adaptable instanceof SlingHttpServletRequest) {
+            SlingHttpServletRequest request = (SlingHttpServletRequest)adaptable;
+
+            if (resourcePage != null) {
+                String resourceDesignKey = COM_DAY_CQ_WCM_TAGS_DEFINE_OBJECTS_TAG + resourcePage.getPath();
+                Object cachedResourceDesign = request.getAttribute(resourceDesignKey);
+
+                if (cachedResourceDesign != null) {
+                    return (Design) cachedResourceDesign;
+                } else {
+                    Design resourceDesign = designer.getDesign(resourcePage);
+                    request.setAttribute(resourceDesignKey, resourceDesign);
+
+                    return resourceDesign;
+                }
+            }
+        }
+
+        if(adaptable instanceof Resource) {
+            return designer.getDesign(resourcePage);
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param adaptable a SlingHttpServletRequest
+     * @return the current Style if the adaptable was a SlingHttpServletRequest, null otherwise
+     */
+    private Style getCurrentStyle(Object adaptable) {
+        Design currentDesign = getCurrentDesign(adaptable);
+        ComponentContext componentContext = getComponentContext(adaptable);
+
+        if((currentDesign == null) || (componentContext == null)) {
+            return null;
+        } else {
+            return currentDesign.getStyle(componentContext.getCell());
+        }
+    }
+
+    /**
+     *
+     * @param adaptable Either a SlingHttpServletRequest or a Resource
+     * @return the current Session
+     */
+    private Session getSession(Object adaptable) {
+        return getResourceResolver(adaptable).adaptTo(Session.class);
+    }
+
+    /**
+     *
+     * @param adaptable a SlingHttpServletRequest
+     * @return a XSSAPI object configured for the current request, or null otherwise
+     */
+    private XSSAPI getXssApi(Object adaptable) {
+        if(adaptable instanceof SlingHttpServletRequest) {
+            SlingHttpServletRequest request = (SlingHttpServletRequest)adaptable;
+
+            return request.adaptTo(XSSAPI.class);
+        }
+        // otherwise will fetch generic XSSAPI from Osgi Service
+
+        return null;
+    }
+
+}
