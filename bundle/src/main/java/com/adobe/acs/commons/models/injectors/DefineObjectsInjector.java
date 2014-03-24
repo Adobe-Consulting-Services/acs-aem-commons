@@ -84,6 +84,7 @@ public class DefineObjectsInjector implements Injector {
 
     @Override
     public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element, DisposalCallbackRegistry callbackRegistry) {
+        try {
         ObjectType nameEnum = ObjectType.fromString(name);
 
         switch(nameEnum) {
@@ -114,6 +115,9 @@ public class DefineObjectsInjector implements Injector {
         }
 
         return null;
+        } catch(Exception e) {
+            return null;
+        }
     }
 
     // --- private stuff --
