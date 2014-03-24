@@ -55,6 +55,7 @@ enum ObjectType {
                 }
             }
         }
+
         return null;
     }
 }
