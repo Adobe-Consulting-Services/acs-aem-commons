@@ -1,0 +1,8 @@
+---
+layout: feature
+title: Release 1.5.0 now available!
+description: New features - Named Image Transform Servlet, ACL Packager, Responsive Column Control, Sitemap Generator, MultiField Panel Widget, Vanity Path Uniqueness Check, Syslog Integration, LinkedIn OAuth2 support.
+date: 2014-03-24 10:39:29
+thumbnail: /images/default/thumbnail.png
+categories: news
+---
