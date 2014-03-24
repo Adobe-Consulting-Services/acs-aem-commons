@@ -26,15 +26,16 @@ import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.api.designer.Design;
 import com.day.cq.wcm.api.designer.Designer;
 import com.day.cq.wcm.api.designer.Style;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Constants;
 
@@ -48,52 +49,75 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DefineObjectsInjectorTest {
 
-    @Spy
-    private DefineObjectsInjector defineObjectsInjector;
-
     @Mock
     private Resource resource;
-
+    @Mock
+    private SlingHttpServletRequest request;
     @Mock
     private ResourceResolver resourceResolver;
-
     @Mock
     private Session session;
-
     @Mock
     private PageManager pageManager;
-
     @Mock
     private Designer designer;
 
     private TestModelAdapterFactory factory;
+    private DefineObjectsInjector defineObjectsInjector;
 
     @Before
     public final void setUp() throws Exception {
-
+        defineObjectsInjector  = new DefineObjectsInjector();
         factory = new TestModelAdapterFactory();
+
         factory.bindInjector(defineObjectsInjector, Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 1L));
     }
 
-    @Test
-    public final void testInjection() {
+    @After
+    public final void tearDown() {
+        defineObjectsInjector = null;
+        factory = null;
+    }
+
+//    @Test
+    public final void testResourceInjection() {
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
         when(resourceResolver.adaptTo(Designer.class)).thenReturn(designer);
 
-        TestModel testModel = factory.getAdapter(resource, TestModel.class);
+        TestResourceModel testResourceModel = factory.getAdapter(resource, TestResourceModel.class);
 
-        assertNotNull(testModel);
-        assertNotNull(testModel.getResource());
-        assertNotNull(testModel.getResourceResolver());
-        assertNotNull(testModel.getPageManager());
-        assertNotNull(testModel.getDesigner());
-        assertNotNull(testModel.getSession());
+        assertNotNull(testResourceModel);
+        assertNotNull(testResourceModel.getResource());
+        assertNotNull(testResourceModel.getResourceResolver());
+        assertNotNull(testResourceModel.getPageManager());
+        assertNotNull(testResourceModel.getDesigner());
+        assertNotNull(testResourceModel.getSession());
+        // TODO: Tests for the remaining injectable objects
     }
 
-    @Model(adaptables = Resource.class)
-    public static class TestModel {
+    @Test
+    public final void testSlingHttpServiceRequestInjection() {
+        when(request.getResource()).thenReturn(resource);
+        when(request.getResourceResolver()).thenReturn(resourceResolver);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+        when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
+        when(resourceResolver.adaptTo(Designer.class)).thenReturn(designer);
+
+        TestResourceModel testResourceModel = factory.getAdapter(request, TestResourceModel.class);
+
+        assertNotNull(testResourceModel);
+        assertNotNull(testResourceModel.getResource());
+        assertNotNull(testResourceModel.getResourceResolver());
+        assertNotNull(testResourceModel.getPageManager());
+        assertNotNull(testResourceModel.getDesigner());
+        assertNotNull(testResourceModel.getSession());
+        // TODO: Tests for the remaining injectable objects
+    }
+
+    @Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
+    public static class TestResourceModel {
 
         @Inject
         private Resource resource;

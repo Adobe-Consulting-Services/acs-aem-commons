@@ -129,7 +129,7 @@ public class DefineObjectsInjector implements Injector {
      */
     private Resource getResource(Object adaptable) {
         if(adaptable instanceof SlingHttpServletRequest) {
-            ((SlingHttpServletRequest)adaptable).getResource();
+            return ((SlingHttpServletRequest)adaptable).getResource();
         }
         if(adaptable instanceof Resource) {
             return (Resource)adaptable;
@@ -145,7 +145,7 @@ public class DefineObjectsInjector implements Injector {
      */
     private ResourceResolver getResourceResolver(Object adaptable) {
         if(adaptable instanceof SlingHttpServletRequest) {
-            ((SlingHttpServletRequest)adaptable).getResourceResolver();
+            return ((SlingHttpServletRequest)adaptable).getResourceResolver();
         }
         if(adaptable instanceof Resource) {
             return ((Resource)adaptable).getResourceResolver();
