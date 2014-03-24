@@ -31,7 +31,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,23 +62,16 @@ public class DefineObjectsInjectorTest {
     private Designer designer;
 
     private TestModelAdapterFactory factory;
-    private DefineObjectsInjector defineObjectsInjector;
 
     @Before
     public final void setUp() throws Exception {
-        defineObjectsInjector  = new DefineObjectsInjector();
+        DefineObjectsInjector defineObjectsInjector = new DefineObjectsInjector();
         factory = new TestModelAdapterFactory();
 
         factory.bindInjector(defineObjectsInjector, Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 1L));
     }
 
-    @After
-    public final void tearDown() {
-        defineObjectsInjector = null;
-        factory = null;
-    }
-
-//    @Test
+    @Test
     public final void testResourceInjection() {
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
@@ -121,37 +113,26 @@ public class DefineObjectsInjectorTest {
 
         @Inject
         private Resource resource;
-
         @Inject
         private ResourceResolver resourceResolver;
-
         @Inject @Optional
         private ComponentContext componentContext;
-
         @Inject
         private PageManager pageManager;
-
         @Inject @Optional
         private Page currentPage;
-
         @Inject @Optional
         private Page resourcePage;
-
         @Inject @Optional
         private Designer designer;
-
         @Inject @Optional
         private Design currentDesign;
-
         @Inject @Optional
         private Design resourceDesign;
-
         @Inject @Optional
         private Style currentStyle;
-
         @Inject @Optional
         private Session session;
-
         @Inject @Optional
         private XSSAPI xssApi;
 
