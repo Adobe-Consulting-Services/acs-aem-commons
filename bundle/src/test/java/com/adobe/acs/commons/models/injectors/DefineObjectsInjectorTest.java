@@ -31,18 +31,23 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
+import org.apache.sling.models.impl.ModelAdapterFactory;
+import org.apache.sling.models.spi.Injector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
 import javax.inject.Inject;
 import javax.jcr.Session;
 import java.util.Collections;
+import java.util.Map;
 
 import static junit.framework.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -107,6 +112,8 @@ public class DefineObjectsInjectorTest {
         assertNotNull(testResourceModel.getSession());
         // TODO: Tests for the remaining injectable objects
     }
+
+    // --- inner classes ---
 
     @Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
     public static class TestResourceModel {
@@ -183,5 +190,25 @@ public class DefineObjectsInjectorTest {
         public XSSAPI getXssApi() {
             return xssApi;
         }
+    }
+
+    // makes activate() and bindInjector() accessible
+    private class TestModelAdapterFactory extends ModelAdapterFactory {
+
+        public TestModelAdapterFactory() {
+            super();
+
+            org.osgi.service.component.ComponentContext componentCtx = mock(org.osgi.service.component.ComponentContext.class);
+            BundleContext bundleContext = mock(BundleContext.class);
+            when(componentCtx.getBundleContext()).thenReturn(bundleContext);
+
+            activate(componentCtx);
+        }
+
+        @Override
+        public void bindInjector(Injector injector, Map<String, Object> props) {
+            super.bindInjector(injector, props);
+        }
+
     }
 }
