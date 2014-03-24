@@ -40,3 +40,5 @@ Gets less-common data renditions from Resources including:
 - @TextUtil@ := Gets default values, non-blank values. See also "CQ TextUtils":http://dev.day.com/docs/en/cq/current/javadoc/com/day/text/TextUtils.html and "Apache Commons StringUtils":http://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/StringUtils.html.
 
 - @TypeUtil@ := Intelligently determines Java object types and converts between types (including "unusual" transformations like Array to Map)
+
+- @ThreadContextClassLoaderTaskExecutor@ (since 1.5.0) := Execute a task (using the @Callabale@ interface) after setting the Thread Context ClassLoader, and then resetting it upon completion of the task.

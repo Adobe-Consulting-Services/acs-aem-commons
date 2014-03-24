@@ -5,7 +5,7 @@ description: Set TTLs on ClientLib JS/CSS to infinity and beyond!
 date: 2013-10-01 23:39:29
 thumbnail: /images/versioned-clientlibs/thumbnail.png
 categories: features
-tags: new
+tags: updated
 initial-release: 1.2.0
 ---
 
@@ -17,7 +17,9 @@ Allow CSS and JavaScript served via AEM ClientLibs to be cached client-side with
 
 Add a Sling rewriter configuration node (example below) that includes the `versioned-clientlibs` transformer type to you project. 
 
-The URIs to clientlibs will be rewritten in the format `/path/to/clientlib.last-modified-timestamp.js`
+The URIs to clientlibs will be rewritten in the format `/path/to/clientlib.md5hash.js`
+
+> Prior to version 1.5, the last modified timestamp was used instead of a hash.
 
 ### Note
 
@@ -56,7 +58,7 @@ To validate that your configuration was successful, look at the Sling Rewriter t
 To configure Apache to send the right header to set a long TTL:
 
 {% highlight apache %}
-SetEnvIf Request_URI "(\.min)?\.[1-9][0-9]+\.js" long_expires=true
-SetEnvIf Request_URI "(\.min)?\.[1-9][0-9]+\.css" long_expires=true
+SetEnvIf Request_URI "(\.min)?\.[a-f0-9]+\.js" long_expires=true
+SetEnvIf Request_URI "(\.min)?\.[a-f0-9]+\.css" long_expires=true
 Header set Cache-Control max-age=2592000 env=long_expires 
-{% endhighlight %}   
+{% endhighlight %}
