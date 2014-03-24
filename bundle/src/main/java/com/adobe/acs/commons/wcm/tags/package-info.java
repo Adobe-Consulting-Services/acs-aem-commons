@@ -18,7 +18,8 @@
  * #L%
  */
 /**
- * Miscellaneous WCM Utilities.
+ * JSP Functions for working with custom widgets.
  */
-@aQute.bnd.annotation.Version("1.1.0")
-package com.adobe.acs.commons.wcm;
+@aQute.bnd.annotation.Version("1.0.0")
+@tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/wcm", descriptorFile = "wcm.tld")
+package com.adobe.acs.commons.wcm.tags;

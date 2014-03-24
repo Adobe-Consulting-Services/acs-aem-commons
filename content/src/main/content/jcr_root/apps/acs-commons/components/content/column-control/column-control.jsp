@@ -23,7 +23,7 @@
 <c:set var="columns" value="${properties.columns}"/>
 <c:choose>
     <c:when test="${empty columns}">
-        <wcmmode:edit>You need to specify the column widths.</wcmmode:edit>
+        <wcm:placeholder>You need to specify the column widths.</wcm:placeholder>
     </c:when>
     <c:otherwise>
         <c:forEach items="${columns}" var="column" varStatus="status">
