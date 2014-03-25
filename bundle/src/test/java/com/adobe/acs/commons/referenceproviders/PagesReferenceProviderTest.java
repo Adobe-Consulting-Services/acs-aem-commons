@@ -42,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -70,6 +71,12 @@ public class PagesReferenceProviderTest {
     private Page referredpage1;
     
     @Mock
+    private PageManager manager;
+    
+    @Mock
+    private Page page;
+    
+    @Mock
     private Iterator<Resource> iter;
     
     @Before
@@ -80,6 +87,9 @@ public class PagesReferenceProviderTest {
         ValueMap vm =  new ValueMapDecorator(map);
         when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
         when(resource.getResourceResolver()).thenReturn(resolver);
+        when(resolver.adaptTo(PageManager.class)).thenReturn(manager);
+        when(manager.getContainingPage(path)).thenReturn(referredpage);
+        when(referredpage.getPath()).thenReturn(path);
         when(resource.listChildren()).thenReturn(iter);
         when(iter.hasNext()).thenReturn(false);
         when(resolver.getResource(path)).thenReturn(res);
@@ -130,6 +140,8 @@ public class PagesReferenceProviderTest {
         when(res1.adaptTo(Page.class)).thenReturn(referredpage1);
         when(referredpage.getName()).thenReturn("geometrixx");
         when(referredpage1.getName()).thenReturn("geometrixx1");
+        when(referredpage1.getPath()).thenReturn(path1);
+        when(manager.getContainingPage(path1)).thenReturn(referredpage1);
         Calendar cal = GregorianCalendar.getInstance();
         when(referredpage.getLastModified()).thenReturn(cal);
         when(referredpage1.getLastModified()).thenReturn(cal);
@@ -158,6 +170,8 @@ public class PagesReferenceProviderTest {
         when(res1.adaptTo(Page.class)).thenReturn(referredpage);
         when(referredpage.getName()).thenReturn("geometrixx");
         when(referredpage1.getName()).thenReturn("geometrixx");
+        when(referredpage1.getPath()).thenReturn(path1);
+        when(manager.getContainingPage(path1)).thenReturn(referredpage1);
         Calendar cal = GregorianCalendar.getInstance();
         when(referredpage.getLastModified()).thenReturn(cal);
         when(referredpage1.getLastModified()).thenReturn(cal);
@@ -184,6 +198,8 @@ public class PagesReferenceProviderTest {
         when(res1.adaptTo(Page.class)).thenReturn(referredpage1);
         when(referredpage.getName()).thenReturn("geometrixx");
         when(referredpage1.getName()).thenReturn("geometrixx1");
+        when(referredpage1.getPath()).thenReturn(path1);
+        when(manager.getContainingPage(path1)).thenReturn(referredpage1);
         Calendar cal = GregorianCalendar.getInstance();
         when(referredpage.getLastModified()).thenReturn(cal);
         when(referredpage1.getLastModified()).thenReturn(cal);

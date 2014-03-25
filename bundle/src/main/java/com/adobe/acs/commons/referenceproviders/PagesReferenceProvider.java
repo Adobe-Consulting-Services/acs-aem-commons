@@ -19,38 +19,57 @@
  */
 package com.adobe.acs.commons.referenceproviders;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 
+import com.day.cq.commons.PathInfo;
 import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
 import com.day.cq.wcm.api.reference.ReferenceProvider;
 @Component(label = "ACS AEM Commons - Pages Reference Provider",
 description = "Reference provider that searches for  pages referenced inside any given page resource",
 metatype = false)
-@Service(ReferenceProvider.class)
+@Service
+
 public class PagesReferenceProvider implements ReferenceProvider {
 
 private static final String TYPE_PAGE = "page";
-private static final String pageRootPath = "/content/";
-private static final String jcrContentRelativePath ="/"+JcrConstants.JCR_CONTENT;
-private static final String urlExtension =".html";
+private static final String DEFAULT_PAGE_ROOT_PATH = "/content/";
+
+private String pageRootPath=DEFAULT_PAGE_ROOT_PATH;
+
+@Property(
+        label = "page root path",
+        description = "Page root path",
+        value = DEFAULT_PAGE_ROOT_PATH)
+private static final String PAGE_ROOT_PATH = "prop.page.root.path";
+
 //any text containing /content/
-private final Pattern pattern = Pattern.compile("([\"']|^)(" + Pattern.quote(pageRootPath) + ")(\\S|$)");
+private  Pattern pattern = Pattern.compile("([\"']|^)(" + Pattern.quote(pageRootPath) + ")(\\S|$)");
+@Activate
+protected void activate(Map<String, Object> props) {
+    pageRootPath = PropertiesUtil.toString(props.get(PAGE_ROOT_PATH),
+            DEFAULT_PAGE_ROOT_PATH);
+    pattern = Pattern.compile("([\"']|^)(" + Pattern.quote(pageRootPath) + ")(\\S|$)");
+
+}
+
     @Override
     public List<Reference> findReferences(Resource resource) {
         List<Reference> references = new ArrayList<Reference>();
@@ -72,14 +91,16 @@ private final Pattern pattern = Pattern.compile("([\"']|^)(" + Pattern.quote(pag
         }
     }
     private void findReferencesInResource(Resource resource, Set<String> references, ResourceResolver resolver){
+        PageManager manager = resolver.adaptTo(PageManager.class);
         ValueMap map = resource.adaptTo(ValueMap.class);
         for(String key :map.keySet()){
             String[] values = map.get(key, new String[0]);
             for(String value :values){
                 if (pattern.matcher(value).find()) {
                    for(String path:getAllPathsInAProperty( value)){
-                       if(isResourcePartOfAnotherPage(resolver , path)){
-                           references.add(getPagePathOfGivenResourcePath(path));
+                       Page page =manager.getContainingPage( path);
+                       if(page!=null){
+                           references.add(page.getPath());
                        }
                    }
                 }
@@ -95,35 +116,6 @@ private final Pattern pattern = Pattern.compile("([\"']|^)(" + Pattern.quote(pag
         long lastModified = mod != null ? mod.getTimeInMillis() : -1;
         return lastModified;
     }
-    private boolean isResourcePartOfAnotherPage(ResourceResolver resolver, String ref){
-        String path = ref;
-        int jcrcontentIndex = path.indexOf("/jcr:content");
-        if(jcrcontentIndex>=0){
-            path = path.substring(0,jcrcontentIndex);
-        }
-      int ext = path.indexOf(".html");
-      if(ext>0){
-          path = path.substring(0,ext);
-      }
-        Resource page = resolver.getResource(path);
-        if(page.adaptTo(Page.class)!=null){
-            return true;
-        }
-        return false;
-    }
-
-private String getPagePathOfGivenResourcePath(String ref){
-    String path = ref;
-    int jcrcontentIndex = path.indexOf(jcrContentRelativePath);
-    if(jcrcontentIndex>=0){
-        path = path.substring(0,jcrcontentIndex);
-    }
-    int ext = path.indexOf(urlExtension);
-    if(ext>0){
-        path = path.substring(0,ext);
-    }
-   return path;
-}
     private Set<String> getAllPathsInAProperty(String value){
        
         if(isSinglePathInValue(value)){
@@ -159,10 +151,6 @@ private String getPagePathOfGivenResourcePath(String ref){
         return paths;
     }
     private String decode(String url) {
-        try {
-            return new URI(url).getPath();
-        } catch(URISyntaxException e) {
-            return url;
-        }
+         return new PathInfo(url).getResourcePath();
     }
 }

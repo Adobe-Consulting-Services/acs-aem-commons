@@ -36,7 +36,7 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
 @Component(        label = "ACS AEM Commons - Design Reference Provider",
         description = "Reference provider that searches for design pages for any given page resource",
          metatype = false)
-@Service(ReferenceProvider.class)
+@Service
 public class DesignReferenceProvider implements ReferenceProvider {
 
     private static final String TYPE_DESIGN_PAGE = "designpage";
