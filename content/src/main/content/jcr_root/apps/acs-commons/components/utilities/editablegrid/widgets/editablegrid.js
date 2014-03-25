@@ -6,7 +6,7 @@ ACS.CQ.grid.EditorGridPanel = CQ.Ext.extend(CQ.Ext.grid.EditorGridPanel, {
     updateurl:"",
     deleteurl:"",
     basePath : "",
-    gridcolumns:['value'],
+    gridcolumns:['key','value'],
     gridfields :['uid'],
     region: "center",
     selModel: new CQ.Ext.grid.RowSelectionModel(),
@@ -22,8 +22,11 @@ ACS.CQ.grid.EditorGridPanel = CQ.Ext.extend(CQ.Ext.grid.EditorGridPanel, {
         this.store.reload();        
     }
    ,generateRandomId:function(){
-       var start = new Date(1400,0,1),now = new Date();
-     return  start.getTime() + Math.random() * (now.getTime() - start.getTime());
+       function _p8(s) {
+           var p = (Math.random().toString(16)+"000000000").substr(2,8);
+           return s ? "-" + p.substr(0,4) + "-" + p.substr(4,4) : p ;
+       }
+       return _p8() + _p8(true) + _p8(true) + _p8();
    },
     updateSaveButton : function(store) {
         CQ.Ext.getCmp("strings-save-button").setDisabled(!store.isDirty());
@@ -245,7 +248,7 @@ ACS.CQ.grid.ViewportPanel = CQ.Ext.extend(CQ.Ext.Panel, {
                                grid.stopEditing();
                                var Record = grid.store.recordType,newRecord;
                                 newRecord = new Record({
-                                   uid: grid.generateRandomId()+"rnd"
+                                   uid: grid.generateRandomId()
                                });
 
                                 CQ.Ext.each(grid.gridcolumns, function(column) {
