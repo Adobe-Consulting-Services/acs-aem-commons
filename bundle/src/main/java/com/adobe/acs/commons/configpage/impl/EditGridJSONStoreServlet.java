@@ -66,7 +66,16 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
     @Reference
     private GridStoreService gridStoreService;
     
-    private static enum Operation {update, delete,noop};
+    private static enum Operation {
+        UPDATE("update"), DELETE("delete"),NOOP("noop");
+        private String type;
+        private Operation(String type) {
+            this.type = type;
+        }
+       String type(){
+            return type;
+        }
+    };
   
     
     @Override
@@ -153,13 +162,13 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
         try{
         Operation operation = getOperationFromRequest(request);
         switch(operation){
-        case update:{
+        case UPDATE:{
         return   gridStoreService.addOrUpdateRows(request.getResourceResolver(), getModifiedRowsFromRequestForUpdate(request), request.getResource().getChild("grid")); 
         }
-        case delete:{
+        case DELETE:{
           return  gridStoreService.deleteRows(request.getResourceResolver(), getModifiedRowsFromRequestForDelete(request), request.getResource().getChild("grid")); 
         }
-        case noop:{
+        case NOOP:{
             
         }
         }
@@ -174,11 +183,11 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
    private Operation getOperationFromRequest(SlingHttpServletRequest request){
        String selectorstring = request.getRequestPathInfo().getSelectorString();
        for(Operation operation :Operation.values()){
-          if(selectorstring.contains(operation.toString())){
+          if(selectorstring.contains(operation.type())){
               return operation;
           }
        }
-       return Operation.noop;
+       return Operation.NOOP;
    }
     private Resource getGridResource(Resource contentResource) throws GridOperationFailedException {
 
