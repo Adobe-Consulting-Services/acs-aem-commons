@@ -389,6 +389,11 @@
             <artifactId>com.day.jcr.vault</artifactId>
             <version>2.4.32</version>
         </dependency>
+        <dependency>
+            <groupId>com.adobe.granite</groupId>
+            <artifactId>com.adobe.granite.jmx</artifactId>
+            <version>0.2.6</version>
+        </dependency>
     </dependencies>
 
     <profiles>

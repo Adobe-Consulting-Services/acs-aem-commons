@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
+import com.adobe.acs.commons.errorpagehandler.cache.ErrorPageCache;
 import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.PathInfo;
@@ -48,7 +49,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -120,6 +120,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Reference
     private ComponentHelper componentHelper;
+
+    @Reference
+    private ErrorPageCache cache;
 
     private SortedMap<String, String> pathMap = new TreeMap<String, String>();
 
@@ -603,7 +606,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     public void includeUsingGET(final SlingHttpServletRequest request, final SlingHttpServletResponse response, final String path) {
-        final RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+        /*final RequestDispatcher dispatcher = request.getRequestDispatcher(path);
 
         if (dispatcher != null) {
             try {
@@ -611,6 +614,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             } catch (Exception e) {
                 log.debug("Exception swallowed while including error page", e);
             }
+        }    */
+
+        final String responseData = cache.get(path, new GetRequest(request), response);
+        try {
+            response.getWriter().write(responseData);
+        } catch (Exception e) {
+            log.info("Exception swallowed while including error page", e);
         }
     }
 
@@ -624,7 +634,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         public String getMethod() {
             return "GET";
         }
-
     }
 
 }
