@@ -1,0 +1,13 @@
+Subject: Email Subject
+
+
+<div style="font-size: 12px; font-weight: normal; color: #000000; font-family:Arial,Helvetica,Verdana,sans-serif;">
+
+${body}
+
+Thanks,
+Adobe Team
+-------------------------------------------------------
+This confirmation notice has been sent by electronic mail.  Please do not reply to this email.  
+
+<div>
