@@ -84,6 +84,12 @@ public class DefineObjectsInjector implements Injector {
 
     @Override
     public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element, DisposalCallbackRegistry callbackRegistry) {
+
+        // sanity check
+        if(!(adaptable instanceof Resource || adaptable instanceof SlingHttpServletRequest)) {
+            return null;
+        }
+
         ObjectType nameEnum = ObjectType.fromString(name);
 
         switch(nameEnum) {
@@ -156,7 +162,13 @@ public class DefineObjectsInjector implements Injector {
      * @return the PageManager
      */
     private PageManager getPageManager(Object adaptable) {
-        return getResourceResolver(adaptable).adaptTo(PageManager.class);
+        ResourceResolver resolver = getResourceResolver(adaptable);
+
+        if(resolver != null) {
+            return resolver.adaptTo(PageManager.class);
+        }
+
+        return null;
     }
 
     /**
@@ -165,7 +177,13 @@ public class DefineObjectsInjector implements Injector {
      * @return the Designer
      */
     private Designer getDesigner(Object adaptable) {
-        return getResourceResolver(adaptable).adaptTo(Designer.class);
+        ResourceResolver resolver = getResourceResolver(adaptable);
+
+        if(resolver != null) {
+            return resolver.adaptTo(Designer.class);
+        }
+
+        return null;
     }
 
     /**
@@ -193,7 +211,11 @@ public class DefineObjectsInjector implements Injector {
         PageManager pageManager = getPageManager(adaptable);
         Resource resource = getResource(adaptable);
 
-        return pageManager.getContainingPage(resource);
+        if(pageManager != null && resource != null) {
+            return pageManager.getContainingPage(resource);
+        }
+
+        return null;
     }
 
     /**
@@ -204,7 +226,7 @@ public class DefineObjectsInjector implements Injector {
     private Page getCurrentPage(Object adaptable) {
         ComponentContext context = getComponentContext(adaptable);
 
-        return (context == null) ? null : context.getPage();
+        return (context != null) ? context.getPage() : null;
     }
 
     /**
@@ -214,8 +236,13 @@ public class DefineObjectsInjector implements Injector {
      */
     private Design getCurrentDesign(Object adaptable) {
         Page currentPage = getCurrentPage(adaptable);
+        Designer designer = getDesigner(adaptable);
 
-        return getDesigner(adaptable).getDesign(currentPage);
+        if(currentPage != null && designer != null) {
+            return designer.getDesign(currentPage);
+        }
+
+        return null;
     }
 
     /**
@@ -230,7 +257,7 @@ public class DefineObjectsInjector implements Injector {
         if(adaptable instanceof SlingHttpServletRequest) {
             SlingHttpServletRequest request = (SlingHttpServletRequest)adaptable;
 
-            if (resourcePage != null) {
+            if (resourcePage != null && designer != null) {
                 String resourceDesignKey = COM_DAY_CQ_WCM_TAGS_DEFINE_OBJECTS_TAG + resourcePage.getPath();
                 Object cachedResourceDesign = request.getAttribute(resourceDesignKey);
 
@@ -246,7 +273,7 @@ public class DefineObjectsInjector implements Injector {
         }
 
         if(adaptable instanceof Resource) {
-            return designer.getDesign(resourcePage);
+            return designer != null ? designer.getDesign(resourcePage) : null;
         }
 
         return null;
@@ -261,11 +288,11 @@ public class DefineObjectsInjector implements Injector {
         Design currentDesign = getCurrentDesign(adaptable);
         ComponentContext componentContext = getComponentContext(adaptable);
 
-        if((currentDesign == null) || (componentContext == null)) {
-            return null;
-        } else {
+        if(currentDesign != null && componentContext != null) {
             return currentDesign.getStyle(componentContext.getCell());
         }
+
+        return null;
     }
 
     /**
@@ -274,7 +301,9 @@ public class DefineObjectsInjector implements Injector {
      * @return the current Session
      */
     private Session getSession(Object adaptable) {
-        return getResourceResolver(adaptable).adaptTo(Session.class);
+        ResourceResolver resolver = getResourceResolver(adaptable);
+
+        return resolver != null ?  resolver.adaptTo(Session.class) : null;
     }
 
     /**
