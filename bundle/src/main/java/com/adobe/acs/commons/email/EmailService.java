@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.email;
 
-import java.util.List;
 import java.util.Map;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 /**
@@ -30,13 +30,27 @@ import javax.mail.internet.InternetAddress;
 public interface EmailService {
 	
 	/**
-	 * API that sends an email to a given list of recipients using an Email template.
-	 * It uses the CQ Mail Service configuration. Hence it should be configured in the felix console.
+	 * API that sends an email to a given list of recipients
+	 *  using an Email template. It uses the CQ Mail Service configuration.
+	 *  Hence it should be configured in the felix console.
 	 * 
-	 * @param templatePath, Absolute path of the template used to send the Email (e.g. /etc/notification/email/acsEmailTemplate/emailtemplate.txt)
-	 * @param recipientsList, List of recipient's email id's 
+	 * @param templatePath, Absolute path of the template used to send the Email 
+	 * (e.g. /etc/notification/email/acsEmailTemplate/emailtemplate.txt)
 	 * @param emailParams, Email param Map to be injected in the template
+	 * @param recipients, Variable InternetAddress array of recipient's email id's 
+	 * 
 	 * @return Boolean, true- if Email is sent, false otherwise.
 	 */
-	boolean sendEmail(String templatePath, List<InternetAddress> recipientsList, Map<String,String> emailParams);
+	boolean sendEmail(String templatePath, Map<String,String> emailParams, InternetAddress... recipients);
+	
+	/**
+	 * 
+	 * @param templatePath, Absolute path of the template used to send the Email 
+	 * (e.g. /etc/notification/email/acsEmailTemplate/emailtemplate.txt)
+	 * @param emailParams, Email param Map to be injected in the template
+	 * @param recipients, Variable String array of recipient's email id's 
+	 * @return
+	 * @throws AddressException
+	 */
+	boolean sendEmail(String templatePath, Map<String, String> emailParams, String... recipients) throws AddressException;
 }

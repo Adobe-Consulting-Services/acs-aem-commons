@@ -22,8 +22,26 @@ package com.adobe.acs.commons.email;
 /**
  * Defines static constants used by the EmailService.
  */
-public class EmailServiceConstants {
+public final class EmailServiceConstants {
+	
+	/**
+	 * Overriding the default constructor and making 
+	 * it private, to avoid instantiation.
+	 */
+	private EmailServiceConstants()	{
+		
+	}
 
+	/**
+	 * Sender Email ID variable passed  in the input parameter
+	 *  map to the sendEmail() function.	
+	 */
 	public static final String SENDER_EMAIL_ID = "senderEmailId";
+	
+	
+	/**
+	 * Sender Email Name variable passed in the input parameter
+	 *  map to the sendEmail() function	
+	 */
 	public static final String SENDER_NAME = "senderName";
 }
