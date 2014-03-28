@@ -38,5 +38,5 @@ public interface EmailService {
 	 * @param emailParams, Email param Map to be injected in the template
 	 * @return Boolean, true- if Email is sent, false otherwise.
 	 */
-	Boolean sendEmail(String templatePath, List<InternetAddress> recipientsList, Map<String,String> emailParams);
+	boolean sendEmail(String templatePath, List<InternetAddress> recipientsList, Map<String,String> emailParams);
 }

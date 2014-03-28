@@ -47,7 +47,7 @@ import com.day.cq.mailer.MessageGatewayService;
  * notification to a given list of recipients.
  *
  */
-@Component(immediate = true, metatype = true, label = "Generic Email Service",
+@Component(immediate = true, metatype = true, label = "ACS AEM Commons - E-mail Service",
 			description = "A Generic Email service that sends an email to the given list of recipients using a template specified")
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -66,7 +66,7 @@ public class EmailServiceImpl implements EmailService {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean sendEmail(String templatePath, List<InternetAddress> recipientsList, Map<String, String> emailParams) {
+	public boolean sendEmail(String templatePath, List<InternetAddress> recipientsList, Map<String, String> emailParams) {
 		
 		
 		ResourceResolver resourceResolver = null;
@@ -94,7 +94,7 @@ public class EmailServiceImpl implements EmailService {
 			 */
 			MessageGateway<HtmlEmail> messageGateway = messageGatewayService.getGateway(HtmlEmail.class);	
 			
-			if(messageGateway != null)  {
+			if(messageGateway != null) {
 				messageGateway.send(email);
 				return Boolean.TRUE;
 			} 
