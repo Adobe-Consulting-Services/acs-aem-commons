@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.models.injectors;
+package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
@@ -51,7 +51,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefineObjectsInjectorTest {
+public class AemObjectsInjectorTest {
 
     @Mock
     private Resource resource;
@@ -70,10 +70,10 @@ public class DefineObjectsInjectorTest {
 
     @Before
     public final void setUp() throws Exception {
-        DefineObjectsInjector defineObjectsInjector = new DefineObjectsInjector();
+        AemObjectsInjector aemObjectsInjector = new AemObjectsInjector();
         factory = new TestModelAdapterFactory();
 
-        factory.bindInjector(defineObjectsInjector, Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 1L));
+        factory.bindInjector(aemObjectsInjector, Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 1L));
     }
 
     @Test

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.models.injectors;
+package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
@@ -73,7 +73,7 @@ import java.lang.reflect.Type;
 //SERVICE_RANKING of this service should be lower than the ranking of the OsgiServiceInjector (5000),
 //otherwise the generic XSSAPI service would be injected from Osgi instead of the pre-configured from the current request.
 @Property(name = Constants.SERVICE_RANKING, intValue = 4500)
-public class DefineObjectsInjector implements Injector {
+public class AemObjectsInjector implements Injector {
 
     private static final String COM_DAY_CQ_WCM_TAGS_DEFINE_OBJECTS_TAG = "com.day.cq.wcm.tags.DefineObjectsTag";
 
@@ -322,4 +322,46 @@ public class DefineObjectsInjector implements Injector {
         return null;
     }
 
+    // --- inner classes ---
+
+    /**
+     * Enumeration which encapsulated the available objects.
+     */
+    private enum ObjectType {
+
+        RESOURCE("resource"),
+        RESOURCE_RESOLVER("resourceResolver"),
+        COMPONENT_CONTEXT("componentContext"),
+        PAGE_MANAGER("pageManager"),
+        CURRENT_PAGE("currentPage"),
+        RESOURCE_PAGE("resourcePage"),
+        DESIGNER("designer"),
+        CURRENT_DESIGN("currentDesign"),
+        RESOURCE_DESIGN("resourceDesign"),
+        CURRENT_STYLE("currentStyle"),
+        SESSION("session"),
+        XSS_API("xssApi");
+
+        private String text;
+
+        ObjectType(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+
+        public static ObjectType fromString(String text) {
+            if (text != null) {
+                for (ObjectType b : ObjectType.values()) {
+                    if (text.equalsIgnoreCase(b.text)) {
+                        return b;
+                    }
+                }
+            }
+
+            return null;
+        }
+    }
 }
