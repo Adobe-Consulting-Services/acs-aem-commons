@@ -32,8 +32,7 @@ public interface EmailService {
 	/**
 	 * API that sends an email to a given recipients
 	 *  using an Email template. It uses the CQ Mail Service configuration.
-	 *  Hence it should be configured in the felix console.
-	 * 
+	 *  Hence it should be configured in the felix console. 
 	 * @param templatePath, Absolute path of the template used to send the Email 
 	 * (e.g. /etc/notification/email/acsEmailTemplate/emailtemplate.txt)
 	 * @param emailParams, Email param Map to be injected in the template
@@ -47,8 +46,6 @@ public interface EmailService {
 	 * API that sends an email to a given recipients
 	 *  using an Email template. It uses the CQ Mail Service configuration.
 	 *  Hence it should be configured in the felix console.
-	 * 
-	 * 
 	 * @param templatePath, Absolute path of the template used to send the Email 
 	 * (e.g. /etc/notification/email/acsEmailTemplate/emailtemplate.txt)
 	 * @param emailParams, Email param Map to be injected in the template
