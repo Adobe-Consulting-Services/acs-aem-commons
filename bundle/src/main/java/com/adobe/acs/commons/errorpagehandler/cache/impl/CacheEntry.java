@@ -29,10 +29,14 @@ import java.util.Date;
 public class CacheEntry {
     private static final Logger log = LoggerFactory.getLogger(CacheEntry.class);
 
-    private int ttl;
+    private int ttl = 0;
+
     private String data = "";
+
     private int hits = 0;
+
     private int misses = 0;
+
     private Date expiresAt;
 
     public CacheEntry(int ttl) {
@@ -42,41 +46,59 @@ public class CacheEntry {
         this.data = "";
     }
 
-    public String getData() {
+    public final String getData() {
         return data;
     }
 
-    public void setData(final String data) {
+    public final void setData(final String data) {
         this.data = data;
     }
 
-    public int getHits() {
+    public final int getHits() {
         return hits;
     }
 
-    public void incrementHits() {
+    public final void incrementHits() {
         this.hits++;
     }
 
-    public int getMisses() {
+    public final int getMisses() {
         return misses;
     }
 
-    public void incrementMisses() {
+    public final void incrementMisses() {
         this.misses++;
     }
 
-    public int getTotal() {
+    public final int getTotal() {
         return this.hits + this.misses;
     }
 
-    public boolean isExpired(final Date date) {
+    public final boolean isExpired(final Date date) {
         return expiresAt.before(date);
     }
 
-    public void resetExpiresAt(final int expiresInSeconds) {
+    public final void resetExpiresAt(final int expiresInSeconds) {
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, expiresInSeconds);
         this.expiresAt = calendar.getTime();
+    }
+
+    public final float getHitRate() {
+        final int total = this.getTotal();
+        if (total == 0) {
+            return 0;
+        }
+
+        return this.getHits() / (float) total;
+    }
+
+    public final float getMissRate() {
+        final int total = this.getTotal();
+        if (total == 0) {
+            return 0;
+        }
+
+        return this.getMisses() / (float) total;
     }
 }

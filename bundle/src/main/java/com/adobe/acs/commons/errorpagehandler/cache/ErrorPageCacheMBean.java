@@ -22,13 +22,39 @@ package com.adobe.acs.commons.errorpagehandler.cache;
 
 import com.adobe.granite.jmx.annotation.Description;
 
-@Description("ACS AEM Commons - Error Page Handler Cache MBean.")
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularData;
+
+@Description("ACS AEM Commons - Error Page Handler Cache")
 public interface ErrorPageCacheMBean {
+    @Description("Cache TTL in Seconds")
+    int getTtlInSeconds();
+
+    @Description("Total number of requests to the cache")
     int getTotalCacheRequests();
-    int getMisses();
-    int getHits();
-    int getCacheCount();
-    long getCacheSizeInBytes();
 
+    @Description("Total cache misses")
+    int getTotalMisses();
 
+    @Description("Total cache hits")
+    int getTotalHits();
+
+    @Description("Total cache misses")
+    int getCacheEntriesCount();
+
+    @Description("Total cache size in KB")
+    long getCacheSizeInKB();
+
+    @Description("Details for each cache entry")
+    TabularData getCacheEntries() throws OpenDataException;
+
+    /* Operations */
+    @Description("Clear entire cache")
+    void clearCache();
+
+    @Description("Get the cached data for a specific Error Page. (Ex. getCacheData('/content/site/error/404.html'))")
+    String getCacheData(String errorPage);
 }
+
+
+

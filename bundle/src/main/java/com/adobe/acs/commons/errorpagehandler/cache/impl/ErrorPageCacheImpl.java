@@ -38,12 +38,22 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component(
         label = "ACS AEM Commons - Error Page Handler Cache",
+        description = "In-memory cache for pages. Details fo cache available via the JMX console.",
         metatype = true,
         immediate = true
 )
@@ -51,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
         @Property(
                 label = "MBean Name",
                 name = "jmx.objectname",
-                value = "com.adobe.acs.commons:type=error-page-handler",
+                value = "com.adobe.acs.commons:type=ErrorPageHandlerCache",
                 propertyPrivate = true
         )
 })
@@ -59,7 +69,25 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorPageCache, ErrorPageCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(ErrorPageCacheImpl.class);
 
-    private static int ttl = 60;
+    private static final int DEFAULT_TTL = 60 * 5; // 5 Mins
+    private static final int KB_IN_BYTES = 1000;
+
+    private int ttl = DEFAULT_TTL;
+
+    @Property(label = "TTL (in seconds)",
+            description = "TTL for each cache entry in seconds. [ Default: 300 ]",
+            intValue = DEFAULT_TTL)
+    public static final String PROP_TTL = "ttl";
+
+
+    private static final boolean DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE = false;
+
+    private boolean serveAuthenticatedFromCache = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE;
+
+    @Property(label = "Serve authenticated from cache",
+            description = "Serve authenticated requests from the error page cache. [ Default: false ]",
+            boolValue = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
+    public static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-autheticated-from-cache";
 
     private ConcurrentHashMap<String, CacheEntry> cache;
 
@@ -69,77 +97,76 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
 
 
     @Override
-    public String get(final String path,
-                    final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+    public final String get(final String path,
+                            final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
 
         CacheEntry cacheEntry = cache.get(path);
 
-        /*if(!StringUtils.equals("anonymous", request.getUserPrincipal().getName())) {
-            log.debug("Not Anonymous: {}", path);
+        if (!serveAuthenticatedFromCache && !isAnonymousRequest(request)) {
+            // For authenticated requests, dont return from cache
 
-            final String data = ResourceDataUtil.getIncludeAsString(path, request, response);
-
-            log.debug(data);
-
-            return data;
-
-        } else */
-
-        if(cacheEntry == null || cacheEntry.isExpired(new Date())) {
-            // MISS
-            if(cacheEntry == null) {
-                cacheEntry = new CacheEntry(ttl);
-            }
-
-            log.debug("Cache miss: {}", path);
-
-            final String data = ResourceDataUtil.getIncludeAsString(path, request, response);
-
-            log.debug(data);
-
-            cacheEntry.setData(data);
-            cacheEntry.resetExpiresAt(ttl);
-            cacheEntry.incrementMisses();
-
-            // Add entry to cache
-            cache.put(path, cacheEntry);
-
-            log.debug("cache size; {}", this.cache.size());
-
-            return data;
+            return ResourceDataUtil.getIncludeAsString(path, request, response);
         } else {
-            // HIT
-            log.debug("Cache hit: {}", path);
+            // If anonymous request, serve from cache
 
-            final String data = cacheEntry.getData();
-            cacheEntry.incrementHits();
+            if (cacheEntry == null || cacheEntry.isExpired(new Date())) {
+                // MISS
+                if (cacheEntry == null) {
+                    cacheEntry = new CacheEntry(ttl);
+                }
 
-            cache.put(path, cacheEntry);
+                final String data = ResourceDataUtil.getIncludeAsString(path, request, response);
 
-            log.debug(data);
+                cacheEntry.setData(data);
+                cacheEntry.resetExpiresAt(ttl);
+                cacheEntry.incrementMisses();
 
-            return data;
+                // Add entry to cache
+                cache.put(path, cacheEntry);
+
+                return data;
+            } else {
+                // HIT
+                final String data = cacheEntry.getData();
+                cacheEntry.incrementHits();
+                cache.put(path, cacheEntry);
+                return data;
+            }
         }
     }
 
+    private boolean isAnonymousRequest(final SlingHttpServletRequest request) {
+        return (request.getAuthType() == null || request.getRemoteUser() == null);
+    }
+
+
     @Activate
-    protected  void activate(Map<String, String> config) {
-        ttl = PropertiesUtil.toInteger(config.get("ttl"), 60);
+    protected final void activate(Map<String, String> config) {
+        ttl = PropertiesUtil.toInteger(config.get(PROP_TTL), DEFAULT_TTL);
+
+        serveAuthenticatedFromCache = PropertiesUtil.toBoolean(config.get(PROP_SERVE_AUTHENTICATED_FROM_CACHE),
+                DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE);
+
         cache = new ConcurrentHashMap<String, CacheEntry>();
     }
 
     @Deactivate
-    protected void deactivate(Map<String, String> config) {
+    protected final void deactivate(Map<String, String> config) {
         cache = null;
     }
 
-    /* MBean Methods */
+    /* MBean Attributes */
 
     @Override
-    public int getHits() {
+    public final int getTtlInSeconds() {
+        return ttl;
+    }
+
+    @Override
+    public final int getTotalHits() {
         int hits = 0;
 
-        for(final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
+        for (final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
             hits = hits + entry.getValue().getHits();
         }
 
@@ -147,8 +174,8 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
     }
 
     @Override
-    public int getCacheCount() {
-        if(this.cache == null) {
+    public final int getCacheEntriesCount() {
+        if (this.cache == null) {
             return 0;
         } else {
             return this.cache.size();
@@ -156,10 +183,10 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
     }
 
     @Override
-    public int getMisses() {
+    public final int getTotalMisses() {
         int misses = 0;
 
-        for(final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
+        for (final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
             misses = misses + entry.getValue().getMisses();
         }
 
@@ -167,23 +194,73 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
     }
 
     @Override
-    public int getTotalCacheRequests() {
-        return this.getHits() + getMisses();
+    public final int getTotalCacheRequests() {
+        return this.getTotalHits() + getTotalMisses();
     }
 
     @Override
-    public int getTotal() {
-        return this.getHits() + getMisses();
-    }
-
-    @Override
-    public long getCacheSizeInBytes() {
+    public final long getCacheSizeInKB() {
         long bytes = 0;
 
-        for(final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
+        for (final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
             bytes = bytes + entry.getValue().getData().getBytes().length;
         }
 
-        return bytes;
+        return bytes / KB_IN_BYTES;
+    }
+
+
+    public final TabularData getCacheEntries() throws OpenDataException {
+
+        final CompositeType cacheEntryType = new CompositeType(
+                "cacheEntry", /* type name */
+                "Cache Entry", /* type description */
+                new String[]{"errorPage", "hit", "miss", "hitRate", "missRate", "sizeInKB" }, /* item names */
+                new String[]{"Error Page", "Hit", "Miss", "Hit Rate", "Miss Rate", "Size in KB" },
+                /* item descriptions */
+                new OpenType[]{SimpleType.STRING, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.FLOAT,
+                        SimpleType.FLOAT, SimpleType.INTEGER }  /* item types */
+        );
+
+        final TabularDataSupport tabularData = new TabularDataSupport(
+                new TabularType("cacheEntries",
+                        "Cache Entries",
+                        cacheEntryType,
+                        new String[]{"errorPage" })
+        );
+
+        for (final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
+            final CacheEntry cacheEntry = entry.getValue();
+
+            final Map<String, Object> data = new HashMap<String, Object>();
+            data.put("errorPage", entry.getKey());
+            data.put("hit", cacheEntry.getHits());
+            data.put("miss", cacheEntry.getMisses());
+            data.put("hitRate", cacheEntry.getHitRate());
+            data.put("missRate", cacheEntry.getMissRate());
+            data.put("sizeInKB", cacheEntry.getData().getBytes().length / KB_IN_BYTES);
+
+            tabularData.put(new CompositeDataSupport(cacheEntryType, data));
+        }
+
+        return tabularData;
+    }
+
+    /* MBean Operations */
+
+    @Override
+    public final void clearCache() {
+        this.cache.clear();
+    }
+
+
+    @Override
+    public final String getCacheData(final String errorPage) {
+        final CacheEntry cacheEntry = this.cache.get(errorPage);
+        if (cacheEntry == null) {
+            return "";
+        }
+
+        return cacheEntry.getData();
     }
 }
