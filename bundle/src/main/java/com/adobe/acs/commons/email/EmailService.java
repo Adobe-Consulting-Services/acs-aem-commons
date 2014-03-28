@@ -30,7 +30,7 @@ import javax.mail.internet.InternetAddress;
 public interface EmailService {
 	
 	/**
-	 * API that sends an email to a given list of recipients
+	 * API that sends an email to a given recipients
 	 *  using an Email template. It uses the CQ Mail Service configuration.
 	 *  Hence it should be configured in the felix console.
 	 * 
@@ -44,6 +44,10 @@ public interface EmailService {
 	boolean sendEmail(String templatePath, Map<String,String> emailParams, InternetAddress... recipients);
 	
 	/**
+	 * API that sends an email to a given recipients
+	 *  using an Email template. It uses the CQ Mail Service configuration.
+	 *  Hence it should be configured in the felix console.
+	 * 
 	 * 
 	 * @param templatePath, Absolute path of the template used to send the Email 
 	 * (e.g. /etc/notification/email/acsEmailTemplate/emailtemplate.txt)
