@@ -88,7 +88,7 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
     @Property(label = "Serve authenticated from cache",
             description = "Serve authenticated requests from the error page cache. [ Default: false ]",
             boolValue = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
-    public static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-autheticated-from-cache";
+    public static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
 
     private ConcurrentHashMap<String, CacheEntry> cache;
 
@@ -99,19 +99,27 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
 
     @Override
     public final String get(final String path,
-                            final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+                            final SlingHttpServletRequest request,
+                            final SlingHttpServletResponse response) {
 
-        CacheEntry cacheEntry = cache.get(path);
 
         if (!serveAuthenticatedFromCache && !isAnonymousRequest(request)) {
             // For authenticated requests, dont return from cache
-
             return ResourceDataUtil.getIncludeAsString(path, request, response);
-        } else {
-            // If anonymous request, serve from cache
+        }
+
+
+        final long start = System.currentTimeMillis();
+
+        // Lock the cache because we we increment values within the cache even on valid cache hits"
+        synchronized (this.cache) {
+
+            CacheEntry cacheEntry = cache.get(path);
 
             if (cacheEntry == null || cacheEntry.isExpired(new Date())) {
-                // MISS
+
+                // Cache Miss
+
                 if (cacheEntry == null) {
                     cacheEntry = new CacheEntry(ttl);
                 }
@@ -125,12 +133,20 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
                 // Add entry to cache
                 cache.put(path, cacheEntry);
 
+
+                log.debug("Served cache MISS for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
+
                 return data;
             } else {
-                // HIT
+                // Cache Hit
+
                 final String data = cacheEntry.getData();
+
                 cacheEntry.incrementHits();
                 cache.put(path, cacheEntry);
+
+                log.debug("Served cache HIT for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
+
                 return data;
             }
         }
@@ -140,15 +156,18 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
         return (request.getAuthType() == null || request.getRemoteUser() == null);
     }
 
-
     @Activate
     protected final void activate(Map<String, String> config) {
+        cache = new ConcurrentHashMap<String, CacheEntry>();
+
         ttl = PropertiesUtil.toInteger(config.get(PROP_TTL), DEFAULT_TTL);
 
         serveAuthenticatedFromCache = PropertiesUtil.toBoolean(config.get(PROP_SERVE_AUTHENTICATED_FROM_CACHE),
                 DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE);
 
-        cache = new ConcurrentHashMap<String, CacheEntry>();
+        log.info("Starting ACS AEM Commons Error Page Handler Cache");
+        log.info(" > TTL (in seconds): {}", ttl);
+        log.info(" > Serve authenticated requests from cache: {}", serveAuthenticatedFromCache);
     }
 
     @Deactivate
@@ -251,7 +270,9 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
 
     @Override
     public final void clearCache() {
-        this.cache.clear();
+        synchronized (this.cache) {
+            this.cache.clear();
+        }
     }
 
 
