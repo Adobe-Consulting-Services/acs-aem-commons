@@ -52,7 +52,7 @@
                         <Import-Package>
                             org.scribe*;version="[1.3.0,2)",
                             ch.qos.logback.*;resolution:=optional,
-                            org.apache.sling.models.api.*;resolution:=optional,
+                            org.apache.sling.models.*;resolution:=optional,
                             *
                         </Import-Package>
                         <Include-Resource>
