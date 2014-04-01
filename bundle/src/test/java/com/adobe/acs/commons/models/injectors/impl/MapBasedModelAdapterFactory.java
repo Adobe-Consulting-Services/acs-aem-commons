@@ -24,6 +24,7 @@ import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.ComponentContext;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.when;
 /**
  * Simple ModelAdapterFactory which is backed by a java.util.Map
  *
- * The key is the name of the property (or the value of the @Named annotation),
+ * The key of a map entry is the name of the property (or the value of the @Named annotation),
  * value is the value to be injected.
  *
  * @see MapBasedModelAdapterFactoryTest
@@ -46,9 +47,8 @@ public class MapBasedModelAdapterFactory extends ModelAdapterFactory {
     public MapBasedModelAdapterFactory(Map<String, Object> map) {
         super();
 
-        org.osgi.service.component.ComponentContext componentCtx = mock(org.osgi.service.component.ComponentContext.class);
-        BundleContext bundleContext = mock(BundleContext.class);
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
+        ComponentContext componentCtx = mock(ComponentContext.class);
+        when(componentCtx.getBundleContext()).thenReturn(mock(BundleContext.class));
 
         activate(componentCtx);
 
