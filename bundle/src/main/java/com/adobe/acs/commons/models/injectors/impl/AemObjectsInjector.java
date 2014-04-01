@@ -43,7 +43,7 @@ import java.lang.reflect.Type;
 
 /**
  * Sling Models Injector which injects the Adobe AEM objects defined in
- * <a href="http://dev.day.com/docs/en/cq/current/howto/taglib.html#%3Ccq:defineObjects%3E">&lt;cq:defineObjects/&gt;</a>
+ * <a href="http://bit.ly/1gmlmfE">&lt;cq:defineObjects/&gt;</a>.
  * <p>
  * the following objects can be injected:
  * <ul>
@@ -70,10 +70,13 @@ import java.lang.reflect.Type;
  */
 @Component
 @Service
-//SERVICE_RANKING of this service should be lower than the ranking of the OsgiServiceInjector (5000),
-//otherwise the generic XSSAPI service would be injected from Osgi instead of the pre-configured from the current request.
+/*
+ * SERVICE_RANKING of this service should be lower than the ranking of the OsgiServiceInjector (5000),
+ * otherwise the generic XSSAPI service would be injected from the OSGi Service Registry instead of the
+ * pre-configured from the current request.
+ */
 @Property(name = Constants.SERVICE_RANKING, intValue = 4500)
-public class AemObjectsInjector implements Injector {
+public final class AemObjectsInjector implements Injector {
 
     private static final String COM_DAY_CQ_WCM_TAGS_DEFINE_OBJECTS_TAG = "com.day.cq.wcm.tags.DefineObjectsTag";
 
@@ -83,58 +86,53 @@ public class AemObjectsInjector implements Injector {
     }
 
     @Override
-    public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element, DisposalCallbackRegistry callbackRegistry) {
+    public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element,
+            DisposalCallbackRegistry callbackRegistry) {
 
         // sanity check
-        if(!(adaptable instanceof Resource || adaptable instanceof SlingHttpServletRequest)) {
+        if (!(adaptable instanceof Resource || adaptable instanceof SlingHttpServletRequest)) {
             return null;
         }
 
         ObjectType nameEnum = ObjectType.fromString(name);
 
-        switch(nameEnum) {
-            case RESOURCE:
-                return getResource(adaptable);
-            case RESOURCE_RESOLVER:
-                return getResourceResolver(adaptable);
-            case COMPONENT_CONTEXT:
-                return getComponentContext(adaptable);
-            case PAGE_MANAGER:
-                return getPageManager(adaptable);
-            case CURRENT_PAGE:
-                return getCurrentPage(adaptable);
-            case RESOURCE_PAGE:
-                return getResourcePage(adaptable);
-            case DESIGNER:
-                return getDesigner(adaptable);
-            case CURRENT_DESIGN:
-                return getCurrentDesign(adaptable);
-            case RESOURCE_DESIGN:
-                return getResourceDesign(adaptable);
-            case CURRENT_STYLE:
-                return getCurrentStyle(adaptable);
-            case SESSION:
-                return getSession(adaptable);
-            case XSS_API:
-                return getXssApi(adaptable);
+        switch (nameEnum) {
+        case RESOURCE:
+            return getResource(adaptable);
+        case RESOURCE_RESOLVER:
+            return getResourceResolver(adaptable);
+        case COMPONENT_CONTEXT:
+            return getComponentContext(adaptable);
+        case PAGE_MANAGER:
+            return getPageManager(adaptable);
+        case CURRENT_PAGE:
+            return getCurrentPage(adaptable);
+        case RESOURCE_PAGE:
+            return getResourcePage(adaptable);
+        case DESIGNER:
+            return getDesigner(adaptable);
+        case CURRENT_DESIGN:
+            return getCurrentDesign(adaptable);
+        case RESOURCE_DESIGN:
+            return getResourceDesign(adaptable);
+        case CURRENT_STYLE:
+            return getCurrentStyle(adaptable);
+        case SESSION:
+            return getSession(adaptable);
+        case XSS_API:
+            return getXssApi(adaptable);
+        default:
+            return null;
         }
-
-        return null;
     }
 
     // --- private stuff --
-
-    /**
-     *
-     * @param adaptable Either a SlingHttpServletRequest or a Resource
-     * @return the Resource
-     */
     private Resource getResource(Object adaptable) {
-        if(adaptable instanceof SlingHttpServletRequest) {
-            return ((SlingHttpServletRequest)adaptable).getResource();
+        if (adaptable instanceof SlingHttpServletRequest) {
+            return ((SlingHttpServletRequest) adaptable).getResource();
         }
-        if(adaptable instanceof Resource) {
-            return (Resource)adaptable;
+        if (adaptable instanceof Resource) {
+            return (Resource) adaptable;
         }
 
         return null;
@@ -146,11 +144,11 @@ public class AemObjectsInjector implements Injector {
      * @return the ResourceResolver
      */
     private ResourceResolver getResourceResolver(Object adaptable) {
-        if(adaptable instanceof SlingHttpServletRequest) {
-            return ((SlingHttpServletRequest)adaptable).getResourceResolver();
+        if (adaptable instanceof SlingHttpServletRequest) {
+            return ((SlingHttpServletRequest) adaptable).getResourceResolver();
         }
-        if(adaptable instanceof Resource) {
-            return ((Resource)adaptable).getResourceResolver();
+        if (adaptable instanceof Resource) {
+            return ((Resource) adaptable).getResourceResolver();
         }
 
         return null;
@@ -164,7 +162,7 @@ public class AemObjectsInjector implements Injector {
     private PageManager getPageManager(Object adaptable) {
         ResourceResolver resolver = getResourceResolver(adaptable);
 
-        if(resolver != null) {
+        if (resolver != null) {
             return resolver.adaptTo(PageManager.class);
         }
 
@@ -179,7 +177,7 @@ public class AemObjectsInjector implements Injector {
     private Designer getDesigner(Object adaptable) {
         ResourceResolver resolver = getResourceResolver(adaptable);
 
-        if(resolver != null) {
+        if (resolver != null) {
             return resolver.adaptTo(Designer.class);
         }
 
@@ -192,8 +190,8 @@ public class AemObjectsInjector implements Injector {
      * @return the ComponentContext if the adaptable was a SlingHttpServletRequest, or null otherwise
      */
     private ComponentContext getComponentContext(Object adaptable) {
-        if(adaptable instanceof SlingHttpServletRequest) {
-            SlingHttpServletRequest request = ((SlingHttpServletRequest)adaptable);
+        if (adaptable instanceof SlingHttpServletRequest) {
+            SlingHttpServletRequest request = ((SlingHttpServletRequest) adaptable);
 
             return WCMUtils.getComponentContext(request);
         }
@@ -211,7 +209,7 @@ public class AemObjectsInjector implements Injector {
         PageManager pageManager = getPageManager(adaptable);
         Resource resource = getResource(adaptable);
 
-        if(pageManager != null && resource != null) {
+        if (pageManager != null && resource != null) {
             return pageManager.getContainingPage(resource);
         }
 
@@ -238,7 +236,7 @@ public class AemObjectsInjector implements Injector {
         Page currentPage = getCurrentPage(adaptable);
         Designer designer = getDesigner(adaptable);
 
-        if(currentPage != null && designer != null) {
+        if (currentPage != null && designer != null) {
             return designer.getDesign(currentPage);
         }
 
@@ -254,8 +252,8 @@ public class AemObjectsInjector implements Injector {
         Page resourcePage = getResourcePage(adaptable);
         Designer designer = getDesigner(adaptable);
 
-        if(adaptable instanceof SlingHttpServletRequest) {
-            SlingHttpServletRequest request = (SlingHttpServletRequest)adaptable;
+        if (adaptable instanceof SlingHttpServletRequest) {
+            SlingHttpServletRequest request = (SlingHttpServletRequest) adaptable;
 
             if (resourcePage != null && designer != null) {
                 String resourceDesignKey = COM_DAY_CQ_WCM_TAGS_DEFINE_OBJECTS_TAG + resourcePage.getPath();
@@ -272,7 +270,7 @@ public class AemObjectsInjector implements Injector {
             }
         }
 
-        if(adaptable instanceof Resource) {
+        if (adaptable instanceof Resource) {
             return designer != null ? designer.getDesign(resourcePage) : null;
         }
 
@@ -288,7 +286,7 @@ public class AemObjectsInjector implements Injector {
         Design currentDesign = getCurrentDesign(adaptable);
         ComponentContext componentContext = getComponentContext(adaptable);
 
-        if(currentDesign != null && componentContext != null) {
+        if (currentDesign != null && componentContext != null) {
             return currentDesign.getStyle(componentContext.getCell());
         }
 
@@ -303,7 +301,7 @@ public class AemObjectsInjector implements Injector {
     private Session getSession(Object adaptable) {
         ResourceResolver resolver = getResourceResolver(adaptable);
 
-        return resolver != null ?  resolver.adaptTo(Session.class) : null;
+        return resolver != null ? resolver.adaptTo(Session.class) : null;
     }
 
     /**
@@ -312,8 +310,8 @@ public class AemObjectsInjector implements Injector {
      * @return a XSSAPI object configured for the current request, or null otherwise
      */
     private XSSAPI getXssApi(Object adaptable) {
-        if(adaptable instanceof SlingHttpServletRequest) {
-            SlingHttpServletRequest request = (SlingHttpServletRequest)adaptable;
+        if (adaptable instanceof SlingHttpServletRequest) {
+            SlingHttpServletRequest request = (SlingHttpServletRequest) adaptable;
 
             return request.adaptTo(XSSAPI.class);
         }
@@ -346,10 +344,6 @@ public class AemObjectsInjector implements Injector {
 
         ObjectType(String text) {
             this.text = text;
-        }
-
-        public String getText() {
-            return this.text;
         }
 
         public static ObjectType fromString(String text) {
