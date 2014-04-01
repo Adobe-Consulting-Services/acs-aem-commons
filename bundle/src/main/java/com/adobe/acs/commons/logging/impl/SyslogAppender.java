@@ -37,7 +37,7 @@ import ch.qos.logback.core.Appender;
 @Component(metatype = true, configurationFactory = true,
         label = "ACS AEM Commons - Syslog Appender",
         description = "Logback appender to send messages using Syslog")
-public class SyslogAppender {
+public final class SyslogAppender {
 
     private static final String ROOT = "ROOT";
 
