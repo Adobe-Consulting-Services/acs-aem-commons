@@ -18,12 +18,13 @@
   #L%
   --%>
 <%@include file="/libs/foundation/global.jsp" %>
-<%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %>
+<%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
+%><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %>
 <wcmmode:edit><cq:includeClientLib categories="acs-commons.columncontrol.widgets"/></wcmmode:edit>
 <c:set var="columns" value="${properties.columns}"/>
 <c:choose>
     <c:when test="${empty columns}">
-        <wcmmode:edit>You need to specify the column widths.</wcmmode:edit>
+        <wcm:placeholder>You need to specify the column widths.</wcm:placeholder>
     </c:when>
     <c:otherwise>
         <c:forEach items="${columns}" var="column" varStatus="status">

@@ -20,11 +20,12 @@
 <%@include file="/libs/foundation/global.jsp" %>
 <%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
 %><%@ taglib prefix="widgets" uri="http://www.adobe.com/consulting/acs-aem-commons/widgets" %><%
-%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %>
+%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
+%><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %>
 <c:set var="definitions" value="${widgets:getMultiFieldPanelValues(resource, 'definitions')}"/>
 <c:choose>
     <c:when test="${empty definitions}">
-        <wcmmode:edit><img class="cq-dl-placeholder cq-block-placeholder" src="/etc/designs/default/0.gif"/></wcmmode:edit>
+        <wcm:placeholder classNames="cq-dl-placeholder cq-block-placeholder"/>
     </c:when>
     <c:otherwise>
         <dl>

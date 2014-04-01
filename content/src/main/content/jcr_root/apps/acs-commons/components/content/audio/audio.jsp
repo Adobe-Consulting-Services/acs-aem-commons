@@ -27,6 +27,7 @@
 %><%@ page import="com.day.cq.wcm.api.WCMMode,
                    com.day.cq.wcm.api.components.DropTarget"%><%
 %><%@taglib prefix="audio" uri="http://www.adobe.com/consulting/acs-aem-commons/audio" %><%
+%><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
 %><cq:include script="partials/init.jsp"/><%
 %><c:choose>
     <c:when test="${!empty audio_asset}">
@@ -46,7 +47,6 @@
         </c:choose>
     </c:when>
     <c:otherwise>
-        <img class="<%= DropTarget.CSS_CLASS_PREFIX + "audio" + (WCMMode.fromRequest(request) == WCMMode.EDIT ?
-         " cq-audio-placeholder cq-block-placeholder" : "") %>" src="/etc/designs/default/0.gif"/>
+        <wcm:placeholder classNames="cq-audio-placeholder cq-block-placeholder" ddType="audio" />
     </c:otherwise>
 </c:choose>

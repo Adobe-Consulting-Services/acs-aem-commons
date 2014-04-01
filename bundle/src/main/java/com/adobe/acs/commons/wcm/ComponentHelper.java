@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.wcm;
 
+import javax.servlet.ServletRequest;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
@@ -65,6 +67,14 @@ public interface ComponentHelper {
      * @return true if the mode is either EDIT or DESIGN
      */
     boolean isAuthoringMode(SlingHttpServletRequest request);
+    
+    /**
+     * Checks if touch authoring mode has been selected.
+     * 
+     * @param request the current request
+     * @return true if touch authoring mode is active
+     */
+    boolean isTouchAuthoringMode(ServletRequest request);
 
     /**
      * Prints the HTML representation of the Component's edit block to the Response.
@@ -191,4 +201,14 @@ public interface ComponentHelper {
      * @return
      */
     String getEditIconImgTag(ComponentEditType.Type editType);
+
+    /**
+     * Build the placeholder image HTML for the Classic UI.
+     * 
+     * @param classNames the HTML class names which will be added to the generated HTML.
+     * @param title the title (if any) for the generated HTML.
+     * 
+     * @return an HTML fragment.
+     */
+    String generateClassicUIPlaceholder(String classNames, String title);
 }
