@@ -17,51 +17,39 @@
   limitations under the License.
   #L%
   --%>
-<%@ page
-	import="com.adobe.granite.xss.XSSAPI,
-			com.adobe.acs.commons.twitter.util.TwitterUtil,
-    			 com.day.cq.wcm.api.WCMMode"%>
-<%@include file="/libs/foundation/global.jsp"%>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@include file="/libs/foundation/global.jsp"%><%@ page import="java.util.Arrays,java.util.List" %><%
+%><%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %><%
+%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
+%><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
+%><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
 
-<cq:includeClientLib css="acs-commons.twitter.feed" />
-<cq:includeClientLib js="acs-commons.twitter.feed" />
+    String[] tweets = properties.get("tweets", new String[0]);
+    int limit = properties.get("limit", 0);
+    List<String> tweetList = Arrays.asList(tweets);
+    if (limit > 0) {
+        tweetList = tweetList.subList(0, limit);
+    }
 
-<%
-	String[] tweets = properties.get("tweets", new String[0]);
-	String[] filterWords = properties.get("filterWords", new String[0]);
-	int noOfTweets = properties.get("noOfTweets", -1);
-
-	tweets = TwitterUtil.filterTwitterFeeds(tweets, filterWords, noOfTweets);
-	request.setAttribute("tweets", tweets);
-
-	boolean isEdit = WCMMode.fromRequest(request) == WCMMode.EDIT;
+    request.setAttribute("tweets", tweetList);
 %>
+<c:choose>
+    <c:when test="${empty properties.username}">
+        <wcm:placeholder>Please provide a Twitter username.</wcm:placeholder>
+    </c:when>
+    <c:otherwise>
+        <ul>
+            <c:choose>
+                <c:when test="${fn:length(tweets) gt 0}">
+                    <c:forEach var="tweet" items="${tweets}">
+                        <li>${xss:filterHTML(xssAPI, tweet)}</li>
+                    </c:forEach>
+                </c:when>
+                <c:when test="${wcmmode:isEdit(pageContext)}">
+                    The Twitter timeline for user: '${xss:encodeForHTML(xssAPI, properties.username)}' hasn't been fetched yet.
+                </c:when>
+            </c:choose>
+        </ul>
+    </c:otherwise>
+</c:choose>
 
-
-<c:set var="isEdit" value="<%=isEdit%>" />
-
-
-<div class="az-twitterFeed row">
-	<section class="small-12 columns">
-		<section class="small-12 columns">
-			<hr>
-			<img src="/etc/designs/acs-commons/images/twitter-bird.png"
-				alt="Twitter Bird" />
-			<ul class="jta-tweet-list">
-				<c:choose>
-					<c:when test="${fn:length(tweets) gt 0}">
-						<c:forEach var="tweet" items="${tweets}">
-							<li class="jta-tweet-list-item"><%=xssAPI.filterHTML((String) pageContext.getAttribute("tweet"))%></li>
-						</c:forEach>
-					</c:when>
-					<c:when test="${isEdit}">
-						<c:out
-							value="The Twitter timeline for user:'${properties.username}' hasn't been fetched yet." />
-					</c:when>
-				</c:choose>
-			</ul>
-		</section>
-	</section>
-</div>
 

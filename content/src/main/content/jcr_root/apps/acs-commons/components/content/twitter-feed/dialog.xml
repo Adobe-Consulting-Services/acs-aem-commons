@@ -1,36 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:Dialog"
-    title="Twitter-feed"
+    title="Twitter Feed"
     xtype="tabpanel">
     <items jcr:primaryType="cq:WidgetCollection">
         <twitter
             jcr:primaryType="cq:Widget"
-            title="Twitter-feed">
+            title="Twitter">
             <items jcr:primaryType="cq:WidgetCollection">
                 <userName
                     jcr:primaryType="cq:Widget"
-                    fieldDescription="This user's timeline will be displayed."
-                    fieldLabel="Twitter Username"
+                    fieldDescription="This Twitter username whose tweets will be displayed.."
+                    fieldLabel="Username"
                     name="./username"
                     xtype="textfield"/>
-                <filter
-                    jcr:primaryType="cq:Widget"
-                    fieldDescription="A list of words, Tweets containing any word from this list will be displayed. When left blank all Tweets are displayed."
-                    fieldLabel="Tweets Filter Words"
-                    name="./filterWords"
-                    xtype="multifield"/>
                 <limit
                     jcr:primaryType="cq:Widget"
                     boxMaxWidth="{Long}30"
-                    fieldDescription="No of Tweets to be displayed."
-                    fieldLabel="No of Tweets"
-                    name="./noOfTweets"
+                    fieldDescription="Number of tweets to be displayed."
+                    fieldLabel="Limit"
+                    name="./limit"
                     xtype="numberfield"/>
                 <replicate
                     jcr:primaryType="cq:Widget"
-                    fieldDescription="When checked twitter feed gets replicated to publish instance/s."
-                    fieldLabel="Replicate feed"
+                    fieldDescription="When checked the page containing this component is replicated when the feed is updated."
+                    fieldLabel="Replicate Page?"
                     name="./replicate"
                     type="checkbox"
                     xtype="selection"/>

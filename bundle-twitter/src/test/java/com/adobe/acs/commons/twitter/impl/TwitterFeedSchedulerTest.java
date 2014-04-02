@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.twitter;
+package com.adobe.acs.commons.twitter.impl;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
@@ -31,6 +31,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.adobe.acs.commons.twitter.impl.TwitterFeedScheduler;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TwitterFeedSchedulerTest {
@@ -46,8 +48,6 @@ public class TwitterFeedSchedulerTest {
     @Mock
     private ResourceResolver resourceResolver;
 
-    private String[] twitterComponentPaths = { "acs-commons//components//content//twitter-feed" };
-
     @Before
     public void setUp() throws Exception {
 
@@ -57,8 +57,6 @@ public class TwitterFeedSchedulerTest {
                 resourceResolverFactory);
         PrivateAccessor.setField(scheduler, "twitterFeedService",
                 twitterFeedService);
-        PrivateAccessor.setField(scheduler, "twitterComponentPaths",
-                twitterComponentPaths);
 
         when(
                 resourceResolverFactory
@@ -80,8 +78,7 @@ public class TwitterFeedSchedulerTest {
             throws Exception {
         scheduler.bindRepository("", "", true);
         scheduler.run();
-        verify(twitterFeedService).refreshTwitterFeed(resourceResolver,
-                twitterComponentPaths);
+        verify(twitterFeedService).refreshTwitterFeedComponents(resourceResolver);
 
     }
 

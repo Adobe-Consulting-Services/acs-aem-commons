@@ -72,14 +72,15 @@ public final class TwitterAdapterFactory implements AdapterFactory {
             client = createTwitterClient((com.day.cq.wcm.webservicesupport.Configuration) adaptable);
         }
 
-        if (type == TwitterClient.class) {
-            return (AdapterType) client;
-        } else if (type == Twitter.class) {
-            return (AdapterType) client.getTwitter();
-        } else {
-            return null;
+        if (client != null) {
+            if (type == TwitterClient.class) {
+                return (AdapterType) client;
+            } else if (type == Twitter.class) {
+                return (AdapterType) client.getTwitter();
+            }
         }
 
+        return null;
     }
 
     private Configuration buildConfiguration() {

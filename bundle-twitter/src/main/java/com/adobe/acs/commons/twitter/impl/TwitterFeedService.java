@@ -1,6 +1,6 @@
 /*
  * #%L
- * ACS AEM Commons Package
+ * ACS AEM Commons Twitter Support Bundle
  * %%
  * Copyright (C) 2013 - 2014 Adobe
  * %%
@@ -17,21 +17,14 @@
  * limitations under the License.
  * #L%
  */
-$(function() {
+package com.adobe.acs.commons.twitter.impl;
 
-	function twitterFeed() {
-		var tweetIndex = 1,
-			$items = $('.jta-tweet-list-item'),
-		    tweetNum = $items.length - 1;
-		setInterval(function() {
-			$items.hide().eq(tweetIndex).fadeIn();
-			if (tweetIndex < tweetNum) {
-				tweetIndex++;
-			} else {
-				tweetIndex = 0;
-			}
-		}, 10000);
-	}
+import javax.jcr.RepositoryException;
 
-	twitterFeed();
-});
+import org.apache.sling.api.resource.ResourceResolver;
+
+public interface TwitterFeedService {
+
+    void refreshTwitterFeedComponents(ResourceResolver resourceResolver) throws RepositoryException;
+
+}
