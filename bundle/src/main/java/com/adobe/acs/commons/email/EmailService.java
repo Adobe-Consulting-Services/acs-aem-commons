@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.email;
 
 import java.util.Map;
-import javax.mail.internet.AddressException;
+
 import javax.mail.internet.InternetAddress;
 
 /**
@@ -28,30 +28,28 @@ import javax.mail.internet.InternetAddress;
  * 
  */
 public interface EmailService {
-	
-	/**
-	 * API that sends an email to a given recipients
-	 *  using an Email template. It uses the CQ Mail Service configuration.
-	 *  Hence it should be configured in the felix console. 
-	 * @param templatePath, Absolute path of the template used to send the Email 
-	 * (e.g. /etc/notification/email/acsEmailTemplate/emailtemplate.txt)
-	 * @param emailParams, Email param Map to be injected in the template
-	 * @param recipients, Variable InternetAddress array of recipient's email id's 
-	 * 
-	 * @return Boolean, true- if Email is sent, false otherwise.
-	 */
-	boolean sendEmail(String templatePath, Map<String,String> emailParams, InternetAddress... recipients);
-	
-	/**
-	 * API that sends an email to a given recipients
-	 *  using an Email template. It uses the CQ Mail Service configuration.
-	 *  Hence it should be configured in the felix console.
-	 * @param templatePath, Absolute path of the template used to send the Email 
-	 * (e.g. /etc/notification/email/acsEmailTemplate/emailtemplate.txt)
-	 * @param emailParams, Email param Map to be injected in the template
-	 * @param recipients, Variable String array of recipient's email id's 
-	 * @return
-	 * @throws AddressException
-	 */
-	boolean sendEmail(String templatePath, Map<String, String> emailParams, String... recipients) throws AddressException;
+
+    /**
+     * Construct an email based on a template and send it to one or more
+     * recipients.
+     * 
+     * @param templatePath Absolute path of the template used to send the email.
+     * @param emailParams Replacement variable map to be injected in the template
+     * @param recipients recipient email addresses
+     * 
+     * @return true if email is sent, false otherwise.
+     */
+    boolean sendEmail(String templatePath, Map<String, String> emailParams, InternetAddress... recipients);
+
+    /**
+     * Construct an email based on a template and send it to one or more
+     * recipients.
+     * 
+     * @param templatePath Absolute path of the template used to send the email.
+     * @param emailParams Replacement variable map to be injected in the template
+     * @param recipients recipient email addresses. Invalid email addresses are skipped.
+     * 
+     * @return true if email is sent, false otherwise.
+     */
+    boolean sendEmail(String templatePath, Map<String, String> emailParams, String... recipients);
 }
