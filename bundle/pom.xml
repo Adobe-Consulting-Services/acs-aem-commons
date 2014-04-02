@@ -337,7 +337,12 @@
             <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.day.cq</groupId>
+            <artifactId>cq-mailer</artifactId>
+            <version>5.6.4</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.apache.sling</groupId>
