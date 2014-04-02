@@ -37,7 +37,7 @@ public interface EmailService {
      * @param emailParams Replacement variable map to be injected in the template
      * @param recipients recipient email addresses
      * 
-     * @return true if email is sent, false otherwise.
+     * @return true if email is sent to at least one recipient, false otherwise (including if no addresses provided).
      */
     boolean sendEmail(String templatePath, Map<String, String> emailParams, InternetAddress... recipients);
 
@@ -49,7 +49,7 @@ public interface EmailService {
      * @param emailParams Replacement variable map to be injected in the template
      * @param recipients recipient email addresses. Invalid email addresses are skipped.
      * 
-     * @return true if email is sent, false otherwise.
+     * @return true if email is sent to at least one recipient, false otherwise (including if no addresses provided).
      */
     boolean sendEmail(String templatePath, Map<String, String> emailParams, String... recipients);
 }

@@ -19,24 +19,20 @@
 */
 package com.adobe.acs.commons.email.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import javax.jcr.Session;
-import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.lang.text.StrLookup;
-import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
@@ -48,7 +44,7 @@ import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 
-@Component(immediate = true, label = "ACS AEM Commons - E-mail Service",
+@Component(label = "ACS AEM Commons - E-mail Service",
     description = "A Generic Email service that sends an email to the given list of recipients.")
 @Service
 public final class EmailServiceImpl implements EmailService {
@@ -79,6 +75,7 @@ public final class EmailServiceImpl implements EmailService {
             return sendEmail(templatePath, emailParams, iAddressRecipients);
 
         } else {
+            // no recipients - return false
             return false;
         }
     }
@@ -86,78 +83,69 @@ public final class EmailServiceImpl implements EmailService {
     @Override
     public boolean sendEmail(final String templatePath, final Map<String, String> emailParams,
             final InternetAddress... recipients) {
-
-        ResourceResolver resourceResolver = null;
-
-        try {
-            resourceResolver = getResourceResolver();
-
-            if (resourceResolver.getResource(templatePath) == null) {
-                log.error("Missing template at path {} ", templatePath);
+        
+        if (recipients != null && recipients.length > 0) {
+            MessageGateway<HtmlEmail> messageGateway = messageGatewayService.getGateway(HtmlEmail.class);
+            if (messageGateway == null) {
+                log.error("Failed to send email due to null message gateway service. Please check configuration.");
                 return false;
             }
 
-            final MailTemplate mailTemplate = MailTemplate
+            HtmlEmail email = getEmail(templatePath, emailParams);
+            if (email != null) {
+                boolean success = false;
+                for (InternetAddress address : recipients) {
+                    try {
+                        email.setTo(Collections.singleton(address));
+                        messageGateway.send(email);
+                        success = true;
+                    } catch (Exception e) {
+                        log.error("Exception sending email to " + address, e);
+                    }
+                }
+                return success;
+            } else {
+                // no email - return false
+                return false;
+            }
+        } else {
+            // no recipients - return false
+            return false;
+        }
+
+    }
+
+    private HtmlEmail getEmail(String templatePath, Map<String, String> emailParams) {
+        ResourceResolver resourceResolver = null;
+        try {
+            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+
+           final MailTemplate mailTemplate = MailTemplate
                     .create(templatePath, resourceResolver.adaptTo(Session.class));
+
+           if (mailTemplate == null) {
+               log.warn("Email template at {} could not be created.", templatePath);
+               return null;
+           }
 
             final HtmlEmail email = mailTemplate.getEmail(StrLookup.mapLookup(emailParams), HtmlEmail.class);
 
-            List<InternetAddress> recipientsList = Arrays.asList(recipients);
-
-            email.setTo(recipientsList);
-
-            setSenderInformation(email, emailParams);
-
-            /**
-            * This is the configuration to send out an email, which will at least
-            * contain one recipient, and message body.
-            *
-            */
-            MessageGateway<HtmlEmail> messageGateway = messageGatewayService.getGateway(HtmlEmail.class);
-
-            if (messageGateway != null) {
-                messageGateway.send(email);
-                return true;
-            } else {
-                log.error("Failed to send email due to null message gateway service. Please check configuration.");
+            if (emailParams.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)
+                    && emailParams.containsKey(EmailServiceConstants.SENDER_NAME)) {
+                email.setFrom(emailParams.get(EmailServiceConstants.SENDER_EMAIL_ADDRESS),
+                        emailParams.get(EmailServiceConstants.SENDER_NAME));
+            } else if (emailParams.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)) {
+                email.setFrom(emailParams.get(EmailServiceConstants.SENDER_EMAIL_ADDRESS));
             }
 
-        } catch (IOException e) {
-            log.error("Failed to send the Email to Addresses: ", e);
-
-        } catch (MessagingException e) {
-            log.error("Failed to send the Email to Addresses: ", e);
-
-        } catch (EmailException e) {
-            log.error("Failed to send the Email to Addresses: ", e);
-
+            return email;
         } catch (Exception e) {
-            log.error("Failed to send the Email to Addresses: ", e);
-
-        } finally {
+            log.error("Unable to construct email from template " + templatePath, e);
             if (resourceResolver != null) {
                 resourceResolver.close();
             }
-        }
-
-        return false;
-
-    }
-
-    private ResourceResolver getResourceResolver() throws LoginException {
-
-        return resourceResolverFactory.getAdministrativeResourceResolver(null);
-    }
-
-    private void setSenderInformation(final HtmlEmail email, final Map<String, String> emailParams)
-            throws EmailException {
-
-        if (emailParams.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)
-                && emailParams.containsKey(EmailServiceConstants.SENDER_NAME)) {
-            email.setFrom(emailParams.get(EmailServiceConstants.SENDER_EMAIL_ADDRESS),
-                    emailParams.get(EmailServiceConstants.SENDER_NAME));
-        } else if (emailParams.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)) {
-            email.setFrom(emailParams.get(EmailServiceConstants.SENDER_EMAIL_ADDRESS));
+            return null;
         }
     }
+
 }
