@@ -50,34 +50,28 @@ import com.adobe.acs.commons.configpage.GridOperationFailedException;
 import com.adobe.acs.commons.configpage.GridStoreService;
 
 @SuppressWarnings("serial")
-@SlingServlet(
-        label = "ACS AEM Commons - Config Page Servlet",
-        description = "Servlet end-point used to the json store in config page",
-        resourceTypes = {"acs-commons/components/utilities/editablegrid"},
-        selectors = {"store"},
-        extensions = {"json"},
-        methods = {"GET","POST"},
-        generateComponent = true)
+@SlingServlet(label = "ACS AEM Commons - Config Page Servlet", description = "Servlet end-point used to the json store in config page", resourceTypes = { "acs-commons/components/utilities/editablegrid" }, selectors = { "store" }, extensions = { "json" }, methods = {
+        "GET", "POST" }, generateComponent = true)
 public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory
             .getLogger(EditGridJSONStoreServlet.class);
 
-
     @Reference
     private GridStoreService gridStoreService;
-    
+
     private static enum Operation {
-        UPDATE("update"), DELETE("delete"),NOOP("noop");
+        UPDATE("update"), DELETE("delete"), NOOP("noop");
         private String type;
+
         private Operation(String type) {
             this.type = type;
         }
-       String type(){
+
+        String type() {
             return type;
         }
     };
-  
-    
+
     @Override
     public final void doGet(SlingHttpServletRequest request,
             SlingHttpServletResponse response) throws IOException,
@@ -86,14 +80,13 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
         response.setCharacterEncoding("utf-8");
         final JSONWriter writer = new JSONWriter(response.getWriter());
 
-      
         ResourceResolver resolver = request.getResourceResolver();
 
         try {
             Resource gridResource = getGridResource(request.getResource());
-            int iLen =0;
+            int iLen = 0;
             writer.object();
-            
+
             writer.key("grid");
             writer.array();
             if (gridResource != null) {
@@ -106,22 +99,22 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
                     for (Iterator<String> keyIter = map.keySet().iterator(); keyIter
                             .hasNext();) {
                         String key = keyIter.next();
-                        if(!JcrConstants.JCR_PRIMARYTYPE.equals(key)){
-                        writer.key(key);
-                        writer.value(map.get(key, ""));
+                        if (!JcrConstants.JCR_PRIMARYTYPE.equals(key)) {
+                            writer.key(key);
+                            writer.value(map.get(key, ""));
                         }
                     }
                     writer.endObject();
 
                 }
-            
+
             }
             writer.endArray();
-           
+
             writer.key("results");
             writer.value(iLen);
             writer.endObject();
-         
+
         } catch (JSONException e) {
             response.reset();
             log.error(e.getMessage(), e);
@@ -129,15 +122,15 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
         } catch (GridOperationFailedException e) {
             log.error(e.getMessage(), e);
             throw new ServletException("Unable to produce JSON", e);
-        } 
+        }
 
     }
+
     @Override
-    public  void doPost(SlingHttpServletRequest request,
+    public void doPost(SlingHttpServletRequest request,
             SlingHttpServletResponse response) throws IOException,
             ServletException {
 
-      
         boolean success = false;
         try {
             success = update(request);
@@ -147,7 +140,9 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
 
         }
     }
-    protected void writeJsonToResponse(SlingHttpServletResponse response, boolean success) throws IOException{
+
+    protected void writeJsonToResponse(SlingHttpServletResponse response,
+            boolean success) throws IOException {
         JSONWriter w = new JSONWriter(response.getWriter());
         try {
             w.object();
@@ -157,53 +152,66 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
             log.error("error writing json response", e);
         }
     }
+
     protected boolean update(SlingHttpServletRequest request) {
         boolean success = false;
-        try{
-        Operation operation = getOperationFromRequest(request);
-        switch(operation){
-        case UPDATE:{
-        return   gridStoreService.addOrUpdateRows(request.getResourceResolver(), getModifiedRowsFromRequestForUpdate(request), request.getResource().getChild("grid")); 
-        }
-        case DELETE:{
-          return  gridStoreService.deleteRows(request.getResourceResolver(), getModifiedRowsFromRequestForDelete(request), request.getResource().getChild("grid")); 
-        }
-        case NOOP:{
-            
-        }
-        }
-        }catch(GridOperationFailedException e){
+        try {
+            Operation operation = getOperationFromRequest(request);
+            switch (operation) {
+            case UPDATE: {
+                return gridStoreService.addOrUpdateRows(request
+                        .getResourceResolver(),
+                        getModifiedRowsFromRequestForUpdate(request), request
+                                .getResource().getChild("grid"));
+            }
+            case DELETE: {
+                return gridStoreService.deleteRows(request
+                        .getResourceResolver(),
+                        getModifiedRowsFromRequestForDelete(request), request
+                                .getResource().getChild("grid"));
+            }
+            case NOOP: {
+
+            }
+            }
+        } catch (GridOperationFailedException e) {
             log.error(e.getMessage(), e);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-       return success;
+        return success;
     }
-    
-   private Operation getOperationFromRequest(SlingHttpServletRequest request){
-       String selectorstring = request.getRequestPathInfo().getSelectorString();
-       for(Operation operation :Operation.values()){
-          if(selectorstring.contains(operation.type())){
-              return operation;
-          }
-       }
-       return Operation.NOOP;
-   }
-    private Resource getGridResource(Resource contentResource) throws GridOperationFailedException {
+
+    private Operation getOperationFromRequest(SlingHttpServletRequest request) {
+        String selectorstring = request.getRequestPathInfo()
+                .getSelectorString();
+        for (Operation operation : Operation.values()) {
+            if (selectorstring.contains(operation.type())) {
+                return operation;
+            }
+        }
+        return Operation.NOOP;
+    }
+
+    private Resource getGridResource(Resource contentResource)
+            throws GridOperationFailedException {
 
         return contentResource.getChild("grid");
     }
-    private List<Map<String,String>> getModifiedRowsFromRequestForUpdate(SlingHttpServletRequest request) throws IOException, GridOperationFailedException{
+
+    private List<Map<String, String>> getModifiedRowsFromRequestForUpdate(
+            SlingHttpServletRequest request) throws IOException,
+            GridOperationFailedException {
         JSONObject grid = getJsonFromRequest(request);
         try {
             JSONArray rows = grid.getJSONArray("grid");
-            List<Map<String, String>> modifiedRows = new ArrayList<Map<String,String>>();
-            if(rows!=null){
-                for(int i =0 ; i <rows.length();i++){
+            List<Map<String, String>> modifiedRows = new ArrayList<Map<String, String>>();
+            if (rows != null) {
+                for (int i = 0; i < rows.length(); i++) {
                     JSONObject row = rows.getJSONObject(i);
-                   
+
                     Map<String, String> map = new HashMap<String, String>();
-                    for(Iterator<String> iter = row.keys();iter.hasNext();){
+                    for (Iterator<String> iter = row.keys(); iter.hasNext();) {
                         String key = iter.next();
                         map.put(key, row.getString(key));
                     }
@@ -216,15 +224,18 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
         }
         return Collections.emptyList();
     }
-    private List<String> getModifiedRowsFromRequestForDelete(SlingHttpServletRequest request) throws IOException, GridOperationFailedException{
+
+    private List<String> getModifiedRowsFromRequestForDelete(
+            SlingHttpServletRequest request) throws IOException,
+            GridOperationFailedException {
         JSONObject grid = getJsonFromRequest(request);
         try {
             JSONArray rows = grid.getJSONArray("grid");
             List<String> modifiedRows = new ArrayList<String>();
-            if(rows!=null){
-                for(int i =0 ; i <rows.length();i++){
-                   
-                    modifiedRows.add(  rows.getString(i));
+            if (rows != null) {
+                for (int i = 0; i < rows.length(); i++) {
+
+                    modifiedRows.add(rows.getString(i));
                 }
                 return modifiedRows;
             }
@@ -233,6 +244,7 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
         }
         return Collections.emptyList();
     }
+
     private JSONObject getJsonFromRequest(SlingHttpServletRequest request)
             throws IOException {
 
@@ -244,6 +256,7 @@ public class EditGridJSONStoreServlet extends SlingAllMethodsServlet {
         }
         return getJsonFromString(sb.toString());
     }
+
     private JSONObject getJsonFromString(String str) {
         try {
             JSONObject obj = new JSONObject(str);

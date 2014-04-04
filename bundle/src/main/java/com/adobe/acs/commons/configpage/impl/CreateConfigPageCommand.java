@@ -39,10 +39,13 @@ import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.api.commands.WCMCommand;
 import com.day.cq.wcm.api.commands.WCMCommandContext;
+
 @Component
 @Service
 public class CreateConfigPageCommand implements WCMCommand {
-    private static final Logger log = LoggerFactory.getLogger(CreateConfigPageCommand.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(CreateConfigPageCommand.class);
+
     @Override
     public String getCommandName() {
         return "createConfigPage";
@@ -53,33 +56,39 @@ public class CreateConfigPageCommand implements WCMCommand {
             SlingHttpServletRequest request, SlingHttpServletResponse response,
             PageManager pageManager) {
         HtmlResponse resp = null;
-        
+
         try {
             String parentPath = request.getParameter(PARENT_PATH_PARAM);
             String pageLabel = request.getParameter(PAGE_LABEL_PARAM);
             String template = request.getParameter(TEMPLATE_PARAM);
             String pageTitle = request.getParameter(PAGE_TITLE_PARAM);
             String[] columns = request.getParameterValues("columns");
- 
-            Page page = pageManager.create(parentPath, pageLabel, template,pageTitle);
- 
-            Session session = request.getResourceResolver().adaptTo(Session.class);
+
+            Page page = pageManager.create(parentPath, pageLabel, template,
+                    pageTitle);
+
+            Session session = request.getResourceResolver().adaptTo(
+                    Session.class);
             Node pageNode = page.adaptTo(Node.class);
- 
+
             Node contentNode = pageNode.getNode("./" + Node.JCR_CONTENT);
             contentNode.setProperty("gridcolumns", columns);
-            JcrUtils.getOrAddNode(contentNode  , "grid", JcrConstants.NT_UNSTRUCTURED);
+            JcrUtils.getOrAddNode(contentNode, "grid",
+                    JcrConstants.NT_UNSTRUCTURED);
             session.save();
- 
-            resp = HtmlStatusResponseHelper.createStatusResponse(true, "Page created", page.getPath());
-        }catch (WCMException e) {
+
+            resp = HtmlStatusResponseHelper.createStatusResponse(true,
+                    "Page created", page.getPath());
+        } catch (WCMException e) {
             log.error("Error during page creation.", e);
-            resp = HtmlStatusResponseHelper.createStatusResponse(false, e.getMessage());
-        }catch (RepositoryException e) {
+            resp = HtmlStatusResponseHelper.createStatusResponse(false,
+                    e.getMessage());
+        } catch (RepositoryException e) {
             log.error("Error during page creation.", e);
-            resp = HtmlStatusResponseHelper.createStatusResponse(false, e.getMessage());
+            resp = HtmlStatusResponseHelper.createStatusResponse(false,
+                    e.getMessage());
         }
- 
+
         return resp;
     }
 
