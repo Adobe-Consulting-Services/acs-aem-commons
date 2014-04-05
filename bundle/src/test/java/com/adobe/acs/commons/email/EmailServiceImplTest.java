@@ -52,26 +52,26 @@ import com.day.cq.mailer.MessageGatewayService;
 @RunWith(PowerMockRunner.class)
 public class EmailServiceImplTest {
 
-	@Mock
-	MessageGatewayService messageGatewayService;
+    @Mock
+    MessageGatewayService messageGatewayService;
 	
-	@Mock
-	ResourceResolverFactory resourceResolverFactory;
+    @Mock
+    ResourceResolverFactory resourceResolverFactory;
 	
-	@Mock
-	MessageGateway<HtmlEmail> messageGateway;
+    @Mock
+    MessageGateway<HtmlEmail> messageGateway;
 	
-	@Mock
-	ResourceResolver resourceResolver;
+    @Mock
+    ResourceResolver resourceResolver;
 	
-	@Mock
-	Session session;
+    @Mock
+    Session session;
 	
-	@InjectMocks
-	private EmailServiceImpl emailService;
+    @InjectMocks
+    private EmailServiceImpl emailService;
 	
-	private String emailTemplatePath;
-	private Map<String, String> emailParams;
+    private String emailTemplatePath;
+    private Map<String, String> emailParams;
     private InternetAddress[] recipientsInternetAddressArray;
     private InternetAddress singleRecipientInternetAddress;
     private String[] recipientsStringArray;
