@@ -106,8 +106,8 @@ public class EmailServiceImplTest {
     
     private void populateDataForMultiInternetAddressRecipients() throws AddressException {
     	recipientsInternetAddressArray = new InternetAddress[] { new InternetAddress("recipient1@example.com"),
-    														     new InternetAddress("recipient2@example.com")
-    															};
+                                                                 new InternetAddress("recipient2@example.com")
+                                                                };
     }
     
     private void populateDataForSingleStringRecipient() {
@@ -116,9 +116,9 @@ public class EmailServiceImplTest {
     
     private void populateDataForMultiStringRecipient() {
     	recipientsStringArray = new String[] { "recipient1@example.com",
-    										   "recipient2@example.com",
-    										   "recipient3@example.com"
-    										  };
+    			                               "recipient2@example.com",
+    			                               "recipient3@example.com"
+                                              };
     }
     
     private void testPreperationForGetEmailMethod() throws Exception {
