@@ -25,7 +25,7 @@ ACS.CQ.grid.EditorGridPanel = CQ.Ext.extend(CQ.Ext.grid.EditorGridPanel, {
     updateurl:"",
     deleteurl:"",
     basePath : "",
-    gridcolumns:['key','value'],
+    gridcolumns:['key','text','value'],
     gridfields :['uid'],
     region: "center",
     selModel: new CQ.Ext.grid.RowSelectionModel(),
