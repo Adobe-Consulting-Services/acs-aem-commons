@@ -116,8 +116,8 @@ public class EmailServiceImplTest {
     
     private void populateDataForMultiStringRecipient() {
     	recipientsStringArray = new String[] { "recipient1@example.com",
-    			                               "recipient2@example.com",
-    			                               "recipient3@example.com"
+                                               "recipient2@example.com",
+                                               "recipient3@example.com"
                                               };
     }
     
