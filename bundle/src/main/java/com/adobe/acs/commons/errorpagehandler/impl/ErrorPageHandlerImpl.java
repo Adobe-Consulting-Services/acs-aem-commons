@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
-import com.adobe.acs.commons.errorpagehandler.cache.ErrorPageCache;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
 import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.PathInfo;

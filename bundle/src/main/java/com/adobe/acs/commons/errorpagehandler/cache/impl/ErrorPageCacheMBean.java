@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.errorpagehandler.cache;
+package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
 import com.adobe.granite.jmx.annotation.Description;
 

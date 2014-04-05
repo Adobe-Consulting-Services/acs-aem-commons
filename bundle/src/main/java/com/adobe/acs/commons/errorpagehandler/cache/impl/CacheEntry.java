@@ -20,17 +20,10 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Calendar;
 import java.util.Date;
 
-public class CacheEntry {
-    private static final Logger log = LoggerFactory.getLogger(CacheEntry.class);
-
-    private int ttl = 0;
-
+class CacheEntry {
     private String data = "";
 
     private int hits = 0;
@@ -39,11 +32,11 @@ public class CacheEntry {
 
     private Date expiresAt;
 
-    public CacheEntry(int ttl) {
-        this.ttl = ttl;
+    public CacheEntry() {
         this.hits = 0;
         this.misses = 0;
         this.data = "";
+        this.expiresAt = new Date(0);
     }
 
     public final String getData() {
@@ -70,15 +63,11 @@ public class CacheEntry {
         this.misses++;
     }
 
-    public final int getTotal() {
-        return this.hits + this.misses;
-    }
-
     public final boolean isExpired(final Date date) {
         return expiresAt.before(date);
     }
 
-    public final void resetExpiresAt(final int expiresInSeconds) {
+    public final void setExpiresIn(final int expiresInSeconds) {
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, expiresInSeconds);
         this.expiresAt = calendar.getTime();
@@ -100,5 +89,9 @@ public class CacheEntry {
         }
 
         return this.getMisses() / (float) total;
+    }
+
+    final int getTotal() {
+        return this.hits + this.misses;
     }
 }

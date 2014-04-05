@@ -20,8 +20,6 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
-import com.adobe.acs.commons.errorpagehandler.cache.ErrorPageCache;
-import com.adobe.acs.commons.errorpagehandler.cache.ErrorPageCacheMBean;
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +50,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("UnusedDeclaration")
 @Component(
         label = "ACS AEM Commons - Error Page Handler Cache",
         description = "In-memory cache for pages. Details fo cache available via the JMX console.",
@@ -70,7 +69,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorPageCache, ErrorPageCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(ErrorPageCacheImpl.class);
 
-    private static final int DEFAULT_TTL = 60 * 5; // 5 Mins
+    private static final int DEFAULT_TTL = 60 * 5; // 5 minutes
     private static final int KB_IN_BYTES = 1000;
 
     private int ttl = DEFAULT_TTL;
@@ -104,14 +103,13 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
 
 
         if (!serveAuthenticatedFromCache && !isAnonymousRequest(request)) {
-            // For authenticated requests, dont return from cache
+            // For authenticated requests, don't return from cache
             return ResourceDataUtil.getIncludeAsString(path, request, response);
         }
 
-
         final long start = System.currentTimeMillis();
 
-        // Lock the cache because we we increment values within the cache even on valid cache hits"
+        // Lock the cache because we we increment values within the cache even on valid cache hits
         synchronized (this.cache) {
 
             CacheEntry cacheEntry = cache.get(path);
@@ -121,20 +119,20 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
                 // Cache Miss
 
                 if (cacheEntry == null) {
-                    cacheEntry = new CacheEntry(ttl);
+                    cacheEntry = new CacheEntry();
                 }
 
                 final String data = ResourceDataUtil.getIncludeAsString(path, request, response);
 
                 cacheEntry.setData(data);
-                cacheEntry.resetExpiresAt(ttl);
+                cacheEntry.setExpiresIn(ttl);
                 cacheEntry.incrementMisses();
 
                 // Add entry to cache
                 cache.put(path, cacheEntry);
 
 
-                log.debug("Served cache MISS for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
+                log.info("Served cache MISS for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
 
                 return data;
             } else {
@@ -145,7 +143,7 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
                 cacheEntry.incrementHits();
                 cache.put(path, cacheEntry);
 
-                log.debug("Served cache HIT for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
+                log.info("Served cache HIT for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
 
                 return data;
             }
@@ -274,7 +272,6 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
             this.cache.clear();
         }
     }
-
 
     @Override
     public final String getCacheData(final String errorPage) {
