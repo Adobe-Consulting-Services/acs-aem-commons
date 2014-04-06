@@ -20,9 +20,6 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,8 +31,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ErrorPageCacheImplTest {
@@ -80,40 +75,12 @@ public class ErrorPageCacheImplTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @After
-    public void tearDown() throws Exception {
-
-    }
-
-    @Test
     public void testGet() throws Exception {
-        SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
-        SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
-
-        CacheEntry jupiter = spy(new CacheEntry());
-
-        jupiter.setData("hello jupiter");
-        jupiter.incrementMisses();
-        jupiter.incrementHits();
-        jupiter.incrementMisses();
-        jupiter.incrementHits();
-        jupiter.incrementHits();
-        jupiter.setExpiresIn(FAR_FUTURE_EXPIRY);
-
-        cache.put("/content/jupiter", jupiter);
-
-        assertEquals(3, jupiter.getHits());
-
-        String data = errorPageCache.get("/content/jupiter", request, response);
-
-        assertEquals("hello jupiter", data);
-
-        assertEquals(4, jupiter.getHits());
-    }
-
-    @Test
-    public void testGetTtlInSeconds() throws Exception {
-
+        /**
+         * Implemented in PowerMoockErrorPageCacheImplTest
+         *
+         * Powermock was having problems running with @Spy'ed vars in this Test.
+         */
     }
 
     @Test

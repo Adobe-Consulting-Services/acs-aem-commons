@@ -89,7 +89,7 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
             boolValue = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
     public static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
 
-    private ConcurrentHashMap<String, CacheEntry> cache;
+    private ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<String, CacheEntry>();
 
     public ErrorPageCacheImpl() throws NotCompliantMBeanException {
         super(ErrorPageCacheMBean.class);
@@ -130,7 +130,6 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
 
                 // Add entry to cache
                 cache.put(path, cacheEntry);
-
 
                 log.info("Served cache MISS for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
 
@@ -231,13 +230,12 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
     public final TabularData getCacheEntries() throws OpenDataException {
 
         final CompositeType cacheEntryType = new CompositeType(
-                "cacheEntry", /* type name */
-                "Cache Entry", /* type description */
-                new String[]{"errorPage", "hit", "miss", "hitRate", "missRate", "sizeInKB" }, /* item names */
+                "cacheEntry",
+                "Cache Entry",
+                new String[]{"errorPage", "hit", "miss", "hitRate", "missRate", "sizeInKB" },
                 new String[]{"Error Page", "Hit", "Miss", "Hit Rate", "Miss Rate", "Size in KB" },
-                /* item descriptions */
                 new OpenType[]{SimpleType.STRING, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.FLOAT,
-                        SimpleType.FLOAT, SimpleType.INTEGER }  /* item types */
+                        SimpleType.FLOAT, SimpleType.INTEGER }
         );
 
         final TabularDataSupport tabularData = new TabularDataSupport(
