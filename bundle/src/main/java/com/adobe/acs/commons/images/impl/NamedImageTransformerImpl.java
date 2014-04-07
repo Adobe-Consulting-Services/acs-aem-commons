@@ -91,7 +91,7 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
     /**
      * @inheritDoc
      */
-    public final Layer transform(Layer layer) throws IOException, RepositoryException {
+    public final Layer transform(Layer layer) {
 
         for (final String type : this.transforms.keySet()) {
             final ImageTransformer imageTransformer = this.imageTransformers.get(type);
