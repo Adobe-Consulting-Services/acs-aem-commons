@@ -18,8 +18,6 @@
  * #L%
  */
 package com.adobe.acs.commons.email;
-
-import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -41,7 +39,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.easymock.PowerMock;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.adobe.acs.commons.email.impl.EmailServiceImpl;
@@ -50,6 +49,7 @@ import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 
 @RunWith(PowerMockRunner.class)
+@PrepareForTest(MailTemplate.class)
 public class EmailServiceImplTest {
 
     @Mock
@@ -131,53 +131,48 @@ public class EmailServiceImplTest {
 
     }
     
-    @PrepareForTest(MailTemplate.class)
     @Test
     public void test_to_send_email_to_multiple_Internet_addressess() throws Exception {
     	boolean emailSent_Expected = true;   
     	populateDataForMultiInternetAddressRecipients();   	
     	mockMailTemplate();  
     	boolean emailSent_Actual = emailService.sendEmail(emailTemplatePath, emailParams, recipientsInternetAddressArray); 	
-
+    	
 		assertEquals(emailSent_Expected, emailSent_Actual);
     	
     }
     
-    @PrepareForTest(MailTemplate.class)
     @Test
     public void test_to_send_email_to_single_Internet_address() throws Exception {
     	boolean emailSent_Expected = true;  
     	populateDataForSingleInternetAddressRecipient();
     	mockMailTemplate();
     	boolean emailSent_Actual = emailService.sendEmail(emailTemplatePath, emailParams, singleRecipientInternetAddress);
-    	
+   
     	assertEquals(emailSent_Expected, emailSent_Actual);
     }
     
-    @PrepareForTest(MailTemplate.class)
     @Test
 	public void test_to_send_email_to_multiple_String_addresses() throws Exception {
     	boolean emailSent_Expected = true; 
     	populateDataForMultiStringRecipient();
     	mockMailTemplate();
     	boolean emailSent_Actual = emailService.sendEmail(emailTemplatePath, emailParams, recipientsStringArray);
-    	
+    
     	assertEquals(emailSent_Expected, emailSent_Actual);
 	}
     
-    @PrepareForTest(MailTemplate.class)
     @Test
     public void test_to_send_email_to_single_String_address() throws Exception {
     	boolean emailSent_Expected = true; 
     	populateDataForSingleStringRecipient();
     	mockMailTemplate();
     	boolean emailSent_Actual = emailService.sendEmail(emailTemplatePath, emailParams, singleRecipientString);
-    	
+   
     	assertEquals(emailSent_Expected, emailSent_Actual);
 
     }
     
-    @PrepareForTest(MailTemplate.class)
     @Test
     public void test_to_validate_Html_Email_generation() throws Exception {
     	testPreperationForGetEmailMethod();
@@ -215,17 +210,16 @@ public class EmailServiceImplTest {
     }
     
     private void mockMailTemplate() throws IOException {   	
-	   	PowerMock.mockStatic(MailTemplate.class); 
+	   	PowerMockito.mockStatic(MailTemplate.class); 
 	   	InputStream inputstream = new FileInputStream(emailTemplatePath);
-	   	MailTemplate mailTemplate = new MailTemplate(inputstream, "UTF-8");  	
-	   	expect(MailTemplate.create(emailTemplatePath, session)).andReturn(mailTemplate);      	
-	   	PowerMock.replay(MailTemplate.class);
+	   	MailTemplate mailTemplate = new MailTemplate(inputstream, "UTF-8");    
+	   	when(MailTemplate.create(emailTemplatePath, session)).thenReturn(mailTemplate);
    }
     
  
    
    @After
 	public void tearDown() {
-	     
+	   Mockito.reset();
 	}
 }

@@ -390,25 +390,6 @@
             <version>2.2.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-	        <groupId>org.easymock</groupId>
-	        <artifactId>easymockclassextension</artifactId>
-	        <version>3.0</version>
-	        <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-easymock</artifactId>
-            <version>1.4.6</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-	        <groupId>org.powermock</groupId>
-	        <artifactId>powermock-module-testng</artifactId>
-	        <version>1.4.9</version>
-	        <scope>test</scope>
-         </dependency>
-         
 
         <!--  Build Dependencies -->
         <dependency>
