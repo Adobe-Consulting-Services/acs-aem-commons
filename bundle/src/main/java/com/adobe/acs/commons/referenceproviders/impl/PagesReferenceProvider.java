@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.referenceproviders;
+package com.adobe.acs.commons.referenceproviders.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
@@ -42,98 +43,111 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
 import com.day.cq.wcm.api.reference.ReferenceProvider;
-@Component(label = "ACS AEM Commons - Pages Reference Provider",
-description = "Reference provider that searches for  pages referenced inside any given page resource",
-metatype = false)
-@Service
 
+@Component(
+        label = "ACS AEM Commons - Pages Reference Provider",
+        description = "Reference provider that searches for  pages referenced inside any given page resource",
+        metatype = false , policy = ConfigurationPolicy.REQUIRE)
+@Service
 public class PagesReferenceProvider implements ReferenceProvider {
 
-private static final String TYPE_PAGE = "page";
-private static final String DEFAULT_PAGE_ROOT_PATH = "/content/";
+    private static final String TYPE_PAGE = "page";
+    private static final String DEFAULT_PAGE_ROOT_PATH = "/content/";
 
-private String pageRootPath=DEFAULT_PAGE_ROOT_PATH;
+    private String pageRootPath = DEFAULT_PAGE_ROOT_PATH;
 
-@Property(
-        label = "page root path",
-        description = "Page root path",
-        value = DEFAULT_PAGE_ROOT_PATH)
-private static final String PAGE_ROOT_PATH = "prop.page.root.path";
+    @Property(label = "page root path", description = "Page root path",
+            value = DEFAULT_PAGE_ROOT_PATH)
+    private static final String PAGE_ROOT_PATH = "page.root.path";
 
-//any text containing /content/
-private  Pattern pattern = Pattern.compile("([\"']|^)(" + Pattern.quote(pageRootPath) + ")(\\S|$)");
-@Activate
-protected void activate(Map<String, Object> props) {
-    pageRootPath = PropertiesUtil.toString(props.get(PAGE_ROOT_PATH),
-            DEFAULT_PAGE_ROOT_PATH);
-    pattern = Pattern.compile("([\"']|^)(" + Pattern.quote(pageRootPath) + ")(\\S|$)");
+    // any text containing /content/
+    private Pattern pattern = Pattern.compile("([\"']|^)("
+            + Pattern.quote(pageRootPath) + ")(\\S|$)");
 
-}
+    @Activate
+    protected final void activate(Map<String, Object> props) {
+        pageRootPath =
+                PropertiesUtil.toString(props.get(PAGE_ROOT_PATH),
+                        DEFAULT_PAGE_ROOT_PATH);
+        pattern =
+                Pattern.compile("([\"']|^)(" + Pattern.quote(pageRootPath)
+                        + ")(\\S|$)");
+
+    }
 
     @Override
-    public List<Reference> findReferences(Resource resource) {
+    public final List<Reference> findReferences(Resource resource) {
         List<Reference> references = new ArrayList<Reference>();
 
-        Set<String> paths = new HashSet<String>(); 
+        Set<String> paths = new HashSet<String>();
         ResourceResolver resolver = resource.getResourceResolver();
-        search(resource, paths , resolver);
-        for(String path : paths){
+        search(resource, paths, resolver);
+        for (String path : paths) {
             references.add(getReference(resolver.getResource(path)));
         }
-       
+
         return references;
     }
 
-    private void search(Resource resource, Set<String> references,ResourceResolver resolver){
+    private void search(Resource resource, Set<String> references,
+            ResourceResolver resolver) {
         findReferencesInResource(resource, references, resolver);
-        for(Iterator<Resource> iter = resource.listChildren();iter.hasNext();){
+        for (Iterator<Resource> iter = resource.listChildren(); iter.hasNext();) {
             search(iter.next(), references, resolver);
         }
     }
-    private void findReferencesInResource(Resource resource, Set<String> references, ResourceResolver resolver){
+
+    private void findReferencesInResource(Resource resource,
+            Set<String> references, ResourceResolver resolver) {
         PageManager manager = resolver.adaptTo(PageManager.class);
         ValueMap map = resource.adaptTo(ValueMap.class);
-        for(String key :map.keySet()){
+        for (String key : map.keySet()) {
             String[] values = map.get(key, new String[0]);
-            for(String value :values){
+            for (String value : values) {
                 if (pattern.matcher(value).find()) {
-                   for(String path:getAllPathsInAProperty( value)){
-                       Page page =manager.getContainingPage( path);
-                       if(page!=null){
-                           references.add(page.getPath());
-                       }
-                   }
+                    for (String path : getAllPathsInAProperty(value)) {
+                        Page page = manager.getContainingPage(path);
+                        if (page != null) {
+                            references.add(page.getPath());
+                        }
+                    }
                 }
             }
         }
     }
-    private Reference getReference(Resource res){
+
+    private Reference getReference(Resource res) {
         Page page = res.adaptTo(Page.class);
-        return new Reference(TYPE_PAGE, page.getName(), res, getLastModifiedTimeOfResource(page));
+        return new Reference(TYPE_PAGE, page.getName(), res,
+                getLastModifiedTimeOfResource(page));
     }
+
     private long getLastModifiedTimeOfResource(Page page) {
         final Calendar mod = page.getLastModified();
         long lastModified = mod != null ? mod.getTimeInMillis() : -1;
         return lastModified;
     }
-    private Set<String> getAllPathsInAProperty(String value){
-       
-        if(isSinglePathInValue(value)){
-           return getSinglePath(value);
-        }
-        else{
+
+    private Set<String> getAllPathsInAProperty(String value) {
+
+        if (isSinglePathInValue(value)) {
+            return getSinglePath(value);
+        } else {
             return getMultiplePaths(value);
         }
     }
-    private boolean isSinglePathInValue(String value){
+
+    private boolean isSinglePathInValue(String value) {
         return value.startsWith("/");
     }
-    private Set<String> getSinglePath(String value){
+
+    private Set<String> getSinglePath(String value) {
         Set<String> paths = new HashSet<String>();
-         paths.add(decode(value));
-         return paths;
+        paths.add(decode(value));
+        return paths;
     }
-    private Set<String> getMultiplePaths(String value){
+
+    private Set<String> getMultiplePaths(String value) {
         Set<String> paths = new HashSet<String>();
         int startPos = value.indexOf(pageRootPath, 1);
         while (startPos != -1) {
@@ -142,7 +156,7 @@ protected void activate(Map<String, Object> props) {
                 int endPos = value.indexOf(charBeforeStartPos, startPos);
                 if (endPos > startPos) {
                     String ref = value.substring(startPos, endPos);
-                    paths.add(decode(ref) );
+                    paths.add(decode(ref));
                     startPos = endPos;
                 }
             }
@@ -150,7 +164,8 @@ protected void activate(Map<String, Object> props) {
         }
         return paths;
     }
+
     private String decode(String url) {
-         return new PathInfo(url).getResourcePath();
+        return new PathInfo(url).getResourcePath();
     }
 }
