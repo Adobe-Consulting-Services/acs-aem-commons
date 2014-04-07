@@ -7,8 +7,4 @@ predicates/PathPropertyPredicate.js
 predicates/SelectionPredicate.js
 DDPathField.js
 polyfill_composite_field_processParentRecord.js
-<<<<<<< HEAD
-ReferenceSearchDialogExt.js
-=======
-multipanel.js
->>>>>>> a924851327419521e4ac19082215565eb9854c6c
+
