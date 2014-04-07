@@ -48,6 +48,8 @@ public class RotateImageTransformerImpl implements ImageTransformer {
 
     private static final String KEY_DEGREES = "degrees";
 
+    private static final int TOTAL_DEGREES = 360;
+
     @Override
     public final Layer transform(final Layer layer, final ValueMap properties) {
         if (properties == null || properties.isEmpty()) {
@@ -58,7 +60,7 @@ public class RotateImageTransformerImpl implements ImageTransformer {
 
         log.debug("Transforming with [ {} ]", TYPE);
 
-        int degrees = properties.get(KEY_DEGREES, 0) % 360;
+        int degrees = properties.get(KEY_DEGREES, 0) % TOTAL_DEGREES;
 
         layer.rotate(degrees);
 

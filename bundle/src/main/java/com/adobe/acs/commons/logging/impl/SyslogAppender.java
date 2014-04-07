@@ -66,7 +66,7 @@ public final class SyslogAppender {
     @Activate
     protected void activate(ComponentContext ctx) {
         final Dictionary<?, ?> properties = ctx.getProperties();
-        String[] loggers = PropertiesUtil.toStringArray(properties.get(PROP_LOGGERS), new String[] { ROOT });
+        String[] loggers = PropertiesUtil.toStringArray(properties.get(PROP_LOGGERS), new String[] {ROOT});
         String suffixPattern = PropertiesUtil
                 .toString(properties.get(PROP_SUFFIX_PATTERN), DEFAULT_SUFFIX_PATTERN);
         int port = PropertiesUtil.toInteger(properties.get(PROP_PORT), DEFAULT_PORT);

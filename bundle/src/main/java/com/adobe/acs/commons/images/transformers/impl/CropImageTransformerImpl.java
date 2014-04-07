@@ -53,7 +53,15 @@ public class CropImageTransformerImpl implements ImageTransformer {
 
     private static final String KEY_SMART_BOUNDING = "smart";
 
-    private static final int NUM_BOUNDS_PARAMS= 4;
+    private static final int NUM_BOUNDS_PARAMS = 4;
+
+    private static final int PARAM_INDEX_X = 0;
+
+    private static final int PARAM_INDEX_Y = 1;
+
+    private static final int PARAM_INDEX_WIDTH = 2;
+
+    private static final int PARAM_INDEX_HEIGHT = 3;
 
     @Override
     public final Layer transform(final Layer layer, final ValueMap properties) {
@@ -68,11 +76,11 @@ public class CropImageTransformerImpl implements ImageTransformer {
         final String[] bounds = StringUtils.split(properties.get(KEY_BOUNDS, ""), ",");
 
         if (bounds.length == NUM_BOUNDS_PARAMS) {
-            int x = Integer.parseInt(bounds[0]);
-            int y = Integer.parseInt(bounds[1]);
+            int x = Integer.parseInt(bounds[PARAM_INDEX_X]);
+            int y = Integer.parseInt(bounds[PARAM_INDEX_Y]);
 
-            int width = Integer.parseInt(bounds[2]);
-            int height = Integer.parseInt(bounds[3]);
+            int width = Integer.parseInt(bounds[PARAM_INDEX_WIDTH]);
+            int height = Integer.parseInt(bounds[PARAM_INDEX_HEIGHT]);
 
             Rectangle rectangle = new Rectangle();
 
@@ -95,7 +103,7 @@ public class CropImageTransformerImpl implements ImageTransformer {
         return layer;
     }
 
-    private final Rectangle getSmartBounds(int x, int y, int width, int height, int layerWidth, int layerHeight) {
+    private Rectangle getSmartBounds(int x, int y, int width, int height, int layerWidth, int layerHeight) {
         final Rectangle rectangle = new Rectangle();
 
         final int x2 = x + width;

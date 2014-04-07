@@ -113,9 +113,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();
 
-    
-
-
     /* Asset Rendition Pattern Picker */
 
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
@@ -163,14 +160,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return true;
     }
 
-    /**
-     * Writes the transformed image to the response.
-     *
-     * @param request  SlingRequest object
-     * @param response SlingResponse object
-     * @throws ServletException
-     * @throws IOException
-     */
     @Override
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
             ServletException, IOException {
