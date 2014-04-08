@@ -24,7 +24,8 @@ import java.util.Map;
 
 /**
  * The configuration object that has methods to allow easy retrieving of
- * row/rows of configurations.
+ * row/rows of configurations. If the configuration is not available, the search
+ * will be done in the parent configuration page and so on.
  * 
  * 
  */
@@ -32,15 +33,20 @@ public interface Configuration {
 
     /**
      * Returns the first available configuration , the key column of which
-     * matches the method argument key.
-     * @param key the key checked against the value in column key for each rows
+     * matches the method argument key. If the configuration is not available,
+     * the search will be done in the parent configuration page and so on.
+     * 
+     * @param key
+     *            the key checked against the value in column key for each rows
      * @return
      */
     Map<String, String> getRowByKey(String key);
 
     /**
      * returns all the list of configurations with key column matching the
-     * method argument key.
+     * method argument key. If the configuration is not available, the search
+     * will be done in the parent configuration page and so on.
+     * 
      * @param key
      * @return
      */
@@ -48,7 +54,9 @@ public interface Configuration {
 
     /**
      * Returns the first available configuration , for which the columnName
-     * column has the value columnValue.
+     * column has the value columnValue. If the configuration is not available,
+     * the search will be done in the parent configuration page and so on.
+     * 
      * @param columnName
      * @param columnValue
      * @return
@@ -58,7 +66,9 @@ public interface Configuration {
 
     /**
      * Returns all the list of configurations , for which the columnName column
-     * has the value columnValue.
+     * has the value columnValue. If the configuration is not available, the
+     * search will be done in the parent configuration page and so on.
+     * 
      * @param columnName
      * @param columnValue
      * @return
