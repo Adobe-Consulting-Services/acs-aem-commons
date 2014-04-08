@@ -176,7 +176,7 @@ ACS.CQ.grid.EditorGridPanel = CQ.Ext.extend(CQ.Ext.grid.EditorGridPanel, {
             saveAll: function() {
                 // delete records marked for deletion
                 this.each(function (record) {
-                    
+                    record.id=record.data.uid;
                     if (record.deleted) {
                         this.remove(record);
                     }
@@ -199,15 +199,7 @@ ACS.CQ.grid.EditorGridPanel = CQ.Ext.extend(CQ.Ext.grid.EditorGridPanel, {
                     width: 120,
                     sortable: true
                 },
-                columns:[{
-                    id: 'id',
-                    header: "id",
-                    dataIndex: 'id',
-                    width: 100,
-                    sortable: true,
-                    hidden: true
-
-                }]      
+                columns:[]      
         };
        
     
@@ -275,7 +267,7 @@ ACS.CQ.grid.ViewportPanel = CQ.Ext.extend(CQ.Ext.Panel, {
                                grid.stopEditing();
                                var Record = grid.store.recordType,newRecord;
                                 newRecord = new Record({
-                                   uid: grid.generateRandomId()
+                                   "uid": grid.generateRandomId()
                                });
 
                                 CQ.Ext.each(grid.gridcolumns, function(column) {
@@ -293,6 +285,7 @@ ACS.CQ.grid.ViewportPanel = CQ.Ext.extend(CQ.Ext.Panel, {
                                var s = grid.getSelectionModel().getSelections(),i,rec;
                                for (i = 0 ;i < s.length; i++) {
                                    rec = s[i];
+                                   rec.id=rec.data.uid;
                                    if (rec.phantom) {
                                        grid.store.remove(rec);
                                    } else {
