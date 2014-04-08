@@ -199,7 +199,15 @@ ACS.CQ.grid.EditorGridPanel = CQ.Ext.extend(CQ.Ext.grid.EditorGridPanel, {
                     width: 120,
                     sortable: true
                 },
-                columns:[]      
+                columns:[{
+                    id: 'id',
+                    header: "id",
+                    dataIndex: 'id',
+                    width: 100,
+                    sortable: true,
+                    hidden: true
+
+                }]      
         };
        
     

@@ -77,7 +77,7 @@ public class GridStoreServiceImpl implements GridStoreService {
         try {
             for (Map<String, String> row : rows) {
                 Node rowNode =
-                        JcrUtils.getOrCreateUniqueByPath(gridNode,
+                        JcrUtils.getOrAddNode(gridNode,
                                 row.get(COLUMN_UID),
                                 JcrConstants.NT_UNSTRUCTURED);
                 for (Map.Entry entry : row.entrySet()) {
