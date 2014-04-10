@@ -172,11 +172,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final String mimeType = this.getMimeType(request, image);
 
         // Transform the image
-        try {
-            namedImageTransformer.transform(layer);
-        } catch (RepositoryException e) {
-            throw new ServletException(e);
-        }
+        namedImageTransformer.transform(layer);
 
         final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
         response.setContentType(mimeType);

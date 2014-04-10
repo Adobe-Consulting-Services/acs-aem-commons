@@ -19,17 +19,13 @@
  */
 package com.adobe.acs.commons.images.impl;
 
-import java.io.IOException;
-
-import javax.jcr.RepositoryException;
-
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.day.image.Layer;
 
 public class StaticNamedImageTransformer implements NamedImageTransformer {
 
     @Override
-    public Layer transform(final Layer layer) throws IOException, RepositoryException {
+    public Layer transform(final Layer layer) {
         return layer;
     }
 
