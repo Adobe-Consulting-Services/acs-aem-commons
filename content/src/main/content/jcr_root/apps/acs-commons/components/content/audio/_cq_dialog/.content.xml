@@ -23,7 +23,7 @@
                         fieldLabel="Audio asset"
                         fileNameParameter="./fileName"
                         fileReferenceParameter="./asset"
-                        mimeTypes="[.*]"
+                        mimeTypes="[audio/.*]"
                         multiple="{Boolean}false"
                         name="./file"
                         title="Upload Audio Asset"
