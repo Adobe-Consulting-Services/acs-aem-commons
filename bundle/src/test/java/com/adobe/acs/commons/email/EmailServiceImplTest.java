@@ -18,18 +18,11 @@
  * #L%
  */
 package com.adobe.acs.commons.email;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import javax.jcr.Session;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+
+import com.adobe.acs.commons.email.impl.EmailServiceImpl;
+import com.day.cq.commons.mail.MailTemplate;
+import com.day.cq.mailer.MessageGateway;
+import com.day.cq.mailer.MessageGatewayService;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -37,16 +30,26 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.adobe.acs.commons.email.impl.EmailServiceImpl;
-import com.day.cq.commons.mail.MailTemplate;
-import com.day.cq.mailer.MessageGateway;
-import com.day.cq.mailer.MessageGatewayService;
+
+import javax.jcr.Session;
+import java.io.FileInputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(MailTemplate.class)
@@ -59,18 +62,18 @@ public class EmailServiceImplTest {
     ResourceResolverFactory resourceResolverFactory;
 	
     @Mock
-    MessageGateway<HtmlEmail> messageGateway;
-	
-    @Mock
     ResourceResolver resourceResolver;
+
+    @Mock
+    MessageGateway<HtmlEmail> messageGateway;
 	
     @Mock
     Session session;
 	
     @InjectMocks
     private EmailServiceImpl emailService;
-	
-    private String emailTemplatePath;
+
+    /*
     private Map<String, String> emailParams;
     private InternetAddress[] recipientsInternetAddressArray;
     private InternetAddress singleRecipientInternetAddress;
@@ -79,20 +82,26 @@ public class EmailServiceImplTest {
     private Method getEmailMethod;
     private Class[] parameterTypes;
     private Object[] parameters;
-    
+*/
+    private String emailTemplatePath;
+
     @Before
     public void setUp() throws Exception {
-    
-    	emailParams = new HashMap<String, String>();
-    	
-    	when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGateway);
-    	when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(resourceResolver);
-    	when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-    	
-    	populateTestData();   	
-    	
+
+        emailTemplatePath = this.getClass().getResource("/emailTemplate.txt").getFile().toString();
+
+        emailService = new EmailServiceImpl();
+        MockitoAnnotations.initMocks(this);
+
+        when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGateway);
+        when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(resourceResolver);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+
+        // Get Mail Template
+        PowerMockito.mockStatic(MailTemplate.class);
+        when(MailTemplate.create(emailTemplatePath, session)).thenReturn(new MailTemplate(new FileInputStream(emailTemplatePath), "UTF-8"));
     }
- 
+    /*
     private void populateTestData() {
     	emailTemplatePath = this.getClass().getResource("/emailTemplate.txt").getFile().toString();
     	emailParams.put("message", "This is just for test");
@@ -130,6 +139,55 @@ public class EmailServiceImplTest {
     	parameters = new Object[2];
 
     }
+    */
+
+
+    @Test
+    public void test_sendEmail() throws Exception {
+        final String expMessage = "this is just a message";
+        final String expSenderName = "John Smith";
+        final String expSenderEmailAddress = "john@smith.com";
+
+        final String templatePath = emailTemplatePath;
+
+        final Map<String, String> params = new HashMap<String, String>();
+        params.put("message", expMessage);
+        params.put("senderName", expSenderName);
+        params.put("senderEmailAddress", expSenderEmailAddress);
+
+        final String[] recipients = new String[] {
+                "upsanac@acs.com",
+                "david@acs.com",
+                "justin@acs.com"};
+
+        final ArgumentCaptor<HtmlEmail> captor = ArgumentCaptor.forClass(HtmlEmail.class);
+        final boolean result = emailService.sendEmail(templatePath, params, recipients);
+
+        verify(messageGateway, times(recipients.length)).send(captor.capture());
+
+        assertEquals(expSenderEmailAddress, captor.getValue().getFromAddress().getAddress());
+        assertEquals(expSenderName, captor.getValue().getFromAddress().getPersonal());
+        /* Add other assertions against the HtmlEmail object that is passed to Send */
+
+        // Assert the result of the method call is true
+        assertTrue(result);
+    }
+
+
+    @Test
+    public void test_sendEmail_noRecipients() throws Exception {
+        final String templatePath = emailTemplatePath;
+
+        final Map<String, String> params = new HashMap<String, String>();
+
+        final String[] recipients = new String[] { };
+
+        final boolean result = emailService.sendEmail(templatePath, params, recipients);
+
+        assertFalse(result);
+    }
+
+    /*
     
     @Test
     public void test_to_send_email_to_multiple_Internet_addressess() throws Exception {
@@ -193,7 +251,7 @@ public class EmailServiceImplTest {
     	testPreperationForGetEmailMethod();
     	
     	parameters[0] = emailTemplatePath;
-    	parameters[1] = emailParams;  		
+    	parameters[1] = emailParams;
     	
     	mockMailTemplate();
     	
@@ -216,7 +274,7 @@ public class EmailServiceImplTest {
 	   	when(MailTemplate.create(emailTemplatePath, session)).thenReturn(mailTemplate);
    }
     
- 
+    */
    
    @After
 	public void tearDown() {
