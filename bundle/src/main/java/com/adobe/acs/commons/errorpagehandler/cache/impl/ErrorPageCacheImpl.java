@@ -22,6 +22,7 @@ package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -45,17 +46,18 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @SuppressWarnings("UnusedDeclaration")
 @Component(
         label = "ACS AEM Commons - Error Page Handler Cache",
         description = "In-memory cache for pages. Details fo cache available via the JMX console.",
-        metatype = true,
-        immediate = true
+        metatype = true
 )
 @Properties({
         @Property(
@@ -87,9 +89,9 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
     @Property(label = "Serve authenticated from cache",
             description = "Serve authenticated requests from the error page cache. [ Default: false ]",
             boolValue = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
-    public static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
+    private static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
 
-    private ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<String, CacheEntry>();
+    private ConcurrentMap<String, CacheEntry> cache = new ConcurrentHashMap<String, CacheEntry>();
 
     public ErrorPageCacheImpl() throws NotCompliantMBeanException {
         super(ErrorPageCacheMBean.class);
@@ -108,44 +110,41 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
         }
 
         final long start = System.currentTimeMillis();
+        CacheEntry cacheEntry = cache.get(path);
+        final boolean newEntry = cacheEntry == null;
 
-        // Lock the cache because we we increment values within the cache even on valid cache hits
-        synchronized (this.cache) {
+        if (newEntry || cacheEntry.isExpired(new Date())) {
 
-            CacheEntry cacheEntry = cache.get(path);
+            // Cache Miss
+            final String data = ResourceDataUtil.getIncludeAsString(path, request, response);
 
-            if (cacheEntry == null || cacheEntry.isExpired(new Date())) {
+            if (newEntry) {
+                cacheEntry = new CacheEntry();
+            }
 
-                // Cache Miss
+            cacheEntry.setData(data);
+            cacheEntry.setExpiresIn(ttl);
+            cacheEntry.incrementMisses();
 
-                if (cacheEntry == null) {
-                    cacheEntry = new CacheEntry();
-                }
-
-                final String data = ResourceDataUtil.getIncludeAsString(path, request, response);
-
-                cacheEntry.setData(data);
-                cacheEntry.setExpiresIn(ttl);
-                cacheEntry.incrementMisses();
-
+            if (newEntry) {
                 // Add entry to cache
                 cache.put(path, cacheEntry);
-
-                log.info("Served cache MISS for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
-
-                return data;
-            } else {
-                // Cache Hit
-
-                final String data = cacheEntry.getData();
-
-                cacheEntry.incrementHits();
-                cache.put(path, cacheEntry);
-
-                log.info("Served cache HIT for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
-
-                return data;
             }
+
+            log.info("Served cache MISS for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
+
+            return data;
+        } else {
+            // Cache Hit
+
+            final String data = cacheEntry.getData();
+
+            cacheEntry.incrementHits();
+            cache.put(path, cacheEntry);
+
+            log.info("Served cache HIT for [ {} ] in [ {} ] ms", path, System.currentTimeMillis() - start);
+
+            return data;
         }
     }
 
@@ -183,8 +182,8 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
     public final int getTotalHits() {
         int hits = 0;
 
-        for (final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
-            hits = hits + entry.getValue().getHits();
+        for (final CacheEntry entry : this.cache.values()) {
+            hits = hits + entry.getHits();
         }
 
         return hits;
@@ -212,15 +211,15 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
 
     @Override
     public final int getTotalCacheRequests() {
-        return this.getTotalHits() + getTotalMisses();
+        return this.getTotalHits() + this.getTotalMisses();
     }
 
     @Override
     public final long getCacheSizeInKB() {
         long bytes = 0;
 
-        for (final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
-            bytes = bytes + entry.getValue().getData().getBytes().length;
+        for (final CacheEntry entry : this.cache.values()) {
+            bytes = bytes + entry.getBytes();
         }
 
         return bytes / KB_IN_BYTES;
@@ -254,7 +253,7 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
             data.put("miss", cacheEntry.getMisses());
             data.put("hitRate", cacheEntry.getHitRate());
             data.put("missRate", cacheEntry.getMissRate());
-            data.put("sizeInKB", cacheEntry.getData().getBytes().length / KB_IN_BYTES);
+            data.put("sizeInKB", cacheEntry.getBytes() / KB_IN_BYTES);
 
             tabularData.put(new CompositeDataSupport(cacheEntryType, data));
         }
@@ -266,9 +265,7 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
 
     @Override
     public final void clearCache() {
-        synchronized (this.cache) {
-            this.cache.clear();
-        }
+        this.cache.clear();
     }
 
     @Override

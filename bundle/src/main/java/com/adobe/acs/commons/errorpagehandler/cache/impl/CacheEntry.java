@@ -20,21 +20,23 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class CacheEntry {
-    private String data = "";
+    private String data;
 
-    private int hits = 0;
+    private final AtomicInteger hits;
 
-    private int misses = 0;
+    private final AtomicInteger misses;
 
     private Date expiresAt;
 
     public CacheEntry() {
-        this.hits = 0;
-        this.misses = 0;
+        this.hits = new AtomicInteger();
+        this.misses = new AtomicInteger();
         this.data = "";
         this.expiresAt = new Date(0);
     }
@@ -48,19 +50,19 @@ class CacheEntry {
     }
 
     public final int getHits() {
-        return hits;
+        return hits.get();
     }
 
     public final void incrementHits() {
-        this.hits++;
+        this.hits.incrementAndGet();
     }
 
     public final int getMisses() {
-        return misses;
+        return misses.get();
     }
 
     public final void incrementMisses() {
-        this.misses++;
+        this.misses.incrementAndGet();
     }
 
     public final boolean isExpired(final Date date) {
@@ -92,6 +94,10 @@ class CacheEntry {
     }
 
     final int getTotal() {
-        return this.hits + this.misses;
+        return this.hits.get() + this.misses.get();
+    }
+    
+    final int getBytes() {
+        return getData().getBytes(Charset.forName("UTF-8")).length;
     }
 }
