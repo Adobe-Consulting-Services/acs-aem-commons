@@ -6,7 +6,6 @@ date: 2014-01-12 01:00:00
 thumbnail: /images/named-image-transform/thumbnail.png
 categories: features
 initial-release: 1.5.0
-tags: new
 ---
 
 # Purpose

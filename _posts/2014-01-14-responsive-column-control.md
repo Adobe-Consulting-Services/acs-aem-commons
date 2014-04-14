@@ -6,7 +6,6 @@ date: 2014-01-14 23:39:29
 thumbnail: /images/responsive-column-control/thumbnail.png
 categories: features
 initial-release: 1.5.0
-tags: new
 ---
 
 # Purpose

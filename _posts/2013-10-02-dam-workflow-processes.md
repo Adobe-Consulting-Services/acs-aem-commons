@@ -5,7 +5,6 @@ description: Commonly required DAM workflow processes.
 date: 2013-10-02 15:39:29
 thumbnail: /images/dam-workflow-processes/thumbnail.png
 categories: features
-tags: updated
 initial-release: 1.0
 ---
 

@@ -5,7 +5,7 @@ description: Ease LinkedIn integration needs
 date: 2013-07-25 23:39:29
 thumbnail: /images/linkedin-scribe/thumbnail.png
 categories: features
-tags: new
+initial-release: 1.5.0
 ---
 
 # Purpose
