@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
 import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.PathInfo;
@@ -48,7 +49,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -61,7 +61,9 @@ import java.util.TreeMap;
 
 @Component(
         label = "ACS AEM Commons - Error Page Handler",
-        description = "Error Page Handling module which facilitates the resolution of errors against authorable pages for discrete content trees.",
+        description = "Error Page Handling module which facilitates the resolution of errors "
+                + "against author-able "
+                + "pages for discrete content trees.",
         immediate = false, metatype = true)
 @Service
 public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
@@ -69,18 +71,23 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private static final Logger log = LoggerFactory.getLogger(ErrorPageHandlerImpl.class);
 
     public static final String DEFAULT_ERROR_PAGE_NAME = "errors";
+
     public static final String ERROR_PAGE_PROPERTY = "errorPages";
 
     /* Enable/Disable */
     private static final boolean DEFAULT_ENABLED = true;
+
     private boolean enabled = DEFAULT_ENABLED;
+
     @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
             boolValue = DEFAULT_ENABLED)
     private static final String PROP_ENABLED = "prop.enabled";
 
     /* Error Page Extension */
     private static final String DEFAULT_ERROR_PAGE_EXTENSION = "html";
+
     private String errorPageExtension = DEFAULT_ERROR_PAGE_EXTENSION;
+
     @Property(label = "Error page extension",
             description = "Examples: html, htm, xml, json. [Optional] [Default: html]",
             value = DEFAULT_ERROR_PAGE_EXTENSION)
@@ -88,27 +95,37 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /* Fallback Error Code Extension */
     private static final String DEFAULT_FALLBACK_ERROR_NAME = "500";
+
     private String fallbackErrorName = DEFAULT_FALLBACK_ERROR_NAME;
+
     @Property(
             label = "Fallback error page name",
-            description = "Error page name (not path) to use if a valid Error Code/Error Servlet Name cannot be retrieved from the Request. [Required] [Default: 500]",
+            description = "Error page name (not path) to use if a valid Error Code/Error Servlet Name cannot be "
+                    + "retrieved from the Request. [Required] [Default: 500]",
             value = DEFAULT_FALLBACK_ERROR_NAME)
     private static final String PROP_FALLBACK_ERROR_NAME = "prop.error-page.fallback-name";
 
     /* System Error Page Path */
     private static final String DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT = "";
+
     private String systemErrorPagePath = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT;
+
     @Property(
             label = "System error page",
-            description = "Absolute path to system Error page resource to serve if no other more appropriate error pages can be found. Does not include extension. [Optional... but highly recommended]",
+            description = "Absolute path to system Error page resource to serve if no other more appropriate "
+                    + "error pages can be found. Does not include extension. [Optional... but highly recommended]",
             value = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT)
     private static final String PROP_ERROR_PAGE_PATH = "prop.error-page.system-path";
 
     /* Search Paths */
     private static final String[] DEFAULT_SEARCH_PATHS = {};
+
     @Property(
             label = "Error page paths",
-            description = "List of valid inclusive content trees under which error pages may reside, along with the name of the the default error page for the content tree. This is a fallback/less powerful option to adding the ./errorPages property to CQ Page property dialogs. Example: /content/geometrixx/en:errors [Optional]",
+            description = "List of valid inclusive content trees under which error pages may reside, "
+                    + "along with the name of the the default error page for the content tree. This is a "
+                    + "fallback/less powerful option to adding the ./errorPages property to CQ Page property dialogs."
+                    + " Example: /content/geometrixx/en:errors [Optional]",
             cardinality = Integer.MAX_VALUE)
     private static final String PROP_SEARCH_PATHS = "prop.paths";
 
@@ -121,10 +138,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Reference
     private ComponentHelper componentHelper;
 
+    @Reference
+    private ErrorPageCache cache;
+
     private SortedMap<String, String> pathMap = new TreeMap<String, String>();
 
     /**
-     * Find the JCR full path to the most appropriate Error Page
+     * Find the JCR full path to the most appropriate Error Page.
      *
      * @param request
      * @param errorResource
@@ -147,11 +167,11 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Try to find the closest real parent for the requested resource
         final Resource parent = findFirstRealParentOrSelf(errorResource);
-        if(parent != null) {
+        if (parent != null) {
             // Get content resource of the page
             final Resource parentContentResource = parent.getChild("jcr:content");
 
-            if(parentContentResource != null) {
+            if (parentContentResource != null) {
                 final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(parentContentResource);
                 errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
 
@@ -167,7 +187,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             }
         }
 
-        if(StringUtils.isNotBlank(errorsPath)) {
+        if (StringUtils.isNotBlank(errorsPath)) {
             log.debug("Best matching errors path for request is: {}", errorsPath);
 
 
@@ -176,7 +196,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
             // No error-specific page could be found, use the "default" error page
             // for the Root content path
-            if(page == null && StringUtils.isNotBlank(errorsPath)) {
+            if (page == null && StringUtils.isNotBlank(errorsPath)) {
                 page = resourceResolver.resolve(errorsPath);
             }
         }
@@ -199,7 +219,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /**
      * Gets the resource object for the provided path.
-     *
+     * <p/>
      * Performs checks to ensure resource exists and is accessible to user.
      *
      * @param resourceResolver
@@ -220,7 +240,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /** HTTP Request Data Retrieval Methods **/
 
     /**
-     * Get Error Status Code from Request or Default (500) if no status code can be found
+     * Get Error Status Code from Request or Default (500) if no status code can be found.
      *
      * @param request
      * @return
@@ -237,7 +257,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /**
      * Get the Error Page's name (all lowercase) that should be used to render the page for this error.
-     *
+     * <p/>
      * This looks at the Status code delivered via by Sling into the error page content
      *
      * @param request
@@ -278,8 +298,10 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /** OSGi Component Property Getters/Setters **/
 
     /**
-     * Determines if this Service is "enabled". If it has been configured to be "Disabled" the Service still exists however it should not be used.
-     * This OSGi Property toggle allows error page handler to be toggled on an off without via OSGi means without throwing Null pointers, etc.
+     * Determines if this Service is "enabled". If it has been configured to be "Disabled" the Service still exists
+     * however it should not be used.
+     * This OSGi Property toggle allows error page handler to be toggled on an off without via OSGi means without
+     * throwing Null pointers, etc.
      *
      * @return true is the Service should be considered enabled
      */
@@ -288,7 +310,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Checks if the System Error Page has been configured
+     * Checks if the System Error Page has been configured.
      *
      * @return
      */
@@ -297,7 +319,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Get the configured System Error Page Path
+     * Get the configured System Error Page Path.
+     *
      * @return
      */
     public String getSystemErrorPagePath() {
@@ -305,7 +328,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Get configured error page extension
+     * Get configured error page extension.
      *
      * @return
      */
@@ -314,7 +337,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Gets the Error Pages Path for the provided content root path
+     * Gets the Error Pages Path for the provided content root path.
      *
      * @param rootPath
      * @param errorPagesMap
@@ -329,7 +352,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Given the Request path, find the first Real Parent of the Request (even if the resource doesnt exist)
+     * Given the Request path, find the first Real Parent of the Request (even if the resource doesnt exist).
      *
      * @param resource
      * @return
@@ -366,8 +389,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Add extension as configured via OSGi Component Property
-     *
+     * Add extension as configured via OSGi Component Property.
+     * <p/>
      * Defaults to .html
      *
      * @param path
@@ -389,7 +412,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /** Script Support Methods **/
 
     /**
-     * Determines if the request has been authenticated or is Anonymous
+     * Determines if the request has been authenticated or is Anonymous.
      *
      * @param request
      * @return
@@ -399,7 +422,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Attempts to invoke a valid Sling Authentication Handler for the request
+     * Attempts to invoke a valid Sling Authentication Handler for the request.
      *
      * @param request
      * @param response
@@ -414,8 +437,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies .
-     *
+     * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies.
+     * <p/>
      * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
      *
      * @param request
@@ -435,7 +458,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Returns the Exception Message (Stacktrace) from the Request
+     * Returns the Exception Message (Stacktrace) from the Request.
      *
      * @param request
      * @return
@@ -469,7 +492,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Returns a String representation of the RequestProgress trace
+     * Returns a String representation of the RequestProgress trace.
      *
      * @param request
      * @return
@@ -486,15 +509,20 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /**
      * Reset response attributes to support printing out a new page (rather than one that potentially errored out).
      * This includes clearing clientlib inclusion state, and resetting the response.
+     * <p/>
+     * If the response is committed, and it hasnt been closed by code, check the response AND jsp buffer sizes and
+     * ensure they are large enough to NOT force a buffer flush.
      *
-     * If the response is committed, and it hasnt been closed by code, check the response AND jsp buffer sizes and ensure they are large enough to NOT force a buffer flush.
      * @param request
      * @param response
      * @param statusCode
      */
-    public void resetRequestAndResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, int statusCode) {
+    public void resetRequestAndResponse(SlingHttpServletRequest request, SlingHttpServletResponse response,
+                                        int statusCode) {
         // Clear client libraries
-        // TODO: Replace with proper API call is HtmlLibraryManager provides one in the future; Currently this is our only option.
+
+        // Replace with proper API call is HtmlLibraryManager provides one in the future;
+        // Currently this is our only option.
         request.setAttribute(com.day.cq.widget.HtmlLibraryManager.class.getName() + ".included",
                 new HashSet<String>());
         // Clear the response
@@ -504,7 +532,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Util for parsing Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;
+     * Util for parsing Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;.
      *
      * @param value
      * @param separator
@@ -523,8 +551,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             return null;
         }
     }
-
-    /** OSGi Component Methods **/
 
     @Activate
     protected void activate(ComponentContext componentContext) {
@@ -560,7 +586,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
-     * Covert OSGi Property storing Root content paths:Error page paths into a SortMap
+     * Covert OSGi Property storing Root content paths:Error page paths into a SortMap.
      *
      * @param paths
      * @return
@@ -602,8 +628,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         return sortedMap;
     }
 
-    public void includeUsingGET(final SlingHttpServletRequest request, final SlingHttpServletResponse response, final String path) {
-        final RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+    public void includeUsingGET(final SlingHttpServletRequest request, final SlingHttpServletResponse response,
+                                final String path) {
+        /*final RequestDispatcher dispatcher = request.getRequestDispatcher(path);
 
         if (dispatcher != null) {
             try {
@@ -611,6 +638,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             } catch (Exception e) {
                 log.debug("Exception swallowed while including error page", e);
             }
+        }    */
+
+        final String responseData = cache.get(path, new GetRequest(request), response);
+        try {
+            response.getWriter().write(responseData);
+        } catch (Exception e) {
+            log.info("Exception swallowed while including error page", e);
         }
     }
 
@@ -624,7 +658,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         public String getMethod() {
             return "GET";
         }
-
     }
 
 }
