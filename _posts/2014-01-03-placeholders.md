@@ -6,7 +6,7 @@ date: 2014-01-10 23:39:29
 thumbnail: /images/placeholders/thumbnail.png
 categories: features
 initial-release: 1.5.0
-tags: new
+tags: updated
 ---
 
 ## Purpose
@@ -47,13 +47,25 @@ Note that sizes can be used with the standard placeholder classes as well:
 
 ## How To Use
 
-### Classic UI only (5.6)
+### JSP Tag (Since 1.6.0)
 
-    <wcmmode:edit>
-      <img class="cq-dl-placeholder cq-block-placeholder" src="/etc/designs/default/0.gif"/>
-    </wcmmode:edit>
+You can also use a custom JSP tag to add placeholders.
 
-### Classic UI &amp; TouchUI (5.6.1+)
+First, add the declaration:
+
+    <%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %>
+
+Then use the `placeholder` tag. To use a class-based placeholder:
+
+    <wcm:placeholder classNames="cq-audio-placeholder cq-block-placeholder" ddType="audio" />
+
+Placeholders can also be arbitrary text or HTML:
+
+    <wcm:placeholder>You need to specify the column widths.</wcm:placeholder>
+
+> In Touch UI mode, the component's title will always be output instead of any custom placeholder text or image.
+
+### Manual
 
     <wcmmode:edit>
       <%=
@@ -62,7 +74,6 @@ Note that sizes can be used with the standard placeholder classes as well:
           )%>
        %>
     </wcmmode:edit>
-
 
 ## Sample
 
@@ -76,7 +87,6 @@ Yields the following ..
 
 ![Sample Placeholderes]({{ site.baseurl }}/images/placeholders/sample.png)
 
-
 ## Notes
 
 **Drag and Drop** can be easily added to these placeholders via the extra CSS class `cq-dd-<drop-target name>` where `drop-target name` matches the `cq:EditConfig` dropTarget node name.
@@ -85,6 +95,4 @@ Yields the following ..
 <img class="cq-audio-placeholder cq-block-sm-placeholder cq-dd-audio" src="/etc/designs/default/0.gif"/>
 <img class="cq-image-placeholder cq-block-lg-placeholder cq-dd-image" src="/etc/designs/default/0.gif"/>
 {% endhighlight %}
-
-
 
