@@ -47,7 +47,7 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
 @Component(
         label = "ACS AEM Commons - Pages Reference Provider",
         description = "Reference provider that searches for  pages referenced inside any given page resource",
-        metatype = false , policy = ConfigurationPolicy.REQUIRE)
+        policy = ConfigurationPolicy.REQUIRE)
 @Service
 public class PagesReferenceProvider implements ReferenceProvider {
 
@@ -79,36 +79,37 @@ public class PagesReferenceProvider implements ReferenceProvider {
     public final List<Reference> findReferences(Resource resource) {
         List<Reference> references = new ArrayList<Reference>();
 
-        Set<String> paths = new HashSet<String>();
         ResourceResolver resolver = resource.getResourceResolver();
-        search(resource, paths, resolver);
-        for (String path : paths) {
-            references.add(getReference(resolver.getResource(path)));
+        PageManager pageManager = resolver.adaptTo(PageManager.class);
+
+        Set<Page> pages = new HashSet<Page>();
+        search(resource, pages, pageManager);
+        
+        for (Page page: pages) {
+            references.add(getReference(page));
         }
 
         return references;
     }
 
-    private void search(Resource resource, Set<String> references,
-            ResourceResolver resolver) {
-        findReferencesInResource(resource, references, resolver);
+    private void search(Resource resource, Set<Page> pages, PageManager pageManager) {
+        findReferencesInResource(resource, pages, pageManager);
         for (Iterator<Resource> iter = resource.listChildren(); iter.hasNext();) {
-            search(iter.next(), references, resolver);
+            search(iter.next(), pages, pageManager);
         }
     }
 
     private void findReferencesInResource(Resource resource,
-            Set<String> references, ResourceResolver resolver) {
-        PageManager manager = resolver.adaptTo(PageManager.class);
+            Set<Page> pages, PageManager pageManager) {
         ValueMap map = resource.adaptTo(ValueMap.class);
         for (String key : map.keySet()) {
             String[] values = map.get(key, new String[0]);
             for (String value : values) {
                 if (pattern.matcher(value).find()) {
                     for (String path : getAllPathsInAProperty(value)) {
-                        Page page = manager.getContainingPage(path);
+                        Page page = pageManager.getContainingPage(path);
                         if (page != null) {
-                            references.add(page.getPath());
+                            pages.add(page);
                         }
                     }
                 }
@@ -116,9 +117,10 @@ public class PagesReferenceProvider implements ReferenceProvider {
         }
     }
 
-    private Reference getReference(Resource res) {
-        Page page = res.adaptTo(Page.class);
-        return new Reference(TYPE_PAGE, page.getName(), res,
+    private Reference getReference(Page page) {
+        return new Reference(TYPE_PAGE, 
+                String.format("%s (Page)", page.getName()),
+                page.getContentResource(),
                 getLastModifiedTimeOfResource(page));
     }
 
