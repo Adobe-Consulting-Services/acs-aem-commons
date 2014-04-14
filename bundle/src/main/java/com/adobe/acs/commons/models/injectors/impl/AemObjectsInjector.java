@@ -138,11 +138,6 @@ public final class AemObjectsInjector implements Injector {
         return null;
     }
 
-    /**
-     *
-     * @param adaptable Either a SlingHttpServletRequest or a Resource
-     * @return the ResourceResolver
-     */
     private ResourceResolver getResourceResolver(Object adaptable) {
         if (adaptable instanceof SlingHttpServletRequest) {
             return ((SlingHttpServletRequest) adaptable).getResourceResolver();
@@ -154,11 +149,6 @@ public final class AemObjectsInjector implements Injector {
         return null;
     }
 
-    /**
-     *
-     * @param adaptable Either a SlingHttpServletRequest or a Resource
-     * @return the PageManager
-     */
     private PageManager getPageManager(Object adaptable) {
         ResourceResolver resolver = getResourceResolver(adaptable);
 
@@ -169,11 +159,6 @@ public final class AemObjectsInjector implements Injector {
         return null;
     }
 
-    /**
-     *
-     * @param adaptable Either a SlingHttpServletRequest or a Resource
-     * @return the Designer
-     */
     private Designer getDesigner(Object adaptable) {
         ResourceResolver resolver = getResourceResolver(adaptable);
 
@@ -185,7 +170,8 @@ public final class AemObjectsInjector implements Injector {
     }
 
     /**
-     *
+     * Get the current component context.
+     * 
      * @param adaptable a SlingHttpServletRequest
      * @return the ComponentContext if the adaptable was a SlingHttpServletRequest, or null otherwise
      */
@@ -200,11 +186,6 @@ public final class AemObjectsInjector implements Injector {
         return null;
     }
 
-    /**
-     *
-     * @param adaptable Either a SlingHttpServletRequest or a Resource
-     * @return the Page containing the Resource
-     */
     private Page getResourcePage(Object adaptable) {
         PageManager pageManager = getPageManager(adaptable);
         Resource resource = getResource(adaptable);
@@ -217,6 +198,7 @@ public final class AemObjectsInjector implements Injector {
     }
 
     /**
+     * Get the current page.
      *
      * @param adaptable a SlingHttpServletRequest
      * @return the current Page if the adaptable was a SlingHttpServletRequest, null otherwise
@@ -228,6 +210,7 @@ public final class AemObjectsInjector implements Injector {
     }
 
     /**
+     * Get the current design.
      *
      * @param adaptable a SlingHttpServletRequest
      * @return the current Design if the adaptable was a SlingHttpServletRequest, the default Design otherwise
@@ -243,11 +226,6 @@ public final class AemObjectsInjector implements Injector {
         return null;
     }
 
-    /**
-     *
-     * @param adaptable a SlingHttpServletRequest
-     * @return the current Page if the adaptable was a SlingHttpServletRequest, null otherwise
-     */
     private Design getResourceDesign(Object adaptable) {
         Page resourcePage = getResourcePage(adaptable);
         Designer designer = getDesigner(adaptable);
@@ -278,7 +256,8 @@ public final class AemObjectsInjector implements Injector {
     }
 
     /**
-     *
+     * Get the current style.
+     * 
      * @param adaptable a SlingHttpServletRequest
      * @return the current Style if the adaptable was a SlingHttpServletRequest, null otherwise
      */
@@ -294,6 +273,7 @@ public final class AemObjectsInjector implements Injector {
     }
 
     /**
+     * Get the session.
      *
      * @param adaptable Either a SlingHttpServletRequest or a Resource
      * @return the current Session
@@ -305,6 +285,7 @@ public final class AemObjectsInjector implements Injector {
     }
 
     /**
+     * Get the XSS API.
      *
      * @param adaptable a SlingHttpServletRequest
      * @return a XSSAPI object configured for the current request, or null otherwise
