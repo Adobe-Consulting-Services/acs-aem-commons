@@ -23,8 +23,8 @@ import javax.jcr.RepositoryException;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
-public interface TwitterFeedService {
+public interface TwitterFeedUpdater {
 
-    void refreshTwitterFeedComponents(ResourceResolver resourceResolver) throws RepositoryException;
+    void updateTwitterFeedComponents(ResourceResolver resourceResolver) throws RepositoryException;
 
 }

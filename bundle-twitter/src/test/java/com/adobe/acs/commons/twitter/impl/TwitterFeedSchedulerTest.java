@@ -40,7 +40,7 @@ public class TwitterFeedSchedulerTest {
     private TwitterFeedScheduler scheduler;
 
     @Mock
-    private TwitterFeedService twitterFeedService;
+    private TwitterFeedUpdater twitterFeedService;
 
     @Mock
     private ResourceResolverFactory resourceResolverFactory;
@@ -78,7 +78,7 @@ public class TwitterFeedSchedulerTest {
             throws Exception {
         scheduler.bindRepository("", "", true);
         scheduler.run();
-        verify(twitterFeedService).refreshTwitterFeedComponents(resourceResolver);
+        verify(twitterFeedService).updateTwitterFeedComponents(resourceResolver);
 
     }
 
