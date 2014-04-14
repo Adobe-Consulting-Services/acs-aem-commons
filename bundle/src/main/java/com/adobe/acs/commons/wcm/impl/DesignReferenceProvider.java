@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -28,9 +27,12 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 
-import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.designer.Design;
+import com.day.cq.wcm.api.designer.Designer;
 import com.day.cq.wcm.api.reference.Reference;
 import com.day.cq.wcm.api.reference.ReferenceProvider;
 
@@ -38,43 +40,41 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
  * 
  * ACS AEM commons Design Reference Provider.
  * Reference provider that searches for design pages for any given page resource.
- *
  */
 @Component(
         label = "ACS AEM Commons - Design Reference Provider",
         description = "Reference provider that searches for design pages for any given page resource",
-        metatype = false , policy = ConfigurationPolicy.REQUIRE)
+        policy = ConfigurationPolicy.REQUIRE)
 @Service
-public class DesignReferenceProvider implements ReferenceProvider {
+public final class DesignReferenceProvider implements ReferenceProvider {
 
     private static final String TYPE_DESIGN_PAGE = "designpage";
-    private static final String DESIGN_PATH = "cq:designPath";
 
     @Override
-    public final List<Reference> findReferences(Resource resource) {
-        String designPath = getDesignPath(resource);
-        if (null == designPath || "".equals(designPath)) {
+    public List<Reference> findReferences(Resource resource) {
+        ResourceResolver resourceResolver = resource.getResourceResolver();
+        PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+        Designer designer = resourceResolver.adaptTo(Designer.class);
+
+        Page page = pageManager.getContainingPage(resource);
+        if (page == null) {
             return Collections.emptyList();
         }
-        Resource designResource =
-                resource.getResourceResolver().getResource(designPath);
-        Page designPage = designResource.adaptTo(Page.class);
-        List<Reference> references = new ArrayList<Reference>(1);
-        references.add(new Reference(TYPE_DESIGN_PAGE,
-                designResource.getName(), designResource,
-                getLastModifiedTimeOfResource(designPage)));
-        return references;
+
+        Design design = designer.getDesign(page);
+        if (design == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.singletonList(new Reference(TYPE_DESIGN_PAGE,
+                String.format("%s (Design)", design.getId()),
+                design.getContentResource(),
+                getLastModified(design)));
     }
 
-    private long getLastModifiedTimeOfResource(Page page) {
-        final Calendar mod = page.getLastModified();
+    private long getLastModified(Design design) {
+        final Calendar mod = design.getLastModified();
         long lastModified = mod != null ? mod.getTimeInMillis() : -1;
         return lastModified;
-    }
-
-    private String getDesignPath(Resource resource) {
-        HierarchyNodeInheritanceValueMap hnvm =
-                new HierarchyNodeInheritanceValueMap(resource);
-        return hnvm.getInherited(DESIGN_PATH, "");
     }
 }
