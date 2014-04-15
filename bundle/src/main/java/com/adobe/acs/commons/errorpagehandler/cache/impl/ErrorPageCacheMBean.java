@@ -55,6 +55,3 @@ public interface ErrorPageCacheMBean {
     @Description("Get the cached data for a specific Error Page. (Ex. getCacheData('/content/site/error/404.html'))")
     String getCacheData(String errorPage);
 }
-
-
-

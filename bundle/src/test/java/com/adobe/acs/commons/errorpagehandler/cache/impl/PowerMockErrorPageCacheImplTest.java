@@ -50,7 +50,7 @@ public class PowerMockErrorPageCacheImplTest {
 
     @Before
     public void setUp() throws Exception {
-        errorPageCache = new ErrorPageCacheImpl();
+        errorPageCache = new ErrorPageCacheImpl(1, false);
     }
 
     @Test
@@ -58,11 +58,6 @@ public class PowerMockErrorPageCacheImplTest {
         mockStatic(ResourceDataUtil.class);
 
         String data = "";
-
-        final Map<String, String> map = new HashMap<String, String>();
-        map.put("ttl", "1");
-
-        errorPageCache.activate(map);
 
         SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
         SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);

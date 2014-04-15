@@ -20,12 +20,14 @@
 package com.adobe.acs.commons.errorpagehandler.impl;
 
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
 import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.search.QueryBuilder;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -45,16 +47,22 @@ import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.auth.core.AuthUtil;
 import org.apache.sling.commons.auth.Authenticator;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -129,6 +137,20 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             cardinality = Integer.MAX_VALUE)
     private static final String PROP_SEARCH_PATHS = "prop.paths";
 
+    private static final int DEFAULT_TTL = 60 * 5; // 5 minutes
+
+    private static final boolean DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE = false;
+
+    @Property(label = "Serve authenticated from cache",
+            description = "Serve authenticated requests from the error page cache. [ Default: false ]",
+            boolValue = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
+    private static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
+
+    @Property(label = "TTL (in seconds)",
+            description = "TTL for each cache entry in seconds. [ Default: 300 ]",
+            intValue = DEFAULT_TTL)
+    private static final String PROP_TTL = "ttl";
+
     @Reference
     private QueryBuilder queryBuilder;
 
@@ -138,10 +160,11 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Reference
     private ComponentHelper componentHelper;
 
-    @Reference
     private ErrorPageCache cache;
 
     private SortedMap<String, String> pathMap = new TreeMap<String, String>();
+
+    private ServiceRegistration cacheRegistration;
 
     /**
      * Find the JCR full path to the most appropriate Error Page.
@@ -560,6 +583,10 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         enabled = false;
+        if (cacheRegistration != null) {
+            cacheRegistration.unregister();
+            cacheRegistration = null;
+        }
     }
 
     private void configure(ComponentContext componentContext) {
@@ -578,6 +605,20 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         this.pathMap = configurePathMap(PropertiesUtil.toStringArray(properties.get(PROP_SEARCH_PATHS),
                 DEFAULT_SEARCH_PATHS));
+
+        int ttl = PropertiesUtil.toInteger(properties.get(PROP_TTL), DEFAULT_TTL);
+        boolean serveAuthenticatedFromCache = PropertiesUtil.toBoolean(properties.get(PROP_SERVE_AUTHENTICATED_FROM_CACHE),
+                DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE);
+        try {
+            cache = new ErrorPageCacheImpl(ttl, serveAuthenticatedFromCache);
+            
+            Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+            serviceProps.put("jmx.objectname", "com.adobe.acs.commons:type=ErrorPageHandlerCache");
+            
+            cacheRegistration = componentContext.getBundleContext().registerService(DynamicMBean.class.getName(), cache, serviceProps);
+        } catch (NotCompliantMBeanException e) {
+            log.error("Unable to create cache", e);
+        }
 
         log.debug("Enabled: {}", this.enabled);
         log.debug("System Error Page Path: {}", this.systemErrorPagePath);
@@ -630,21 +671,23 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     public void includeUsingGET(final SlingHttpServletRequest request, final SlingHttpServletResponse response,
                                 final String path) {
-        /*final RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+        if (cache == null) {
+            final RequestDispatcher dispatcher = request.getRequestDispatcher(path);
 
-        if (dispatcher != null) {
-            try {
-                dispatcher.include(new GetRequest(request), response);
-            } catch (Exception e) {
-                log.debug("Exception swallowed while including error page", e);
+            if (dispatcher != null) {
+                try {
+                    dispatcher.include(new GetRequest(request), response);
+                } catch (Exception e) {
+                    log.debug("Exception swallowed while including error page", e);
+                }
             }
-        }    */
-
-        final String responseData = cache.get(path, new GetRequest(request), response);
-        try {
-            response.getWriter().write(responseData);
-        } catch (Exception e) {
-            log.info("Exception swallowed while including error page", e);
+        } else {
+            final String responseData = cache.get(path, new GetRequest(request), response);
+            try {
+                response.getWriter().write(responseData);
+            } catch (Exception e) {
+                log.info("Exception swallowed while including error page", e);
+            }
         }
     }
 

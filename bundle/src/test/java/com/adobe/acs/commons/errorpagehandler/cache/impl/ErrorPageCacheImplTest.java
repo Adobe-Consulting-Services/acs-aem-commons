@@ -30,6 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import junitx.util.PrivateAccessor;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,14 +40,12 @@ public class ErrorPageCacheImplTest {
     @Spy
     private ConcurrentHashMap<String, CacheEntry> cache;
 
-    @InjectMocks
     private ErrorPageCacheImpl errorPageCache;
 
     @Before
     public void setUp() throws Exception {
-        errorPageCache = new ErrorPageCacheImpl();
-
-        cache = new ConcurrentHashMap<String, CacheEntry>();
+        errorPageCache = new ErrorPageCacheImpl(5, false);
+        PrivateAccessor.setField(errorPageCache, "cache", cache);
 
         // 1 Miss
         // 2 Hits

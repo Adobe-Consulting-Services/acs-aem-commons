@@ -24,19 +24,11 @@ import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -53,53 +45,31 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-@SuppressWarnings("UnusedDeclaration")
-@Component(
-        label = "ACS AEM Commons - Error Page Handler Cache",
-        description = "In-memory cache for pages. Details fo cache available via the JMX console.",
-        metatype = true
-)
-@Properties({
-        @Property(
-                label = "MBean Name",
-                name = "jmx.objectname",
-                value = "com.adobe.acs.commons:type=ErrorPageHandlerCache",
-                propertyPrivate = true
-        )
-})
-@Service(value = { DynamicMBean.class, ErrorPageCache.class })
-public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorPageCache, ErrorPageCacheMBean {
+public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorPageCache, ErrorPageCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(ErrorPageCacheImpl.class);
 
-    private static final int DEFAULT_TTL = 60 * 5; // 5 minutes
     private static final int KB_IN_BYTES = 1000;
 
-    private int ttl = DEFAULT_TTL;
+    private final ConcurrentMap<String, CacheEntry> cache = new ConcurrentHashMap<String, CacheEntry>();
 
-    @Property(label = "TTL (in seconds)",
-            description = "TTL for each cache entry in seconds. [ Default: 300 ]",
-            intValue = DEFAULT_TTL)
-    public static final String PROP_TTL = "ttl";
+    private final int ttl;
+
+    private final boolean serveAuthenticatedFromCache;
 
 
-    private static final boolean DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE = false;
-
-    private boolean serveAuthenticatedFromCache = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE;
-
-    @Property(label = "Serve authenticated from cache",
-            description = "Serve authenticated requests from the error page cache. [ Default: false ]",
-            boolValue = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
-    private static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
-
-    private ConcurrentMap<String, CacheEntry> cache = new ConcurrentHashMap<String, CacheEntry>();
-
-    public ErrorPageCacheImpl() throws NotCompliantMBeanException {
+    public ErrorPageCacheImpl(int ttl, boolean serveAuthenticatedFromCache) throws NotCompliantMBeanException {
         super(ErrorPageCacheMBean.class);
+        this.ttl = ttl;
+        this.serveAuthenticatedFromCache = serveAuthenticatedFromCache;
+
+        log.info("Starting ACS AEM Commons Error Page Handler Cache");
+        log.info(" > TTL (in seconds): {}", ttl);
+        log.info(" > Serve authenticated requests from cache: {}", serveAuthenticatedFromCache);
     }
 
 
     @Override
-    public final String get(final String path,
+    public String get(final String path,
                             final SlingHttpServletRequest request,
                             final SlingHttpServletResponse response) {
 
@@ -150,25 +120,6 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
 
     private boolean isAnonymousRequest(final SlingHttpServletRequest request) {
         return (request.getAuthType() == null || request.getRemoteUser() == null);
-    }
-
-    @Activate
-    protected final void activate(Map<String, String> config) {
-        cache = new ConcurrentHashMap<String, CacheEntry>();
-
-        ttl = PropertiesUtil.toInteger(config.get(PROP_TTL), DEFAULT_TTL);
-
-        serveAuthenticatedFromCache = PropertiesUtil.toBoolean(config.get(PROP_SERVE_AUTHENTICATED_FROM_CACHE),
-                DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE);
-
-        log.info("Starting ACS AEM Commons Error Page Handler Cache");
-        log.info(" > TTL (in seconds): {}", ttl);
-        log.info(" > Serve authenticated requests from cache: {}", serveAuthenticatedFromCache);
-    }
-
-    @Deactivate
-    protected final void deactivate(Map<String, String> config) {
-        cache = null;
     }
 
     /* MBean Attributes */
