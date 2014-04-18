@@ -1,4 +1,5 @@
 name: ACS AEM Commons
 pygments: true
 permalink:  none
+markdown: kramdown
 baseurl: /acs-aem-commons
