@@ -122,7 +122,8 @@ public class EmailServiceImplTest {
         List<HtmlEmail> actualAllHtmlEmailsSent = captor.getAllValues();
         assertEquals(actualAllHtmlEmailsSent.size(), recipients.length);
         
-        //TO-DO test email content and recipients
+        // Assert the last recipient address who received an email
+        assertEquals(recipients[2], captor.getValue().getToAddresses().get(0).toString());
         
         // Assert the result of the method call is true
         assertTrue(result);
@@ -130,7 +131,7 @@ public class EmailServiceImplTest {
 
     
     @Test
-    public void test_sendEmail_singleRecipients() throws Exception {
+    public void test_sendEmail_singleRecipient() throws Exception {
        
     	final String expectedMessage = "This is just a message";
         final String expectedSenderName = "John Smith";
