@@ -49,7 +49,7 @@ public final class TwitterFeedScheduler extends RunnableOnMaster {
     private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private TwitterFeedService twitterFeedService;
+    private TwitterFeedUpdater twitterFeedService;
 
     @Override
     public void runOnMaster() {
@@ -62,7 +62,7 @@ public final class TwitterFeedScheduler extends RunnableOnMaster {
             resourceResolver = resourceResolverFactory
                     .getAdministrativeResourceResolver(null);
 
-            twitterFeedService.refreshTwitterFeedComponents(resourceResolver);
+            twitterFeedService.updateTwitterFeedComponents(resourceResolver);
 
         } catch (Exception e) {
             log.error(

@@ -38,8 +38,6 @@ public interface NamedImageTransformer {
      * @param layer the image layer to transform
      * @return the transform image layer; or if no modifications are possible (invalid named transforms/named
      * transform parameters) the layer unmodified
-     * @throws IOException
-     * @throws RepositoryException
      */
-    Layer transform(Layer layer) throws IOException, RepositoryException;
+    Layer transform(Layer layer);
 }

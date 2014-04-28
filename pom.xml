@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -173,25 +173,21 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>1.5</version>
                 </plugin>
-                <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.4.2</version>
-                    <configuration>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                    </configuration>
-                    <dependencies>
-                      <dependency>
-                        <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-api</artifactId>
-                        <version>1.8.1</version>
-                      </dependency>
-                      <dependency>
-                        <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-provider-gitexe</artifactId>
-                        <version>1.8.1</version>
-                      </dependency>
-                    </dependencies>
-                </plugin>
+                 <plugin>
+                     <artifactId>maven-release-plugin</artifactId>
+                     <version>3.0-r1585899</version>
+                     <configuration>
+                         <autoVersionSubmodules>true</autoVersionSubmodules>
+                         <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
+                     </configuration>
+                     <dependencies>
+                         <dependency>
+                             <groupId>org.apache.maven.release</groupId>
+                             <artifactId>maven-release-oddeven-policy</artifactId>
+                             <version>3.0-r1585899</version>
+                         </dependency>
+                     </dependencies>
+                 </plugin>
             </plugins>
         </pluginManagement>
     </build>

@@ -41,14 +41,15 @@ ACS.CQ.form.DDPathField = CQ.Ext.extend(CQ.form.PathField, {
             "ddGroups" : [ CQ.wcm.EditBase.DD_GROUP_ASSET,
                           CQ.wcm.EditBase.DD_GROUP_PAGE ],
             "listeners" : {
-                "render" : this.initHrefDragAndDrop
+                "render" : this.registerDragAndDrop,
+                "destroy" : this.unregisterDragAndDrop
             }
             
         });
         ACS.CQ.form.DDPathField.superclass.constructor.call(this, config);
     },
 
-    initHrefDragAndDrop : function() {
+    registerDragAndDrop : function() {
         var field = this,
             dialog = this.findParentByType('dialog'),
             inMultiField = CQ.Ext.isDefined(this.findParentByType('multifield')),
@@ -109,7 +110,9 @@ ACS.CQ.form.DDPathField = CQ.Ext.extend(CQ.form.PathField, {
             }, target);
 
             dialog.on("hide", function() {
-                CQ.WCM.unregisterDropTargetComponent(field);
+                if (!inMultiField) {
+                    CQ.WCM.unregisterDropTargetComponent(field);
+                }
             }, target);
 
             for (i = 0; i < this.ddGroups.length; i++) {
@@ -117,6 +120,15 @@ ACS.CQ.form.DDPathField = CQ.Ext.extend(CQ.form.PathField, {
             }
             target.removeFromGroup(CQ.wcm.EditBase.DD_GROUP_DEFAULT);
             this.dropTargets = [ target ];
+        }
+    },
+
+    unregisterDragAndDrop : function() {
+        var field = this,
+            inMultiField = CQ.Ext.isDefined(this.findParentByType('multifield'));
+
+        if (inMultiField) {
+            CQ.WCM.unregisterDropTargetComponent(field);
         }
     }
 });

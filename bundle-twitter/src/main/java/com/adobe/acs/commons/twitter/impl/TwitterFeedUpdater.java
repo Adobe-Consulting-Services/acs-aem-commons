@@ -1,8 +1,8 @@
 /*
  * #%L
- * ACS AEM Commons Bundle
+ * ACS AEM Commons Twitter Support Bundle
  * %%
- * Copyright (C) 2014 Adobe
+ * Copyright (C) 2013 - 2014 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.images.impl;
+package com.adobe.acs.commons.twitter.impl;
 
-import com.adobe.acs.commons.images.NamedImageTransformer;
-import com.day.image.Layer;
+import javax.jcr.RepositoryException;
 
-public class StaticNamedImageTransformer implements NamedImageTransformer {
+import org.apache.sling.api.resource.ResourceResolver;
 
-    @Override
-    public Layer transform(final Layer layer) {
-        return layer;
-    }
+public interface TwitterFeedUpdater {
+
+    void updateTwitterFeedComponents(ResourceResolver resourceResolver) throws RepositoryException;
 
 }
