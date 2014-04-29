@@ -280,6 +280,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         if (layer == null) {
             log.error("Could not create layer - layer is null;");
+        } else {
+            image.crop(layer);
+            image.rotate(layer);
         }
 
         return layer;
