@@ -4,4 +4,8 @@
     cq:dialogMode="floating"
     cq:disableTargeting="{Boolean}true"
     cq:layout="editbar"
-    jcr:primaryType="cq:EditConfig"/>
+    jcr:primaryType="cq:EditConfig">
+    <cq:listeners
+        jcr:primaryType="cq:EditListenersConfig"
+        afteredit="REFRESH_PAGE"/>
+</jcr:root>
