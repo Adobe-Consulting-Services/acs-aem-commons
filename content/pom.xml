@@ -129,5 +129,25 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>noTwitterBundle</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.day.jcr.vault</groupId>
+                        <artifactId>content-package-maven-plugin</artifactId>
+                        <configuration>
+                            <embeddeds>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-bundle</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                </embedded>
+                            </embeddeds>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>
