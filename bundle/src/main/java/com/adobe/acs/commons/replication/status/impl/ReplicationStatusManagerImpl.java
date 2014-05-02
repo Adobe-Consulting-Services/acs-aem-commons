@@ -136,7 +136,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                 JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, replicationStatus);
             }
 
-            log.info("Updated replication status for resource [ {} ].", resource.getPath());
+            log.info("Updated replication status for resource [ {} ] to [ {} ].", resource.getPath(), status.name());
 
             if(count++ > saveThreshold) {
                 session.save();
