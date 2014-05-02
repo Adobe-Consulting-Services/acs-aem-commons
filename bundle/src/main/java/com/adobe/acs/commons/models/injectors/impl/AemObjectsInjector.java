@@ -95,6 +95,9 @@ public final class AemObjectsInjector implements Injector {
         }
 
         ObjectType nameEnum = ObjectType.fromString(name);
+        if (nameEnum == null) {
+            return null;
+        }
 
         switch (nameEnum) {
         case RESOURCE:
