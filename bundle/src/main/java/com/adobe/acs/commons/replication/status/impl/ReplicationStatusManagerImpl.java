@@ -23,11 +23,7 @@ package com.adobe.acs.commons.replication.status.impl;
 import com.adobe.acs.commons.packaging.JcrPackageCoverageProgressListener;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.day.cq.commons.jcr.JcrUtil;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationStatus;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
 import com.day.jcr.vault.packaging.JcrPackage;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -35,6 +31,7 @@ import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +62,6 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
 
             jcrPackage.getDefinition().dumpCoverage(jcrPackageCoverageProgressListener);
 
-            final Calendar now = Calendar.getInstance();
             final List<String> paths = jcrPackageCoverageProgressListener.getCoverage();
 
             this.updateReplicationStatus(
@@ -84,6 +80,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                                         final Calendar replicatedAt,
                                         final Status status,
                                         final String... paths) throws RepositoryException, PersistenceException {
+
         for (final String path : paths) {
             final Resource resource = resourceResolver.getResource(path);
 
@@ -108,24 +105,20 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
 
         int count = 0;
         for (final Resource resource : resources) {
-            /* if (!resource.isResourceType(ReplicationStatus.NODE_TYPE)) {
-                log.debug("Invalid resource for updating replication status [ {} ]. "
-                        + "Resource is not of type [ {} ]",
-                        resource.getPath(),
-                        ReplicationStatus.NODE_TYPE);
+            if(resource == null || ResourceUtil.isNonExistingResource(resource)) {
                 return;
-            } */
+            }
 
-            final Resource contentResource = this.getReplicationStatusResource(resource);
+            final Node node = resource.adaptTo(Node.class);
 
-            if(contentResource == null) {
-                //log.debug("Invalid resource to update replication status: {}", resource.getPath());
+            if(!node.isNodeType(ReplicationStatus.NODE_TYPE)) {
+                // Must be a cq:ReplicationStatus node type
                 continue;
             }
 
-            final Node node = contentResource.adaptTo(Node.class);
-
             if (Status.CLEAR.equals(status)) {
+
+                /* Clear replication status; Set all to null to remove properties */
 
                 JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, null);
                 JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, null);
@@ -158,7 +151,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
 
     public void clearReplicationStatus(final ResourceResolver resourceResolver,
                                        final Resource... resources) throws RepositoryException, PersistenceException {
-        updateReplicationStatus(resourceResolver, null, null, Status.CLEAR, resources);
+        this.updateReplicationStatus(resourceResolver, null, null, Status.CLEAR, resources);
     }
 
     private Calendar getJcrPackageLastReplicatedAt(final JcrPackage jcrPackage) throws RepositoryException {
@@ -166,31 +159,6 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
 
         if (node.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED)) {
             return node.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate();
-        }
-
-        return null;
-    }
-
-
-    private Resource getReplicationStatusResource(final Resource resource) {
-        if(resource == null) {
-            return null;
-        }
-
-        if(resource.isResourceType("rep:User")) {
-            return resource;
-        } else if(resource.isResourceType("rep:Group")) {
-            return resource;
-        } else if(DamUtil.isAsset(resource)) {
-            final Asset asset = DamUtil.resolveToAsset(resource);
-            final Resource assetResource = asset.adaptTo(Resource.class);
-            return assetResource.getChild(JcrConstants.JCR_CONTENT);
-        } else {
-            final PageManager pageManager = resource.getResourceResolver().adaptTo(PageManager.class);
-            final Page page = pageManager.getPage(resource.getPath());
-            if(page != null) {
-                return page.getContentResource();
-            }
         }
 
         return null;

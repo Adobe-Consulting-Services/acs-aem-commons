@@ -26,6 +26,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import javax.jcr.RepositoryException;
 import java.io.IOException;
 
+
 public interface ReplicationStatusManager {
     String REP_STATUS_ACTIVATE = "Activate";
     String REP_STATUS_DEACTIVATE = "Deactivate";
@@ -38,5 +39,4 @@ public interface ReplicationStatusManager {
 
     public boolean updateReplicationStatus(ResourceResolver resourceResolver, Status status,
                                            JcrPackage... jcrPackages) throws RepositoryException, IOException;
-
 }
