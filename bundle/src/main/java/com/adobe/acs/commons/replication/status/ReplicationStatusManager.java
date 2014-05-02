@@ -21,11 +21,10 @@
 package com.adobe.acs.commons.replication.status;
 
 import com.day.jcr.vault.packaging.JcrPackage;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.RepositoryException;
-import java.util.Calendar;
+import java.io.IOException;
 
 public interface ReplicationStatusManager {
     String REP_STATUS_ACTIVATE = "Activate";
@@ -37,5 +36,7 @@ public interface ReplicationStatusManager {
         CLEAR
     }
 
+    public boolean updateReplicationStatus(ResourceResolver resourceResolver, Status status,
+                                           JcrPackage... jcrPackages) throws RepositoryException, IOException;
 
-    }
+}
