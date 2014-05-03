@@ -36,7 +36,11 @@ import java.util.List;
 import java.util.Map;
 
 @Component(
-        label = "ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)",
+        label = "ACS AEM Commons - Package Replication Status Updater",
+        description = "Event handler that listens for Jcr Package replications and updates the Replication Status of "
+                 + "its content accordingly.",
+        metatype = true,
+        immediate =  true,
         policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
@@ -82,15 +86,14 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
 
     @Override
     public final void handleEvent(final Event event) {
-        if (!this.isMaster) {
+        if (this.isMaster) {
             // Only run on master
-            return;
-        }
 
-        final String[] paths = (String[]) event.getProperty("paths");
+            final String[] paths = (String[]) event.getProperty("paths");
 
-        if (this.containsJcrPackagePath(paths) && !CollectionUtils.isEmpty(this.getJcrPackages(paths))) {
-            JobUtil.processJob(event, this);
+            if (this.containsJcrPackagePath(paths) && !CollectionUtils.isEmpty(this.getJcrPackages(paths))) {
+                JobUtil.processJob(event, this);
+            }
         }
     }
 
