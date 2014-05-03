@@ -30,7 +30,6 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -57,6 +56,10 @@ import java.util.Map;
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 
+    private static final String REP_STATUS_ACTIVATE = "Activate";
+    private static final String REP_STATUS_DEACTIVATE = "Deactivate";
+    private static final int SAVE_THRESHOLD = 1024;
+
     private static final String[] DEFAULT_REPLICATION_STATUS_NODE_TYPES = {
             ReplicationStatus.NODE_TYPE,
             "rep:User",
@@ -71,10 +74,13 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
             value = { })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
 
-    public boolean updateReplicationStatus(final ResourceResolver resourceResolver,
-                                           final Status status,
-                                           final JcrPackage... jcrPackages) throws RepositoryException, IOException {
-
+    /**
+     * {@inheritDoc}
+     */
+    public final void updateReplicationStatus(final ResourceResolver resourceResolver,
+                                        final String replicatedBy,
+                                        final Status status,
+                                        final JcrPackage... jcrPackages) throws RepositoryException, IOException {
 
         for (final JcrPackage jcrPackage : jcrPackages) {
 
@@ -87,16 +93,17 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
 
             this.updateReplicationStatus(
                     resourceResolver,
-                    resourceResolver.getUserID(),
+                    replicatedBy,
                     jcrPackage.getPackage().getLastWrapped(),
                     status,
                     paths.toArray(new String[paths.size()]));
         }
-
-        return true;
     }
 
-    public void updateReplicationStatus(final ResourceResolver resourceResolver,
+    /**
+     * {@inheritDoc}
+     */
+    public final void updateReplicationStatus(final ResourceResolver resourceResolver,
                                         final String replicatedBy,
                                         final Calendar replicatedAt,
                                         final Status status,
@@ -114,7 +121,10 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
         }
     }
 
-    public void updateReplicationStatus(final ResourceResolver resourceResolver,
+    /**
+     * {@inheritDoc}
+     */
+    public final void updateReplicationStatus(final ResourceResolver resourceResolver,
                                         final String replicatedBy,
                                         final Calendar replicatedAt,
                                         final Status status,
@@ -122,19 +132,15 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
 
         final Session session = resourceResolver.adaptTo(Session.class);
 
-        int saveThreshold = 1024;
-
         int count = 0;
         for (final Resource resource : resources) {
-            if (resource == null || ResourceUtil.isNonExistingResource(resource)) {
-                return;
+
+            if (!this.accept(resource)) {
+                continue;
             }
 
             final Node node = resource.adaptTo(Node.class);
 
-            if (!this.accept(node)) {
-                continue;
-            }
 
             if (Status.CLEAR.equals(status)) {
 
@@ -167,7 +173,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
 
             log.info("Updated replication status for resource [ {} ] to [ {} ].", resource.getPath(), status.name());
 
-            if (count++ > saveThreshold) {
+            if (count++ > SAVE_THRESHOLD) {
                 session.save();
                 count = 0;
             }
@@ -178,31 +184,42 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
         }
     }
 
-    public void clearReplicationStatus(final ResourceResolver resourceResolver,
+    /**
+     * {@inheritDoc}
+     */
+    public final void clearReplicationStatus(final ResourceResolver resourceResolver,
                                        final Resource... resources) throws RepositoryException, PersistenceException {
         this.updateReplicationStatus(resourceResolver, null, null, Status.CLEAR, resources);
     }
 
-    private Calendar getJcrPackageLastReplicatedAt(final JcrPackage jcrPackage) throws RepositoryException {
-        final Node node = jcrPackage.getNode().getNode(JcrConstants.JCR_CONTENT);
+    /**
+     * Checks if the ReplicationStatusManager should make the provides resource w replication status
+     *
+     * @param resource the return
+     * @return true is the resource is markable resource
+     * @throws RepositoryException
+     */
+    private boolean accept(final Resource resource) throws RepositoryException {
+        if (resource != null && ResourceUtil.isNonExistingResource(resource)) {
+            final Node node = resource.adaptTo(Node.class);
 
-        if (node.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED)) {
-            return node.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate();
-        }
-
-        return null;
-    }
-
-    private boolean accept(final Node node) throws RepositoryException {
-        for (final String nodeType : this.replicationStatusNodeTypes) {
-            if (node.isNodeType(nodeType)) {
-                return true;
+            for (final String nodeType : this.replicationStatusNodeTypes) {
+                if (node.isNodeType(nodeType)) {
+                    return true;
+                }
             }
         }
 
         return false;
     }
 
+    /**
+     * Adds the cq:ReplicationStatus mixin if the node doesnt already have it or does have it as its jcr:supertype
+     * already
+     *
+     * @param node the node obj
+     * @throws RepositoryException
+     */
     private void addReplicationStatusMixin(final Node node) throws RepositoryException {
         if (!this.hasMixin(node, ReplicationStatus.NODE_TYPE)) {
             if (node.canAddMixin(ReplicationStatus.NODE_TYPE)) {
@@ -211,12 +228,26 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
         }
     }
 
+    /**
+     * Removes the cq:ReplicationStatus mixin from the node if it has it
+     *
+     * @param node the node
+     * @throws RepositoryException
+     */
     private void removeReplicationStatusMixin(final Node node) throws RepositoryException {
         if (this.hasMixin(node, ReplicationStatus.NODE_TYPE)) {
             node.removeMixin(ReplicationStatus.NODE_TYPE);
         }
     }
 
+    /**
+     * Checks if the node has the mixin
+     *
+     * @param node the node obj
+     * @param mixin the mixin name
+     * @return trye if the node has the mixin
+     * @throws RepositoryException
+     */
     private boolean hasMixin(final Node node, String mixin) throws RepositoryException {
         if (StringUtils.isBlank(mixin)) {
             return false;

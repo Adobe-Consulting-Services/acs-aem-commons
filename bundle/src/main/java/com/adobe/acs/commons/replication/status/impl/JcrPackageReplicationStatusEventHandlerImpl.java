@@ -9,6 +9,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -18,6 +19,7 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.event.jobs.JobProcessor;
 import org.apache.sling.event.jobs.JobUtil;
 import org.osgi.service.event.Event;
@@ -34,7 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 @Component(
-        label = "ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)"
+        label = "ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)",
+        policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
         @Property(
@@ -68,11 +71,25 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
 
     private boolean isMaster = false;
 
+    private static final String DEFAULT_REPLICATED_BY = "Package Replication";
+
+    private String replicatedBy = DEFAULT_REPLICATED_BY;
+
+    @Property(label = "Replicated By",
+            description = "The 'name' to set the 'replicated by' property to. Defaults to: " + DEFAULT_REPLICATED_BY,
+            value = DEFAULT_REPLICATED_BY)
+    public static final String PROP_REPLICATED_BY = "replicated-by";
+
     @Override
     public final void handleEvent(final Event event) {
+        if (!this.isMaster) {
+            // Only run on master
+            return;
+        }
+
         final String[] paths = (String[]) event.getProperty("paths");
 
-        if(this.containsJcrPackagePath(paths) && !CollectionUtils.isEmpty(this.getJcrPackages(paths))) {
+        if (this.containsJcrPackagePath(paths) && !CollectionUtils.isEmpty(this.getJcrPackages(paths))) {
             JobUtil.processJob(event, this);
         }
     }
@@ -85,15 +102,15 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
 
         final List<JcrPackage> jcrPackages = this.getJcrPackages(paths);
 
-        if(CollectionUtils.isEmpty(jcrPackages)) {
+        if (CollectionUtils.isEmpty(jcrPackages)) {
             log.warn("JCR Package is unavailable for Replication Status Update at: {}", paths);
             return true;
         }
 
-        for(final JcrPackage jcrPackage : jcrPackages) {
+        for (final JcrPackage jcrPackage : jcrPackages) {
             try {
                 replicationStatusManager.updateReplicationStatus(this.adminResourceResolver,
-                        ReplicationStatusManager.Status.ACTIVATED, jcrPackage);
+                        this.replicatedBy, ReplicationStatusManager.Status.ACTIVATED, jcrPackage);
                 log.info("Updated Replication Status for JCR Package: {}", jcrPackage.getDefinition().getId());
 
             } catch (RepositoryException e) {
@@ -110,8 +127,17 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
         return true;
     }
 
+    /**
+     * Checks if any path in the array of paths looks like a Jcr Package path.
+     *
+     * Provides a very fast, String-based, in-memory check to weed out most false positives and avoid
+     * resolving the path to a Jcr Package and ensure it is valid.
+     *
+     * @param paths the array of paths
+     * @return true if at least one path looks like a Jcr Package path
+     */
     private boolean containsJcrPackagePath(final String[] paths) {
-        for(final String path : paths) {
+        for (final String path : paths) {
             if (StringUtils.startsWith(path, "/etc/packages/")
                     && StringUtils.endsWith(path, ".zip")) {
                 // At least 1 entry looks like a package
@@ -123,17 +149,23 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
         return false;
     }
 
-    private List<JcrPackage> getJcrPackages(final String[] paths)  {
+    /**
+     * Resolves paths to Jcr Packages. If any path does not resolve to a valid Jcr Package, it is discarded.
+     *
+     * @param paths the list of paths to resolve to Jcr Packages
+     * @return a list of Jcr Packages that correspond to the provided paths
+     */
+    private List<JcrPackage> getJcrPackages(final String[] paths) {
         final List<JcrPackage> packages = new ArrayList<JcrPackage>();
 
-        for(final String path : paths) {
+        for (final String path : paths) {
             final Resource eventResource = this.adminResourceResolver.getResource(path);
 
             JcrPackage jcrPackage;
 
             try {
                 jcrPackage = packaging.open(eventResource.adaptTo(Node.class), false);
-                if(jcrPackage != null) {
+                if (jcrPackage != null) {
                     packages.add(jcrPackage);
                 }
             } catch (RepositoryException e) {
@@ -149,22 +181,24 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
         log.info("Activating the ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)");
 
         this.adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+
+        this.replicatedBy = PropertiesUtil.toString(config.get(PROP_REPLICATED_BY), DEFAULT_REPLICATED_BY);
     }
 
     @Deactivate
     private void deactivate(final Map<String, String> properties) {
-        if(this.adminResourceResolver != null) {
+        if (this.adminResourceResolver != null) {
             this.adminResourceResolver.close();
         }
     }
 
     @Override
-    public void bindRepository(String repositoryId, String clusterId, boolean isMaster) {
-        this.isMaster = isMaster;
+    public final void bindRepository(String repositoryId, String clusterId, boolean newIsMaster) {
+        this.isMaster = newIsMaster;
     }
 
     @Override
-    public void unbindRepository() {
+    public final void unbindRepository() {
         this.isMaster = false;
     }
 }

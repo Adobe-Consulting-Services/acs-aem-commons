@@ -21,22 +21,99 @@
 package com.adobe.acs.commons.replication.status;
 
 import com.day.jcr.vault.packaging.JcrPackage;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.RepositoryException;
 import java.io.IOException;
+import java.util.Calendar;
 
 
 public interface ReplicationStatusManager {
-    String REP_STATUS_ACTIVATE = "Activate";
-    String REP_STATUS_DEACTIVATE = "Deactivate";
 
+    /**
+     * Replication Status Enum
+     *
+     *  ACTIVATED: Marks resource as "Activated"
+     *  DEACTIVATED: Marks resource as "Deactivated"
+     *  CLEAR: Removes Replication status properties from Resource along with cq:ReplicationStatus mixin when
+     *  applicable.
+     */
     enum Status {
         ACTIVATED,
         DEACTIVATED,
         CLEAR
     }
 
-    public boolean updateReplicationStatus(ResourceResolver resourceResolver, Status status,
-                                           JcrPackage... jcrPackages) throws RepositoryException, IOException;
+    /**
+     * Marks the resources at the provides paths with the parameterized replication status.
+     * <p/>
+     * Only resources that are of the OSGi Property parameterized "node-types" are candidates for Replication Status
+     * updates. All other resources will be quietly skipped.
+     *
+     * @param resourceResolver The resource resolver must have access to modify all of target resources.
+     * @param replicatedBy     name to set the last replicated property to.
+     * @param replicatedAt     date to set the last replicated date to.
+     * @param status           ACTIVATE | DEACTIVATE | CLEAR (Clear removes all replication properties and the
+     *                         cq:ReplicationStatus mixin when possible)
+     * @param paths            The paths to update.
+     * @throws RepositoryException
+     * @throws PersistenceException
+     */
+    void updateReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Calendar replicatedAt,
+                                 Status status, String... paths) throws RepositoryException, PersistenceException;
+
+    /**
+     * Marks the resources at the provides paths with the parameterized replication status.
+     * <p/>
+     * Only resources that are of the OSGi Property parameterized "node-types" are candidates for Replication Status
+     * updates. All other resources will be quietly skipped.
+     *
+     * @param resourceResolver The resource resolver must have access to modify all of target resources.
+     * @param replicatedBy     name to set the last replicated property to.
+     * @param replicatedAt     date to set the last replicated date to.
+     * @param status           ACTIVATE | DEACTIVATE | CLEAR (Clear removes all replication properties and the
+     *                         cq:ReplicationStatus mixin when possible)
+     * @param resources        The resources to update.
+     * @throws RepositoryException
+     * @throws PersistenceException
+     */
+    void updateReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Calendar replicatedAt,
+                                 Status status, Resource... resources) throws RepositoryException, PersistenceException;
+
+
+    /**
+     * Marks the resources covered in the JcrPackages with the parameterized replication status.
+     * <p/>
+     * The replicatedAt date will be derived from the JcrPackages lastWrapped date.
+     * <p/>
+     * Only resources that are of the OSGi Property parameterized "node-types" are candidates for Replication Status
+     * updates. All other resources will be quietly skipped.
+     *
+     * @param resourceResolver The resource resolver must have access to modify all of target resources.
+     * @param replicatedBy     name to set the last replicated property to.
+     * @param status           ACTIVATE | DEACTIVATE | CLEAR (Clear removes all replication properties and the
+     *                         cq:ReplicationStatus mixin when possible)
+     * @param jcrPackages      the JcrPackages to update
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    void updateReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Status status,
+                                 JcrPackage... jcrPackages) throws RepositoryException, IOException;
+
+
+    /**
+     * Clear the replication status from the provides resources
+     *
+     * Only resources that are of the OSGi Property parameterized "node-types" are candidates for Replication Status
+     * updates. All other resources will be quietly skipped.
+     *
+     * @param resourceResolver The resource resolver must have access to modify all of target resources.
+     * @param resources The resources to update.
+     * @throws RepositoryException
+     * @throws PersistenceException
+     */
+    void clearReplicationStatus(ResourceResolver resourceResolver, final Resource... resources) throws
+            RepositoryException, PersistenceException;
 }
