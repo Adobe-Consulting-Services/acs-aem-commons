@@ -30,11 +30,13 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,8 @@ import java.util.Map;
 
 @Component(
         label = "ACS AEM Commons - Replication Status Manager",
-        description = "Service for changing the replication status of resources."
+        description = "Service for changing the replication status of resources.",
+        metatype = true
 )
 @Service
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
@@ -94,7 +97,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
             this.updateReplicationStatus(
                     resourceResolver,
                     replicatedBy,
-                    jcrPackage.getPackage().getLastWrapped(),
+                    this.getJcrPackageLastModified(resourceResolver, jcrPackage),
                     status,
                     paths.toArray(new String[paths.size()]));
         }
@@ -200,7 +203,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
      * @throws RepositoryException
      */
     private boolean accept(final Resource resource) throws RepositoryException {
-        if (resource != null && ResourceUtil.isNonExistingResource(resource)) {
+        if (resource != null && !ResourceUtil.isNonExistingResource(resource)) {
             final Node node = resource.adaptTo(Node.class);
 
             for (final String nodeType : this.replicationStatusNodeTypes) {
@@ -260,6 +263,22 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
         }
 
         return false;
+    }
+
+    /**
+     * Gets the last build time of the package
+     *
+     * @param resourceResolver the resource resolver to access the package properties
+     * @param jcrPackage the package obj
+     * @return the package's last build time or null if none can be found
+     * @throws RepositoryException
+     */
+    private Calendar getJcrPackageLastModified(final ResourceResolver resourceResolver, final JcrPackage jcrPackage) throws RepositoryException {
+        final String path = jcrPackage.getNode().getPath();
+        final Resource resource = resourceResolver.getResource(path);
+        final ValueMap properties = resource.adaptTo(ValueMap.class);
+
+        return properties.get(JcrConstants.JCR_LASTMODIFIED, Calendar.class);
     }
 
     @Activate
