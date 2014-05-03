@@ -145,7 +145,7 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
     }
 
     @Activate
-    private void activate(final Map<String, String> properties) throws LoginException {
+    private void activate(final Map<String, String> config) throws LoginException {
         log.info("Activating the ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)");
 
         this.adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
