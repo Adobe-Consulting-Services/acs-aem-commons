@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.replication.status;
 
 import com.day.jcr.vault.packaging.JcrPackage;
+import com.day.jcr.vault.packaging.PackageException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -61,8 +62,8 @@ public interface ReplicationStatusManager {
      * @throws RepositoryException
      * @throws PersistenceException
      */
-    void updateReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Calendar replicatedAt,
-                                 Status status, String... paths) throws RepositoryException, PersistenceException;
+    void setReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Calendar replicatedAt,
+                              Status status, String... paths) throws RepositoryException, PersistenceException;
 
     /**
      * Marks the resources at the provides paths with the parameterized replication status.
@@ -79,8 +80,8 @@ public interface ReplicationStatusManager {
      * @throws RepositoryException
      * @throws PersistenceException
      */
-    void updateReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Calendar replicatedAt,
-                                 Status status, Resource... resources) throws RepositoryException, PersistenceException;
+    void setReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Calendar replicatedAt,
+                              Status status, Resource... resources) throws RepositoryException, PersistenceException;
 
 
     /**
@@ -99,8 +100,8 @@ public interface ReplicationStatusManager {
      * @throws RepositoryException
      * @throws IOException
      */
-    void updateReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Status status,
-                                 JcrPackage... jcrPackages) throws RepositoryException, IOException;
+    void setReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Status status,
+                              JcrPackage... jcrPackages) throws RepositoryException, IOException, PackageException;
 
 
     /**

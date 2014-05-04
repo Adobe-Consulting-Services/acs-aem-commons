@@ -4,6 +4,7 @@ import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.day.cq.jcrclustersupport.ClusterAware;
 import com.day.cq.replication.ReplicationAction;
 import com.day.jcr.vault.packaging.JcrPackage;
+import com.day.jcr.vault.packaging.PackageException;
 import com.day.jcr.vault.packaging.Packaging;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -112,7 +113,7 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
 
         for (final JcrPackage jcrPackage : jcrPackages) {
             try {
-                replicationStatusManager.updateReplicationStatus(this.adminResourceResolver,
+                replicationStatusManager.setReplicationStatus(this.adminResourceResolver,
                         this.replicatedBy, ReplicationStatusManager.Status.ACTIVATED, jcrPackage);
                 log.info("Updated Replication Status for JCR Package: {}", jcrPackage.getDefinition().getId());
 
@@ -124,6 +125,9 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
                 log.error("IOException occurred updating replication status for contents of package");
                 log.error(e.getMessage());
 
+            } catch (PackageException e) {
+                log.error("Could not retrieve the Packages contents.");
+                log.error(e.getMessage());
             }
         }
 
