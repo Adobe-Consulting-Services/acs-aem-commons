@@ -278,7 +278,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private Calendar getJcrPackageLastModified(final ResourceResolver resourceResolver,
                                                final JcrPackage jcrPackage) throws RepositoryException {
         final String path = jcrPackage.getNode().getPath();
-        final Resource resource = resourceResolver.getResource(path);
+        final Resource resource = resourceResolver.getResource(path).getChild(JcrConstants.JCR_CONTENT);
         final ValueMap properties = resource.adaptTo(ValueMap.class);
 
         return properties.get(JcrConstants.JCR_LASTMODIFIED, Calendar.class);
