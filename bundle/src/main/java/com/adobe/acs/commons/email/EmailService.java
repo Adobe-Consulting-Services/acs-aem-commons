@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.email;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.mail.internet.InternetAddress;
@@ -37,9 +38,10 @@ public interface EmailService {
      * @param emailParams Replacement variable map to be injected in the template
      * @param recipients recipient email addresses
      * 
-     * @return true if email is sent to at least one recipient, false otherwise (including if no addresses provided).
+     * @return failureList containing list recipient's InternetAddresses for which email sent failed
      */
-    boolean sendEmail(String templatePath, Map<String, String> emailParams, InternetAddress... recipients);
+    List<InternetAddress> sendEmail(String templatePath, Map<String, String> emailParams,
+        InternetAddress... recipients);
 
     /**
      * Construct an email based on a template and send it to one or more
@@ -49,7 +51,7 @@ public interface EmailService {
      * @param emailParams Replacement variable map to be injected in the template
      * @param recipients recipient email addresses. Invalid email addresses are skipped.
      * 
-     * @return true if email is sent to at least one recipient, false otherwise (including if no addresses provided).
+     * @return failureList containing list recipient's String addresses for which email sent failed
      */
-    boolean sendEmail(String templatePath, Map<String, String> emailParams, String... recipients);
+    List<String> sendEmail(String templatePath, Map<String, String> emailParams, String... recipients);
 }
