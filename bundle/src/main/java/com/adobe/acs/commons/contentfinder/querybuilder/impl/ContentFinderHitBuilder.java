@@ -64,24 +64,30 @@ public final class ContentFinderHitBuilder {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
 
         final Resource resource = hit.getResource();
-        final boolean isPage = getPage(resource) != null;
-        final boolean isAsset = DamUtil.isAsset(resource);
 
         /**
          * Common result properties
          */
-        map.put("name", resource.getName());
         map.put("path", hit.getPath());
 
-        if (isPage) {
-            map = addPageData(hit, map);
-        } else if (isAsset) {
-            map = addAssetData(hit, map);
-        } else {
-            map = addOtherData(hit, map);
+        /**
+         * Apply custom properties based on the "type"
+         */
+
+        // Assets
+        final Asset asset = DamUtil.resolveToAsset(resource);
+        if (asset != null) {
+            return addAssetData(asset, hit, map);
         }
 
-        return map;
+        // Pages
+        final Page page = getPage(resource);
+        if (page != null) {
+            return addPageData(page, hit, map);
+        }
+
+        // Other
+        return addOtherData(hit, map);
     }
 
     /**
@@ -92,14 +98,11 @@ public final class ContentFinderHitBuilder {
      * @return
      * @throws javax.jcr.RepositoryException
      */
-    private static Map<String, Object> addPageData(final Hit hit, Map<String, Object> map)
+    private static Map<String, Object> addPageData(final Page page, final Hit hit, Map<String, Object> map)
             throws RepositoryException {
-        final Resource resource = hit.getResource();
-
-        final Page page = getPage(resource);
 
         // Title
-        String title = resource.getName();
+        String title = page.getName();
 
         if (StringUtils.isNotBlank(page.getTitle())) {
             title = page.getTitle();
@@ -118,6 +121,7 @@ public final class ContentFinderHitBuilder {
             }
         }
 
+        map.put("name", page.getName());
         map.put("title", title);
         map.put("excerpt", excerpt);
         map.put("ddGroups", "page");
@@ -135,12 +139,10 @@ public final class ContentFinderHitBuilder {
      * @return
      * @throws javax.jcr.RepositoryException
      */
-    private static Map<String, Object> addAssetData(final Hit hit, Map<String, Object> map)
+    private static Map<String, Object> addAssetData(final Asset asset, final Hit hit, Map<String, Object> map)
             throws RepositoryException {
-        final Resource resource = hit.getResource();
-        final Asset asset = DamUtil.resolveToAsset(resource);
 
-        String title = resource.getName();
+        String title = asset.getName();
 
         if (StringUtils.isNotBlank(asset.getMetadataValue(DamConstants.DC_TITLE))) {
             title = asset.getMetadataValue(DamConstants.DC_TITLE);
@@ -155,6 +157,7 @@ public final class ContentFinderHitBuilder {
             }
         }
 
+        map.put("name", asset.getName());
         map.put("title", title);
         map.put("excerpt", excerpt);
         map.put("mimeType", asset.getMimeType());
@@ -178,6 +181,7 @@ public final class ContentFinderHitBuilder {
             throws RepositoryException {
         final Resource resource = hit.getResource();
 
+        map.put("name", resource.getName());
         map.put("title", resource.getName());
         map.put("excerpt", hit.getExcerpt());
         map.put("lastModified", getLastModified(resource));
@@ -280,6 +284,13 @@ public final class ContentFinderHitBuilder {
         }
     }
 
+    /**
+     * Gets the Page object corresponding the with the resource.
+     * Will resolve to a Page if the reuslt is a cq:Page or a cq:Page's jcr:content node.
+     *
+     * @param resource The resource to covert to a Page
+     * @return a Page if  the resource is Page like (cq:Page or a cq:Page's jcr:content node), else null
+     */
     private static Page getPage(final Resource resource) {
         if (resource == null) {
             return null;
