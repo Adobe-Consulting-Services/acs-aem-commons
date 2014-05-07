@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class ContentFinderHitBuilder {
+    private static final Long ONE_MILLION = 1000000L;
 
     private ContentFinderHitBuilder() {
     }
@@ -49,7 +50,7 @@ public final class ContentFinderHitBuilder {
 
     /**
      * Builds the result object that will representing a CF view record for the provided hit.
-     *
+     * <p/>
      * This method will generate the result object data points based on if the hit is:
      * 1) a Page
      * 2) an Asset
@@ -273,27 +274,27 @@ public final class ContentFinderHitBuilder {
             Resource contentResource = resource.getChild(JcrConstants.JCR_CONTENT);
             ValueMap properties = contentResource.adaptTo(ValueMap.class);
 
-            return properties.get(JcrConstants.JCR_LASTMODIFIED, 0L) / 1000 * 1000;
+            return properties.get(JcrConstants.JCR_LASTMODIFIED, 0L) / ONE_MILLION;
         } catch (Exception ex) {
             return 0L;
         }
     }
 
     private static Page getPage(final Resource resource) {
-        if(resource == null) {
+        if (resource == null) {
             return null;
         }
 
         // If resource is a cq:Page node; then return the Page
-        if(resource.adaptTo(Page.class) != null) {
+        if (resource.adaptTo(Page.class) != null) {
             return resource.adaptTo(Page.class);
         }
 
         // If the resource is a cq:Page/jcr:content node, then return the cq:Page page
-        if(StringUtils.equals(resource.getName(), JcrConstants.JCR_CONTENT)) {
+        if (StringUtils.equals(resource.getName(), JcrConstants.JCR_CONTENT)) {
             final Resource parent = resource.getParent();
-            if(parent != null) {
-                if(parent.adaptTo(Page.class) != null) {
+            if (parent != null) {
+                if (parent.adaptTo(Page.class) != null) {
                     return parent.adaptTo(Page.class);
                 }
             }
