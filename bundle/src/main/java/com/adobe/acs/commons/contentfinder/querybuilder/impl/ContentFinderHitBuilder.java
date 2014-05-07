@@ -63,7 +63,7 @@ public final class ContentFinderHitBuilder {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
 
         final Resource resource = hit.getResource();
-        final boolean isPage = resource.adaptTo(Page.class) != null;
+        final boolean isPage = getPage(resource) != null;
         final boolean isAsset = DamUtil.isAsset(resource);
 
         /**
@@ -95,7 +95,7 @@ public final class ContentFinderHitBuilder {
             throws RepositoryException {
         final Resource resource = hit.getResource();
 
-        final Page page = resource.adaptTo(Page.class);
+        final Page page = getPage(resource);
 
         // Title
         String title = resource.getName();
@@ -277,5 +277,28 @@ public final class ContentFinderHitBuilder {
         } catch (Exception ex) {
             return 0L;
         }
+    }
+
+    private static Page getPage(final Resource resource) {
+        if(resource == null) {
+            return null;
+        }
+
+        // If resource is a cq:Page node; then return the Page
+        if(resource.adaptTo(Page.class) != null) {
+            return resource.adaptTo(Page.class);
+        }
+
+        // If the resource is a cq:Page/jcr:content node, then return the cq:Page page
+        if(StringUtils.equals(resource.getName(), JcrConstants.JCR_CONTENT)) {
+            final Resource parent = resource.getParent();
+            if(parent != null) {
+                if(parent.adaptTo(Page.class) != null) {
+                    return parent.adaptTo(Page.class);
+                }
+            }
+        }
+
+        return null;
     }
 }
