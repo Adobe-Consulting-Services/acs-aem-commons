@@ -20,6 +20,6 @@
 /**
  * Client Library Designer API.
  */
-@aQute.bnd.annotation.Version("1.2.0")
+@aQute.bnd.annotation.Version("1.1.0")
 @tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/dhlm", descriptorFile = "dhlm.tld")
 package com.adobe.acs.commons.designer;

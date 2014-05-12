@@ -65,9 +65,6 @@
                             META-INF/widgets.tld=target/classes/META-INF/widgets.tld,
                             META-INF/wcm.tld=target/classes/META-INF/wcm.tld
                         </Include-Resource>
-                        <Sling-Model-Packages>
-                            com.adobe.acs.commons.designer
-                        </Sling-Model-Packages>
                     </instructions>
                 </configuration>
             </plugin>
