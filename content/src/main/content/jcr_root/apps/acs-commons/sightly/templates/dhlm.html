@@ -23,9 +23,9 @@
 */-->
 <template data-sly-template.head="${@ mode = 'optional: JS, CSS, or ALL, case-insensitve. default is ALL'}">
     <section data-sly-test="${request.getResourceResolver}"
-             data-sly-use.clientlib="${'com.adobe.acs.commons.designer.DesignHtmlLibraryManagerUseObject' @ region='head', mode=mode}"
+             data-sly-use.dhlm="${'/apps/acs-commons/sightly/templates/dhlm.js' @ region='head', mode=mode}"
              data-sly-unwrap>
-${clientlib.include @ context='unsafe'}
+${dhlm.include @ context='unsafe'}
     </section>
 </template>
 
@@ -34,8 +34,8 @@ ${clientlib.include @ context='unsafe'}
 */-->
 <template data-sly-template.body>
     <section data-sly-test="${request.getResourceResolver}"
-             data-sly-use.clientlib="${'com.adobe.acs.commons.designer.DesignHtmlLibraryManagerUseObject' @ region='body', mode=mode}"
+             data-sly-use.dhlm="${'/apps/acs-commons/sightly/templates/dhlm.js' @ region='body'}"
              data-sly-unwrap>
-${clientlib.include @ context='unsafe'}
+${dhlm.include @ context='unsafe'}
     </section>
 </template>
