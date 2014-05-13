@@ -142,7 +142,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
             // Add the ACL Packager Configuration page
             if (properties.get(INCLUDE_CONFIGURATION, DEFAULT_INCLUDE_CONFIGURATION)) {
                 final Resource tmp = this.getACLPackagerPageResource(request);
-                if(tmp != null) {
+                if (tmp != null) {
                     packageResources.add(tmp);
                 }
             }
@@ -255,7 +255,8 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
     /**
      * Gets the resources for the param principals.
      *
-     * @param resourceResolver the resourceresolver to get the principal resources; Must have read access to these resources.
+     * @param resourceResolver the ResourceResolver obj to get the principal resources;
+     *                         Must have read access to the principal resources.
      * @param principalNames   the principals to get
      * @return a list of resources that represent the principals that match to the principalNames
      * @throws RepositoryException
@@ -279,10 +280,10 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
     }
 
     /**
-     * Gets the ACL Packager page resource.
+     * Gets the ACL Packager Page resource.
      *
      * @param request the Sling HTTP Servlet Request object
-     * @return a List of 1 resource representing the cq:Page; or if cannot be found an empty list
+     * @return a the resource representing the cq:Page or null
      */
     private Resource getACLPackagerPageResource(final SlingHttpServletRequest request) {
         final ResourceResolver resourceResolver = request.getResourceResolver();
