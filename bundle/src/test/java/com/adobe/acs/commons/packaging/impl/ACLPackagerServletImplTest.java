@@ -24,14 +24,9 @@ import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.Version;
-import org.apache.commons.lang.StringUtils;
-import org.apache.jackrabbit.api.security.user.Authorizable;
-import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.testing.sling.MockResource;
 import org.apache.sling.commons.testing.sling.MockResourceResolver;
@@ -47,12 +42,18 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.Session;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ACLPackagerServletImplTest {
@@ -60,10 +61,7 @@ public class ACLPackagerServletImplTest {
     static final String CONTENT_RESOURCE_PATH = "/etc/acs-commons/packages/acl-packager-test/jcr:content";
     static final String CONTENT_RESOURCE_TYPE = "acs-commons/components/utilities/packager/acl-packager";
 
-    @Spy
     SuccessMockResourceResolver resourceResolver = new SuccessMockResourceResolver();
-
-    @Spy
     ErrorMockResourceResolver errorResourceResolver = new ErrorMockResourceResolver();
 
     @Spy
@@ -76,13 +74,9 @@ public class ACLPackagerServletImplTest {
     @Mock
     PackageHelper packageHelper;
 
-    @Mock
-    JcrPackage jcrPackage;
+    @Mock JcrPackage jcrPackage;
 
     @Mock Session session;
-
-    @Mock
-    UserManager userManager;
 
     @InjectMocks
     ACLPackagerServletImpl aclPackagerServlet;
@@ -118,7 +112,7 @@ public class ACLPackagerServletImplTest {
 
     @After
     public void tearDown() throws Exception {
-
+        reset(packageHelper, session, jcrPackage);
     }
 
     @Test
@@ -144,49 +138,6 @@ public class ACLPackagerServletImplTest {
         final JSONObject actual = new JSONObject(response.getOutput().toString());
         assertEquals("success", actual.optString("status", "error"));
     }
-
-    @Test
-    public void testDoPost_includePrincipals() throws Exception {
-        when(resourceResolver.adaptTo(UserManager.class)).thenReturn(userManager);
-
-        Authorizable justin = mock(Authorizable.class);
-        when(justin.getPath()).thenReturn("/home/users/justin");
-        when(userManager.getAuthorizable("justin")).thenReturn(justin);
-        when(resourceResolver.getResource("/home/users/justin")).thenReturn(new MockResource(resourceResolver, "/home/users/justin", "rep:User"));
-
-        final String resourcePath = "/etc/acs-commons/packages/acl-packager-test/jcr:content";
-        final String selectors = "package";
-        final String extension = "json";
-        final String suffix = "";
-        final String queryString = "";
-
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourcePath, selectors,
-                extension, suffix, queryString);
-        request.setResourceResolver(resourceResolver);
-        request.setMethod("POST");
-
-        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
-
-        request.setResourceResolver(resourceResolver);
-        request.setResource(contentResource);
-
-        Map<String, Object> map = new HashMap<String, Object>();
-
-        map.put("includePatterns", new String[]{});
-        map.put("principalNames", new String[]{ "justin" });
-        map.put("includePrincipals", true);
-        map.put("conflictResolution", "IncrementVersion");
-
-        ValueMap properties = new ValueMapDecorator(map);
-
-        doReturn(properties).when(configurationResource).adaptTo(ValueMap.class);
-
-        aclPackagerServlet.doPost(request, response);
-
-        final JSONObject actual = new JSONObject(response.getOutput().toString());
-        assertEquals("success", actual.optString("status", "error"));
-    }
-
 
 
     @Test
@@ -310,27 +261,6 @@ public class ACLPackagerServletImplTest {
                 return null;
             }
         }
-    }
-
-    private List<String> getRootPathsFromResponse(final MockSlingHttpServletResponse response) throws JSONException {
-        final List<String> rootPaths = new ArrayList<String>();
-        final JSONObject actual = new JSONObject(response.getOutput().toString());
-
-        JSONArray filterSets = actual.optJSONArray("filterSets");
-        if(filterSets != null) {
-
-            for (int i = 0; i < filterSets.length(); i++) {
-                final JSONObject jsonObject = filterSets.optJSONObject(i);
-                if (jsonObject != null) {
-                    final String rootPath = jsonObject.optString("rootPath");
-                    if (StringUtils.isNotBlank(rootPath)) {
-                        rootPaths.add(rootPath);
-                    }
-                }
-            }
-        }
-
-        return rootPaths;
     }
 
 }
