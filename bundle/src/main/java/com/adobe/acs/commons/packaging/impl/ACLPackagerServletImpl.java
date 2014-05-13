@@ -21,12 +21,16 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import com.day.jcr.vault.fs.io.AccessControlHandling;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
 import com.day.jcr.vault.packaging.Packaging;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.jackrabbit.api.security.user.Authorizable;
+import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -60,7 +64,7 @@ import java.util.regex.Pattern;
                 + "configuration.",
         methods = { "POST" },
         resourceTypes = { "acs-commons/components/utilities/packager/acl-packager" },
-        selectors = { "package" },
+        selectors =  {"package" },
         extensions = { "json" }
 )
 public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
@@ -82,6 +86,10 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
     private static final String CONFLICT_RESOLUTION = "conflictResolution";
 
+    private static final String INCLUDE_PRINCIPALS = "includePrincipals";
+
+    private static final String INCLUDE_CONFIGURATION = "includeConfiguration";
+
     private static final String DEFAULT_PACKAGE_NAME = "acls";
 
     private static final String DEFAULT_PACKAGE_GROUP_NAME = "ACLs";
@@ -90,6 +98,10 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
     private static final String DEFAULT_PACKAGE_DESCRIPTION = "ACL Package initially defined by a ACS AEM Commons - "
             + "ACL Packager configuration.";
+
+    private static final boolean DEFAULT_INCLUDE_PRINCIPALS = false;
+
+    private static final boolean DEFAULT_INCLUDE_CONFIGURATION = false;
 
     private static final String QUERY = "SELECT * FROM [rep:ACL]";
 
@@ -108,17 +120,33 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
     public final void doPost(final SlingHttpServletRequest request,
                              final SlingHttpServletResponse response) throws IOException {
 
+        final ResourceResolver resourceResolver = request.getResourceResolver();
         final boolean preview = Boolean.parseBoolean(request.getParameter("preview"));
 
         log.debug("Preview mode: {}", preview);
 
         final ValueMap properties = this.getProperties(request);
 
-        final Set<Resource> repPolicyResources = this.findResources(request.getResourceResolver(),
-                Arrays.asList(properties.get(PRINCIPAL_NAMES, new String[]{})),
+        final String[] principalNames = properties.get(PRINCIPAL_NAMES, new String[]{});
+
+        final Set<Resource> packageResources = this.findResources(resourceResolver,
+                Arrays.asList(principalNames),
                 this.toPatterns(Arrays.asList(properties.get(INCLUDE_PATTERNS, new String[]{}))));
 
         try {
+            // Add Principals
+            if (properties.get(INCLUDE_PRINCIPALS, DEFAULT_INCLUDE_PRINCIPALS)) {
+                packageResources.addAll(this.getPrincipalResources(resourceResolver, principalNames));
+            }
+
+            // Add the ACL Packager Configuration page
+            if (properties.get(INCLUDE_CONFIGURATION, DEFAULT_INCLUDE_CONFIGURATION)) {
+                final Resource tmp = this.getACLPackagerPageResource(request);
+                if(tmp != null) {
+                    packageResources.add(tmp);
+                }
+            }
+
             final Map<String, String> packageDefinitionProperties = new HashMap<String, String>();
 
             // ACL Handling
@@ -132,21 +160,22 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
             if (preview) {
                 // Handle preview mode
-                response.getWriter().print(packageHelper.getPreviewJSON(repPolicyResources));
-            } else if (repPolicyResources == null || repPolicyResources.isEmpty()) {
+                response.getWriter().print(packageHelper.getPreviewJSON(packageResources));
+            } else if (packageResources == null || packageResources.isEmpty()) {
                 // Do not create empty packages; This will only clutter up CRX Package Manager
                 response.getWriter().print(packageHelper.getErrorJSON("Refusing to create a package with no filter "
                         + "set rules."));
             } else {
                 // Create JCR Package; Defaults should always be passed in via Request Parameters, but just in case
-                final JcrPackage jcrPackage = packageHelper.createPackage(repPolicyResources,
+                final JcrPackage jcrPackage = packageHelper.createPackage(packageResources,
                         request.getResourceResolver().adaptTo(Session.class),
                         properties.get(PACKAGE_GROUP_NAME, DEFAULT_PACKAGE_GROUP_NAME),
                         properties.get(PACKAGE_NAME, DEFAULT_PACKAGE_NAME),
                         properties.get(PACKAGE_VERSION, DEFAULT_PACKAGE_VERSION),
                         PackageHelper.ConflictResolution.valueOf(properties.get(CONFLICT_RESOLUTION,
                                 PackageHelper.ConflictResolution.IncrementVersion.toString())),
-                        packageDefinitionProperties);
+                        packageDefinitionProperties
+                );
 
                 // Add thumbnail to the package definition
                 packageHelper.addThumbnail(jcrPackage,
@@ -224,6 +253,50 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
     }
 
     /**
+     * Gets the resources for the param principals.
+     *
+     * @param resourceResolver the resourceresolver to get the principal resources; Must have read access to these resources.
+     * @param principalNames   the principals to get
+     * @return a list of resources that represent the principals that match to the principalNames
+     * @throws RepositoryException
+     */
+    private List<Resource> getPrincipalResources(final ResourceResolver resourceResolver,
+                                                 final String[] principalNames) throws RepositoryException {
+        final UserManager userManager = resourceResolver.adaptTo(UserManager.class);
+        final List<Resource> resources = new ArrayList<Resource>();
+
+        for (final String principalName : principalNames) {
+            final Authorizable authorizable = userManager.getAuthorizable(principalName);
+            if (authorizable != null) {
+                final Resource resource = resourceResolver.getResource(authorizable.getPath());
+                if (resource != null) {
+                    resources.add(resource);
+                }
+            }
+        }
+
+        return resources;
+    }
+
+    /**
+     * Gets the ACL Packager page resource.
+     *
+     * @param request the Sling HTTP Servlet Request object
+     * @return a List of 1 resource representing the cq:Page; or if cannot be found an empty list
+     */
+    private Resource getACLPackagerPageResource(final SlingHttpServletRequest request) {
+        final ResourceResolver resourceResolver = request.getResourceResolver();
+        final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+        final Page page = pageManager.getContainingPage(request.getResource());
+
+        if (page != null) {
+            return resourceResolver.getResource(page.getPath());
+        }
+
+        return null;
+    }
+
+    /**
      * Determines if the resource's path matches any of the include patterns
      * <p/>
      * If includePatterns is null or empty all resources are expected to be included.
@@ -273,7 +346,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
      * Compares and sorts resources alphabetically (descending) by path.
      */
     private static Comparator<Resource> resourceComparator = new Comparator<Resource>() {
-        public int compare(Resource r1, Resource r2) {
+        public int compare(final Resource r1, final Resource r2) {
             return r1.getPath().compareTo(r2.getPath());
         }
     };
