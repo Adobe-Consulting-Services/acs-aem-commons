@@ -4,5 +4,4 @@
     <jcr:content
         jcr:primaryType="nt:unstructured"
         jcr:title="Content Packagers"/>
-    <test2/>
 </jcr:root>
