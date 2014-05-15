@@ -16,6 +16,9 @@
     <filter root="/etc/cloudservices/dtm">
         <include pattern="/etc/cloudservices/dtm/jcr:content"/>
     </filter>
+    <filter root="/etc/cloudservices/sharethis">
+        <include pattern="/etc/cloudservices/sharethis/jcr:content"/>
+    </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?" />
         <include pattern="/etc/acs-commons/version-replicator(.*)?" />
