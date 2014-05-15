@@ -108,23 +108,23 @@
                         xtype="textfield"/>
                 </include-patterns>
                 <include-principals
-                        jcr:primaryType="cq:Widget"
-                        fieldLabel="Include principals"
-                        fieldDescription="Include the principal nodes specified above in the package. [ Default: false ]"
-                        defaultValue="false"
-                        inputValue="true"
-                        name="./includePrincipals"
-                        type="checkbox"
-                        xtype="selection"/>
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="false"
+                    fieldDescription="Include the principal nodes specified above in the package. [ Default: false ]"
+                    fieldLabel="Include principals"
+                    inputValue="true"
+                    name="./includePrincipals"
+                    type="checkbox"
+                    xtype="selection"/>
                 <include-acl-packager-configuration
-                        jcr:primaryType="cq:Widget"
-                        fieldLabel="Include ACL Packager"
-                        fieldDescription="Include this page as part of the package. [ Default: false ]"
-                        defaultValue="false"
-                        inputValue="true"
-                        name="./includeConfiguration"
-                        type="checkbox"
-                        xtype="selection"/>
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="false"
+                    fieldDescription="Include this page as part of the package. [ Default: false ]"
+                    fieldLabel="Include ACL Packager"
+                    inputValue="true"
+                    name="./includeConfiguration"
+                    type="checkbox"
+                    xtype="selection"/>
             </items>
         </tab1>
     </items>
