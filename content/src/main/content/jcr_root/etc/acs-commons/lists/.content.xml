@@ -4,4 +4,5 @@
     <jcr:content
         jcr:primaryType="nt:unstructured"
         jcr:title="Generic Lists"/>
+    <sharethis-services/>
 </jcr:root>
