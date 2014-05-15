@@ -4,5 +4,4 @@
     <jcr:content
         jcr:primaryType="nt:unstructured"
         jcr:title="Dispatcher Flush"/>
-    <test1/>
 </jcr:root>
