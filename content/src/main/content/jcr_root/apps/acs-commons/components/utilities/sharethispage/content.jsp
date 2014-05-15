@@ -21,7 +21,7 @@
 %><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
 %>
 <ul>
-    <li>Publisher ID: <%= xssAPI.encodeForHTML(properties.get("publisherID", "none")) %></li>
+    <li>Publisher ID: <%= xssAPI.encodeForHTML(properties.get("publisherId", "none")) %></li>
     <li>Do Not Hash: <%= properties.get("doNotHash", false) %></li>
     <li>Do Not Copy: <%= properties.get("doNotCopy", false) %></li>
     <li>Hash Address Bar: <%= properties.get("hashAddressBar", false) %></li>

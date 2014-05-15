@@ -27,15 +27,16 @@
 String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
 ConfigurationManager cfgMgr = (ConfigurationManager)sling.getService(ConfigurationManager.class);
 if(cfgMgr != null) {
-    String publisherID = null;
+    String publisherId = null;
     Configuration cfg = cfgMgr.getConfiguration("sharethis", services);
     if(cfg != null) {
-        publisherID = cfg.get("publisherID", null);
-         if (publisherID != null) {
-             publisherID = xssAPI.encodeForJSString(publisherID);
+        publisherId = cfg.get("publisherId", null);
+         if (publisherId != null) {
+             publisherId = xssAPI.encodeForJSString(publisherId);
         }
     }
-    if(publisherID != null) {
+    if(publisherId != null) {
+        request.setAttribute("com.adobe.acs.commons.sharethis.publisherId", publisherId);
     %>
 <script type="text/javascript">
     var switchTo5x=true;
@@ -44,7 +45,7 @@ if(cfgMgr != null) {
         document.write(unescape("%3Cscript src='" + stJsHost + "sharethis.com/button/buttons.js' type='text/javascript'%3E%3C/script%3E"));
     })();
 </script>
-<script type="text/javascript">stLight.options({publisher: "<%= publisherID %>", doNotHash: <%= cfg.get("doNotHash", false) %>, doNotCopy: <%= cfg.get("doNotCopy", false) %>, hashAddressBar: <%= cfg.get("hashAddressBar", false) %>});</script>
+<script type="text/javascript">stLight.options({publisher: "<%= publisherId %>", doNotHash: <%= cfg.get("doNotHash", false) %>, doNotCopy: <%= cfg.get("doNotCopy", false) %>, hashAddressBar: <%= cfg.get("hashAddressBar", false) %>});</script>
 <%
     }
 }

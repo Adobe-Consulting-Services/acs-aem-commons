@@ -16,7 +16,7 @@
                         allowBlank="{Boolean}false"
                         fieldDescription="Publisher ID assigned by Share This!"
                         fieldLabel="Publisher ID"
-                        name="./publisherID"
+                        name="./publisherId"
                         validateOnBlur="{Boolean}true"
                         xtype="textfield"/>
                     <options
