@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    title="Share This Configuration"
+    xtype="dialog">
+    <items
+        jcr:primaryType="cq:Widget"
+        xtype="tabpanel">
+        <items jcr:primaryType="cq:WidgetCollection">
+            <tab
+                jcr:primaryType="cq:Panel"
+                title="Config">
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <publisherID
+                        jcr:primaryType="cq:Widget"
+                        allowBlank="{Boolean}false"
+                        fieldDescription="Publisher ID assigned by Share This!"
+                        fieldLabel="Publisher ID"
+                        name="./publisherId"
+                        validateOnBlur="{Boolean}true"
+                        xtype="textfield"/>
+                    <options
+                        jcr:primaryType="cq:Widget"
+                        collapsed="{Boolean}false"
+                        collapsible="{Boolean}false"
+                        title="Options"
+                        xtype="dialogfieldset">
+                        <items jcr:primaryType="cq:WidgetCollection">
+                            <static
+                                jcr:primaryType="cq:Widget"
+                                html="&lt;p style='margin-bottom: 10px;'>See the &lt;a href='http://support.sharethis.com/customer/portal/articles/961937' style='text-decoration: underline;'>Share This site&lt;/a> for more information on these options.&lt;/p>"
+                                xtype="static"/>
+                            <doNotHash
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Do Not Hash?"
+                                name="./doNotHash"
+                                type="checkbox"
+                                xtype="selection"/>
+                            <doNotCopy
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Do Not Copy?"
+                                name="./doNotCopy"
+                                type="checkbox"
+                                xtype="selection"/>
+                            <hashAddressBar
+                                jcr:primaryType="cq:Widget"
+                                fieldLabel="Hash Address Bar?"
+                                name="./hashAddressBar"
+                                type="checkbox"
+                                xtype="selection"/>
+                        </items>
+                    </options>
+                </items>
+            </tab>
+        </items>
+    </items>
+</jcr:root>
