@@ -140,7 +140,14 @@ public class PackageHelperImpl implements PackageHelper {
                 final Node child = children.nextNode();
 
                 final JcrPackage jcrPackage = jcrPackageManager.open(child, true);
-                if (!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
+                if (jcrPackage == null
+                        || jcrPackage.getDefinition() == null
+                        || jcrPackage.getDefinition().getId() == null) {
+
+                    log.warn("Could not covert node [ {} ] into a proper JCR Package, moving to next node", child.getPath());
+                    continue;
+
+                } else if (!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
                     // Name mismatch - so just skip
                     continue;
                 }
