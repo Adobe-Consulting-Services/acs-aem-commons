@@ -343,6 +343,14 @@
             <version>5.6.4</version>
             <scope>provided</scope>
         </dependency>
+        <dependency> 
+        	<groupId>org.apache.felix</groupId> 
+        	<artifactId>org.apache.felix.scr</artifactId> 
+        	<version>1.6.3-R1409029</version> 
+        	<scope>provided</scope> 
+        </dependency>
+        
+        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -390,6 +398,7 @@
             <version>2.2.0</version>
             <scope>test</scope>
         </dependency>
+        
 
         <!--  Build Dependencies -->
         <dependency>
