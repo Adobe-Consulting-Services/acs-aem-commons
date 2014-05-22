@@ -66,11 +66,6 @@ public final class ContentFinderHitBuilder {
         final Resource resource = hit.getResource();
 
         /**
-         * Common result properties
-         */
-        map.put("path", hit.getPath());
-
-        /**
          * Apply custom properties based on the "type"
          */
 
@@ -121,6 +116,7 @@ public final class ContentFinderHitBuilder {
             }
         }
 
+        map.put("path", page.getPath());
         map.put("name", page.getName());
         map.put("title", title);
         map.put("excerpt", excerpt);
@@ -157,6 +153,7 @@ public final class ContentFinderHitBuilder {
             }
         }
 
+        map.put("path", asset.getPath());
         map.put("name", asset.getName());
         map.put("title", title);
         map.put("excerpt", excerpt);
@@ -180,9 +177,11 @@ public final class ContentFinderHitBuilder {
     private static Map<String, Object> addOtherData(final Hit hit, Map<String, Object> map)
             throws RepositoryException {
         final Resource resource = hit.getResource();
+        final ValueMap properties = resource.adaptTo(ValueMap.class);
 
+        map.put("path", resource.getPath());
         map.put("name", resource.getName());
-        map.put("title", resource.getName());
+        map.put("title", properties.get("jcr:title", resource.getName()));
         map.put("excerpt", hit.getExcerpt());
         map.put("lastModified", getLastModified(resource));
         map.put("type", "Data");
@@ -286,7 +285,7 @@ public final class ContentFinderHitBuilder {
 
     /**
      * Gets the Page object corresponding the with the resource.
-     * Will resolve to a Page if the reuslt is a cq:Page or a cq:Page's jcr:content node.
+     * Will resolve to a Page if the result is a cq:Page or a cq:Page's jcr:content node.
      *
      * @param resource The resource to covert to a Page
      * @return a Page if  the resource is Page like (cq:Page or a cq:Page's jcr:content node), else null
