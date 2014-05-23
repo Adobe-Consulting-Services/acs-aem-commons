@@ -155,6 +155,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
                 if (m.matches()) {
                 	final String flushPath = m.replaceAll(entry.getValue());
+
                     log.debug("Requesting hierarchical flush of associated path: {} ~> {}", path,
                     		flushPath);
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
@@ -169,10 +170,12 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 final Matcher m = pattern.matcher(path);
 
                 if (m.matches()) {
+                    final String flushPath = m.replaceAll(entry.getValue());
+
                     log.debug("Requesting ResourceOnly flush of associated path: {} ~> {}", path, entry.getValue());
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
                             RESOURCE_ONLY_FILTER,
-                            entry.getValue());
+                            flushPath);
                 }
             }
 
