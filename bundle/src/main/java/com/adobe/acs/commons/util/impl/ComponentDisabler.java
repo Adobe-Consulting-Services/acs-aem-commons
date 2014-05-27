@@ -1,17 +1,18 @@
 package com.adobe.acs.commons.util.impl;
 
-import org.apache.felix.scr.annotations.Reference; 
-import org.apache.felix.scr.annotations.Service; 
-import org.apache.felix.scr.annotations.Property; 
-import org.apache.felix.scr.annotations.Activate; 
-import org.apache.felix.scr.ScrService; 
-import org.apache.felix.scr.Component; 
-import org.apache.sling.commons.osgi.PropertiesUtil; 
-import org.osgi.service.component.ComponentContext; 
-import org.osgi.service.event.Event; 
-import org.osgi.service.event.EventHandler; 
-import org.slf4j.Logger; 
-import org.slf4j.LoggerFactory; 
+import org.apache.felix.scr.Component;
+import org.apache.felix.scr.ScrService;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -35,48 +36,60 @@ import org.slf4j.LoggerFactory;
  */
 
 
-@org.apache.felix.scr.annotations.Component(immediate=true,metatype=true,label="ACS AEM Common -- Component Disabler",description="Disables components by configuration") 
+@org.apache.felix.scr.annotations.Component(
+	immediate = true, 
+	metatype = true, 
+	label = "ACS AEM Common -- OSGI Component Disabler", 
+	description = "Disables components by configuration", 
+	policy = ConfigurationPolicy.REQUIRE)
 @Service() 
 @Property(name="event.topics", value={"/org/osgi/framework/BundleEvent/STARTED","org/osgi/framework/ServiceEvent/REGISTERED"}, propertyPrivate=true) 
 public class ComponentDisabler implements EventHandler { 
 
 
-        @Reference 
-        ScrService scrService; 
+    @Reference
+    ScrService scrService;
 
-        private static final Logger log = LoggerFactory.getLogger(ComponentDisabler.class); 
+    private static final Logger log = LoggerFactory
+	    .getLogger(ComponentDisabler.class);
 
-        @Property(label="Disabled components", description="The names of the components/services you want to disable", cardinality=Integer.MAX_VALUE) 
-        private static final String DISABLED_COMPONENTS = "services"; 
-        private String[] disabledComponents; 
+    @Property(label = "Disabled components", description = "The names of the components/services you want to disable", cardinality = Integer.MAX_VALUE)
+    private static final String DISABLED_COMPONENTS = "services";
+    private String[] disabledComponents;
 
-        @Activate 
-        protected void Activate (ComponentContext ctx) { 
-                disabledComponents = PropertiesUtil.toStringArray(ctx.getProperties().get(DISABLED_COMPONENTS), new String[]{}); 
-                log.info("Disabling components and services" + disabledComponents.toString());
-                handleEvent(null); 
-        } 
+    @Activate
+    protected void activate(ComponentContext ctx) {
+	disabledComponents = PropertiesUtil.toStringArray(ctx.getProperties()
+		.get(DISABLED_COMPONENTS), new String[] {});
+	log.info("Disabling components and services {}",
+		disabledComponents.toString());
+	handleEvent(null);
+    }
 
 
-        @Override 
-        public void handleEvent(Event event) { 
-                // We don't care about the event, we just need iterate all configured components and 
-        		// try to disable them
-        
+    @Override
+    public void handleEvent(Event event) {
+	// We don't care about the event, we just need iterate all configured
+	// components and
+	// try to disable them
 
-                for (String component: disabledComponents) { 
-                        disableComponent(component); 
-                } 
-        } 
+	for (String component : disabledComponents) {
+	    disableComponent(component);
+	}
+    }
 
-        private boolean disableComponent (String componentName) { 
-                Component[] comps = (Component[]) scrService.getComponents(componentName); 
-                for (Component comp: comps){ 
-                        if (comp.getState() != Component.STATE_DISABLED) { 
-                                comp.disable(); 
-                                log.info("Component {} disabled by configuration (pid={}) ", new Object[]{comp.getClassName(), comp.getConfigurationPid()}); 
-                        } 
-                } 
-                return true; 
-        } 
+    private boolean disableComponent(String componentName) {
+	Component[] comps = (Component[]) scrService
+		.getComponents(componentName);
+	for (Component comp : comps) {
+	    if (comp.getState() != Component.STATE_DISABLED) {
+		comp.disable();
+		log.info(
+			"Component {} disabled by configuration (pid={}) ",
+			new Object[] { comp.getClassName(),
+				comp.getConfigurationPid() });
+	    }
+	}
+	return true;
+    }
 }
