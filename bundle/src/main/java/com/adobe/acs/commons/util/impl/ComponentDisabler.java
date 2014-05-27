@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.util.impl;
 
+import java.util.Arrays;
+
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.apache.felix.scr.annotations.Activate;
@@ -62,7 +64,7 @@ public class ComponentDisabler implements EventHandler {
 	disabledComponents = PropertiesUtil.toStringArray(ctx.getProperties()
 		.get(DISABLED_COMPONENTS), new String[] {});
 	log.info("Disabling components and services {}",
-		disabledComponents.toString());
+		Arrays.toString(disabledComponents));
 	handleEvent(null);
     }
 
