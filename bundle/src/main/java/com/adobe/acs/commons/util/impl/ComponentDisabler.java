@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 @org.apache.felix.scr.annotations.Component(
 	immediate = true, 
 	metatype = true, 
-	label = "ACS AEM Common -- OSGI Component Disabler", 
+ label = "ACS AEM Commons - OSGI Component Disabler",
 	description = "Disables components by configuration", 
 	policy = ConfigurationPolicy.REQUIRE)
 @Service() 
