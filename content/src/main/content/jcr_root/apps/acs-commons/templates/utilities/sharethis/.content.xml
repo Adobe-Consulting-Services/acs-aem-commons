@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:description="Account settings for Share This"
+    jcr:primaryType="cq:Template"
+    jcr:title="Share This Configuration"
+    sling:resourceSuperType="cq/cloudserviceconfigs/templates/configpage"
+    allowedChildren="[/apps/acs-commons/templates/sharethis]"
+    allowedPaths="[/etc/cloudservices/sharethis(/.*)?]"
+    ranking="{Long}100">
+    <jcr:content
+        cq:designPath="/etc/designs/cloudservices/sharethis"
+        jcr:primaryType="cq:PageContent"
+        sling:resourceType="acs-commons/components/utilities/sharethispage"/>
+</jcr:root>

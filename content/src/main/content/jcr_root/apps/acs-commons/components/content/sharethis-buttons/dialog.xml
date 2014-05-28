@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Dialog"
+    title="ShareThis Buttons"
+    xtype="dialog">
+    <items
+        jcr:primaryType="cq:Widget"
+        xtype="tabpanel">
+        <items jcr:primaryType="cq:WidgetCollection">
+            <tab1
+                jcr:primaryType="cq:Panel"
+                title="ShareThis">
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <size
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Size"
+                        name="./size"
+                        type="radio"
+                        xtype="selection">
+                        <options jcr:primaryType="cq:WidgetCollection">
+                            <small
+                                jcr:primaryType="nt:unstructured"
+                                text="Small (16x16)"
+                                value="small"/>
+                            <large
+                                jcr:primaryType="nt:unstructured"
+                                text="Large (32x32)"
+                                value="large"/>
+                        </options>
+                    </size>
+                    <services
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Services"
+                        name="./services"
+                        xtype="multifield">
+                        <fieldConfig
+                            jcr:primaryType="cq:Widget"
+                            options="/etc/acs-commons/lists/sharethis-services/_jcr_content.list.json"
+                            type="select"
+                            xtype="selection"/>
+                    </services>
+                </items>
+            </tab1>
+        </items>
+    </items>
+</jcr:root>
