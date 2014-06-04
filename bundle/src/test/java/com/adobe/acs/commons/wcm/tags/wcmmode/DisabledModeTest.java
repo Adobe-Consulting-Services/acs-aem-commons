@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.wcm.tags.wcmmode;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 import javax.servlet.jsp.tagext.TagSupport;
 

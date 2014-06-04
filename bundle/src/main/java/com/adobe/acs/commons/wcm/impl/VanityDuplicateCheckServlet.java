@@ -22,12 +22,7 @@ package com.adobe.acs.commons.wcm.impl;
 import java.io.IOException;
 import java.util.Iterator;
 
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
-import javax.jcr.query.QueryManager;
-import javax.jcr.query.QueryResult;
 import javax.servlet.ServletException;
 
 import org.apache.commons.lang.StringUtils;
@@ -42,7 +37,6 @@ import org.apache.sling.commons.json.io.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.day.cq.commons.TidyJSONWriter;
 import com.day.cq.wcm.api.NameConstants;
 
 

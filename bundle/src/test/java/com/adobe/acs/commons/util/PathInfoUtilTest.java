@@ -52,12 +52,21 @@ public class PathInfoUtilTest {
      */
     @Test
     public void testGetQueryParam_HttpServletRequest_String() {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show", "html", "simple", "ghz=2.4");
+        // MockSlingHttpServletRequest doesn't natively support getParameter
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show", "html", "simple", null) {
+            public String getParameter(String name) {
+                if (name.equals("ghz")) {
+                    return "2.4";
+                } else {
+                    return null;
+                }
+            };
+        };
 
         String key = "ghz";
         String expResult = "2.4";
         String result = PathInfoUtil.getQueryParam(request, key);
-        //assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     /**
@@ -65,17 +74,26 @@ public class PathInfoUtilTest {
      */
     @Test
     public void testGetQueryParam_withDefault() {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show", "html", "simple", "cpu=i7&ghz=2.4");
+        // MockSlingHttpServletRequest doesn't natively support getParameter
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show", "html", "simple", "cpu=i7&ghz=2.4") {
+            public String getParameter(String name) {
+                if (name.equals("ghz")) {
+                    return "2.4";
+                } else {
+                    return null;
+                }
+            };
+        };
 
         String key = "ghz";
         String expResult = "2.4";
         String result = PathInfoUtil.getQueryParam(request, key, "3");
-        //assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         key = "doesnt-exist";
         expResult = "3";
         result = PathInfoUtil.getQueryParam(request, key, "3");
-        //assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
     }
 

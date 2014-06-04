@@ -22,9 +22,6 @@ package com.adobe.acs.commons.images;
 
 import com.day.image.Layer;
 
-import javax.jcr.RepositoryException;
-import java.io.IOException;
-
 public interface NamedImageTransformer {
     /**
      * The OSGi config property used to identify the named transform.

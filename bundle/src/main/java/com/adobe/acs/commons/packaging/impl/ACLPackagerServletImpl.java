@@ -27,6 +27,7 @@ import com.day.jcr.vault.fs.io.AccessControlHandling;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
 import com.day.jcr.vault.packaging.Packaging;
+
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +60,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("serial")
 @SlingServlet(
         label = "ACS AEM Commons - ACL Packager Servlet",
         description = "Servlet end-point used to create ACL CRX packages based on the underlying resource's "
@@ -131,7 +134,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
         final Set<Resource> packageResources = this.findResources(resourceResolver,
                 Arrays.asList(principalNames),
-                this.toPatterns(Arrays.asList(properties.get(INCLUDE_PATTERNS, new String[]{}))));
+                toPatterns(Arrays.asList(properties.get(INCLUDE_PATTERNS, new String[]{}))));
 
         try {
             // Add Principals

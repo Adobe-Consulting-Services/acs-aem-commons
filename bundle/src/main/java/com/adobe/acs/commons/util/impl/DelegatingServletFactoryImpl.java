@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
@@ -180,6 +181,7 @@ public class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
      * @param request
      * @return the delegation history set (of resource types previously targeted by this Servlet)
      */
+    @SuppressWarnings("unchecked")
     private Set<String> getDelegationHistory(final SlingHttpServletRequest request) {
         Set<String> history = new HashSet<String>();
         final Object tmp = request.getAttribute(REQUEST_ATTR_DELEGATION_HISTORY);

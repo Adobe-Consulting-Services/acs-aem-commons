@@ -22,7 +22,6 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
-import com.day.jcr.vault.fs.api.FilterSet;
 import com.day.jcr.vault.fs.api.PathFilterSet;
 import com.day.jcr.vault.fs.config.DefaultWorkspaceFilter;
 import com.day.jcr.vault.packaging.JcrPackage;
@@ -276,7 +275,7 @@ public class PackageHelperImpl implements PackageHelper {
         json.put("filterSets", new JSONArray());
 
         final List<PathFilterSet> filterSets = jcrPackage.getDefinition().getMetaInf().getFilter().getFilterSets();
-        for (final FilterSet filterSet : filterSets) {
+        for (final PathFilterSet filterSet : filterSets) {
             final JSONObject jsonFilterSet = new JSONObject();
             jsonFilterSet.put("importMode", filterSet.getImportMode().name());
             jsonFilterSet.put("rootPath", filterSet.getRoot());
