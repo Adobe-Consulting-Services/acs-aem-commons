@@ -45,7 +45,7 @@ public class EventLogger implements EventHandler {
     /**
      * Use this logger for tracing this service instance's own lifecycle.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventLogger.class);
+    private static final Logger log = LoggerFactory.getLogger(EventLogger.class);
 
     private static final String[] DEFAULT_TOPICS = new String[0];
     private static final String DEFAULT_FILTER = "(event.topics=*)";
@@ -96,7 +96,7 @@ public class EventLogger implements EventHandler {
 
     /**
      * Suppress the PMD.LoggerIsNotStaticFinal check because the point is to have an
-     * SCR-configurable logger separate from the normal class-level LOGGER object defined
+     * SCR-configurable logger separate from the normal class-level log object defined
      * above.
      */
     @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
@@ -108,7 +108,7 @@ public class EventLogger implements EventHandler {
      * @param event an OSGi Event
      */
     private void logEvent(Event event) {
-        LOGGER.trace("[logEvent] event={}", event);
+        log.trace("[logEvent] event={}", event);
         try {
             String message = constructMessage(event);
             if (logLevel == LogLevel.ERROR) {
@@ -123,7 +123,7 @@ public class EventLogger implements EventHandler {
                 this.eventLogger.trace(message);
             }
         } catch (JSONException e) {
-            LOGGER.error("[logEvent] failed to construct log message from event: " + event.toString(), e);
+            log.error("[logEvent] failed to construct log message from event: " + event.toString(), e);
         }
     }
 
@@ -201,7 +201,7 @@ public class EventLogger implements EventHandler {
 
     @Activate
     protected void activate(Map<String, Object> props) {
-        LOGGER.trace("[activate] entered activate method.");
+        log.trace("[activate] entered activate method.");
         this.topics = PropertiesUtil.toStringArray(props.get(OSGI_TOPICS), DEFAULT_TOPICS);
         this.filter = PropertiesUtil.toString(props.get(OSGI_FILTER), DEFAULT_FILTER);
         this.category = PropertiesUtil.toString(props.get(OSGI_CATEGORY), DEFAULT_CATEGORY).trim();
@@ -213,12 +213,12 @@ public class EventLogger implements EventHandler {
         } else {
             this.eventLogger = null;
         }
-        LOGGER.debug("[activate] logger state: {}", this);
+        log.debug("[activate] logger state: {}", this);
     }
 
     @Deactivate
     protected void deactivate() {
-        LOGGER.trace("[deactivate] entered activate method.");
+        log.trace("[deactivate] entered deactivate method.");
         this.eventLogger = null;
         this.logLevel = null;
         this.topics = DEFAULT_TOPICS;
@@ -233,7 +233,7 @@ public class EventLogger implements EventHandler {
 
     @Override
     public String toString() {
-        return "EventLoggerService{" +
+        return "EventLogger{" +
                 "topics=" + Arrays.toString(topics) +
                 ", filter='" + filter + '\'' +
                 ", category='" + category + '\'' +
