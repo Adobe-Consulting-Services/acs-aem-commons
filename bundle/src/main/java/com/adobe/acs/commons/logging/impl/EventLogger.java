@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.logging.impl;
 
 import org.apache.felix.scr.annotations.*;
+import org.apache.jackrabbit.util.ISO8601;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -30,10 +31,7 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.
@@ -164,7 +162,7 @@ public class EventLogger implements EventHandler {
                 Object[] vals = (Object[]) val;
                 obj.put(prop, Arrays.asList(vals));
             } else if (val instanceof Map) {
-                Map valMap = (Map) val;
+                Map<?, ?> valMap = (Map<?, ?>) val;
                 if (valMap.isEmpty()) {
                     obj.put(prop, Collections.<String, String>emptyMap());
                 } else if (valMap.keySet().iterator().next() instanceof String) {
@@ -174,6 +172,13 @@ public class EventLogger implements EventHandler {
                 }
             } else if (val instanceof Collection) {
                 obj.put(prop, (Collection<?>) val);
+            } else if (val instanceof Calendar) {
+                try {
+                    obj.put(prop, ISO8601.format((Calendar) val));
+                } catch (IllegalArgumentException e) {
+                    log.debug("[constructMessage] failed to convert Calendar to ISO8601 String: {}, {}", e.getMessage(), val);
+                    obj.put(prop, val);
+                }
             } else {
                 obj.put(prop, val);
             }
