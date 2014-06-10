@@ -1,9 +1,8 @@
 package com.adobe.acs.commons.legacyurls;
 
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public interface LegacyURLHandler {
@@ -18,7 +17,7 @@ public interface LegacyURLHandler {
      * @return true is redirect could be found and a
      * @throws IOException
      */
-    boolean doRedirect(SlingHttpServletRequest request,
-                       SlingHttpServletResponse response) throws IOException;
+    boolean doRedirect(HttpServletRequest request,
+                       HttpServletResponse response) throws IOException;
 
 }

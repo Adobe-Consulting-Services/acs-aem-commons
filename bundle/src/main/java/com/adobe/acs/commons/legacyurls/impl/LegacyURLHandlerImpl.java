@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,13 +59,23 @@ public class LegacyURLHandlerImpl implements LegacyURLHandler {
     @Property(label = "Redirect Status Code",
             description = "[ 301: Moved Permanently ] , [ 302: Found (Temporary) ] - [ Default: 301 ]",
             cardinality = 2,
-            intValue = { SlingHttpServletResponse.SC_MOVED_PERMANENTLY, SlingHttpServletResponse.SC_TEMPORARY_REDIRECT })
+            intValue = { SlingHttpServletResponse.SC_MOVED_PERMANENTLY,
+                    SlingHttpServletResponse.SC_TEMPORARY_REDIRECT })
     public static final String PROP_REDIRECT_STATUS_CODE = "redirect-status-code";
 
-    public final boolean doRedirect(SlingHttpServletRequest request,
-                                    SlingHttpServletResponse response) throws IOException {
+    public final boolean doRedirect(HttpServletRequest request,
+                                    HttpServletResponse response) throws IOException {
 
-        final ResourceResolver resourceResolver = request.getResourceResolver();
+        if (!(request instanceof SlingHttpServletRequest)) {
+            log.warn("Reques for [ {} ] was not a SlingHttpServletRequest", request.getRequestURI());
+            return false;
+        }
+
+        final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
+
+        log.debug("Invoking LegacyURLHandler");
+
+        final ResourceResolver resourceResolver = slingRequest.getResourceResolver();
         final Session session = resourceResolver.adaptTo(Session.class);
         final String requestURI = request.getRequestURI();
 
@@ -81,7 +93,7 @@ public class LegacyURLHandlerImpl implements LegacyURLHandler {
             if (size > 1) {
                 log.warn("Found multiple [ {} ] matches for legacyURL [ {} ]", size, requestURI);
 
-                if(log.isDebugEnabled()) {
+                if (log.isDebugEnabled()) {
                     for (final Hit hit : result.getHits()) {
                         try {
                             log.debug("Legacy URLs [ {} ] maps to [ {} ]", requestURI, hit.getResource().getPath());
@@ -111,6 +123,8 @@ public class LegacyURLHandlerImpl implements LegacyURLHandler {
 
                 if (!StringUtils.isBlank(redirectURI)) {
                     redirectURI = resourceResolver.map(redirectURI);
+
+                    log.info("Redirecting legacy URI [ {} ] to [ {} ]", requestURI, redirectURI);
 
                     response.setStatus(redirectStatusCode);
                     response.sendRedirect(redirectURI);
