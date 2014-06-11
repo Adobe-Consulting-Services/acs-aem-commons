@@ -166,8 +166,8 @@ public class EventLogger implements EventHandler {
 
     /**
      * Converts individual java objects to JSONObjects using reflection and recursion
-     * @param val
-     * @return
+     * @param val an untyped Java object to try to convert
+     * @return {@code val} if not handled, or return a converted JSONObject, JSONArray, or String
      * @throws JSONException
      */
     @SuppressWarnings("unchecked")
@@ -210,6 +210,14 @@ public class EventLogger implements EventHandler {
                 return ISO8601.format((Calendar) val);
             } catch (IllegalArgumentException e) {
                 log.debug("[constructMessage] failed to convert Calendar to ISO8601 String: {}, {}", e.getMessage(), val);
+            }
+        } else if (val instanceof Date) {
+            try {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime((Date) val);
+                return ISO8601.format(calendar);
+            } catch (IllegalArgumentException e) {
+                log.debug("[constructMessage] failed to convert Date to ISO8601 String: {}, {}", e.getMessage(), val);
             }
         }
 
