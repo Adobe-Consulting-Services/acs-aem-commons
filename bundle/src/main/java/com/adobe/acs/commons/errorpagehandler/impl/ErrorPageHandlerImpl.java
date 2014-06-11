@@ -60,9 +60,11 @@ import javax.servlet.ServletException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -151,6 +153,37 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             intValue = DEFAULT_TTL)
     private static final String PROP_TTL = "ttl";
 
+    /* Enable/Disables delivering of 404 placeholder images */
+    private static final boolean DEFAULT_PLACEHOLDER_IMAGES_ENABLED = false;
+
+    private boolean placeholderImagesEnabled = DEFAULT_PLACEHOLDER_IMAGES_ENABLED;
+
+    @Property(label = "Enable placeholder images", description = "Enables/Disables delivering of 404 placeholder images.",
+            boolValue = DEFAULT_PLACEHOLDER_IMAGES_ENABLED)
+    private static final String PROP_PLACEHOLDER_IMAGES_ENABLED = "prop.error-page.placeholder-images-enabled";
+
+    /* Relative placeholder image path */
+    private static final String DEFAULT_ERROR_IMAGE_PATH = "image.img.png";
+
+    private String errorImagePath = DEFAULT_ERROR_IMAGE_PATH;
+
+    @Property(label = "Placeholder image path",
+            description = "The relative (to the found error page) path of the returned 404 placeholder images. [Optional] [Default: image.img.png]",
+            value = DEFAULT_ERROR_IMAGE_PATH)
+    private static final String PROP_ERROR_IMAGE_PATH = "prop.error-page.image-path";
+
+    /* Error image extensions to handle */
+    private static final String[] DEFAULT_ERROR_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif"};
+
+    private String[] errorImageExtensions = DEFAULT_ERROR_IMAGE_EXTENSIONS;
+
+    @Property(
+            label = "Error image extensions",
+            description = "List of valid image extensions to handle. Example: png [Optional] [Default: jpg, jpeg, png, gif]",
+            cardinality = Integer.MAX_VALUE,
+            value = {"jpg", "jpeg", "png", "gif"})
+    private static final String PROP_ERROR_IMAGE_EXTENSIONS = "prop.error-page.image-extensions";
+
     @Reference
     private QueryBuilder queryBuilder;
 
@@ -224,19 +257,25 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             }
         }
 
+        String errorPage = null;
         if (page == null || ResourceUtil.isNonExistingResource(page)) {
             // If no error page could be found
             if (this.hasSystemErrorPage()) {
-                final String errorPage = applyExtension(this.getSystemErrorPagePath());
-                log.debug("Using default error page: {}", errorPage);
-                return StringUtils.stripToNull(errorPage);
+                errorPage = this.getSystemErrorPagePath();
             }
         } else {
-            final String errorPage = applyExtension(page.getPath());
-            log.debug("Using resolved error page: {}", errorPage);
-            return StringUtils.stripToNull(errorPage);
+            errorPage = page.getPath();
         }
 
+        if (StringUtils.isNotBlank(errorPage) && isImageRequest(request)) {
+            final String imagePath = StringUtils.stripToNull(errorPage).concat("/").concat(getErrorImagePath());
+            log.debug("Using resolved placeholder image: {}", imagePath);
+            return imagePath;
+        } else if (StringUtils.isNotBlank(errorPage)) {
+            errorPage = StringUtils.stripToNull(applyExtension(errorPage));
+            log.debug("Using resolved error page: {}", errorPage);
+            return errorPage;
+        }
         return null;
     }
 
@@ -342,6 +381,21 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     /**
+     * Check if this is an image request.
+     * Created by: Tino Truppel
+     *
+     * @param request the current {@link SlingHttpServletRequest}
+     * @return True if this request should deliver an image.
+     */
+    private boolean isImageRequest(final SlingHttpServletRequest request) {
+        String ext = request.getRequestPathInfo().getExtension();
+        return placeholderImagesEnabled &&
+                StringUtils.isNotBlank(ext) &&
+                Arrays.asList(errorImageExtensions).contains(ext.toLowerCase(Locale.ENGLISH)) &&
+                StringUtils.isNotBlank(getErrorImagePath());
+    }
+
+    /**
      * Get the configured System Error Page Path.
      *
      * @return
@@ -357,6 +411,16 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      */
     public String getErrorPageExtension() {
         return StringUtils.stripToEmpty(this.errorPageExtension);
+    }
+
+    /**
+     * Get configured relative image path.
+     * Created by: Tino Truppel
+     *
+     * @return the relative path to the placeholder image
+     */
+    public String getErrorImagePath() {
+        return StringUtils.stripToEmpty(this.errorImagePath);
     }
 
     /**
@@ -606,6 +670,15 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         this.pathMap = configurePathMap(PropertiesUtil.toStringArray(properties.get(PROP_SEARCH_PATHS),
                 DEFAULT_SEARCH_PATHS));
 
+        this.placeholderImagesEnabled = PropertiesUtil.toBoolean(properties.get(PROP_PLACEHOLDER_IMAGES_ENABLED),
+                DEFAULT_PLACEHOLDER_IMAGES_ENABLED);
+
+        this.errorImagePath = PropertiesUtil.toString(properties.get(PROP_ERROR_IMAGE_PATH),
+                DEFAULT_ERROR_IMAGE_PATH);
+
+        this.errorImageExtensions = PropertiesUtil.toStringArray(properties.get(PROP_ERROR_IMAGE_EXTENSIONS),
+                DEFAULT_ERROR_IMAGE_EXTENSIONS);
+
         int ttl = PropertiesUtil.toInteger(properties.get(PROP_TTL), DEFAULT_TTL);
         boolean serveAuthenticatedFromCache = PropertiesUtil.toBoolean(properties.get(PROP_SERVE_AUTHENTICATED_FROM_CACHE),
                 DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE);
@@ -624,6 +697,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         log.debug("System Error Page Path: {}", this.systemErrorPagePath);
         log.debug("Error Page Extension: {}", this.errorPageExtension);
         log.debug("Fallback Error Page Name: {}", this.fallbackErrorName);
+        log.debug("Image placeholder enabled: {}", this.placeholderImagesEnabled);
     }
 
     /**
@@ -671,7 +745,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     public void includeUsingGET(final SlingHttpServletRequest request, final SlingHttpServletResponse response,
                                 final String path) {
-        if (cache == null) {
+        if (cache == null || isImageRequest(request)) {
             final RequestDispatcher dispatcher = request.getRequestDispatcher(path);
 
             if (dispatcher != null) {
