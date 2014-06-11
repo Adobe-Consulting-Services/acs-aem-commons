@@ -46,6 +46,9 @@ public class EventLogger implements EventHandler {
      */
     private static final Logger log = LoggerFactory.getLogger(EventLogger.class);
 
+    /** We add this timestamp property to all logged events */
+    public static final String PROP_ACS_TIMESTAMP = "_acs_time";
+
     private static final String[] DEFAULT_TOPICS = new String[0];
     private static final String DEFAULT_FILTER = "(event.topics=*)";
     private static final String DEFAULT_CATEGORY = "";
@@ -154,13 +157,14 @@ public class EventLogger implements EventHandler {
      * @return a serialized JSON object
      * @throws org.apache.sling.commons.json.JSONException
      */
-    public static String constructMessage(Event event) throws JSONException {
+    protected static String constructMessage(Event event) throws JSONException {
         JSONObject obj = new JSONObject();
         for (String prop : event.getPropertyNames()) {
             Object val = event.getProperty(prop);
             Object converted = convertValue(val);
             obj.put(prop, converted == null ? val : converted);
         }
+        obj.put(PROP_ACS_TIMESTAMP, ISO8601.format(Calendar.getInstance()));
         return obj.toString();
     }
 
