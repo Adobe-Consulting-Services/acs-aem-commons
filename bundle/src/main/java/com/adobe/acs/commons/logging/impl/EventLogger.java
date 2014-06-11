@@ -21,6 +21,7 @@ package com.adobe.acs.commons.logging.impl;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.jackrabbit.util.ISO8601;
+import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -153,37 +154,66 @@ public class EventLogger implements EventHandler {
      * @return a serialized JSON object
      * @throws org.apache.sling.commons.json.JSONException
      */
-    @SuppressWarnings("unchecked")
     public static String constructMessage(Event event) throws JSONException {
         JSONObject obj = new JSONObject();
         for (String prop : event.getPropertyNames()) {
             Object val = event.getProperty(prop);
-            if (val.getClass().isArray()) {
-                Object[] vals = (Object[]) val;
-                obj.put(prop, Arrays.asList(vals));
-            } else if (val instanceof Map) {
-                Map<?, ?> valMap = (Map<?, ?>) val;
-                if (valMap.isEmpty()) {
-                    obj.put(prop, Collections.<String, String>emptyMap());
-                } else if (valMap.keySet().iterator().next() instanceof String) {
-                    obj.put(prop, (Map<String, ?>) valMap);
-                } else {
-                    obj.put(prop, val);
-                }
-            } else if (val instanceof Collection) {
-                obj.put(prop, (Collection<?>) val);
-            } else if (val instanceof Calendar) {
-                try {
-                    obj.put(prop, ISO8601.format((Calendar) val));
-                } catch (IllegalArgumentException e) {
-                    log.debug("[constructMessage] failed to convert Calendar to ISO8601 String: {}, {}", e.getMessage(), val);
-                    obj.put(prop, val);
-                }
-            } else {
-                obj.put(prop, val);
-            }
+            Object converted = convertValue(val);
+            obj.put(prop, converted == null ? val : converted);
         }
         return obj.toString();
+    }
+
+    /**
+     * Converts individual java objects to JSONObjects using reflection and recursion
+     * @param val
+     * @return
+     * @throws JSONException
+     */
+    @SuppressWarnings("unchecked")
+    protected static Object convertValue(Object val) throws JSONException {
+        if (val.getClass().isArray()) {
+            Object[] vals = (Object[]) val;
+            JSONArray array = new JSONArray();
+            for (Object arrayVal : vals) {
+                Object converted = convertValue(arrayVal);
+                array.put(converted == null ? arrayVal : converted);
+            }
+            return array;
+        } else if (val instanceof Collection) {
+            JSONArray array = new JSONArray();
+            for (Object arrayVal : (Collection<?>) val) {
+                Object converted = convertValue(arrayVal);
+                array.put(converted == null ? arrayVal : converted);
+            }
+            return array;
+        } else if (val instanceof Map) {
+            Map<?, ?> valMap = (Map<?, ?>) val;
+            JSONObject obj = new JSONObject();
+            if (valMap.isEmpty()) {
+                return obj;
+            } else if (valMap.keySet().iterator().next() instanceof String) {
+                for (Map.Entry<String, ?> entry : ((Map<String, ?>) valMap).entrySet()) {
+                    Object converted = convertValue(entry.getValue());
+                    obj.put(entry.getKey(), converted == null ? entry.getValue() : converted);
+                }
+            } else {
+                for (Map.Entry<?, ?> entry : valMap.entrySet()) {
+                    Object converted = convertValue(entry.getValue());
+                    obj.put(entry.getKey().toString(),
+                            converted == null ? entry.getValue() : converted);
+                }
+            }
+            return obj;
+        } else if (val instanceof Calendar) {
+            try {
+                return ISO8601.format((Calendar) val);
+            } catch (IllegalArgumentException e) {
+                log.debug("[constructMessage] failed to convert Calendar to ISO8601 String: {}, {}", e.getMessage(), val);
+            }
+        }
+
+        return val;
     }
 
     //
