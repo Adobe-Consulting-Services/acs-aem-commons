@@ -20,13 +20,16 @@
 
 package com.adobe.acs.commons.packaging.impl;
 
+import com.adobe.acs.commons.packaging.JcrPackageCoverageProgressListener;
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.jcr.vault.fs.api.PathFilterSet;
 import com.day.jcr.vault.fs.config.DefaultWorkspaceFilter;
+import com.day.jcr.vault.fs.io.ImportOptions;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
 import com.day.jcr.vault.packaging.JcrPackageManager;
+import com.day.jcr.vault.packaging.PackageException;
 import com.day.jcr.vault.packaging.PackageId;
 import com.day.jcr.vault.packaging.Packaging;
 import com.day.jcr.vault.packaging.Version;
@@ -262,6 +265,23 @@ public class PackageHelperImpl implements PackageHelper {
         session.save();
 
         return jcrPackage;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public final List<String> getContents(final JcrPackage jcrPackage) throws IOException, RepositoryException, PackageException {
+
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setDryRun(true);
+        importOptions.setListener(new JcrPackageCoverageProgressListener());
+
+        jcrPackage.extract(importOptions);
+
+        JcrPackageCoverageProgressListener jcrPackageCoverageProgressListener =
+                (JcrPackageCoverageProgressListener) importOptions.getListener();
+
+        return jcrPackageCoverageProgressListener.getCoverage();
     }
 
     /**
