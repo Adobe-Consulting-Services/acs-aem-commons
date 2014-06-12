@@ -36,6 +36,7 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
@@ -89,6 +90,11 @@ import java.util.Map;
 public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor, EventHandler, ClusterAware {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 
+    private enum ReplicatedAt {
+        CURRENT_TIME,
+        PACKAGE_LAST_MODIFIED;
+    }
+
     private static final String[] DEFAULT_REPLICATION_STATUS_NODE_TYPES = {
             ReplicationStatus.NODE_TYPE,
             "cq:PageContent",
@@ -133,6 +139,22 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
             description = "The 'name' to set the 'replicated by' property to. Defaults to: " + DEFAULT_REPLICATED_BY,
             value = DEFAULT_REPLICATED_BY)
     public static final String PROP_REPLICATED_BY = "replicated-by";
+
+    private static final ReplicatedAt DEFAULT_REPLICATED_AT = ReplicatedAt.PACKAGE_LAST_MODIFIED;
+    private ReplicatedAt replicatedAt = DEFAULT_REPLICATED_AT;
+    @Property(label = "Replicated At",
+            description = "The 'value' used to set the 'replicated at' property. [ Default: Package Last Modified ]",
+            options = {
+                    @PropertyOption(
+                        name = "PACKAGE_LAST_MODIFIED",
+                        value = "Package Last Modified"
+                    ),
+                    @PropertyOption(
+                        name = "CURRENT_TIME",
+                        value = "Current Time"
+                    )
+            })
+    public static final String PROP_REPLICATED_AT = "replicated-at";
 
     @Override
     public final void handleEvent(final Event event) {
@@ -283,25 +305,39 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
      */
     private Calendar getJcrPackageLastModified(final ResourceResolver resourceResolver,
                                                final JcrPackage jcrPackage) throws RepositoryException {
-        final String path = jcrPackage.getNode().getPath();
-        final Resource resource = resourceResolver.getResource(path).getChild(JcrConstants.JCR_CONTENT);
-        final ValueMap properties = resource.adaptTo(ValueMap.class);
+        if (ReplicatedAt.CURRENT_TIME.equals(this.replicatedAt)) {
+            return Calendar.getInstance();
+        } else {
+            final String path = jcrPackage.getNode().getPath();
+            final Resource resource = resourceResolver.getResource(path).getChild(JcrConstants.JCR_CONTENT);
+            final ValueMap properties = resource.adaptTo(ValueMap.class);
 
-        return properties.get(JcrConstants.JCR_LASTMODIFIED, Calendar.class);
+            return properties.get(JcrConstants.JCR_LASTMODIFIED, Calendar.class);
+        }
     }
 
     @Activate
     private void activate(final Map<String, String> config) throws LoginException {
-        log.info("Activating the ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)");
+        log.trace("Activating the ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)");
 
         this.adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
         this.replicatedBy = PropertiesUtil.toString(config.get(PROP_REPLICATED_BY), DEFAULT_REPLICATED_BY);
 
+        String tmp = PropertiesUtil.toString(config.get(PROP_REPLICATED_AT), "");
+        try {
+            this.replicatedAt = ReplicatedAt.valueOf(tmp);
+        } catch (IllegalArgumentException ex) {
+            this.replicatedAt = ReplicatedAt.PACKAGE_LAST_MODIFIED;
+        }
+
         this.replicationStatusNodeTypes = PropertiesUtil.toStringArray(config.get(PROP_REPLICATION_STATUS_NODE_TYPES),
                 DEFAULT_REPLICATION_STATUS_NODE_TYPES);
 
-        log.info("Replication Status Node Types: [ {} ]", StringUtils.join(this.replicationStatusNodeTypes, ", "));
+        log.info("Package Replication Status - Replicated By: [ {} ]", this.replicatedBy);
+        log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
+        log.info("Package Replication Status - Node Types: [ {} ]",
+                StringUtils.join(this.replicationStatusNodeTypes, ", "));
     }
 
     @Deactivate
