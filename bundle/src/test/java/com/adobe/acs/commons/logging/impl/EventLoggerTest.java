@@ -28,9 +28,6 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by mark.j.adamcin on 6/5/14.
- */
 public class EventLoggerTest {
 
     @Test
