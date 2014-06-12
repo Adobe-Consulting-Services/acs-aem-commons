@@ -24,6 +24,7 @@ import java.util.Hashtable;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
@@ -34,7 +35,7 @@ import org.osgi.service.component.ComponentContext;
 
 import ch.qos.logback.core.Appender;
 
-@Component(metatype = true, configurationFactory = true,
+@Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
         label = "ACS AEM Commons - Syslog Appender",
         description = "Logback appender to send messages using Syslog")
 public final class SyslogAppender {
