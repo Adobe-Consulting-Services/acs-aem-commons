@@ -26,6 +26,8 @@ import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.event.EventUtil;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -37,21 +39,18 @@ import java.util.*;
 /**
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.
  */
-@Component(metatype = true, configurationFactory = true, label = "ACS AEM Commons - Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
-@Service
-public class EventLogger implements EventHandler {
+@Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
+    label = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
+public class JsonEventLogger implements EventHandler {
 
     /**
      * Use this logger for tracing this service instance's own lifecycle.
      */
-    private static final Logger log = LoggerFactory.getLogger(EventLogger.class);
+    private static final Logger log = LoggerFactory.getLogger(JsonEventLogger.class);
 
     /** We add this timestamp property to all logged events */
-    public static final String PROP_ACS_TIMESTAMP = "_acs_time";
+    private static final String PROP_TIMESTAMP = "_timestamp";
 
-    private static final String[] DEFAULT_TOPICS = new String[0];
-    private static final String DEFAULT_FILTER = "(event.topics=*)";
-    private static final String DEFAULT_CATEGORY = "";
     private static final String DEFAULT_LEVEL = "INFO";
 
     /**
@@ -72,14 +71,14 @@ public class EventLogger implements EventHandler {
         }
     }
 
-    @Property(label = "Event Topics", cardinality = Integer.MAX_VALUE, value = {},
+    @Property(label = "Event Topics", unbounded = PropertyUnbounded.ARRAY,
             description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
     private static final String OSGI_TOPICS = EventConstants.EVENT_TOPIC;
 
-    @Property(label = "Event Filter", value = DEFAULT_FILTER, description = "LDAP-style event filter query. Do not leave this empty. A safe default value is (event.topics=*) which matches all valid events.")
+    @Property(label = "Event Filter", description = "LDAP-style event filter query. Leave blank to log all events to the configured topic or topics.")
     private static final String OSGI_FILTER = EventConstants.EVENT_FILTER;
 
-    @Property(label = "Logger Name", value = DEFAULT_CATEGORY, description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
+    @Property(label = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
     private static final String OSGI_CATEGORY = "event.logger.category";
 
     @Property(label = "Logger Level", value = DEFAULT_LEVEL, options = {
@@ -91,10 +90,11 @@ public class EventLogger implements EventHandler {
     }, description = "Select the logging level the messages should be sent with.")
     private static final String OSGI_LEVEL = "event.logger.level";
 
-    private String[] topics = DEFAULT_TOPICS;
+    private String[] topics;
     private String filter;
     private String category;
     private String level;
+    private boolean valid;
 
     /**
      * Suppress the PMD.LoggerIsNotStaticFinal check because the point is to have an
@@ -104,6 +104,8 @@ public class EventLogger implements EventHandler {
     @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     private Logger eventLogger;
     private LogLevel logLevel;
+
+    private ServiceRegistration registration;
 
     /**
      * Writes an event to the configured logger using the configured log level
@@ -164,7 +166,7 @@ public class EventLogger implements EventHandler {
             Object converted = convertValue(val);
             obj.put(prop, converted == null ? val : converted);
         }
-        obj.put(PROP_ACS_TIMESTAMP, ISO8601.format(Calendar.getInstance()));
+        obj.put(PROP_TIMESTAMP, ISO8601.format(Calendar.getInstance()));
         return obj.toString();
     }
 
@@ -247,31 +249,42 @@ public class EventLogger implements EventHandler {
     //
 
     @Activate
-    protected void activate(Map<String, Object> props) {
+    protected void activate(ComponentContext ctx) {
         log.trace("[activate] entered activate method.");
-        this.topics = PropertiesUtil.toStringArray(props.get(OSGI_TOPICS), DEFAULT_TOPICS);
-        this.filter = PropertiesUtil.toString(props.get(OSGI_FILTER), DEFAULT_FILTER);
-        this.category = PropertiesUtil.toString(props.get(OSGI_CATEGORY), DEFAULT_CATEGORY).trim();
+        Dictionary<?, ?> props = ctx.getProperties();
+        this.topics = PropertiesUtil.toStringArray(props.get(OSGI_TOPICS));
+        this.filter = PropertiesUtil.toString(props.get(OSGI_FILTER), "").trim();
+        this.category = PropertiesUtil.toString(props.get(OSGI_CATEGORY), "").trim();
         this.level = PropertiesUtil.toString(props.get(OSGI_LEVEL), DEFAULT_LEVEL);
 
         this.logLevel = LogLevel.fromProperty(this.level);
-        if (!this.category.isEmpty()) {
+
+        this.valid = (this.topics != null && this.topics.length > 0 && !this.category.isEmpty());
+
+        if (this.valid) {
             this.eventLogger = LoggerFactory.getLogger(this.category);
+            Dictionary<String, Object> registrationProps = new Hashtable<String, Object>();
+            registrationProps.put(EventConstants.EVENT_TOPIC, this.topics);
+            if (!this.filter.isEmpty()) {
+                registrationProps.put(EventConstants.EVENT_FILTER, this.filter);
+            }
+            this.registration = ctx.getBundleContext().registerService(EventHandler.class.getName(), this, registrationProps);
         } else {
-            this.eventLogger = null;
+            log.warn("Not registering invalid event handler. Check configuration.");
         }
+
         log.debug("[activate] logger state: {}", this);
     }
 
     @Deactivate
     protected void deactivate() {
         log.trace("[deactivate] entered deactivate method.");
+        if (this.registration != null) {
+            this.registration.unregister();
+            this.registration = null;
+        }
         this.eventLogger = null;
         this.logLevel = null;
-        this.topics = DEFAULT_TOPICS;
-        this.filter = DEFAULT_FILTER;
-        this.category = DEFAULT_CATEGORY;
-        this.level = DEFAULT_LEVEL;
     }
 
     //
@@ -281,7 +294,8 @@ public class EventLogger implements EventHandler {
     @Override
     public String toString() {
         return "EventLogger{" +
-                "topics=" + Arrays.toString(topics) +
+                "valid=" + valid +
+                ", topics=" + Arrays.toString(topics) +
                 ", filter='" + filter + '\'' +
                 ", category='" + category + '\'' +
                 ", level='" + level + '\'' +
