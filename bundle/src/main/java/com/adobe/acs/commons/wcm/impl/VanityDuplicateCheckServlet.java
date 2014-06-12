@@ -53,36 +53,28 @@ import com.day.cq.wcm.api.NameConstants;
         paths = { "/bin/wcm/duplicateVanityCheck" },
         methods = { "GET" }
 )
-
-public class VanityDuplicateCheckServlet extends SlingSafeMethodsServlet{
+public final class VanityDuplicateCheckServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(VanityDuplicateCheckServlet.class);
 
-    /**
-     * Overriden doGet method, runs a query to see if the vanity URL entered by the user in already in use.
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException
-     */
     @Override
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
 
         try {
             final ResourceResolver resolver = request.getResourceResolver();
             final String vanityPath = request.getParameter("vanityPath");
             final String pagePath = request.getParameter("pagePath");
-            log.debug("vanity path parameter passed is {}", vanityPath);
-            log.debug("page path parameter passed is {}", pagePath);
+            log.debug("vanity path parameter passed is {}; page path parameter passed is {}", vanityPath, pagePath);
 
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            
+
             JSONWriter jsonWriter = new JSONWriter(response.getWriter());
             jsonWriter.array();
 
             if (StringUtils.isNotBlank(vanityPath)) {
-                String xpath = "//element(*)[" + NameConstants.PN_SLING_VANITY_PATH + "='"+ vanityPath + "']";
+                String xpath = "//element(*)[" + NameConstants.PN_SLING_VANITY_PATH + "='" + vanityPath + "']";
                 @SuppressWarnings("deprecation")
                 Iterator<Resource> resources = resolver.findResources(xpath, Query.XPATH);
                 while (resources.hasNext()) {

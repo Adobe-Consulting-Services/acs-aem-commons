@@ -45,7 +45,7 @@ import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.polling.importer.Importer;
 
 @SlingServlet(paths = "/bin/acs-commons/custom-importers")
-public class CustomPollingImporterListServlet extends SlingSafeMethodsServlet {
+public final class CustomPollingImporterListServlet extends SlingSafeMethodsServlet {
 
     private static final long serialVersionUID = -4921197948987912363L;
 

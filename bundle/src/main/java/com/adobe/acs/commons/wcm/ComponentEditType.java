@@ -29,7 +29,7 @@ import org.apache.commons.lang.StringUtils;
  * public static final Type CUSTOM = new ComponentEditType.Type("CUSTOM");
  * }
  */
-public class ComponentEditType {
+public final class ComponentEditType {
     public static final Type CHART = new Type("CHART");
     public static final Type IMAGE = new Type("IMAGE");
     public static final Type VIDEO = new Type("VIDEO");

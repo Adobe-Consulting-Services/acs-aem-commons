@@ -37,8 +37,11 @@ import tldgen.Function;
 /**
  * JSP functions for working with MultiFieldPanel widget.
  */
-public class MultiFieldPanelFunctions {
+public final class MultiFieldPanelFunctions {
     private static final Logger log = LoggerFactory.getLogger(MultiFieldPanelFunctions.class);
+
+    private MultiFieldPanelFunctions() {
+    }
 
     /**
      * Extract the value of a MultiFieldPanel property into a list of maps. Will never return

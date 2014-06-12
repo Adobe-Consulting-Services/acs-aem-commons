@@ -45,12 +45,13 @@ import org.slf4j.LoggerFactory;
 import com.day.cq.polling.importer.ImportException;
 import com.day.cq.polling.importer.Importer;
 
-@Component(label = "ACS AEM Commons - File Importer", description = "Importer which can import a file from the file system into the content repository.",
+@Component(label = "ACS AEM Commons - File Importer",
+    description = "Importer which can import a file from the file system into the content repository.",
     metatype = true)
 @Service
 @Property(label = "Display Name", description = "Label which will be displayed in the Polling Importer Add... dialog",
         name = "displayName", value = "File")
-public class FileImporter implements Importer {
+public final class FileImporter implements Importer {
 
     private static final Logger log = LoggerFactory.getLogger(FileImporter.class);
 
@@ -72,7 +73,7 @@ public class FileImporter implements Importer {
     }
 
     @Override
-    public void importData(String schemeValue, String dataSource, Resource target) throws ImportException {
+    public void importData(String schemeValue, String dataSource, Resource target) {
         if (scheme.equals(schemeValue)) {
             File file = new File(dataSource);
             if (file.exists()) {
@@ -95,7 +96,8 @@ public class FileImporter implements Importer {
                             targetName = node.getName();
                             Calendar nodeLastMod = JcrUtils.getLastModified(node);
                             if (!nodeLastMod.before(fileLastMod)) {
-                                log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.", dataSource, target);
+                                log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
+                                        dataSource, target);
                                 return;
                             }
                         } else {
@@ -106,7 +108,8 @@ public class FileImporter implements Importer {
                                 Node targetNode = targetParent.getNode(targetName);
                                 Calendar nodeLastMod = JcrUtils.getLastModified(targetNode);
                                 if (!nodeLastMod.before(fileLastMod)) {
-                                    log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.", dataSource, targetNode.getPath());
+                                    log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
+                                            dataSource, targetNode.getPath());
                                     return;
                                 }
                             }

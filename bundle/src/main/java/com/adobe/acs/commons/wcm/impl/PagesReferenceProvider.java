@@ -49,7 +49,7 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
         description = "Reference provider that searches for  pages referenced inside any given page resource",
         policy = ConfigurationPolicy.REQUIRE)
 @Service
-public class PagesReferenceProvider implements ReferenceProvider {
+public final class PagesReferenceProvider implements ReferenceProvider {
 
     private static final String TYPE_PAGE = "page";
     private static final String DEFAULT_PAGE_ROOT_PATH = "/content/";
@@ -65,7 +65,7 @@ public class PagesReferenceProvider implements ReferenceProvider {
             + Pattern.quote(pageRootPath) + ")(\\S|$)");
 
     @Activate
-    protected final void activate(Map<String, Object> props) {
+    protected void activate(Map<String, Object> props) {
         pageRootPath =
                 PropertiesUtil.toString(props.get(PAGE_ROOT_PATH),
                         DEFAULT_PAGE_ROOT_PATH);
@@ -76,7 +76,7 @@ public class PagesReferenceProvider implements ReferenceProvider {
     }
 
     @Override
-    public final List<Reference> findReferences(Resource resource) {
+    public List<Reference> findReferences(Resource resource) {
         List<Reference> references = new ArrayList<Reference>();
 
         ResourceResolver resolver = resource.getResourceResolver();
@@ -84,7 +84,7 @@ public class PagesReferenceProvider implements ReferenceProvider {
 
         Set<Page> pages = new HashSet<Page>();
         search(resource, pages, pageManager);
-        
+
         for (Page page: pages) {
             references.add(getReference(page));
         }
@@ -118,7 +118,7 @@ public class PagesReferenceProvider implements ReferenceProvider {
     }
 
     private Reference getReference(Page page) {
-        return new Reference(TYPE_PAGE, 
+        return new Reference(TYPE_PAGE,
                 String.format("%s (Page)", page.getName()),
                 page.getContentResource(),
                 getLastModifiedTimeOfResource(page));

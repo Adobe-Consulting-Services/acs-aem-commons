@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TextUtil {
+public final class TextUtil {
     
     private static final Pattern RICH_TEXT_PATTERN = Pattern.compile("<[^>]+>");
 

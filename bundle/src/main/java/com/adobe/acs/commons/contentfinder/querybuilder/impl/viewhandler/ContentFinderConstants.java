@@ -55,9 +55,13 @@ public final class ContentFinderConstants {
     public static final int DEFAULT_OFFSET = 0;
     public static final int DEFAULT_LIMIT = 20;
 
-    static final String[] QUERYBUILDER_BLACKLIST = new String[] { "_dc", "ck", "_charset_", "wcmmode",
-            CF_MIMETYPE, CF_FULLTEXT, CF_LIMIT, CONVERT_TO_QUERYBUILDER_KEY };
-    static final String[] PROPERTY_BLACKLIST = new String[] { "_dc", "ck", "_charset_", "wcmmode", CF_FULLTEXT,
-            CF_LIMIT, CONVERT_TO_QUERYBUILDER_KEY };
+    static final String[] QUERYBUILDER_BLACKLIST = new String[] {
+            "_dc", "ck", "_charset_", "wcmmode",
+            CF_MIMETYPE, CF_FULLTEXT, CF_LIMIT, CONVERT_TO_QUERYBUILDER_KEY
+    };
+    static final String[] PROPERTY_BLACKLIST = new String[] {
+            "_dc", "ck", "_charset_", "wcmmode", CF_FULLTEXT,
+            CF_LIMIT, CONVERT_TO_QUERYBUILDER_KEY
+    };
 
 }

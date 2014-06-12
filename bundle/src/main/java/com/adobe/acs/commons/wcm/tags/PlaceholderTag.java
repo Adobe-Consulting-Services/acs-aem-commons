@@ -46,19 +46,15 @@ import com.day.cq.wcm.foundation.Placeholder;
  *
  */
 @Tag(bodyContentType = BodyContentType.JSP, value = "placeholder")
-public class PlaceholderTag extends BodyTagSupport {
+public final class PlaceholderTag extends BodyTagSupport {
 
     private static final long serialVersionUID = -2497240151981056169L;
 
     private static final String DEFAULT_CLASS_NAME = "cq-text-placeholder";
 
-    private transient ComponentHelper componentHelper;
-
-    public PlaceholderTag() {
-        // NOTE - not a service lookup because (right now) ComponentHelperImpl is
-        // not configured.
-        componentHelper = new ComponentHelperImpl();
-    }
+    // NOTE - not a service lookup because (right now) ComponentHelperImpl is
+    // not configured.
+    private transient ComponentHelper componentHelper = new ComponentHelperImpl();
 
     private String classNames;
 

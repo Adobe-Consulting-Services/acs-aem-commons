@@ -20,7 +20,12 @@
 package com.adobe.acs.commons.util.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
@@ -73,7 +78,7 @@ import java.util.Set;
         )
 })
 @Service(Servlet.class)
-public class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
+public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
     protected static final Logger log = LoggerFactory.getLogger(DelegatingServletFactoryImpl.class);
     private static final String REQUEST_ATTR_DELEGATION_HISTORY = DelegatingServletFactoryImpl.class.getName() + "_History";
 
