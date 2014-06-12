@@ -304,8 +304,9 @@ public final class ContentFinderHitBuilder {
         if (StringUtils.equals(resource.getName(), JcrConstants.JCR_CONTENT)) {
             final Resource parent = resource.getParent();
             if (parent != null) {
-                if (parent.adaptTo(Page.class) != null) {
-                    return parent.adaptTo(Page.class);
+                Page parentPage = parent.adaptTo(Page.class);
+                if (parentPage != null) {
+                    return parentPage;
                 }
             }
         }
