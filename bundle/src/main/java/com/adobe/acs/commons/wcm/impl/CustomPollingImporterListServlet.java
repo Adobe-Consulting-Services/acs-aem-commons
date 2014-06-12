@@ -44,11 +44,12 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.polling.importer.Importer;
 
-@SuppressWarnings("serial")
 @SlingServlet(paths = "/bin/acs-commons/custom-importers")
 public class CustomPollingImporterListServlet extends SlingSafeMethodsServlet {
 
-    private ServiceTracker tracker;
+    private static final long serialVersionUID = -4921197948987912363L;
+
+    private transient ServiceTracker tracker;
 
     @Activate
     protected void activate(ComponentContext ctx) throws InvalidSyntaxException {
