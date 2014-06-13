@@ -124,6 +124,7 @@
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>2.12.1</version>
                     <configuration>
+                        <linkXRef>false</linkXRef>
                         <configLocation>https://raw.github.com/Adobe-Consulting-Services/coding-standards/master/checkstyle/checks.xml</configLocation>
                         <includeResources>false</includeResources>
                         <includeTestResources>false</includeTestResources>

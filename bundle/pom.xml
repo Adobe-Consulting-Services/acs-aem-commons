@@ -55,16 +55,6 @@
                             org.apache.sling.models.*;resolution:=optional,
                             *
                         </Import-Package>
-                        <Include-Resource>
-                            {maven-resources},
-                            META-INF/wcmmode.tld=target/classes/META-INF/wcmmode.tld,
-                            META-INF/audio.tld=target/classes/META-INF/audio.tld,
-                            META-INF/dhlm.tld=target/classes/META-INF/dhlm.tld,
-                            META-INF/xss.tld=target/classes/META-INF/xss.tld,
-                            META-INF/dam.tld=target/classes/META-INF/dam.tld,
-                            META-INF/widgets.tld=target/classes/META-INF/widgets.tld,
-                            META-INF/wcm.tld=target/classes/META-INF/wcm.tld
-                        </Include-Resource>
                     </instructions>
                 </configuration>
             </plugin>
