@@ -34,7 +34,7 @@ import ch.qos.logback.core.Appender;
 
 @Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
         label = "ACS AEM Commons - Syslog Appender",
-        description = "Logback appender to send messages using Syslog. When testing this configuration, you should verify that the remote syslog daemon accepts requests from an external source. Experience shows that, by default, syslog daemons usually deny requests coming via a network connection.")
+        description = "Logback appender to send messages using Syslog")
 public final class SyslogAppender {
 
     private static final String ROOT = "ROOT";
@@ -59,17 +59,8 @@ public final class SyslogAppender {
             value = DEFAULT_SUFFIX_PATTERN)
     private static final String PROP_SUFFIX_PATTERN = "suffix.pattern";
 
-    @Property(label = "Syslog Facility", value = DEFAULT_FACILITY, options = {
-            @PropertyOption(name = "USER", value = "USER"),
-            @PropertyOption(name = "LOCAL0", value = "LOCAL0"),
-            @PropertyOption(name = "LOCAL1", value = "LOCAL1"),
-            @PropertyOption(name = "LOCAL2", value = "LOCAL2"),
-            @PropertyOption(name = "LOCAL3", value = "LOCAL3"),
-            @PropertyOption(name = "LOCAL4", value = "LOCAL4"),
-            @PropertyOption(name = "LOCAL5", value = "LOCAL5"),
-            @PropertyOption(name = "LOCAL6", value = "LOCAL6"),
-            @PropertyOption(name = "LOCAL7", value = "LOCAL7")
-    }, description = "The Syslog Facility is meant to identify the source of a message, separately from any context included in the Suffix Pattern.")
+    @Property(label = "Syslog Facility", value = DEFAULT_FACILITY, propertyPrivate = true,
+            description = "The Syslog Facility is meant to identify the source of a message, separately from any context included in the Suffix Pattern. The facility option must be set to one of the strings KERN, USER, MAIL, DAEMON, AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, NTP, AUDIT, ALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7. Case is not important.")
     private static final String PROP_FACILITY = "facility";
 
     @Property(label = "Stack Trace Pattern", description = "Logback Pattern for customizing the string appearing just before each stack trace line. The default value for this property is a single tab character.")
