@@ -19,3 +19,5 @@ Using this OSGi configured Logback appender, you can easily send log messages to
 Configure a new instance of the `com.adobe.acs.commons.logging.impl.SyslogAppender` with the host and port of your syslog server. To log all messages, leave the logger names field as `ROOT`; otherwise specify the specific logger names you want to send to the server.
 
 ![syslog configuration]({{ site.baseurl }}/images/syslog/config.png)
+
+When testing this configuration, you should verify that the remote syslog daemon accepts requests from an external source. Experience shows that, by default, syslog daemons usually deny requests coming via a network connection.
