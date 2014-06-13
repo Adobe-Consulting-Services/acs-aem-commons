@@ -22,12 +22,9 @@ package com.adobe.acs.commons.logging.impl;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
+import ch.qos.logback.core.net.SyslogAppenderBase;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -37,7 +34,7 @@ import ch.qos.logback.core.Appender;
 
 @Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
         label = "ACS AEM Commons - Syslog Appender",
-        description = "Logback appender to send messages using Syslog")
+        description = "Logback appender to send messages using Syslog. When testing this configuration, you should verify that the remote syslog daemon accepts requests from an external source. Experience shows that, by default, syslog daemons usually deny requests coming via a network connection.")
 public final class SyslogAppender {
 
     private static final String ROOT = "ROOT";
@@ -45,6 +42,8 @@ public final class SyslogAppender {
     private static final int DEFAULT_PORT = -1;
 
     private static final String DEFAULT_SUFFIX_PATTERN = "[%thread] %-5level %logger{36} - %msg%n";
+
+    private static final String DEFAULT_FACILITY = "USER";
 
     @Property(label = "Host", description = "Host of Syslog server")
     private static final String PROP_HOST = "host";
@@ -60,6 +59,26 @@ public final class SyslogAppender {
             value = DEFAULT_SUFFIX_PATTERN)
     private static final String PROP_SUFFIX_PATTERN = "suffix.pattern";
 
+    @Property(label = "Syslog Facility", value = DEFAULT_FACILITY, options = {
+            @PropertyOption(name = "USER", value = "USER"),
+            @PropertyOption(name = "LOCAL0", value = "LOCAL0"),
+            @PropertyOption(name = "LOCAL1", value = "LOCAL1"),
+            @PropertyOption(name = "LOCAL2", value = "LOCAL2"),
+            @PropertyOption(name = "LOCAL3", value = "LOCAL3"),
+            @PropertyOption(name = "LOCAL4", value = "LOCAL4"),
+            @PropertyOption(name = "LOCAL5", value = "LOCAL5"),
+            @PropertyOption(name = "LOCAL6", value = "LOCAL6"),
+            @PropertyOption(name = "LOCAL7", value = "LOCAL7")
+    }, description = "The Syslog Facility is meant to identify the source of a message, separately from any context included in the Suffix Pattern.")
+    private static final String PROP_FACILITY = "facility";
+
+    @Property(label = "Stack Trace Pattern", description = "Logback Pattern for customizing the string appearing just before each stack trace line. The default value for this property is a single tab character.")
+    private static final String PROP_STACK_TRACE_PATTERN = "stack.trace.pattern";
+
+    @Property(label = "Exclude Throwables", description = "Set to true to cause stack trace data associated with a Throwable to be omitted. By default, this is set to false so that stack trace data is sent to the syslog server.",
+            boolValue = false)
+    private static final String PROP_THROWABLE_EXCLUDED = "throwable.excluded";
+
     private ch.qos.logback.classic.net.SyslogAppender appender;
 
     private ServiceRegistration appenderRegistration;
@@ -72,11 +91,17 @@ public final class SyslogAppender {
                 .toString(properties.get(PROP_SUFFIX_PATTERN), DEFAULT_SUFFIX_PATTERN);
         int port = PropertiesUtil.toInteger(properties.get(PROP_PORT), DEFAULT_PORT);
         String host = PropertiesUtil.toString(properties.get(PROP_HOST), null);
+        String facility = PropertiesUtil.toString(properties.get(PROP_FACILITY), DEFAULT_FACILITY);
+        String stackTracePattern = PropertiesUtil.toString(properties.get(PROP_STACK_TRACE_PATTERN), "");
+        boolean throwableExcluded = PropertiesUtil.toBoolean(properties.get(PROP_THROWABLE_EXCLUDED), false);
 
         if (host == null || port == -1) {
             throw new IllegalArgumentException(
                     "Syslog Appender not configured correctly. Both host and port need to be provided.");
         }
+
+        // throws a descriptive IllegalArgumentException if facility is not valid.
+        int checkFacility = SyslogAppenderBase.facilityStringToint(facility);
 
         BundleContext bundleContext = ctx.getBundleContext();
 
@@ -85,8 +110,14 @@ public final class SyslogAppender {
         appender.setSyslogHost(host);
         appender.setPort(port);
 
-        appender.setFacility("USER");
+        appender.setFacility(facility);
         appender.setSuffixPattern(suffixPattern);
+
+        if (StringUtils.isNotEmpty(stackTracePattern)) {
+            appender.setStackTracePattern(stackTracePattern);
+        }
+
+        appender.setThrowableExcluded(throwableExcluded);
 
         Dictionary<String, Object> props = new Hashtable<String, Object>();
         props.put("loggers", loggers);
