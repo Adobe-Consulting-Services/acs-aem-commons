@@ -40,6 +40,10 @@ import com.day.image.Layer;
 @Property(name = "process.label", value = "Matte Rendition")
 public final class MatteRenditionProcess extends AbstractRenditionModifyingProcess {
 
+    private static final int RADIX_HEX = 16;
+    private static final int COLOR_STRING_LENGTH = 6;
+    private static final int DEFAULT_WIDTH = 1000;
+    private static final int DEFAULT_HEIGHT = 1000;
     private static final Logger log = LoggerFactory.getLogger(MatteRenditionProcess.class);
 
     enum VerticalPosition {
@@ -121,12 +125,12 @@ public final class MatteRenditionProcess extends AbstractRenditionModifyingProce
     private Color parseColor(String str, Color defaultColor) {
         if ("transparent".equals(str)) {
             return null;
-        } else if (str == null || str.length() != 6) {
+        } else if (str == null || str.length() != COLOR_STRING_LENGTH) {
             return defaultColor;
         }
-        int r = Integer.parseInt(str.substring(0, 2), 16);
-        int g = Integer.parseInt(str.substring(2, 4), 16);
-        int b = Integer.parseInt(str.substring(4, 6), 16);
+        int r = Integer.parseInt(str.substring(0, 2), RADIX_HEX);
+        int g = Integer.parseInt(str.substring(2, 4), RADIX_HEX);
+        int b = Integer.parseInt(str.substring(4, 6), RADIX_HEX);
         return new Color(r, g, b);
     }
 
@@ -139,7 +143,7 @@ public final class MatteRenditionProcess extends AbstractRenditionModifyingProce
             return d;
         }
         // default value(s)
-        return new Integer[] { 1000, 1000 };
+        return new Integer[] { DEFAULT_WIDTH, DEFAULT_HEIGHT };
     }
 
 }
