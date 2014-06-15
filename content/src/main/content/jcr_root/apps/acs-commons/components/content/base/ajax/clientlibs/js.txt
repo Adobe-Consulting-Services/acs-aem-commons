@@ -1,3 +1,4 @@
 #base=js
 
+spin.min.js
 ajax.js
