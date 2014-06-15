@@ -78,9 +78,10 @@
                 <configuration>
                     <sourceJsFolder>src/main/content/jcr_root</sourceJsFolder>
                     <failOnIssues>true</failOnIssues>
-                    <predefinedVars>jQuery,window,$</predefinedVars>
+                    <predefinedVars>jQuery,window,$,Spinner</predefinedVars>
                     <excludes>
                         <exclude>**/extensions/**/*.js</exclude>
+                        <exclude>**/*min.js</exclude>
                     </excludes>
                 </configuration>
             </plugin>

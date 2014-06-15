@@ -17,6 +17,10 @@
  * limitations under the License.
  * #L%
  */
-.acs-ajax-component {
-    display: none;
+
+.acs-ajax-loader {
+	position: relative;
+	z-index: 20000;
+	min-height: 50px;
+	display: block;
 }
