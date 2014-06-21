@@ -71,11 +71,6 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
         });
     };
 
-    /**
-     * Get and refresh the status of index nodes
-     *
-     * @param index
-     */
     $scope.get = function(index) {
 
         $http({
@@ -126,7 +121,7 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
         }());
 
         if(!data) {
-            $scope.addNotification('notice', 'NOTICE', 'Use checkboxes to select one or more indexes for bulk reindexing');
+            $scope.addNotification('help', 'HELP', 'Select one or more checkboxes in the index table to bulk reindex');
             return;
         }
 

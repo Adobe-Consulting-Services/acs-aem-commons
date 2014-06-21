@@ -22,6 +22,7 @@
 
     pageContext.setAttribute("pagePath", resourceResolver.map(currentPage.getPath()));
     pageContext.setAttribute("resourcePath", resourceResolver.map(resource.getPath()));
+    pageContext.setAttribute("hasOakIndex", resourceResolver.getResource("/oak:index") != null);
 
 %><!doctype html><html>
 <head>
@@ -37,19 +38,21 @@
 
 <body id="acs-commons-oak-index-manager-app">
 
-<header class="top">
+    <header class="top">
 
-    <div class="logo">
-        <a href="/"><i class="icon-marketingcloud medium"></i></a>
-    </div>
+        <div class="logo">
+            <a href="/"><i class="icon-marketingcloud medium"></i></a>
+        </div>
 
-    <nav class="crumbs">
-        <a href="/miscadmin">Tools</a>
-        <a href="${pagePath}.html">Oak Index Manager</a>
-    </nav>
-</header>
+        <nav class="crumbs">
+            <a href="/miscadmin">Tools</a>
+            <a href="${pagePath}.html">Oak Index Manager</a>
+        </nav>
+    </header>
 
-<div class="page" role="main"
+<c:choose>
+    <c:when test="${hasOakIndex}">
+        <div class="page" role="main"
      ng-controller="MainCtrl"
      ng-init="app.resource = '${resourcePath}'; init();">
 
@@ -121,18 +124,28 @@
                     </tr>
                 </tbody>
             </table>
-            <br/>
-            <br/>
-
     </div>
 </div>
 
-<cq:includeClientLib js="acs-commons.oak-index-manager.app"/>
+    <cq:includeClientLib js="acs-commons.oak-index-manager.app"/>
 
-<%-- Register angular app; Decreases chances of collisions w other angular apps on the page (ex. via injection) --%>
-<script type="text/javascript">
-    angular.bootstrap(document.getElementById('acs-commons-oak-index-manager-app'),
-            ['oakIndexManager']);
-</script>
+    <%-- Register angular app; Decreases chances of collisions w other angular apps on the page (ex. via injection) --%>
+    <script type="text/javascript">
+        angular.bootstrap(document.getElementById('acs-commons-oak-index-manager-app'),
+                ['oakIndexManager']);
+    </script>
+
+</div>
+    </c:when>
+    <c:otherwise>
+        <div class="unsupported large alert notice">
+            <strong>Unsupported version of AEM</strong>
+
+            <div>
+                ACS AEM Commons Oak Index Manager requires an Apache Jackrabbit Oak based repository.
+            </div>
+        </div>
+    </c:otherwise>
+</c:choose>
 </body>
 </html>
