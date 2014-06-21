@@ -20,7 +20,6 @@
 
 /*global angular: false */
 
-
 var explainQueryApp = angular.module('oakIndexManager',[]);
 
 explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
