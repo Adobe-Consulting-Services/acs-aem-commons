@@ -23,6 +23,7 @@
     pageContext.setAttribute("pagePath", resourceResolver.map(currentPage.getPath()));
     pageContext.setAttribute("resourcePath", resourceResolver.map(resource.getPath()));
     pageContext.setAttribute("hasOakIndex", resourceResolver.getResource("/oak:index") != null);
+    pageContext.setAttribute("favicon", component.getPath() + "/clientlibs/images/favicon.ico");
 
 %><!doctype html><html>
 <head>
@@ -31,7 +32,7 @@
 
     <title>Oak Index Manager | ACS AEM Commons</title>
 
-    <link rel="shortcut icon" href=""/>
+    <link rel="shortcut icon" href="${favicon}"/>
 
     <cq:includeClientLib css="acs-commons.oak-index-manager.app"/>
 </head>
@@ -79,8 +80,10 @@
             </div>
 
             <div style="float: right;">
-                <div ng-show="app.running" class="running-indicator spinner large"></div>
-                <button class="primary" ng-click="bulkReindex()">Bulk Reindex</button>
+                <div ng-show="app.running"
+                     class="running-indicator spinner large"></div>
+                <button class="primary"
+                        ng-click="bulkReindex( ( filtered | indexCheckedFilter : true ) )">Bulk Reindex</button>
             </div>
 
             <table class="data index-table">
@@ -98,29 +101,46 @@
                         <th>Reindex</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    <tr ng-repeat="index in filteredIndexes = ( oakIndex.indexes | filter:{ $: keyword } )"
-                        ng-class="{ reindexing : index.reindex }">
-                        <td><label><input type="checkbox" ng-model="index.checked"><span></span></label></td>
-                        <td>{{ index.name }}</td>
+                    <tr ng-repeat="(name, index) in filtered = ( indexes | indexKeywordFilter : keyword )"
+                        ng-class="{ reindexing: index.reindex }">
+
                         <td>
-                            <div ng-repeat="declaringNodeType in index.declaringNodeTypes">{{ declaringNodeType
-                                }} </div>
+                            <label><input type="checkbox" ng-model="index.checked"><span></span></label>
                         </td>
                         <td>
-                            <div ng-repeat="propertyName in index.propertyNames">{{ propertyName
-                                }} </div></td>
+                            {{ name }}
+                        </td>
                         <td>
-                            <div ng-repeat="includePropertyType in index.includePropertyTypes">{{ includePropertyType
-                                }} </div></td>
+                            <div ng-repeat="declaringNodeType in index.declaringNodeTypes">{{ declaringNodeType }}</div>
+                        </td>
                         <td>
-                            <div ng-repeat="excludePropertyName in index.excludePropertyNames">{{ excludePropertyName
-                                }} </div></td>
-                        <td>{{ index.type }}</td>
-                        <td>{{ index.unique }}</td>
-                        <td>{{ index.async }}</td>
-                        <td><a href="#" ng-click="reindex(index)">Reindex</a></td>
+                            <div ng-repeat="propertyName in index.propertyNames">{{ propertyName }}</div>
+                        </td>
+                        <td>
+                            <div ng-repeat="includePropertyType in index.includePropertyTypes">{{
+                                includePropertyType }}</div>
+                        </td>
+                        <td>
+                            <div ng-repeat="excludePropertyName in index.excludePropertyNames">{{
+                                excludePropertyName }}</div>
+                        </td>
+                        <td>
+                            {{ index.type }}
+                        </td>
+                        <td>
+                            {{ index.unique }}
+                        </td>
+                        <td>
+                            {{ index.async }}
+                        </td>
+                        <td class="reindex-status">
+                            <a href="#"
+                               class="icon-refresh reindex-button"
+                               ng-show="!index.reindex"
+                               ng-click="reindex(index)">\U00F0AB</a>
+                            <div ng-show="index.reindex" class="spinner"></div>
+                        </td>
                     </tr>
                 </tbody>
             </table>

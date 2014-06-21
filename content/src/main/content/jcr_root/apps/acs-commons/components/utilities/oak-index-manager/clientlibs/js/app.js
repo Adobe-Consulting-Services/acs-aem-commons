@@ -20,170 +20,207 @@
 
 /*global angular: false */
 
-var explainQueryApp = angular.module('oakIndexManager',[]);
+angular.module('oakIndexManager', ['filters'])
+    .controller('MainCtrl', function ($scope, $http, $timeout) {
 
-explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
+        $scope.app = {
+            resource: '',
+            running: false
+        };
 
-    $scope.app = {
-        resource: '',
-        running: false
-    };
+        $scope.notifications = [];
+        $scope.indexes = {};
+        $scope.async = {};
 
-    $scope.notifications = [];
-
-    $scope.oakIndex = {
-        asyncDone: '',
-        asyncStatus: '',
-        indexes: []
-    };
-
-    $scope.$watch('toggleChecks', function(newValue, oldValue) {
-        angular.forEach($scope.filteredIndexes, function(index, key) {
-            index.checked = newValue;
+        $scope.$watch('toggleChecks', function (newValue, oldValue) {
+            angular.forEach($scope.filtered, function (index, key) {
+                index.checked = newValue;
+            });
         });
+
+        $scope.list = function () {
+            $http({
+                method: 'GET',
+                url: encodeURI($scope.app.resource + '.list.json'),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).
+                success(function (data, status, headers, config) {
+                    var priorState = $scope.indexes;
+
+                    $scope.async.status = data['async-status'] || '';
+                    $scope.async.start = data['async-start'] || '';
+                    $scope.async.reindexDone = data['async-reindex-done'] || '';
+                    $scope.async.reindexStatus = data['async-reindex-status'] || '';
+
+                    $scope.indexes = {};
+
+                    angular.forEach(data, function (index, key) {
+                        if (index['jcr:primaryType'] === 'oak:QueryIndexDefinition') {
+                            index.name = key;
+
+                            // Don't clear any applied checkmarks
+                            index.checked = (function (needle, haystack) {
+                                var checked = false;
+                                angular.forEach(haystack, function (value, key) {
+                                    if (value.name === needle) {
+                                        checked = value.checked || false;
+                                    }
+                                });
+
+                                return checked;
+                            }(index.name, priorState));
+
+                            $scope.indexes[index.name] = index;
+                        }
+                    });
+
+                }).
+                error(function (data, status, headers, config) {
+                    $scope.addNotification('error', 'ERROR', 'Unable to retrieve Oak indexes; Ensure you are running with elevated permissions and are on AEM6+');
+                });
+        };
+
+        $scope.get = function (index) {
+            $http({
+                method: 'GET',
+                url: encodeURI($scope.app.resource + '.get.json'),
+                params: { name: index.name },
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).
+                success(function (data, status, headers, config) {
+                    data.name = index.name;
+                    data.checked = index.checked;
+                    $scope.indexes[index.name] = data;
+
+                    if(index.reindex && !data.reindex) {
+                        $timeout.cancel(index.timeout);
+                        $scope.addNotification('success', 'SUCCESS', 'Reindex completed for: ' + index.name);
+                    }
+                }).
+                error(function (data, status, headers, config) {
+                    $scope.addNotification('error', 'ERROR', 'Unable to retrieve Oak index: ' + index.name);
+                });
+        };
+
+        $scope.reindex = function (index) {
+            $scope.app.running = true;
+            index.reindex = true;
+
+            $http({
+                method: 'POST',
+                url: encodeURI($scope.app.resource + '.reindex.json'),
+                data: 'name=' + index.name,
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).
+                success(function (data, status, headers, config) {
+                    $scope.app.running = false;
+                    $scope.addNotification('info', 'INFO', 'Reindex requested for: ' + index.name);
+                }).
+                error(function (data, status, headers, config) {
+                    $scope.app.running = false;
+                    index.reindex = false;
+                    $scope.addNotification('error', 'ERROR', 'Reindex request failed for: ' + index.name);
+                });
+
+            $scope.refresh(index);
+        };
+
+        $scope.bulkReindex = function (bulkIndexes) {
+            var data = (function () {
+                var params = [];
+
+                angular.forEach(bulkIndexes, function (index, key) {
+                    params.push('name=' + encodeURIComponent(index.name));
+                });
+
+                return params.join('&');
+            }());
+
+            if (!data) {
+                $scope.addNotification('help', 'HELP', 'Select one or more checkboxes in the index table to bulk reindex');
+                return;
+            }
+
+            $scope.app.running = true;
+
+            angular.forEach(bulkIndexes, function (index, key) {
+                index.reindex = true;
+            });
+
+            $http({
+                method: 'POST',
+                url: encodeURI($scope.app.resource + '.reindex.json'),
+                data: data,
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).
+                success(function (data, status, headers, config) {
+                    var i;
+                    for(i in bulkIndexes) {
+                        $scope.refresh(bulkIndexes[i]);
+                    }
+
+                    if (data.success) {
+                        $scope.addNotification('info', 'INFO', 'Bulk reindex requested for: ' + data.success.join(', '));
+                    }
+
+                    $scope.app.running = false;
+                }).
+                error(function (data, status, headers, config) {
+                    var i;
+                    for(i in bulkIndexes) {
+                        $scope.refresh(bulkIndexes[i]);
+                    }
+
+                    if (data.success) {
+                        $scope.addNotification('info', 'INFO', 'Bulk reindex request succeeded for: ' + data.success.join(', '));
+                    }
+
+                    if (data.error) {
+                        $scope.addNotification('error', 'ERROR', 'Bulk reindex request failed for: ' + data.error.join(', '));
+                    }
+
+                    $scope.app.running = false;
+                });
+
+        };
+
+        $scope.refresh = function (index, count) {
+            count = count || 0;
+
+            if (index && index.reindex) {
+                if (count++ < 30) {
+                    index.timeout = $timeout(function () {
+                        $scope.get(index);
+                        $scope.refresh(index, count);
+                    }, 2500 * count);
+                } else {
+                    $scope.addNotification('info', 'INFO', 'Reindex check timed out for : ' + index.name);
+                    $timeout.cancel(index.timeout);
+                }
+            }
+        };
+
+        $scope.addNotification = function (type, title, message) {
+            var timeout = 10000;
+
+            if (type === 'success') {
+                timeout = timeout / 2;
+            }
+
+            $scope.notifications.push({
+                type: type,
+                title: title,
+                message: message
+            });
+
+            $timeout(function () {
+                $scope.notifications.shift();
+            }, timeout);
+        };
+
+        $scope.init = function () {
+            $scope.list();
+        };
     });
 
 
-    $scope.list = function() {
-        $http({
-            method: 'GET',
-            url: encodeURI($scope.app.resource + '.list.json'),
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        }).
-        success(function(data, status, headers, config) {
-            $scope.oakIndex.asyncDone = data['async-done'] || 'Unknown';
-            $scope.oakIndex.asyncStatus = data['async-status'] || 'Unknown';
-
-            $scope.oakIndex.indexes = [];
-            angular.forEach(data, function(value, key) {
-                if(value['jcr:primaryType'] === 'oak:QueryIndexDefinition') {
-                    value.name = key;
-                    $scope.oakIndex.indexes.push(value);
-                }
-            });
-
-        }).
-        error(function(data, status, headers, config) {
-            $scope.addNotification('error', 'ERROR', 'Unable to retrieve Oak indexes; Ensure you are running with elevated permissions and are on AEM6+');
-        });
-    };
-
-    $scope.get = function(index) {
-
-        $http({
-            method: 'GET',
-            url: encodeURI($scope.app.resource + '.get.json'),
-            params: { name: index.name },
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        }).
-            success(function(data, status, headers, config) {
-                index = data;
-                index.name = name;
-            }).
-            error(function(data, status, headers, config) {
-                $scope.addNotification('error', 'ERROR', 'Unable to retrieve Oak index: ' + name);
-            });
-    };
-
-    $scope.reindex = function(index) {
-        $scope.app.running = true;
-        $http({
-            method: 'POST',
-            url: encodeURI($scope.app.resource + '.reindex.json'),
-            data: 'name=' + index.name,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        }).
-        success(function(data, status, headers, config) {
-            $scope.app.running = false;
-            $scope.addNotification('info', 'INFO', 'Reindex successfully initiated for: ' + index.name);
-            $scope.reindexStatus(index);
-        }).
-        error(function(data, status, headers, config) {
-            $scope.app.running = false;
-            $scope.addNotification('error', 'ERROR', 'Reindex request failed for: ' + index.name);
-        });
-    };
-
-    $scope.bulkReindex = function() {
-        var data = (function() {
-            var params = [];
-
-            angular.forEach($scope.filteredIndexes, function(index, key) {
-                if(index.checked) {
-                    params.push('name=' + encodeURIComponent(index.name));
-                }
-            });
-
-            return params.join('&');
-        }());
-
-        if(!data) {
-            $scope.addNotification('help', 'HELP', 'Select one or more checkboxes in the index table to bulk reindex');
-            return;
-        }
-
-        $scope.app.running = true;
-
-        $http({
-            method: 'POST',
-            url: encodeURI($scope.app.resource + '.reindex.json'),
-            data: data,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        }).
-        success(function(data, status, headers, config) {
-            $scope.app.running = false;
-
-            if(data.success) {
-                $scope.addNotification('info', 'INFO', 'Bulk reindex successfully initiated for: ' + data.success.join(', '));
-            }
-        }).
-        error(function(data, status, headers, config) {
-
-            $scope.app.running = false;
-            if(data.success) {
-                $scope.addNotification('info', 'INFO', 'Bulk reindex successfully initiated for: ' + data.success.join(', '));
-            }
-
-            if(data.error) {
-                $scope.addNotification('error', 'ERROR', 'Bulk reindex could not be initiated for: ' + data.error.join(', '));
-            }
-        });
-    };
-
-    $scope.reindexStatus = function(index) {
-        $scope.get(index);
-
-        if(index.reindex === false) {
-            $scope.addNotification('success', 'SUCCESS', 'Reindex completed for: ' + index.name);
-        } else {
-            $timeout($scope.reindexStatus(index), 2000);
-        }
-    };
-
-    $scope.addNotification = function (type, title, message) {
-        var timeout = 10000;
-
-        if(type === 'success')  {
-            timeout = timeout / 2;
-        }
-
-        $scope.notifications.push({
-            type: type,
-            title: title,
-            message: message
-        });
-
-        $timeout(function() {
-            $scope.notifications.shift();
-        }, timeout);
-    };
-
-
-    /*
-    * Init
-    *
-    */
-    $scope.init = function() {
-        $scope.list();
-    };
-});
