@@ -25,7 +25,8 @@ var explainQueryApp = angular.module('oakIndexManager',[]);
 explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
 
     $scope.app = {
-        resource: ''
+        resource: '',
+        running: false
     };
 
     $scope.notifications = [];
@@ -51,23 +52,23 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
             url: encodeURI($scope.app.resource + '.list.json'),
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
         }).
-            success(function(data, status, headers, config) {
-                $scope.oakIndex.asyncDone = data['async-done'] || 'Unknown';
-                $scope.oakIndex.asyncStatus = data['async-status'] || 'Unknown';
+        success(function(data, status, headers, config) {
+            $scope.oakIndex.asyncDone = data['async-done'] || 'Unknown';
+            $scope.oakIndex.asyncStatus = data['async-status'] || 'Unknown';
 
-                $scope.oakIndex.indexes = [];
-                angular.forEach(data, function(value, key) {
-                    if(value['jcr:primaryType'] === 'oak:QueryIndexDefinition') {
-                        value.name = key;
-                        value.show = true;
-                        $scope.oakIndex.indexes.push(value);
-                    }
-                });
-
-            }).
-            error(function(data, status, headers, config) {
-                $scope.addNotification('error', 'ERROR', 'Unable to retrieve Oak indexes.');
+            $scope.oakIndex.indexes = [];
+            angular.forEach(data, function(value, key) {
+                if(value['jcr:primaryType'] === 'oak:QueryIndexDefinition') {
+                    value.name = key;
+                    value.show = true;
+                    $scope.oakIndex.indexes.push(value);
+                }
             });
+
+        }).
+        error(function(data, status, headers, config) {
+            $scope.addNotification('error', 'ERROR', 'Unable to retrieve Oak indexes; Ensure you are running with elevated permissions and are on AEM6+');
+        });
     };
 
     /**
@@ -79,7 +80,7 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
 
         $http({
             method: 'GET',
-            url: encodeURI($scope.app.resource + '.index.json'),
+            url: encodeURI($scope.app.resource + '.get.json'),
             params: { name: index.name },
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
         }).
@@ -93,7 +94,7 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
     };
 
     $scope.reindex = function(index) {
-
+        $scope.app.running = true;
         $http({
             method: 'POST',
             url: encodeURI($scope.app.resource + '.reindex.json'),
@@ -101,11 +102,13 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
         }).
         success(function(data, status, headers, config) {
-            $scope.addNotification('info', 'INFO', 'Reindex successfully initiated for ' + index.name);
+            $scope.app.running = false;
+            $scope.addNotification('info', 'INFO', 'Reindex successfully initiated for: ' + index.name);
             $scope.reindexStatus(index);
         }).
         error(function(data, status, headers, config) {
-            $scope.addNotification('error', 'ERROR', 'Reindex request failed for ' + index.name);
+            $scope.app.running = false;
+            $scope.addNotification('error', 'ERROR', 'Reindex request failed for: ' + index.name);
         });
     };
 
@@ -113,7 +116,7 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
         var data = (function() {
             var params = [];
 
-            angular.forEach($scope.oakIndex.indexes, function(index, key) {
+            angular.forEach($scope.selectedIndexes, function(index, key) {
                 if(index.show && index.checked) {
                     params.push('name=' + encodeURIComponent(index.name));
                 }
@@ -122,6 +125,13 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
             return params.join('&');
         }());
 
+        if(!data) {
+            $scope.addNotification('notice', 'NOTICE', 'Use checkboxes to select one or more indexes for bulk reindexing');
+            return;
+        }
+
+        $scope.app.running = true;
+
         $http({
             method: 'POST',
             url: encodeURI($scope.app.resource + '.reindex.json'),
@@ -129,10 +139,22 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
         }).
         success(function(data, status, headers, config) {
-            $scope.addNotification('info', 'INFO', 'Bulk reindex successfully initiated');
+            $scope.app.running = false;
+
+            if(data.success) {
+                $scope.addNotification('info', 'INFO', 'Bulk reindex successfully initiated for: ' + data.success.join(', '));
+            }
         }).
         error(function(data, status, headers, config) {
-            $scope.addNotification('error', 'ERROR', 'Bulk reindex request failed');
+
+            $scope.app.running = false;
+            if(data.success) {
+                $scope.addNotification('info', 'INFO', 'Bulk reindex successfully initiated for: ' + data.success.join(', '));
+            }
+
+            if(data.error) {
+                $scope.addNotification('error', 'ERROR', 'Bulk reindex could not be initiated for: ' + data.error.join(', '));
+            }
         });
     };
 
@@ -140,7 +162,7 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
         $scope.get(index);
 
         if(index.reindex === false) {
-            $scope.addNotification('success', 'SUCCESS', 'Reindex completed for ' + index.name);
+            $scope.addNotification('success', 'SUCCESS', 'Reindex completed for: ' + index.name);
         } else {
             $timeout($scope.reindexStatus(index), 2000);
         }

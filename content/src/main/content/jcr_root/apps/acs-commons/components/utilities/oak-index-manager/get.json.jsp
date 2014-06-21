@@ -1,5 +1,5 @@
 <%@include file="/libs/foundation/global.jsp"%><%
-%><%@page session="false" contentType="text/html" pageEncoding="utf-8"
+%><%@page session="false" contentType="application/json; charset=UTF-8" pageEncoding="utf-8"
           import="org.apache.commons.lang.StringUtils"%><%
 
     final String name = slingRequest.getParameter("name");

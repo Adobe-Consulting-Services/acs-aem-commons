@@ -32,12 +32,6 @@
 
     <link rel="shortcut icon" href=""/>
 
-    <style>
-        .reindexing {
-            background-color: red;
-        }
-    </style>
-
     <cq:includeClientLib css="acs-commons.oak-index-manager.app"/>
 </head>
 
@@ -59,38 +53,42 @@
      ng-controller="MainCtrl"
      ng-init="app.resource = '${resourcePath}'; init();">
 
+    <div ng-show="notifications.length > 0"
+         class="notifications">
+        <div ng-repeat="notification in notifications">
+            <div class="alert {{ notification.type }}">
+                <button class="close" data-dismiss="alert">&times;</button>
+                <strong>{{ notification.title }}</strong>
+
+                <div>{{ notification.message }}</div>
+            </div>
+        </div>
+    </div>
+
     <div class="content">
         <div class="content-container">
 
             <h1>Oak Index Manager</h1>
 
-            <div ng-show="notifications.length > 0">
-                <div ng-repeat="notification in notifications">
-                    <div class="alert {{ notification.type }}">
-                        <button class="close" data-dismiss="alert">&times;</button>
-                        <strong>{{ notification.title }}</strong>
-
-                        <div>{{ notification.message }}</div>
-                    </div>
-                </div>
-            </div>
-
             <div class="search">
-                <input ng-model="keyword" type="text" placeholder="Filter" style="width: 400px">
+                <input ng-model="keyword" type="text" placeholder="Filter" class="filter-input">
                 <button>Filter</button>
             </div>
 
             <div style="float: right;">
+                <div ng-show="app.running" class="running-indicator spinner large"></div>
                 <button class="primary" ng-click="bulkReindex()">Bulk Reindex</button>
             </div>
 
-            <table class="data" style="width: 100%; clear: both; margin-top: 1em;">
+            <table class="data index-table">
                 <thead>
                     <tr>
                         <th class="check"><label><input type="checkbox" ng-model="toggleChecks"><span></span></label></th>
                         <th>Node Name</th>
                         <th>Declaring Node Types</th>
                         <th>Property Names</th>
+                        <th>Include Property Types</th>
+                        <th>Exclude Property Types</th>
                         <th>Type</th>
                         <th>Unique</th>
                         <th>Async</th>
@@ -99,7 +97,7 @@
                 </thead>
 
                 <tbody>
-                    <tr ng-repeat="index in oakIndex.indexes | filter:{ $: keyword }"
+                    <tr ng-repeat="index in selectedIndexes = ( oakIndex.indexes | filter:{ $: keyword } )"
                         ng-class="{ reindexing : index.reindex }">
                         <td><label><input type="checkbox" ng-model="index.checked"><span></span></label></td>
                         <td>{{ index.name }}</td>
@@ -107,7 +105,14 @@
                             <div ng-repeat="declaringNodeType in index.declaringNodeTypes">{{ declaringNodeType
                                 }} </div>
                         </td>
-                        <td> <div ng-repeat="propertyName in index.propertyNames">{{ propertyName
+                        <td>
+                            <div ng-repeat="propertyName in index.propertyNames">{{ propertyName
+                                }} </div></td>
+                        <td>
+                            <div ng-repeat="includePropertyType in index.includePropertyTypes">{{ includePropertyType
+                                }} </div></td>
+                        <td>
+                            <div ng-repeat="excludePropertyName in index.excludePropertyNames">{{ excludePropertyName
                                 }} </div></td>
                         <td>{{ index.type }}</td>
                         <td>{{ index.unique }}</td>
