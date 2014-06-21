@@ -38,10 +38,8 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
     };
 
     $scope.$watch('toggleChecks', function(newValue, oldValue) {
-        angular.forEach($scope.oakIndex.indexes, function(index, key) {
-            if(index.show) {
-                index.checked = newValue;
-            }
+        angular.forEach($scope.filteredIndexes, function(index, key) {
+            index.checked = newValue;
         });
     });
 
@@ -60,7 +58,6 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
             angular.forEach(data, function(value, key) {
                 if(value['jcr:primaryType'] === 'oak:QueryIndexDefinition') {
                     value.name = key;
-                    value.show = true;
                     $scope.oakIndex.indexes.push(value);
                 }
             });
@@ -111,8 +108,8 @@ explainQueryApp.controller('MainCtrl', function($scope, $http, $timeout) {
         var data = (function() {
             var params = [];
 
-            angular.forEach($scope.selectedIndexes, function(index, key) {
-                if(index.show && index.checked) {
+            angular.forEach($scope.filteredIndexes, function(index, key) {
+                if(index.checked) {
                     params.push('name=' + encodeURIComponent(index.name));
                 }
             });

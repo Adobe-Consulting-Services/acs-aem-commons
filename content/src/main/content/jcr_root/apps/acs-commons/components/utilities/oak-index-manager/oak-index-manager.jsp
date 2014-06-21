@@ -100,7 +100,7 @@
                 </thead>
 
                 <tbody>
-                    <tr ng-repeat="index in selectedIndexes = ( oakIndex.indexes | filter:{ $: keyword } )"
+                    <tr ng-repeat="index in filteredIndexes = ( oakIndex.indexes | filter:{ $: keyword } )"
                         ng-class="{ reindexing : index.reindex }">
                         <td><label><input type="checkbox" ng-model="index.checked"><span></span></label></td>
                         <td>{{ index.name }}</td>
