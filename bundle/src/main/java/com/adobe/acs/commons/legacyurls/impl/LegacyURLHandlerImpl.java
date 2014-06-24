@@ -1,34 +1,24 @@
 package com.adobe.acs.commons.legacyurls.impl;
 
 import com.adobe.acs.commons.legacyurls.LegacyURLHandler;
+import com.adobe.acs.commons.legacyurls.PreviouslyPublishedURLManager;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.commons.util.DamUtil;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
-import com.day.cq.search.result.Hit;
-import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -37,14 +27,7 @@ public class LegacyURLHandlerImpl implements LegacyURLHandler {
     private static final Logger log = LoggerFactory.getLogger(LegacyURLHandlerImpl.class);
 
     @Reference
-    private QueryBuilder queryBuilder;
-
-    private static final String DEFAULT_PROPERTY_NAME = "legacyURLs";
-    private String propertyName = DEFAULT_PROPERTY_NAME;
-    @Property(label = "Property Name",
-            description = "The property name that contains the legacy URLs to match on.",
-            value = DEFAULT_PROPERTY_NAME)
-    public static final String PROP_PROPERTY_NAME = "property-name";
+    private PreviouslyPublishedURLManager previouslyPublishedURLManager;
 
     private static final String DEFAULT_PAGE_EXTENSION = ".html";
     private String pageExtension = DEFAULT_PAGE_EXTENSION;
@@ -67,7 +50,7 @@ public class LegacyURLHandlerImpl implements LegacyURLHandler {
                                     HttpServletResponse response) throws IOException {
 
         if (!(request instanceof SlingHttpServletRequest)) {
-            log.warn("Reques for [ {} ] was not a SlingHttpServletRequest", request.getRequestURI());
+            log.warn("Request for [ {} ] was not a SlingHttpServletRequest", request.getRequestURI());
             return false;
         }
 
@@ -76,72 +59,42 @@ public class LegacyURLHandlerImpl implements LegacyURLHandler {
         log.debug("Invoking LegacyURLHandler");
 
         final ResourceResolver resourceResolver = slingRequest.getResourceResolver();
-        final Session session = resourceResolver.adaptTo(Session.class);
         final String requestURI = request.getRequestURI();
 
-        final Map<String, String> params = new HashMap<String, String>();
+        String redirectURI;
+        Resource targetResource;
 
-        params.put("property", propertyName);
-        params.put("property.value", requestURI);
+        targetResource = previouslyPublishedURLManager.find(resourceResolver, requestURI);
 
-        final Query query = queryBuilder.createQuery(PredicateGroup.create(params), session);
+        final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-        final SearchResult result = query.getResult();
+        final Page page = pageManager.getContainingPage(targetResource);
 
-        final int size = result.getHits().size();
-        if (size > 0) {
-            if (size > 1) {
-                log.warn("Found multiple [ {} ] matches for legacyURL [ {} ]", size, requestURI);
+        if (page != null) {
+            redirectURI = resourceResolver.map(page.getPath() + pageExtension);
+        } else if (DamUtil.isAsset(targetResource)) {
+            final Asset asset = DamUtil.resolveToAsset(targetResource);
+            redirectURI = asset.getPath();
+        } else {
+            redirectURI = targetResource.getPath();
+        }
 
-                if (log.isDebugEnabled()) {
-                    for (final Hit hit : result.getHits()) {
-                        try {
-                            log.debug("Legacy URLs [ {} ] maps to [ {} ]", requestURI, hit.getResource().getPath());
-                        } catch (RepositoryException ex) {
-                            log.error(ex.getMessage());
-                        }
-                    }
-                }
-            }
+        if (!StringUtils.isBlank(redirectURI)) {
+            redirectURI = resourceResolver.map(redirectURI);
 
-            String redirectURI = null;
+            log.info("Redirecting legacy URI [ {} ] to [ {} ]", requestURI, redirectURI);
 
-            final Hit hit = result.getHits().get(0);
-            final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-
-            try {
-                final Page page = pageManager.getContainingPage(hit.getResource());
-
-                if (page != null) {
-                    redirectURI = resourceResolver.map(page.getPath() + pageExtension);
-                } else if (DamUtil.isAsset(hit.getResource())) {
-                    final Asset asset = DamUtil.resolveToAsset(hit.getResource());
-                    redirectURI = asset.getPath();
-                } else {
-                    redirectURI = hit.getResource().getPath();
-                }
-
-                if (!StringUtils.isBlank(redirectURI)) {
-                    redirectURI = resourceResolver.map(redirectURI);
-
-                    log.info("Redirecting legacy URI [ {} ] to [ {} ]", requestURI, redirectURI);
-
-                    response.setStatus(redirectStatusCode);
-                    response.sendRedirect(redirectURI);
-                    return true;
-                }
-            } catch (RepositoryException e) {
-                log.error("RepositoryException retrieving the resource the legacy URL should redirect to [ {} ]",
-                        requestURI);
-            }
+            response.setStatus(redirectStatusCode);
+            response.sendRedirect(redirectURI);
+            return true;
         }
 
         return false;
     }
 
+
     @Activate
     protected final void activate(Map<String, String> config) {
-        propertyName = PropertiesUtil.toString(config.get(PROP_PROPERTY_NAME), DEFAULT_PROPERTY_NAME);
 
         pageExtension = PropertiesUtil.toString(config.get(PROP_PAGE_EXTENSION), DEFAULT_PAGE_EXTENSION);
         if (!StringUtils.startsWith(pageExtension, ".")) {
@@ -151,7 +104,6 @@ public class LegacyURLHandlerImpl implements LegacyURLHandler {
         redirectStatusCode = PropertiesUtil.toInteger(config.get(PROP_REDIRECT_STATUS_CODE),
                 DEFAULT_REDIRECT_STATUS_CODE);
 
-        log.info("Legacy URL Handler - Property Name: {}", propertyName);
         log.info("Legacy URL Handler - Page Extension: {}", pageExtension);
         log.info("Legacy URL Handler - Redirect Status Code: {}", redirectStatusCode);
     }
