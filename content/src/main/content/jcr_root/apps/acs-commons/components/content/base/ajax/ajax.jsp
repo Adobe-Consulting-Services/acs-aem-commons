@@ -35,9 +35,14 @@
 
     final String CN_AJAX_SELECTOR = "ajaxSelectors";
     final String CN_AJAX_EXTENSION = "ajaxExtension";
+    final String CN_AJAX_LOADING_INDICATOR = "ajaxLoadingIndicator";
 
     final WCMMode mode = WCMMode.fromRequest(slingRequest);
     final ValueMap componentProperties = component.getProperties();
+
+    String ajaxLoadingIndicator =
+            xssAPI.encodeForHTMLAttr(StringUtils.stripToEmpty(componentProperties.get(CN_AJAX_LOADING_INDICATOR, "")));
+    boolean ajaxLoadingIndicatorEnabled = StringUtils.isNotBlank(ajaxLoadingIndicator);
 
     String ajaxSelectors = StringUtils.stripToEmpty(componentProperties.get(CN_AJAX_SELECTOR, DEFAULT_SELECTOR));
     String ajaxExtension = StringUtils.stripToEmpty(componentProperties.get(CN_AJAX_EXTENSION, DEFAULT_EXTENSION));
@@ -47,7 +52,11 @@
     final String url = resourceResolver.map(resource.getPath()) + "." + ajaxSelectors + "." + ajaxExtension;
 
 %><% if(WCMMode.PREVIEW.equals(mode) || WCMMode.DISABLED.equals(mode)) { %>
-    <div data-ajax-component data-url="<%= url %>" class="acs-ajax-component"></div>
+    <div data-ajax-component data-url="<%= url %>" class="acs-ajax-component">
+    	<% if (ajaxLoadingIndicatorEnabled) { %>
+    		<div class="<%= ajaxLoadingIndicator %>"></div>
+    	<% } %>
+    </div>
 <% } else { %>
     <%-- In Authoring modes, do not bother AJAX'ing in components;
          Instead include them using the usual methods --%>
