@@ -20,7 +20,7 @@
 
 /*global angular: false */
 
-angular.module('oakIndexManager', ['filters'])
+angular.module('oakIndexManager', [])
     .controller('MainCtrl', function ($scope, $http, $timeout) {
 
         $scope.app = {
@@ -29,7 +29,7 @@ angular.module('oakIndexManager', ['filters'])
         };
 
         $scope.notifications = [];
-        $scope.indexes = {};
+        $scope.indexes = [];
         $scope.async = {};
 
         $scope.$watch('toggleChecks', function (newValue, oldValue) {
@@ -45,32 +45,17 @@ angular.module('oakIndexManager', ['filters'])
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'}
             }).
                 success(function (data, status, headers, config) {
-                    var priorState = $scope.indexes;
 
                     $scope.async.status = data['async-status'] || '';
                     $scope.async.start = data['async-start'] || '';
                     $scope.async.reindexDone = data['async-reindex-done'] || '';
                     $scope.async.reindexStatus = data['async-reindex-status'] || '';
 
-                    $scope.indexes = {};
+                    $scope.indexes = [];
 
                     angular.forEach(data, function (index, key) {
                         if (index['jcr:primaryType'] === 'oak:QueryIndexDefinition') {
-                            index.name = key;
-
-                            // Don't clear any applied checkmarks
-                            index.checked = (function (needle, haystack) {
-                                var checked = false;
-                                angular.forEach(haystack, function (value, key) {
-                                    if (value.name === needle) {
-                                        checked = value.checked || false;
-                                    }
-                                });
-
-                                return checked;
-                            }(index.name, priorState));
-
-                            $scope.indexes[index.name] = index;
+                            $scope.put(key, index);
                         }
                     });
 
@@ -81,6 +66,7 @@ angular.module('oakIndexManager', ['filters'])
         };
 
         $scope.get = function (index) {
+            var reindexing = index.reindex;
             $http({
                 method: 'GET',
                 url: encodeURI($scope.app.resource + '.get.json'),
@@ -88,11 +74,9 @@ angular.module('oakIndexManager', ['filters'])
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'}
             }).
                 success(function (data, status, headers, config) {
-                    data.name = index.name;
-                    data.checked = index.checked;
-                    $scope.indexes[index.name] = data;
+                    $scope.put(index.name, data);
 
-                    if(index.reindex && !data.reindex) {
+                    if(reindexing && !data.reindex) {
                         $timeout.cancel(index.timeout);
                         $scope.addNotification('success', 'SUCCESS', 'Reindex completed for: ' + index.name);
                     }
@@ -183,6 +167,35 @@ angular.module('oakIndexManager', ['filters'])
                 });
 
         };
+
+
+        $scope.put = function(name, data) {
+            var i,
+                checked,
+                timeout;
+
+            data.name = name;
+            if(data.reindex) {
+                data.reindexKeyword = 'reindexing';
+            }
+
+            for(i = 0; i < $scope.indexes.length; i++) {
+                if($scope.indexes[i].name === data.name) {
+                    checked = $scope.indexes[i].checked;
+                    timeout = $scope.indexes[i].timeout;
+
+                    $scope.indexes[i] = data;
+                    $scope.indexes[i].checked = checked;
+                    $scope.indexes[i].timeout = timeout;
+
+                    return;
+                }
+            }
+
+            // Could not find anything to update so add
+            $scope.indexes.push(data);
+        };
+
 
         $scope.refresh = function (index, count) {
             count = count || 0;

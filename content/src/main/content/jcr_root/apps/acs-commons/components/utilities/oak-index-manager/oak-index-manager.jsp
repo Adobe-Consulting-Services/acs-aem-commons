@@ -83,7 +83,8 @@
                 <div ng-show="app.running"
                      class="running-indicator spinner large"></div>
                 <button class="primary"
-                        ng-click="bulkReindex( ( filtered | indexCheckedFilter : true ) )">Bulk Reindex</button>
+                        ng-click="bulkReindex( (filtered | filter: { checked: true }) )">Bulk
+                    Reindex</button>
             </div>
 
             <table class="data index-table">
@@ -102,14 +103,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(name, index) in filtered = ( indexes | indexKeywordFilter : keyword )"
+                    <tr ng-repeat="index in filtered = ( indexes | filter : { $: keyword } | orderBy: '+name' )"
                         ng-class="{ reindexing: index.reindex }">
 
                         <td>
                             <label><input type="checkbox" ng-model="index.checked"><span></span></label>
                         </td>
                         <td>
-                            {{ name }}
+                            {{ index.name }}
                         </td>
                         <td>
                             <div ng-repeat="declaringNodeType in index.declaringNodeTypes">{{ declaringNodeType }}</div>
@@ -142,6 +143,16 @@
                             <div ng-show="index.reindex" class="spinner"></div>
                         </td>
                     </tr>
+
+                    <tr ng-show="keyword && !filtered.length">
+                        <td colspan="10"
+                            class="empty-results">
+
+                            No matching indexes found
+
+                        </td>
+                    </tr>
+
                 </tbody>
             </table>
     </div>
