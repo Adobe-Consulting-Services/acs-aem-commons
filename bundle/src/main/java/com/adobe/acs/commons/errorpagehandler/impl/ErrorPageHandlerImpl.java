@@ -26,6 +26,7 @@ import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -39,8 +40,10 @@ import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestProgressTracker;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.auth.core.AuthUtil;
@@ -125,7 +128,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private static final String PROP_ERROR_PAGE_PATH = "error-page.system-path";
 
     /* Search Paths */
-    private static final String[] DEFAULT_SEARCH_PATHS = {};
+    private static final String[] DEFAULT_SEARCH_PATHS = { };
 
     @Property(
             label = "Error page paths",
@@ -162,7 +165,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /* Relative placeholder image path */
     private static final String DEFAULT_ERROR_IMAGE_PATH = ".img.png";
+
     private String errorImagePath = DEFAULT_ERROR_IMAGE_PATH;
+
     @Property(label = "Error image path/selector",
             description = "Accepts a selectors.extension (ex. `.img.png`) or relative path. "
                     + "This value is applied to the resolved error page."
@@ -172,7 +177,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private static final String PROP_ERROR_IMAGE_PATH = "error-images.path";
 
     /* Error image extensions to handle */
-    private static final String[] DEFAULT_ERROR_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif"};
+    private static final String[] DEFAULT_ERROR_IMAGE_EXTENSIONS = { "jpg", "jpeg", "png", "gif" };
 
     private String[] errorImageExtensions = DEFAULT_ERROR_IMAGE_EXTENSIONS;
 
@@ -184,6 +189,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             cardinality = Integer.MAX_VALUE,
             value = { "png", "jpeg", "jpg", "gif" })
     private static final String PROP_ERROR_IMAGE_EXTENSIONS = "error-images.extensions";
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     private QueryBuilder queryBuilder;
@@ -268,21 +276,26 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         }
 
         if (errorImagesEnabled && this.isImageRequest(request)) {
-            if (StringUtils.isNotBlank(errorPagePath)) {
-                // Relative path; compute path based off found error page
-                if (StringUtils.startsWith(errorImagePath, ".")) {
-                    final String selectorErrorImagePath = errorPagePath + errorImagePath;
+
+            if (StringUtils.startsWith(this.errorImagePath, "/")) {
+                // Absolute path
+                return this.errorImagePath;
+            } else if (StringUtils.isNotBlank(errorPagePath)) {
+                // Selector or Relative path; compute path based off found error page
+
+                if (StringUtils.startsWith(this.errorImagePath, ".")) {
+                    final String selectorErrorImagePath = errorPagePath + this.errorImagePath;
                     log.debug("Using selector-based error image: {}", selectorErrorImagePath);
                     return selectorErrorImagePath;
                 } else {
                     final String relativeErrorImagePath = errorPagePath + "/"
-                            + StringUtils.removeStart(errorImagePath, "/");
+                            + StringUtils.removeStart(this.errorImagePath, "/");
                     log.debug("Using relative path-based error image: {}", relativeErrorImagePath);
                     return relativeErrorImagePath;
                 }
             } else {
                 log.warn("Error image path found, but no error page could be found so relative path cannot "
-                        + "be applied: {}", errorImagePath);
+                        + "be applied: {}", this.errorImagePath);
             }
         } else if (StringUtils.isNotBlank(errorPagePath)) {
             errorPagePath = StringUtils.stripToNull(applyExtension(errorPagePath));
@@ -676,6 +689,33 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         this.errorImagePath = PropertiesUtil.toString(config.get(PROP_ERROR_IMAGE_PATH),
                 PropertiesUtil.toString(config.get(legacyPrefix + PROP_ERROR_IMAGE_PATH),
                         DEFAULT_ERROR_IMAGE_PATH));
+
+        // Absolute path
+        if (StringUtils.startsWith(this.errorImagePath, "/")) {
+            ResourceResolver adminResourceResolver = null;
+            try {
+                adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                final Resource resource = adminResourceResolver.resolve(this.errorImagePath);
+
+                if (resource != null && resource.isResourceType(JcrConstants.NT_FILE)) {
+                    final PathInfo pathInfo = new PathInfo(this.errorImagePath);
+
+                    if (!StringUtils.equals("img", pathInfo.getSelectorString())
+                            || StringUtils.isBlank(pathInfo.getExtension())) {
+
+                        log.warn("Absolute Error Image Path paths to nt:files should have '.img.XXX' "
+                                + "selector.extension");
+                    }
+                }
+            } catch (LoginException e) {
+                log.error("Could not get admin resource resolver to inspect validity of absolute errorImagePath");
+            } finally {
+                if (adminResourceResolver != null) {
+                    adminResourceResolver.close();
+                }
+            }
+        }
+
 
         this.errorImageExtensions = PropertiesUtil.toStringArray(config.get(PROP_ERROR_IMAGE_EXTENSIONS),
                 DEFAULT_ERROR_IMAGE_EXTENSIONS);
