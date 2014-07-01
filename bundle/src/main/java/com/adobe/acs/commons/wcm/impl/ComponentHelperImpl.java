@@ -265,7 +265,7 @@ public final class ComponentHelperImpl implements ComponentHelper {
             if (dropTarget != null) {
                 // If editType has not been specified then intelligently determine the best match
                 editType = (editType == null) ? getWCMEditType(dropTarget) : editType;
-                
+
                 String classNames = dropTarget.getId() + " " + editType.getCssClass();
                 String placeholderTitle = "Drop Target: " + dropTarget.getName();
 

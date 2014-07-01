@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>1.5.1-SNAPSHOT</version>
+        <version>1.6.3-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -81,6 +81,7 @@
                     <predefinedVars>jQuery,window,$</predefinedVars>
                     <excludes>
                         <exclude>**/extensions/**/*.js</exclude>
+                        <exclude>**/vendor/**/*.js</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -93,6 +94,48 @@
                         <exclude>**/*.xml</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+
+            <!-- configuration to create minimal package -->
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>create-min-package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source>${pom.basedir}/src/main/script/CreateMinPackage.groovy</source>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}-min.zip</file>
+                                    <type>zip</type>
+                                    <classifier>min</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

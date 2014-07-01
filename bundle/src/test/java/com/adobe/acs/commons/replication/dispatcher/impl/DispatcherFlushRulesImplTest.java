@@ -75,10 +75,7 @@ public class DispatcherFlushRulesImplTest {
 
     @After
     public void tearDown() throws Exception {
-        reset(dispatcherFlusher);
-        reset(resourceResolverFactory);
-        reset(hierarchicalFlushRules);
-        reset(resourceOnlyFlushRules);
+        reset(dispatcherFlusher, resourceResolverFactory, hierarchicalFlushRules, resourceOnlyFlushRules);
     }
 
     @Test
@@ -334,4 +331,90 @@ public class DispatcherFlushRulesImplTest {
 
         verifyNoMoreInteractions(dispatcherFlusher);
     }
+
+    @Test
+    public void testPreprocess_success_translation1() throws Exception {
+        hierarchicalFlushRules.put(Pattern.compile("/content/acs-aem-commons/(.*)"), "/content/target/$1");
+
+        final ReplicationAction replicationAction = mock(ReplicationAction.class);
+        when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/page");
+        when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
+
+        final ReplicationOptions replicationOptions = new ReplicationOptions();
+        replicationOptions.setSynchronous(false);
+
+        final ArgumentCaptor<DispatcherFlushFilter> agentFilterCaptor = ArgumentCaptor.forClass(DispatcherFlushFilter
+                .class);
+
+        dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
+
+        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+                eq(false),
+                agentFilterCaptor.capture(),
+                eq("/content/target/page"));
+
+        assertEquals(DispatcherFlushFilter.FlushType.Hierarchical, agentFilterCaptor.getValue().getFlushType());
+        // Private impl class; no access to test for instanceof
+        assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
+
+        verifyNoMoreInteractions(dispatcherFlusher);
+    }
+
+    @Test
+    public void testPreprocess_success_translation2() throws Exception {
+        hierarchicalFlushRules.put(Pattern.compile("/content/acs-aem-commons/(.*)/(.*)"), "/content/target/$1/acs-aem-commons/$2");
+
+        final ReplicationAction replicationAction = mock(ReplicationAction.class);
+        when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/en/page");
+        when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
+
+        final ReplicationOptions replicationOptions = new ReplicationOptions();
+        replicationOptions.setSynchronous(false);
+
+        final ArgumentCaptor<DispatcherFlushFilter> agentFilterCaptor = ArgumentCaptor.forClass(DispatcherFlushFilter
+                .class);
+
+        dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
+
+        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+                eq(false),
+                agentFilterCaptor.capture(),
+                eq("/content/target/en/acs-aem-commons/page"));
+
+        assertEquals(DispatcherFlushFilter.FlushType.Hierarchical, agentFilterCaptor.getValue().getFlushType());
+        // Private impl class; no access to test for instanceof
+        assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
+
+        verifyNoMoreInteractions(dispatcherFlusher);
+    }
+
+
+    @Test
+    public void testPreprocess_success_resourceonly_translation2() throws Exception {
+        resourceOnlyFlushRules.put(Pattern.compile("/content/acs-aem-commons/(.*)/(.*)"), "/content/target/$1/acs-aem-commons/$2");
+
+        final ReplicationAction replicationAction = mock(ReplicationAction.class);
+        when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/en/page");
+        when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
+
+        final ReplicationOptions replicationOptions = new ReplicationOptions();
+        replicationOptions.setSynchronous(false);
+
+        final ArgumentCaptor<DispatcherFlushFilter> agentFilterCaptor = ArgumentCaptor.forClass(DispatcherFlushFilter
+                .class);
+
+        dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
+
+        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+                eq(false),
+                agentFilterCaptor.capture(),
+                eq("/content/target/en/acs-aem-commons/page"));
+
+        assertEquals(DispatcherFlushFilter.FlushType.ResourceOnly, agentFilterCaptor.getValue().getFlushType());
+        // Private impl class; no access to test for instanceof
+        assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
+
+        verifyNoMoreInteractions(dispatcherFlusher);
+    }
+
 }

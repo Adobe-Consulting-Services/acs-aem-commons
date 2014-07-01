@@ -46,19 +46,15 @@ import com.day.cq.wcm.foundation.Placeholder;
  *
  */
 @Tag(bodyContentType = BodyContentType.JSP, value = "placeholder")
-public class PlaceholderTag extends BodyTagSupport {
+public final class PlaceholderTag extends BodyTagSupport {
 
     private static final long serialVersionUID = -2497240151981056169L;
 
     private static final String DEFAULT_CLASS_NAME = "cq-text-placeholder";
 
-    private transient ComponentHelper componentHelper;
-
-    public PlaceholderTag() {
-        // NOTE - not a service lookup because (right now) ComponentHelperImpl is
-        // not configured.
-        componentHelper = new ComponentHelperImpl();
-    }
+    // NOTE - not a service lookup because (right now) ComponentHelperImpl is
+    // not configured.
+    private transient ComponentHelper componentHelper = new ComponentHelperImpl();
 
     private String classNames;
 
@@ -66,24 +62,32 @@ public class PlaceholderTag extends BodyTagSupport {
 
     private String getAllClassNames() {
         StringBuilder allClassNames = new StringBuilder();
-        if (ddType != null) {
-            allClassNames.append(DropTarget.CSS_CLASS_PREFIX);
-            allClassNames.append(ddType);
-            allClassNames.append(" ");
-        }
+        allClassNames.append(getDdClass());
+        allClassNames.append(" ");
         if (classNames != null) {
             allClassNames.append(classNames);
         } else {
             allClassNames.append(DEFAULT_CLASS_NAME);
         }
-        return allClassNames.toString();
+        return allClassNames.toString().trim();
+    }
+
+    private String getDdClass() {
+        if (ddType != null) {
+            StringBuilder bld = new StringBuilder();
+            bld.append(DropTarget.CSS_CLASS_PREFIX);
+            bld.append(ddType);
+            return bld.toString();
+        } else {
+            return "";
+        }
     }
 
     @TagAttribute(required = false)
     public void setClassNames(String classNames) {
         this.classNames = classNames;
     }
-    
+
     @TagAttribute(required = false)
     public void setDdType(String type) {
         this.ddType = type;
@@ -116,10 +120,10 @@ public class PlaceholderTag extends BodyTagSupport {
             String bodyContentString = bodyContent != null ? bodyContent.getString() : null;
             if (StringUtils.isNotBlank(bodyContentString)) {
                 // use the body content as the default placeholder
-                placeholder = Placeholder.getDefaultPlaceholder(request, component, bodyContentString);
+                placeholder = Placeholder.getDefaultPlaceholder(request, component, bodyContentString, getDdClass());
             } else {
                 String classicUIPlaceholder = componentHelper.generateClassicUIPlaceholder(getAllClassNames(), null);
-                placeholder = Placeholder.getDefaultPlaceholder(request, component, classicUIPlaceholder);
+                placeholder = Placeholder.getDefaultPlaceholder(request, component, classicUIPlaceholder, getDdClass());
             }
 
             try {

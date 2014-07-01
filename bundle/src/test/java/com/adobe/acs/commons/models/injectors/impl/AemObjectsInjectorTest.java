@@ -142,6 +142,8 @@ public class AemObjectsInjectorTest {
         private Session session;
         @Inject @Optional
         private XSSAPI xssApi;
+        @Inject @Optional
+        private String namedSomethingElse;
 
         public Resource getResource() {
             return resource;

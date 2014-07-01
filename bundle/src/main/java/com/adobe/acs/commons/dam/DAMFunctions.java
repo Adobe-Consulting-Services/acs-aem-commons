@@ -33,7 +33,7 @@ public final class DAMFunctions {
 
     private DAMFunctions() {
     }
-    
+
     /**
      * Return the title or name of the asset, if the title is not defined.
      * 

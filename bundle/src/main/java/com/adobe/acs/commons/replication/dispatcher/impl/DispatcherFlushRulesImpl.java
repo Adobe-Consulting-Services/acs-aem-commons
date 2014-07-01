@@ -72,10 +72,12 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
     private static final String OPTION_INHERIT = "INHERIT";
     private static final String OPTION_ACTIVATE = "ACTIVATE";
     private static final String OPTION_DELETE = "DELETE";
-    
 
-    private static final DispatcherFlushFilter HIERARCHICAL_FILTER = new DispatcherFlushRulesFilter(FlushType.Hierarchical);
-    private static final DispatcherFlushFilter RESOURCE_ONLY_FILTER = new DispatcherFlushRulesFilter(FlushType.ResourceOnly);
+
+    private static final DispatcherFlushFilter HIERARCHICAL_FILTER =
+            new DispatcherFlushRulesFilter(FlushType.Hierarchical);
+    private static final DispatcherFlushFilter RESOURCE_ONLY_FILTER =
+            new DispatcherFlushRulesFilter(FlushType.ResourceOnly);
 
     /* Replication Action Type Property */
 
@@ -154,11 +156,13 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 final Matcher m = pattern.matcher(path);
 
                 if (m.matches()) {
+                    final String flushPath = m.replaceAll(entry.getValue());
+
                     log.debug("Requesting hierarchical flush of associated path: {} ~> {}", path,
-                            entry.getValue());
+                    		flushPath);
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
                             HIERARCHICAL_FILTER,
-                            entry.getValue());
+                            flushPath);
                 }
             }
 
@@ -168,10 +172,12 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 final Matcher m = pattern.matcher(path);
 
                 if (m.matches()) {
+                    final String flushPath = m.replaceAll(entry.getValue());
+
                     log.debug("Requesting ResourceOnly flush of associated path: {} ~> {}", path, entry.getValue());
                     dispatcherFlusher.flush(resourceResolver, flushActionType, false,
                             RESOURCE_ONLY_FILTER,
-                            entry.getValue());
+                            flushPath);
                 }
             }
 

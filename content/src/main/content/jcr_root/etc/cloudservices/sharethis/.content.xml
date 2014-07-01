@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:lastModified="{Date}2013-10-17T12:25:32.019-04:00"
+        cq:lastModifiedBy="admin"
+        cq:template="/libs/cq/cloudserviceconfigs/templates/servicepage"
+        jcr:description="Enable site visitors to share content to social networks."
+        jcr:primaryType="cq:PageContent"
+        jcr:title="Share This"
+        sling:resourceType="cq/cloudserviceconfigs/components/servicepage"
+        componentReference="acs-commons/components/utilities/sharethis"
+        description="Enable site visitors to share content to social networks."
+        serviceAdminUrl="http://www.sharethis.com/"
+        serviceUrl="http://www.sharethis.com"
+        thumbnailPath="/apps/acs-commons/templates/utilities/sharethis/thumbnail.png"/>
+</jcr:root>

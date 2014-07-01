@@ -25,7 +25,7 @@ import org.apache.sling.api.wrappers.SlingHttpServletResponseWrapper;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class StringWriterResponse extends SlingHttpServletResponseWrapper {
+public final class StringWriterResponse extends SlingHttpServletResponseWrapper {
     private StringWriter stringWriter = new StringWriter();
     private PrintWriter printWriter = new PrintWriter(stringWriter);
 

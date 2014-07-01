@@ -63,9 +63,9 @@ import com.day.cq.wcm.api.PageManager;
 @Component(immediate = true, label = "ACS AEM Commons - Twitter Feed Update Service",
     metatype = true, description = "Service to update Twitter Feed components.")
 @Service
-public final class TwitterFeedServiceImpl implements TwitterFeedService {
+public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
-    private static final Logger log = LoggerFactory.getLogger(TwitterFeedServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TwitterFeedUpdaterImpl.class);
 
     @Reference
     private Replicator replicator;
@@ -84,7 +84,7 @@ public final class TwitterFeedServiceImpl implements TwitterFeedService {
     }
 
     @Override
-    public void refreshTwitterFeedComponents(ResourceResolver resourceResolver) {
+    public void updateTwitterFeedComponents(ResourceResolver resourceResolver) {
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
         List<Resource> twitterResources = findTwitterResources(resourceResolver);

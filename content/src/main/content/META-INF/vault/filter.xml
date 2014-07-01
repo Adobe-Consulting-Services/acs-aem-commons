@@ -4,6 +4,7 @@
         <exclude pattern="/apps/acs-commons/components/utilities/designer/clientlibsmanager/clientlibs/less/generated"/>
         <exclude pattern="/apps/acs-commons/components/content/column-control/clientlib/css/generated"/>
         <exclude pattern="/apps/acs-commons/widgets/source/css/generated"/>
+        <exclude pattern="/apps/acs-commons/components/utilities/page/clientlibs/css/generated"/>
     </filter>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
@@ -15,8 +16,21 @@
     <filter root="/etc/cloudservices/dtm">
         <include pattern="/etc/cloudservices/dtm/jcr:content"/>
     </filter>
+    <filter root="/etc/cloudservices/sharethis">
+        <include pattern="/etc/cloudservices/sharethis/jcr:content"/>
+    </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?" />
         <include pattern="/etc/acs-commons/version-replicator(.*)?" />
+        <include pattern="/etc/acs-commons/dispatcher-flush"/>
+        <include pattern="/etc/acs-commons/dispatcher-flush/jcr:content"/>
+        <include pattern="/etc/acs-commons/lists"/>
+        <include pattern="/etc/acs-commons/lists/jcr:content"/>
+        <include pattern="/etc/acs-commons/lists/sharethis-services"/>
+        <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content"/>
+        <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content/list"/>
+        <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content/list/default_\d+"/>
+        <include pattern="/etc/acs-commons/packagers"/>
+        <include pattern="/etc/acs-commons/packagers/jcr:content"/>
     </filter>
 </workspaceFilter>

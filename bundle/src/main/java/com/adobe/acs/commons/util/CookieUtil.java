@@ -20,8 +20,6 @@
 package com.adobe.acs.commons.util;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +30,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CookieUtil {
-    private static final Logger log = LoggerFactory.getLogger(CookieUtil.class);
 
     private CookieUtil() {
     }

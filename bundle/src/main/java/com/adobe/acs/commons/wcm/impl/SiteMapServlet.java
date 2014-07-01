@@ -55,7 +55,7 @@ import com.day.cq.wcm.api.PageManager;
         @Property(name = "sling.servlet.selectors", value = "sitemap", propertyPrivate = true),
         @Property(name = "sling.servlet.extensions", value = "xml", propertyPrivate = true),
         @Property(name = "sling.servlet.methods", value = "GET", propertyPrivate = true) })
-public class SiteMapServlet extends SlingSafeMethodsServlet {
+public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final String DEFAULT_EXTERNALIZER_DOMAIN = "publish";
 
