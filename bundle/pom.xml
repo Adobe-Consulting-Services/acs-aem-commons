@@ -435,6 +435,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.api</artifactId>
+            <version>2.4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.scheduler</artifactId>
+            <version>2.3.4</version>
+        </dependency>
     </dependencies>
 
     <profiles>
