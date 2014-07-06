@@ -23,7 +23,8 @@
 angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($scope, $http, $timeout) {
 
     $scope.app = {
-        uri: ''
+        uri: '',
+        statusInterval: 5
     };
 
     $scope.notifications = [];
@@ -31,6 +32,16 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
     $scope.form = {};
 
     $scope.data = {};
+
+
+    $scope.$watch('app.statusInterval', function(newValue, oldValue) {
+        if(!angular.isNumber(newValue) || newValue <= 0) {
+            $scope.app.statusInterval = 10;
+        } else {
+            $timeout.cancel($scope.app.statusPromise);
+            $scope.status();
+        }
+    });
 
     $scope.start = function() {
         $scope.results = {};
@@ -82,7 +93,6 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
     };
 
     $scope.status = function() {
-        var timeout = 2000;
 
         $http({
             method: 'GET',
@@ -93,9 +103,13 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
                 $scope.data.status = data || {};
 
                 if ($scope.data.status.state === 'running') {
+
+                    $scope.data.status.percentComplete =
+                        Math.round(($scope.data.status.complete / $scope.data.status.total) * 100);
+
                     $scope.app.statusPromise = $timeout(function () {
                         $scope.status();
-                    }, timeout);
+                    }, $scope.app.statusInterval * 1000);
                 } else {
                     $timeout.cancel($scope.app.statusPromise);
                 }

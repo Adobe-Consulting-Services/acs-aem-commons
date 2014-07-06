@@ -274,19 +274,26 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
      * @throws RepositoryException
      */
     private Resource advance(Resource resource) throws PersistenceException, RepositoryException {
+        // Page Resource
         final ResourceResolver resourceResolver = resource.getResourceResolver();
         final ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
 
+        // Current Batch
         final Resource currentBatch = this.getCurrentBatch(resource);
         final ModifiableValueMap currentProperties = currentBatch.adaptTo(ModifiableValueMap.class);
 
+        // Next Batch
         final String nextBatchPath = currentProperties.get(PN_NEXT_BATCH, "ERROR");
 
         if(StringUtils.equalsIgnoreCase(nextBatchPath, "DONE")) {
 
             this.complete(resource);
 
+            properties.put(PN_COMPLETE_COUNT,
+                    properties.get(PN_COMPLETE_COUNT, 0) + this.getSize(currentBatch.getChildren()));
+
         } else {
+
             final Resource nextBatch = resourceResolver.getResource(nextBatchPath);
             final ModifiableValueMap nextProperties = nextBatch.adaptTo(ModifiableValueMap.class);
 
@@ -398,13 +405,11 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
     @Activate
     protected void activate(final Map<String, String> config) {
-        log.debug("Activating...");
         jobs = new ConcurrentHashMap<String, String>();
     }
 
     @Deactivate
     protected void deactivate(final Map<String, String> config) {
-        log.debug("Deactivating...");
         ResourceResolver resourceResolver = null;
 
         try {
@@ -420,9 +425,8 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
                 try {
                     this.stop(resourceResolver.getResource(path));
                 } catch (Exception e) {
-                    log.error("Could not stop job via normal means due to: {}", e.getMessage());
                     this.scheduler.removeJob(jobName);
-                    log.error("Performed a hard stop for [ {} ]", jobName);
+                    log.error("Performed a hard stop for [ {} ] at de-activation due to: ", jobName, e.getMessage());
                 }
             }
         } catch (org.apache.sling.api.resource.LoginException e) {

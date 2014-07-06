@@ -1,8 +1,10 @@
 #acs-commons-bulk-workflow-manager-app {
 
   .content-container {
-    width: 960px;
-    margin: 0 auto;
+    .content-container-inner {
+      width: 960px;
+      margin: 0 auto;
+    }
   }
 
   .section {
@@ -13,16 +15,6 @@
     }
   }
 
-  .result {
-    font-size: 1.25em;
-    line-height: 1.4em;
-
-    p {
-      background-color: white;
-      border: solid 1px #ccc;
-      padding: 1em;
-    }
-  }
 
   form {
     margin-top: 2em;
@@ -45,50 +37,34 @@
         text-align: right;
       }
 
-      input[type=text] {
+      input[type=text],
+      textarea {
         width: 75%;
       }
     }
+  }
 
-    table.properties-table {
+  .current-batch-table {
+    width: 100%;
 
-      width: 75%;
-
-      .property-multi {
-        text-align: center;
-      }
-
-      .property-name {
-
-      }
-
-      .property-value {
-        width: 50%;
-      }
-
-      .property-remove {
-        text-align: center;
-      }
-
-      .property-add {
-        text-align: right;
-      }
-
-      input[type=text] {
-        width: 100%;
-      }
-    }
-
-    .instructions {
-      font-style: italic;
+    .status-col {
+      width: 10em;
     }
   }
 
-  .results {
-    margin-top: 2em;
+  .status-interval {
+    line-height: 3em;
+    margin-bottom: .5em;
 
-    h2 {
-      margin-bottom: .5em;
+    .status-interval-input {
+      width: 4em;
+      min-width: 4em;
+      magin-left: .25em;
+      margin-right: .25em;
     }
+  }
+
+  .progress {
+    width: 95%;
   }
 }
