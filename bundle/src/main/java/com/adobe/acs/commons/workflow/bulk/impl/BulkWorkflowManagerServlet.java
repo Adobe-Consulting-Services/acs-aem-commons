@@ -113,6 +113,7 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
         json.put("total", total);
         json.put("complete", complete);
         json.put("remaining", total - complete);
+        json.put("percentComplete", Math.round((complete / (total * 1F)) * 100));
 
         // Times
         json.put("startedAt", properties.get(BulkWorkflowManager.PN_STARTED_AT, Date.class));

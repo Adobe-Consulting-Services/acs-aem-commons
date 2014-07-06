@@ -5,25 +5,33 @@
 
         <section class="well">
 
-            <ul>
-                <li>Status: {{ data.status.state }}</li>
-                <li>Batch Size: {{ data.status.batchSize }}</li>
-                <li>Total: {{ data.status.total }}</li>
-                <li>Complete: {{ data.status.complete }}</li>
-                <li>Remaining: {{ data.status.remaining }}</li>
-                <li>Workflow Model: {{ data.status.workflowModel }}</li>
-                <li>Auto Purge Batches: {{ data.status.autoPurgeWorkflows }}</li>
-                <li>Current Batch: {{ data.status.currentBatch }}</li>
+            <div class="left">
+                <ul>
+                    <li>Status: <span style="text-transform: capitalize;">{{ data.status.state }}</span></li>
+                    <li>Total: {{ data.status.total }}</li>
+                    <li>Complete: {{ data.status.complete }}</li>
+                    <li>Remaining: {{ data.status.remaining }}</li>
+                    <li>Current Batch: {{ data.status.currentBatch }}</li>
 
-                <li ng-show="data.status.startedAt">Started At: {{ data.status.startedAt }}</li>
-                <li ng-show="data.status.stoppedAt">Stopped At: {{ data.status.stoppedAt }}</li>
-                <li ng-show="data.status.completedAt">Competed At: {{ data.status.completedAt }}</li>
-            </ul>
+                    <li ng-show="data.status.startedAt">Started At: {{ data.status.startedAt }}</li>
+                    <li ng-show="data.status.stoppedAt">Stopped At: {{ data.status.stoppedAt }}</li>
+                    <li ng-show="data.status.completedAt">Competed At: {{ data.status.completedAt }}</li>
+                </ul>
+            </div>
+
+            <div class="right">
+                <ul>
+                    <li>Batch Size: {{ data.status.batchSize }}</li>
+                    <li>Workflow Model: {{ data.status.workflowModel }}</li>
+                    <li>Auto Purge Batches: {{ data.status.autoPurgeWorkflows }}</li>
+                </ul>
+            </div>
+            <div style="clear: both;"></div>
         </section>
     </div>
 
     <div class="section progress-section">
-        <div ng-show="data.status.percentComplete">
+        <div ng-show="data.status.percentComplete || data.status.percentComplete === 0">
             <div class="progress">
                 <div class="bar"
                      style="width: {{ data.status.percentComplete }}%;"></div>
@@ -44,15 +52,16 @@
 
     <div    ng-show="data.status.state === 'running'"
             class="section current-batch-section">
-        <h3>Current Batch</h3>
 
+        <h3>Current Batch</h3>
 
          <div class="status-interval">
              Refresh status table every
             <input type="text"
                    class="status-interval-input"
-                   ng-model="form.statusInterval"
-                   placeholder="10"/> seconds
+                   ng-blur="updatePollingInterval(form.pollingInterval)"
+                   ng-model="form.pollingInterval"
+                   placeholder="{{ dfault.pollingInterval }}"/> seconds
         </div>
 
         <table class="data current-batch-table">

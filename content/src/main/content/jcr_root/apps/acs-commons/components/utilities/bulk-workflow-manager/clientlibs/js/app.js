@@ -22,9 +22,14 @@
 
 angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($scope, $http, $timeout) {
 
+    $scope.dfault = {
+        pollingInterval: 5
+    };
+
     $scope.app = {
         uri: '',
-        statusInterval: 5
+        statusInterval: 5,
+        polling: false
     };
 
     $scope.notifications = [];
@@ -32,16 +37,6 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
     $scope.form = {};
 
     $scope.data = {};
-
-
-    $scope.$watch('app.statusInterval', function(newValue, oldValue) {
-        if(!angular.isNumber(newValue) || newValue <= 0) {
-            $scope.app.statusInterval = 10;
-        } else {
-            $timeout.cancel($scope.app.statusPromise);
-            $scope.status();
-        }
-    });
 
     $scope.start = function() {
         $scope.results = {};
@@ -69,7 +64,8 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
         }).
             success(function(data, status, headers, config) {
                 $scope.data.status = data || {};
-                $timeout.cancel($scope.app.statusPromise);
+
+                $timeout.cancel($scope.app.pollingPromise);
             }).
             error(function(data, status, headers, config) {
                 $scope.addNotification('error', 'ERROR', 'Check your params and your error logs and try again.');
@@ -93,6 +89,8 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
     };
 
     $scope.status = function() {
+        var timeout = ($scope.app.pollingInterval || $scope.dfault.pollingInterval ) * 1000;
+        $scope.app.polling = true;
 
         $http({
             method: 'GET',
@@ -103,18 +101,17 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
                 $scope.data.status = data || {};
 
                 if ($scope.data.status.state === 'running') {
-
-                    $scope.data.status.percentComplete =
-                        Math.round(($scope.data.status.complete / $scope.data.status.total) * 100);
-
-                    $scope.app.statusPromise = $timeout(function () {
+                    $scope.app.pollingPromise = $timeout(function () {
                         $scope.status();
-                    }, $scope.app.statusInterval * 1000);
+                    }, timeout);
                 } else {
-                    $timeout.cancel($scope.app.statusPromise);
+                    $timeout.cancel($scope.app.pollingPromise);
                 }
+
+                $scope.app.polling = false;
             }).
             error(function(data, status, headers, config) {
+                $scope.app.polling = false;
                 $scope.addNotification('error', 'ERROR', 'Check your params and your error logs and try again.');
             });
     };
@@ -123,6 +120,19 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
         $scope.status();
     };
 
+    $scope.updatePollingInterval = function(interval) {
+        interval = parseInt(interval, 10);
+
+        if(!angular.isNumber(interval) || interval < 1) {
+            $scope.form.pollingInterval = $scope.dfault.pollingInterval;
+            $scope.app.pollingInterval = $scope.form.pollingInterval;
+        } else {
+            $scope.form.pollingInterval = interval;
+            $scope.app.pollingInterval = interval;
+            $timeout.cancel($scope.app.pollingPromise);
+            $scope.status();
+        }
+    };
 
     $scope.addNotification = function (type, title, message) {
         var timeout = 10000;
