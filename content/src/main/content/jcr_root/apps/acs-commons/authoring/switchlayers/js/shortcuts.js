@@ -19,8 +19,6 @@
  */
 
 /*global top: false */
-/*global Granite: false */
-
 
 //keymapping for edit layer
 jQuery(document).bind('keydown', 'ctrl+shift+e', function() {  
