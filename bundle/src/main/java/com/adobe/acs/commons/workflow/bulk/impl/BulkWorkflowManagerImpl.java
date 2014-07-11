@@ -1,6 +1,7 @@
 package com.adobe.acs.commons.workflow.bulk.impl;
 
 
+import com.adobe.acs.commons.workflow.bulk.Bucket;
 import com.adobe.acs.commons.workflow.bulk.BulkWorkflowManager;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
@@ -11,17 +12,8 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.model.WorkflowModel;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.felix.scr.annotations.*;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +24,8 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import javax.jcr.query.QueryResult;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -84,23 +72,25 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
         // Query for all candidate resources
 
-        final Session session = resource.getResourceResolver().adaptTo(Session.class);
+        final ResourceResolver resourceResolver = resource.getResourceResolver();
+        final Session session = resourceResolver.adaptTo(Session.class);
         final QueryManager queryManager = session.getWorkspace().getQueryManager();
-        final NodeIterator nodes = queryManager.createQuery(query, Query.JCR_SQL2).execute().getNodes();
+        final QueryResult queryResult = queryManager.createQuery(query, Query.JCR_SQL2).execute();
+        final NodeIterator nodes = queryResult.getNodes();
+
+        final Bucket bucket = new Bucket(batchSize, queryResult.getRows().getSize());
 
         // Create the structure
-        int batchCount = 0, total = 0;
+        int total = 0;
         Node previousBatchNode = null, node = null;
         while (nodes.hasNext()) {
-
-            final String path = this.getOrCreateBatchesResource(resource).getPath() + "/" + batchCount + "/" + total++;
+            final String path = bucket.getNextPath(resourceResolver) + "/"  + total++;
             node = JcrUtil.createPath(path, SLING_FOLDER, JcrConstants.NT_UNSTRUCTURED, session, false);
 
             JcrUtil.setProperty(node, PN_PATH, nodes.nextNode().getPath());
 
             if (total % batchSize == 0) {
                 previousBatchNode = node.getParent();
-                batchCount++;
             } else if (total % batchSize == 1) {
                 if (previousBatchNode != null) {
                     JcrUtil.setProperty(previousBatchNode, PN_NEXT_BATCH, node.getParent().getPath());
