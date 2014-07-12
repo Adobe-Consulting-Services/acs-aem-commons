@@ -76,7 +76,7 @@
         <h3>Current Batch</h3>
 
          <div class="status-interval">
-             Refresh status table every
+             Refresh status every
             <input type="text"
                    class="status-interval-input"
                    ng-blur="updatePollingInterval(form.pollingInterval)"
