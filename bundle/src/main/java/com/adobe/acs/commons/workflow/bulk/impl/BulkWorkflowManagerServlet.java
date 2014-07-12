@@ -1,3 +1,23 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package com.adobe.acs.commons.workflow.bulk.impl;
 
 import com.adobe.acs.commons.workflow.bulk.BulkWorkflowManager;
@@ -36,6 +56,7 @@ import java.util.Date;
 public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowManagerServlet.class);
 
+    private static final int DECIMAL_TO_PERCENT = 100;
     public static final String SLING_RESOURCE_TYPE = "acs-commons/components/utilities/bulk-workflow-manager";
 
     @Reference
@@ -45,7 +66,7 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
     private BulkWorkflowManager bulkWorkflowManager;
 
     @Override
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+    protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         JSONObject json = new JSONObject();
 
@@ -62,34 +83,8 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
         response.getWriter().write(json.toString());
     }
 
-    private JSONObject form(final SlingHttpServletRequest request) {
-        final JSONObject json = new JSONObject();
-        final WorkflowSession workflowSession = workflowService.getWorkflowSession(request.getResourceResolver().adaptTo
-                (Session.class));
-
-        try {
-            final WorkflowModel[] workflowModels = workflowSession.getModels();
-
-            for(final WorkflowModel workflowModel : workflowModels) {
-                JSONObject jsonWorkflow = new JSONObject();
-                try {
-                    jsonWorkflow.put("label", workflowModel.getTitle());
-                    jsonWorkflow.put("value", workflowModel.getId());
-                    json.accumulate("workflowModels", jsonWorkflow);
-                } catch (JSONException e) {
-                    log.error("Could not add workflow [ {} - {} ] to Workflow Models dropdown JSON object",
-                            workflowModel.getTitle(), workflowModel.getId());
-                }
-            }
-        } catch (WorkflowException e) {
-            log.error("Could not create workflow model drop-down due to: {}", e.getMessage());
-        }
-
-        return json;
-    }
-
     @Override
-    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
+    protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
         JSONObject json = new JSONObject();
@@ -115,6 +110,32 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
         response.getWriter().write(json.toString());
     }
 
+    private JSONObject form(final SlingHttpServletRequest request) {
+        final JSONObject json = new JSONObject();
+        final WorkflowSession workflowSession = workflowService.getWorkflowSession(
+                request.getResourceResolver().adaptTo(Session.class));
+
+        try {
+            final WorkflowModel[] workflowModels = workflowSession.getModels();
+
+            for (final WorkflowModel workflowModel : workflowModels) {
+                JSONObject jsonWorkflow = new JSONObject();
+                try {
+                    jsonWorkflow.put("label", workflowModel.getTitle());
+                    jsonWorkflow.put("value", workflowModel.getId());
+                    json.accumulate("workflowModels", jsonWorkflow);
+                } catch (JSONException e) {
+                    log.error("Could not add workflow [ {} - {} ] to Workflow Models dropdown JSON object",
+                            workflowModel.getTitle(), workflowModel.getId());
+                }
+            }
+        } catch (WorkflowException e) {
+            log.error("Could not create workflow model drop-down due to: {}", e.getMessage());
+        }
+
+        return json;
+    }
+
     private JSONObject start(SlingHttpServletRequest request) throws RepositoryException, JSONException,
             PersistenceException, ServletException {
 
@@ -127,18 +148,18 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
 
         // Validate input
 
-        if(batchSize < 1) {
+        if (batchSize < 1) {
             throw new ServletException("Batch size must be greater than zero.");
         }
 
-        if(interval < 1) {
+        if (interval < 1) {
             throw new ServletException("Update interval must be greater than zero.");
         }
 
         final WorkflowSession workflowSession = workflowService.getWorkflowSession(request.getResourceResolver()
                 .adaptTo(Session.class));
         try {
-            final WorkflowModel model = workflowSession.getModel(workflowModel);
+            workflowSession.getModel(workflowModel);
         } catch (WorkflowException e) {
             throw new ServletException(String.format("Unable to locate workflow at: %s",
                     workflowModel));
@@ -182,7 +203,7 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
         json.put("total", total);
         json.put("complete", complete);
         json.put("remaining", total - complete);
-        json.put("percentComplete", Math.round((complete / (total * 1F)) * 100));
+        json.put("percentComplete", Math.round((complete / (total * 1F)) * DECIMAL_TO_PERCENT));
 
         // Times
         json.put("startedAt", properties.get(BulkWorkflowManager.PN_STARTED_AT, Date.class));

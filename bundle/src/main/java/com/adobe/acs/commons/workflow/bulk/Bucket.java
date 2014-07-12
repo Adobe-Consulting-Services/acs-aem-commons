@@ -1,3 +1,23 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package com.adobe.acs.commons.workflow.bulk;
 
 import com.day.cq.commons.jcr.JcrUtil;
@@ -10,41 +30,47 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.Arrays;
 
-public class Bucket {
+public final class Bucket {
     private static final Logger log = LoggerFactory.getLogger(Bucket.class);
+
     private static final String NT_SLING_FOLDER = "sling:Folder";
 
     private final int bucketSize;
+
     private final long total;
+
     private final String bucketType;
 
     private int[] depthTracker;
+
     private int bucketCount = 0;
+
     private String rootPath;
 
     /**
-     * Create a new Bucket
+     * Create a new Bucket.
      *
      * @param bucketSize Max number of resource per bucket
-     * @param total Total number of resources to bucket out; If this is less than bucketSize,
-     *              a single bucket will be created
+     * @param total      Total number of resources to bucket out; If this is less than bucketSize,
+     *                   a single bucket will be created
      */
     public Bucket(final int bucketSize, final long total) {
         this(bucketSize, total, NT_SLING_FOLDER, "/content/" + String.valueOf(System.currentTimeMillis()));
     }
 
     /**
+     * Create a new Bucket.
      *
      * @param bucketSize Max number of resource per bucket
-     * @param total Total number of resources to bucket out; If this is less than bucketSize,
-     *              a single bucket will be created
-     * @param rootPath the absolute path to create the buckets
+     * @param total      Total number of resources to bucket out; If this is less than bucketSize,
+     *                   a single bucket will be created
+     * @param rootPath   the absolute path to create the buckets
      * @param bucketType nodeType used when creating the buckets
      */
     public Bucket(final int bucketSize, final long total, final String rootPath, final String bucketType) {
         this.bucketSize = bucketSize;
 
-        if(this.bucketSize > total) {
+        if (this.bucketSize > total) {
             this.total = this.bucketSize;
         } else {
             this.total = total;
@@ -96,13 +122,14 @@ public class Bucket {
     private String getOrCreateBucketPath(final ResourceResolver resourceResolver)
             throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
-        String folderPath = this.rootPath;
 
+        final StringBuilder sb = new StringBuilder(this.rootPath);
         for (int i = 0; i < this.depthTracker.length; i++) {
             final String tmp = Integer.toString(this.depthTracker[i] + 1);
-            folderPath += "/" + tmp;
+            sb.append("/").append(tmp);
         }
 
+        final String folderPath = sb.toString();
         if (resourceResolver.getResource(folderPath) != null) {
             return folderPath;
         } else {

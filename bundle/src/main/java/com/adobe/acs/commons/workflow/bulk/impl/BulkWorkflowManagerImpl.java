@@ -1,3 +1,23 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package com.adobe.acs.commons.workflow.bulk.impl;
 
 
@@ -5,7 +25,6 @@ import com.adobe.acs.commons.workflow.bulk.Bucket;
 import com.adobe.acs.commons.workflow.bulk.BulkWorkflowManager;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
-import com.day.cq.search.QueryBuilder;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
@@ -54,10 +73,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
     private static final int SAVE_THRESHOLD = 1000;
 
     @Reference
-    QueryBuilder queryBuilder;
-
-    @Reference
-    WorkflowService workflowService;
+    private WorkflowService workflowService;
 
     @Reference
     private Scheduler scheduler;
@@ -67,20 +83,28 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
     private ConcurrentHashMap<String, String> jobs = null;
 
-    public Resource getCurrentBatch(final Resource resource) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Resource getCurrentBatch(final Resource resource) {
         final ValueMap properties = resource.adaptTo(ValueMap.class);
         final String currentBatch = properties.get(PN_CURRENT_BATCH, "");
         final Resource currentBatchResource = resource.getResourceResolver().getResource(currentBatch);
 
-        if(currentBatchResource == null) {
+        if (currentBatchResource == null) {
             log.error("Current batch resource [ {} ] could not be located. Cannot process Bulk workflow.",
                     currentBatch);
         }
         return currentBatchResource;
     }
 
-    public void initialize(Resource resource, String query, long estimatedSize, int batchSize,
-                           int interval, String workflowModel) throws
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void initialize(Resource resource, String query, long estimatedSize, int batchSize,
+                                 int interval, String workflowModel) throws
             PersistenceException, RepositoryException {
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
@@ -122,7 +146,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
             final String batchPath = bucket.getNextPath(resourceResolver);
 
-            if(currentBatch == null) {
+            if (currentBatch == null) {
                 // Set the currentBatch to the first batch folder
                 currentBatch = batchPath;
             }
@@ -134,12 +158,10 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
             if (total % batchSize == 0) {
                 previousBatchNode = node.getParent();
-            } else if (total % batchSize == 1) {
-                if (previousBatchNode != null) {
-                    // Set the "next batch" property, so we know what the next batch to process is when
-                    // the current batch is complete
-                    JcrUtil.setProperty(previousBatchNode, PN_NEXT_BATCH, node.getParent().getPath());
-                }
+            } else if ((total % batchSize == 1) && previousBatchNode != null) {
+                // Set the "next batch" property, so we know what the next batch to process is when
+                // the current batch is complete
+                JcrUtil.setProperty(previousBatchNode, PN_NEXT_BATCH, node.getParent().getPath());
             }
 
             if (total % SAVE_THRESHOLD == 0) {
@@ -162,7 +184,11 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         resource.getResourceResolver().commit();
     }
 
-    public void start(final Resource resource) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void start(final Resource resource) {
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
         final String jobName = mvm.get(PN_JOB_NAME, String.class);
@@ -172,7 +198,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
         final Runnable job = new Runnable() {
 
-            Map<String, String> workflowMap = new LinkedHashMap<String, String>();
+            private Map<String, String> workflowMap = new LinkedHashMap<String, String>();
 
             public void run() {
                 ResourceResolver adminResourceResolver = null;
@@ -182,9 +208,9 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
                     workflowMap = getActiveWorkflows(adminResourceResolver, workflowMap);
                     final Resource contentResource = adminResourceResolver.getResource(resourcePath);
 
-                    if(contentResource == null) {
-                      log.warn("Bulk workflow process resource [ {} ] could not be found. Removing periodic job.",
-                              resourcePath);
+                    if (contentResource == null) {
+                        log.warn("Bulk workflow process resource [ {} ] could not be found. Removing periodic job.",
+                                resourcePath);
                         scheduler.removeJob(jobName);
                     } else if (workflowMap.isEmpty()) {
                         workflowMap = process(contentResource, workflowModel);
@@ -220,14 +246,35 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         }
     }
 
-    public void stop(final Resource resource) throws PersistenceException {
+    /**
+     * Stops the bulk workflow process using the user initiated stop state.
+     *
+     * @param resource the jcr:content configuration resource
+     * @throws PersistenceException
+     */
+    @Override
+    public final void stop(final Resource resource) throws PersistenceException {
         this.stop(resource, STATE_STOPPED);
     }
 
+    /**
+     * Stops the bulk workflow process using the OSGi Component deactivated stop state.
+     *
+     * Allows the system to know to resume this when the OSGi Component is activated.
+     *
+     * @param resource the jcr:content configuration resource
+     * @throws PersistenceException
+     */
     private void stopDeactivate(final Resource resource) throws PersistenceException {
         this.stop(resource, STATE_STOPPED_DEACTIVATED);
     }
 
+    /**
+     * Stops the bulk workflow process.
+     *
+     * @param resource the jcr:content configuration resource
+     * @throws PersistenceException
+     */
     private void stop(final Resource resource, final String state) throws PersistenceException {
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
         final String jobName = mvm.get(PN_JOB_NAME, String.class);
@@ -249,13 +296,22 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void resume(final Resource resource) {
+    public final void resume(final Resource resource) {
         this.start(resource);
         log.info("Resumed bulk workflow for [ {} ]", resource.getPath());
     }
 
-    public void complete(final Resource resource) throws PersistenceException {
+    /**
+     * Updates the bulk workflow process status to be completed.
+     *
+     * @param resource the jcr:content configuration resource
+     * @throws PersistenceException
+     */
+    private void complete(final Resource resource) throws PersistenceException {
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
         final String jobName = mvm.get(PN_JOB_NAME, String.class);
 
@@ -274,10 +330,16 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         }
     }
 
+    /**
+     * Processes the bulk process workflow batch; starts WF's as necessary for each batch item.
+     *
+     * @param resource the jcr:content configuration resource
+     * @throws PersistenceException
+     */
     private Map<String, String> process(final Resource resource, String workflowModel) throws
             WorkflowException, PersistenceException, RepositoryException {
 
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Processing batch [ {} ] with workflow model [ {} ]", this.getCurrentBatch(resource).getPath(),
                     workflowModel);
         }
@@ -295,7 +357,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
         final Resource nextBatch = this.advance(resource);
 
-        if(nextBatch != null) {
+        if (nextBatch != null) {
             for (final Resource child : nextBatch.getChildren()) {
                 final ModifiableValueMap properties = child.adaptTo(ModifiableValueMap.class);
 
@@ -378,6 +440,13 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         }
     }
 
+    /**
+     * Deletes the Workflow instances for each item in the batch.
+     *
+     * @param batchResource the batch resource
+     * @return the number of workflow instances purged
+     * @throws RepositoryException
+     */
     private int purge(Resource batchResource) throws RepositoryException {
         final ResourceResolver resourceResolver = batchResource.getResourceResolver();
         final List<String> payloadPaths = new ArrayList<String>();
@@ -407,13 +476,22 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         return payloadPaths.size();
     }
 
+    /**
+     * Retrieves the active worklows for the batch.
+     *
+     * @param resourceResolver the resource resolver
+     * @param workflowMap the map tracking what batch items are under WF
+     * @return the updated map of which batch items and their workflow state
+     * @throws RepositoryException
+     * @throws PersistenceException
+     */
     private Map<String, String> getActiveWorkflows(ResourceResolver resourceResolver,
                                                    final Map<String, String> workflowMap)
             throws RepositoryException, PersistenceException {
 
         final Map<String, String> activeWorkflowMap = new LinkedHashMap<String, String>();
-        final WorkflowSession workflowSession = workflowService.getWorkflowSession(resourceResolver.adaptTo
-                (Session.class));
+        final WorkflowSession workflowSession =
+                workflowService.getWorkflowSession(resourceResolver.adaptTo(Session.class));
 
         boolean dirty = false;
         for (final Map.Entry<String, String> entry : workflowMap.entrySet()) {
@@ -445,16 +523,25 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         return activeWorkflowMap;
     }
 
-    private int getSize(Iterable<Resource> resources) {
+    /**
+     * Gets the size of an iterable; Used for getting number of items under a batch.
+     *
+     * @param theIterable the iterable to count
+     * @return number of items in the iterable
+     */
+    private int getSize(Iterable<?> theIterable) {
         int count = 0;
-        for (final Resource resource : resources) {
+
+        final Iterator<?> iterator = theIterable.iterator();
+        while (iterator.next() != null) {
             count++;
         }
+
         return count;
     }
 
     @Activate
-    protected void activate(final Map<String, String> config) {
+    protected final void activate(final Map<String, String> config) {
         jobs = new ConcurrentHashMap<String, String>();
 
         ResourceResolver adminResourceResolver = null;
@@ -484,7 +571,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
     }
 
     @Deactivate
-    protected void deactivate(final Map<String, String> config) {
+    protected final void deactivate(final Map<String, String> config) {
         ResourceResolver resourceResolver = null;
 
         try {
