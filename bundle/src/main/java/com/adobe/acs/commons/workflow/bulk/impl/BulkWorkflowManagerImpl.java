@@ -12,8 +12,18 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.model.WorkflowModel;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
-import org.apache.sling.api.resource.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +35,18 @@ import javax.jcr.Session;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
+@Component(
+        immediate = true
+)
 @Service
 public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowManagerImpl.class);
@@ -49,13 +67,20 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
     private ConcurrentHashMap<String, String> jobs = null;
 
-    public Resource getCurrentBatch(Resource resource) {
+    public Resource getCurrentBatch(final Resource resource) {
         final ValueMap properties = resource.adaptTo(ValueMap.class);
         final String currentBatch = properties.get(PN_CURRENT_BATCH, "");
-        return resource.getResourceResolver().getResource(currentBatch);
+        final Resource currentBatchResource = resource.getResourceResolver().getResource(currentBatch);
+
+        if(currentBatchResource == null) {
+            log.error("Current batch resource [ {} ] could not be located. Cannot process Bulk workflow.",
+                    currentBatch);
+        }
+        return currentBatchResource;
     }
 
-    public void initialize(Resource resource, String query, int batchSize, String workflowModel) throws
+    public void initialize(Resource resource, String query, long estimatedSize, int batchSize,
+                           int interval, String workflowModel) throws
             PersistenceException, RepositoryException {
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
@@ -68,6 +93,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         mvm.put(PN_BATCH_SIZE, batchSize);
         mvm.put(PN_WORKFLOW_MODEL, workflowModel);
         mvm.put(PN_JOB_NAME, resource.getPath());
+        mvm.put(PN_INTERVAL, interval);
         mvm.put(PN_AUTO_PURGE_WORKFLOW, true);
 
         // Query for all candidate resources
@@ -78,14 +104,34 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         final QueryResult queryResult = queryManager.createQuery(query, Query.JCR_SQL2).execute();
         final NodeIterator nodes = queryResult.getNodes();
 
-        final Bucket bucket = new Bucket(batchSize, queryResult.getRows().getSize());
+        long size = queryResult.getNodes().getSize();
+        if (size < 0) {
+            log.debug("Using provided estimate total size [ {} ] as actual size [ {} ] could not be retrieved.",
+                    estimatedSize, size);
+            size = estimatedSize;
+        }
+
+        final Bucket bucket = new Bucket(batchSize, size,
+                resource.getChild(NN_BATCHES).getPath(), "sling:Folder");
 
         // Create the structure
+        String currentBatch = null;
         int total = 0;
         Node previousBatchNode = null, node = null;
         while (nodes.hasNext()) {
-            final String path = bucket.getNextPath(resourceResolver) + "/"  + total++;
-            node = JcrUtil.createPath(path, SLING_FOLDER, JcrConstants.NT_UNSTRUCTURED, session, false);
+
+            final String batchPath = bucket.getNextPath(resourceResolver);
+
+            if(currentBatch == null) {
+                // Set the currentBatch to the first batch folder
+                currentBatch = batchPath;
+            }
+
+            node = JcrUtil.createPath(batchPath + "/" + total++,
+                    SLING_FOLDER,
+                    JcrConstants.NT_UNSTRUCTURED,
+                    session,
+                    false);
 
             JcrUtil.setProperty(node, PN_PATH, nodes.nextNode().getPath());
 
@@ -102,13 +148,13 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
             }
         }
 
-        JcrUtil.setProperty(node.getParent(), PN_NEXT_BATCH, "DONE");
+        JcrUtil.setProperty(node.getParent(), PN_NEXT_BATCH, STATE_COMPLETE);
 
         if (total % SAVE_THRESHOLD != 0) {
             session.save();
         }
 
-        mvm.put(PN_CURRENT_BATCH, resource.getChild(NN_BATCHES).getPath() + "/0");
+        mvm.put(PN_CURRENT_BATCH, currentBatch);
         mvm.put(PN_TOTAL, total);
         mvm.put(PN_INITIALIZED, true);
         mvm.put(PN_STATE, STATE_NOT_STARTED);
@@ -116,26 +162,31 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         resource.getResourceResolver().commit();
     }
 
-    public void start(final Resource resource, long period) {
+    public void start(final Resource resource) {
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
         final String jobName = mvm.get(PN_JOB_NAME, String.class);
         final String workflowModel = mvm.get(PN_WORKFLOW_MODEL, String.class);
         final String resourcePath = resource.getPath();
+        long interval = mvm.get(PN_INTERVAL, DEFAULT_INTERVAL);
 
         final Runnable job = new Runnable() {
 
             Map<String, String> workflowMap = new LinkedHashMap<String, String>();
 
             public void run() {
-                ResourceResolver resourceResolver = null;
+                ResourceResolver adminResourceResolver = null;
 
                 try {
-                    resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                    workflowMap = getActiveWorkflows(resourceResolver, workflowMap);
-                    final Resource contentResource = resourceResolver.getResource(resourcePath);
+                    adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                    workflowMap = getActiveWorkflows(adminResourceResolver, workflowMap);
+                    final Resource contentResource = adminResourceResolver.getResource(resourcePath);
 
-                    if (workflowMap.isEmpty()) {
+                    if(contentResource == null) {
+                      log.warn("Bulk workflow process resource [ {} ] could not be found. Removing the associated "
+                              + "periodic job.",  resourcePath);
+                        scheduler.removeJob(jobName);
+                    } else if (workflowMap.isEmpty()) {
                         workflowMap = process(contentResource, workflowModel);
                     } else {
                         log.info("Workflows for batch [ {} ] are still active", contentResource.adaptTo(ValueMap
@@ -144,17 +195,19 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
                 } catch (Exception e) {
                     log.error("Error processing periodic execution: {}", e.getMessage());
                 } finally {
-                    if (resourceResolver != null) {
-                        resourceResolver.close();
+                    if (adminResourceResolver != null) {
+                        adminResourceResolver.close();
                     }
                 }
             }
         };
 
         try {
-            scheduler.addPeriodicJob(jobName, job, null, period, false);
 
-            log.info("Periodic job added for [ {} ] every [ {} seconds ]", jobName, period);
+            final boolean canRunConcurrently = false;
+            scheduler.addPeriodicJob(jobName, job, null, interval, canRunConcurrently);
+
+            log.info("Periodic job added for [ {} ] every [ {} seconds ]", jobName, interval);
 
             mvm.put(PN_STATE, STATE_RUNNING);
             mvm.put(PN_STARTED_AT, Calendar.getInstance());
@@ -169,6 +222,14 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
     }
 
     public void stop(final Resource resource) throws PersistenceException {
+        this.stop(resource, STATE_STOPPED);
+    }
+
+    private void stopDeactivate(final Resource resource) throws PersistenceException {
+        this.stop(resource, STATE_STOPPED_DEACTIVATED);
+    }
+
+    private void stop(final Resource resource, final String state) throws PersistenceException {
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
         final String jobName = mvm.get(PN_JOB_NAME, String.class);
 
@@ -179,7 +240,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
             log.info("Bulk Workflow Manager stopped for [ {} ]", jobName);
 
-            mvm.put(PN_STATE, STATE_STOPPED);
+            mvm.put(PN_STATE, state);
             mvm.put(PN_STOPPED_AT, Calendar.getInstance());
 
             resource.getResourceResolver().commit();
@@ -190,8 +251,8 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
     }
 
     @Override
-    public void resume(final Resource resource, final long period) {
-        this.start(resource, period);
+    public void resume(final Resource resource) {
+        this.start(resource);
         log.info("Resumed bulk workflow for [ {} ]", resource.getPath());
     }
 
@@ -220,10 +281,10 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         log.debug("Processing batch...");
 
         final boolean autoCleanupWorkflow = resource.adaptTo(ValueMap.class).get(PN_AUTO_PURGE_WORKFLOW, true);
-
         final Session session = resource.getResourceResolver().adaptTo(Session.class);
         final WorkflowSession workflowSession = workflowService.getWorkflowSession(session);
         final WorkflowModel model = workflowSession.getModel(workflowModel + "/jcr:content/model");
+
         final Map<String, String> workflowMap = new LinkedHashMap<String, String>();
 
         if (autoCleanupWorkflow) {
@@ -234,6 +295,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
         for (final Resource child : batchResource.getChildren()) {
             final ModifiableValueMap properties = child.adaptTo(ModifiableValueMap.class);
+
             final String payloadPath = properties.get(PN_PATH, String.class);
 
             if (StringUtils.isNotBlank(payloadPath)) {
@@ -273,9 +335,9 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         final ModifiableValueMap currentProperties = currentBatch.adaptTo(ModifiableValueMap.class);
 
         // Next Batch
-        final String nextBatchPath = currentProperties.get(PN_NEXT_BATCH, "ERROR");
+        final String nextBatchPath = currentProperties.get(PN_NEXT_BATCH, "/dev/null");
 
-        if(StringUtils.equalsIgnoreCase(nextBatchPath, "DONE")) {
+        if (StringUtils.equalsIgnoreCase(nextBatchPath, STATE_COMPLETE)) {
 
             this.complete(resource);
 
@@ -313,7 +375,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
             final String path = properties.get(PN_PATH, "Missing Path");
 
             final Resource resource = resourceResolver.getResource(workflowId);
-            if(resource != null) {
+            if (resource != null) {
                 final Node node = resource.adaptTo(Node.class);
                 node.remove();
                 payloadPaths.add(path);
@@ -322,7 +384,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
             }
         }
 
-        if(payloadPaths.size() > 0) {
+        if (payloadPaths.size() > 0) {
             resourceResolver.adaptTo(Session.class).save();
             log.info("Purged {} workflow instances for payloads: {}",
                     payloadPaths.size(),
@@ -370,21 +432,6 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         return activeWorkflowMap;
     }
 
-    private Resource getOrCreateBatchesResource(Resource contentResource) throws RepositoryException {
-        Resource resource = contentResource.getChild(NN_BATCHES);
-
-        if (resource == null) {
-            final Session session = contentResource.getResourceResolver().adaptTo(Session.class);
-            final String path = contentResource.getPath() + "/" + NN_BATCHES;
-
-            JcrUtil.createPath(path, SLING_FOLDER, session);
-
-            resource = contentResource.getResourceResolver().getResource(path);
-        }
-
-        return resource;
-    }
-
     private int getSize(Iterable<Resource> resources) {
         int count = 0;
         for (final Resource resource : resources) {
@@ -396,6 +443,31 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
     @Activate
     protected void activate(final Map<String, String> config) {
         jobs = new ConcurrentHashMap<String, String>();
+
+        ResourceResolver adminResourceResolver = null;
+
+        try {
+            adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+
+            Iterator<Resource> resources = adminResourceResolver.findResources(
+                    "SELECT * FROM [cq:PageContent] WHERE [sling:resourceType] = "
+                            + "'" + BulkWorkflowManagerServlet.SLING_RESOURCE_TYPE + "'", Query.JCR_SQL2);
+
+            while (resources.hasNext()) {
+                final Resource resource = resources.next();
+                final ValueMap properties = resource.adaptTo(ValueMap.class);
+
+                if (StringUtils.equals(STATE_STOPPED_DEACTIVATED, properties.get(PN_STATE, ""))) {
+                    this.resume(resource);
+                }
+            }
+        } catch (LoginException e) {
+            log.error("{}", e.getMessage());
+        } finally {
+            if (adminResourceResolver != null) {
+                adminResourceResolver.close();
+            }
+        }
     }
 
     @Deactivate
@@ -413,7 +485,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
                         path, jobName);
 
                 try {
-                    this.stop(resourceResolver.getResource(path));
+                    this.stopDeactivate(resourceResolver.getResource(path));
                 } catch (Exception e) {
                     this.scheduler.removeJob(jobName);
                     log.error("Performed a hard stop for [ {} ] at de-activation due to: ", jobName, e.getMessage());

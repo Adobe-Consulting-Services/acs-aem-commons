@@ -52,7 +52,7 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
             $scope.status();
         }).
         error(function(data, status, headers, config) {
-            $scope.addNotification('error', 'ERROR', 'Check your params and your error logs and try again.');
+            $scope.addNotification('error', 'ERROR', data);
         });
     };
 
@@ -68,7 +68,7 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
                 $timeout.cancel($scope.app.pollingPromise);
             }).
             error(function(data, status, headers, config) {
-                $scope.addNotification('error', 'ERROR', 'Check your params and your error logs and try again.');
+                $scope.addNotification('error', 'ERROR', 'Error stopping the bulk workflow process.');
             });
     };
 
@@ -84,7 +84,7 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
                 $scope.status();
             }).
             error(function(data, status, headers, config) {
-                $scope.addNotification('error', 'ERROR', 'Check your params and your error logs and try again.');
+                $scope.addNotification('error', 'ERROR', 'Error resuming bulk workflow process.');
             });
     };
 
@@ -112,7 +112,7 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
             }).
             error(function(data, status, headers, config) {
                 $scope.app.polling = false;
-                $scope.addNotification('error', 'ERROR', 'Check your params and your error logs and try again.');
+                $scope.addNotification('error', 'ERROR', 'Could not retrieve bulk workflow status.');
             });
     };
 

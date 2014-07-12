@@ -24,6 +24,17 @@
     </div>
 
     <div class="form-row">
+        <h4>Total Size</h4>
+
+        <span>
+            <input type="text"
+                   ng-required="true"
+                   ng-model="form.estimatedTotal"
+                   placeholder="Total size of payloads to process. If unsure, ensure this # is larger than the actual amount."/>
+        </span>
+    </div>
+
+    <div class="form-row">
         <h4>Batch Size</h4>
 
         <span>

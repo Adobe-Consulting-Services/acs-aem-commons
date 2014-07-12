@@ -10,6 +10,8 @@ public interface BulkWorkflowManager {
 
     String SLING_FOLDER = "sling:Folder";
 
+    int DEFAULT_INTERVAL = 10;
+
     String NN_BATCHES = "batches";
 
     String PN_TOTAL = "total";
@@ -25,6 +27,8 @@ public interface BulkWorkflowManager {
     String PN_BATCH_SIZE = "batchSize";
 
     String PN_JOB_NAME = "jobName";
+
+    String PN_INTERVAL = "interval";
 
     String PN_WORKFLOW_ID = "workflowId";
 
@@ -52,15 +56,17 @@ public interface BulkWorkflowManager {
 
     String STATE_STOPPED = "stopped";
 
+    String STATE_STOPPED_DEACTIVATED = "stopped [ deactivated ]";
 
-    void initialize(Resource resource, String query, int batchSize,
+
+    void initialize(Resource resource, String query, long estimatedTotalSize, int batchSize, int interval,
                    String workflowModel) throws PersistenceException, RepositoryException;
 
-    void start(final Resource resource, long period);
+    void start(final Resource resource);
 
     void stop(Resource resource) throws PersistenceException;
 
-    void resume(Resource resource, long period);
+    void resume(Resource resource);
 
     public Resource getCurrentBatch(Resource resource);
 

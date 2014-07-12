@@ -18,22 +18,38 @@ public class Bucket {
     private final long total;
     private final String bucketType;
 
-    private int[] depthTracker = new int[0];
+    private int[] depthTracker;
     private int bucketCount = 0;
     private String rootPath;
 
+    /**
+     * Create a new Bucket
+     *
+     * @param bucketSize Max number of resource per bucket
+     * @param total Total number of resources to bucket out; If this is less than bucketSize,
+     *              a single bucket will be created
+     */
     public Bucket(final int bucketSize, final long total) {
-        this.bucketSize = bucketSize;
-        this.total = total;
-        this.bucketType = NT_SLING_FOLDER;
-        this.rootPath = "/content/" + String.valueOf(System.currentTimeMillis());
-
-        this.initDepthTracker();
+        this(bucketSize, total, NT_SLING_FOLDER, "/content/" + String.valueOf(System.currentTimeMillis()));
     }
 
+    /**
+     *
+     * @param bucketSize Max number of resource per bucket
+     * @param total Total number of resources to bucket out; If this is less than bucketSize,
+     *              a single bucket will be created
+     * @param rootPath the absolute path to create the buckets
+     * @param bucketType nodeType used when creating the buckets
+     */
     public Bucket(final int bucketSize, final long total, final String rootPath, final String bucketType) {
         this.bucketSize = bucketSize;
-        this.total = total;
+
+        if(this.bucketSize > total) {
+            this.total = this.bucketSize;
+        } else {
+            this.total = total;
+        }
+
         this.bucketType = bucketType;
         this.rootPath = rootPath;
 
@@ -77,7 +93,7 @@ public class Bucket {
      * @return the path to the newly created bucket
      * @throws RepositoryException
      */
-    private String getOrCreateBucketPath(ResourceResolver resourceResolver)
+    private String getOrCreateBucketPath(final ResourceResolver resourceResolver)
             throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
         String folderPath = this.rootPath;
@@ -123,7 +139,7 @@ public class Bucket {
                 this.depthTracker[i] = 0;
             } else {
                 this.depthTracker[i] = this.depthTracker[i] + 1;
-                log.debug("Updating depthTracker at location [ {} ] to [ {} ]", i, this.depthTracker[i]);
+                log.debug("Updating depthTracker: {}", Arrays.toString(this.depthTracker));
                 break;
             }
         }
@@ -136,7 +152,7 @@ public class Bucket {
      */
     private int getDepth() {
         int depth = 0;
-        long remainingSize = total;
+        long remainingSize = this.total;
 
         do {
             remainingSize = (long) Math.ceil((double) remainingSize / (double) this.bucketSize);

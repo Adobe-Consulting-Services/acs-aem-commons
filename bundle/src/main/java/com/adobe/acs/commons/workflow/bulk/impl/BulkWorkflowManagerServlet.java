@@ -1,6 +1,10 @@
 package com.adobe.acs.commons.workflow.bulk.impl;
 
 import com.adobe.acs.commons.workflow.bulk.BulkWorkflowManager;
+import com.day.cq.workflow.WorkflowException;
+import com.day.cq.workflow.WorkflowService;
+import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.model.WorkflowModel;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -16,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
@@ -24,12 +29,17 @@ import java.util.Date;
         label = "ACS AEM Commons - Bulk Workflow Manager Servlet",
         description = "...",
         methods = { "POST", "GET" },
-        resourceTypes = { "acs-commons/components/utilities/bulk-workflow-manager" },
+        resourceTypes = { BulkWorkflowManagerServlet.SLING_RESOURCE_TYPE },
         selectors = { "start", "stop", "resume", "status" },
         extensions = { "json" }
 )
 public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowManagerServlet.class);
+
+    public static final String SLING_RESOURCE_TYPE = "acs-commons/components/utilities/bulk-workflow-manager";
+
+    @Reference
+    private WorkflowService workflowService;
 
     @Reference
     private BulkWorkflowManager bulkWorkflowManager;
@@ -63,22 +73,46 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
             }
         } catch (Exception e) {
             log.error("Error handling POST for bulk workflow management. {}", e.getMessage());
+
+            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    e.getMessage());
         }
 
         response.getWriter().write(json.toString());
     }
 
     private JSONObject start(SlingHttpServletRequest request) throws RepositoryException, JSONException,
-            PersistenceException {
+            PersistenceException, ServletException {
 
         final JSONObject params = new JSONObject(request.getParameter("params"));
         final String query = params.getString("query");
         final String workflowModel = params.getString("workflowModel");
         final int batchSize = params.optInt("batchSize", 10);
-        final int updateInterval = params.optInt("updateInterval", 10); // in seconds
+        final int interval = params.optInt("updateInterval", BulkWorkflowManager.DEFAULT_INTERVAL); // in seconds
+        final long estimatedTotal = params.optLong("estimatedTotal", 1000000); // Default to 1 million
 
-        bulkWorkflowManager.initialize(request.getResource(), query, batchSize, workflowModel);
-        bulkWorkflowManager.start(request.getResource(), updateInterval * 1L);
+        // Validate input
+
+        if(batchSize < 1) {
+            throw new ServletException("Batch size must be greater than zero.");
+        }
+
+        if(interval < 1) {
+            throw new ServletException("Update interval must be greater than zero.");
+        }
+
+        final WorkflowSession workflowSession = workflowService.getWorkflowSession(request.getResourceResolver()
+                .adaptTo(Session.class));
+        try {
+            final WorkflowModel model = workflowSession.getModel(workflowModel + "/jcr:content/model");
+        } catch (WorkflowException e) {
+            throw new ServletException(String.format("Unable to locate workflow at: %s",
+                    workflowModel + "/jcr:content/model"));
+        }
+
+        bulkWorkflowManager.initialize(request.getResource(), query, estimatedTotal, batchSize, interval,
+                workflowModel);
+        bulkWorkflowManager.start(request.getResource());
 
         return this.status(request);
     }
@@ -89,7 +123,7 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
     }
 
     private JSONObject resume(final SlingHttpServletRequest request) throws JSONException {
-        bulkWorkflowManager.resume(request.getResource(), 10 * 1L);
+        bulkWorkflowManager.resume(request.getResource());
         return status(request);
     }
 
