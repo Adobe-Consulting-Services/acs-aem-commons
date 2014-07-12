@@ -34,6 +34,8 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
 
     $scope.notifications = [];
 
+    $scope.formOptions = {};
+
     $scope.form = {};
 
     $scope.data = {};
@@ -116,7 +118,22 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
             });
     };
 
+    $scope.initForm = function() {
+        $http({
+            method: 'GET',
+            url: $scope.app.uri + '.form.json',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+        }).
+            success(function(data, status, headers, config) {
+                $scope.formOptions = data || {};
+            }).
+            error(function(data, status, headers, config) {
+                $scope.addNotification('error', 'ERROR', 'Error retrieving form values from the server.');
+            });
+    };
+
     $scope.init = function() {
+        $scope.initForm();
         $scope.status();
     };
 

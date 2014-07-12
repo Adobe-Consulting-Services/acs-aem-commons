@@ -30,7 +30,7 @@ import java.util.Date;
         description = "...",
         methods = { "POST", "GET" },
         resourceTypes = { BulkWorkflowManagerServlet.SLING_RESOURCE_TYPE },
-        selectors = { "start", "stop", "resume", "status" },
+        selectors = { "start", "stop", "resume", "status", "form" },
         extensions = { "json" }
 )
 public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
@@ -47,11 +47,45 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
+        JSONObject json = new JSONObject();
+
         try {
-            response.getWriter().write(status(request).toString());
+            if (StringUtils.equals("form", request.getRequestPathInfo().getSelectorString())) {
+                json = this.form(request);
+            } else {
+                json = this.status(request);
+            }
         } catch (JSONException e) {
             response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error collecting status");
         }
+
+        response.getWriter().write(json.toString());
+    }
+
+    private JSONObject form(final SlingHttpServletRequest request) {
+        final JSONObject json = new JSONObject();
+        final WorkflowSession workflowSession = workflowService.getWorkflowSession(request.getResourceResolver().adaptTo
+                (Session.class));
+
+        try {
+            final WorkflowModel[] workflowModels = workflowSession.getModels();
+
+            for(final WorkflowModel workflowModel : workflowModels) {
+                JSONObject jsonWorkflow = new JSONObject();
+                try {
+                    jsonWorkflow.put("label", workflowModel.getTitle());
+                    jsonWorkflow.put("value", workflowModel.getId());
+                    json.accumulate("workflowModels", jsonWorkflow);
+                } catch (JSONException e) {
+                    log.error("Could not add workflow [ {} - {} ] to Workflow Models dropdown JSON object",
+                            workflowModel.getTitle(), workflowModel.getId());
+                }
+            }
+        } catch (WorkflowException e) {
+            log.error("Could not create workflow model drop-down due to: {}", e.getMessage());
+        }
+
+        return json;
     }
 
     @Override
@@ -104,10 +138,10 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
         final WorkflowSession workflowSession = workflowService.getWorkflowSession(request.getResourceResolver()
                 .adaptTo(Session.class));
         try {
-            final WorkflowModel model = workflowSession.getModel(workflowModel + "/jcr:content/model");
+            final WorkflowModel model = workflowSession.getModel(workflowModel);
         } catch (WorkflowException e) {
             throw new ServletException(String.format("Unable to locate workflow at: %s",
-                    workflowModel + "/jcr:content/model"));
+                    workflowModel));
         }
 
         bulkWorkflowManager.initialize(request.getResource(), query, estimatedTotal, batchSize, interval,
@@ -137,7 +171,8 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
 
         json.put("state", properties.get(BulkWorkflowManager.PN_STATE, BulkWorkflowManager.STATE_NOT_STARTED));
         json.put("query", properties.get(BulkWorkflowManager.PN_QUERY, ""));
-        json.put("workflowModel", properties.get(BulkWorkflowManager.PN_WORKFLOW_MODEL, ""));
+        json.put("workflowModel", StringUtils.removeEnd(properties.get(BulkWorkflowManager.PN_WORKFLOW_MODEL, ""),
+                "/jcr:content/model"));
 
         json.put("batchSize", properties.get(BulkWorkflowManager.PN_BATCH_SIZE, 0));
         json.put("currentBatch", properties.get(BulkWorkflowManager.PN_CURRENT_BATCH, "Unknown"));

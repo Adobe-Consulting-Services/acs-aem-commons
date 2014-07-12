@@ -9,17 +9,26 @@
                     ng-required="true"
                     ng-model="form.query"
                     placeholder="SELECT * FROM [cq:Page] WHERE ISDESCENDANTNODE([/content])"></textarea>
+
+            <div class="instructions">
+                Example: SELECT * FROM [cq:Page] WHERE ISDESCENDANTNODE([/content])
+                <br/>
+                Please ensure that this query is correct prior to submitting form as it will collect the resources
+                for processing which can be an expensive operation for large bulk workflow processes.
+            </div>
         </span>
+
     </div>
 
     <div class="form-row">
         <h4>Workflow Model</h4>
 
         <span>
-            <input type="text"
-                   ng-required="true"
-                   ng-model="form.workflowModel"
-                   placeholder="/etc/workflow/models/..."/>
+            <select
+                    required="true"
+                    ng-model="form.workflowModel"
+                    ng-options="workflowModel.value as workflowModel.label for workflowModel in formOptions.workflowModels">
+            </select>
         </span>
     </div>
 
@@ -30,7 +39,7 @@
             <input type="text"
                    ng-required="true"
                    ng-model="form.estimatedTotal"
-                   placeholder="Total size of payloads to process. If unsure, ensure this # is larger than the actual amount."/>
+                   placeholder="Total size of payloads to process. If unsure, make this larger than the actual number of items to process."/>
         </span>
     </div>
 
@@ -53,6 +62,11 @@
                    ng-required="false"
                    ng-model="form.period"
                    placeholder="in seconds [ Default: 10 ]"/>
+            <div class="instructions">
+                The minimum number of seconds to wait before trying to process the next batch.
+                <br/>
+                If unsure use approximately: [ Batch Size ] x  [ Seconds for 1 WF to complete ] / 2
+            </div>
         </span>
     </div>
 

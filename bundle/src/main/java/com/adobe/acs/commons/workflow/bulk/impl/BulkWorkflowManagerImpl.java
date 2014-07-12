@@ -127,11 +127,8 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
                 currentBatch = batchPath;
             }
 
-            node = JcrUtil.createPath(batchPath + "/" + total++,
-                    SLING_FOLDER,
-                    JcrConstants.NT_UNSTRUCTURED,
-                    session,
-                    false);
+            final String batchItemPath = batchPath + "/" + total++;
+            node = JcrUtil.createPath(batchItemPath, SLING_FOLDER, JcrConstants.NT_UNSTRUCTURED, session, false);
 
             JcrUtil.setProperty(node, PN_PATH, nodes.nextNode().getPath());
 
@@ -139,6 +136,8 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
                 previousBatchNode = node.getParent();
             } else if (total % batchSize == 1) {
                 if (previousBatchNode != null) {
+                    // Set the "next batch" property, so we know what the next batch to process is when
+                    // the current batch is complete
                     JcrUtil.setProperty(previousBatchNode, PN_NEXT_BATCH, node.getParent().getPath());
                 }
             }
@@ -148,6 +147,7 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
             }
         }
 
+        // Set last batch's "next batch" property to complete so we know we're done
         JcrUtil.setProperty(node.getParent(), PN_NEXT_BATCH, STATE_COMPLETE);
 
         if (total % SAVE_THRESHOLD != 0) {
@@ -183,13 +183,13 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
                     final Resource contentResource = adminResourceResolver.getResource(resourcePath);
 
                     if(contentResource == null) {
-                      log.warn("Bulk workflow process resource [ {} ] could not be found. Removing the associated "
-                              + "periodic job.",  resourcePath);
+                      log.warn("Bulk workflow process resource [ {} ] could not be found. Removing periodic job.",
+                              resourcePath);
                         scheduler.removeJob(jobName);
                     } else if (workflowMap.isEmpty()) {
                         workflowMap = process(contentResource, workflowModel);
                     } else {
-                        log.info("Workflows for batch [ {} ] are still active", contentResource.adaptTo(ValueMap
+                        log.debug("Workflows for batch [ {} ] are still active.", contentResource.adaptTo(ValueMap
                                 .class).get(PN_CURRENT_BATCH, "Missing batch"));
                     }
                 } catch (Exception e) {
@@ -203,9 +203,10 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         };
 
         try {
-
             final boolean canRunConcurrently = false;
             scheduler.addPeriodicJob(jobName, job, null, interval, canRunConcurrently);
+            jobs.put(resource.getPath(), jobName);
+            log.debug("Added tracking for job [ {} , {} ]", resource.getPath(), jobName);
 
             log.info("Periodic job added for [ {} ] every [ {} seconds ]", jobName, interval);
 
@@ -214,8 +215,6 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
             resource.getResourceResolver().commit();
 
-            jobs.put(resource.getPath(), jobName);
-            log.debug("Added tracking for job [ {} , {} ]", resource.getPath(), jobName);
         } catch (Exception e) {
             log.error("Error starting bulk workflow management. {}", e.getMessage());
         }
@@ -278,12 +277,15 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
     private Map<String, String> process(final Resource resource, String workflowModel) throws
             WorkflowException, PersistenceException, RepositoryException {
 
-        log.debug("Processing batch...");
+        if(log.isDebugEnabled()) {
+            log.debug("Processing batch [ {} ] with workflow model [ {} ]", this.getCurrentBatch(resource).getPath(),
+                    workflowModel);
+        }
 
         final boolean autoCleanupWorkflow = resource.adaptTo(ValueMap.class).get(PN_AUTO_PURGE_WORKFLOW, true);
         final Session session = resource.getResourceResolver().adaptTo(Session.class);
         final WorkflowSession workflowSession = workflowService.getWorkflowSession(session);
-        final WorkflowModel model = workflowSession.getModel(workflowModel + "/jcr:content/model");
+        final WorkflowModel model = workflowSession.getModel(workflowModel);
 
         final Map<String, String> workflowMap = new LinkedHashMap<String, String>();
 
@@ -291,23 +293,30 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
             this.purge(this.getCurrentBatch(resource));
         }
 
-        final Resource batchResource = this.advance(resource);
+        final Resource nextBatch = this.advance(resource);
 
-        for (final Resource child : batchResource.getChildren()) {
-            final ModifiableValueMap properties = child.adaptTo(ModifiableValueMap.class);
+        if(nextBatch != null) {
+            for (final Resource child : nextBatch.getChildren()) {
+                final ModifiableValueMap properties = child.adaptTo(ModifiableValueMap.class);
 
-            final String payloadPath = properties.get(PN_PATH, String.class);
+                final String state = properties.get(PN_STATE, "");
+                final String payloadPath = properties.get(PN_PATH, String.class);
 
-            if (StringUtils.isNotBlank(payloadPath)) {
-                final Workflow workflow = workflowSession.startWorkflow(model,
-                        workflowSession.newWorkflowData("JCR_PATH", payloadPath));
-                properties.put(PN_WORKFLOW_ID, workflow.getId());
-                properties.put(PN_STATE, workflow.getState());
+                if (StringUtils.isBlank(state)
+                        && StringUtils.isNotBlank(payloadPath)) {
 
-                workflowMap.put(child.getPath(), workflow.getId());
+                    // Don't try to restart already processed batch items
 
-                //log.info("Added [ {} ] to workflow [ {} ]", payloadPath, workflowModel);
+                    final Workflow workflow = workflowSession.startWorkflow(model,
+                            workflowSession.newWorkflowData("JCR_PATH", payloadPath));
+                    properties.put(PN_WORKFLOW_ID, workflow.getId());
+                    properties.put(PN_STATE, workflow.getState());
+
+                    workflowMap.put(child.getPath(), workflow.getId());
+                }
             }
+        } else {
+            log.debug("No batch to process (may be completed).");
         }
 
         resource.getResourceResolver().commit();
@@ -320,12 +329,12 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
      * <p/>
      * This method assumes the current batch has been verified as complete.
      *
-     * @param resource
-     * @return
+     * @param resource the bulk workflow manager content resource
+     * @return the next batch resource to process
      * @throws PersistenceException
      * @throws RepositoryException
      */
-    private Resource advance(Resource resource) throws PersistenceException, RepositoryException {
+    private Resource advance(final Resource resource) throws PersistenceException, RepositoryException {
         // Page Resource
         final ResourceResolver resourceResolver = resource.getResourceResolver();
         final ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
@@ -335,16 +344,22 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
         final ModifiableValueMap currentProperties = currentBatch.adaptTo(ModifiableValueMap.class);
 
         // Next Batch
-        final String nextBatchPath = currentProperties.get(PN_NEXT_BATCH, "/dev/null");
+        final String nextBatchPath = currentProperties.get(PN_NEXT_BATCH, STATE_COMPLETE);
 
         if (StringUtils.equalsIgnoreCase(nextBatchPath, STATE_COMPLETE)) {
+
+            // Last batch
 
             this.complete(resource);
 
             properties.put(PN_COMPLETE_COUNT,
                     properties.get(PN_COMPLETE_COUNT, 0) + this.getSize(currentBatch.getChildren()));
 
+            return null;
+
         } else {
+
+            // Not the last batch
 
             final Resource nextBatch = resourceResolver.getResource(nextBatchPath);
             final ModifiableValueMap nextProperties = nextBatch.adaptTo(ModifiableValueMap.class);
@@ -361,8 +376,6 @@ public class BulkWorkflowManagerImpl implements BulkWorkflowManager {
 
             return nextBatch;
         }
-
-        return null;
     }
 
     private int purge(Resource batchResource) throws RepositoryException {
