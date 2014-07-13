@@ -74,12 +74,12 @@
     </div>
 
     <div class="form-row">
-        <h4>Batch Period</h4>
+        <h4>Batch Interval</h4>
 
         <span>
             <input type="text"
                    ng-required="false"
-                   ng-model="form.period"
+                   ng-model="form.interval"
                    placeholder="in seconds [ Default: 10 ]"/>
             <div class="instructions">
                 The minimum number of seconds to wait before trying to process the next batch.
@@ -93,7 +93,7 @@
         <h4>Purge Workflows</h4>
 
         <span>
-            <label><input type="checkbox" name="autoPurgeWorkflows" checked><span></span></label>
+            <label><input type="checkbox" name="purgeWorkflows" checked><span></span></label>
         </span>
     </div>
 

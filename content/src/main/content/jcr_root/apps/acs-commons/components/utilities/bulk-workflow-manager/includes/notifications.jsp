@@ -36,8 +36,7 @@
 
         <div>
             The execution of this bulk workflow process was stopped.
-            The stopping may have been intentional, or may have resulted from a restart of the parent bundle/OSGi
-            Component.
+            Press the &quot;Resume Bulk Worklfow&quot; button below to resume bulk workflow processing.
         </div>
     </div>
 

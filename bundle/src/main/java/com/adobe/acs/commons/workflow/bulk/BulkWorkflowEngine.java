@@ -23,50 +23,59 @@ package com.adobe.acs.commons.workflow.bulk;
 
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 
 import javax.jcr.RepositoryException;
 
-public interface BulkWorkflowManager {
+public interface BulkWorkflowEngine {
 
     String SLING_FOLDER = "sling:Folder";
 
     int DEFAULT_INTERVAL = 10;
 
+    long DEFAULT_ESTIMATED_TOTAL = 1000000;
+
+    int DEFAULT_BATCH_SIZE = 10;
+
+    boolean DEFAULT_PURGE_WORKFLOW = true;
+
     String NN_BATCHES = "batches";
 
-    String PN_TOTAL = "total";
+    String KEY_QUERY = "query";
 
-    String PN_INITIALIZED = "initialized";
+    String KEY_TOTAL = "total";
 
-    String PN_AUTO_PURGE_WORKFLOW = "autoPurgeWorkflows";
+    String KEY_COMPLETE_COUNT = "complete";
 
-    String PN_COMPLETE_COUNT = "complete";
+    String KEY_ESTIMATED_TOTAL = "estimatedTotal";
 
-    String PN_QUERY = "query";
+    String KEY_INITIALIZED = "initialized";
 
-    String PN_BATCH_SIZE = "batchSize";
+    String KEY_PURGE_WORKFLOW = "purgeWorkflow";
 
-    String PN_JOB_NAME = "jobName";
+    String KEY_BATCH_SIZE = "batchSize";
 
-    String PN_INTERVAL = "interval";
+    String KEY_JOB_NAME = "jobName";
 
-    String PN_WORKFLOW_ID = "workflowId";
+    String KEY_INTERVAL = "interval";
 
-    String PN_WORKFLOW_MODEL = "workflowModel";
+    String KEY_WORKFLOW_ID = "workflowId";
 
-    String PN_CURRENT_BATCH = "currentBatch";
+    String KEY_WORKFLOW_MODEL = "workflowModel";
 
-    String PN_NEXT_BATCH = "nextBatch";
+    String KEY_CURRENT_BATCH = "currentBatch";
 
-    String PN_PATH = "path";
+    String KEY_NEXT_BATCH = "nextBatch";
 
-    String PN_STARTED_AT = "startedAt";
+    String KEY_PATH = "path";
 
-    String PN_STOPPED_AT = "stoppedAt";
+    String KEY_STARTED_AT = "startedAt";
 
-    String PN_COMPLETED_AT = "completedAt";
+    String KEY_STOPPED_AT = "stoppedAt";
 
-    String PN_STATE = "state";
+    String KEY_COMPLETED_AT = "completedAt";
+
+    String KEY_STATE = "state";
 
     String STATE_NOT_STARTED = "not started";
 
@@ -76,23 +85,19 @@ public interface BulkWorkflowManager {
 
     String STATE_STOPPED = "stopped";
 
-    String STATE_STOPPED_DEACTIVATED = "stopped [ deactivated ]";
+    String STATE_STOPPED_DEACTIVATED = "stopped-deactivated";
 
 
     /**
      * Initialize the Bulk Workflow Manager jcr:content node and build out the batch structure.
      *
      * @param resource jcr:content resource
-     * @param query the query to collect all resources to undergo workflow
-     * @param estimatedTotalSize estimate total size
-     * @param batchSize batch size
-     * @param interval number of seconds between checking is a batch has been completely processed
-     * @param workflowModel workflow model to use
+     * @param properties a valuemap containing all requisite properties
      * @throws PersistenceException
      * @throws RepositoryException
      */
-    void initialize(Resource resource, String query, long estimatedTotalSize, int batchSize, int interval,
-                    String workflowModel) throws PersistenceException, RepositoryException;
+    void initialize(Resource resource, ValueMap properties) throws PersistenceException,
+            RepositoryException;
 
     /**
      * Start bulk workflow process.
@@ -102,7 +107,7 @@ public interface BulkWorkflowManager {
     void start(final Resource resource);
 
     /**
-     * Stop bulk workflow process
+     * Stop bulk workflow process.
      *
      * @param resource jcr:content configuration resource
      * @throws PersistenceException
@@ -110,7 +115,7 @@ public interface BulkWorkflowManager {
     void stop(Resource resource) throws PersistenceException;
 
     /**
-     * Resume as stopped bulk workflow process
+     * Resume as stopped bulk workflow process.
      *
      * @param resource jcr:content configuration resource
      * @throws PersistenceException
@@ -118,7 +123,15 @@ public interface BulkWorkflowManager {
     void resume(Resource resource);
 
     /**
-     * Get the current batch to process
+     * Resume as stopped bulk workflow process.
+     *
+     * @param resource jcr:content configuration resource
+     * @param interval in seconds
+     */
+    void resume(Resource resource, long interval) throws PersistenceException;
+
+    /**
+     * Get the current batch to process.
      *
      * @param resource jcr:content configuration resource
      * @return the resource that is the current batch to process

@@ -34,7 +34,7 @@
                     <li>Current Batch: {{ data.status.currentBatch }}</li>
 
                     <li ng-show="data.status.startedAt">Started At: {{ data.status.startedAt }}</li>
-                    <li ng-show="data.status.stoppedAt">Stopped At: {{ data.status.stoppedAt }}</li>
+                    <li ng-show="data.status.stoppedAt && !data.status.completedAt">Stopped At: {{ data.status.stoppedAt }}</li>
                     <li ng-show="data.status.completedAt">Competed At: {{ data.status.completedAt }}</li>
                 </ul>
             </div>
@@ -42,8 +42,9 @@
             <div class="right">
                 <ul>
                     <li>Batch Size: {{ data.status.batchSize }}</li>
+                    <li>Batch Interval: {{ data.status.interval }} seconds</li>
                     <li>Workflow Model: {{ data.status.workflowModel }}</li>
-                    <li>Auto Purge Batches: {{ data.status.autoPurgeWorkflows }}</li>
+                    <li>Purge Workflow: {{ data.status.purgeWorkflow }}</li>
                 </ul>
             </div>
             <div style="clear: both;"></div>
@@ -64,9 +65,25 @@
         <button ng-click="stop()"
                 ng-show="data.status.state === 'running'"
                 class="warning">Stop Bulk Workflow</button>
+
         <button ng-click="resume()"
-                ng-show="data.status.state === 'stopped'"
+                ng-show="data.status.state === 'stopped' || data.status.state === 'stopped-deactivated'"
+                style="float: left;"
                 class="primary">Resume Bulk Workflow</button>
+
+        <div    class="inline-input-wrapper"
+                style="margin-left: 15em"
+                ng-show="data.status.state === 'stopped' || data.status.state === 'stopped-deactivated'">
+            Update batch interval to
+
+            <input type="text"
+                   class="inline-input"
+                   ng-required="false"
+                   ng-model="form.interval"
+                   placeholder="{{ form.interval }}"/>
+            seconds.
+        </div>
+
     </div>
 
 
@@ -75,10 +92,10 @@
 
         <h3>Current Batch</h3>
 
-         <div class="status-interval">
+         <div class="inline-input-wrapper">
              Refresh status every
             <input type="text"
-                   class="status-interval-input"
+                   class="inline-input"
                    ng-blur="updatePollingInterval(form.pollingInterval)"
                    ng-model="form.pollingInterval"
                    placeholder="{{ dfault.pollingInterval }}"/> seconds
@@ -92,9 +109,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="resource in data.status.active ">
-                    <td class="{{ resource.state }}">{{ resource.state || 'NOT STARTED' }}</td>
-                    <td>{{ resource.path }}</td>
+                <tr ng-repeat="item in data.status.currentBatchItems ">
+                    <td class="{{ item.state }}">{{ resource.state || 'NOT STARTED' }}</td>
+                    <td>{{ item.path }}</td>
                 </tr>
             </tbody>
         </table>

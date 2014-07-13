@@ -52,6 +52,7 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
         success(function(data, status, headers, config) {
             $scope.data.status = data || {};
             $scope.status();
+            $scope.form = {};
         }).
         error(function(data, status, headers, config) {
             $scope.addNotification('error', 'ERROR', data);
@@ -79,6 +80,7 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
         $http({
             method: 'POST',
             url: $scope.app.uri + '.resume.json',
+            data: 'params=' + encodeURIComponent(JSON.stringify({ interval: $scope.form.interval })),
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
         }).
             success(function(data, status, headers, config) {

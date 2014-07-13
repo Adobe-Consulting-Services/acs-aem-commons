@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.workflow.bulk.impl;
 
-import com.adobe.acs.commons.workflow.bulk.BulkWorkflowManager;
+import com.adobe.acs.commons.workflow.bulk.BulkWorkflowEngine;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
@@ -34,6 +34,7 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
@@ -44,10 +45,10 @@ import javax.jcr.Session;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 
 @SlingServlet(
         label = "ACS AEM Commons - Bulk Workflow Manager Servlet",
-        description = "...",
         methods = { "POST", "GET" },
         resourceTypes = { BulkWorkflowManagerServlet.SLING_RESOURCE_TYPE },
         selectors = { "start", "stop", "resume", "status", "form" },
@@ -63,7 +64,7 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
     private WorkflowService workflowService;
 
     @Reference
-    private BulkWorkflowManager bulkWorkflowManager;
+    private BulkWorkflowEngine bulkWorkflowEngine;
 
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -140,45 +141,48 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
             PersistenceException, ServletException {
 
         final JSONObject params = new JSONObject(request.getParameter("params"));
-        final String query = params.getString("query");
-        final String workflowModel = params.getString("workflowModel");
-        final int batchSize = params.optInt("batchSize", 10);
-        final int interval = params.optInt("updateInterval", BulkWorkflowManager.DEFAULT_INTERVAL); // in seconds
-        final long estimatedTotal = params.optLong("estimatedTotal", 1000000); // Default to 1 million
 
-        // Validate input
+        final ValueMap map = new ValueMapDecorator(new HashMap<String, Object>());
 
-        if (batchSize < 1) {
-            throw new ServletException("Batch size must be greater than zero.");
-        }
+        map.put(BulkWorkflowEngine.KEY_QUERY,
+                params.getString(BulkWorkflowEngine.KEY_QUERY));
 
-        if (interval < 1) {
-            throw new ServletException("Update interval must be greater than zero.");
-        }
+        map.put(BulkWorkflowEngine.KEY_WORKFLOW_MODEL,
+                params.getString(BulkWorkflowEngine.KEY_WORKFLOW_MODEL));
 
-        final WorkflowSession workflowSession = workflowService.getWorkflowSession(request.getResourceResolver()
-                .adaptTo(Session.class));
-        try {
-            workflowSession.getModel(workflowModel);
-        } catch (WorkflowException e) {
-            throw new ServletException(String.format("Unable to locate workflow at: %s",
-                    workflowModel));
-        }
+        map.put(BulkWorkflowEngine.KEY_BATCH_SIZE,
+                params.optInt(BulkWorkflowEngine.KEY_BATCH_SIZE, BulkWorkflowEngine.DEFAULT_BATCH_SIZE));
 
-        bulkWorkflowManager.initialize(request.getResource(), query, estimatedTotal, batchSize, interval,
-                workflowModel);
-        bulkWorkflowManager.start(request.getResource());
+        map.put(BulkWorkflowEngine.KEY_INTERVAL,
+                params.optInt(BulkWorkflowEngine.KEY_INTERVAL, BulkWorkflowEngine.DEFAULT_INTERVAL));
+
+        map.put(BulkWorkflowEngine.KEY_ESTIMATED_TOTAL,
+                params.optLong(BulkWorkflowEngine.KEY_ESTIMATED_TOTAL, BulkWorkflowEngine.DEFAULT_ESTIMATED_TOTAL));
+
+        map.put(BulkWorkflowEngine.KEY_PURGE_WORKFLOW,
+                params.optBoolean(BulkWorkflowEngine.KEY_PURGE_WORKFLOW, BulkWorkflowEngine.DEFAULT_PURGE_WORKFLOW));
+
+        bulkWorkflowEngine.initialize(request.getResource(), map);
+        bulkWorkflowEngine.start(request.getResource());
 
         return this.status(request);
     }
 
     private JSONObject stop(final SlingHttpServletRequest request) throws PersistenceException, JSONException {
-        bulkWorkflowManager.stop(request.getResource());
+        bulkWorkflowEngine.stop(request.getResource());
         return status(request);
     }
 
-    private JSONObject resume(final SlingHttpServletRequest request) throws JSONException {
-        bulkWorkflowManager.resume(request.getResource());
+    private JSONObject resume(final SlingHttpServletRequest request) throws JSONException, PersistenceException {
+        final JSONObject params = new JSONObject(request.getParameter("params"));
+        final long interval = params.optLong(BulkWorkflowEngine.KEY_INTERVAL, -1);
+
+        if (interval < 1) {
+            bulkWorkflowEngine.resume(request.getResource());
+        } else {
+            bulkWorkflowEngine.resume(request.getResource(), interval);
+        }
+
         return status(request);
     }
 
@@ -187,36 +191,52 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
 
         final JSONObject json = new JSONObject();
 
-        int total = properties.get(BulkWorkflowManager.PN_TOTAL, 0);
-        int complete = properties.get(BulkWorkflowManager.PN_COMPLETE_COUNT, 0);
+        int total = properties.get(BulkWorkflowEngine.KEY_TOTAL, 0);
+        int complete = properties.get(BulkWorkflowEngine.KEY_COMPLETE_COUNT, 0);
 
-        json.put("state", properties.get(BulkWorkflowManager.PN_STATE, BulkWorkflowManager.STATE_NOT_STARTED));
-        json.put("query", properties.get(BulkWorkflowManager.PN_QUERY, ""));
-        json.put("workflowModel", StringUtils.removeEnd(properties.get(BulkWorkflowManager.PN_WORKFLOW_MODEL, ""),
-                "/jcr:content/model"));
+        json.put(BulkWorkflowEngine.KEY_STATE,
+                properties.get(BulkWorkflowEngine.KEY_STATE, BulkWorkflowEngine.STATE_NOT_STARTED));
 
-        json.put("batchSize", properties.get(BulkWorkflowManager.PN_BATCH_SIZE, 0));
-        json.put("currentBatch", properties.get(BulkWorkflowManager.PN_CURRENT_BATCH, "Unknown"));
-        json.put("autoPurgeWorkflows", properties.get(BulkWorkflowManager.PN_AUTO_PURGE_WORKFLOW, "false"));
+        json.put(BulkWorkflowEngine.KEY_QUERY,
+                properties.get(BulkWorkflowEngine.KEY_QUERY, ""));
+
+        json.put(BulkWorkflowEngine.KEY_WORKFLOW_MODEL,
+                StringUtils.removeEnd(properties.get(BulkWorkflowEngine.KEY_WORKFLOW_MODEL, ""), "/jcr:content/model"));
+
+        json.put(BulkWorkflowEngine.KEY_BATCH_SIZE,
+                properties.get(BulkWorkflowEngine.KEY_BATCH_SIZE, BulkWorkflowEngine.DEFAULT_BATCH_SIZE));
+
+        json.put(BulkWorkflowEngine.KEY_CURRENT_BATCH,
+                properties.get(BulkWorkflowEngine.KEY_CURRENT_BATCH, "Unknown"));
+
+        json.put(BulkWorkflowEngine.KEY_PURGE_WORKFLOW,
+                properties.get(BulkWorkflowEngine.KEY_PURGE_WORKFLOW, BulkWorkflowEngine.DEFAULT_PURGE_WORKFLOW));
+
+        json.put(BulkWorkflowEngine.KEY_INTERVAL,
+                properties.get(BulkWorkflowEngine.KEY_INTERVAL, BulkWorkflowEngine.DEFAULT_INTERVAL));
 
         // Counts
-        json.put("total", total);
-        json.put("complete", complete);
+        json.put(BulkWorkflowEngine.KEY_TOTAL, total);
+        json.put(BulkWorkflowEngine.KEY_COMPLETE_COUNT, complete);
         json.put("remaining", total - complete);
         json.put("percentComplete", Math.round((complete / (total * 1F)) * DECIMAL_TO_PERCENT));
 
         // Times
-        json.put("startedAt", properties.get(BulkWorkflowManager.PN_STARTED_AT, Date.class));
-        json.put("stoppedAt", properties.get(BulkWorkflowManager.PN_STOPPED_AT, Date.class));
-        json.put("completedAt", properties.get(BulkWorkflowManager.PN_COMPLETED_AT, Date.class));
+        json.put(BulkWorkflowEngine.KEY_STARTED_AT,
+                properties.get(BulkWorkflowEngine.KEY_STARTED_AT, Date.class));
 
+        json.put(BulkWorkflowEngine.KEY_STOPPED_AT,
+                properties.get(BulkWorkflowEngine.KEY_STOPPED_AT, Date.class));
 
-        final Resource currentBatch = bulkWorkflowManager.getCurrentBatch(request.getResource());
+        json.put(BulkWorkflowEngine.KEY_COMPLETED_AT,
+                properties.get(BulkWorkflowEngine.KEY_COMPLETED_AT, Date.class));
+
+        final Resource currentBatch = bulkWorkflowEngine.getCurrentBatch(request.getResource());
         if (currentBatch != null) {
-            json.put("currentBatch", currentBatch.getPath());
+            json.put(BulkWorkflowEngine.KEY_CURRENT_BATCH, currentBatch.getPath());
 
             for (final Resource child : currentBatch.getChildren()) {
-                json.accumulate("active", new JSONObject(child.adaptTo(ValueMap.class)));
+                json.accumulate("currentBatchItems", new JSONObject(child.adaptTo(ValueMap.class)));
             }
         }
 
