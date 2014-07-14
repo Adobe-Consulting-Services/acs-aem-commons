@@ -37,6 +37,10 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
      */
     constructor: function(config){
         config = config || {};
+        if (!config.layout) {
+            config.layout = 'form';
+            config.padding = '10px';
+        }
         ACS.CQ.MultiFieldPanel.superclass.constructor.call(this, config);
     },
 

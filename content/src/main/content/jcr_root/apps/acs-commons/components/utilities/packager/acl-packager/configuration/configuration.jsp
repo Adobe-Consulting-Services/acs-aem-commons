@@ -31,6 +31,9 @@
 
     final String packageACLHandling = properties.get("packageACLHandling", "Overwrite");
     final String conflictResolution = properties.get("conflictResolution", "IncrementVersion");
+
+    final boolean includePrincipals = properties.get("includePrincipals", false);
+    final boolean includeConfiguration = properties.get("includeConfiguration", false);
 %>
 
 <h3>Package definition</h3>
@@ -41,6 +44,8 @@
     <li>Package description: <%= xssAPI.encodeForHTML(packageDescription) %></li>
     <li>Package ACL handling: <%= xssAPI.encodeForHTML(packageACLHandling) %></li>
     <li>Conflict resolution: <%= xssAPI.encodeForHTML(conflictResolution) %></li>
+    <li>Include principals: <%= includePrincipals %></li>
+    <li>Include ACL packager page: <%= includeConfiguration %></li>
 </ul>
 
 <h3>Targeted principals</h3>

@@ -39,8 +39,6 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -91,7 +89,7 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
     /**
      * @inheritDoc
      */
-    public final Layer transform(Layer layer) throws IOException, RepositoryException {
+    public final Layer transform(Layer layer) {
 
         for (final String type : this.transforms.keySet()) {
             final ImageTransformer imageTransformer = this.imageTransformers.get(type);

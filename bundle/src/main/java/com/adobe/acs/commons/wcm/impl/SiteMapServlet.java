@@ -46,15 +46,16 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(metatype = true, label = "ACS AEM Commons Site Map Servlet", description = "Site Map Servlet",
+@Component(metatype = true, label = "ACS AEM Commons - Site Map Servlet", description = "Site Map Servlet",
         configurationFactory = true)
 @Service
 @SuppressWarnings("serial")
-@Properties({ @Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY),
+@Properties({ @Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY,
+        label = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components."),
         @Property(name = "sling.servlet.selectors", value = "sitemap", propertyPrivate = true),
         @Property(name = "sling.servlet.extensions", value = "xml", propertyPrivate = true),
         @Property(name = "sling.servlet.methods", value = "GET", propertyPrivate = true) })
-public class SiteMapServlet extends SlingSafeMethodsServlet {
+public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final String DEFAULT_EXTERNALIZER_DOMAIN = "publish";
 
@@ -78,6 +79,7 @@ public class SiteMapServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
+        response.setContentType(request.getResponseContentType());
         ResourceResolver resourceResolver = request.getResourceResolver();
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         Page page = pageManager.getContainingPage(request.getResource());

@@ -25,8 +25,6 @@ import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationListener;
 import com.day.cq.replication.ReplicationLog;
 import com.day.cq.replication.ReplicationResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +33,6 @@ import java.util.Map;
  * Replication Listener that stores replication results for a series of agents.
  */
 public class ReplicationResultListener implements ReplicationListener {
-    private static final Logger log = LoggerFactory.getLogger(ReplicationResultListener.class);
 
     private final Map<Agent, ReplicationResult> results = new HashMap<Agent, ReplicationResult>();
 

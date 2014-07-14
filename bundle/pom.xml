@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>1.4.3-SNAPSHOT</version>
+        <version>1.6.3-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -52,17 +52,9 @@
                         <Import-Package>
                             org.scribe*;version="[1.3.0,2)",
                             ch.qos.logback.*;resolution:=optional,
+                            org.apache.sling.models.*;resolution:=optional,
                             *
                         </Import-Package>
-                        <Include-Resource>
-                            {maven-resources},
-                            META-INF/wcmmode.tld=target/classes/META-INF/wcmmode.tld,
-                            META-INF/audio.tld=target/classes/META-INF/audio.tld,
-                            META-INF/dhlm.tld=target/classes/META-INF/dhlm.tld,
-                            META-INF/xss.tld=target/classes/META-INF/xss.tld,
-                            META-INF/dam.tld=target/classes/META-INF/dam.tld,
-                            META-INF/mpf.tld=target/classes/META-INF/mpf.tld
-                        </Include-Resource>
                     </instructions>
                 </configuration>
             </plugin>
@@ -165,13 +157,13 @@
         <dependency>
             <groupId>com.day.cq.wcm</groupId>
             <artifactId>cq-wcm-api</artifactId>
-            <version>5.6.2</version>
+            <version>5.6.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.day.cq.wcm</groupId>
             <artifactId>cq-wcm-foundation</artifactId>
-            <version>5.6.2</version>
+            <version>5.6.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -300,9 +292,21 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.jackrabbit</groupId>
+            <artifactId>jackrabbit-api</artifactId>
+            <version>2.6.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.rewriter</artifactId>
             <version>1.0.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.scripting.api</artifactId>
+            <version>2.1.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -329,7 +333,42 @@
             <version>1.0.13</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.models.api</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.day.cq</groupId>
+            <artifactId>cq-mailer</artifactId>
+            <version>5.6.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.day.cq</groupId>
+            <artifactId>cq-polling-importer</artifactId>
+            <version>5.6.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency> 
+            <groupId>org.apache.felix</groupId> 
+            <artifactId>org.apache.felix.scr</artifactId> 
+            <version>1.6.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.day.jcr.vault</groupId>
+            <artifactId>com.day.jcr.vault</artifactId>
+            <version>2.4.32</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.adobe.granite</groupId>
+            <artifactId>com.adobe.granite.jmx</artifactId>
+            <version>0.2.6</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -365,7 +404,19 @@
             <groupId>junit-addons</groupId>
             <artifactId>junit-addons</artifactId>
         </dependency>
-        
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.models.impl</artifactId>
+            <version>1.0.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.osgi</artifactId>
+            <version>2.2.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <!--  Build Dependencies -->
         <dependency>
             <groupId>com.google.code.tld-generator</groupId>
@@ -383,11 +434,6 @@
                     <groupId>javax.servlet.jsp</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.day.jcr.vault</groupId>
-            <artifactId>com.day.jcr.vault</artifactId>
-            <version>2.4.32</version>
         </dependency>
     </dependencies>
 

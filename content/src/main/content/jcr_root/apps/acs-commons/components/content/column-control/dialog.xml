@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Dialog"
+    title="Responsive Column Control"
+    width="600"
+    xtype="dialog">
+    <items
+        jcr:primaryType="cq:Widget"
+        xtype="tabpanel">
+        <items jcr:primaryType="cq:WidgetCollection">
+            <tab1
+                jcr:primaryType="cq:Panel"
+                title="Columns">
+                <items jcr:primaryType="cq:WidgetCollection">
+                    <columns
+                        jcr:primaryType="cq:Widget"
+                        fieldDescription="Column widths as a percent. Must add up to 100."
+                        fieldLabel="Column Widths"
+                        name="./columns"
+                        orderable="{Boolean}false"
+                        xtype="multifield">
+                        <fieldConfig
+                            jcr:primaryType="cq:Widget"
+                            maxValue="100"
+                            minValue="1"
+                            xtype="numberfield"/>
+                    </columns>
+                    <typehint
+                        jcr:primaryType="cq:Widget"
+                        ignoreValue="{Boolean}true"
+                        name="./columns@TypeHint"
+                        value="Long[]"
+                        xtype="hidden"/>
+                    <label
+                        jcr:primaryType="cq:Widget"
+                        text="NOTE: Removing columns does not delete their contained content. Be sure to remove all components from a column before deleting it."
+                        xtype="static"/>
+                </items>
+            </tab1>
+        </items>
+    </items>
+    <listeners
+        jcr:primaryType="nt:unstructured"
+        beforesubmit="function(dialog){ return ACS.CQ.ColumnControl.validateDialog(dialog); }"/>
+</jcr:root>

@@ -31,6 +31,7 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.foundation.Image;
 import com.day.image.Layer;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -55,12 +56,14 @@ import javax.imageio.ImageIO;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("serial")
 @Component(
         label = "ACS AEM Commons - Named Transform Image Servlet",
         description = "Transform images programatically by applying a named transform to the requested Image.",
@@ -113,9 +116,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();
 
-    
-
-
     /* Asset Rendition Pattern Picker */
 
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
@@ -163,14 +163,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return true;
     }
 
-    /**
-     * Writes the transformed image to the response.
-     *
-     * @param request  SlingRequest object
-     * @param response SlingResponse object
-     * @throws ServletException
-     * @throws IOException
-     */
     @Override
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
             ServletException, IOException {
@@ -183,11 +175,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final String mimeType = this.getMimeType(request, image);
 
         // Transform the image
-        try {
-            namedImageTransformer.transform(layer);
-        } catch (RepositoryException e) {
-            throw new ServletException(e);
-        }
+        namedImageTransformer.transform(layer);
 
         final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
         response.setContentType(mimeType);
@@ -295,6 +283,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         if (layer == null) {
             log.error("Could not create layer - layer is null;");
+        } else {
+            image.crop(layer);
+            image.rotate(layer);
         }
 
         return layer;

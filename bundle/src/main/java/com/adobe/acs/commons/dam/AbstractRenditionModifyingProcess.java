@@ -164,7 +164,7 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
      * @return a usable quality value
      */
     protected final double getQuality(double base, String qualityStr) {
-        int q = Integer.valueOf(qualityStr);
+        int q = Integer.parseInt(qualityStr);
         double res = base * q / MAX_GENERIC_QUALITY;
         return res;
     }

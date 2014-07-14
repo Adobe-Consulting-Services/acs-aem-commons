@@ -25,6 +25,8 @@ import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.ComponentEditConfig;
 import com.day.cq.wcm.api.components.DropTarget;
 import com.day.cq.wcm.commons.WCMUtils;
+import com.day.cq.wcm.foundation.Placeholder;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -36,6 +38,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.ServletRequest;
 
 /**
  * Component Helper is an OSGi Service used in the context of CQ Components
@@ -51,6 +55,20 @@ import java.util.Map;
 @Service
 public final class ComponentHelperImpl implements ComponentHelper {
     private static final String CSS_EDIT_MODE = "wcm-helper-edit-mode";
+
+    public String generateClassicUIPlaceholder(String classNames, String title) {
+        StringBuilder html = new StringBuilder();
+        // Create the HTML img tag used for the edit icon
+        html.append("<img src=\"/libs/cq/ui/resources/0.gif\" ");
+        html.append(" class=\"").append(classNames);
+        html.append("\" ");
+        if (StringUtils.isNotBlank(title)) {
+            html.append("alt=\"").append(title).append("\" ");
+            html.append("title=\"").append(title).append("\"");
+        }
+        html.append("/>");
+        return html.toString();
+    }
 
     public boolean isDesignMode(SlingHttpServletRequest request) {
         return WCMMode.DESIGN.equals(WCMMode.fromRequest(request));
@@ -74,6 +92,10 @@ public final class ComponentHelperImpl implements ComponentHelper {
 
     public boolean isAuthoringMode(SlingHttpServletRequest request) {
         return (isEditMode(request) || isDesignMode(request));
+    }
+
+    public boolean isTouchAuthoringMode(ServletRequest request) {
+       return Placeholder.isAuthoringUIModeTouch(request);
     }
 
     public boolean printEditBlock(SlingHttpServletRequest request,
@@ -222,7 +244,7 @@ public final class ComponentHelperImpl implements ComponentHelper {
         final Resource resource = request.getResource();
         final com.day.cq.wcm.api.components.Component component = WCMUtils.getComponent(resource);
 
-        String html = "";
+        StringBuilder html = new StringBuilder();
 
         ComponentEditConfig editConfig = component.getEditConfig();
         Map<String, DropTarget> dropTargets = (editConfig != null) ? editConfig.getDropTargets() : null;
@@ -244,15 +266,14 @@ public final class ComponentHelperImpl implements ComponentHelper {
                 // If editType has not been specified then intelligently determine the best match
                 editType = (editType == null) ? getWCMEditType(dropTarget) : editType;
 
-                // Create the HTML img tag used for the edit icon
-                html += "<img src=\"/libs/cq/ui/resources/0.gif\"" + " "
-                        + "class=\"" + dropTarget.getId() + " " + editType.getCssClass() + "\""
-                        + " " + "alt=\"Drop Target: " + dropTarget.getName() + "\"" + " "
-                        + "title=\"Drop Target: " + dropTarget.getName() + "\"" + "/>";
+                String classNames = dropTarget.getId() + " " + editType.getCssClass();
+                String placeholderTitle = "Drop Target: " + dropTarget.getName();
+
+                html.append(generateClassicUIPlaceholder(classNames, placeholderTitle));
             }
         }
 
-        return html;
+        return html.toString();
     }
 
     public String getEditIconImgTag(ComponentEditType.Type editType) {

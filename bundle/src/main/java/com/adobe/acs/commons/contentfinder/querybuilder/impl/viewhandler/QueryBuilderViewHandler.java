@@ -24,6 +24,7 @@ import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.wcm.core.contentfinder.ViewHandler;
 import com.day.cq.wcm.core.contentfinder.ViewQuery;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -88,6 +90,7 @@ public final class QueryBuilderViewHandler extends ViewHandler {
      * @param queryString
      * @return
      */
+    @SuppressWarnings("unchecked")
     private Map<String, String> getQueryBuilderParams(final SlingHttpServletRequest request, final String queryString) {
         Map<String, String> map = new LinkedHashMap<String, String>();
 

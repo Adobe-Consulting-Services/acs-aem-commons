@@ -113,11 +113,11 @@ public class CookieUtilTest {
     @Test
     public void testGetCookies() {
         String regex = "(.*)mammal(.*)";
-        List expResult = new ArrayList<Cookie>();
+        List<Cookie> expResult = new ArrayList<Cookie>();
         expResult.add(catCookie);
         expResult.add(dogCookie);
 
-        List result = CookieUtil.getCookies(request, regex);
+        List<Cookie> result = CookieUtil.getCookies(request, regex);
         assertEquals(expResult, result);
     }
 

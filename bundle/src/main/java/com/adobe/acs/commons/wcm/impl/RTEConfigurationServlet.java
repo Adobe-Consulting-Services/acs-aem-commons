@@ -172,21 +172,21 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
     }
 
     private void writeConfigResource(Resource resource, String rteName, boolean isDefault,
-            SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, JSONException, ServletException {
+            SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws IOException, JSONException, ServletException {
         JSONObject widget = createEmptyRTE(rteName);
 
         // these two size properties seem to be necessary to get the size correct
         // in a component dialog
         widget.put("width", RTE_WIDTH);
         widget.put("height", RTE_HEIGHT);
-        
+
         RequestParameterMap map = request.getRequestParameterMap();
         for (Map.Entry<String, RequestParameter[]> entry : map.entrySet()) {
             String key = entry.getKey();
             RequestParameter[] params = entry.getValue();
             if (params != null) {
-                if (params.length > 1 ||
-                        EXTERNAL_STYLESHEETS_PROPERTY.equals(key)) {
+                if (params.length > 1 || EXTERNAL_STYLESHEETS_PROPERTY.equals(key)) {
                     JSONArray arr = new JSONArray();
                     for (int i = 0; i < params.length; i++) {
                         arr.put(params[i].getString());

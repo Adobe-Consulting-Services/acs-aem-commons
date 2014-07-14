@@ -1,0 +1,4 @@
+#base=js
+
+vendor/spin.min.js
+loading-indicator.js

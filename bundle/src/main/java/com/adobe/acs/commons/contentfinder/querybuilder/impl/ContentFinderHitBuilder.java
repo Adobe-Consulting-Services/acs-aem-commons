@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class ContentFinderHitBuilder {
+    private static final Long ONE_MILLION = 1000000L;
 
     private ContentFinderHitBuilder() {
     }
@@ -49,7 +50,7 @@ public final class ContentFinderHitBuilder {
 
     /**
      * Builds the result object that will representing a CF view record for the provided hit.
-     *
+     * <p/>
      * This method will generate the result object data points based on if the hit is:
      * 1) a Page
      * 2) an Asset
@@ -63,24 +64,25 @@ public final class ContentFinderHitBuilder {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
 
         final Resource resource = hit.getResource();
-        final boolean isPage = resource.adaptTo(Page.class) != null;
-        final boolean isAsset = DamUtil.isAsset(resource);
 
         /**
-         * Common result properties
+         * Apply custom properties based on the "type"
          */
-        map.put("name", resource.getName());
-        map.put("path", hit.getPath());
 
-        if (isPage) {
-            map = addPageData(hit, map);
-        } else if (isAsset) {
-            map = addAssetData(hit, map);
-        } else {
-            map = addOtherData(hit, map);
+        // Assets
+        final Asset asset = DamUtil.resolveToAsset(resource);
+        if (asset != null) {
+            return addAssetData(asset, hit, map);
         }
 
-        return map;
+        // Pages
+        final Page page = getPage(resource);
+        if (page != null) {
+            return addPageData(page, hit, map);
+        }
+
+        // Other
+        return addOtherData(hit, map);
     }
 
     /**
@@ -91,14 +93,11 @@ public final class ContentFinderHitBuilder {
      * @return
      * @throws javax.jcr.RepositoryException
      */
-    private static Map<String, Object> addPageData(final Hit hit, Map<String, Object> map)
+    private static Map<String, Object> addPageData(final Page page, final Hit hit, Map<String, Object> map)
             throws RepositoryException {
-        final Resource resource = hit.getResource();
-
-        final Page page = resource.adaptTo(Page.class);
 
         // Title
-        String title = resource.getName();
+        String title = page.getName();
 
         if (StringUtils.isNotBlank(page.getTitle())) {
             title = page.getTitle();
@@ -117,6 +116,8 @@ public final class ContentFinderHitBuilder {
             }
         }
 
+        map.put("path", page.getPath());
+        map.put("name", page.getName());
         map.put("title", title);
         map.put("excerpt", excerpt);
         map.put("ddGroups", "page");
@@ -134,12 +135,10 @@ public final class ContentFinderHitBuilder {
      * @return
      * @throws javax.jcr.RepositoryException
      */
-    private static Map<String, Object> addAssetData(final Hit hit, Map<String, Object> map)
+    private static Map<String, Object> addAssetData(final Asset asset, final Hit hit, Map<String, Object> map)
             throws RepositoryException {
-        final Resource resource = hit.getResource();
-        final Asset asset = DamUtil.resolveToAsset(resource);
 
-        String title = resource.getName();
+        String title = asset.getName();
 
         if (StringUtils.isNotBlank(asset.getMetadataValue(DamConstants.DC_TITLE))) {
             title = asset.getMetadataValue(DamConstants.DC_TITLE);
@@ -154,6 +153,8 @@ public final class ContentFinderHitBuilder {
             }
         }
 
+        map.put("path", asset.getPath());
+        map.put("name", asset.getName());
         map.put("title", title);
         map.put("excerpt", excerpt);
         map.put("mimeType", asset.getMimeType());
@@ -176,8 +177,11 @@ public final class ContentFinderHitBuilder {
     private static Map<String, Object> addOtherData(final Hit hit, Map<String, Object> map)
             throws RepositoryException {
         final Resource resource = hit.getResource();
+        final ValueMap properties = resource.adaptTo(ValueMap.class);
 
-        map.put("title", resource.getName());
+        map.put("path", resource.getPath());
+        map.put("name", resource.getName());
+        map.put("title", properties.get("jcr:title", resource.getName()));
         map.put("excerpt", hit.getExcerpt());
         map.put("lastModified", getLastModified(resource));
         map.put("type", "Data");
@@ -273,9 +277,37 @@ public final class ContentFinderHitBuilder {
             Resource contentResource = resource.getChild(JcrConstants.JCR_CONTENT);
             ValueMap properties = contentResource.adaptTo(ValueMap.class);
 
-            return properties.get(JcrConstants.JCR_LASTMODIFIED, 0L) / 1000 * 1000;
+            return properties.get(JcrConstants.JCR_LASTMODIFIED, 0L) / ONE_MILLION;
         } catch (Exception ex) {
             return 0L;
         }
+    }
+
+    /**
+     * Gets the Page object corresponding the with the resource.
+     * Will resolve to a Page if the result is a cq:Page or a cq:Page's jcr:content node.
+     *
+     * @param resource The resource to covert to a Page
+     * @return a Page if  the resource is Page like (cq:Page or a cq:Page's jcr:content node), else null
+     */
+    private static Page getPage(final Resource resource) {
+        if (resource == null) {
+            return null;
+        }
+
+        // If resource is a cq:Page node; then return the Page
+        if (resource.adaptTo(Page.class) != null) {
+            return resource.adaptTo(Page.class);
+        }
+
+        // If the resource is a cq:Page/jcr:content node, then return the cq:Page page
+        if (StringUtils.equals(resource.getName(), JcrConstants.JCR_CONTENT)) {
+            final Resource parent = resource.getParent();
+            if (parent != null) {
+                return parent.adaptTo(Page.class);
+            }
+        }
+
+        return null;
     }
 }

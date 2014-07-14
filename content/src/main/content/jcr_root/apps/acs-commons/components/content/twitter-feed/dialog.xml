@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    title="Twitter Feed"
+    xtype="tabpanel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <twitter
+            jcr:primaryType="cq:Widget"
+            title="Twitter">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <userName
+                    jcr:primaryType="cq:Widget"
+                    fieldDescription="This Twitter username whose tweets will be displayed.."
+                    fieldLabel="Username"
+                    name="./username"
+                    xtype="textfield"/>
+                <limit
+                    jcr:primaryType="cq:Widget"
+                    boxMaxWidth="{Long}30"
+                    fieldDescription="Number of tweets to be displayed."
+                    fieldLabel="Limit"
+                    name="./limit"
+                    xtype="numberfield"/>
+                <replicate
+                    jcr:primaryType="cq:Widget"
+                    fieldDescription="When checked the page containing this component is replicated when the feed is updated."
+                    fieldLabel="Replicate Page?"
+                    name="./replicate"
+                    type="checkbox"
+                    xtype="selection"/>
+            </items>
+        </twitter>
+    </items>
+</jcr:root>

@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>1.4.3-SNAPSHOT</version>
+    <version>1.6.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -44,7 +44,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.7.4</version>
+                    <version>1.17.0</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.slf4j</groupId>
@@ -56,7 +56,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.3.6</version>
+                    <version>2.4.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -83,42 +83,10 @@
                     <artifactId>content-package-maven-plugin</artifactId>
                     <version>0.0.20</version>
                 </plugin>
-                <!--This plugin's configuration is used to store Eclipse
-                    m2e settings only. It has no influence on the Maven build itself. -->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.apache.felix
-                                        </groupId>
-                                        <artifactId>
-                                            maven-scr-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.0.0,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>scr</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.6.3.201306030806</version>
+                    <version>0.7.1.201405082137</version>
                     <executions>
                         <execution>
                             <id>default-prepare-agent</id>
@@ -130,7 +98,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-pmd-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.1</version>
                     <configuration>
                         <linkXRef>false</linkXRef>
                         <rulesets>
@@ -138,18 +106,28 @@
                         </rulesets>
                         <targetJdk>1.6</targetJdk>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-api</artifactId>
+                            <version>1.6.4</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>2.5.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.10</version>
+                    <version>2.12.1</version>
                     <configuration>
+                        <linkXRef>false</linkXRef>
                         <configLocation>https://raw.github.com/Adobe-Consulting-Services/coding-standards/master/checkstyle/checks.xml</configLocation>
+                        <includeResources>false</includeResources>
+                        <includeTestResources>false</includeTestResources>
                     </configuration>
                     <dependencies>
                         <dependency>
@@ -173,25 +151,21 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>1.5</version>
                 </plugin>
-                <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.4.2</version>
-                    <configuration>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                    </configuration>
-                    <dependencies>
-                      <dependency>
-                        <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-api</artifactId>
-                        <version>1.8.1</version>
-                      </dependency>
-                      <dependency>
-                        <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-provider-gitexe</artifactId>
-                        <version>1.8.1</version>
-                      </dependency>
-                    </dependencies>
-                </plugin>
+                 <plugin>
+                     <artifactId>maven-release-plugin</artifactId>
+                     <version>3.0-r1585899</version>
+                     <configuration>
+                         <autoVersionSubmodules>true</autoVersionSubmodules>
+                         <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
+                     </configuration>
+                     <dependencies>
+                         <dependency>
+                             <groupId>org.apache.maven.release</groupId>
+                             <artifactId>maven-release-oddeven-policy</artifactId>
+                             <version>3.0-r1585899</version>
+                         </dependency>
+                     </dependencies>
+                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -218,7 +192,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>1.6.0</version>
+                <version>1.9.8</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -254,7 +228,7 @@
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.api</artifactId>
-                <version>2.2.0</version>
+                <version>2.3.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -274,6 +248,17 @@
                 <artifactId>junit-addons</artifactId>
                 <version>1.4</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.day.cq.wcm</groupId>
+                <artifactId>cq-wcm-webservice-support</artifactId>
+                <version>5.6.4</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.twitter4j</groupId>
+                <artifactId>twitter4j-core</artifactId>
+                <version>3.0.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
