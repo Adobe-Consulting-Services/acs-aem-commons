@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.images.transformers.impl;
+package com.adobe.acs.commons.images.imagetransformers.impl;
 
 import com.adobe.acs.commons.images.transformers.impl.AdjustImageTransformerImpl;
 import com.day.image.Layer;
@@ -65,11 +65,11 @@ public class AdjustImageTransformerImplTest {
 
     @Test
     public void testTransform() throws Exception {
-        final int brightness = 100;
-        final float contrast = 0.05F;
+        final Integer brightness = 100;
+        final Float contrast = 0.05F;
 
-        map.put("brightness", brightness);
-        map.put("contrast", contrast);
+        map.put("brightness", brightness.toString());
+        map.put("contrast", contrast.toString());
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
@@ -89,9 +89,9 @@ public class AdjustImageTransformerImplTest {
 
     @Test
     public void testTransform_onlyBrightness() throws Exception {
-        final int brightness = 100;
+        final Integer brightness = 100;
 
-        map.put("brightness", brightness);
+        map.put("brightness", brightness.toString());
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
@@ -102,9 +102,9 @@ public class AdjustImageTransformerImplTest {
 
     @Test
     public void testTransform_onlyContrast() throws Exception {
-        final float contrast = 0.05F;
+        final Float contrast = 0.05F;
 
-        map.put("contrast", contrast);
+        map.put("contrast", contrast.toString());
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
