@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.images.imagetransformers.impl;
+package com.adobe.acs.commons.images.transformers.impl;
 
 import com.adobe.acs.commons.images.transformers.impl.GreyscaleImageTransformerImpl;
 import com.day.image.Layer;
