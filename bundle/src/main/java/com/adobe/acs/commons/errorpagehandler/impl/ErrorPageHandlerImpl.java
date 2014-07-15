@@ -63,6 +63,7 @@ import javax.servlet.ServletException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -93,7 +94,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
             boolValue = DEFAULT_ENABLED)
-    private static final String PROP_ENABLED = "prop.enabled";
+    private static final String PROP_ENABLED = "enabled";
 
     /* Error Page Extension */
     private static final String DEFAULT_ERROR_PAGE_EXTENSION = "html";
@@ -103,7 +104,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Property(label = "Error page extension",
             description = "Examples: html, htm, xml, json. [Optional] [Default: html]",
             value = DEFAULT_ERROR_PAGE_EXTENSION)
-    private static final String PROP_ERROR_PAGE_EXTENSION = "prop.error-page.extension";
+    private static final String PROP_ERROR_PAGE_EXTENSION = "error-page.extension";
 
     /* Fallback Error Code Extension */
     private static final String DEFAULT_FALLBACK_ERROR_NAME = "500";
@@ -115,7 +116,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             description = "Error page name (not path) to use if a valid Error Code/Error Servlet Name cannot be "
                     + "retrieved from the Request. [Required] [Default: 500]",
             value = DEFAULT_FALLBACK_ERROR_NAME)
-    private static final String PROP_FALLBACK_ERROR_NAME = "prop.error-page.fallback-name";
+    private static final String PROP_FALLBACK_ERROR_NAME = "error-page.fallback-name";
 
     /* System Error Page Path */
     private static final String DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT = "";
@@ -127,19 +128,19 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             description = "Absolute path to system Error page resource to serve if no other more appropriate "
                     + "error pages can be found. Does not include extension. [Optional... but highly recommended]",
             value = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT)
-    private static final String PROP_ERROR_PAGE_PATH = "prop.error-page.system-path";
+    private static final String PROP_ERROR_PAGE_PATH = "error-page.system-path";
 
     /* Search Paths */
     private static final String[] DEFAULT_SEARCH_PATHS = {};
 
     @Property(
             label = "Error page paths",
-            description = "List of valid inclusive content trees under which error pages may reside, "
+            description = "List of inclusive content trees under which error pages may reside, "
                     + "along with the name of the the default error page for the content tree. This is a "
                     + "fallback/less powerful option to adding the ./errorPages property to CQ Page property dialogs."
                     + " Example: /content/geometrixx/en:errors [Optional]",
             cardinality = Integer.MAX_VALUE)
-    private static final String PROP_SEARCH_PATHS = "prop.paths";
+    private static final String PROP_SEARCH_PATHS = "paths";
 
     private static final int DEFAULT_TTL = 60 * 5; // 5 minutes
 
@@ -148,12 +149,14 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Property(label = "Serve authenticated from cache",
             description = "Serve authenticated requests from the error page cache. [ Default: false ]",
             boolValue = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
-    private static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
+    private static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "cache.serve-authenticated";
+    private static final String LEGACY_PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
 
     @Property(label = "TTL (in seconds)",
             description = "TTL for each cache entry in seconds. [ Default: 300 ]",
             intValue = DEFAULT_TTL)
-    private static final String PROP_TTL = "ttl";
+    private static final String PROP_TTL = "cache.ttl";
+    private static final String LEGACY_PROP_TTL = "ttl";
 
     /* Enable/Disables error images */
     private static final boolean DEFAULT_ERROR_IMAGES_ENABLED = false;
@@ -178,7 +181,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private static final String PROP_ERROR_IMAGE_PATH = "error-images.path";
 
     /* Error image extensions to handle */
-    private static final String[] DEFAULT_ERROR_IMAGE_EXTENSIONS = { "jpg", "jpeg", "png", "gif" };
+    private static final String[] DEFAULT_ERROR_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif"};
 
     private String[] errorImageExtensions = DEFAULT_ERROR_IMAGE_EXTENSIONS;
 
@@ -669,42 +672,57 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     private void configure(ComponentContext componentContext) {
-        Dictionary<?, ?> properties = componentContext.getProperties();
+        Dictionary<?, ?> config = componentContext.getProperties();
+        final String legacyPrefix = "prop.";
 
-        this.enabled = PropertiesUtil.toBoolean(properties.get(PROP_ENABLED), DEFAULT_ENABLED);
+        this.enabled = PropertiesUtil.toBoolean(config.get(PROP_ENABLED),
+                PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
+                        DEFAULT_ENABLED));
 
-        this.systemErrorPagePath = PropertiesUtil.toString(properties.get(PROP_ERROR_PAGE_PATH),
-                DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT);
+        /** Error Pages **/
 
-        this.errorPageExtension = PropertiesUtil.toString(properties.get(PROP_ERROR_PAGE_EXTENSION),
-                DEFAULT_ERROR_PAGE_EXTENSION);
+        this.systemErrorPagePath = PropertiesUtil.toString(config.get(PROP_ERROR_PAGE_PATH),
+                PropertiesUtil.toString(config.get(legacyPrefix + PROP_ERROR_PAGE_PATH),
+                        DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT));
 
-        this.fallbackErrorName = PropertiesUtil.toString(properties.get(PROP_FALLBACK_ERROR_NAME),
-                DEFAULT_FALLBACK_ERROR_NAME);
+        this.errorPageExtension = PropertiesUtil.toString(config.get(PROP_ERROR_PAGE_EXTENSION),
+                PropertiesUtil.toString(config.get(legacyPrefix + PROP_ERROR_PAGE_EXTENSION),
+                        DEFAULT_ERROR_PAGE_EXTENSION));
 
-        this.pathMap = configurePathMap(PropertiesUtil.toStringArray(properties.get(PROP_SEARCH_PATHS),
-                DEFAULT_SEARCH_PATHS));
+        this.fallbackErrorName = PropertiesUtil.toString(config.get(PROP_FALLBACK_ERROR_NAME),
+                PropertiesUtil.toString(config.get(legacyPrefix + PROP_FALLBACK_ERROR_NAME),
+                        DEFAULT_FALLBACK_ERROR_NAME));
 
-        int ttl = PropertiesUtil.toInteger(properties.get(PROP_TTL), DEFAULT_TTL);
-        boolean serveAuthenticatedFromCache = PropertiesUtil.toBoolean(properties.get(PROP_SERVE_AUTHENTICATED_FROM_CACHE),
-                DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE);
+        this.pathMap = configurePathMap(PropertiesUtil.toStringArray(config.get(PROP_SEARCH_PATHS),
+                PropertiesUtil.toStringArray(config.get(legacyPrefix + PROP_SEARCH_PATHS),
+                        DEFAULT_SEARCH_PATHS)));
+
+        /** Error Page Cache **/
+
+        int ttl = PropertiesUtil.toInteger(config.get(PROP_TTL),
+                PropertiesUtil.toInteger(LEGACY_PROP_TTL, DEFAULT_TTL));
+
+        boolean serveAuthenticatedFromCache = PropertiesUtil.toBoolean(config.get(PROP_SERVE_AUTHENTICATED_FROM_CACHE),
+                PropertiesUtil.toBoolean(LEGACY_PROP_SERVE_AUTHENTICATED_FROM_CACHE,
+                        DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE));
         try {
             cache = new ErrorPageCacheImpl(ttl, serveAuthenticatedFromCache);
-            
+
             Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
             serviceProps.put("jmx.objectname", "com.adobe.acs.commons:type=ErrorPageHandlerCache");
-            
-            cacheRegistration = componentContext.getBundleContext().registerService(DynamicMBean.class.getName(), cache, serviceProps);
+
+            cacheRegistration = componentContext.getBundleContext().registerService(DynamicMBean.class.getName(),
+                    cache, serviceProps);
         } catch (NotCompliantMBeanException e) {
             log.error("Unable to create cache", e);
         }
-        
+
         /** Error Images **/
 
-        this.errorImagesEnabled = PropertiesUtil.toBoolean(properties.get(PROP_ERROR_IMAGES_ENABLED),
+        this.errorImagesEnabled = PropertiesUtil.toBoolean(config.get(PROP_ERROR_IMAGES_ENABLED),
                 DEFAULT_ERROR_IMAGES_ENABLED);
 
-        this.errorImagePath = PropertiesUtil.toString(properties.get(PROP_ERROR_IMAGE_PATH),
+        this.errorImagePath = PropertiesUtil.toString(config.get(PROP_ERROR_IMAGE_PATH),
                 DEFAULT_ERROR_IMAGE_PATH);
 
         // Absolute path
@@ -733,8 +751,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             }
         }
 
-
-        this.errorImageExtensions = PropertiesUtil.toStringArray(properties.get(PROP_ERROR_IMAGE_EXTENSIONS),
+        this.errorImageExtensions = PropertiesUtil.toStringArray(config.get(PROP_ERROR_IMAGE_EXTENSIONS),
                 DEFAULT_ERROR_IMAGE_EXTENSIONS);
 
         for (int i = 0; i < errorImageExtensions.length; i++) {
@@ -747,8 +764,12 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         log.debug("Error Page Extension: {}", this.errorPageExtension);
         log.debug("Fallback Error Page Name: {}", this.fallbackErrorName);
 
-        log.debug("Error Images Enabled: {}", this.errorImagesEnabled);
-        log.debug("Error Image Path: {}", this.errorImagePath);
+        log.debug("Cache - TTL: {}", ttl);
+        log.debug("Cache - Serve Authenticated: {}", serveAuthenticatedFromCache);
+
+        log.debug("Error Images - Enabled: {}", this.errorImagesEnabled);
+        log.debug("Error Images - Path: {}", this.errorImagePath);
+        log.debug("Error Images - Extensions: {}", Arrays.toString(this.errorImageExtensions));
     }
 
     /**
