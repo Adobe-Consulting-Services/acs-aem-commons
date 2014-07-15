@@ -5,6 +5,7 @@
         <exclude pattern="/apps/acs-commons/components/content/column-control/clientlib/css/generated"/>
         <exclude pattern="/apps/acs-commons/widgets/source/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/page/clientlibs/css/generated"/>
+        <exclude pattern="/apps/acs-commons/components/utilities/oak-index-manager/clientlibs/css/generated"/>
     </filter>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
