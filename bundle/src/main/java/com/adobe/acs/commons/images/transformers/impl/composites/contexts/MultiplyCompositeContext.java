@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2014 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.images.transformers.impl.composites.contexts;
 
 import java.awt.CompositeContext;
@@ -15,7 +34,7 @@ import java.awt.image.WritableRaster;
 public class MultiplyCompositeContext implements CompositeContext {
     
     
-    private static final int MAX_COLOR_DEPTH = 0xFF;
+	private static final int ALPHA_MASK = 24;
     private static final int BLEND_SHIFT = 8;
     
     private final float alpha;
@@ -28,76 +47,78 @@ public class MultiplyCompositeContext implements CompositeContext {
     @Override
     public void compose(Raster src, Raster destIn, WritableRaster dstOut) {
 
-    	//    	int width = Math.min(src.getWidth(), destIn.getWidth());
-//        int height = Math.min(src.getHeight(), destIn.getHeight());
-//
-//        int[] srcPixels = new int[width];
-//        int[] destPixels = new int[width];
-//
-//        // Get a row of pixels.
-//        for (int y = 0; y < height; y++) {
-//            src.getDataElements(0, y, width, 1, srcPixels);
-//            destIn.getDataElements(0, y, width, 1, destPixels);
-//            
-//            // Each pixel in the row
-//            for (int x = 0; x < width; x++) {
-//
-//                // pixels are stored as INT_ARGB
-//                int[] srcPixel = new int[4]; 
-//                int[] destPixel = new int[4];
-//
-//                int pixel = srcPixels[x];
-//                
-//                srcPixel[ARGBMask.ALPHA.position] = (pixel >> ARGBMask.ALPHA.mask) & MAX_COLOR_DEPTH;
-//                srcPixel[ARGBMask.RED.position] = (pixel >> ARGBMask.RED.mask) & MAX_COLOR_DEPTH;
-//                srcPixel[ARGBMask.GREEN.position] = (pixel >> ARGBMask.GREEN.mask) & MAX_COLOR_DEPTH;
-//                srcPixel[ARGBMask.BLUE.position] = (pixel >> ARGBMask.BLUE.mask) & MAX_COLOR_DEPTH;
-//                
-//                pixel = destPixels[x];
-//                // Clearing out the alpha of the destination
-//                destPixel[ARGBMask.ALPHA.position] = (pixel >> ARGBMask.ALPHA.mask) & MAX_COLOR_DEPTH;
-//                destPixel[ARGBMask.RED.position] = (pixel >> ARGBMask.RED.mask) & MAX_COLOR_DEPTH;
-//                destPixel[ARGBMask.GREEN.position] = (pixel >> ARGBMask.GREEN.mask) & MAX_COLOR_DEPTH;
-//                destPixel[ARGBMask.BLUE.position] = (pixel >> ARGBMask.BLUE.mask) & MAX_COLOR_DEPTH;
-//                
-//                
-//                int[] result = blend(srcPixel, destPixel);
-//                destPixels[x] = processOpacity(destPixel, result);
-//            }
-//            dstOut.setDataElements(0, y, width, 1, destPixels);
-//        }
+    	int width = Math.min(src.getWidth(), destIn.getWidth());
+        int height = Math.min(src.getHeight(), destIn.getHeight());
+
+        int[] srcPixels = new int[width];
+        int[] destPixels = new int[width];
+
+        // Get a row of pixels.
+        for (int y = 0; y < height; y++) {
+            src.getDataElements(0, y, width, 1, srcPixels);
+            destIn.getDataElements(0, y, width, 1, destPixels);
+            
+            // Each pixel in the row
+            for (int x = 0; x < width; x++) {
+
+                // pixels are stored as INT_ARGB
+                int srcPixel = srcPixels[x];
+                int destPixel = destPixels[x];
+                int result = 0;
+                int tmp = 0;
+                
+                for (ColorMask mask : ColorMask.values()) {
+
+                	int srcColor = (srcPixel >> mask.getMask()) & ColorMask.MAX_DEPTH;
+                	int destColor = (destPixel >> mask.getMask()) & ColorMask.MAX_DEPTH;
+                	tmp = blendColor(srcColor, destColor);
+                	
+                	tmp = processColorOpacity(tmp, destColor);
+                	result = result | (tmp << mask.getMask());
+                }
+                
+                int srcAlpha = (srcPixel >> ALPHA_MASK) & ColorMask.MAX_DEPTH;
+                int destAlpha = (destPixel >> ALPHA_MASK) & ColorMask.MAX_DEPTH;
+                
+                tmp = blendAlpha(srcAlpha, destAlpha);
+                tmp = processAlphaOpacity(tmp, destAlpha);
+                result = result | (tmp << ALPHA_MASK);
+                destPixels[x] = result;
+            }
+            dstOut.setDataElements(0, y, width, 1, destPixels);
+        }
         
     }
 
-//    private int[] blend(int[] src, int[] dst) {
-//    	int[] result = new int[4];
-//        result[ARGBMask.ALPHA.position] = 
-//        		Math.min(255, src[ARGBMask.ALPHA.position] + dst[ARGBMask.ALPHA.position] - 
-//        				(src[ARGBMask.ALPHA.position] * dst[ARGBMask.ALPHA.position]) / 255);
-//        
-//        result[ARGBMask.RED.position] = (src[ARGBMask.RED.position] * dst[ARGBMask.RED.position]) >> BLEND_SHIFT;
-//        result[ARGBMask.GREEN.position] = (src[ARGBMask.GREEN.position] * dst[ARGBMask.GREEN.position]) >> BLEND_SHIFT;
-//        result[ARGBMask.BLUE.position] = (src[ARGBMask.BLUE.position] * dst[ARGBMask.BLUE.position]) >> BLEND_SHIFT;
-//        return result;
-//    }
-//    
-//    private int processOpacity(int[] dest, int[] blended) {
-//    
-//    	int result = 0;
-//    	result = result | (((int) (dest[ARGBMask.ALPHA.position] + 
-//    				(blended[ARGBMask.ALPHA.position] - dest[ARGBMask.ALPHA.position]) * alpha) & 0xFF) << 24);
-//    	
-//    	result = result | (((int) (dest[ARGBMask.RED.position] + 
-//    				(blended[ARGBMask.RED.position] - dest[ARGBMask.RED.position]) * alpha) & 0xFF) <<  16);
-//    	
-//    	result = result | (((int) (dest[ARGBMask.GREEN.position] + 
-//    				(blended[ARGBMask.GREEN.position] - dest[ARGBMask.GREEN.position]) * alpha) & 0xFF) << 8);
-//    	
-//    	result = result | ((int) (dest[ARGBMask.BLUE.position] + 
-//    				(blended[ARGBMask.BLUE.position] - dest[ARGBMask.BLUE.position]) * alpha) & 0xFF);
-//    	return result;
-//	}
-//
+    private int blendColor(int src, int dest) {
+    	return (src * dest) >> BLEND_SHIFT;
+        
+    }
+    
+    private int processColorOpacity(int blended, int dest) {
+    	int tmp = blended - dest;
+    	tmp = (int) (tmp * alpha);
+    	tmp = dest + tmp;
+    	tmp = tmp & ColorMask.MAX_DEPTH;
+    	return tmp;
+    }
+    
+    private int blendAlpha(int src, int dest) {
+    	int tmp = (src * dest) / 255;
+    	tmp = src + dest - tmp;
+    	return Math.min(255, tmp);
+    }
+    
+    private int processAlphaOpacity(int blended, int dest) {
+    	
+    	int tmp = blended - dest;
+    	tmp = (int) (tmp * alpha);
+    	tmp = dest - tmp;
+    	tmp = tmp & ColorMask.MAX_DEPTH;
+    	return tmp;
+    	
+    	
+    }
     
     @Override
     public void dispose() {

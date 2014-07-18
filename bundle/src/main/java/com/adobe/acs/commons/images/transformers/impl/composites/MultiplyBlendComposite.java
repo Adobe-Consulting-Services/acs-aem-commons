@@ -37,11 +37,9 @@ import com.adobe.acs.commons.images.transformers.impl.composites.contexts.Multip
  */
 public class MultiplyBlendComposite implements Composite {
 
-	static final int ALPHA_MASK = 0xFF000000;
-    static final int RED_MASK = 0x00FF0000;
-    static final int GREEN_MASK = 0x0000FF00;
-    static final int BLUE_MASK = 0x000000FF;
-    
+	
+	private static final DirectColorModel colorModel = (DirectColorModel) ColorModel.getRGBdefault();
+	
     private final float alpha;
     
     public MultiplyBlendComposite(float alpha) {
@@ -68,10 +66,10 @@ public class MultiplyBlendComposite implements Composite {
     	
     	DirectColorModel dcm = (DirectColorModel) cm;
     	
-    	return (dcm.getAlphaMask() == ALPHA_MASK &&
-    			dcm.getRedMask() == RED_MASK &&
-    			dcm.getGreenMask() == GREEN_MASK &&
-    			dcm.getBlueMask() == BLUE_MASK);
+    	return (dcm.getAlphaMask() == colorModel.getAlphaMask() &&
+    			dcm.getRedMask() == colorModel.getRedMask() &&
+    			dcm.getGreenMask() == colorModel.getGreenMask() &&
+    			dcm.getBlueMask() == colorModel.getBlueMask());
     }
 
     
