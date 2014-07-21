@@ -18,9 +18,9 @@
  * #L%
  */
 
-package com.adobe.acs.commons.images.imagetransformers.impl;
+package com.adobe.acs.commons.images.transformers.impl;
 
-import com.adobe.acs.commons.images.transformers.impl.ResizeImageTransformerImpl;
+import com.adobe.acs.commons.images.transformers.impl.CropImageTransformerImpl;
 import com.day.image.Layer;
 
 import org.apache.sling.api.resource.ValueMap;
@@ -32,19 +32,20 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ResizeImageTransformerImplTest {
-    ResizeImageTransformerImpl transformer;
+public class CropImageTransformerImplTest {
+
+    CropImageTransformerImpl transformer;
 
     @Mock
     Layer layer;
@@ -54,7 +55,7 @@ public class ResizeImageTransformerImplTest {
     @Before
     public void setUp() throws Exception {
         map = new HashMap<String, Object>();
-        transformer = new ResizeImageTransformerImpl();
+        transformer = new CropImageTransformerImpl();
 
         when(layer.getWidth()).thenReturn(1600);
         when(layer.getHeight()).thenReturn(900);
@@ -62,89 +63,77 @@ public class ResizeImageTransformerImplTest {
 
     @After
     public void tearDown() throws Exception {
-        map = null;
         reset(layer);
+        map = null;
     }
 
     @Test
     public void testTransform() throws Exception {
-        final int width = 100;
-        final int height = 200;
+        Rectangle expected = new Rectangle();
+        expected.setBounds(0, 0, 100, 200);
 
-        map.put("width", width);
-        map.put("height", height);
+        map.put("bounds", "0,0,100,200");
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).resize(width, height);
-        verifyNoMoreInteractions(layer);
+        verify(layer, times(1)).crop(expected);
     }
 
     @Test
-    public void testTransform_onlyWidth() throws Exception {
-        final int width = 160;
+    public void testTransform_smartBoundsWidth() throws Exception {
+        // 1600 x 900
+        Rectangle expected = new Rectangle();
+        expected.setBounds(0, 0, 1600, 400);
 
-        map.put("width", width);
+        map.put("bounds", "0,0,2000,500");
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).resize(width, 90);
+        verify(layer, times(1)).crop(expected);
     }
 
     @Test
-    public void testTransform_onlyHeight() throws Exception {
-        final int height = 90;
+    public void testTransform_smartBoundsHeight() throws Exception {
+        // 1600 x 900
+        Rectangle expected = new Rectangle();
+        expected.setBounds(0, 0, 400, 900);
 
-        map.put("height", height);
+        map.put("bounds", "0,0,800,1800");
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).resize(160, height);
+        verify(layer, times(1)).crop(expected);
     }
 
     @Test
-    public void testTransform_invalidHeightAndWidth() throws Exception {
-        final int width = -100;
-        final int height = -200;
+    public void testTransform_smartBoundsBoth_width() throws Exception {
+        // 1600 x 900
+        Rectangle expected = new Rectangle();
+        expected.setBounds(0, 0, 1600, 400);
 
-        map.put("width", width);
-        map.put("height", height);
+        map.put("bounds", "0,0,20000,5000");
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).resize(1600, 900);
+        verify(layer, times(1)).crop(expected);
     }
 
     @Test
-    public void testTransform_invalidWifth() throws Exception {
-        final int width = -100;
-        final int height = 90;
+    public void testTransform_smartBoundsBoth_height() throws Exception {
+        // 1600 x 900
+        Rectangle expected = new Rectangle();
+        expected.setBounds(0, 0, 400, 900);
 
-        map.put("width", width);
-        map.put("height", height);
+        map.put("bounds", "0,0,8000,18000");
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).resize(160, height);
-    }
-
-    @Test
-    public void testTransform_invalidHeight() throws Exception {
-        final int width = 160;
-        final int height = -100;
-
-        map.put("width", width);
-        map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
-
-        transformer.transform(layer, properties);
-
-        verify(layer, times(1)).resize(width, 90);
+        verify(layer, times(1)).crop(expected);
     }
 
     @Test

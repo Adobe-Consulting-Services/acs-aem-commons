@@ -18,9 +18,9 @@
  * #L%
  */
 
-package com.adobe.acs.commons.images.imagetransformers.impl;
+package com.adobe.acs.commons.images.transformers.impl;
 
-import com.adobe.acs.commons.images.transformers.impl.GreyscaleImageTransformerImpl;
+import com.adobe.acs.commons.images.transformers.impl.RotateImageTransformerImpl;
 import com.day.image.Layer;
 
 import org.apache.sling.api.resource.ValueMap;
@@ -42,9 +42,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GreyscaleImageTransformerImplTest {
+public class RotateImageTransformerImplTest {
 
-    GreyscaleImageTransformerImpl transformer;
+    RotateImageTransformerImpl transformer;
 
     @Mock
     Layer layer;
@@ -54,7 +54,7 @@ public class GreyscaleImageTransformerImplTest {
     @Before
     public void setUp() throws Exception {
         map = new HashMap<String, Object>();
-        transformer = new GreyscaleImageTransformerImpl();
+        transformer = new RotateImageTransformerImpl();
     }
 
     @After
@@ -65,11 +65,41 @@ public class GreyscaleImageTransformerImplTest {
 
     @Test
     public void testTransform() throws Exception {
+        final int degrees = 50;
+
+        map.put("degrees", degrees);
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).grayscale();
+        verify(layer, times(1)).rotate(degrees);
+        verifyNoMoreInteractions(layer);
+    }
+
+    @Test
+    public void testTransform_mod() throws Exception {
+        final int degrees = 5;
+
+        map.put("degrees", 360 + degrees);
+        ValueMap properties = new ValueMapDecorator(map);
+
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).rotate(degrees);
+        verifyNoMoreInteractions(layer);
+    }
+
+
+    @Test
+    public void testTransform_neg() throws Exception {
+        final int degrees = -15;
+
+        map.put("degrees", -360 + degrees);
+        ValueMap properties = new ValueMapDecorator(map);
+
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).rotate(degrees);
         verifyNoMoreInteractions(layer);
     }
 
@@ -79,7 +109,6 @@ public class GreyscaleImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).grayscale();
         verifyZeroInteractions(layer);
     }
 
@@ -87,7 +116,6 @@ public class GreyscaleImageTransformerImplTest {
     public void testTransform_nullParams() throws Exception {
         transformer.transform(layer, null);
 
-        verify(layer, times(1)).grayscale();
         verifyZeroInteractions(layer);
     }
 }
