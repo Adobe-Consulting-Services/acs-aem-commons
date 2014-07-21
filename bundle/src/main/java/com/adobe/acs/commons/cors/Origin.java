@@ -58,7 +58,7 @@ public class Origin {
     }
 
     public int getPort() {
-        return this.getPort();
+        return this.port;
     }
 
     @Override
