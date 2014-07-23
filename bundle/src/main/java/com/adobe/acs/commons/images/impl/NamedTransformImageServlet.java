@@ -171,11 +171,11 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final NamedImageTransformer namedImageTransformer = this.namedImageTransformers.get(transformName);
 
         final Image image = this.resolveImage(request);
-        final Layer layer = this.getLayer(image);
         final String mimeType = this.getMimeType(request, image);
-
+        Layer layer = this.getLayer(image);
+        
         // Transform the image
-        namedImageTransformer.transform(layer);
+        layer = namedImageTransformer.transform(layer);
 
         final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
         response.setContentType(mimeType);
