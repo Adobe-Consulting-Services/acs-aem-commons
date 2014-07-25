@@ -20,22 +20,40 @@
 
 package com.adobe.acs.commons.images.transformers.impl.composites.contexts;
 
+/**
+ * Represents a Color bitmask for making calculations.
+ * 
+ */
 public enum ColorMask {
 
-	RED(16),
-	GREEN(8),
-	BLUE(0);
+    /**
+     * Red Color Mask.
+     */
+    RED(16),
 
-	public static int MAX_DEPTH = 0xFF;
-	
-	private int	mask;
+    /**
+     * Green Color Mask.
+     */
+    GREEN(8),
 
-	ColorMask(int mask) {
-		this.mask = mask;
-	}
+    /**
+     * Blue Color Mask.
+     */
+    BLUE(0);
 
-	int getMask() {
-		return mask;
-	}
+    /**
+     * Maximum value a single RGB value is allowed.
+     */
+    public static final int MAX_DEPTH = 0xFF;
+
+    private int mask;
+
+    ColorMask(int mask) {
+        this.mask = mask;
+    }
+
+    int getMask() {
+        return mask;
+    }
 
 }

@@ -38,135 +38,134 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( { ColorModel.class, DirectColorModel.class } )
+@PrepareForTest({ ColorModel.class, DirectColorModel.class })
 public class MultiplyBlendCompositeTest {
 
-	private static final float ALPHA = 0.75f;
+    private static final float ALPHA = 0.75f;
 
-	@Mock
-	ColorModel notDirect;
-	
-	@Spy
-	DirectColorModel srcColorModel = (DirectColorModel) DirectColorModel.getRGBdefault();
-	
-	@Spy
-	DirectColorModel destColorModel = (DirectColorModel) DirectColorModel.getRGBdefault();
-	
-	@Mock
-	RenderingHints hints;
-	
-	MultiplyBlendComposite composite = new MultiplyBlendComposite(ALPHA);
-	
+    @Mock
+    ColorModel notDirect;
+
+    @Spy
+    DirectColorModel srcColorModel = (DirectColorModel) DirectColorModel.getRGBdefault();
+
+    @Spy
+    DirectColorModel destColorModel = (DirectColorModel) DirectColorModel.getRGBdefault();
+
+    @Mock
+    RenderingHints hints;
+
+    MultiplyBlendComposite composite = new MultiplyBlendComposite(ALPHA);
+
     @Before
     public void setUp() throws Exception {
-    	
+
     }
 
     @After
     public void tearDown() throws Exception {
-    	reset(notDirect, hints);
+        reset(notDirect, hints);
     }
-    
+
     @Test
     public void testCreateContext() throws Exception {
 
-    	CompositeContext ctx = composite.createContext(srcColorModel, destColorModel, hints);
-    	assertNotNull(ctx);
-    	verifyZeroInteractions(srcColorModel, destColorModel, hints);
+        CompositeContext ctx = composite.createContext(srcColorModel, destColorModel, hints);
+        assertNotNull(ctx);
+        verifyZeroInteractions(srcColorModel, destColorModel, hints);
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidSrc() throws Exception {
-    	composite.createContext(notDirect, destColorModel, hints);
+        composite.createContext(notDirect, destColorModel, hints);
         verifyZeroInteractions(notDirect, destColorModel, hints);
-    	
+
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidDest() throws Exception {
-    	composite.createContext(srcColorModel, notDirect, hints);
+        composite.createContext(srcColorModel, notDirect, hints);
         verifyZeroInteractions(notDirect, srcColorModel, hints);
     }
-    
+
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidSrcAlphaMask() throws Exception {
-    	
-    	srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(), 
-    			srcColorModel.getBlueMask(), 0);
-    	composite.createContext(srcColorModel, destColorModel, hints);
-    	PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-    	verifyZeroInteractions(hints);
+
+        srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(),
+                srcColorModel.getBlueMask(), 0);
+        composite.createContext(srcColorModel, destColorModel, hints);
+        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        verifyZeroInteractions(hints);
     }
-    
+
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidSrcRedMask() throws Exception {
-    	
-    	srcColorModel = new DirectColorModel(Integer.SIZE, 0, srcColorModel.getGreenMask(), 
-    			srcColorModel.getBlueMask(), srcColorModel.getAlphaMask());
-    	composite.createContext(srcColorModel, destColorModel, hints);
-    	PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-    	verifyZeroInteractions(hints);    	
+
+        srcColorModel = new DirectColorModel(Integer.SIZE, 0, srcColorModel.getGreenMask(),
+                srcColorModel.getBlueMask(), srcColorModel.getAlphaMask());
+        composite.createContext(srcColorModel, destColorModel, hints);
+        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidSrcGreenMask() throws Exception {
-    	
-    	srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), 0, 
-    			srcColorModel.getBlueMask(), srcColorModel.getAlphaMask());
-    	composite.createContext(srcColorModel, destColorModel, hints);
-    	PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-    	verifyZeroInteractions(hints);    	
+
+        srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), 0, srcColorModel.getBlueMask(),
+                srcColorModel.getAlphaMask());
+        composite.createContext(srcColorModel, destColorModel, hints);
+        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidSrcBlueMask() throws Exception {
-    	
-    	srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(), 
-    			0, srcColorModel.getAlphaMask());
-    	composite.createContext(srcColorModel, destColorModel, hints);
-    	PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-    	verifyZeroInteractions(hints);    	
+
+        srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(), 0,
+                srcColorModel.getAlphaMask());
+        composite.createContext(srcColorModel, destColorModel, hints);
+        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidDestAlphaMask() throws Exception {
-    	
-    	destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(), 
-    			destColorModel.getBlueMask(), 0);
-    	composite.createContext(srcColorModel, destColorModel, hints);
-    	PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-    	verifyZeroInteractions(hints);
+
+        destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(),
+                destColorModel.getBlueMask(), 0);
+        composite.createContext(srcColorModel, destColorModel, hints);
+        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        verifyZeroInteractions(hints);
     }
-    
+
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidDestRedMask() throws Exception {
-    	
-    	destColorModel = new DirectColorModel(Integer.SIZE, 0, destColorModel.getGreenMask(), 
-    			destColorModel.getBlueMask(), destColorModel.getAlphaMask());
-    	composite.createContext(srcColorModel, destColorModel, hints);
-    	PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-    	verifyZeroInteractions(hints);    	
+
+        destColorModel = new DirectColorModel(Integer.SIZE, 0, destColorModel.getGreenMask(),
+                destColorModel.getBlueMask(), destColorModel.getAlphaMask());
+        composite.createContext(srcColorModel, destColorModel, hints);
+        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidDestGreenMask() throws Exception {
-    	
-    	destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), 0, 
-    			destColorModel.getBlueMask(), destColorModel.getAlphaMask());
-    	composite.createContext(srcColorModel, destColorModel, hints);
-    	PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-    	verifyZeroInteractions(hints);    	
+
+        destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), 0,
+                destColorModel.getBlueMask(), destColorModel.getAlphaMask());
+        composite.createContext(srcColorModel, destColorModel, hints);
+        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidDestBlueMask() throws Exception {
-    	
-    	destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(), 
-    			0, destColorModel.getAlphaMask());
-    	composite.createContext(srcColorModel, destColorModel, hints);
-    	PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-    	verifyZeroInteractions(hints);    	
+
+        destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(),
+                0, destColorModel.getAlphaMask());
+        composite.createContext(srcColorModel, destColorModel, hints);
+        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        verifyZeroInteractions(hints);
     }
 }

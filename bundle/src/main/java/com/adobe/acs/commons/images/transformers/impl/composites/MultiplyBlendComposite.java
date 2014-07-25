@@ -30,47 +30,45 @@ import com.adobe.acs.commons.images.transformers.impl.composites.contexts.Multip
 
 /**
  * Applies a multiply blend to the models.
- *
- * Follows the rules defined here: http://helpx.adobe.com/after-effects/using/blending-modes-layer-styles.html#Multiply
- *
- * Based on http://www.java2s.com/Code/Java/2D-Graphics-GUI/BlendCompositeDemo.htm    
+ * 
+ * Follows the rules defined here:
+ * http://helpx.adobe.com/after-effects/using/blending
+ * -modes-layer-styles.html#Multiply
+ * 
+ * Based on
+ * http://www.java2s.com/Code/Java/2D-Graphics-GUI/BlendCompositeDemo.htm
  */
 public class MultiplyBlendComposite implements Composite {
 
-	
-	private static final DirectColorModel colorModel = (DirectColorModel) ColorModel.getRGBdefault();
-	
+    private static final DirectColorModel COLOR_MODEL = (DirectColorModel) ColorModel.getRGBdefault();
+
     private final float alpha;
-    
+
     public MultiplyBlendComposite(float alpha) {
         this.alpha = alpha;
     }
-    
+
     @Override
     public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
-        
-    	if (!isValidColorModel(srcColorModel) || !isValidColorModel(dstColorModel)) {
-    		throw new RasterFormatException("Invalid color model provided.");
-    	}
-    	
+
+        if (!isValidColorModel(srcColorModel) || !isValidColorModel(dstColorModel)) {
+            throw new RasterFormatException("Invalid color model provided.");
+        }
+
         return new MultiplyCompositeContext(alpha);
-        
+
     }
 
-    
     private static boolean isValidColorModel(ColorModel cm) {
-    	
-    	if (!(cm instanceof DirectColorModel)) {
-    		return false;
-    	}
-    	
-    	DirectColorModel dcm = (DirectColorModel) cm;
-    	
-    	return (dcm.getAlphaMask() == colorModel.getAlphaMask() &&
-    			dcm.getRedMask() == colorModel.getRedMask() &&
-    			dcm.getGreenMask() == colorModel.getGreenMask() &&
-    			dcm.getBlueMask() == colorModel.getBlueMask());
+
+        if (!(cm instanceof DirectColorModel)) {
+            return false;
+        }
+
+        DirectColorModel dcm = (DirectColorModel) cm;
+
+        return (dcm.getAlphaMask() == COLOR_MODEL.getAlphaMask() && dcm.getRedMask() == COLOR_MODEL.getRedMask()
+                && dcm.getGreenMask() == COLOR_MODEL.getGreenMask() && dcm.getBlueMask() == COLOR_MODEL.getBlueMask());
     }
 
-    
 }
