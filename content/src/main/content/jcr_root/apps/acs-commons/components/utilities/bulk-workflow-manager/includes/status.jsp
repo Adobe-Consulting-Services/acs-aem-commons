@@ -110,7 +110,7 @@
             </thead>
             <tbody>
                 <tr ng-repeat="item in data.status.currentBatchItems ">
-                    <td class="{{ item.state }}">{{ resource.state || 'NOT STARTED' }}</td>
+                    <td class="{{ item.state }}">{{ item.state || 'NOT STARTED' }}</td>
                     <td>{{ item.path }}</td>
                 </tr>
             </tbody>
