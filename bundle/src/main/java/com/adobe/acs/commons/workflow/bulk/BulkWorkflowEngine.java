@@ -55,6 +55,8 @@ public interface BulkWorkflowEngine {
 
     String KEY_BATCH_SIZE = "batchSize";
 
+    String KEY_RELATIVE_PATH = "relativePath";
+
     String KEY_JOB_NAME = "jobName";
 
     String KEY_INTERVAL = "interval";

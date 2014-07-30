@@ -109,6 +109,8 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
             PersistenceException, RepositoryException {
         final ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
 
+        log.trace("Entering initialized");
+
         if (properties.get(KEY_INITIALIZED, false)) {
             log.warn("Refusing to re-initialize an already initialized Bulk Workflow Manager.");
             return;
@@ -126,7 +128,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                 Query.JCR_SQL2).execute();
         final NodeIterator nodes = queryResult.getNodes();
 
-        long size = queryResult.getNodes().getSize();
+        long size = nodes.getSize();
         if (size < 0) {
             log.debug("Using provided estimate total size [ {} ] as actual size [ {} ] could not be retrieved.",
                     properties.get(KEY_ESTIMATED_TOTAL, DEFAULT_ESTIMATED_TOTAL), size);
@@ -137,12 +139,29 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
         final Bucket bucket = new Bucket(batchSize, size,
                 resource.getChild(NN_BATCHES).getPath(), "sling:Folder");
 
+        final String relPath = params.get(KEY_RELATIVE_PATH, "");
+
         // Create the structure
         String currentBatch = null;
         int total = 0;
-        Node previousBatchNode = null, node = null;
+        Node previousBatchNode = null, batchItemNode = null;
         while (nodes.hasNext()) {
+            Node payloadNode = nodes.nextNode();
+            log.debug("nodes has next: {}", nodes.hasNext());
 
+            log.trace("Processing search result [ {} ]", payloadNode.getPath());
+
+            if(StringUtils.isNotBlank(relPath)) {
+                if(payloadNode.hasNode(relPath)) {
+                    payloadNode = payloadNode.getNode(relPath);
+                } else {
+                    log.warn("Could not find node at [ {} ]", payloadNode.getPath() + "/" + relPath);
+                    continue;
+                }
+                // No rel path, so use the Query result node as the payload Node
+            }
+
+            total++;
             final String batchPath = bucket.getNextPath(resourceResolver);
 
             if (currentBatch == null) {
@@ -150,37 +169,48 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                 currentBatch = batchPath;
             }
 
-            final String batchItemPath = batchPath + "/" + total++;
-            node = JcrUtil.createPath(batchItemPath, SLING_FOLDER, JcrConstants.NT_UNSTRUCTURED, session, false);
+            final String batchItemPath = batchPath + "/" + total;
 
-            JcrUtil.setProperty(node, KEY_PATH, nodes.nextNode().getPath());
+            batchItemNode = JcrUtil.createPath(batchItemPath, SLING_FOLDER, JcrConstants.NT_UNSTRUCTURED, session,
+                    false);
+
+            log.trace("Created batch item path at [ {} ]", batchItemPath);
+
+            JcrUtil.setProperty(batchItemNode, KEY_PATH, payloadNode.getPath());
+            log.trace("Added payload [ {} ] for batch item [ {} ]", payloadNode.getPath(), batchItemNode.getPath());
 
             if (total % batchSize == 0) {
-                previousBatchNode = node.getParent();
+                previousBatchNode = batchItemNode.getParent();
             } else if ((total % batchSize == 1) && previousBatchNode != null) {
                 // Set the "next batch" property, so we know what the next batch to process is when
                 // the current batch is complete
-                JcrUtil.setProperty(previousBatchNode, KEY_NEXT_BATCH, node.getParent().getPath());
+                JcrUtil.setProperty(previousBatchNode, KEY_NEXT_BATCH, batchItemNode.getParent().getPath());
             }
 
             if (total % SAVE_THRESHOLD == 0) {
                 session.save();
             }
+        } // while
+
+        if(total > 0) {
+            // Set last batch's "next batch" property to complete so we know we're done
+            JcrUtil.setProperty(batchItemNode.getParent(), KEY_NEXT_BATCH, STATE_COMPLETE);
+
+            if (total % SAVE_THRESHOLD != 0) {
+                session.save();
+            }
+
+            properties.put(KEY_CURRENT_BATCH, currentBatch);
+            properties.put(KEY_TOTAL, total);
+            properties.put(KEY_INITIALIZED, true);
+            properties.put(KEY_STATE, STATE_NOT_STARTED);
+
+            resource.getResourceResolver().commit();
+
+            log.info("Completed initialization of Bulk Workflow Manager");
+        } else {
+            throw new IllegalArgumentException("Query returned zero results.");
         }
-
-        // Set last batch's "next batch" property to complete so we know we're done
-        JcrUtil.setProperty(node.getParent(), KEY_NEXT_BATCH, STATE_COMPLETE);
-
-        if (total % SAVE_THRESHOLD != 0) {
-            session.save();
-        }
-
-        properties.put(KEY_CURRENT_BATCH, currentBatch);
-        properties.put(KEY_TOTAL, total);
-        properties.put(KEY_INITIALIZED, true);
-        properties.put(KEY_STATE, STATE_NOT_STARTED);
-
-        resource.getResourceResolver().commit();
     }
 
     /**
@@ -244,6 +274,8 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
         } catch (Exception e) {
             log.error("Error starting bulk workflow management. {}", e.getMessage());
         }
+
+        log.info("Completed starting of Bulk Workflow Manager");
     }
 
     /**

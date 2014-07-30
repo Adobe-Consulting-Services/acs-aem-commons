@@ -39,12 +39,26 @@
 
     </div>
 
+
+
+
+    <div class="form-row">
+        <h4>Search Node Rel Path</h4>
+
+        <span>
+            <input type="text"
+                   ng-model="form.relativePath"
+                   placeholder="Rel path to append to search results (Ex. jcr:content/renditions/original )"/>
+        </span>
+    </div>
+
+
     <div class="form-row">
         <h4>Workflow Model</h4>
 
         <span>
             <select
-                    required="true"
+                    ng-required="true"
                     ng-model="form.workflowModel"
                     ng-options="workflowModel.value as workflowModel.label for workflowModel in formOptions.workflowModels">
             </select>

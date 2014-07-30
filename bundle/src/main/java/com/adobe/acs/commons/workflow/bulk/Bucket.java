@@ -32,6 +32,7 @@ import java.util.Arrays;
 
 public final class Bucket {
     private static final Logger log = LoggerFactory.getLogger(Bucket.class);
+    private static final int MAX_DEPTH = 100000; // one hundred thousand
 
     private static final String NT_SLING_FOLDER = "sling:Folder";
 
@@ -144,7 +145,7 @@ public final class Bucket {
      *
      * @return the depth tracker array initialized to all 0's
      */
-    private void initDepthTracker() {
+    private void initDepthTracker() throws IllegalStateException {
         int depth = getDepth();
 
         this.depthTracker = new int[depth];
@@ -177,9 +178,15 @@ public final class Bucket {
      *
      * @return The node depth required to achieve desired bucket-size
      */
-    private int getDepth() {
+    private int getDepth() throws IllegalStateException {
         int depth = 0;
         long remainingSize = this.total;
+
+        if(this.bucketSize < 2) {
+            throw new IllegalStateException("Trying to build bucket structure with bucket size [ "
+                    + this.bucketSize
+                    + "]. Refusing as this does not make sense, and is a flat list of nodes.");
+        }
 
         do {
             remainingSize = (long) Math.ceil((double) remainingSize / (double) this.bucketSize);
@@ -187,7 +194,13 @@ public final class Bucket {
             log.debug("Remaining size of [ {} ] at depth [ {} ]", remainingSize, depth);
 
             depth++;
-        } while (remainingSize > this.bucketSize);
+        } while (remainingSize > this.bucketSize && depth < MAX_DEPTH);
+
+
+        if(depth == MAX_DEPTH) {
+            throw new IllegalStateException("Bucket Max Depth of {} reached. Cowardly refusing to support such a large bucket " +
+                    "structure");
+        }
 
         log.debug("Final depth of [ {} ]", depth);
 

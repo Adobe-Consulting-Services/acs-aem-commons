@@ -147,6 +147,9 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
         map.put(BulkWorkflowEngine.KEY_QUERY,
                 params.getString(BulkWorkflowEngine.KEY_QUERY));
 
+        map.put(BulkWorkflowEngine.KEY_RELATIVE_PATH,
+                StringUtils.removeStart(params.optString(BulkWorkflowEngine.KEY_RELATIVE_PATH, ""), "/"));
+
         map.put(BulkWorkflowEngine.KEY_WORKFLOW_MODEL,
                 params.getString(BulkWorkflowEngine.KEY_WORKFLOW_MODEL));
 
