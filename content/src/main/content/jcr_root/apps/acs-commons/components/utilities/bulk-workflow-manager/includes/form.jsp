@@ -104,6 +104,24 @@
     </div>
 
     <div class="form-row">
+        <h4>Batch Timeout</h4>
+
+        <span>
+            <input type="text"
+                   ng-required="false"
+                   ng-model="form.batchTimeout"
+                   placeholder="Number of batch intervals to wait for entire batch to complete [ Default: 20 ]"/>
+            <div class="instructions">
+                Any active workflows in a batch after this duration will be terminated and marked as "FORCE
+                TERMINATED".
+                <br/>
+                [ Batch Time ] x [ Batch Interval ] should be sufficient for all workflows to complete for the entire
+                batch under normal conditions.
+            </div>
+        </span>
+    </div>
+
+    <div class="form-row">
         <h4>Purge Workflows</h4>
 
         <span>

@@ -227,29 +227,63 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
         final Runnable job = new Runnable() {
 
-            private Map<String, String> workflowMap = new LinkedHashMap<String, String>();
+            private Map<String, String> activeWorkflows = new LinkedHashMap<String, String>();
 
             public void run() {
                 ResourceResolver adminResourceResolver = null;
+                Resource contentResource = null;
 
                 try {
                     adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                    workflowMap = getActiveWorkflows(adminResourceResolver, workflowMap);
-                    final Resource contentResource = adminResourceResolver.getResource(resourcePath);
+                    activeWorkflows = getActiveWorkflows(adminResourceResolver, activeWorkflows);
+                    contentResource = adminResourceResolver.getResource(resourcePath);
 
                     if (contentResource == null) {
                         log.warn("Bulk workflow process resource [ {} ] could not be found. Removing periodic job.",
                                 resourcePath);
                         scheduler.removeJob(jobName);
-                    } else if (workflowMap.isEmpty()) {
-                        // Either the beginnign or the end of a batch process
-                        workflowMap = process(contentResource, workflowModel);
+                    } else if (activeWorkflows.isEmpty()) {
+                        // Either the beginning or the end of a batch process
+                        activeWorkflows = process(contentResource, workflowModel);
                     } else {
-                        log.debug("Workflows for batch [ {} ] are still active.", contentResource.adaptTo(ValueMap
-                                .class).get(KEY_CURRENT_BATCH, "Missing batch"));
+                        log.debug("Workflows for batch [ {} ] are still active.",
+                                contentResource.adaptTo(ValueMap.class).get(KEY_CURRENT_BATCH, "Missing batch"));
+
+                        final ValueMap properties = contentResource.adaptTo(ValueMap.class);
+                        final int batchTimeout = properties.get(KEY_BATCH_TIMEOUT, 0);
+
+                        final Resource currentBatch = getCurrentBatch(contentResource);
+                        final ModifiableValueMap currentBatchProperties =
+                                currentBatch.adaptTo(ModifiableValueMap.class);
+
+                        final int batchTimeoutCount = currentBatchProperties.get(KEY_BATCH_TIMEOUT_COUNT, 0);
+
+                        if(batchTimeoutCount >= batchTimeout) {
+                            terminateActiveWorkflows(adminResourceResolver,
+                                    contentResource,
+                                    activeWorkflows);
+                            // Next batch will be pulled on next iteration
+                        } else {
+                            // Still withing batch processing range; continue.
+                            currentBatchProperties.put(KEY_BATCH_TIMEOUT_COUNT, batchTimeoutCount + 1);
+                            adminResourceResolver.commit();
+                        }
                     }
                 } catch (Exception e) {
                     log.error("Error processing periodic execution: {}", e.getMessage());
+
+                    try {
+                        if(contentResource != null) {
+                            stop(contentResource, STATE_STOPPED_ERROR);
+                        } else {
+                            scheduler.removeJob(jobName);
+                            log.error("Removed scheduled job [ {} ] due to errors content resource [ {} ] could not "
+                                    + "be found.", jobName, resourcePath);
+                        }
+                    } catch(Exception ex) {
+                        scheduler.removeJob(jobName);
+                        log.error("Removed scheduled job [ {} ] due to errors and could not stop normally.", jobName);
+                    }
                 } finally {
                     if (adminResourceResolver != null) {
                         adminResourceResolver.close();
@@ -585,6 +619,65 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
         return activeWorkflowMap;
     }
+
+
+    /**
+     * Terminate active workflows
+     *
+     * @param resourceResolver
+     * @param contentResource
+     * @param workflowMap
+     * @return number of terminated workflows
+     * @throws RepositoryException
+     * @throws PersistenceException
+     */
+    private int terminateActiveWorkflows(ResourceResolver resourceResolver,
+                                         final Resource contentResource,
+                                         final Map<String, String> workflowMap)
+            throws RepositoryException, PersistenceException {
+
+        final WorkflowSession workflowSession =
+                workflowService.getWorkflowSession(resourceResolver.adaptTo(Session.class));
+
+        boolean dirty = false;
+        int count = 0;
+        for (final Map.Entry<String, String> entry : workflowMap.entrySet()) {
+            final String workflowId = entry.getValue();
+
+            final Workflow workflow;
+            try {
+                workflow = workflowSession.getWorkflow(workflowId);
+                if (workflow.isActive()) {
+
+                    workflowSession.terminateWorkflow(workflow);
+
+                    count++;
+
+                    log.info("Terminated workflow [ {} ]", workflowId);
+
+                    final Resource resource = resourceResolver.getResource(entry.getKey());
+                    final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
+
+                    mvm.put(KEY_STATE, STATE_FORCE_TERMINATED.toUpperCase());
+
+                    dirty = true;
+                }
+
+            } catch (WorkflowException e) {
+                log.error("Could not get workflow with id [ {} ]. {}", workflowId, e.getMessage());
+            }
+        }
+
+        if (dirty) {
+            final ModifiableValueMap properties = contentResource.adaptTo(ModifiableValueMap.class);
+            properties.put(KEY_FORCE_TERMINATED_COUNT,
+                    properties.get(KEY_FORCE_TERMINATED_COUNT, 0) + count);
+            resourceResolver.commit();
+        }
+
+        return count;
+    }
+
 
     /**
      * Gets the size of an iterable; Used for getting number of items under a batch.

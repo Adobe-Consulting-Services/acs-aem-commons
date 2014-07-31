@@ -37,6 +37,8 @@ public interface BulkWorkflowEngine {
 
     int DEFAULT_BATCH_SIZE = 10;
 
+    int DEFAULT_BATCH_TIMEOUT = 20;
+
     boolean DEFAULT_PURGE_WORKFLOW = true;
 
     String NN_BATCHES = "batches";
@@ -48,6 +50,12 @@ public interface BulkWorkflowEngine {
     String KEY_COMPLETE_COUNT = "complete";
 
     String KEY_ESTIMATED_TOTAL = "estimatedTotal";
+
+    String KEY_BATCH_TIMEOUT_COUNT = "batchTimeoutCount";
+
+    String KEY_FORCE_TERMINATED_COUNT = "forceTerminatedCount";
+
+    String KEY_BATCH_TIMEOUT = "batchTimeout";
 
     String KEY_INITIALIZED = "initialized";
 
@@ -87,7 +95,12 @@ public interface BulkWorkflowEngine {
 
     String STATE_STOPPED = "stopped";
 
+    String STATE_FORCE_TERMINATED = "force terminated";
+
     String STATE_STOPPED_DEACTIVATED = "stopped-deactivated";
+
+    String STATE_STOPPED_ERROR = "stopped-error";
+
 
 
     /**

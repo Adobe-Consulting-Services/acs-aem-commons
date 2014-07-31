@@ -159,6 +159,9 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
         map.put(BulkWorkflowEngine.KEY_INTERVAL,
                 params.optInt(BulkWorkflowEngine.KEY_INTERVAL, BulkWorkflowEngine.DEFAULT_INTERVAL));
 
+        map.put(BulkWorkflowEngine.KEY_BATCH_TIMEOUT,
+                params.optInt(BulkWorkflowEngine.KEY_BATCH_TIMEOUT, BulkWorkflowEngine.DEFAULT_BATCH_TIMEOUT));
+
         map.put(BulkWorkflowEngine.KEY_ESTIMATED_TOTAL,
                 params.optLong(BulkWorkflowEngine.KEY_ESTIMATED_TOTAL, BulkWorkflowEngine.DEFAULT_ESTIMATED_TOTAL));
 
@@ -218,11 +221,17 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
         json.put(BulkWorkflowEngine.KEY_INTERVAL,
                 properties.get(BulkWorkflowEngine.KEY_INTERVAL, BulkWorkflowEngine.DEFAULT_INTERVAL));
 
+        json.put(BulkWorkflowEngine.KEY_BATCH_TIMEOUT,
+                properties.get(BulkWorkflowEngine.KEY_BATCH_TIMEOUT, BulkWorkflowEngine.DEFAULT_BATCH_TIMEOUT));
+
         // Counts
         json.put(BulkWorkflowEngine.KEY_TOTAL, total);
         json.put(BulkWorkflowEngine.KEY_COMPLETE_COUNT, complete);
         json.put("remaining", total - complete);
         json.put("percentComplete", Math.round((complete / (total * 1F)) * DECIMAL_TO_PERCENT));
+
+        json.put(BulkWorkflowEngine.KEY_FORCE_TERMINATED_COUNT,
+                properties.get(BulkWorkflowEngine.KEY_FORCE_TERMINATED_COUNT, 0));
 
         // Times
         json.put(BulkWorkflowEngine.KEY_STARTED_AT,
@@ -235,6 +244,8 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
                 properties.get(BulkWorkflowEngine.KEY_COMPLETED_AT, Date.class));
 
         final Resource currentBatch = bulkWorkflowEngine.getCurrentBatch(request.getResource());
+        final ValueMap currentBatchProperties = currentBatch.adaptTo(ValueMap.class);
+
         if (currentBatch != null) {
             json.put(BulkWorkflowEngine.KEY_CURRENT_BATCH, currentBatch.getPath());
 
@@ -242,6 +253,9 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
                 json.accumulate("currentBatchItems", new JSONObject(child.adaptTo(ValueMap.class)));
             }
         }
+
+        json.put(BulkWorkflowEngine.KEY_BATCH_TIMEOUT_COUNT, currentBatchProperties.get(BulkWorkflowEngine
+                .KEY_BATCH_TIMEOUT_COUNT, 1));
 
         return json;
     }

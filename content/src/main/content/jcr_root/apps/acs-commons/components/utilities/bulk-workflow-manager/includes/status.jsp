@@ -32,6 +32,8 @@
                     <li>Complete: {{ data.status.complete }}</li>
                     <li>Remaining: {{ data.status.remaining }}</li>
                     <li>Current Batch: {{ data.status.currentBatch }}</li>
+                    <li>Current Batch Timeout: {{ data.status.batchTimeoutCount }}
+                            of {{ data.status.batchTimeout }}</li>
 
                     <li ng-show="data.status.startedAt">Started At: {{ data.status.startedAt }}</li>
                     <li ng-show="data.status.stoppedAt && !data.status.completedAt">Stopped At: {{ data.status.stoppedAt }}</li>
@@ -42,6 +44,7 @@
             <div class="right">
                 <ul>
                     <li>Batch Size: {{ data.status.batchSize }}</li>
+                    <li>Batch Timeout : {{ data.status.batchTimeout }}</li>
                     <li>Batch Interval: {{ data.status.interval }} seconds</li>
                     <li>Workflow Model: {{ data.status.workflowModel }}</li>
                     <li>Purge Workflow: {{ data.status.purgeWorkflow }}</li>
