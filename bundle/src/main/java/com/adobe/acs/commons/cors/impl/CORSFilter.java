@@ -44,44 +44,44 @@ import java.util.Set;
 })
 public class CORSFilter implements Filter {
 
-    @Property(name = CORSFilter.HOST_NAME, label = "host name",
-            description = "Host name")
+    @Property(label = "host name",
+            description = "Host name", value = "localhost:4502")
     private static final String HOST_NAME = "host.name";
-    @Property(name = CORSFilter.ALLOW_ANY_ORIGIN, label = "Allow any origin?",
+    @Property(label = "Allow any origin?",
             description = "Allow any origin?", boolValue = false)
     private static final String ALLOW_ANY_ORIGIN = "allow.any.origin";
-    @Property(name = CORSFilter.ALLOW_ANY_REQ_METHOD, label = "Allow any request method?",
+    @Property(label = "Allow any request method?",
             description = "Allow any request method?", boolValue = false)
     private static final String ALLOW_ANY_REQ_METHOD = "allow.any.req.method";
-    @Property(name = CORSFilter.ALLOW_ANY_REQ_HEADERS, label = "Allow any request headers?",
+    @Property(label = "Allow any request headers?",
             description = "Allow any request headers?", boolValue = false)
     private static final String ALLOW_ANY_REQ_HEADERS = "allow.any.req.headers";
-    @Property(name = CORSFilter.EXPOSE_ANY_REQ_HEADERS, label = "expose any request headers?",
+    @Property(label = "expose any request headers?",
             description = "expose any request headers?", boolValue = false)
     private static final String EXPOSE_ANY_REQ_HEADERS = "expose.any.req.headers";
-    @Property(name = CORSFilter.ALLOW_CREDENTIALS, label = "Allow credentials?",
+    @Property(label = "Allow credentials?",
             description = "Allow credentials?", boolValue = true)
     private static final String ALLOW_CREDENTIALS = "allow.credentials";
-    @Property(name = CORSFilter.ALLOW_SUBDOMAINS, label = "Allow any subdomain origin?",
+    @Property(label = "Allow any subdomain origin?",
             description = "Allow any subdomain origin?", boolValue = false)
     private static final String ALLOW_SUBDOMAINS = "allow.any.subdomain.origin";
-    @Property(name = CORSFilter.ALLOWED_REQUEST_METHODS, label = "Allowed request methods in Uppercase",
+    @Property(label = "Allowed request methods in Uppercase",
             description = "Allowed request methods", cardinality = 100)
     private static final String ALLOWED_REQUEST_METHODS = "allowed.request.methods";
-    @Property(name = CORSFilter.ALLOWED_REQUEST_HEADERS, label = "Allowed request headers",
-            description = "Allowed request headers", cardinality = 100)
+    @Property(label = "Allowed request headers",
+            description = "Allowed request headers", cardinality = 100, value = {"GET", "OPTIONS", "POST"})
     private static final String ALLOWED_REQUEST_HEADERS = "allowed.request.headers";
-    @Property(name = CORSFilter.ALLOWED_EXPOSE_REQUEST_HEADERS, label = "Allowed exposable request methods comma " +
-            "separated",
-            description = "Allowed exposable request headers")
+    @Property(label = "Allowed exposable request methods (comma " +
+            "separated)",
+            description = "Allowed exposable request headers", value = "Authorization")
     private static final String ALLOWED_EXPOSE_REQUEST_HEADERS = "allowed.expose.request.headers";
-    @Property(name = CORSFilter.ALLOWED_ORIGINS,
+    @Property(
             label = "allowed origins",
             description = "allowed origins for the given host",
-            cardinality = 100)
+            cardinality = 100, value = {"http://localhost"})
     private static final String ALLOWED_ORIGINS = "allowed.origins";
-    @Property(name = CORSFilter.MAX_AGE, label = "Max age",
-            description = "Max age")
+    @Property(label = "Max age (in seconds)",
+            description = "Max age", intValue = 10)
     private static final String MAX_AGE = "cors.maxage";
 
     private String host = "";
