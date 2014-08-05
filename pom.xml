@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.7.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -102,7 +102,7 @@
                     <configuration>
                         <linkXRef>false</linkXRef>
                         <rulesets>
-                            <ruleset>https://raw.github.com/Adobe-Consulting-Services/coding-standards/master/pmd/rules.xml</ruleset>
+                            <ruleset>acs/pmd/rules.xml</ruleset>
                         </rulesets>
                         <targetJdk>1.6</targetJdk>
                     </configuration>
@@ -111,6 +111,11 @@
                             <groupId>org.slf4j</groupId>
                             <artifactId>slf4j-api</artifactId>
                             <version>1.6.4</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.adobe.acs</groupId>
+                            <artifactId>coding-standards</artifactId>
+                            <version>0.0.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -125,7 +130,7 @@
                     <version>2.12.1</version>
                     <configuration>
                         <linkXRef>false</linkXRef>
-                        <configLocation>https://raw.github.com/Adobe-Consulting-Services/coding-standards/master/checkstyle/checks.xml</configLocation>
+                        <configLocation>acs/checkstyle/checks.xml</configLocation>
                         <includeResources>false</includeResources>
                         <includeTestResources>false</includeTestResources>
                     </configuration>
@@ -135,11 +140,21 @@
                             <artifactId>checkstyle-osgi-checks</artifactId>
                             <version>0.0.3</version>
                         </dependency>
+                        <dependency>
+                            <groupId>com.adobe.acs</groupId>
+                            <artifactId>coding-standards</artifactId>
+                            <version>0.0.1</version>
+                        </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.9</version>
+                    <configuration>
+                        <excludePackageNames>
+                            *.impl
+                        </excludePackageNames>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
