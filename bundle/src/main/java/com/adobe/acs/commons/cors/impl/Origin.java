@@ -17,8 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.cors;
+package com.adobe.acs.commons.cors.impl;
 
+
+import org.apache.commons.lang.StringUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,8 +31,10 @@ public class Origin {
     private int port;
     private String scheme;
 
-    public Origin(String origin) {
-
+    public Origin(String origin) throws URISyntaxException {
+        if (StringUtils.isEmpty(origin)) {
+            throw new URISyntaxException("origin is empty", "Origin is empty");
+        }
         if (!origin.startsWith("http")) {
             origin = "http://" + origin;
         }
@@ -41,7 +45,7 @@ public class Origin {
             this.port = uri.getPort();
             this.scheme = uri.getScheme();
         } catch (URISyntaxException e) {
-
+            throw e;
         }
     }
 
@@ -58,7 +62,7 @@ public class Origin {
     }
 
     public int getPort() {
-        return this.port;
+        return this.getPort();
     }
 
     @Override

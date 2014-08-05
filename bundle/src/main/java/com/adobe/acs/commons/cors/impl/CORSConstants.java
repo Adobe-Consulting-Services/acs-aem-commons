@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.cors;
+package com.adobe.acs.commons.cors.impl;
 
 public class CORSConstants {
 

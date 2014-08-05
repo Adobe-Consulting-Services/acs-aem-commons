@@ -17,8 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.cors;
+package com.adobe.acs.commons.cors.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.Constants;
@@ -27,6 +28,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -104,20 +106,24 @@ public class CORSFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
             ServletException {
         HttpServletRequest httpServletRequest =
-                (HttpServletRequest) request;
+                httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-
+        if (isCurrentHost(httpServletRequest)) {
         if (isPreFlightRequest(httpServletRequest)) {
-            if (isCurrentHost(httpServletRequest)) {
-                isOriginAllowed(httpServletRequest, httpServletResponse);
-                isRequestMethodAllowed(httpServletRequest, httpServletResponse);
-                allowCredentials(httpServletResponse);
-                addMaxAge(httpServletResponse);
-                isRequestHeadersAllowed(httpServletRequest, httpServletResponse);
-                exposeAnyReqHeaders(httpServletResponse);
+            isRequestMethodAllowed(httpServletRequest.getMethod(), httpServletResponse);
+            isOriginAllowed(httpServletRequest, httpServletResponse);
+            allowCredentials(httpServletRequest, httpServletResponse);
+            exposeAnyReqHeaders(httpServletRequest, httpServletResponse);
+            chain.doFilter(request, response);
+
             } else {
-                chain.doFilter(request, response);
-            }
+            isOriginAllowed(httpServletRequest, httpServletResponse);
+            isRequestMethodAllowed(httpServletRequest, httpServletResponse);
+            allowCredentials(httpServletRequest, httpServletResponse);
+            addMaxAge(httpServletRequest, httpServletResponse);
+            isRequestHeadersAllowed(httpServletRequest, httpServletResponse);
+
+        }
         } else {
             chain.doFilter(request, response);
         }
@@ -128,32 +134,31 @@ public class CORSFilter implements Filter {
 
     }
 
-    private void exposeAnyReqHeaders(HttpServletResponse response) {
+    private void exposeAnyReqHeaders(HttpServletRequest request, HttpServletResponse response) {
         if (this.exposeAnyRequestHeaders) {
-            response.addHeader(CORSConstants.ACCESS_CONTROL_EXPOSE_HEADERS, "*");
+            response.addHeader("Access-Control-Expose-Headers", "*");
         } else if (!this.allowedExposeRequestHeaders.isEmpty()) {
-            response.addHeader(CORSConstants.ACCESS_CONTROL_EXPOSE_HEADERS, this.allowedExposeRequestHeaders);
+            response.addHeader("Access-Control-Expose-Headers", this.allowedExposeRequestHeaders);
         }
 
     }
 
-    private void addMaxAge(HttpServletResponse response) {
+    private void addMaxAge(HttpServletRequest request, HttpServletResponse response) {
         if (this.maxAge > 0) {
-            response.addHeader(CORSConstants.ACCESS_CONTROL_MAX_AGE, Long.toString(this.maxAge));
+            response.addHeader("Access-Control-Max-Age", Long.toString(this.maxAge));
         }
 
     }
 
-    private void allowCredentials(HttpServletResponse response) {
+    private void allowCredentials(HttpServletRequest request, HttpServletResponse response) {
         if (this.allowCredentials) {
-            response.addHeader(CORSConstants.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            response.addHeader("Access-Control-Allow-Credentials", "true");
         }
 
     }
 
     private void isRequestHeadersAllowed(HttpServletRequest request, HttpServletResponse response) {
-        String rawRequestHeaderString = PropertiesUtil.toString(request.getHeader(CORSConstants
-                .ACCESS_CONTROL_REQUEST_HEADERS), "");
+        String rawRequestHeaderString = request.getHeader("Access-Control-Request-Headers");
         String[] requestHeaders = CORSUtil.getHeadersAsArray(rawRequestHeaderString);
         if (requestHeaders == null || requestHeaders.length == 0) {
             return;
@@ -165,28 +170,46 @@ public class CORSFilter implements Filter {
                 }
             }
         }
-        response.addHeader(CORSConstants.ACCESS_CONTROL_ALLOW_HEADERS, rawRequestHeaderString);
+        response.addHeader("Access-Control-Allow-Headers", rawRequestHeaderString);
 
     }
 
     private void isRequestMethodAllowed(HttpServletRequest request, HttpServletResponse response) {
-        String requestMethod = PropertiesUtil.toString(request.getHeader(CORSConstants.ACCESS_CONTROL_REQUEST_METHOD)
-                , "").toUpperCase();
+        String requestMethod = PropertiesUtil.toString(request.getHeader("Access-Control-Request-Method"), "").toUpperCase();
         if (this.allowAnyReqMethods || allowedMethods.contains(requestMethod)) {
-            response.addHeader(CORSConstants.ACCESS_CONTROL_ALLOW_METHODS, requestMethod);
+            response.addHeader("Access-Control-Allow-Methods", requestMethod);
+        }
+    }
+
+    private void isRequestMethodAllowed(String requestMethod, HttpServletResponse response) {
+
+        if (this.allowAnyReqMethods || allowedMethods.contains(requestMethod)) {
+            response.addHeader("Access-Control-Allow-Methods", requestMethod);
         }
     }
 
     private void isOriginAllowed(HttpServletRequest request, HttpServletResponse response) {
-        String originStr = request.getHeader(CORSConstants.ORIGIN);
-        if (originStr == null || originStr.isEmpty()) {
+        String originStr = request.getHeader("Origin");
+        if (StringUtils.isEmpty(originStr)) {
             return;
         }
-        Origin origin = new Origin(originStr);
-        if (this.allowAnyOrigin || allowedOrigins.contains(origin) || (allowSubdomainOrigin && isSubdomainAllowed
-                (origin))) {
-            response.addHeader(CORSConstants.ACCESS_CONTROL_ALLOW_ORIGIN, origin.getOriginStr());
-            response.addHeader(CORSConstants.VARY, CORSConstants.ORIGIN);
+        Origin origin = null;
+        try {
+            origin = new Origin(originStr);
+        } catch (URISyntaxException e) {
+            return;
+        }
+        if (this.allowAnyOrigin) {
+            response.addHeader("Access-Control-Allow-Origin", origin.getOriginStr());
+            response.addHeader("Vary", "Origin");
+        } else if (allowedOrigins.contains(origin)) {
+            response.addHeader("Access-Control-Allow-Origin", origin.getOriginStr());
+            response.addHeader("Vary", "Origin");
+        } else if (allowSubdomainOrigin) {
+            if (isSubdomainAllowed(origin)) {
+                response.addHeader("Access-Control-Allow-Origin", origin.getOriginStr());
+                response.addHeader("Vary", "Origin");
+            }
         }
 
     }
@@ -205,7 +228,7 @@ public class CORSFilter implements Filter {
 
     private boolean isPreFlightRequest(HttpServletRequest request) {
         String method = request.getMethod();
-        if (CORSConstants.PREFLIGHT.equals(method)) {
+        if ("OPTIONS".equals(method)) {
             return true;
         }
 
@@ -213,7 +236,7 @@ public class CORSFilter implements Filter {
     }
 
     private boolean isCurrentHost(HttpServletRequest request) {
-        String currHost = request.getHeader(CORSConstants.HOST);
+        String currHost = request.getHeader("Host");
         if (host.equals(currHost)) {
             return true;
         }
@@ -234,8 +257,7 @@ public class CORSFilter implements Filter {
         this.allowedOrigins = getAllowedOriginsAsSet(allowedOrigins);
         String[] allowedMethods = PropertiesUtil.toStringArray(properties.get(ALLOWED_REQUEST_METHODS), new String[0]);
         this.allowedMethods = new HashSet<String>(Arrays.asList(allowedMethods));
-        String[] allowedRequestHeaders = PropertiesUtil.toStringArray(properties.get(ALLOWED_REQUEST_HEADERS),
-                new String[0]);
+        String[] allowedRequestHeaders = PropertiesUtil.toStringArray(properties.get(ALLOWED_REQUEST_HEADERS), new String[0]);
         this.allowedRequestHeaders = new HashSet<String>(Arrays.asList(allowedRequestHeaders));
         this.maxAge = PropertiesUtil.toLong(properties.get(MAX_AGE), -1);
         this.allowedExposeRequestHeaders = PropertiesUtil.toString(properties.get(ALLOWED_EXPOSE_REQUEST_HEADERS), "");
@@ -244,8 +266,14 @@ public class CORSFilter implements Filter {
     private Set<Origin> getAllowedOriginsAsSet(String[] allowedOrigins) {
         Set<Origin> originSet = new HashSet<Origin>();
         for (String originStr : allowedOrigins) {
-            Origin origin = new Origin(originStr);
-            originSet.add(origin);
+            Origin origin = null;
+            try {
+                origin = new Origin(originStr);
+                originSet.add(origin);
+            } catch (URISyntaxException e) {
+
+            }
+
         }
         return originSet;
     }
