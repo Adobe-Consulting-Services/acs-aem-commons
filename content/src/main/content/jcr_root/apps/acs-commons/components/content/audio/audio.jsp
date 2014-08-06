@@ -35,7 +35,7 @@
             <c:when test="${fn:length(renditions) == fn:length(profiles)}">
 <audio id="${id}"${attributes}>
     <c:forEach var="entry" items="${renditions}">
-        <source src="${audio:getHtmlSource(entry.value, entry.key)}" type="${entry.key.htmlType}"/>
+        <source src="${request.contextPath}${audio:getHtmlSource(entry.value, entry.key)}" type="${entry.key.htmlType}"/>
     </c:forEach>
         <cq:include script="partials/fallback.jsp"/>
 </audio>
