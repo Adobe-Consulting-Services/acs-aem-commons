@@ -98,7 +98,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-pmd-plugin</artifactId>
-                    <version>3.1</version>
+                    <version>3.2</version>
                     <configuration>
                         <linkXRef>false</linkXRef>
                         <rulesets>
@@ -107,11 +107,6 @@
                         <targetJdk>1.6</targetJdk>
                     </configuration>
                     <dependencies>
-                        <dependency>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-api</artifactId>
-                            <version>1.6.4</version>
-                        </dependency>
                         <dependency>
                             <groupId>com.adobe.acs</groupId>
                             <artifactId>coding-standards</artifactId>
