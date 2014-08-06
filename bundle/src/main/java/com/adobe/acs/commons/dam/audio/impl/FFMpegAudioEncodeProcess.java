@@ -105,7 +105,10 @@ public final class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
                 }
             }
         }
-        log.info("finished processing asset [{}] in [{}ms].", asset.getPath(), System.currentTimeMillis() - start);
+        if (log.isInfoEnabled()) {
+            final long time = System.currentTimeMillis() - start;
+            log.info("finished processing asset [{}] in [{}ms].", asset.getPath(), time);
+        }
     }
 
     public String[] getVideoProfiles(MetaDataMap metaData) {
