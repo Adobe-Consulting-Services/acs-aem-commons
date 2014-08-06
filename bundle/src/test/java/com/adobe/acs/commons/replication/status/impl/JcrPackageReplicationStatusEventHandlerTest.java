@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JcrPackageReplicationStatusEventHandlerImplTest {
+public class JcrPackageReplicationStatusEventHandlerTest {
 
     @Mock
     ReplicationStatusManager replicationStatusManager;
@@ -49,8 +49,8 @@ public class JcrPackageReplicationStatusEventHandlerImplTest {
     ResourceResolver adminResourceResolver;
 
     @InjectMocks
-    JcrPackageReplicationStatusEventHandlerImpl jcrPackageReplicationStatusEventHandler = new
-            JcrPackageReplicationStatusEventHandlerImpl();
+    JcrPackageReplicationStatusEventHandler jcrPackageReplicationStatusEventHandler = new
+            JcrPackageReplicationStatusEventHandler();
 
     @Before
     public void setUp() throws Exception {

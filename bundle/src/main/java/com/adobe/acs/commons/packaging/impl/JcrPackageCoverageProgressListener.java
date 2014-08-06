@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.packaging;
+package com.adobe.acs.commons.packaging.impl;
 
 import com.day.jcr.vault.fs.api.ProgressTrackerListener;
 

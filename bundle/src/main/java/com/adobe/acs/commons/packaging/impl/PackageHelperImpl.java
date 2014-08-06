@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.packaging.impl;
 
-import com.adobe.acs.commons.packaging.JcrPackageCoverageProgressListener;
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.jcr.vault.fs.api.PathFilterSet;
@@ -62,7 +61,7 @@ import java.util.Set;
         description = "Helper utility for creating CRX Packages and using the ACS AEM Commons packager. "
 )
 @Service
-public class PackageHelperImpl implements PackageHelper {
+public final class PackageHelperImpl implements PackageHelper {
     private static final Logger log = LoggerFactory.getLogger(ACLPackagerServletImpl.class);
 
     private static final String NN_THUMBNAIL = "thumbnail.png";
@@ -79,7 +78,7 @@ public class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public final void addThumbnail(final JcrPackage jcrPackage, Resource thumbnailResource) {
+    public void addThumbnail(final JcrPackage jcrPackage, Resource thumbnailResource) {
         ResourceResolver resourceResolver = null;
 
         if (jcrPackage == null) {
@@ -119,7 +118,7 @@ public class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public final Version getNextVersion(final JcrPackageManager jcrPackageManager,
+    public Version getNextVersion(final JcrPackageManager jcrPackageManager,
                                         final String groupName, final String name,
                                         final String version) throws RepositoryException {
         final Node packageRoot = jcrPackageManager.getPackageRoot(false);
@@ -217,7 +216,7 @@ public class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public final void removePackage(final JcrPackageManager jcrPackageManager,
+    public void removePackage(final JcrPackageManager jcrPackageManager,
                                     final String groupName, final String name,
                                     final String version) throws RepositoryException {
         final PackageId packageId = new PackageId(groupName, name, version);
@@ -234,7 +233,7 @@ public class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public final JcrPackage createPackage(final Set<Resource> resources, final Session session,
+    public JcrPackage createPackage(final Set<Resource> resources, final Session session,
                                           final String groupName, final String name, String version,
                                           final ConflictResolution conflictResolution,
                                           final Map<String, String> packageDefinitionProperties)
@@ -270,16 +269,15 @@ public class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public final List<String> getContents(final JcrPackage jcrPackage) throws IOException, RepositoryException, PackageException {
+    public List<String> getContents(final JcrPackage jcrPackage) throws IOException, RepositoryException, PackageException {
 
+        JcrPackageCoverageProgressListener jcrPackageCoverageProgressListener = new JcrPackageCoverageProgressListener();
+        
         ImportOptions importOptions = new ImportOptions();
         importOptions.setDryRun(true);
-        importOptions.setListener(new JcrPackageCoverageProgressListener());
+        importOptions.setListener(jcrPackageCoverageProgressListener);
 
         jcrPackage.extract(importOptions);
-
-        JcrPackageCoverageProgressListener jcrPackageCoverageProgressListener =
-                (JcrPackageCoverageProgressListener) importOptions.getListener();
 
         return jcrPackageCoverageProgressListener.getCoverage();
     }
@@ -287,7 +285,7 @@ public class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public final String getSuccessJSON(final JcrPackage jcrPackage) throws JSONException, RepositoryException {
+    public String getSuccessJSON(final JcrPackage jcrPackage) throws JSONException, RepositoryException {
         final JSONObject json = new JSONObject();
 
         json.put("status", "success");
@@ -309,7 +307,7 @@ public class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public final String getPreviewJSON(final Set<Resource> resources) throws JSONException {
+    public String getPreviewJSON(final Set<Resource> resources) throws JSONException {
         final JSONObject json = new JSONObject();
 
         json.put("status", "preview");
@@ -331,7 +329,7 @@ public class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public final String getErrorJSON(final String msg) {
+    public String getErrorJSON(final String msg) {
         final JSONObject json = new JSONObject();
         try {
             json.put("status", "error");

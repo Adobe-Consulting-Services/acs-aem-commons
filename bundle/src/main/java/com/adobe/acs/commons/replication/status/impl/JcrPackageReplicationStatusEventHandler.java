@@ -87,7 +87,7 @@ import java.util.Map;
         )
 })
 @Service
-public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor, EventHandler, ClusterAware {
+public class JcrPackageReplicationStatusEventHandler implements JobProcessor, EventHandler, ClusterAware {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 
     private enum ReplicatedAt {
@@ -202,8 +202,7 @@ public class JcrPackageReplicationStatusEventHandlerImpl implements JobProcessor
 
                     log.info("Updated Replication Status for JCR Package: {}", jcrPackage.getDefinition().getId());
                 } else {
-                    log.info("Could not find any resources in JCR Package [ {} ] that are candidates to have their "
-                                    + "Replication Status updated",
+                    log.info("Could not find any resources in JCR Package [ {} ] that are candidates to have their Replication Status updated",
                             jcrPackage.getDefinition().getId());
                 }
             } catch (RepositoryException e) {

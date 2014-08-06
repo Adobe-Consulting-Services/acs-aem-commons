@@ -145,10 +145,9 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
      * @throws RepositoryException
      */
     private void addReplicationStatusMixin(final Node node) throws RepositoryException {
-        if (!this.hasMixin(node, ReplicationStatus.NODE_TYPE)) {
-            if (node.canAddMixin(ReplicationStatus.NODE_TYPE)) {
-                node.addMixin(ReplicationStatus.NODE_TYPE);
-            }
+        if (!this.hasMixin(node, ReplicationStatus.NODE_TYPE) &&
+                node.canAddMixin(ReplicationStatus.NODE_TYPE)) {
+            node.addMixin(ReplicationStatus.NODE_TYPE);
         }
     }
 
