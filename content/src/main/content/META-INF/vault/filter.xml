@@ -6,6 +6,7 @@
         <exclude pattern="/apps/acs-commons/widgets/source/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/page/clientlibs/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/oak-index-manager/clientlibs/css/generated"/>
+        <exclude pattern="/apps/acs-commons/components/utilities/bulk-workflow-manager/clientlibs/css/generated"/>
     </filter>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
@@ -22,6 +23,8 @@
     </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/oak-index-manager(.*)?" />
+        <include pattern="/etc/acs-commons/bulk-workflow-manager(.*)?" />
+        <exclude pattern="/etc/acs-commons/bulk-workflow-manager/jcr:content/batches/.*" />
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?" />
         <include pattern="/etc/acs-commons/version-replicator(.*)?" />
         <include pattern="/etc/acs-commons/dispatcher-flush"/>
