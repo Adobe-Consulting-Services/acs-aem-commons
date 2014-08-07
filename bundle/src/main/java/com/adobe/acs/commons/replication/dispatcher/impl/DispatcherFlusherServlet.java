@@ -108,7 +108,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
                 suffix = StringUtils.join(overallResults, '/');
             }
 
-            response.sendRedirect(currentPage.getPath() + ".html/" + suffix);
+            response.sendRedirect(request.getContextPath() + currentPage.getPath() + ".html/" + suffix);
         }
     }
 
