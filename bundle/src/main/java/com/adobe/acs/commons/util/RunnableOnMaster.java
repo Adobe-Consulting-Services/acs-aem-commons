@@ -26,7 +26,7 @@ import com.day.cq.jcrclustersupport.ClusterAware;
  */
 public abstract class RunnableOnMaster implements ClusterAware, Runnable {
 
-    private boolean isMaster;
+    private volatile boolean isMaster;
 
     /**
      * Run the scheduled job.

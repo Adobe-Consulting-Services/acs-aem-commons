@@ -25,6 +25,7 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.model.WorkflowModel;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -32,6 +33,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -43,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -244,7 +247,7 @@ public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
                 properties.get(BulkWorkflowEngine.KEY_COMPLETED_AT, Date.class));
 
         final Resource currentBatch = bulkWorkflowEngine.getCurrentBatch(request.getResource());
-        final ValueMap currentBatchProperties = currentBatch.adaptTo(ValueMap.class);
+        final ValueMap currentBatchProperties = ResourceUtil.getValueMap(currentBatch);
 
         if (currentBatch != null) {
             json.put(BulkWorkflowEngine.KEY_CURRENT_BATCH, currentBatch.getPath());

@@ -18,9 +18,9 @@
  * #L%
  */
 
-package com.adobe.acs.commons.images.imagetransformers.impl;
+package com.adobe.acs.commons.images.transformers.impl;
 
-import com.adobe.acs.commons.images.transformers.impl.AdjustImageTransformerImpl;
+import com.adobe.acs.commons.images.transformers.impl.GreyscaleImageTransformerImpl;
 import com.day.image.Layer;
 
 import org.apache.sling.api.resource.ValueMap;
@@ -42,9 +42,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AdjustImageTransformerImplTest {
+public class GreyscaleImageTransformerImplTest {
 
-    AdjustImageTransformerImpl transformer;
+    GreyscaleImageTransformerImpl transformer;
 
     @Mock
     Layer layer;
@@ -54,63 +54,40 @@ public class AdjustImageTransformerImplTest {
     @Before
     public void setUp() throws Exception {
         map = new HashMap<String, Object>();
-        transformer = new AdjustImageTransformerImpl();
+        transformer = new GreyscaleImageTransformerImpl();
     }
 
     @After
     public void tearDown() throws Exception {
-        reset(layer);
         map = null;
+        reset(layer);
     }
 
     @Test
     public void testTransform() throws Exception {
-        final int brightness = 100;
-        final float contrast = 0.05F;
-
-        map.put("brightness", brightness);
-        map.put("contrast", contrast);
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).adjust(brightness, contrast);
+        verify(layer, times(1)).grayscale();
         verifyNoMoreInteractions(layer);
     }
 
     @Test
-    public void testTransform_noParams() throws Exception {
+    public void testTransform_emptyParams() throws Exception {
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
+        verify(layer, times(1)).grayscale();
         verifyZeroInteractions(layer);
     }
 
     @Test
-    public void testTransform_onlyBrightness() throws Exception {
-        final int brightness = 100;
+    public void testTransform_nullParams() throws Exception {
+        transformer.transform(layer, null);
 
-        map.put("brightness", brightness);
-        ValueMap properties = new ValueMapDecorator(map);
-
-        transformer.transform(layer, properties);
-
-        verify(layer, times(1)).adjust(brightness, 1F);
-        verifyNoMoreInteractions(layer);
-    }
-
-    @Test
-    public void testTransform_onlyContrast() throws Exception {
-        final float contrast = 0.05F;
-
-        map.put("contrast", contrast);
-        ValueMap properties = new ValueMapDecorator(map);
-
-        transformer.transform(layer, properties);
-
-        verify(layer, times(1)).adjust(0, contrast);
-        verifyNoMoreInteractions(layer);
+        verify(layer, times(1)).grayscale();
+        verifyZeroInteractions(layer);
     }
 }
-

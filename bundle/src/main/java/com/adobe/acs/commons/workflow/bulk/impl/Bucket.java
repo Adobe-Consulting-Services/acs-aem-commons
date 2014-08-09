@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk;
+package com.adobe.acs.commons.workflow.bulk.impl;
 
 import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.sling.api.resource.ResourceResolver;

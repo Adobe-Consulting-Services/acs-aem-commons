@@ -18,9 +18,9 @@
  * #L%
  */
 
-package com.adobe.acs.commons.images.imagetransformers.impl;
+package com.adobe.acs.commons.images.transformers.impl;
 
-import com.adobe.acs.commons.images.transformers.impl.RotateImageTransformerImpl;
+import com.adobe.acs.commons.images.transformers.impl.AdjustImageTransformerImpl;
 import com.day.image.Layer;
 
 import org.apache.sling.api.resource.ValueMap;
@@ -42,9 +42,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RotateImageTransformerImplTest {
+public class AdjustImageTransformerImplTest {
 
-    RotateImageTransformerImpl transformer;
+    AdjustImageTransformerImpl transformer;
 
     @Mock
     Layer layer;
@@ -54,57 +54,32 @@ public class RotateImageTransformerImplTest {
     @Before
     public void setUp() throws Exception {
         map = new HashMap<String, Object>();
-        transformer = new RotateImageTransformerImpl();
+        transformer = new AdjustImageTransformerImpl();
     }
 
     @After
     public void tearDown() throws Exception {
-        map = null;
         reset(layer);
+        map = null;
     }
 
     @Test
     public void testTransform() throws Exception {
-        final int degrees = 50;
+        final Integer brightness = 100;
+        final Float contrast = 0.05F;
 
-        map.put("degrees", degrees);
+        map.put("brightness", brightness.toString());
+        map.put("contrast", contrast.toString());
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).rotate(degrees);
+        verify(layer, times(1)).adjust(brightness, contrast);
         verifyNoMoreInteractions(layer);
     }
 
     @Test
-    public void testTransform_mod() throws Exception {
-        final int degrees = 5;
-
-        map.put("degrees", 360 + degrees);
-        ValueMap properties = new ValueMapDecorator(map);
-
-        transformer.transform(layer, properties);
-
-        verify(layer, times(1)).rotate(degrees);
-        verifyNoMoreInteractions(layer);
-    }
-
-
-    @Test
-    public void testTransform_neg() throws Exception {
-        final int degrees = -15;
-
-        map.put("degrees", -360 + degrees);
-        ValueMap properties = new ValueMapDecorator(map);
-
-        transformer.transform(layer, properties);
-
-        verify(layer, times(1)).rotate(degrees);
-        verifyNoMoreInteractions(layer);
-    }
-
-    @Test
-    public void testTransform_emptyParams() throws Exception {
+    public void testTransform_noParams() throws Exception {
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
@@ -113,9 +88,29 @@ public class RotateImageTransformerImplTest {
     }
 
     @Test
-    public void testTransform_nullParams() throws Exception {
-        transformer.transform(layer, null);
+    public void testTransform_onlyBrightness() throws Exception {
+        final Integer brightness = 100;
 
-        verifyZeroInteractions(layer);
+        map.put("brightness", brightness.toString());
+        ValueMap properties = new ValueMapDecorator(map);
+
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).adjust(brightness, 1F);
+        verifyNoMoreInteractions(layer);
+    }
+
+    @Test
+    public void testTransform_onlyContrast() throws Exception {
+        final Float contrast = 0.05F;
+
+        map.put("contrast", contrast.toString());
+        ValueMap properties = new ValueMapDecorator(map);
+
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).adjust(0, contrast);
+        verifyNoMoreInteractions(layer);
     }
 }
+

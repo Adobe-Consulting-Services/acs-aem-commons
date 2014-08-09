@@ -3,13 +3,12 @@
     jcr:description="Utility page for managing the bulk application of Workflow to content."
     jcr:primaryType="cq:Template"
     jcr:title="Bulk Workflow Manager"
-    allowedPaths="[/etc/acs-commons(/.*)?]"
+    allowedPaths="[/etc/acs-commons/bulk-workflow-manager(/.*)?]"
     ranking="{Long}120">
     <jcr:content
         cq:designPath="/etc/designs/acs-commons"
         jcr:primaryType="cq:PageContent"
         sling:resourceType="acs-commons/components/utilities/bulk-workflow-manager">
-        <batches
-                jcr:primaryType="sling:Folder"/>
+        <batches/>
     </jcr:content>
 </jcr:root>

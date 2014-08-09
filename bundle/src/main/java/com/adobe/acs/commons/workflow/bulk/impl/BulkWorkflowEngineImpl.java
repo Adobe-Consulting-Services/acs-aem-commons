@@ -21,7 +21,6 @@
 package com.adobe.acs.commons.workflow.bulk.impl;
 
 
-import com.adobe.acs.commons.workflow.bulk.Bucket;
 import com.adobe.acs.commons.workflow.bulk.BulkWorkflowEngine;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
@@ -30,6 +29,7 @@ import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.model.WorkflowModel;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -54,6 +54,7 @@ import javax.jcr.Session;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
