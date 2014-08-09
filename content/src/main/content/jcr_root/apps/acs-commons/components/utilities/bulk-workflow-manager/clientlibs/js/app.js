@@ -123,7 +123,7 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
     $scope.initForm = function() {
         $http({
             method: 'GET',
-            url: $scope.app.uri + '.form.json',
+            url: $scope.app.uri + '.init.json',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
         }).
             success(function(data, status, headers, config) {

@@ -28,6 +28,7 @@ import org.apache.sling.api.resource.ValueMap;
 import javax.jcr.RepositoryException;
 
 public interface BulkWorkflowEngine {
+    String SLING_RESOURCE_TYPE = "acs-commons/components/utilities/bulk-workflow-manager";
 
     String SLING_FOLDER = "sling:Folder";
 

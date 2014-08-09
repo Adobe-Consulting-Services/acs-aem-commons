@@ -50,7 +50,7 @@ import java.util.HashMap;
 @SlingServlet(
         label = "ACS AEM Commons - Bulk Workflow Manager Servlet",
         methods = { "POST", "GET" },
-        resourceTypes = { BulkWorkflowManagerServlet.SLING_RESOURCE_TYPE },
+        resourceTypes = { "dev/null" },
         selectors = { "start", "stop", "resume", "status", "form" },
         extensions = { "json" }
 )
