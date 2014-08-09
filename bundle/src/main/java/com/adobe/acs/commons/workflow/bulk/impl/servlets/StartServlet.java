@@ -52,12 +52,12 @@ public class StartServlet extends SlingAllMethodsServlet {
     @Reference
     private BulkWorkflowEngine bulkWorkflowEngine;
 
-
     @Override
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
         try {
             final JSONObject params = new JSONObject(request.getParameter("params"));
@@ -85,7 +85,8 @@ public class StartServlet extends SlingAllMethodsServlet {
                     params.optLong(BulkWorkflowEngine.KEY_ESTIMATED_TOTAL, BulkWorkflowEngine.DEFAULT_ESTIMATED_TOTAL));
 
             map.put(BulkWorkflowEngine.KEY_PURGE_WORKFLOW,
-                    params.optBoolean(BulkWorkflowEngine.KEY_PURGE_WORKFLOW, BulkWorkflowEngine.DEFAULT_PURGE_WORKFLOW));
+                    params.optBoolean(BulkWorkflowEngine.KEY_PURGE_WORKFLOW,
+                            BulkWorkflowEngine.DEFAULT_PURGE_WORKFLOW));
 
             bulkWorkflowEngine.initialize(request.getResource(), map);
             bulkWorkflowEngine.start(request.getResource());
@@ -94,20 +95,31 @@ public class StartServlet extends SlingAllMethodsServlet {
 
         } catch (JSONException e) {
             log.error("Could not parse HTTP Request params: {}", e.getMessage());
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Could not parse HTTP Request params: " +  e.getMessage());
+
+            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not initialize Bulk Workflow due to invalid parameters."
+                            + " Please review the form and try again.",
+                    e.getMessage());
         } catch (RepositoryException e) {
             log.error("Could not initialize Bulk Workflow: {}", e.getMessage());
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Could not initialize Bulk Workflow: " + e.getMessage());
+
+            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not initialize Bulk Workflow.",
+                    e.getMessage());
+
         } catch (IllegalArgumentException e) {
             log.warn("Could not initialize Bulk Workflow due to invalid arguments: {}", e.getMessage());
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "!!!" + e.getMessage());
+
+            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not initialize Bulk Workflow due to invalid arguments.",
+                    e.getMessage());
+
         } catch (Exception e) {
             log.error("Could not initialize Bulk Workflow due to unexpected error: {}", e.getMessage());
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Error: " + e.getMessage());
+
+            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not start Bulk Workflow.",
+                    e.getMessage());
         }
     }
 }

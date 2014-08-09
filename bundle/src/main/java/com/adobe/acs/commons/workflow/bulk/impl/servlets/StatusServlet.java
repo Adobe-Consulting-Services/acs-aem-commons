@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.bulk.impl.servlets;
 
+import com.adobe.acs.commons.util.TextUtil;
 import com.adobe.acs.commons.workflow.bulk.BulkWorkflowEngine;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
@@ -57,6 +58,9 @@ public class StatusServlet extends SlingAllMethodsServlet {
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
         final ValueMap properties = request.getResource().adaptTo(ValueMap.class);
 
         final JSONObject json = new JSONObject();
@@ -73,7 +77,8 @@ public class StatusServlet extends SlingAllMethodsServlet {
                     properties.get(BulkWorkflowEngine.KEY_QUERY, ""));
 
             json.put(BulkWorkflowEngine.KEY_WORKFLOW_MODEL,
-                    StringUtils.removeEnd(properties.get(BulkWorkflowEngine.KEY_WORKFLOW_MODEL, ""), "/jcr:content/model"));
+                    StringUtils.removeEnd(properties.get(BulkWorkflowEngine.KEY_WORKFLOW_MODEL, ""),
+                            "/jcr:content/model"));
 
             json.put(BulkWorkflowEngine.KEY_BATCH_SIZE,
                     properties.get(BulkWorkflowEngine.KEY_BATCH_SIZE, BulkWorkflowEngine.DEFAULT_BATCH_SIZE));
@@ -126,10 +131,13 @@ public class StatusServlet extends SlingAllMethodsServlet {
             response.getWriter().write(json.toString());
 
         } catch (JSONException e) {
-            log.error("Error creating Bulk Workflow Manager status: {}", e.getMessage());
+            log.error("Could not collect Bulk Workflow status due to: {}", e.getMessage());
 
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Error collecting status: " + e.getMessage());
+            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not collect Bulk Workflow status.",
+                    TextUtil.getFirstNonEmpty(e.getMessage(), "Check to ensure the ACS AEM Commons bundle is "
+                            + "installed and active."));
+
         }
     }
 }

@@ -40,7 +40,15 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
 
     $scope.data = {};
 
-    $scope.start = function() {
+    $scope.start = function(isValid) {
+        if(!isValid) {
+            $scope.addNotification('error',
+                "Invalid form parameters",
+                "Form is incomplete or contains invalid parameters.");
+
+            return;
+        }
+
         $scope.results = {};
 
         $http({
@@ -53,10 +61,20 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
             $scope.data.status = data || {};
             $scope.status();
             $scope.form = {};
+
+            $scope.notifications.shift();
         }).
         error(function(data, status, headers, config) {
-            $scope.addNotification('error', 'ERROR', data);
+            $scope.addNotification('error',
+                data.title || "Error starting Bulk Workflow",
+                data.message);
+
+            $scope.notifications.shift();
         });
+
+        $scope.addNotification('notice',
+            "Starting...",
+            "Collecting payloads for processing. Depending on the query and number of payload items this may take some time. Please be patient.");
     };
 
     $scope.stop = function() {
@@ -71,7 +89,9 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
                 $timeout.cancel($scope.app.pollingPromise);
             }).
             error(function(data, status, headers, config) {
-                $scope.addNotification('error', 'ERROR', 'Error stopping the bulk workflow process.');
+                $scope.addNotification('error',
+                    data.title || 'Error stopping the bulk workflow process.',
+                    data.message);
             });
     };
 
@@ -88,7 +108,9 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
                 $scope.status();
             }).
             error(function(data, status, headers, config) {
-                $scope.addNotification('error', 'ERROR', 'Error resuming bulk workflow process.');
+                $scope.addNotification('error',
+                    data.title || 'Error resuming bulk workflow process.',
+                    data.message);
             });
     };
 
@@ -116,21 +138,24 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
             }).
             error(function(data, status, headers, config) {
                 $scope.app.polling = false;
-                $scope.addNotification('error', 'ERROR', 'Could not retrieve bulk workflow status.');
+                $scope.addNotification('error',
+                    'Could not retrieve bulk workflow status.', data.message);
             });
     };
 
     $scope.initForm = function() {
         $http({
             method: 'GET',
-            url: $scope.app.uri + '.init.json',
+            url: $scope.app.uri + '.init-form.json',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
         }).
             success(function(data, status, headers, config) {
                 $scope.formOptions = data || {};
             }).
             error(function(data, status, headers, config) {
-                $scope.addNotification('error', 'ERROR', 'Error retrieving form values from the server.');
+                $scope.addNotification('error',
+                    data.title || 'Error retrieving form values from the server.',
+                    data.message);
             });
     };
 
@@ -154,13 +179,13 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
     };
 
     $scope.addNotification = function (type, title, message) {
-        var timeout = 10000;
+        var timeout = 30000;
 
         if(type === 'success')  {
             timeout = timeout / 2;
         }
 
-        $scope.notifications.unshift({
+        $scope.notifications.push({
             type: type,
             title: title,
             message: message

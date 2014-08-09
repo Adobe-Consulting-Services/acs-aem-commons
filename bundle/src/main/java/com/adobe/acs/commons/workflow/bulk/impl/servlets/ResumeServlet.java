@@ -52,6 +52,7 @@ public class ResumeServlet extends SlingAllMethodsServlet {
             throws ServletException, IOException {
 
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
         final JSONObject params;
         try {
@@ -67,7 +68,11 @@ public class ResumeServlet extends SlingAllMethodsServlet {
 
             response.sendRedirect(request.getResourceResolver().map(request.getResource().getPath()) + ".status.json");
         } catch (JSONException e) {
-            e.printStackTrace();
+            log.error("Could not resume Bulk Workflow due to: {}", e.getMessage());
+
+            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not resume Bulk Workflow.",
+                    e.getMessage());
         }
     }
 }

@@ -44,7 +44,9 @@
             <div class="right">
                 <ul>
                     <li>Batch Size: {{ data.status.batchSize }}</li>
-                    <li>Batch Timeout : {{ data.status.batchTimeout }}</li>
+                    <li>Batch Timeout: {{ data.status.batchTimeout * data.status.interval }} seconds
+                        ( Multiplier: {{ data.status.batchTimeout }} )
+                    </li>
                     <li>Batch Interval: {{ data.status.interval }} seconds</li>
                     <li>Workflow Model: {{ data.status.workflowModel }}</li>
                     <li>Purge Workflow: {{ data.status.purgeWorkflow }}</li>
@@ -65,18 +67,19 @@
     </div>
 
     <div class="section button-controls-section">
+
         <button ng-click="stop()"
                 ng-show="data.status.state === 'running'"
                 class="warning">Stop Bulk Workflow</button>
 
         <button ng-click="resume()"
-                ng-show="data.status.state === 'stopped' || data.status.state === 'stopped-deactivated'"
+                ng-show="data.status.state.indexOf('stopped') === 0"
                 style="float: left;"
                 class="primary">Resume Bulk Workflow</button>
 
         <div    class="inline-input-wrapper"
                 style="margin-left: 15em"
-                ng-show="data.status.state === 'stopped' || data.status.state === 'stopped-deactivated'">
+                ng-show="data.status.state.indexOf('stopped') === 0">
             Update batch interval to
 
             <input type="text"

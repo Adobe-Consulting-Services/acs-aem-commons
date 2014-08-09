@@ -40,14 +40,14 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 @SlingServlet(
-        label = "ACS AEM Commons - Bulk Workflow Manager - Init Servlet",
+        label = "ACS AEM Commons - Bulk Workflow Manager - Init Form Servlet",
         methods = { "GET" },
         resourceTypes = { BulkWorkflowEngine.SLING_RESOURCE_TYPE },
-        selectors = { "init" },
+        selectors = { "init-form" },
         extensions = { "json" }
 )
-public class InitServlet extends SlingAllMethodsServlet {
-    private static final Logger log = LoggerFactory.getLogger(InitServlet.class);
+public class InitFormServlet extends SlingAllMethodsServlet {
+    private static final Logger log = LoggerFactory.getLogger(InitFormServlet.class);
 
     @Reference
     private WorkflowService workflowService;
@@ -57,6 +57,7 @@ public class InitServlet extends SlingAllMethodsServlet {
             throws ServletException, IOException {
 
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
         final JSONObject json = new JSONObject();
 
@@ -77,10 +78,15 @@ public class InitServlet extends SlingAllMethodsServlet {
                             workflowModel.getTitle(), workflowModel.getId());
                 }
             }
+
+            response.getWriter().write(json.toString());
+
         } catch (WorkflowException e) {
             log.error("Could not create workflow model drop-down due to: {}", e.getMessage());
-        }
 
-        response.getWriter().write(json.toString());
+            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not collect Workflows",
+                    e.getMessage());
+        }
     }
 }

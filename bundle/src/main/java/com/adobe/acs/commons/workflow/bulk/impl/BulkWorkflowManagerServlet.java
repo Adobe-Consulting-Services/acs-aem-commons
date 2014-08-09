@@ -58,10 +58,11 @@ import java.util.HashMap;
         extensions = { "json" }
 )
 public class BulkWorkflowManagerServlet extends SlingAllMethodsServlet {
+    public static final String SLING_RESOURCE_TYPE = "acs-commons/components/utilities/bulk-workflow-manager";
+
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowManagerServlet.class);
 
     private static final int DECIMAL_TO_PERCENT = 100;
-    public static final String SLING_RESOURCE_TYPE = "acs-commons/components/utilities/bulk-workflow-manager";
 
     @Reference
     private WorkflowService workflowService;

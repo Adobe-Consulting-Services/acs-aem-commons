@@ -152,8 +152,8 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
             log.trace("Processing search result [ {} ]", payloadNode.getPath());
 
-            if(StringUtils.isNotBlank(relPath)) {
-                if(payloadNode.hasNode(relPath)) {
+            if (StringUtils.isNotBlank(relPath)) {
+                if (payloadNode.hasNode(relPath)) {
                     payloadNode = payloadNode.getNode(relPath);
                 } else {
                     log.warn("Could not find node at [ {} ]", payloadNode.getPath() + "/" + relPath);
@@ -193,7 +193,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
             }
         } // while
 
-        if(total > 0) {
+        if (total > 0) {
             // Set last batch's "next batch" property to complete so we know we're done
             JcrUtil.setProperty(batchItemNode.getParent(), KEY_NEXT_BATCH, STATE_COMPLETE);
 
@@ -259,7 +259,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
                         final int batchTimeoutCount = currentBatchProperties.get(KEY_BATCH_TIMEOUT_COUNT, 0);
 
-                        if(batchTimeoutCount >= batchTimeout) {
+                        if (batchTimeoutCount >= batchTimeout) {
                             terminateActiveWorkflows(adminResourceResolver,
                                     contentResource,
                                     activeWorkflows);
@@ -274,14 +274,14 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                     log.error("Error processing periodic execution: {}", e.getMessage());
 
                     try {
-                        if(contentResource != null) {
+                        if (contentResource != null) {
                             stop(contentResource, STATE_STOPPED_ERROR);
                         } else {
                             scheduler.removeJob(jobName);
                             log.error("Removed scheduled job [ {} ] due to errors content resource [ {} ] could not "
                                     + "be found.", jobName, resourcePath);
                         }
-                    } catch(Exception ex) {
+                    } catch (Exception ex) {
                         scheduler.removeJob(jobName);
                         log.error("Removed scheduled job [ {} ] due to errors and could not stop normally.", jobName);
                     }
@@ -326,7 +326,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     /**
      * Stops the bulk workflow process using the OSGi Component deactivated stop state.
-     *
+     * <p/>
      * Allows the system to know to resume this when the OSGi Component is activated.
      *
      * @param resource the jcr:content configuration resource
@@ -578,7 +578,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
      * Retrieves the active worklfows for the batch.
      *
      * @param resourceResolver the resource resolver
-     * @param workflowMap the map tracking what batch items are under WF
+     * @param workflowMap      the map tracking what batch items are under WF
      * @return the updated map of which batch items and their workflow state
      * @throws RepositoryException
      * @throws PersistenceException
@@ -623,7 +623,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
 
     /**
-     * Terminate active workflows
+     * Terminate active workflows.
      *
      * @param resourceResolver
      * @param contentResource
@@ -707,7 +707,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
         try {
             adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
-            final String query =  "SELECT * FROM [cq:PageContent] WHERE [sling:resourceType] = "
+            final String query = "SELECT * FROM [cq:PageContent] WHERE [sling:resourceType] = "
                     + "'" + BulkWorkflowManagerServlet.SLING_RESOURCE_TYPE + "'"
                     + " AND [" + KEY_STATE + "] = '" + STATE_STOPPED_DEACTIVATED + "'";
 

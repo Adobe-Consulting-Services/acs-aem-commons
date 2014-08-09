@@ -49,6 +49,9 @@ public class StopServlet extends SlingAllMethodsServlet {
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
         bulkWorkflowEngine.stop(request.getResource());
 
         response.sendRedirect(request.getResourceResolver().map(request.getResource().getPath()) + ".status.json");
