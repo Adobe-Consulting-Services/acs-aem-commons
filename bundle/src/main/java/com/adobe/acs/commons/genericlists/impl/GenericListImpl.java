@@ -24,67 +24,123 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 
 import com.adobe.acs.commons.genericlists.GenericList;
 import com.day.cq.wcm.api.NameConstants;
+import com.day.cq.wcm.commons.WCMUtils;
 
-public class GenericListImpl implements GenericList {
+public final class GenericListImpl implements GenericList {
 
     static final String TMPL_GENERIC_LIST = "/apps/acs-commons/templates/utilities/genericlist";
     static final String PN_VALUE = "value";
+    static final String TITLE_PREFIX = NameConstants.PN_TITLE + ".";
 
-    public static class ItemImpl implements Item {
+    public static final class ItemImpl implements Item {
 
         private final String title;
         private final String value;
+        private final ValueMap props;
 
-        public ItemImpl(String t, String v) {
+        public ItemImpl(String t, String v, ValueMap props) {
             this.title = t;
             this.value = v;
+            this.props = props;
         }
 
-        public final String getTitle() {
+        public String getTitle() {
             return title;
         }
 
-        public final String getValue() {
+        public String getValue() {
             return value;
+        }
+
+        @Override
+        public String getTitle(Locale locale) {
+            // no locale - return default title
+            if (locale == null) {
+                return getTitle();
+            }
+
+            // no language - return default title
+            String language = locale.getLanguage();
+            if (language.length() == 0) {
+                return getTitle();
+            }
+
+            String title = null;
+
+            // try property name like jcr:title.de_ch 
+            if (locale.getCountry().length() > 0) {
+                title = getLocalizedTitle(locale);
+            }
+            // then just jcr:title.de
+            if (title == null) {
+                title = getLocalizedTitle(new Locale(language));
+            }
+            if (title == null) {
+                return getTitle();
+            } else {
+                return title;
+            }
+        }
+        
+        private String getLocalizedTitle(Locale locale) {
+            return props.get(TITLE_PREFIX + locale.toString().toLowerCase(), String.class);
         }
 
     }
 
     private final List<Item> items;
 
-    private final Map<String, String> valueMapping;
+    private final Map<String, Item> valueMapping;
 
     public GenericListImpl(Resource listParsys) {
         List<Item> tempItems = new ArrayList<Item>();
-        Map<String, String> tempValueMapping = new HashMap<String, String>();
+        Map<String, Item> tempValueMapping = new HashMap<String, Item>();
         Iterator<Resource> children = listParsys.listChildren();
         while (children.hasNext()) {
             Resource res = children.next();
-            ValueMap map = res.adaptTo(ValueMap.class);
+            ValueMap map = ResourceUtil.getValueMap(res);
             String title = map.get(NameConstants.PN_TITLE, String.class);
             String value = map.get(PN_VALUE, String.class);
             if (title != null && value != null) {
-                tempItems.add(new ItemImpl(title, value));
-                tempValueMapping.put(value, title);
+                ItemImpl item = new ItemImpl(title, value, map);
+                tempItems.add(item);
+                tempValueMapping.put(value, item);
             }
         }
         items = Collections.unmodifiableList(tempItems);
         valueMapping = Collections.unmodifiableMap(tempValueMapping);
     }
 
-    public final List<Item> getItems() {
+    public List<Item> getItems() {
         return items;
     }
 
-    public final String lookupTitle(String value) {
-        return valueMapping.get(value);
+    public String lookupTitle(String value) {
+        Item item = valueMapping.get(value);
+        if (item != null) {
+            return item.getTitle();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String lookupTitle(String value, Locale locale) {
+        Item item = valueMapping.get(value);
+        if (item != null) {
+            return item.getTitle();
+        } else {
+            return null;
+        }
     }
 
 }

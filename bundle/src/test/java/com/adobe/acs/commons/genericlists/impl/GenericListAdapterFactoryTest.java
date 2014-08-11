@@ -25,6 +25,7 @@ import static org.mockito.Mockito.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
@@ -98,6 +99,8 @@ public class GenericListAdapterFactoryTest {
                     {
                         put(NameConstants.PN_TITLE, "titletwo");
                         put(GenericListImpl.PN_VALUE, "valuetwo");
+                        put(NameConstants.PN_TITLE + "." + "fr", "french_title");
+                        put(NameConstants.PN_TITLE + "." + "fr_ch", "swiss_french_title");
 
                     }
                 });
@@ -153,5 +156,24 @@ public class GenericListAdapterFactoryTest {
 
         GenericList section = adaptToGenericList(wrongPage);
         assertNull(section);
+    }
+
+    @Test
+    public void test_i18n_titles() {
+        Locale french = new Locale("fr");
+        Locale swissFrench = new Locale("fr", "ch");
+        Locale franceFrench = new Locale("fr", "fr");
+        
+        GenericList list = adapterFactory.getAdapter(listPage, GenericList.class);
+        assertNotNull(list);
+        List<Item> items = list.getItems();
+        assertNotNull(items);
+        assertEquals(2, items.size());
+        assertEquals("titleone", items.get(0).getTitle(french));
+        assertEquals("titleone", items.get(0).getTitle(swissFrench));
+        assertEquals("titleone", items.get(0).getTitle(franceFrench));
+        assertEquals("french_title", items.get(1).getTitle(french));
+        assertEquals("swiss_french_title", items.get(1).getTitle(swissFrench));
+        assertEquals("french_title", items.get(1).getTitle(franceFrench));
     }
 }
