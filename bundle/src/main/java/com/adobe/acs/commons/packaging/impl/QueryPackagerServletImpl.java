@@ -108,9 +108,9 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
 
         try {
             final Set<Resource> packageResources = this.findResources(resourceResolver,
+                    properties.get("queryLanguage", Query.JCR_SQL2),
                     properties.get("query", String.class),
-                    properties.get("relPath", String.class),
-                    properties.get("queryLanguage", Query.JCR_SQL2));
+                    properties.get("relPath", String.class));
 
             final Map<String, String> packageDefinitionProperties = new HashMap<String, String>();
 
@@ -162,6 +162,12 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
         }
     }
 
+    /**
+     * Gets the properties saved to the Query Packager Page's jcr:content node.
+     *
+     * @param request the request obj
+     * @return a valuemap representing the properties
+     */
     private ValueMap getProperties(final SlingHttpServletRequest request) {
         if (request.getResource().getChild("configuration") == null) {
             log.warn("Query Packager Configuration node could not be found for: {}", request.getResource());
@@ -171,21 +177,30 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
         }
     }
 
-
+    /**
+     * Find all the resources needed for the package definition.
+     *
+     * @param resourceResolver the resource resolver to find the resources
+     * @param language the Query language
+     * @param statement the Query statement
+     * @param relPath the relative path to resolve against query result nodes for package resources
+     * @return a unique set of paths to include in the package
+     * @throws RepositoryException
+     */
     private Set<Resource> findResources(final ResourceResolver resourceResolver,
-                                         final String statement,
-                                         final String relPath,
-                                         final String language) throws RepositoryException {
+                                        final String language,
+                                        final String statement,
+                                         final String relPath) throws RepositoryException {
 
         final Set<Resource> resources = new HashSet<Resource>();
         final Session session = resourceResolver.adaptTo(Session.class);
         final QueryManager queryManager = session.getWorkspace().getQueryManager();
         final Query query = queryManager.createQuery(statement, language);
-
         final QueryResult queryResult = query.execute();
         final NodeIterator nodeIterator = queryResult.getNodes();
 
         while (nodeIterator.hasNext()) {
+
             final Node node = nodeIterator.nextNode();
             final Resource resource = resourceResolver.getResource(node.getPath());
 

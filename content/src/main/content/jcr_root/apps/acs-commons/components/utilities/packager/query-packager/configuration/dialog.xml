@@ -27,7 +27,7 @@
     <items jcr:primaryType="cq:WidgetCollection">
         <tab1
             jcr:primaryType="cq:Widget"
-            title="ACL Packager Configuration"
+            title="Query Packager Configuration"
             xtype="panel">
             <items jcr:primaryType="cq:WidgetCollection">
                 <package-name
@@ -129,11 +129,13 @@
                 <query
                         jcr:primaryType="cq:Widget"
                         fieldLabel="Query"
+                        fieldDescription="Query which will collect the resource to package. Must match the above Query Language."
                         name="./query"
                         xtype="textarea"/>
-                <rel-path
+                <relative-path
                         jcr:primaryType="cq:Widget"
                         fieldLabel="Relative Path"
+                        fieldDescription="Relative path that is resolved against each query result resource. If resolves to a resource, this resource is included in the package."
                         name="./relPath"
                         xtype="textfield"/>
             </items>
