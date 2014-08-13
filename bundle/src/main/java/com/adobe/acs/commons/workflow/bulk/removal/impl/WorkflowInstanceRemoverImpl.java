@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceFolderComparator;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -12,12 +14,15 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.TreeSet;
 
 @Component(
     label = "ACS AEM Commons - Workflow Instance Remover"
 )
 @Service
-public final class WorkflowInstanceRemoverImpl {
+public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemover {
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceRemoverImpl.class);
 
     private static final String WORKFLOW_INSTANCES_PATH = "/etc/workflow/instances";
@@ -29,16 +34,12 @@ public final class WorkflowInstanceRemoverImpl {
     public final int removeWorkflowInstance(final ResourceResolver resourceResolver, final String... statuses) {
         final long start = System.currentTimeMillis();
         final Resource folders = resourceResolver.getResource(WORKFLOW_INSTANCES_PATH);
+        final Collection<Resource> sortedFolders = this.getSortedAndFilteredFolders(folders);
 
         int total = 0;
         int count = 0;
-        for(final Resource folder : folders.getChildren()) {
+        for(final Resource folder : sortedFolders) {
             int remaining = 0;
-
-            if(!folder.isResourceType(NT_SLING_FOLDER)) {
-                // Only process sling:Folders; skip rep:policy
-                continue;
-            }
 
             for(final Resource instance : folder.getChildren()) {
 
@@ -93,6 +94,25 @@ public final class WorkflowInstanceRemoverImpl {
 
         return total;
     }
+
+    private Collection<Resource> getSortedAndFilteredFolders(Resource folderResource) {
+        final Collection<Resource> sortedCollection = new TreeSet(new WorkflowInstanceFolderComparator());
+        final Iterator<Resource> folders = folderResource.listChildren();
+
+        while(folders.hasNext()) {
+            final Resource folder = folders.next();
+
+            if(!folder.isResourceType(NT_SLING_FOLDER)) {
+                // Only process sling:Folders; eg. skip rep:policy
+                continue;
+            } else {
+                sortedCollection.add(folder);
+            }
+        }
+
+        return sortedCollection;
+    }
+
 
     private void save(ResourceResolver resourceResolver) {
         final long start = System.currentTimeMillis();

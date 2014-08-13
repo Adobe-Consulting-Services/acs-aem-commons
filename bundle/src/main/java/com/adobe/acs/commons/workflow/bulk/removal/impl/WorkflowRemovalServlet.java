@@ -15,7 +15,6 @@ import org.apache.sling.commons.scheduler.Job;
 import org.apache.sling.commons.scheduler.JobContext;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.apache.sling.jcr.api.SlingRepository;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -105,7 +104,7 @@ public class WorkflowRemovalServlet extends SlingAllMethodsServlet {
         adminSession.logout();
 
         final Map<String, Object> authInfo = new HashMap<String, Object>();
-        authInfo.put(JcrResourceConstants.AUTHENTICATION_INFO_SESSION, impersonatedSession);
+        authInfo.put("user.jcr.session", impersonatedSession);
 
         return resourceResolverFactory.getResourceResolver(authInfo);
     }
