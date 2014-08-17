@@ -708,7 +708,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
             adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
             final String query = "SELECT * FROM [cq:PageContent] WHERE [sling:resourceType] = "
-                    + "'" + BulkWorkflowManagerServlet.SLING_RESOURCE_TYPE + "'"
+                    + "'" + SLING_RESOURCE_TYPE + "'"
                     + " AND [" + KEY_STATE + "] = '" + STATE_STOPPED_DEACTIVATED + "'";
 
             log.debug("Finding bulk workflows to reactivate using query: {}", query);
