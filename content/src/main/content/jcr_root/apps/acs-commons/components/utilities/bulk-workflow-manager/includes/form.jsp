@@ -161,10 +161,12 @@
         <div class="form-left-cell">&nbsp;</div>
 
         <button type="submit"
+                role="button"
                 ng-show="params.$valid && !params.$pristine"
                 class="primary">Start Bulk Workflow</button>
 
         <button type="submit"
+                role="button"
                 ng-show="params.$invalid || params.$pristine"
                 disabled>Start Bulk Workflow</button>
 
