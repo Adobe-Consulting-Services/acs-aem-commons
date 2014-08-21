@@ -32,8 +32,24 @@ public final class WorkflowInstanceRemoverImpl {
 
         int total = 0;
         int count = 0;
+        Resource folderToDelete = null;
+
         for(final Resource folder : folders.getChildren()) {
             int remaining = 0;
+
+            if(folderToDelete != null) {
+                try {
+                    folder.adaptTo(Node.class).remove();
+                    // Incrementing only count to trigger batch save and not total since is not a WF
+                    count++;
+                } catch (RepositoryException e) {
+                    log.error("Could not remove workflow folder at [ {} ] due to: {}",
+                            folder.getPath(), e.getMessage());
+                }
+            }
+
+            folderToDelete = null;
+
 
             if(!folder.isResourceType(NT_SLING_FOLDER)) {
                 // Only process sling:Folders; skip rep:policy
@@ -73,14 +89,12 @@ public final class WorkflowInstanceRemoverImpl {
             }
 
             if(remaining == 0) {
-                try {
-                    folder.adaptTo(Node.class).remove();
-                    // Incrementing only count to trigger batch save and not total since is not a WF
-                    count++;
-                } catch (RepositoryException e) {
-                    log.error("Could not remove workflow folder at [ {} ] due to: {}",
-                            folder.getPath(), e.getMessage());
-                }
+                // Marking this folder to be deleted as long as it is not the last folder
+                // This folder will be deleted before processing the contents of the next folder
+
+                // Leave folders for now since its hard to tell if they are in use
+
+                //folderToDelete = folder;
             }
         }
 
