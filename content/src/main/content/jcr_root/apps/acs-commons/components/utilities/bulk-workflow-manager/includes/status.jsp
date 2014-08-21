@@ -87,7 +87,11 @@
                    ng-required="false"
                    ng-model="form.interval"
                    placeholder="{{ form.interval }}"/>
-            seconds.
+            seconds, or
+
+            <button ng-click="status(true)"
+                    ng-show="data.status.state.indexOf('stopped') === 0"
+                    class="primary">Force refresh status</button>
         </div>
 
     </div>
