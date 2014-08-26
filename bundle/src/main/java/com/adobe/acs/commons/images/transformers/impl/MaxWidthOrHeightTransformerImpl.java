@@ -24,9 +24,6 @@ import java.util.Map;
         )
 })
 @Service(value = ImageTransformer.class)
-/**
- * @author mkreis
- */
 public class MaxWidthOrHeightTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(MaxWidthOrHeightTransformerImpl.class);
 
