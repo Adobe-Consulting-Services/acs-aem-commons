@@ -20,7 +20,9 @@
 
 /*global JSON: false, angular: false */
 
-angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($scope, $http, $timeout) {
+angular.module('bulkWorkflowManagerApp',[])
+    .controller('MainCtrl', ['$scope', '$http', '$timeout',
+    function($scope, $http, $timeout) {
 
     $scope.dfault = {
         pollingInterval: 5
@@ -170,4 +172,4 @@ angular.module('bulkWorkflowManagerApp',[]).controller('MainCtrl', function($sco
             $scope.notifications.shift();
         }, timeout);
     };
-});
+}]);

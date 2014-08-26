@@ -1,4 +1,4 @@
-angular.js
-angular-sanitize.js
-angular-animate.js
-angular-cookies.js
+angular.min.js
+angular-sanitize.min.js
+angular-animate.min.js
+angular-cookies.min.js
