@@ -21,7 +21,8 @@
 /*global angular: false */
 
 angular.module('oakIndexManager', [])
-    .controller('MainCtrl', function ($scope, $http, $timeout) {
+    .controller('MainCtrl', ['$scope', '$http', '$timeout',
+    function ($scope, $http, $timeout) {
 
         $scope.app = {
             resource: '',
@@ -234,6 +235,6 @@ angular.module('oakIndexManager', [])
         $scope.init = function () {
             $scope.list();
         };
-    });
+    }]);
 
 
