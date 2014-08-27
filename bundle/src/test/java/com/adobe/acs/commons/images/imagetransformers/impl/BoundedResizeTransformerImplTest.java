@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.images.imagetransformers.impl;
 
-import com.adobe.acs.commons.images.transformers.impl.MaxWidthOrHeightTransformerImpl;
+import com.adobe.acs.commons.images.transformers.impl.BoundedResizeTransformerImpl;
 import com.day.image.Layer;
 
 import org.apache.sling.api.resource.ValueMap;
@@ -39,9 +39,9 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MaxWidthOrHeightTransformerImplTest {
+public class BoundedResizeTransformerImplTest {
 
-    MaxWidthOrHeightTransformerImpl transformer;
+    BoundedResizeTransformerImpl transformer;
 
     @Mock
     Layer layer;
@@ -51,7 +51,7 @@ public class MaxWidthOrHeightTransformerImplTest {
     @Before
     public void setUp() throws Exception {
         map = new HashMap<String, Object>();
-        transformer = new MaxWidthOrHeightTransformerImpl();
+        transformer = new BoundedResizeTransformerImpl();
     }
 
     @After
@@ -169,6 +169,21 @@ public class MaxWidthOrHeightTransformerImplTest {
         transformer.transform(layer, properties);
 
         verify(layer, times(0)).resize(anyInt(), anyInt());
+    }
+
+    @Test
+    public void testTransform_allow_resize() throws Exception {
+        prepareSquare();
+
+        map.put("width", 800);
+        map.put("height", 600);
+        map.put("allowUpscaling", true);
+
+        ValueMap properties = new ValueMapDecorator(map);
+
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).resize(600, 600);
     }
 
     private void prepareLandscape(){

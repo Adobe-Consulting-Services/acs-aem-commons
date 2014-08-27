@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 @Component(
-        label = "Image Transformer - Max width or height resizing",
+        label = "ACS AEM Commons - Image Transformer - Bounded Resize",
         description =
                 "ImageTransformer that resizes the layer. Accepts two Integer params: height and width. " +
                 "Only width or height will be scaled and the other dimension will be calculated to keep original ratio. " +
@@ -19,17 +19,13 @@ import java.util.Map;
 @Properties({
         @Property(
                 name = ImageTransformer.PROP_TYPE,
-                value = MaxWidthOrHeightTransformerImpl.TYPE,
+                value = BoundedResizeTransformerImpl.TYPE,
                 propertyPrivate = true
         )
 })
 @Service(value = ImageTransformer.class)
-public class MaxWidthOrHeightTransformerImpl implements ImageTransformer {
-    private static final Logger log = LoggerFactory.getLogger(MaxWidthOrHeightTransformerImpl.class);
-
-    @Property(label = "Allow upscaling images", boolValue = false)
-    static final String ALLOW_UPSCALING_PROPERTY = "maxwidthorheight.allowUpscaling";
-    private boolean allowUpscaling;
+public class BoundedResizeTransformerImpl implements ImageTransformer {
+    private static final Logger log = LoggerFactory.getLogger(BoundedResizeTransformerImpl.class);
 
     static final String TYPE = "maxwidthorheight";
 
@@ -40,6 +36,8 @@ public class MaxWidthOrHeightTransformerImpl implements ImageTransformer {
     private static final String KEY_HEIGHT = "height";
 
     private static final String KEY_HEIGHT_ALIAS = "h";
+
+    private static final String ALLOW_UPSCALING = "allowUpscaling";
 
 
     @Override
@@ -55,6 +53,7 @@ public class MaxWidthOrHeightTransformerImpl implements ImageTransformer {
         int originalHeight = layer.getHeight();
         int width = properties.get(KEY_WIDTH, properties.get(KEY_WIDTH_ALIAS, originalWidth));
         int height = properties.get(KEY_HEIGHT, properties.get(KEY_HEIGHT_ALIAS, originalHeight));
+        boolean allowUpscaling = properties.get(ALLOW_UPSCALING, false);
 
 
         if((float) width / originalWidth < (float) height / originalHeight){
@@ -72,10 +71,5 @@ public class MaxWidthOrHeightTransformerImpl implements ImageTransformer {
         }
 
         return layer;
-    }
-
-    @Activate
-    protected final void activate(final Map<String, String> config) {
-        allowUpscaling = PropertiesUtil.toBoolean(config.get(ALLOW_UPSCALING_PROPERTY), false);
     }
 }
