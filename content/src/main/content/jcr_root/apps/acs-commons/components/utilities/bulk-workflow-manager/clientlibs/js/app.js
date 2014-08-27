@@ -116,7 +116,7 @@ angular.module('bulkWorkflowManagerApp',[])
             });
     };
 
-    $scope.status = function() {
+    $scope.status = function(forceStatus) {
         var timeout = ($scope.app.pollingInterval || $scope.dfault.pollingInterval ) * 1000;
         $scope.app.polling = true;
 
@@ -128,12 +128,14 @@ angular.module('bulkWorkflowManagerApp',[])
             success(function(data, status, headers, config) {
                 $scope.data.status = data || {};
 
-                if ($scope.data.status.state === 'running') {
-                    $scope.app.pollingPromise = $timeout(function () {
-                        $scope.status();
-                    }, timeout);
-                } else {
-                    $timeout.cancel($scope.app.pollingPromise);
+                if(!forceStatus) {
+                    if ($scope.data.status.state === 'running') {
+                        $scope.app.pollingPromise = $timeout(function () {
+                            $scope.status();
+                        }, timeout);
+                    } else {
+                        $timeout.cancel($scope.app.pollingPromise);
+                    }
                 }
 
                 $scope.app.polling = false;
@@ -144,6 +146,7 @@ angular.module('bulkWorkflowManagerApp',[])
                     'Could not retrieve bulk workflow status.', data.message);
             });
     };
+
 
     $scope.initForm = function() {
         $http({

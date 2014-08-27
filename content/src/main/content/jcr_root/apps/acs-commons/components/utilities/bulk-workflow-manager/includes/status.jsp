@@ -45,7 +45,7 @@
                 <ul>
                     <li>Batch Size: {{ data.status.batchSize }}</li>
                     <li>Batch Timeout: {{ data.status.batchTimeout * data.status.interval }} seconds
-                        ( Multiplier: {{ data.status.batchTimeout }} )
+                        ( multiplier: {{ data.status.batchTimeout }} )
                     </li>
                     <li>Batch Interval: {{ data.status.interval }} seconds</li>
                     <li>Workflow Model: {{ data.status.workflowModel }}</li>
@@ -69,10 +69,12 @@
     <div class="section button-controls-section">
 
         <button ng-click="stop()"
+                role="button"
                 ng-show="data.status.state === 'running'"
                 class="warning">Stop Bulk Workflow</button>
 
         <button ng-click="resume()"
+                role="button"
                 ng-show="data.status.state.indexOf('stopped') === 0"
                 style="float: left;"
                 class="primary">Resume Bulk Workflow</button>
@@ -89,9 +91,7 @@
                    placeholder="{{ form.interval }}"/>
             seconds.
         </div>
-
     </div>
-
 
     <div    ng-show="data.status.state === 'running'"
             class="section current-batch-section">
@@ -104,8 +104,12 @@
                    class="inline-input"
                    ng-blur="updatePollingInterval(form.pollingInterval)"
                    ng-model="form.pollingInterval"
-                   placeholder="{{ dfault.pollingInterval }}"/> seconds
-        </div>
+                   placeholder="{{ dfault.pollingInterval }}"/> seconds, or
+
+             <button ng-click="status(true)"
+                     role="button"
+                     class="inline-button">Refresh now</button>
+         </div>
 
         <table class="data current-batch-table">
             <thead>
