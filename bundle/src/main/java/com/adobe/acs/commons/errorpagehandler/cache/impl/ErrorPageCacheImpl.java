@@ -101,9 +101,9 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
                 cache.put(path, cacheEntry);
             }
 
-            if (log.isInfoEnabled()) {
+            if (log.isDebugEnabled()) {
                 final long time = System.currentTimeMillis() - start;
-                log.info("Served cache MISS for [ {} ] in [ {} ] ms", path, time);
+                log.debug("Served cache MISS for [ {} ] in [ {} ] ms", path, time);
             }
 
             return data;
@@ -115,9 +115,9 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
             cacheEntry.incrementHits();
             cache.put(path, cacheEntry);
 
-            if (log.isInfoEnabled()) {
+            if (log.isDebugEnabled()) {
                 final long time = System.currentTimeMillis() - start;
-                log.info("Served cache HIT for [ {} ] in [ {} ] ms", path, time);
+                log.debug("Served cache HIT for [ {} ] in [ {} ] ms", path, time);
             }
 
             return data;
