@@ -28,6 +28,7 @@ import org.apache.sling.api.resource.ValueMap;
 import javax.jcr.RepositoryException;
 
 public interface BulkWorkflowEngine {
+    String SLING_RESOURCE_TYPE = "acs-commons/components/utilities/bulk-workflow-manager";
 
     String SLING_FOLDER = "sling:Folder";
 
@@ -39,7 +40,7 @@ public interface BulkWorkflowEngine {
 
     int DEFAULT_BATCH_TIMEOUT = 20;
 
-    boolean DEFAULT_PURGE_WORKFLOW = true;
+    boolean DEFAULT_PURGE_WORKFLOW = false;
 
     String NN_BATCHES = "batches";
 
@@ -102,11 +103,10 @@ public interface BulkWorkflowEngine {
     String STATE_STOPPED_ERROR = "stopped-error";
 
 
-
     /**
      * Initialize the Bulk Workflow Manager jcr:content node and build out the batch structure.
      *
-     * @param resource jcr:content resource
+     * @param resource   jcr:content resource
      * @param properties a valuemap containing all requisite properties
      * @throws PersistenceException
      * @throws RepositoryException
