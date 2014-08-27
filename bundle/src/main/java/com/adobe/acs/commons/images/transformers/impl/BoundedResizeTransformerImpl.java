@@ -27,7 +27,7 @@ import java.util.Map;
 public class BoundedResizeTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(BoundedResizeTransformerImpl.class);
 
-    static final String TYPE = "maxwidthorheight";
+    static final String TYPE = "boundedResize";
 
     private static final String KEY_WIDTH = "width";
 
