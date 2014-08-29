@@ -84,7 +84,7 @@ public class ComponentDisabler implements EventHandler {
     public void handleEvent(Event event) {
         // We don't care about the event, we just need iterate all configured
         // components and try to disable them
-        log.info("Disabling components and services {}", Arrays.toString(disabledComponents));
+        log.trace("Disabling components and services {}", Arrays.toString(disabledComponents));
 
         for (String component : disabledComponents) {
             disableComponent(component);
