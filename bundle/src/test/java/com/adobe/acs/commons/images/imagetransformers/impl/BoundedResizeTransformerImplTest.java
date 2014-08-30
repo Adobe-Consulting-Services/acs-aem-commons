@@ -177,7 +177,7 @@ public class BoundedResizeTransformerImplTest {
 
         map.put("width", 800);
         map.put("height", 600);
-        map.put("allowUpscaling", true);
+        map.put("upscale", true);
 
         ValueMap properties = new ValueMapDecorator(map);
 
