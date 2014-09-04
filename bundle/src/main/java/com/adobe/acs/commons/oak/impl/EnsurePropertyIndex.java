@@ -31,6 +31,7 @@ import javax.jcr.ValueFactory;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.jcr.api.SlingRepository;
@@ -43,7 +44,16 @@ import com.adobe.acs.commons.util.AemCapabilityHelper;
         description = "Component Factory to create Oak property indexes.")
 public class EnsurePropertyIndex {
 
+    private static class IndexDefinition {
+        private boolean async;
+        private String[] declaringNodeTypes;
+        private String propertyName;
+        private boolean unique;
+    }
+
     private static final boolean DEFAULT_ASYNC = false;
+
+    private static final boolean DEFAULT_UNIQUE = false;
 
     private static final Logger log = LoggerFactory.getLogger(EnsurePropertyIndex.class);
 
@@ -53,11 +63,15 @@ public class EnsurePropertyIndex {
 
     private static final String PN_ASYNC = "async";
 
+    private static final String PN_DECLARING_NODE_TYPES = "declaringNodeTypes";
+
     private static final String PN_PROPERTY_NAMES = "propertyNames";
 
     private static final String PN_REINDEX = "reindex";
 
     private static final String PN_TYPE = "type";
+
+    private static final String PN_UNIQUE = "unique";
 
     @Property(label = "Async?", description = "Is this index async?", boolValue = DEFAULT_ASYNC)
     private static final String PROP_ASYNC = "index.async";
@@ -65,8 +79,14 @@ public class EnsurePropertyIndex {
     @Property(label = "Index Name", description = "Will be used as the index node name.")
     private static final String PROP_INDEX_NAME = "index.name";
 
+    @Property(label = "Declaring Node Types", description = "Declaring Node Types", unbounded = PropertyUnbounded.ARRAY)
+    private static final String PROP_NODE_TYPES = "node.types";
+    
     @Property(label = "Property Name", description = "Property name to index.")
     private static final String PROP_PROPERTY_NAME = "property.name";
+
+    @Property(label = "Unique", description = "Is in this index unique?", boolValue = DEFAULT_UNIQUE)
+    private static final String PROP_UNIQUE = "unique";
 
     private static final String TYPE_PROPERTY = "property";
 
@@ -76,22 +96,40 @@ public class EnsurePropertyIndex {
     @Reference
     private SlingRepository repository;
 
-    private void createIndex(Node indexNode, String propertyName, boolean async) throws RepositoryException {
+    private void createOrUpdateIndex(Node indexNode, IndexDefinition def) throws RepositoryException {
         ValueFactory valueFactory = indexNode.getSession().getValueFactory();
 
         indexNode.setProperty(PN_TYPE, TYPE_PROPERTY);
         indexNode.setProperty(PN_PROPERTY_NAMES,
-                new Value[] { valueFactory.createValue(propertyName, PropertyType.NAME) });
-        indexNode.setProperty(PN_ASYNC, PN_ASYNC);
+                new Value[] { valueFactory.createValue(def.propertyName, PropertyType.NAME) });
+        if (def.async) {
+            indexNode.setProperty(PN_ASYNC, PN_ASYNC);
+        } else if (indexNode.hasProperty(PN_ASYNC)) {
+            indexNode.getProperty(PN_ASYNC).remove();
+        }
+        if (def.unique) {
+            indexNode.setProperty(PN_UNIQUE, true);
+        } else if (indexNode.hasProperty(PN_ASYNC)) {
+            indexNode.getProperty(PN_UNIQUE).remove();
+        }
+        if (def.declaringNodeTypes != null && def.declaringNodeTypes.length > 0) {
+            Value[] values = new Value[def.declaringNodeTypes.length];
+            for (int i = 0; i < def.declaringNodeTypes.length; i++) {
+                values[i] = valueFactory.createValue(def.declaringNodeTypes[0], PropertyType.NAME);
+            }
+            indexNode.setProperty(PN_DECLARING_NODE_TYPES, values);
+        } else if (indexNode.hasProperty(PN_DECLARING_NODE_TYPES)) {
+            indexNode.getProperty(PN_DECLARING_NODE_TYPES).remove();
+        }
     }
 
-    private boolean needsUpdate(Node indexNode, String propertyName) throws RepositoryException {
+    private boolean needsUpdate(Node indexNode, IndexDefinition def) throws RepositoryException {
         Value[] currentPropertyNames = indexNode.getProperty(PN_PROPERTY_NAMES).getValues();
-        return !currentPropertyNames[0].getString().equals(propertyName);
+        return !currentPropertyNames[0].getString().equals(def.propertyName);
     }
 
-    private void updateIndex(Node indexNode, String propertyName, boolean async) throws RepositoryException {
-        createIndex(indexNode, propertyName, async);
+    private void updateIndex(Node indexNode, IndexDefinition def) throws RepositoryException {
+        createOrUpdateIndex(indexNode, def);
         indexNode.setProperty(PN_REINDEX, true);
     }
 
@@ -99,10 +137,14 @@ public class EnsurePropertyIndex {
     protected void activate(Map<String, Object> properties) throws RepositoryException {
         if (capabilityHelper.isOak()) {
             String name = PropertiesUtil.toString(properties.get(PROP_INDEX_NAME), null);
-            String propertyName = PropertiesUtil.toString(properties.get(PROP_PROPERTY_NAME), null);
-            boolean async = PropertiesUtil.toBoolean(properties.get(PROP_ASYNC), DEFAULT_ASYNC);
 
-            if (name == null && propertyName == null) {
+            IndexDefinition def = new IndexDefinition();
+            def.propertyName = PropertiesUtil.toString(properties.get(PROP_PROPERTY_NAME), null);
+            def.async = PropertiesUtil.toBoolean(properties.get(PROP_ASYNC), DEFAULT_ASYNC);
+            def.unique = PropertiesUtil.toBoolean(properties.get(PROP_UNIQUE), DEFAULT_UNIQUE);
+            def.declaringNodeTypes = PropertiesUtil.toStringArray(properties.get(PROP_NODE_TYPES), new String[0]);
+
+            if (name == null || def.propertyName == null) {
                 log.warn("Incomplete configure; name or property name is null.");
                 return;
             }
@@ -114,11 +156,15 @@ public class EnsurePropertyIndex {
                 Node oakIndexContainer = session.getRootNode().getNode(NN_OAK_INDEX);
                 if (oakIndexContainer.hasNode(name)) {
                     Node indexNode = oakIndexContainer.getNode(name);
-                    if (needsUpdate(indexNode, propertyName)) {
-                        updateIndex(indexNode, propertyName, async);
+                    if (needsUpdate(indexNode, def)) {
+                        log.info("updating index {}", name);
+                        updateIndex(indexNode, def);
+                    } else {
+                        log.debug("index {} does not need updating", name);
                     }
                 } else {
-                    createIndex(oakIndexContainer.addNode(name, NT_QID), propertyName, async);
+                    log.info("creating index {}", name);
+                    createOrUpdateIndex(oakIndexContainer.addNode(name, NT_QID), def);
                 }
                 session.save();
 
