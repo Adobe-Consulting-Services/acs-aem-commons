@@ -34,8 +34,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Component(label = "ACS AEM Commons - CORS Filter to handler Preflight Requests",
-        description = "HTTPFilter to validate the preflight requests for CORS", configurationFactory = true,
+@Component(label = "ACS AEM Commons - CORS HTTP Request Filter",
+        description = "HTTPFilter to validate the requests for CORS", configurationFactory = true,
         metatype = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
@@ -160,7 +160,7 @@ public class CORSFilter implements Filter {
 
     private void isRequestHeadersAllowed(HttpServletRequest request, HttpServletResponse response) {
         String rawRequestHeaderString = request.getHeader(CORSConstants.ACCESS_CONTROL_REQUEST_HEADERS);
-        String[] requestHeaders = CORSUtil.getHeadersAsArray(rawRequestHeaderString);
+        String[] requestHeaders = getHeadersAsArray(rawRequestHeaderString);
         if (requestHeaders == null || requestHeaders.length == 0) {
             return;
         }
@@ -284,5 +284,17 @@ public class CORSFilter implements Filter {
             }
 
         }
+    }
+        private static String[] getHeadersAsArray(final String headerValue) {
+
+        if (headerValue == null)
+            return new String[0]; // empty array
+
+        String trimmedHeaderValue = headerValue.trim();
+
+        if (trimmedHeaderValue.isEmpty())
+            return new String[0];
+
+        return trimmedHeaderValue.split("\\s*,\\s*|\\s+");
     }
 }
