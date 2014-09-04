@@ -45,17 +45,22 @@ public class EnsurePropertyIndex {
 
     private static final boolean DEFAULT_ASYNC = false;
 
-    private static final String PN_REINDEX = "reindex";
-
-    private static final String TYPE_PROPERTY = "property";
-
-    private static final String PN_PROPERTY_NAMES = "propertyNames";
+    private static final Logger log = LoggerFactory.getLogger(EnsurePropertyIndex.class);
 
     private static final String NN_OAK_INDEX = "oak:index";
 
     private static final String NT_QID = "oak:QueryIndexDefinition";
 
+    private static final String PN_ASYNC = "async";
+
+    private static final String PN_PROPERTY_NAMES = "propertyNames";
+
+    private static final String PN_REINDEX = "reindex";
+
     private static final String PN_TYPE = "type";
+
+    @Property(label = "Async?", description = "Is this index async?", boolValue = DEFAULT_ASYNC)
+    private static final String PROP_ASYNC = "index.async";
 
     @Property(label = "Index Name", description = "Will be used as the index node name.")
     private static final String PROP_INDEX_NAME = "index.name";
@@ -63,18 +68,13 @@ public class EnsurePropertyIndex {
     @Property(label = "Property Name", description = "Property name to index.")
     private static final String PROP_PROPERTY_NAME = "property.name";
 
-    @Property(label = "Async?", description = "Is this index async?", boolValue = DEFAULT_ASYNC)
-    private static final String PROP_ASYNC = "index.async";
-
-    private static final Logger log = LoggerFactory.getLogger(EnsurePropertyIndex.class);
-
-    private static final String PN_ASYNC = "async";
-
-    @Reference
-    private SlingRepository repository;
+    private static final String TYPE_PROPERTY = "property";
 
     @Reference
     private AemCapabilityHelper capabilityHelper;
+
+    @Reference
+    private SlingRepository repository;
 
     private void createIndex(Node indexNode, String propertyName, boolean async) throws RepositoryException {
         ValueFactory valueFactory = indexNode.getSession().getValueFactory();
