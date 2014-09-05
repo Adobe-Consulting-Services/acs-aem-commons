@@ -130,6 +130,36 @@ ACS.CQ.form.DDPathField = CQ.Ext.extend(CQ.form.PathField, {
         if (inMultiField) {
             CQ.WCM.unregisterDropTargetComponent(field);
         }
+    },
+    
+    /**
+     * Override default ddGroups in CQ.form.PathField
+     */
+    getDropTargets:function () {
+    var pathFieldComponent = this,
+        target = new CQ.wcm.EditBase.DropTarget(this.el, {
+            "ddAccept": "*/*",
+            "notifyDrop": function(dragObject, evt, data) {
+                if (dragObject && dragObject.clearAnimations) {
+                    dragObject.clearAnimations(this);
+                }
+                if (data && data.records && data.records[0]) {
+                    var pathInfo = data.records[0].get("path");
+                    if (pathInfo) {
+                        pathFieldComponent.setValue(pathInfo);
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }),
+        i;
+
+        for (i = 0; i < this.ddGroups.length; i++) {
+            target.groups[this.ddGroups[i]] = true;
+        }
+
+        return [target];
     }
 });
 
