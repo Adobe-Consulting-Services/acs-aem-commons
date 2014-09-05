@@ -24,12 +24,15 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.jcr.Session;
-import org.apache.commons.mail.HtmlEmail;
+
+import org.apache.commons.mail.SimpleEmail;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.junit.After;
@@ -46,6 +49,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
 import com.adobe.acs.commons.email.impl.EmailServiceImpl;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
@@ -65,7 +69,7 @@ public class EmailServiceImplTest {
     private ResourceResolver resourceResolver;
 
     @Mock
-    private MessageGateway<HtmlEmail> messageGateway;
+    private MessageGateway<SimpleEmail> messageGateway;
 
     @Mock
     private Session session;
@@ -83,7 +87,7 @@ public class EmailServiceImplTest {
 
         MockitoAnnotations.initMocks(this);
 
-        when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGateway);
+        when(messageGatewayService.getGateway(SimpleEmail.class)).thenReturn(messageGateway);
         when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(resourceResolver);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
 
@@ -114,7 +118,7 @@ public class EmailServiceImplTest {
                                                   "david@acs.com",
                                                   "justin@acs.com"
                                                  };
-        ArgumentCaptor<HtmlEmail> captor = ArgumentCaptor.forClass(HtmlEmail.class);
+        ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
 
         List<String> failureList = emailService.sendEmail(emailTemplatePath, params, recipients);
 
@@ -124,7 +128,7 @@ public class EmailServiceImplTest {
         assertEquals(expectedSenderName, captor.getValue().getFromAddress().getPersonal());
         assertEquals(expectedSubject, captor.getValue().getSubject());
 
-        List<HtmlEmail> actualAllHtmlEmailsSent = captor.getAllValues();
+        List<SimpleEmail> actualAllHtmlEmailsSent = captor.getAllValues();
         assertEquals(actualAllHtmlEmailsSent.size(), recipients.length);
 
         //If email sent to all recipients is successful, failureList is empty
@@ -148,7 +152,7 @@ public class EmailServiceImplTest {
 
         final String recipient =  "upasanac@acs.com";
 
-        ArgumentCaptor<HtmlEmail> captor = ArgumentCaptor.forClass(HtmlEmail.class);
+        ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
 
         List<String> failureList = emailService.sendEmail(emailTemplatePath, params, recipient);
 
