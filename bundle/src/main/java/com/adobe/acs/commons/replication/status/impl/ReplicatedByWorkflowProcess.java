@@ -70,7 +70,8 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
     private ResourceResolverFactory resourceResolverFactory;
 
     @Override
-    public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap args) throws WorkflowException {
+    public final void execute(WorkItem workItem, WorkflowSession workflowSession,
+                         MetaDataMap args) throws WorkflowException {
         final WorkflowData workflowData = workItem.getWorkflowData();
 
         final String type = workflowData.getPayloadType();
