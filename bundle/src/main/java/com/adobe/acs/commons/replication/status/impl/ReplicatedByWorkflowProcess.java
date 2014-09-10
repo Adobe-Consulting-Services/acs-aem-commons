@@ -37,6 +37,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -61,6 +62,7 @@ import java.util.Map;
                 description = "Sets the Replicated By Property on the payload to the Workflow Initiator"
         )
 })
+@Service
 public class ReplicatedByWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(ReplicatedByWorkflowProcess.class);
 
