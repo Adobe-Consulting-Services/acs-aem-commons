@@ -132,7 +132,11 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         } else if (StringUtils.equals(request.getHeader("X-Requested-With"), "XMLHttpRequest")) {
             // Do not inject into XHR requests
             return false;
+        } else if(StringUtils.endsWith(request.getHeader("Referer"), "/editor.html" + request.getRequestURI())) {
+            // Do not apply to pages loaded in the TouchUI editor.html
+            return false;
         }
+
         return true;
     }
 
