@@ -89,7 +89,7 @@ public class EnvironmentIndicatorFitler implements Filter {
                     final PrintWriter printWriter = response.getWriter();
 
                     printWriter.write(contents.substring(0, bodyIndex));
-                    printWriter.write("<div style=\"" + style + "\"></div>");
+                    printWriter.write("<div id=\"acs-aem-commons-env-indicator\" style=\"" + style + "\"></div>");
                     printWriter.write(contents.substring(bodyIndex));
                     return;
                 }
