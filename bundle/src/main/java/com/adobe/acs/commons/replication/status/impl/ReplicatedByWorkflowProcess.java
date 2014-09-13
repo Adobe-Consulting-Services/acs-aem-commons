@@ -133,7 +133,6 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
         } catch (LoginException e) {
             log.error("Could not acquire a ResourceResolver object from the Workflow Session's JCR Session: {}",
                     e.getMessage());
-            e.printStackTrace();
         } catch (PersistenceException e) {
             log.error("Could not save replicateBy property for payload [ {} ] due to: {}", path, e.getMessage());
         }
