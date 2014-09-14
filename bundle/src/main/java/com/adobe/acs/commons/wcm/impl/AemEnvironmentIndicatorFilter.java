@@ -1,11 +1,15 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.BufferingResponse;
+import com.adobe.acs.commons.xss.XSSFunctions;
+import com.adobe.granite.xss.XSSAPI;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
@@ -54,42 +58,54 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             + "height: 5px;"
             + "z-index: 100000000000000;";
 
+
+    @Reference
+    private XSSAPI xss;
+
     /* Property: Default Color */
 
-    private static final String DEFAULT_COLOR = "red";
 
-    private String color = DEFAULT_COLOR;
+    private String color = "";
 
     @Property(label = "Color",
             description = "The color of the indicator bar; takes any valid value"
                     + " for CSS's 'background-color' attribute."
                     + " This is ignored if a Style Override is provided.",
-            value = DEFAULT_COLOR)
+            value = "")
     public static final String PROP_COLOR = "css-color";
 
      /* Property: CSS Override */
 
-    private static final String DEFAULT_CSS_OVERRIDE = "";
-
-    private String cssOverride = DEFAULT_CSS_OVERRIDE;
+    private String cssOverride = "";
 
     @Property(label = "CSS Override",
             description = "Accepts any valid CSS to style the AEM indicator div. All CSS rules must only be "
                     + "scoped to #" + DIV_ID + " { .. }",
-            value = DEFAULT_CSS_OVERRIDE)
+            value = "")
     public static final String PROP_CSS_OVERRIDE = "css-override";
 
      /* Property: Inner HTML */
 
-    private static final String DEFAULT_INNER_HTML = "";
-
-    private String innerHTML = DEFAULT_INNER_HTML;
+    private String innerHTML = "";
 
     @Property(label = "Inner HTML",
             description = "Any additional HTML required; Will be injected into a div with"
                     + " id='" + DIV_ID + "'",
-            value = DEFAULT_INNER_HTML)
+            value = "")
     public static final String PROP_INNER_HTML = "inner-html";
+
+
+    /* Property: Browser Title Prefix */
+
+    private static final String DEFAULT_TITLE_PREFIX = "";
+
+    private String titlePrefix = DEFAULT_TITLE_PREFIX;
+
+    @Property(label = "Browser Title",
+            description = "A prefix to add to the browser tab/window title; <THIS VALUE> | <ORIGINAL DOC TITLE>",
+            value = DEFAULT_TITLE_PREFIX)
+    public static final String PROP_TITLE_PREFIX = "browser-title-prefix";
+
 
     private static final String[] REJECT_PATH_PREFIXES = new String[]{
     };
@@ -135,8 +151,18 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                     final PrintWriter printWriter = response.getWriter();
 
                     printWriter.write(contents.substring(0, bodyIndex));
-                    printWriter.write("<style>" + css + " </style>");
-                    printWriter.write("<div id=\"" + DIV_ID + "\">" + innerHTML + "</div>");
+
+                    if (StringUtils.isNotBlank(css)) {
+                        printWriter.write("<style>" + css + " </style>");
+                        printWriter.write("<div id=\"" + DIV_ID + "\">" + innerHTML + "</div>");
+                    }
+
+                    if (StringUtils.isNotBlank(titlePrefix)) {
+                        printWriter.write("<script>document.title = '"
+                                + titlePrefix
+                                + " | ' + document.title;</script>");
+                    }
+
                     printWriter.write(contents.substring(bodyIndex));
                     return;
                 }
@@ -154,8 +180,12 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     }
 
     private boolean accepts(final HttpServletRequest request) {
-
-        if (!StringUtils.equalsIgnoreCase("get", request.getMethod())) {
+        if (StringUtils.isBlank(css) && StringUtils.isBlank(titlePrefix)) {
+            // Only accept is properly configured
+            log.warn("AEM Environment Indicator is not properly configured; If this feature is unwanted, "
+                    + "remove the OSGi configuration and disable completely.");
+            return false;
+        } else if (!StringUtils.equalsIgnoreCase("get", request.getMethod())) {
             // Only inject on GET requests
             return false;
         } else if (StringUtils.startsWithAny(request.getRequestURI(), REJECT_PATH_PREFIXES)) {
@@ -180,14 +210,25 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     @Activate
     protected final void activate(final Map<String, String> config) {
-        color = PropertiesUtil.toString(config.get(PROP_COLOR), DEFAULT_COLOR);
-        cssOverride = PropertiesUtil.toString(config.get(PROP_CSS_OVERRIDE), DEFAULT_CSS_OVERRIDE);
-        innerHTML = PropertiesUtil.toString(config.get(PROP_INNER_HTML), DEFAULT_INNER_HTML);
+        color = PropertiesUtil.toString(config.get(PROP_COLOR), "");
+        cssOverride = PropertiesUtil.toString(config.get(PROP_CSS_OVERRIDE), "");
+        innerHTML = PropertiesUtil.toString(config.get(PROP_INNER_HTML), "");
 
-        if (StringUtils.isBlank(cssOverride)) {
-            css = createCSS(color);
-        } else {
+        // Only write CSS variable if cssOverride or color is provided
+        if (StringUtils.isNotBlank(cssOverride)) {
             css = cssOverride;
+        } else if (StringUtils.isNotBlank(color)) {
+            css = createCSS(color);
         }
+
+        titlePrefix = XSSFunctions.encodeForJSString(xss,
+                PropertiesUtil.toString(config.get(PROP_TITLE_PREFIX), "")).toString();
+    }
+
+
+    @Deactivate
+    protected final void deactivate(final Map<String, String> config) {
+        // Reset CSS variable
+        css = "";
     }
 }
