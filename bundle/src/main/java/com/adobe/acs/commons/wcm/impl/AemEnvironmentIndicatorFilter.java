@@ -74,7 +74,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private String cssOverride = DEFAULT_CSS_OVERRIDE;
 
     @Property(label = "CSS Override",
-            description = "Accepts any valid CSS for the indicator DIV's css attribute. All CSS rules must only be "
+            description = "Accepts any valid CSS to style the AEM indicator div. All CSS rules must only be "
                     + "scoped to #" + DIV_ID + " { .. }",
             value = DEFAULT_CSS_OVERRIDE)
     public static final String PROP_CSS_OVERRIDE = "css-override";
