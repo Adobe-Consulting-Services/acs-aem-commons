@@ -1,6 +1,6 @@
 /*
  * #%L
- * ACS AEM Tools Bundle
+ * ACS AEM Commons Bundle
  * %%
  * Copyright (C) 2014 Adobe
  * %%
@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
         label = "ACS AEM Commons - OSGI Component Disabler", description = "Disables components by configuration",
         policy = ConfigurationPolicy.REQUIRE)
 @Service()
-@Property(name = "event.topics", value = { "/org/osgi/framework/BundleEvent/STARTED",
+@Property(name = "event.topics", value = { "org/osgi/framework/BundleEvent/STARTED",
         "org/osgi/framework/ServiceEvent/REGISTERED" }, propertyPrivate = true)
 public class ComponentDisabler implements EventHandler {
 
