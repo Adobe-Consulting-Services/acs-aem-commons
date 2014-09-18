@@ -148,10 +148,8 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
             Resource child = children.next();
             ValueMap map = child.adaptTo(ValueMap.class);
             Date date = map.get("modifiedDate", Date.class);
-            if (date != null) {
-                if (date.after(yesterday)) {
-                    yesterdayCounter++;
-                }
+            if (date != null && date.after(yesterday)) {
+                yesterdayCounter++;
             }
             counter++;
         }
