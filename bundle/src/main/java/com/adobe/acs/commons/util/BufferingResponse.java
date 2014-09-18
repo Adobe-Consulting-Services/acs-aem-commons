@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2014 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,24 @@
 
 package com.adobe.acs.commons.util;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+
+/**
+ * Generic HttpServletResponseWrapper which will buffer the output content
+ * to a buffer. Only 
+ *
+ */
 public final class BufferingResponse extends HttpServletResponseWrapper {
+
     private StringWriter stringWriter;
+    
+    private boolean outputStreamGotten;
 
     public BufferingResponse(final HttpServletResponse response) {
         super(response);
@@ -40,8 +50,21 @@ public final class BufferingResponse extends HttpServletResponseWrapper {
         }
         super.resetBuffer();
     }
+    
+    @Override
+    public ServletOutputStream getOutputStream() throws IOException {
+        if (this.stringWriter != null) {
+            throw new IllegalStateException("Cannot invoke getOutputStream() once getWriter() has been called.");
+        }
+        ServletOutputStream os = super.getOutputStream();
+        outputStreamGotten = true;
+        return os;
+    }
 
     public PrintWriter getWriter() throws IOException {
+        if (outputStreamGotten) {
+            throw new IllegalStateException("Cannot invoke getWriter once getOutputStream has been called.");
+        }
         if (stringWriter == null) {
             stringWriter = new StringWriter();
         }
