@@ -72,6 +72,7 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
             pw.println("<p class='statline ui-state-highlight'>Inbox Notification Configurations</p>");
             pw.println("<ul>");
 
+            @SuppressWarnings("deprecation")
             Iterator<Resource> configured = resolver
                     .findResources(
                             "/jcr:root//element(*, rep:User)/wcm/notification/config/subscriptions/element(*)[@channel='inbox']",
@@ -90,13 +91,14 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
             pw.println("<table class='content'>");
             pw.println("<tr><th class='content'>Path</th><th class='content'>Count</th><th class='content'>In Last 24 Hours</th><th></th></tr>");
 
+            @SuppressWarnings("deprecation")
             Iterator<Resource> inboxes = resolver.findResources(
                     "/jcr:root//element(*, rep:User)/wcm/notification/inbox", Query.XPATH);
             while (inboxes.hasNext()) {
                 Resource inbox = inboxes.next();
                 long[] childCount = countChildren(inbox, yesterday);
                 pw.printf(
-                        "<tr><td class='content'>%s</td><td class='content'>%s</td><td class='content'>%s</td><td><form method='POST' action=''><input type='hidden' name='path' value='%s'><input type='submit' value='Clear'></form></td></tr>\n",
+                        "<tr><td class='content'>%s</td><td class='content'>%s</td><td class='content'>%s</td><td><form method='POST' action=''><input type='hidden' name='path' value='%s'><input type='submit' value='Clear'></form></td></tr>%n",
                         inbox.getPath(), childCount[0], childCount[1], inbox.getPath());
             }
 
@@ -128,7 +130,7 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
                 }
                 session.save();
 
-                resp.getWriter().printf("<p class='statline ui-state-error'>Deleted %s notifications</p>\n", counter);
+                resp.getWriter().printf("<p class='statline ui-state-error'>Deleted %s notifications</p>%n", counter);
             } catch (Exception e) {
                 throw new ServletException(e);
             } finally {

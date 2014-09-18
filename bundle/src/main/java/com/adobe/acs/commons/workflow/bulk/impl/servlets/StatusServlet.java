@@ -39,6 +39,7 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
 
+@SuppressWarnings("serial")
 @SlingServlet(
         label = "ACS AEM Commons - Bulk Workflow Manager - Status Servlet",
         methods = { "GET" },
@@ -115,7 +116,6 @@ public class StatusServlet extends SlingAllMethodsServlet {
                     properties.get(BulkWorkflowEngine.KEY_COMPLETED_AT, Date.class));
 
             final Resource currentBatch = bulkWorkflowEngine.getCurrentBatch(request.getResource());
-            final ValueMap currentBatchProperties = currentBatch.adaptTo(ValueMap.class);
 
             if (currentBatch != null) {
                 json.put(BulkWorkflowEngine.KEY_CURRENT_BATCH, currentBatch.getPath());
@@ -123,10 +123,12 @@ public class StatusServlet extends SlingAllMethodsServlet {
                 for (final Resource child : currentBatch.getChildren()) {
                     json.accumulate("currentBatchItems", new JSONObject(child.adaptTo(ValueMap.class)));
                 }
-            }
 
-            json.put(BulkWorkflowEngine.KEY_BATCH_TIMEOUT_COUNT, currentBatchProperties.get(BulkWorkflowEngine
-                    .KEY_BATCH_TIMEOUT_COUNT, 1));
+                final ValueMap currentBatchProperties = currentBatch.adaptTo(ValueMap.class);
+
+                json.put(BulkWorkflowEngine.KEY_BATCH_TIMEOUT_COUNT, currentBatchProperties.get(BulkWorkflowEngine
+                        .KEY_BATCH_TIMEOUT_COUNT, 1));
+            }
 
             response.getWriter().write(json.toString());
 
