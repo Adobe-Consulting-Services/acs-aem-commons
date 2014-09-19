@@ -96,7 +96,7 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
                 Resource inbox = inboxes.next();
                 long[] childCount = countChildren(inbox, yesterday);
                 pw.printf(
-                        "<tr><td class='content'>%s</td><td class='content'>%s</td><td class='content'>%s</td><td><form method='POST' action=''><input type='hidden' name='path' value='%s'><input type='submit' value='Clear'></form></td></tr>\n",
+                        "<tr><td class='content'>%s</td><td class='content'>%s</td><td class='content'>%s</td><td><form method='POST' action=''><input type='hidden' name='path' value='%s'><input type='submit' value='Clear'></form></td></tr>%n",
                         inbox.getPath(), childCount[0], childCount[1], inbox.getPath());
             }
 
@@ -128,7 +128,7 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
                 }
                 session.save();
 
-                resp.getWriter().printf("<p class='statline ui-state-error'>Deleted %s notifications</p>\n", counter);
+                resp.getWriter().printf("<p class='statline ui-state-error'>Deleted %s notifications</p>%n", counter);
             } catch (Exception e) {
                 throw new ServletException(e);
             } finally {
@@ -148,10 +148,8 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
             Resource child = children.next();
             ValueMap map = child.adaptTo(ValueMap.class);
             Date date = map.get("modifiedDate", Date.class);
-            if (date != null) {
-                if (date.after(yesterday)) {
-                    yesterdayCounter++;
-                }
+            if (date != null && date.after(yesterday)) {
+                yesterdayCounter++;
             }
             counter++;
         }
