@@ -207,14 +207,6 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
         workingDir = resolveWorkingDir(slingHome, (String) ctx.getProperties().get(PROP_WORKING_DIR));
     }
 
-    /**
-     * creates a temporary directory in the given dir.
-     * 
-     * @param parentDir
-     *            parent directory in which temporary directory is to be created
-     * 
-     * @return a temporary directory
-     */
     protected final File createTempDir(File parentDir) throws IOException {
         File tempDir = null;
         try {

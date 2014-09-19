@@ -25,6 +25,9 @@ import java.util.concurrent.Callable;
  * Utility class for executing a particular task with a set Thread Context Class Loader.
  */
 public final class ThreadContextClassLoaderTaskExecutor {
+    
+    private ThreadContextClassLoaderTaskExecutor() {
+    }
 
     /**
      * Execute the task while the Thread Context Class Loader is set to the provided
@@ -32,6 +35,7 @@ public final class ThreadContextClassLoaderTaskExecutor {
      * 
      * @param classLoader the requested class loader
      * @param task the task
+     * @param <V> the return type of the task
      * @return the return value
      * @throws Exception the exception throw, if any, by the task
      */

@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>1.6.3-SNAPSHOT</version>
+        <version>1.7.5-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -59,15 +59,6 @@
                 <configuration>
                     <slingUrl>http://${crx.host}:${crx.port}/apps/acs-commons/install</slingUrl>
                     <usePut>true</usePut>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <excludePackageNames>
-                        *.impl
-                    </excludePackageNames>
                 </configuration>
             </plugin>
         </plugins>
@@ -136,7 +127,6 @@
         <dependency>
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
-            <version>3.0.5</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>

@@ -31,6 +31,7 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.foundation.Image;
 import com.day.image.Layer;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -55,12 +56,14 @@ import javax.imageio.ImageIO;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("serial")
 @Component(
         label = "ACS AEM Commons - Named Transform Image Servlet",
         description = "Transform images programatically by applying a named transform to the requested Image.",
@@ -168,11 +171,11 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final NamedImageTransformer namedImageTransformer = this.namedImageTransformers.get(transformName);
 
         final Image image = this.resolveImage(request);
-        final Layer layer = this.getLayer(image);
         final String mimeType = this.getMimeType(request, image);
-
+        Layer layer = this.getLayer(image);
+        
         // Transform the image
-        namedImageTransformer.transform(layer);
+        layer = namedImageTransformer.transform(layer);
 
         final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
         response.setContentType(mimeType);

@@ -125,6 +125,7 @@ public class ReplicateVersionImplTest {
         final Resource res1 = mock(Resource.class);
         final Resource res2 = mock(Resource.class);
 
+        @SuppressWarnings("unchecked")
         final Iterator<Resource> itr = mock(Iterator.class);
         when(resourceResolver.listChildren(res)).thenReturn(itr);
         when(itr.hasNext()).thenReturn(true, true, false);

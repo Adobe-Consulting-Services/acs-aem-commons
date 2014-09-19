@@ -24,6 +24,7 @@ import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.Version;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -42,6 +43,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.Session;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -81,6 +83,7 @@ public class ACLPackagerServletImplTest {
     @InjectMocks
     ACLPackagerServletImpl aclPackagerServlet;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
 
@@ -216,6 +219,7 @@ public class ACLPackagerServletImplTest {
             return this.results.iterator();
         }
 
+        @SuppressWarnings("unchecked")
         public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
             return (AdapterType) session;
         }
@@ -243,6 +247,7 @@ public class ACLPackagerServletImplTest {
             return this.results.iterator();
         }
 
+        @SuppressWarnings("unchecked")
         public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
             return (AdapterType) session;
         }

@@ -132,5 +132,6 @@ ACS.CQ.form.DDPathField = CQ.Ext.extend(CQ.form.PathField, {
         }
     }
 });
+ACS.CQ.form.DDPathField.prototype.getDropTargets = CQ.Ext.form.Field.prototype.getDropTargets;
 
 CQ.Ext.reg("ddpathfield", ACS.CQ.form.DDPathField);

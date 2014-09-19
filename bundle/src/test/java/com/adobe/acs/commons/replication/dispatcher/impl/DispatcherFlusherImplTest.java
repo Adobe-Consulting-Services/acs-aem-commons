@@ -27,6 +27,7 @@ import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
+
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.After;
@@ -37,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import javax.jcr.Session;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -130,6 +132,7 @@ public class DispatcherFlusherImplTest {
         final AgentConfig agentConfig1 = mock(AgentConfig.class);
         final AgentConfig agentConfig2 = mock(AgentConfig.class);
 
+        @SuppressWarnings("unchecked")
         final Map<String, Agent> agents = mock(Map.class);
         final Collection<Agent> agentValues = Arrays.asList(new Agent[]{ agent1, agent2 });
 

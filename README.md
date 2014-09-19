@@ -33,7 +33,7 @@ Watch this space.
 ## Rules
 
 * Spaces, not tabs.
-* Provide documentation in the gh-pages branch.
+* Provide documentation in the parent org GH project: https://github.com/Adobe-Consulting-Services/adobe-consulting-services.github.io
 * Target AEM 5.6. If it works on 5.5, super. But don't go out of your way.
 * API classes and interfaces must have JavaDocs. Not necessary for implementation classes.
 * Don't use author tags. This is a community project.

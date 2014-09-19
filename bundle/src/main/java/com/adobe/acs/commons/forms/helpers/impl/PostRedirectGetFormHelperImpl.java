@@ -186,7 +186,6 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      * @param request
      * @return
      */
-    @SuppressWarnings({ "unchecked" })
     protected final Form getGetForm(final String formName, final SlingHttpServletRequest request) {
         Map<String, String> data = new HashMap<String, String>();
         Map<String, String> errors = new HashMap<String, String>();

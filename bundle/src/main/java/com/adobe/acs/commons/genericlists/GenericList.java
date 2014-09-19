@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.genericlists;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -47,6 +48,16 @@ public interface GenericList {
     String lookupTitle(String value);
 
     /**
+     * Get an item's localized title by its value.
+     * 
+     * @param value the list item's value
+     * @param locale the locale for localization
+     * @return the title or null
+     */
+    @CheckForNull
+    String lookupTitle(String value, Locale locale);
+
+    /**
      * A generic item/value pair within a list.
      *
      */
@@ -59,6 +70,16 @@ public interface GenericList {
          */
         @Nonnull
         String getTitle();
+
+        /**
+         * Get the item's localized title.
+         * 
+         * @param locale the locale for localization
+         * 
+         * @return the title
+         */
+        @Nonnull
+        String getTitle(Locale locale);
 
         /**
          * Get the item's value.

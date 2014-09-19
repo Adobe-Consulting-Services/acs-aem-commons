@@ -22,6 +22,7 @@ package com.adobe.acs.commons.packaging;
 
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageManager;
+import com.day.jcr.vault.packaging.PackageException;
 import com.day.jcr.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
@@ -29,6 +30,7 @@ import org.apache.sling.commons.json.JSONException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -118,6 +120,15 @@ public interface PackageHelper {
                                      final ConflictResolution conflictResolution,
                                      final Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException;
+
+    /**
+     * returns a list of the JCR resource paths includes in the built JcrPackage
+     * @param jcrPackage the jcr package
+     * @return a list of absolute (starting with /) paths of the JCR resources included in the package
+     * @throws IOException
+     * @throws RepositoryException
+     */
+    List<String> getContents(JcrPackage jcrPackage) throws IOException, RepositoryException, PackageException;
 
     /**
      * Returns the JSON to return in the event of a successful packaging.

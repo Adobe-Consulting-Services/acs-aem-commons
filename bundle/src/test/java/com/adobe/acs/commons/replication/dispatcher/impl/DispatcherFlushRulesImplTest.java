@@ -75,10 +75,7 @@ public class DispatcherFlushRulesImplTest {
 
     @After
     public void tearDown() throws Exception {
-        reset(dispatcherFlusher);
-        reset(resourceResolverFactory);
-        reset(hierarchicalFlushRules);
-        reset(resourceOnlyFlushRules);
+        reset(dispatcherFlusher, resourceResolverFactory, hierarchicalFlushRules, resourceOnlyFlushRules);
     }
 
     @Test
