@@ -24,7 +24,7 @@ import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.Version;
-
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -43,7 +43,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.Session;
-
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -110,7 +110,7 @@ public class ACLPackagerServletImplTest {
 
         when(packageHelper.getSuccessJSON(any(JcrPackage.class))).thenReturn("{\"status\": \"success\"}");
         when(packageHelper.getErrorJSON(any(String.class))).thenReturn("{\"status\": \"error\"}");
-        when(packageHelper.getPreviewJSON(any(Set.class))).thenReturn("{\"status\": \"preview\"}");
+        when(packageHelper.getPathFilterSetPreviewJSON(any(Collection.class))).thenReturn("{\"status\": \"preview\"}");
     }
 
     @After
@@ -161,7 +161,10 @@ public class ACLPackagerServletImplTest {
         request.setResource(contentResource);
 
         aclPackagerServlet.doPost(request, response);
-        final JSONObject actual = new JSONObject(response.getOutput().toString());
+        String tmp = response.getOutput().toString();
+        System.out.println(tmp);
+        final JSONObject actual = new JSONObject(tmp);
+
         assertEquals("preview", actual.optString("status", "error"));
     }
 
@@ -215,8 +218,38 @@ public class ACLPackagerServletImplTest {
             this.addResource(new MockResource(this, "/home/groups/authors/rep:policy/allow0", ""));
         }
 
+        @Override
+        public Iterable<Resource> getChildren(final Resource resource) {
+            return null;
+        }
+
         public Iterator<Resource> findResources(String query, String language) {
             return this.results.iterator();
+        }
+
+        @Override
+        public void delete(final Resource resource) throws PersistenceException {
+
+        }
+
+        @Override
+        public Resource create(final Resource resource, final String s, final Map<String, Object> stringObjectMap) throws PersistenceException {
+            return null;
+        }
+
+        @Override
+        public void revert() {
+
+        }
+
+        @Override
+        public void commit() throws PersistenceException {
+
+        }
+
+        @Override
+        public boolean hasChanges() {
+            return false;
         }
 
         @SuppressWarnings("unchecked")
@@ -243,8 +276,38 @@ public class ACLPackagerServletImplTest {
             }
         }
 
+        @Override
+        public Iterable<Resource> getChildren(final Resource resource) {
+            return null;
+        }
+
         public Iterator<Resource> findResources(String query, String language) {
             return this.results.iterator();
+        }
+
+        @Override
+        public void delete(final Resource resource) throws PersistenceException {
+
+        }
+
+        @Override
+        public Resource create(final Resource resource, final String s, final Map<String, Object> stringObjectMap) throws PersistenceException {
+            return null;
+        }
+
+        @Override
+        public void revert() {
+
+        }
+
+        @Override
+        public void commit() throws PersistenceException {
+
+        }
+
+        @Override
+        public boolean hasChanges() {
+            return false;
         }
 
         @SuppressWarnings("unchecked")
