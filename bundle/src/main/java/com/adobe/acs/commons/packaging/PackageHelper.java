@@ -31,9 +31,9 @@ import org.apache.sling.commons.json.JSONException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Helper interface for dynamic package creation.
@@ -116,7 +116,7 @@ public interface PackageHelper {
      * @throws IOException
      * @throws RepositoryException
      */
-    JcrPackage createPackage(final List<PathFilterSet> pathFilterSets, final Session session,
+    JcrPackage createPackageFromPathFilterSets(final Collection<PathFilterSet> pathFilterSets, final Session session,
                              final String groupName, final String name, String version,
                              final ConflictResolution conflictResolution,
                              final Map<String, String> packageDefinitionProperties)
@@ -136,7 +136,7 @@ public interface PackageHelper {
      * @throws IOException
      * @throws RepositoryException
      */
-    JcrPackage createPackage(final Set<Resource> resources, final Session session,
+    JcrPackage createPackage(final Collection<Resource> resources, final Session session,
                                      final String groupName, final String name, String version,
                                      final ConflictResolution conflictResolution,
                                      final Map<String, String> packageDefinitionProperties)
@@ -167,7 +167,7 @@ public interface PackageHelper {
      * @return a string representation of JSON to write to response
      * @throws JSONException
      */
-    String getPreviewJSON(final Set<Resource> resources) throws JSONException;
+    String getPreviewJSON(final Collection<Resource> resources) throws JSONException;
 
 
     /**
@@ -177,7 +177,7 @@ public interface PackageHelper {
      * @return a string representation of JSON to write to response
      * @throws JSONException
      */
-    String getPreviewJSON(final List<PathFilterSet> pathFilterSets) throws JSONException;
+    String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets) throws JSONException;
 
 
     /**

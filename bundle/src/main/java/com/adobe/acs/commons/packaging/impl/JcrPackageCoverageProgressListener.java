@@ -26,19 +26,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JcrPackageCoverageProgressListener implements ProgressTrackerListener {
-    final List<String> coverage = new ArrayList<String>();
+    private final List<String> coverage = new ArrayList<String>();
 
     @Override
-    public void onMessage(final Mode mode, final String action, final String path) {
+    public final void onMessage(final Mode mode, final String action, final String path) {
         coverage.add(path);
     }
 
     @Override
-    public void onError(final Mode mode, final String path, final Exception e) {
+    public final void onError(final Mode mode, final String path, final Exception e) {
 
     }
 
-    final public List<String> getCoverage() {
+    public final List<String> getCoverage() {
         return coverage;
     }
 }

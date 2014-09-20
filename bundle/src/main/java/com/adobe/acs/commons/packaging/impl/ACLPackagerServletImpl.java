@@ -28,7 +28,6 @@ import com.day.jcr.vault.fs.filter.DefaultPathFilter;
 import com.day.jcr.vault.fs.io.AccessControlHandling;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import com.day.jcr.vault.packaging.Packaging;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
@@ -48,7 +47,15 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +66,7 @@ import java.util.regex.Pattern;
                 + "configuration.",
         methods = { "POST" },
         resourceTypes = { "acs-commons/components/utilities/packager/acl-packager" },
-        selectors =  {"package" },
+        selectors = { "package" },
         extensions = { "json" }
 )
 public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
@@ -106,9 +113,6 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
             "/apps/acs-commons/components/utilities/packager/acl-packager/definition/package-thumbnail.png";
 
     @Reference
-    private Packaging packaging;
-
-    @Reference
     private PackageHelper packageHelper;
 
     @Override
@@ -118,7 +122,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
         final ResourceResolver resourceResolver = request.getResourceResolver();
         final boolean preview = Boolean.parseBoolean(request.getParameter("preview"));
 
-        log.debug("Preview mode: {}", preview);
+        log.trace("Preview mode: {}", preview);
 
         final ValueMap properties = this.getProperties(request);
 
@@ -155,14 +159,14 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
             if (preview) {
                 // Handle preview mode
-                response.getWriter().print(packageHelper.getPreviewJSON(packageResources));
+                response.getWriter().print(packageHelper.getPathFilterSetPreviewJSON(packageResources));
             } else if (packageResources == null || packageResources.isEmpty()) {
                 // Do not create empty packages; This will only clutter up CRX Package Manager
                 response.getWriter().print(packageHelper.getErrorJSON("Refusing to create a package with no filter "
                         + "set rules."));
             } else {
                 // Create JCR Package; Defaults should always be passed in via Request Parameters, but just in case
-                final JcrPackage jcrPackage = packageHelper.createPackage(packageResources,
+                final JcrPackage jcrPackage = packageHelper.createPackageFromPathFilterSets(packageResources,
                         request.getResourceResolver().adaptTo(Session.class),
                         properties.get(PACKAGE_GROUP_NAME, DEFAULT_PACKAGE_GROUP_NAME),
                         properties.get(PACKAGE_NAME, DEFAULT_PACKAGE_NAME),
@@ -211,8 +215,8 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
      * enumerated in principleNames
      */
     private List<PathFilterSet> findResources(final ResourceResolver resourceResolver,
-                                        final List<String> principalNames,
-                                        final List<Pattern> includePatterns) {
+                                              final List<String> principalNames,
+                                              final List<Pattern> includePatterns) {
 
         final Set<Resource> resources = new TreeSet<Resource>(resourceComparator);
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
@@ -247,7 +251,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
             }
         }
 
-        for(final Resource resource : resources) {
+        for (final Resource resource : resources) {
             pathFilterSets.add(new PathFilterSet(resource.getPath()));
         }
 
@@ -265,7 +269,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
      * @throws RepositoryException
      */
     private List<PathFilterSet> getPrincipalResources(final ResourceResolver resourceResolver,
-                                                 final String[] principalNames) throws RepositoryException {
+                                                      final String[] principalNames) throws RepositoryException {
         final UserManager userManager = resourceResolver.adaptTo(UserManager.class);
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
@@ -276,7 +280,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
                 if (resource != null) {
                     final PathFilterSet principal = new PathFilterSet(resource.getPath());
                     // Exclude tokens as they are not vlt installable in AEM6/Oak
-                    principal.addExclude(new DefaultPathFilter(resource.getPath()+ "/\\.tokens"));
+                    principal.addExclude(new DefaultPathFilter(resource.getPath() + "/\\.tokens"));
                     pathFilterSets.add(principal);
                 }
             }

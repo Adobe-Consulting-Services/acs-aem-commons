@@ -279,7 +279,7 @@ public class PackageHelperImplTest {
     }
 
     @Test
-    public void testCreatePackage() throws Exception {
+         public void testCreatePackage() throws Exception {
 
         Map<String, String> properties = new HashMap<String, String>();
         Set<Resource> resources = new HashSet<Resource>();
@@ -292,6 +292,26 @@ public class PackageHelperImplTest {
         // Verify the session was saved, creating the package
         verify(session, times(1)).save();
     }
+
+
+    @Test
+    public void testCreatePackageFromPathFilterSets() throws Exception {
+        Map<String, String> properties = new HashMap<String, String>();
+
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
+        pathFilterSets.add(new PathFilterSet("/a/b/c"));
+        pathFilterSets.add(new PathFilterSet("/d/e/f"));
+        pathFilterSets.add(new PathFilterSet("/g/h/i"));
+
+        when(jcrPackageManager.create(packageGroup, packageName, packageOneVersion)).thenReturn(packageOne);
+
+        packageHelper.createPackageFromPathFilterSets(pathFilterSets, session, packageGroup, packageName, packageOneVersion,
+                PackageHelper.ConflictResolution.None, properties);
+
+        // Verify the session was saved, creating the package
+        verify(session, times(1)).save();
+    }
+
 
     @Test
     public void testGetSuccessJSON() throws Exception {
@@ -329,6 +349,36 @@ public class PackageHelperImplTest {
 
 
         final String actual = packageHelper.getPreviewJSON(resources);
+        final JSONObject json = new JSONObject(actual);
+
+        assertEquals("preview", json.getString("status"));
+        assertEquals("Not applicable (Preview)", json.getString("path"));
+
+        final String[] expectedFilterSets = new String[]{
+                "/a/b/c",
+                "/d/e/f",
+                "/g/h/i"
+        };
+
+        JSONArray actualArray = json.getJSONArray("filterSets");
+        for(int i = 0; i < actualArray.length(); i++) {
+            JSONObject tmp = actualArray.getJSONObject(i);
+            assertTrue(ArrayUtils.contains(expectedFilterSets, tmp.get("rootPath")));
+        }
+
+        assertEquals(expectedFilterSets.length, actualArray.length());
+    }
+
+
+
+    @Test
+    public void testGetPathFilterSetPreviewJSON() throws Exception {
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
+        pathFilterSets.add(new PathFilterSet("/a/b/c"));
+        pathFilterSets.add(new PathFilterSet("/d/e/f"));
+        pathFilterSets.add(new PathFilterSet("/g/h/i"));
+
+        final String actual = packageHelper.getPathFilterSetPreviewJSON(pathFilterSets);
         final JSONObject json = new JSONObject(actual);
 
         assertEquals("preview", json.getString("status"));

@@ -20,5 +20,5 @@
 /**
  * Dispatcher utilities.
  */
-@aQute.bnd.annotation.Version("1.7.4")
+@aQute.bnd.annotation.Version("1.8.4")
 package com.adobe.acs.commons.packaging;
