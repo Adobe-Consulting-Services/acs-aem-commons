@@ -23,11 +23,12 @@ package com.adobe.acs.commons.packaging.impl;
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
+import com.day.jcr.vault.fs.api.PathFilterSet;
+import com.day.jcr.vault.fs.filter.DefaultPathFilter;
 import com.day.jcr.vault.fs.io.AccessControlHandling;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
 import com.day.jcr.vault.packaging.Packaging;
-
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
@@ -46,17 +47,8 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -132,7 +124,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
         final String[] principalNames = properties.get(PRINCIPAL_NAMES, new String[]{});
 
-        final Set<Resource> packageResources = this.findResources(resourceResolver,
+        final List<PathFilterSet> packageResources = this.findResources(resourceResolver,
                 Arrays.asList(principalNames),
                 toPatterns(Arrays.asList(properties.get(INCLUDE_PATTERNS, new String[]{}))));
 
@@ -144,7 +136,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
             // Add the ACL Packager Configuration page
             if (properties.get(INCLUDE_CONFIGURATION, DEFAULT_INCLUDE_CONFIGURATION)) {
-                final Resource tmp = this.getACLPackagerPageResource(request);
+                final PathFilterSet tmp = this.getACLPackagerPageResource(request);
                 if (tmp != null) {
                     packageResources.add(tmp);
                 }
@@ -215,13 +207,15 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
      * @param resourceResolver ResourceResolver of initiating user
      * @param principalNames   Principal Names to filter rep:ACE nodes with; Only rep:ACE nodes with children
      *                         with rep:principalNames in this list will be returned
-     * @return Set (ordered by path) of rep:ACE nodes who hold permissions for at least one Principal
+     * @return Set (ordered by path) of rep:ACE coverage who hold permissions for at least one Principal
      * enumerated in principleNames
      */
-    private Set<Resource> findResources(final ResourceResolver resourceResolver,
+    private List<PathFilterSet> findResources(final ResourceResolver resourceResolver,
                                         final List<String> principalNames,
                                         final List<Pattern> includePatterns) {
+
         final Set<Resource> resources = new TreeSet<Resource>(resourceComparator);
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
         final Iterator<Resource> repPolicies = resourceResolver.findResources(QUERY, QUERY_LANG);
 
@@ -244,15 +238,21 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
                 if (principalNames == null
                         || principalNames.isEmpty()
                         || principalNames.contains(repPrincipalName)) {
+
                     resources.add(repPolicy);
+
                     log.debug("Included by principal [ {} ]", repPolicy.getPath());
                     break;
                 }
             }
         }
 
-        log.debug("Found {} matching rep:policy resources.", resources.size());
-        return resources;
+        for(final Resource resource : resources) {
+            pathFilterSets.add(new PathFilterSet(resource.getPath()));
+        }
+
+        log.debug("Found {} matching rep:policy resources.", pathFilterSets.size());
+        return pathFilterSets;
     }
 
     /**
@@ -261,40 +261,43 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
      * @param resourceResolver the ResourceResolver obj to get the principal resources;
      *                         Must have read access to the principal resources.
      * @param principalNames   the principals to get
-     * @return a list of resources that represent the principals that match to the principalNames
+     * @return a list of PathFilterSets covering the selectes principal names (if they exist)
      * @throws RepositoryException
      */
-    private List<Resource> getPrincipalResources(final ResourceResolver resourceResolver,
+    private List<PathFilterSet> getPrincipalResources(final ResourceResolver resourceResolver,
                                                  final String[] principalNames) throws RepositoryException {
         final UserManager userManager = resourceResolver.adaptTo(UserManager.class);
-        final List<Resource> resources = new ArrayList<Resource>();
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
         for (final String principalName : principalNames) {
             final Authorizable authorizable = userManager.getAuthorizable(principalName);
             if (authorizable != null) {
                 final Resource resource = resourceResolver.getResource(authorizable.getPath());
                 if (resource != null) {
-                    resources.add(resource);
+                    final PathFilterSet principal = new PathFilterSet(resource.getPath());
+                    // Exclude tokens as they are not vlt installable in AEM6/Oak
+                    principal.addExclude(new DefaultPathFilter(resource.getPath()+ "/\\.tokens"));
+                    pathFilterSets.add(principal);
                 }
             }
         }
 
-        return resources;
+        return pathFilterSets;
     }
 
     /**
      * Gets the ACL Packager Page resource.
      *
      * @param request the Sling HTTP Servlet Request object
-     * @return a the resource representing the cq:Page or null
+     * @return a the PathFilterSet wrapping the cq:Page or null
      */
-    private Resource getACLPackagerPageResource(final SlingHttpServletRequest request) {
+    private PathFilterSet getACLPackagerPageResource(final SlingHttpServletRequest request) {
         final ResourceResolver resourceResolver = request.getResourceResolver();
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         final Page page = pageManager.getContainingPage(request.getResource());
 
         if (page != null) {
-            return resourceResolver.getResource(page.getPath());
+            return new PathFilterSet(page.getPath());
         }
 
         return null;
