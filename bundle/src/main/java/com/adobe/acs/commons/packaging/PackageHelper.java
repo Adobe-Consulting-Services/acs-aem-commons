@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.packaging;
 
+import com.day.jcr.vault.fs.api.PathFilterSet;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.PackageException;
@@ -103,6 +104,26 @@ public interface PackageHelper {
 
     /**
      *
+     * @param pathFilterSets the pathFilterSets that define package
+     * @param session JCR Session obj; must have access to create packages under /etc/packages
+     * @param groupName package group name
+     * @param name package name
+     * @param version package version
+     * @param conflictResolution determines how package creation will be handled in the event of an existing package
+     *                           of the same package group, package name, and version class
+     * @param packageDefinitionProperties properties that will be added to the package definition
+     * @return the jcr package that was created, or null
+     * @throws IOException
+     * @throws RepositoryException
+     */
+    JcrPackage createPackage(final List<PathFilterSet> pathFilterSets, final Session session,
+                             final String groupName, final String name, String version,
+                             final ConflictResolution conflictResolution,
+                             final Map<String, String> packageDefinitionProperties)
+            throws IOException, RepositoryException;
+
+    /**
+     *
      * @param resources the resources to include in the package
      * @param session JCR Session obj; must have access to create packages under /etc/packages
      * @param groupName package group name
@@ -147,6 +168,16 @@ public interface PackageHelper {
      * @throws JSONException
      */
     String getPreviewJSON(final Set<Resource> resources) throws JSONException;
+
+
+    /**
+     * Returns the JSON to return reporting what the packager definition will include for the filterSets.
+     *
+     * @param pathFilterSets the pathFilterSets of the package
+     * @return a string representation of JSON to write to response
+     * @throws JSONException
+     */
+    String getPreviewJSON(final List<PathFilterSet> pathFilterSets) throws JSONException;
 
 
     /**

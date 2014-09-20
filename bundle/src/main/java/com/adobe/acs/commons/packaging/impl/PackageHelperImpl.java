@@ -25,13 +25,7 @@ import com.day.cq.commons.jcr.JcrUtil;
 import com.day.jcr.vault.fs.api.PathFilterSet;
 import com.day.jcr.vault.fs.config.DefaultWorkspaceFilter;
 import com.day.jcr.vault.fs.io.ImportOptions;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import com.day.jcr.vault.packaging.JcrPackageManager;
-import com.day.jcr.vault.packaging.PackageException;
-import com.day.jcr.vault.packaging.PackageId;
-import com.day.jcr.vault.packaging.Packaging;
-import com.day.jcr.vault.packaging.Version;
+import com.day.jcr.vault.packaging.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -52,6 +46,7 @@ import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -234,6 +229,26 @@ public final class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public JcrPackage createPackage(final Set<Resource> resources, final Session session,
+                                    final String groupName, final String name, String version,
+                                    final ConflictResolution conflictResolution,
+                                    final Map<String, String> packageDefinitionProperties)
+            throws IOException, RepositoryException {
+
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
+
+        for(final Resource resource : resources) {
+            pathFilterSets.add(new PathFilterSet(resource.getPath()));
+        }
+
+        return this.createPackage(pathFilterSets, session, groupName, name, version,
+                conflictResolution, packageDefinitionProperties);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public JcrPackage createPackage(final List<PathFilterSet> pathFilterSets, final Session session,
                                           final String groupName, final String name, String version,
                                           final ConflictResolution conflictResolution,
                                           final Map<String, String> packageDefinitionProperties)
@@ -251,8 +266,8 @@ public final class PackageHelperImpl implements PackageHelper {
         final JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
         final DefaultWorkspaceFilter workspaceFilter = new DefaultWorkspaceFilter();
 
-        for (final Resource resource : resources) {
-            workspaceFilter.add(new PathFilterSet(resource.getPath()));
+        for (final PathFilterSet pathFilterSet : pathFilterSets) {
+            workspaceFilter.add(pathFilterSet);
         }
 
         jcrPackageDefinition.setFilter(workspaceFilter, true);
@@ -308,16 +323,30 @@ public final class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public String getPreviewJSON(final Set<Resource> resources) throws JSONException {
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
+
+        for(Resource resource : resources) {
+            pathFilterSets.add(new PathFilterSet(resource.getPath()));
+        }
+
+        return this.getPreviewJSON(pathFilterSets);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getPreviewJSON(final List<PathFilterSet> pathFilterSets) throws JSONException {
         final JSONObject json = new JSONObject();
 
         json.put("status", "preview");
         json.put("path", "Not applicable (Preview)");
         json.put("filterSets", new JSONArray());
 
-        for (final Resource resource : resources) {
+        for (final PathFilterSet pathFilterSet : pathFilterSets) {
             final JSONObject tmp = new JSONObject();
             tmp.put("importMode", "Not applicable (Preview)");
-            tmp.put("rootPath", resource.getPath());
+            tmp.put("rootPath", pathFilterSet.getRoot());
 
             json.accumulate("filterSets", tmp);
         }
