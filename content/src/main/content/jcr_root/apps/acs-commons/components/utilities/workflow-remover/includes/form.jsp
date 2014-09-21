@@ -50,7 +50,7 @@
             <table class="data">
                 <thead>
                 <tr>
-                    <th class="check"><label><input type="checkbox"><span></span></label></th>
+                    <th>&nbsp;</th>
                     <th>Workflow Model</th>
                 </tr>
                 </thead>
@@ -58,7 +58,6 @@
                 <tr ng-repeat="workflowModel in formOptions.workflowModels">
                     <td><label><input ng-bind="{{ workflowModel.id }}" type="checkbox"><span></span></label></td>
                     <td>{{ workflowModel.title }}</td>
-                    <td></td>
                 </tr>
                 </tbody>
 
@@ -76,22 +75,28 @@
         <span>
             <table class="data">
                 <thead>
-                <tr>
-                    <th class="check"><label><input type="checkbox"><span></span></label></th>
-                    <th>Payload Path Regex</th>
-                </tr>
+                    <tr>
+                        <th>Payload Path Regex</th>
+                        <th>&nbsp;</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="payload in form.payloads">
-                    <td><input type="text" value="payload.pattern"/></td>
-                    <td><a ng-click=""</td>
-                </tr>
+                    <tr ng-repeat="payload in form.payloads">
+                        <td><input type="text" ng-bind="payload.pattern"/></td>
+                        <td class="property-remove">
+                            <i      ng-show="form.payloads.length > 1"
+                                    ng-click="form.payloads.splice($index, 1)"
+                                    class="icon-minus-circle">Remove</i>
+                        </td>
+                    </tr>
                 </tbody>
                 <tfoot>
-                <tr>
-                    <td></td>
-                    <td><a ng-click="form.payloads.push({}}">Add</a></td>
-                </tr>
+                    <tr>
+                        <td colspan="2" class="property-add">
+                            <i ng-click="form.payloads.push({ pattern : '' })"
+                               class="icon-add-circle withLabel">Add Payload Pattern</i>
+                        </td>
+                    </tr>
                 </tfoot>
             </table>
         </span>

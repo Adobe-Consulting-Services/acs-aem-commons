@@ -29,6 +29,13 @@ angular.module('workflowRemover', [])
             running: false
         };
 
+        $scope.form = {
+            payloads: [{ pattern: '' }],
+            models: [],
+            statuses: []
+        };
+
+        $scope.formOptions = {};
 
         $scope.status = function () {
             $http({
@@ -83,18 +90,16 @@ angular.module('workflowRemover', [])
         };
 
         $scope.init = function () {
-            $scope.status = function () {
-                $http({
-                    method: 'GET',
-                    url: encodeURI($scope.app.resource + '.init.json')
+            $http({
+                method: 'GET',
+                url: encodeURI($scope.app.resource + '.init.json')
+            }).
+                success(function (data, status, headers, config) {
+                    $scope.formOptions = data || {};
                 }).
-                    success(function (data, status, headers, config) {
-                        $scope.formOptions = data || {};
-                    }).
-                    error(function (data, status, headers, config) {
-                        $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
-                    });
-            };
+                error(function (data, status, headers, config) {
+                    $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
+                });
         };
     }]);
 
