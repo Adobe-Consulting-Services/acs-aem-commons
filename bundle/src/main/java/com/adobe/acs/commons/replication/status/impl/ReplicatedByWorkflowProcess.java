@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
+import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.commons.util.DamUtil;
@@ -47,7 +48,9 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.RepositoryException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component(
@@ -71,6 +74,9 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
+    @Reference
+    private WorkflowPackageManager workflowPackageManager;
+
     @Override
     public final void execute(WorkItem workItem, WorkflowSession workflowSession,
                          MetaDataMap args) throws WorkflowException {
@@ -83,7 +89,7 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
             return;
         }
         // Get the path to the JCR resource from the payload
-        final String path = workflowData.getPayload().toString();
+        final String payloadPath = workflowData.getPayload().toString();
 
         // Get ResourceResolver
         final Map<String, Object> authInfo = new HashMap<String, Object>();
@@ -98,43 +104,52 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
                     "Unknown Workflow User");
 
             final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-            final Page page = pageManager.getContainingPage(path);
-            final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(path));
 
-            Resource resource = null;
+            final List<String> paths = workflowPackageManager.getPaths(resourceResolver, payloadPath);
 
-            if (page != null) {
-                // Page
-                resource = page.getContentResource();
-                log.trace("Candidate Page for setting replicateBy is [ {} ]", resource.getPath());
-            } else if (asset != null) {
-                // DAM Asset
-                final Resource assetResource = resourceResolver.getResource(asset.getPath());
-                resource = assetResource.getChild(JcrConstants.JCR_CONTENT);
-                log.trace("Candidate Asset for setting replicateBy is [ {} ]", resource.getPath());
-            } else {
-                // Some other resource
-                resource = resourceResolver.getResource(path);
-                log.trace("Candidate Resource for setting replicateBy is [ {} ]", resource.getPath());
-            }
+            for (final String path : paths) {
+                // For each item in the WF Package, or if not a WF Package, path = payloadPath
 
-            if (resource != null) {
-                final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
+                final Page page = pageManager.getContainingPage(path);
+                final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(path));
 
-                if (StringUtils.isNotBlank(mvm.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, String.class))) {
-                    mvm.put(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedBy);
-                    resourceResolver.commit();
-                    log.trace("Set replicateBy to [ {} ] on resource  [ {} ]", replicatedBy, resource.getPath());
+                Resource resource = null;
+
+                if (page != null) {
+                    // Page
+                    resource = page.getContentResource();
+                    log.trace("Candidate Page for setting replicateBy is [ {} ]", resource.getPath());
+                } else if (asset != null) {
+                    // DAM Asset
+                    final Resource assetResource = resourceResolver.getResource(asset.getPath());
+                    resource = assetResource.getChild(JcrConstants.JCR_CONTENT);
+                    log.trace("Candidate Asset for setting replicateBy is [ {} ]", resource.getPath());
                 } else {
-                    log.trace("Skipping; Resource does not have replicateBy property set  [ {} ]",
-                            resource.getPath());
+                    // Some other resource
+                    resource = resourceResolver.getResource(path);
+                    log.trace("Candidate Resource for setting replicateBy is [ {} ]", resource.getPath());
+                }
+
+                if (resource != null) {
+                    final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
+
+                    if (StringUtils.isNotBlank(mvm.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY,
+                            String.class))) {
+                        mvm.put(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedBy);
+                        resourceResolver.commit();
+                        log.trace("Set replicateBy to [ {} ] on resource  [ {} ]", replicatedBy, resource.getPath());
+                    } else {
+                        log.trace("Skipping; Resource does not have replicateBy property set  [ {} ]",
+                                resource.getPath());
+                    }
                 }
             }
         } catch (LoginException e) {
-            log.error("Could not acquire a ResourceResolver object from the Workflow Session's JCR Session: {}",
-                    e.getMessage());
+            log.error("Could not acquire a ResourceResolver object from the Workflow Session's JCR Session: {}", e);
         } catch (PersistenceException e) {
-            log.error("Could not save replicateBy property for payload [ {} ] due to: {}", path, e.getMessage());
+            log.error("Could not save replicateBy property for payload [ {} ] due to: {}", payloadPath, e);
+        } catch (RepositoryException e) {
+            log.error("Could not collect Workflow Package items for payload [ {} ] due to: {}", payloadPath, e);
         }
     }
 }
