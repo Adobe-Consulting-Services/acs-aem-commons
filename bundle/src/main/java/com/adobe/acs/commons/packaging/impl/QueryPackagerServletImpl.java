@@ -39,19 +39,15 @@ import org.apache.sling.commons.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
-import javax.jcr.query.QueryManager;
-import javax.jcr.query.QueryResult;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @SuppressWarnings("serial")
 @SlingServlet(
@@ -167,7 +163,7 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
      * Gets the properties saved to the Query Packager Page's jcr:content node.
      *
      * @param request the request obj
-     * @return a valuemap representing the properties
+     * @return a ValueMap representing the properties
      */
     private ValueMap getProperties(final SlingHttpServletRequest request) {
         if (request.getResource().getChild("configuration") == null) {
@@ -194,16 +190,11 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
                                          final String relPath) throws RepositoryException {
 
         final List<Resource> resources = new ArrayList<Resource>();
-        final Session session = resourceResolver.adaptTo(Session.class);
-        final QueryManager queryManager = session.getWorkspace().getQueryManager();
-        final Query query = queryManager.createQuery(statement, language);
-        final QueryResult queryResult = query.execute();
-        final NodeIterator nodeIterator = queryResult.getNodes();
 
-        while (nodeIterator.hasNext()) {
+        Iterator<Resource> resourceIterator = resourceResolver.findResources(statement, language);
 
-            final Node node = nodeIterator.nextNode();
-            final Resource resource = resourceResolver.getResource(node.getPath());
+        while (resourceIterator.hasNext()) {
+            final Resource resource = resourceIterator.next();
 
             if (resource != null) {
                 if (StringUtils.isNotBlank(relPath)) {
