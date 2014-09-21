@@ -45,6 +45,19 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                              final Collection<String> statuses,
                                              final Collection<Pattern> payloads,
                                              final Calendar olderThan) {
+        return removeWorkflowInstances(resourceResolver, models, statuses, payloads, olderThan, Integer.MAX_VALUE);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public final int removeWorkflowInstances(final ResourceResolver resourceResolver,
+                                             final Collection<String> models,
+                                             final Collection<String> statuses,
+                                             final Collection<Pattern> payloads,
+                                             final Calendar olderThan,
+                                             final int limit) {
+
         final long start = System.currentTimeMillis();
         final Resource folders = resourceResolver.getResource(WORKFLOW_INSTANCES_PATH);
         final Collection<Resource> sortedFolders = this.getSortedAndFilteredFolders(folders);
@@ -52,11 +65,17 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         int total = 0;
         int count = 0;
         for(final Resource folder : sortedFolders) {
+            if(total >= limit) {
+                break;
+            }
+
             int remaining = 0;
 
             for(final Resource instance : folder.getChildren()) {
 
-                if (!instance.isResourceType(NT_CQ_WORKFLOW)) {
+                if(total >= limit) {
+                    break;
+                } if (!instance.isResourceType(NT_CQ_WORKFLOW)) {
                     // Only process cq:Workflow's
                     remaining++;
                     continue;
@@ -138,10 +157,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             }
         }
 
-        if(count > 0 && count % BATCH_SIZE != 0) {
-            // Final batch size if needed
-            this.save(resourceResolver);
-        }
+        // Final batch size if needed
+        this.save(resourceResolver);
 
         log.info("Removed a total of [ {} ] workflow instances in [ {} ] ms", total, System.currentTimeMillis() - start);
 
@@ -167,10 +184,14 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     }
 
     private void save(ResourceResolver resourceResolver) {
-        final long start = System.currentTimeMillis();
         try {
-            resourceResolver.adaptTo(Session.class).save();
-            log.debug("Saving batch workflow instance removal in [ {} ] ms", System.currentTimeMillis() - start);
+            final Session session = resourceResolver.adaptTo(Session.class);
+
+            if(session.hasPendingChanges()) {
+                final long start = System.currentTimeMillis();
+                session.save();
+                log.debug("Saving batch workflow instance removal in [ {} ] ms", System.currentTimeMillis() - start);
+            }
         } catch (RepositoryException e) {
             log.error("Could not save batch workflow instance remove: {}", e);
         }
