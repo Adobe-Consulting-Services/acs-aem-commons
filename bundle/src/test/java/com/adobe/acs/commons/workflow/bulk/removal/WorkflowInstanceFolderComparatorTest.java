@@ -37,6 +37,25 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class WorkflowInstanceFolderComparatorTest {
 
     @Test
+    public void testCompare_Simple() throws Exception {
+        Resource one = mock(Resource.class);
+        Resource two = mock(Resource.class);
+
+        when(one.getName()).thenReturn("1980-09-16");
+        when(two.getName()).thenReturn("1980-09-16_1");
+
+        List<Resource> actual = new ArrayList<Resource>();
+
+        actual.add(two);
+        actual.add(one);
+
+        Collections.sort(actual, new WorkflowInstanceFolderComparator());
+
+        assertEquals(actual.get(0).getName(), one.getName());
+        assertEquals(actual.get(1).getName(), two.getName());
+    }
+
+    @Test
     public void testCompare() throws Exception {
 
         Resource one = mock(Resource.class);
@@ -45,11 +64,11 @@ public class WorkflowInstanceFolderComparatorTest {
         Resource four = mock(Resource.class);
         Resource five = mock(Resource.class);
 
-        when(one.getName()).thenReturn("2009_09_02_0");
-        when(two.getName()).thenReturn("2012_01_12_3");
-        when(three.getName()).thenReturn("2014_01_02_1");
-        when(four.getName()).thenReturn("2014_06_06_1");
-        when(five.getName()).thenReturn("2014_06_06_2");
+        when(one.getName()).thenReturn("2009-09-02_0");
+        when(two.getName()).thenReturn("2012-01-12");
+        when(three.getName()).thenReturn("2014-01-02_1");
+        when(four.getName()).thenReturn("2014-06-06");
+        when(five.getName()).thenReturn("2014-06-06_2");
 
         List<Resource> actual = new ArrayList<Resource>();
 
@@ -66,9 +85,5 @@ public class WorkflowInstanceFolderComparatorTest {
         assertEquals(actual.get(2).getName(), three.getName());
         assertEquals(actual.get(3).getName(), four.getName());
         assertEquals(actual.get(4).getName(), five.getName());
-
-
-
-
     }
 }

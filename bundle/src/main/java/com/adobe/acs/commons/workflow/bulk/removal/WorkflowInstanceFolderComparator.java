@@ -22,19 +22,49 @@ package com.adobe.acs.commons.workflow.bulk.removal;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
 
 public class WorkflowInstanceFolderComparator implements Comparator<Resource> {
-    @Override
-    public int compare(final Resource resource1, final Resource resource2) {
+    private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceFolderComparator.class);
 
-        final String[] segments1 = StringUtils.split(resource1.getName(), "_");
-        final String[] segments2 = StringUtils.split(resource2.getName(), "_");
+    private static final int MAX_SEGMENTS = 4; // YYYY-MM-DD_N
+
+    /**
+     * Compares resource names that are in the format YYYY-MM-DD_N where _N is an optional positive integer.
+     *
+     * Sorts in an ascending order.
+     *
+     * @param workflowFolder1 workflow folder 1
+     * @param workflowFolder2 workflow folder 2
+     * @return sort descending
+     */
+    @Override
+    public final int compare(final Resource workflowFolder1, final Resource workflowFolder2) {
+
+        final String[] segments1 = StringUtils.split(workflowFolder1.getName(), "-_");
+        final String[] segments2 = StringUtils.split(workflowFolder2.getName(), "-_");
 
         int result = 0;
-        for(int i = 0; i < segments1.length; i++) {
-            result = this.compare(segments1[0], segments2[0]);
+
+        for (int i = 0; i < MAX_SEGMENTS; i++) {
+            String seg1 = "-1";
+            String seg2 = "-1";
+
+            if (i < segments1.length) {
+                seg1 = segments1[i];
+            }
+
+            if (i < segments2.length) {
+                seg2 = segments2[i];
+            }
+
+            result = this.compare(seg1, seg2);
+
+            log.debug("{} vs {} => " + result, seg1, seg2);
+
             if (result != 0) {
                 return result;
             }
@@ -47,7 +77,6 @@ public class WorkflowInstanceFolderComparator implements Comparator<Resource> {
         Integer integer1 = new Integer(intString1);
         Integer integer2 = new Integer(intString2);
 
-        return integer2.compareTo(integer1);
+        return integer1.compareTo(integer2);
     }
-
 }
