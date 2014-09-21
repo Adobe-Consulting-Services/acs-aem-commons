@@ -47,8 +47,9 @@ import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -107,7 +108,7 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
         final ValueMap properties = this.getProperties(request);
 
         try {
-            final Set<Resource> packageResources = this.findResources(resourceResolver,
+            final List<Resource> packageResources = this.findResources(resourceResolver,
                     properties.get("queryLanguage", Query.JCR_SQL2),
                     properties.get("query", String.class),
                     properties.get("relPath", String.class));
@@ -151,13 +152,13 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
                         packageHelper.getSuccessJSON(jcrPackage));
             }
         } catch (RepositoryException ex) {
-            log.error(ex.getMessage());
+            log.error("Repository error while creating Query Package", ex);
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
         } catch (IOException ex) {
-            log.error(ex.getMessage());
+            log.error("IO error while creating Query Package", ex);
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
         } catch (JSONException ex) {
-            log.error(ex.getMessage());
+            log.error("JSON error while creating Query Package response", ex);
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
         }
     }
@@ -181,18 +182,18 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
      * Find all the resources needed for the package definition.
      *
      * @param resourceResolver the resource resolver to find the resources
-     * @param language the Query language
-     * @param statement the Query statement
-     * @param relPath the relative path to resolve against query result nodes for package resources
+     * @param language         the Query language
+     * @param statement        the Query statement
+     * @param relPath          the relative path to resolve against query result nodes for package resources
      * @return a unique set of paths to include in the package
      * @throws RepositoryException
      */
-    private Set<Resource> findResources(final ResourceResolver resourceResolver,
-                                        final String language,
-                                        final String statement,
+    private List<Resource> findResources(final ResourceResolver resourceResolver,
+                                         final String language,
+                                         final String statement,
                                          final String relPath) throws RepositoryException {
 
-        final Set<Resource> resources = new HashSet<Resource>();
+        final List<Resource> resources = new ArrayList<Resource>();
         final Session session = resourceResolver.adaptTo(Session.class);
         final QueryManager queryManager = session.getWorkspace().getQueryManager();
         final Query query = queryManager.createQuery(statement, language);
