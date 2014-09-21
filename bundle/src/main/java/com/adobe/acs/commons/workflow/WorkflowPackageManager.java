@@ -5,12 +5,34 @@ import com.day.cq.wcm.api.WCMException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.RepositoryException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public interface WorkflowPackageManager {
+    SimpleDateFormat DATED_BUCKET_SEGMENT_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
+
     /**
      * Creates a Workflow Package for the provided paths. The Workflow Page will include the provided paths and
      * any jcr:content sub-structure.
+     *
+     * Stores all workflow packages under /etc/workflow/packages/{bucketSegment}
+     *
+     * @param resourceResolver the resource resolver used to create the package
+     * @param bucketSegment a path segment used to organize workflow packages
+     * @param name the name of the package
+     * @param paths the paths to include
+     * @return the Page representing the Workflow Page
+     * @throws WCMException
+     * @throws RepositoryException
+     */
+    Page create(ResourceResolver resourceResolver, String bucketSegment, String name,
+                String... paths) throws WCMException, RepositoryException;
+
+    /**
+     * Creates a Workflow Package for the provided paths. The Workflow Page will include the provided paths and
+     * any jcr:content sub-structure.
+     *
+     * Stores all workflow packages under /etc/workflow/packages
      *
      * @param resourceResolver the resource resolver used to create the package
      * @param name the name of the package

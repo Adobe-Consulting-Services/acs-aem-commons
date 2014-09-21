@@ -9,6 +9,7 @@ import com.day.cq.wcm.api.WCMException;
 import com.day.cq.workflow.collection.ResourceCollection;
 import com.day.cq.workflow.collection.ResourceCollectionManager;
 import com.day.cq.workflow.collection.ResourceCollectionUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -25,15 +26,13 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @Component(
         label = "ACS AEM Commons - Workflow Package Manager",
-        description = "Manager for creating and working w Workflow Packages"
+        description = "Manager for creating and working with Workflow Packages"
 )
 @Service
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
@@ -53,11 +52,9 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     private static final String SLING_RESOURCE_TYPE = SlingConstants.PROPERTY_RESOURCE_TYPE;
 
-    private static final SimpleDateFormat DATE_FOLDER_NAME = new SimpleDateFormat("yyyy/MM/dd");
-
     private static final String[] DEFAULT_WF_PACKAGE_TYPES = {"cq:Page", "cq:PageContent", "dam:Asset"};
 
-    private String[] workflowPageTypes = DEFAULT_WF_PACKAGE_TYPES;
+    private String[] workflowPackageTypes = DEFAULT_WF_PACKAGE_TYPES;
 
     @Property(label = "Workflow Package Types",
             description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
@@ -72,14 +69,27 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      * {@inheritDoc}
      */
     public final Page create(final ResourceResolver resourceResolver,
-                       final String name, final String... paths) throws WCMException,
+                             final String name, final String... paths) throws WCMException,
+            RepositoryException {
+        return this.create(resourceResolver, null, name, paths);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public final Page create(final ResourceResolver resourceResolver, String bucketSegment,
+                             final String name, final String... paths) throws WCMException,
             RepositoryException {
 
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-        final Node shardNode = JcrUtils.getOrCreateByPath("/etc/workflow/packages/"
-                        + DATE_FOLDER_NAME.format(new Date()),
+        String bucketPath = "/etc/workflow/packages";
+        if (StringUtils.isNotBlank(bucketSegment)) {
+            bucketPath += "/" + bucketSegment;
+        }
+
+        final Node shardNode = JcrUtils.getOrCreateByPath(bucketPath,
                 NT_SLING_FOLDER, NT_SLING_FOLDER, session, false);
         final Page page = pageManager.create(shardNode.getPath(), JcrUtil.createValidName(name),
                 WORKFLOW_PACKAGE_TEMPLATE, name, false);
@@ -110,7 +120,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      * {@inheritDoc}
      */
     public final List<String> getPaths(final ResourceResolver resourceResolver,
-                                 final String path) throws RepositoryException {
+                                       final String path) throws RepositoryException {
         final List<String> paths = new ArrayList<String>();
         final Resource resource = resourceResolver.getResource(path);
 
@@ -124,7 +134,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
                 ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
 
         if (resourceCollection != null) {
-            final List<Node> members = resourceCollection.list(workflowPageTypes);
+            final List<Node> members = resourceCollection.list(workflowPackageTypes);
             for (final Node member : members) {
                 paths.add(member.getPath());
             }
@@ -191,9 +201,8 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         return rules;
     }
 
-
     @Activate
     protected final void activate(final Map<String, String> config) {
-        workflowPageTypes = PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
+        workflowPackageTypes = PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
     }
 }
