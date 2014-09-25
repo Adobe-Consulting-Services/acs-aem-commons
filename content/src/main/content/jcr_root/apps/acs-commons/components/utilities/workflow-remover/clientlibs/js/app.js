@@ -18,89 +18,133 @@
  * #L%
  */
 
-/*global angular: false */
+/*global angular: false, JSON: false */
 
 angular.module('workflowRemover', [])
     .controller('MainCtrl', ['$scope', '$http', '$timeout',
-    function ($scope, $http, $timeout) {
+        function ($scope, $http, $timeout) {
 
-        $scope.app = {
-            resource: '',
-            running: false
-        };
+            $scope.app = {
+                resource: '',
+                running: false,
+                refresh: ''
+            };
 
-        $scope.form = {
-            payloads: [{ pattern: '' }],
-            models: [],
-            statuses: []
-        };
+            $scope.form = {
+                payloads: [
+                    { pattern: '' }
+                ],
+                models: [],
+                statuses: []
+            };
 
-        $scope.formOptions = {};
+            $scope.status = {};
 
-        $scope.status = function () {
-            $http({
-                method: 'GET',
-                url: encodeURI($scope.app.resource + '.json')
-            }).
-                success(function (data, status, headers, config) {
-                    $scope.status = data || {};
+            $scope.formOptions = {};
+
+            $scope.notifications = [];
+
+            /* Methods */
+
+            $scope.init = function () {
+                $http({
+                    method: 'GET',
+                    url: encodeURI($scope.app.resource + '.init.json')
                 }).
-                error(function (data, status, headers, config) {
-                    $scope.addNotification('error', 'ERROR', 'Unable to retrieve Status');
-                });
-        };
+                    success(function (data, status, headers, config) {
+                        $scope.formOptions = data || {};
+                    }).
+                    error(function (data, status, headers, config) {
+                        $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
+                    });
 
+                $scope.getStatus();
+            };
 
-
-        $scope.remove = function () {
-            $scope.app.running = true;
-
-            $http({
-                method: 'POST',
-                url: encodeURI($scope.app.resource + '.remove.json'),
-                data: 'params=',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-            }).
-                success(function (data, status, headers, config) {
-                    $scope.app.running = false;
-                    $scope.addNotification('info', 'INFO', '');
+            $scope.getStatus = function () {
+                $http({
+                    method: 'GET',
+                    url: encodeURI($scope.app.resource + '.json')
                 }).
-                error(function (data, status, headers, config) {
-                    $scope.app.running = false;
-                    $scope.addNotification('error', 'ERROR', '');
-                });
-        };
+                    success(function (data, status, headers, config) {
+                        $scope.status = data || {};
 
-        $scope.addNotification = function (type, title, message) {
-            var timeout = 10000;
+                        if ($scope.status.state === 'complete') {
+                            $scope.app.running = false;
+                        } else if ($scope.status.state === 'running') {
+                            $scope.app.refresh = $timeout(function () {
+                                $scope.getStatus();
+                            }, 3000);
+                        }
+                    }).
+                    error(function (data, status, headers, config) {
+                        $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
+                    });
+            };
 
-            if (type === 'success') {
-                timeout = timeout / 2;
-            }
+            $scope.remove = function () {
+                $scope.app.running = true;
 
-            $scope.notifications.push({
-                type: type,
-                title: title,
-                message: message
-            });
-
-            $timeout(function () {
-                $scope.notifications.shift();
-            }, timeout);
-        };
-
-        $scope.init = function () {
-            $http({
-                method: 'GET',
-                url: encodeURI($scope.app.resource + '.init.json')
-            }).
-                success(function (data, status, headers, config) {
-                    $scope.formOptions = data || {};
+                $http({
+                    method: 'POST',
+                    url: encodeURI($scope.app.resource + '.remove.json'),
+                    data: 'params=' + JSON.stringify($scope.form),
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                 }).
-                error(function (data, status, headers, config) {
-                    $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
+                    success(function (data, status, headers, config) {
+                        $scope.app.running = false;
+                        $scope.getStatus();
+                        $scope.addNotification('info', 'INFO', 'Workflow removal completed');
+                    }).
+                    error(function (data, status, headers, config) {
+                        $scope.app.running = false;
+                        $scope.addNotification('error', 'ERROR', 'Workflow removal failed due to: ' + data);
+                    });
+
+                $scope.getStatus();
+            };
+
+            $scope.addNotification = function (type, title, message) {
+                var timeout = 10000;
+
+                if (type === 'success') {
+                    timeout = timeout / 2;
+                }
+
+                $scope.notifications.push({
+                    type: type,
+                    title: title,
+                    message: message
                 });
-        };
-    }]);
+
+                $timeout(function () {
+                    $scope.notifications.shift();
+                }, timeout);
+            };
+
+
+            /* Form Methods */
+            $scope.toggleStatusSelection = function (status) {
+                var idx = $scope.form.statuses.indexOf(status);
+
+                if (idx > -1) {
+                    $scope.form.statuses.splice(idx, 1);
+                } else {
+                    $scope.form.statuses.push(status);
+                }
+            };
+
+            $scope.toggleModelSelection = function (workflowModelID) {
+                var idx = $scope.form.models.indexOf(workflowModelID);
+
+                if (idx > -1) {
+                    $scope.form.models.splice(idx, 1);
+                } else {
+                    $scope.form.models.push(workflowModelID);
+                }
+            };
+
+
+        }]);
 
 

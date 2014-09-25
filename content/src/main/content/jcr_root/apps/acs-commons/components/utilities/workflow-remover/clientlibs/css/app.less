@@ -70,9 +70,18 @@
       }
 
       input[type=text],
+      table.data,
       textarea,
       select {
         width: 75%;
+      }
+
+      table.data {
+        input[type=text],
+        textarea,
+        select {
+          width: 100%;
+        }
       }
     }
 
@@ -80,14 +89,6 @@
       border-color: #FF4132;
     }
 
-  }
-
-  .current-batch-table {
-    width: 100%;
-
-    .status-col {
-      width: 8em;
-    }
   }
 
   .summary-section {
@@ -101,24 +102,4 @@
     }
   }
 
-  .inline-input-wrapper {
-    line-height: 3em;
-    margin-bottom: .5em;
-
-    .inline-input {
-      width: 4em;
-      min-width: 4em;
-      margin-left: .25em;
-      margin-right: .25em;
-    }
-
-    .inline-button {
-      margin-left: .25em;
-      margin-right: .25em;
-    }
-  }
-
-  .progress {
-    width: 95%;
-  }
 }

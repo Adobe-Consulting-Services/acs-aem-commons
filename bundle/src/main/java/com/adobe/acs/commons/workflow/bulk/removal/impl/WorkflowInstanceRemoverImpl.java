@@ -6,8 +6,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +17,10 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -28,8 +32,11 @@ import java.util.regex.Pattern;
 public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemover {
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceRemoverImpl.class);
 
+    private static final SimpleDateFormat WORKFLOW_FOLDER_FORMAT = new SimpleDateFormat("YYYY-MM-dd");
+
     private static final String WORKFLOW_INSTANCES_PATH = "/etc/workflow/instances";
     private static final String PN_STATUS = "status";
+    private static final String PN_MODEL_ID = "modelId";
     private static final String PN_START_TIME = "startTime";
     private static final String PN_PAYLOAD_PATH = "data/payload/path";
 
@@ -41,23 +48,24 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
      * {@inheritDoc}
      */
     public final int removeWorkflowInstances(final ResourceResolver resourceResolver,
-                                             final Collection<String> models,
+                                             final Collection<String> modelIds,
                                              final Collection<String> statuses,
                                              final Collection<Pattern> payloads,
                                              final Calendar olderThan) {
-        return removeWorkflowInstances(resourceResolver, models, statuses, payloads, olderThan, Integer.MAX_VALUE);
+        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, Integer.MAX_VALUE);
     }
 
     /**
      * {@inheritDoc}
      */
     public final int removeWorkflowInstances(final ResourceResolver resourceResolver,
-                                             final Collection<String> models,
+                                             final Collection<String> modelIds,
                                              final Collection<String> statuses,
                                              final Collection<Pattern> payloads,
                                              final Calendar olderThan,
                                              final int limit) {
 
+        final String TODAY_WORKFLOW_FOLDER = WORKFLOW_FOLDER_FORMAT.format(new Date());
         final long start = System.currentTimeMillis();
         final Resource folders = resourceResolver.getResource(WORKFLOW_INSTANCES_PATH);
         final Collection<Resource> sortedFolders = this.getSortedAndFilteredFolders(folders);
@@ -72,19 +80,19 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             int remaining = 0;
 
             for(final Resource instance : folder.getChildren()) {
+                final ValueMap properties = ResourceUtil.getValueMap(instance);
 
                 if(total >= limit) {
                     break;
-                } if (!instance.isResourceType(NT_CQ_WORKFLOW)) {
+                } if (!StringUtils.equals(NT_CQ_WORKFLOW,
+                       properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
                     // Only process cq:Workflow's
                     remaining++;
                     continue;
                 }
 
-                final ValueMap properties = instance.adaptTo(ValueMap.class);
                 final String status = properties.get(PN_STATUS, String.class);
-                final String model = StringUtils.removeStart(StringUtils.removeEnd(properties.get("modelId", String.class),
-                        "/jcr:content/model"), "/etc/workflow/models/");
+                final String model = properties.get(PN_MODEL_ID, String.class);
                 final Calendar startTime = properties.get(PN_START_TIME, Calendar.class);
                 final String payload = properties.get(PN_PAYLOAD_PATH, String.class);
 
@@ -92,7 +100,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                     log.trace("Workflow instance [ {} ] has non-matching status of [ {} ]", instance.getPath(), status);
                     remaining++;
                     continue;
-                } else if (CollectionUtils.isNotEmpty(models) && !models.contains(model)) {
+                } else if (CollectionUtils.isNotEmpty(modelIds) && !modelIds.contains(model)) {
                     log.trace("Workflow instance [ {} ] has non-matching model of [ {} ]", instance.getPath(), model);
                     remaining++;
                     continue;
@@ -146,7 +154,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                 }
             }
 
-            if(remaining == 0) {
+            if(remaining == 0 && !StringUtils.startsWith(folder.getName(), TODAY_WORKFLOW_FOLDER)) {
+                // Dont remove folders w items and dont remove any of "today's" folders
                 try {
                     folder.adaptTo(Node.class).remove();
                     // Incrementing only count to trigger batch save and not total since is not a WF

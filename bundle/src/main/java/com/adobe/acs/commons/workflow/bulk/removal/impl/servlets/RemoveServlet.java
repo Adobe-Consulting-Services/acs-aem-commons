@@ -2,6 +2,7 @@ package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -11,7 +12,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 
 import javax.servlet.ServletException;
@@ -44,6 +44,8 @@ public class RemoveServlet extends SlingAllMethodsServlet {
     public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
+        response.setContentType("application/json");
+
         List<String> statuses = new ArrayList<String>();
         List<String> models = new ArrayList<String>();
         List<Pattern> payloads = new ArrayList<Pattern>();
@@ -64,11 +66,16 @@ public class RemoveServlet extends SlingAllMethodsServlet {
 
             jsonArray = params.optJSONArray(WORKFLOW_PAYLOADS);
             for (int i = 0; i < jsonArray.length(); i++) {
-                payloads.add(Pattern.compile(jsonArray.getString(i)));
+                final JSONObject tmp = jsonArray.getJSONObject(i);
+                final String pattern = tmp.getString("pattern");
+
+                if(StringUtils.isNotBlank(pattern)) {
+                    payloads.add(Pattern.compile(Pattern.quote(pattern)));
+                }
             }
 
             final Long ts = params.optLong(OLDER_THAN);
-            if (ts != null) {
+            if (ts != null && ts > 0) {
                 olderThan = Calendar.getInstance();
                 olderThan.setTimeInMillis(ts);
             }
@@ -81,8 +88,8 @@ public class RemoveServlet extends SlingAllMethodsServlet {
             final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
             mvm.put("count", 0);
-            mvm.put("status", "running");
-            mvm.put("startTime", Calendar.getInstance());
+            mvm.put("state", "running");
+            mvm.put("startedAt", Calendar.getInstance());
             mvm.remove("endTime");
 
             resourceResolver.commit();
@@ -91,8 +98,8 @@ public class RemoveServlet extends SlingAllMethodsServlet {
             int total = 0;
             do {
                 count = workflowInstanceRemover.removeWorkflowInstances(request.getResourceResolver(),
-                        statuses,
                         models,
+                        statuses,
                         payloads,
                         olderThan,
                         limit.intValue());
@@ -102,16 +109,16 @@ public class RemoveServlet extends SlingAllMethodsServlet {
                 mvm.put("count", total);
                 resource.getResourceResolver().commit();
 
-            } while (count > 0);
+            } while (count > 0 || count < limit.intValue());
 
-            mvm.put("status", "complete");
-            mvm.put("endTime", Calendar.getInstance());
+            mvm.put("state", "complete");
+            mvm.put("completedAt", Calendar.getInstance());
             resourceResolver.commit();
 
-            response.setContentType("application/json");
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(e.getMessage());
         }
     }
 }

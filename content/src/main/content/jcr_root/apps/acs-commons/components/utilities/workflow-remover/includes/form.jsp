@@ -29,11 +29,12 @@
 
         <span>
             <div class="selector">
-                <label><input ng-model="form.statuses" type="checkbox" name="complete"><span>COMPLETE</span></label>
-                <label><input ng-model="form.statuses" type="checkbox" name="aborted"><span>ABORTED</span></label>
-                <label><input ng-model="form.statuses" type="checkbox" name="running"><span>RUNNING</span></label>
-                <label><input ng-model="form.statuses" type="checkbox" name="stale"><span>STALE</span></label>
-                <label><input ng-model="form.statuses" type="checkbox" name="failure"><span>FAILURE</span></label>
+                <label ng-repeat="status in formOptions.statuses">
+                    <input type="checkbox"
+                           name="selectedStatuses[]"
+                           value="{{status}}"
+                           ng-checked="form.selection.indexOf(status) > -1"
+                           ng-click="toggleStatusSelection(status)"><span>{{status}}</span></label>
             </div>
 
             <div class="instructions">
@@ -56,8 +57,12 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="workflowModel in formOptions.workflowModels">
-                    <td><label><input ng-bind="{{ workflowModel.id }}" type="checkbox"><span></span></label></td>
-                    <td>{{ workflowModel.title }}</td>
+                    <td><label><input
+                            ng-checked="form.models.indexOf(workflowModel.id) >= 0"
+                            ng-click="toggleModelSelection(workflowModel.id)"
+                            type="checkbox"><span></span></label></td>
+                    <td
+                            ng-click="toggleModelSelection(workflowModel.id)">{{ workflowModel.title }}</td>
                 </tr>
                 </tbody>
 
@@ -82,7 +87,8 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="payload in form.payloads">
-                        <td><input type="text" ng-bind="payload.pattern"/></td>
+                        <td><input type="text"
+                                   ng-model="payload.pattern"/></td>
                         <td class="property-remove">
                             <i      ng-show="form.payloads.length > 1"
                                     ng-click="form.payloads.splice($index, 1)"
@@ -93,12 +99,25 @@
                 <tfoot>
                     <tr>
                         <td colspan="2" class="property-add">
-                            <i ng-click="form.payloads.push({ pattern : '' })"
+                            <i ng-click="form.payloads.push({})"
                                class="icon-add-circle withLabel">Add Payload Pattern</i>
                         </td>
                     </tr>
                 </tfoot>
             </table>
+        </span>
+    </div>
+
+    <div class="form-row">
+        <h4>Older Than</h4>
+
+        <span>
+            <input type="text"
+                   ng-model="form.olderThan"/>
+
+            <div class="instructions">
+                UTC time in milliseconds
+            </div>
         </span>
     </div>
 

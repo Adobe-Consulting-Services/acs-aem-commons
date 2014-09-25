@@ -54,23 +54,16 @@
              ng-controller="MainCtrl"
              ng-init="app.resource = '${resourcePath}'; init();">
 
-        <div ng-show="notifications.length > 0"
-             class="notifications">
-            <div ng-repeat="notification in notifications">
-                <div class="alert {{ notification.type }}">
-                    <button class="close" data-dismiss="alert">&times;</button>
-                    <strong>{{ notification.title }}</strong>
-
-                    <div>{{ notification.message }}</div>
-                </div>
-            </div>
-        </div>
 
         <div class="content">
             <div class="content-container">
                 <div class="content-container-inner">
 
                     <h1>Workflow Remover</h1>
+
+                    <cq:include script="includes/notifications.jsp"/>
+
+                    <cq:include script="includes/status.jsp"/>
 
                     <cq:include script="includes/form.jsp"/>
 

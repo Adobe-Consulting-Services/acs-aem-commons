@@ -10,14 +10,14 @@ public interface WorkflowInstanceRemover {
 
     /**
      * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
-     * @param models WF Models to remove
+     * @param modelIds WF Models to remove
      * @param statuses WF Statuses to remove
      * @param payloads Regex; WF Payloads to remove
      * @param olderThan UTC time in milliseconds; only delete WF's started after this time
      * @return the number of WF instances removed
      */
     int removeWorkflowInstances(final ResourceResolver resourceResolver,
-                                final Collection<String> models,
+                                final Collection<String> modelIds,
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
                                 final Calendar olderThan);
@@ -25,7 +25,7 @@ public interface WorkflowInstanceRemover {
 
     /**
      * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
-     * @param models WF Models to remove
+     * @param modelIds WF Models to remove
      * @param statuses WF Statuses to remove
      * @param payloads Regex; WF Payloads to remove
      * @param olderThan UTC time in milliseconds; only delete WF's started after this time
@@ -33,7 +33,7 @@ public interface WorkflowInstanceRemover {
      * @return the number of WF instances removed
      */
     int removeWorkflowInstances(final ResourceResolver resourceResolver,
-                                final Collection<String> models,
+                                final Collection<String> modelIds,
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
                                 final Calendar olderThan,

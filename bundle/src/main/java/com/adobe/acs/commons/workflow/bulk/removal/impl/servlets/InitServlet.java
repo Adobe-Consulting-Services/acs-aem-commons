@@ -29,6 +29,7 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Session;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.Arrays;
 
 @SlingServlet(
         label = "ACS AEM Commons - Workflow Remover - Init Servlet",
@@ -47,6 +49,7 @@ import java.io.IOException;
 )
 public class InitServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(InitServlet.class);
+    private static final String[] WORKFLOW_STATUSES = new String[]{"COMPLETED", "ABORTED", "RUNNING", "STALE"};
 
     @Reference
     private WorkflowService workflowService;
@@ -77,6 +80,12 @@ public class InitServlet extends SlingSafeMethodsServlet {
                     log.error("Could not add workflow [ {} - {} ] to Workflow Models dropdown JSON object",
                             workflowModel.getTitle(), workflowModel.getId());
                 }
+            }
+
+            try {
+                json.put("statuses", new JSONArray(Arrays.asList(WORKFLOW_STATUSES)));
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
 
             response.getWriter().write(json.toString());
