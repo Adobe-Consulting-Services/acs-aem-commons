@@ -181,4 +181,34 @@ public class ComponentErrorHandlerImplTest {
         verify(responseWriter, times(1)).print(any(String.class));
         verifyNoMoreInteractions(responseWriter);
     }
+
+
+
+    @Test(expected = ServletException.class)
+    public void testDisabledError_NotPreviouslyProcessedRequest() throws Exception {
+        // This should not invoke ComponentErrorHandling
+        when(request.getAttribute(ComponentErrorHandlerImpl.REQ_ATTR_PREVIOUSLY_PROCESSED)).thenReturn(null);
+        when(componentHelper.isDisabledMode(request)).thenReturn(true);
+
+        doThrow(new ServletException()).when(chain).doFilter(request, response);
+
+        handler.doFilter(request, response, chain);
+        verify(responseWriter, never()).print(any(String.class));
+        verifyNoMoreInteractions(responseWriter);
+
+    }
+
+    @Test(expected = ServletException.class)
+    public void testDisabledError_PreviouslyProcessedRequest() throws Exception {
+        // This should not invoke ComponentErrorHandling
+        when(request.getAttribute(ComponentErrorHandlerImpl.REQ_ATTR_PREVIOUSLY_PROCESSED)).thenReturn(true);
+        when(componentHelper.isDisabledMode(request)).thenReturn(true);
+
+        doThrow(new ServletException()).when(chain).doFilter(request, response);
+
+        handler.doFilter(request, response, chain);
+
+        verify(responseWriter, times(1)).print(any(String.class));
+        verifyNoMoreInteractions(responseWriter);
+    }
 }
