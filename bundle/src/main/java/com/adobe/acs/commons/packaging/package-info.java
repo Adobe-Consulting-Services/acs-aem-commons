@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Dispatcher utilities.
+ * Packaging utilities.
  */
 @aQute.bnd.annotation.Version("1.7.6")
 package com.adobe.acs.commons.packaging;
