@@ -113,7 +113,7 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
                 final Page page = pageManager.getContainingPage(path);
                 final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(path));
 
-                Resource resource = null;
+                Resource resource;
 
                 if (page != null) {
                     // Page
@@ -130,18 +130,16 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
                     log.trace("Candidate Resource for setting replicateBy is [ {} ]", resource.getPath());
                 }
 
-                if (resource != null) {
-                    final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
+                final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
-                    if (StringUtils.isNotBlank(mvm.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY,
-                            String.class))) {
-                        mvm.put(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedBy);
-                        resourceResolver.commit();
-                        log.trace("Set replicateBy to [ {} ] on resource  [ {} ]", replicatedBy, resource.getPath());
-                    } else {
-                        log.trace("Skipping; Resource does not have replicateBy property set  [ {} ]",
-                                resource.getPath());
-                    }
+                if (StringUtils.isNotBlank(mvm.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY,
+                        String.class))) {
+                    mvm.put(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedBy);
+                    resourceResolver.commit();
+                    log.trace("Set replicateBy to [ {} ] on resource  [ {} ]", replicatedBy, resource.getPath());
+                } else {
+                    log.trace("Skipping; Resource does not have replicateBy property set  [ {} ]",
+                            resource.getPath());
                 }
             }
         } catch (LoginException e) {
