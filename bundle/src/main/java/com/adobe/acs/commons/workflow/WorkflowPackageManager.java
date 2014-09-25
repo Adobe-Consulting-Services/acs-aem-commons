@@ -5,12 +5,9 @@ import com.day.cq.wcm.api.WCMException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.RepositoryException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 public interface WorkflowPackageManager {
-    SimpleDateFormat DATED_BUCKET_SEGMENT_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
-
     /**
      * Creates a Workflow Package for the provided paths. The Workflow Page will include the provided paths and
      * any jcr:content sub-structure.
