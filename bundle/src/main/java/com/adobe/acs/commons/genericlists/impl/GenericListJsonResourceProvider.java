@@ -71,7 +71,9 @@ public final class GenericListJsonResourceProvider implements ResourceProvider {
 
     @Override
     public Resource getResource(ResourceResolver resourceResolver, String path) {
-        if (path.equals(ROOT)) {
+        if (path == null) {
+            return null;
+        } else if (path.equals(ROOT)) {
             // this would be a special case where the root resource is requested.
             // return nothing for now.
             return null;
