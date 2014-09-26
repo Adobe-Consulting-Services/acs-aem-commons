@@ -49,7 +49,8 @@ import java.util.Arrays;
 )
 public class InitServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(InitServlet.class);
-    private static final String[] WORKFLOW_STATUSES = new String[]{"COMPLETED", "ABORTED", "RUNNING", "STALE"};
+    private static final String[] WORKFLOW_STATUSES = new String[]{"COMPLETED", "ABORTED", "RUNNING",
+            "SUSPENDED", "STALE"};
 
     @Reference
     private WorkflowService workflowService;

@@ -116,7 +116,7 @@
                    ng-model="form.olderThan"/>
 
             <div class="instructions">
-                UTC time in milliseconds
+                UTC time in seconds (<a href="http://www.epochconverter.com/" target="_blank">epochconverter.com</a>)
             </div>
         </span>
     </div>
