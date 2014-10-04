@@ -28,11 +28,14 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.collection.util.ResultSet;
-import com.day.cq.workflow.exec.*;
+import com.day.cq.workflow.exec.HistoryItem;
+import com.day.cq.workflow.exec.Route;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.Workflow;
+import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.exec.filter.WorkItemFilter;
 import com.day.cq.workflow.model.WorkflowModel;
 import com.day.cq.workflow.model.WorkflowModelFilter;
-import org.apache.jackrabbit.api.JackrabbitSession;
 
 import javax.jcr.Session;
 import javax.jcr.version.VersionException;
@@ -85,13 +88,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Deprecated
     @Override
     public Authorizable getUser() {
-        if(this.getSession() instanceof JackrabbitSession) {
-            //JackrabbitSession jackrabbitSession = ((JackrabbitSession) this.getSession());
-            //return jackrabbitSession.adaptTo(com.day.cq.security.Authorizable.class);
-            return null;
-        } else {
-            return null;
-        }
+        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
     @Override
