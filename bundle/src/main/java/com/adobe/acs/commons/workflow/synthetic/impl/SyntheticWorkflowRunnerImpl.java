@@ -57,15 +57,18 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     private Map<String, WorkflowProcess> workflowProcesses = new HashMap<String, WorkflowProcess>();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void start(final ResourceResolver resourceResolver, String path, String[] workflowProcessLabels,
+    public void start(final ResourceResolver resourceResolver, String payloadPath, String[] workflowProcessLabels,
                       Map<String, Map<String, Object>> metaDataMaps) throws WorkflowException {
 
         final Session session = resourceResolver.adaptTo(Session.class);
         final WorkflowSession workflowSession = this.getWorkflowSession(session);
 
         final SyntheticWorkItem workItem = new SyntheticWorkItem(
-                new SyntheticWorkflowData(path, new HashMap<String, Object>()));
+                new SyntheticWorkflowData(payloadPath, new HashMap<String, Object>()));
 
         workItem.setTimeStarted(new Date());
 
@@ -88,29 +91,43 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                     try {
                         workflowProcess.execute(workItem, workflowSession, workflowProcessMetaDataMap);
                     } catch (SyntheticCompleteWorkflowException ex) {
-                        log.info("Synthetic workflow execution stopped via complete() for [ {} ]", path);
+                        log.info("Synthetic workflow execution stopped via complete() for [ {} ]", payloadPath);
                     } catch (SyntheticTerminateWorkflowException ex) {
-                        log.info("Synthetic workflow execution stopped via terminate() for [ {} ]", path);
+                        log.info("Synthetic workflow execution stopped via terminate() for [ {} ]", payloadPath);
                     }
                 }
             }
         } catch(SyntheticRestartWorkflowException ex) {
-            this.start(resourceResolver, path, workflowProcessLabels, metaDataMaps);
+            this.start(resourceResolver, payloadPath, workflowProcessLabels, metaDataMaps);
         }
 
         workItem.setTimeEnded(new Date());
     }
 
+    /**
+     * Unsupported operation
+     *
+     * @throws WorkflowException
+     */
     @Override
     public void start() throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
+    /**
+     * Unsupported operation
+     */
     @Override
     public void stop() {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
+    /**
+     * Creates a Synthetic Workflow Session from a JCR Session
+     *
+     * @param session the JCR Session to create the Synthetic Workflow Session from
+     * @return the Synthetic Workflow Session
+     */
     @Override
     public WorkflowSession getWorkflowSession(final Session session) {
         return new SyntheticWorkflowSession(this, session);

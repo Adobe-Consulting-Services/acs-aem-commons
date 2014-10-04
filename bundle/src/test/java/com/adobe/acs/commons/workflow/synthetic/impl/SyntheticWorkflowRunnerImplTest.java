@@ -22,18 +22,36 @@ package com.adobe.acs.commons.workflow.synthetic.impl;
 
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.ReadDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.SetDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFArgsWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFDataWorkflowProcess;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.jcr.Session;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SyntheticWorkflowRunnerImplTest {
 
+    @Mock
+    ResourceResolver resourceResolver;
+
+    @Mock
+    Session session;
+
     SyntheticWorkflowRunnerImpl swr = new SyntheticWorkflowRunnerImpl();
+
+    @Before
+    public void setUp() {
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+    }
 
     @Test
     public void testStart_WFData() throws Exception {
@@ -44,14 +62,14 @@ public class SyntheticWorkflowRunnerImplTest {
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
-        swr.start(null,
+        swr.start(resourceResolver,
                 "/content/test",
                 new String[] {"test"},
                 metadata);
     }
 
     @Test
-    public void testStart_PassingData() throws Exception {
+    public void testStart_PassingDataBetweenProcesses() throws Exception {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "set");
@@ -63,9 +81,32 @@ public class SyntheticWorkflowRunnerImplTest {
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
-        swr.start(null,
+        swr.start(resourceResolver,
                 "/content/test",
                 new String[] {"set", "read"},
+                metadata);
+    }
+
+
+    @Test
+    public void testStart_ProcessArgs() throws Exception {
+        Map<Object, Object> map = new HashMap<Object, Object>();
+
+        map.put("process.label", "wf-args");
+        swr.bindWorkflowProcesses(new WFArgsWorkflowProcess(), map);
+
+        /** WF Process Metadata */
+
+        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+
+        Map<String, Object> wfArgs = new HashMap<String, Object>();
+        wfArgs.put("hello", "world");
+
+        metadata.put("wf-args", wfArgs);
+
+        swr.start(resourceResolver,
+                "/content/test",
+                new String[]{ "wf-args" },
                 metadata);
     }
 }

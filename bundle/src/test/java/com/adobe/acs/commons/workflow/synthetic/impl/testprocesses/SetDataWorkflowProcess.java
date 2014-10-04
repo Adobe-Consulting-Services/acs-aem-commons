@@ -37,8 +37,6 @@ public class SetDataWorkflowProcess implements WorkflowProcess {
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        log.debug("Set Data Workflow Process");
-
         workItem.getWorkflowData().getMetaDataMap().put("test-key", "test value");
     }
 }

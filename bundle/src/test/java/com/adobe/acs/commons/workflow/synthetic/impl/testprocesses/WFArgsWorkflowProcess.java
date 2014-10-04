@@ -29,23 +29,16 @@ import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReadDataWorkflowProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(ReadDataWorkflowProcess.class);
+public class WFArgsWorkflowProcess implements WorkflowProcess {
+    private static final Logger log = LoggerFactory.getLogger(WFArgsWorkflowProcess.class);
 
-    public ReadDataWorkflowProcess() {
+    public WFArgsWorkflowProcess() {
 
     }
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        final String expected = "test value";
-        String actual = workItem.getWorkflowData().getMetaDataMap().get("test-key", String.class);
-        Assert.assertEquals(expected, actual);
-
-        actual = workItem.getWorkflow().getWorkflowData().getMetaDataMap().get("test-key", String.class);
-        Assert.assertEquals(expected, actual);
-
-        actual = workItem.getMetaDataMap().get("test-key", String.class);
-        Assert.assertEquals(expected, actual);
+        // Workflow Data
+        Assert.assertEquals("world", metaDataMap.get("hello", String.class));
     }
 }

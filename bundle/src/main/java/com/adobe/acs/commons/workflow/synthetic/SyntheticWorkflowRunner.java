@@ -28,13 +28,16 @@ import java.util.Map;
 
 public interface SyntheticWorkflowRunner extends WorkflowService {
     /**
+     * Process a payload path using using the provided Workflow Processes in order
      *
      * @param resourceResolver
-     * @param path
+     * @param payloadPath
      * @param workflowProcessLabels
      * @param metaDataMaps
      * @throws com.day.cq.workflow.WorkflowException
      */
-    void start(ResourceResolver resourceResolver, String path, String[] workflowProcessLabels,
+    void start(ResourceResolver resourceResolver,
+               String payloadPath,
+               String[] workflowProcessLabels,
                Map<String, Map<String, Object>> metaDataMaps) throws WorkflowException;
 }

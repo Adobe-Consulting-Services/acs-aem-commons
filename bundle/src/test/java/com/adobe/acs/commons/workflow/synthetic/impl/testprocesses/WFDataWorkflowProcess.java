@@ -38,8 +38,6 @@ public class WFDataWorkflowProcess implements WorkflowProcess {
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        log.info("WF Data Workflow Process");
-
         // Workflow Data
         Assert.assertEquals("JCR_PATH", workItem.getWorkflowData().getPayloadType());
         Assert.assertEquals("/content/test", workItem.getWorkflowData().getPayload());
