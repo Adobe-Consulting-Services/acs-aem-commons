@@ -28,16 +28,22 @@ import java.util.Map;
 
 public interface SyntheticWorkflowRunner extends WorkflowService {
     /**
-     * Process a payload path using using the provided Workflow Processes in order
+     * Process a payload path using using the provided Workflow Processes.
      *
-     * @param resourceResolver
-     * @param payloadPath
-     * @param workflowProcessLabels
-     * @param metaDataMaps
+     * @param resourceResolver the resourceResolver object that provides access to the JCR for WF operations
+     * @param payloadPath the path to execute the workflow against
+     * @param workflowProcessLabels the process.labels of the workflow to execute in order against the payloadPath
+     *                              resource
+     * @param metaDataMaps the WF args metadata maps; each workflowProcessLabel can have one map
+     * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
+     * @param autoSaveAtEnd persist changes to JCR after all Workflow Process complete
+     *
      * @throws com.day.cq.workflow.WorkflowException
      */
     void start(ResourceResolver resourceResolver,
                String payloadPath,
                String[] workflowProcessLabels,
-               Map<String, Map<String, Object>> metaDataMaps) throws WorkflowException;
+               Map<String, Map<String, Object>> metaDataMaps,
+               boolean autoSaveAfterEachWorkflowProcess,
+               boolean autoSaveAtEnd) throws WorkflowException;
 }

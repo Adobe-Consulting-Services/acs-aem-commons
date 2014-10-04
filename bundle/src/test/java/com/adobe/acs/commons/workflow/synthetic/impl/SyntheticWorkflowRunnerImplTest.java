@@ -65,7 +65,7 @@ public class SyntheticWorkflowRunnerImplTest {
         swr.start(resourceResolver,
                 "/content/test",
                 new String[] {"test"},
-                metadata);
+                metadata, false, false);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class SyntheticWorkflowRunnerImplTest {
         swr.start(resourceResolver,
                 "/content/test",
                 new String[] {"set", "read"},
-                metadata);
+                metadata, false, false);
     }
 
 
@@ -107,6 +107,6 @@ public class SyntheticWorkflowRunnerImplTest {
         swr.start(resourceResolver,
                 "/content/test",
                 new String[]{ "wf-args" },
-                metadata);
+                metadata, false, false);
     }
 }
