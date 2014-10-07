@@ -20,14 +20,14 @@
 
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.day.cq.rewriter.htmlparser.HtmlParser;
-import com.day.cq.rewriter.htmlparser.SAXWriter;
-import com.day.cq.rewriter.pipeline.Generator;
-import com.day.cq.rewriter.pipeline.Serializer;
-import com.day.cq.rewriter.processor.ProcessingContext;
-import com.day.cq.widget.HtmlLibrary;
-import com.day.cq.widget.HtmlLibraryManager;
-import com.day.cq.widget.LibraryType;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.*;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.apache.sling.rewriter.Transformer;
 import org.junit.After;
 import org.junit.Before;
@@ -41,17 +41,14 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
 
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.only;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.day.cq.rewriter.htmlparser.HtmlParser;
+import com.day.cq.rewriter.htmlparser.SAXWriter;
+import com.day.cq.rewriter.pipeline.Generator;
+import com.day.cq.rewriter.pipeline.Serializer;
+import com.day.cq.rewriter.processor.ProcessingContext;
+import com.day.cq.widget.HtmlLibrary;
+import com.day.cq.widget.HtmlLibraryManager;
+import com.day.cq.widget.LibraryType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VersionedClientlibsTransformerFactoryTest {
@@ -65,6 +62,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     private ContentHandler handler;
 
 	@Mock
+	@SuppressWarnings("deprecation")
 	private ProcessingContext processingContext;
 
     @InjectMocks
