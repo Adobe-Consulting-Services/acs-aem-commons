@@ -57,7 +57,7 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="workflowModel in formOptions.workflowModels">
-                    <td><label><input
+                    <td class="action-col"><label><input
                             ng-checked="form.models.indexOf(workflowModel.id) >= 0"
                             ng-click="toggleModelSelection(workflowModel.id)"
                             type="checkbox"><span></span></label></td>
@@ -89,7 +89,7 @@
                     <tr ng-repeat="payload in form.payloads">
                         <td><input type="text"
                                    ng-model="payload.pattern"/></td>
-                        <td class="property-remove">
+                        <td class="action-col property-remove">
                             <i      ng-show="form.payloads.length > 1"
                                     ng-click="form.payloads.splice($index, 1)"
                                     class="icon-minus-circle">Remove</i>
@@ -100,7 +100,7 @@
                     <tr>
                         <td colspan="2" class="property-add">
                             <i ng-click="form.payloads.push({})"
-                               class="icon-add-circle withLabel">Add Payload Pattern</i>
+                               class="icon-add-circle withLabel">Add Payload Path Pattern</i>
                         </td>
                     </tr>
                 </tfoot>

@@ -18,7 +18,17 @@
   ~ #L%
   --%>
 
-<div ng-show="notifications.length > 0">
+<div class="fixed-notifications">
+    <div class="running-notification"
+            ng-show="app.running">
+        <div class="alert large notice">
+            <strong>Workflow Removal Executing</strong>
+            <div>Please be patient as workflow removal runs.</div>
+        </div>
+    </div>
+</div>
+
+<div class="notifications" ng-show="notifications.length > 0">
     <div ng-repeat="notification in notifications">
         <div class="alert large {{ notification.type }}">
             <button class="close" data-dismiss="alert">&times;</button>
@@ -26,27 +36,5 @@
 
             <div>{{ notification.message }}</div>
         </div>
-    </div>
-</div>
-
-<div class="fixed-notifications">
-    <div    ng-show="data.status.state === 'stopped'"
-            class="large alert notice">
-        <strong>Stopped</strong>
-
-        <div>
-            The execution of this bulk workflow process was stopped.
-            Press the &quot;Resume Bulk Worklfow&quot; button below to resume bulk workflow processing.
-        </div>
-    </div>
-
-
-    <div    ng-show="data.status.state === 'complete'"
-            class="large alert success">
-        <strong>Complete</strong>
-
-        <div>The execution of this bulk run is complete. Please review the
-            <a target="_blank" href="/libs/cq/workflow/content/console.html">workflow history</a>
-            for any unsuccessful Workflow executions.</div>
     </div>
 </div>

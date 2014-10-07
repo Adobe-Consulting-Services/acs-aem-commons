@@ -80,6 +80,8 @@ angular.module('workflowRemover', [])
                     error(function (data, status, headers, config) {
                         $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
                     });
+
+                document.getElementById("container").scrollTo(0,0);
             };
 
             $scope.remove = function () {
