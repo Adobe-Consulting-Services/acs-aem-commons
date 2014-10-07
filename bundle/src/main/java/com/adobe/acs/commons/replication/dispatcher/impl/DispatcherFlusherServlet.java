@@ -65,11 +65,13 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private ResourceResolverFactory resourceResolverFactory;
 
     private static final boolean DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = true;
+
     private boolean flushWithAdminResourceResolver = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER;
+
     @Property(label = "Flush with Admin Resource Resolver",
-            description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of " +
-                    "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the " +
-                    "users JCR permissions. [ Default: true ]",
+            description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of "
+                    + "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the "
+                    + "users JCR permissions. [ Default: true ]",
             boolValue = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER)
     public static final String PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = "flush-with-admin-resource-resolver";
 
@@ -96,12 +98,13 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
         try {
             if (paths.length > 0) {
 
-                if(flushWithAdminResourceResolver) {
+                if (flushWithAdminResourceResolver) {
                     // Use the admin resource resolver for replication to ensure all
                     // replication permission checks are OK
+                    // Make sure to close this resource resolver
                     flushingResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
                 } else {
-                    // Use the HTTP Requests resource resolver
+                    // Use the HTTP Request's resource resolver; don't close this resource resolver
                     flushingResourceResolver = resourceResolver;
                 }
 
@@ -122,7 +125,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
             log.error("Could not obtain an Admin Resource Resolver during Dispatcher Flush request.", e);
             caughtException = true;
         } finally {
-            if(flushWithAdminResourceResolver && flushingResourceResolver != null) {
+            if (flushWithAdminResourceResolver && flushingResourceResolver != null) {
                 // Close the admin resource resolver if opened by this servlet
                 flushingResourceResolver.close();
             }
@@ -161,6 +164,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
         }
 
         private final String agentId;
+
         private final boolean success;
 
         @Override
@@ -170,8 +174,9 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     }
 
     @Activate
-    protected void activate(final Map<String, String> config) {
-        this.flushWithAdminResourceResolver = PropertiesUtil.toBoolean(config.get(PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER),
+    protected final void activate(final Map<String, String> config) {
+        this.flushWithAdminResourceResolver = PropertiesUtil.toBoolean(
+                config.get(PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER),
                 DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER);
     }
 }
