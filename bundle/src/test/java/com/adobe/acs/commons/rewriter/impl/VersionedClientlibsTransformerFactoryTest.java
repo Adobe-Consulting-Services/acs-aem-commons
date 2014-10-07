@@ -61,9 +61,9 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Mock
     private ContentHandler handler;
 
-	@Mock
-	@SuppressWarnings("deprecation")
-	private ProcessingContext processingContext;
+    @Mock
+    @SuppressWarnings("deprecation")
+    private ProcessingContext processingContext;
 
     @InjectMocks
     private VersionedClientlibsTransformerFactory factory = new VersionedClientlibsTransformerFactory();
@@ -326,22 +326,22 @@ public class VersionedClientlibsTransformerFactoryTest {
         assertEquals("https://example.com/same/scheme/styles.css", attributesCaptor.getValue().getValue(0));
     }
 
-	@Test
-	@SuppressWarnings("deprecation")
-	public void testConditionalCSSClientLibrary() throws Exception {
-		when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testConditionalCSSClientLibrary() throws Exception {
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
 
-		String conditionalCSS = "<!--[if lte IE 9]><link rel=\"stylesheet\" " +
-				"href=\"" + PATH + ".css\" type=\"text/css\"><![endif]-->";
-		final Serializer serializer = new SAXWriter();
-		when(processingContext.getWriter()).thenReturn(new PrintWriter(out));
-		serializer.init(processingContext, null);
-		transformer.setContentHandler(serializer);
-		final Generator generator = new HtmlParser();
-		generator.setContentHandler(transformer);
-		PrintWriter writer = generator.getWriter();
-		writer.write(conditionalCSS);
-		assertEquals("<!--[if lte IE 9]><link rel=\"stylesheet\" href=\"" + PATH + "."+ FAKE_STREAM_CHECKSUM + ".css\" " +
-				"type=\"text/css\"><![endif]-->", out.getBuffer().toString());
-	}
+        String conditionalCSS = "<!--[if lte IE 9]><link rel=\"stylesheet\" " +
+                "href=\"" + PATH + ".css\" type=\"text/css\"><![endif]-->";
+        final Serializer serializer = new SAXWriter();
+        when(processingContext.getWriter()).thenReturn(new PrintWriter(out));
+        serializer.init(processingContext, null);
+        transformer.setContentHandler(serializer);
+        final Generator generator = new HtmlParser();
+        generator.setContentHandler(transformer);
+        PrintWriter writer = generator.getWriter();
+        writer.write(conditionalCSS);
+        assertEquals("<!--[if lte IE 9]><link rel=\"stylesheet\" href=\"" + PATH + "." + FAKE_STREAM_CHECKSUM + ".css\" " +
+                "type=\"text/css\"><![endif]-->", out.getBuffer().toString());
+    }
 }

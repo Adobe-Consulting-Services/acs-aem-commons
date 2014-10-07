@@ -66,7 +66,7 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
     private static final String CSS_TYPE = "text/css";
     private static final String JS_TYPE = "text/javascript";
 
-	private static final String CONDITIONAL_COMMENT_REGEX = "^(<!--\\[if(.)*\\]>)((\\s*)?((.*)(\\s*)?)+)(<!\\[endif]-->)$";
+    private static final String CONDITIONAL_COMMENT_REGEX = "^(<!--\\[if(.)*\\]>)((\\s*)?((.*)(\\s*)?)+)(<!\\[endif]-->)$";
 
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
@@ -89,61 +89,61 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
         }
     }
 
-	private char[] versionClientLibs(final char[] chars, int pos, int len, Transformer transformer) {
-		char[] outputChar = chars;
-		String section = StringUtils.trim(new String(chars, pos, len));
-		Pattern pattern = Pattern.compile(CONDITIONAL_COMMENT_REGEX);
-		Matcher matcher = pattern.matcher(section);
-		if(matcher.matches()) {
-			try {
-				String parsedConditionalMarkup = parseConditionalMarkup(matcher.group(3), transformer);
-				outputChar = StringUtils.replace(new String(chars), matcher.group(3), parsedConditionalMarkup).toCharArray();
-			} catch (IOException e) {
-				log.error(e.getMessage());
-			}
-		}
-		return outputChar;
-	}
+    private char[] versionClientLibs(final char[] chars, int pos, int len, Transformer transformer) {
+        char[] outputChar = chars;
+        String section = StringUtils.trim(new String(chars, pos, len));
+        Pattern pattern = Pattern.compile(CONDITIONAL_COMMENT_REGEX);
+        Matcher matcher = pattern.matcher(section);
+        if (matcher.matches()) {
+            try {
+                String parsedConditionalMarkup = parseConditionalMarkup(matcher.group(3), transformer);
+                outputChar = StringUtils.replace(new String(chars), matcher.group(3), parsedConditionalMarkup).toCharArray();
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
+        return outputChar;
+    }
 
-	@SuppressWarnings("deprecation")
-	private String parseConditionalMarkup(String input, Transformer transformer) throws IOException {
-		final StringWriter out = new StringWriter();
-		final Serializer serializer = new SAXWriter();
-		final ProcessingContext pc = getDummyProcessingContext(out);
-		serializer.init(pc, null);
-		transformer.setContentHandler(serializer);
-		final Generator generator = new HtmlParser();
-		generator.setContentHandler(transformer);
-		PrintWriter writer = generator.getWriter();
-		writer.write(input);
-		return out.getBuffer().toString();
-	}
+    @SuppressWarnings("deprecation")
+    private String parseConditionalMarkup(String input, Transformer transformer) throws IOException {
+        final StringWriter out = new StringWriter();
+        final Serializer serializer = new SAXWriter();
+        final ProcessingContext pc = getDummyProcessingContext(out);
+        serializer.init(pc, null);
+        transformer.setContentHandler(serializer);
+        final Generator generator = new HtmlParser();
+        generator.setContentHandler(transformer);
+        PrintWriter writer = generator.getWriter();
+        writer.write(input);
+        return out.getBuffer().toString();
+    }
 
-	@SuppressWarnings("deprecation")
-	private ProcessingContext getDummyProcessingContext(final Writer out) {
-		return new ProcessingContext() {
+    @SuppressWarnings("deprecation")
+    private ProcessingContext getDummyProcessingContext(final Writer out) {
+        return new ProcessingContext() {
 
-			public OutputStream getOutputStream() throws IOException {
-				return null;
-			}
+            public OutputStream getOutputStream() throws IOException {
+                return null;
+            }
 
-			public String getContentType() {
-				return null;
-			}
+            public String getContentType() {
+                return null;
+            }
 
-			public PrintWriter getWriter() {
-				return new PrintWriter(out);
-			}
+            public PrintWriter getWriter() {
+                return new PrintWriter(out);
+            }
 
-			public SlingHttpServletRequest getRequest() {
-				return null;
-			}
+            public SlingHttpServletRequest getRequest() {
+                return null;
+            }
 
-			public SlingHttpServletResponse getResponse() {
-				return null;
-			}
-		};
-	}
+            public SlingHttpServletResponse getResponse() {
+                return null;
+            }
+        };
+    }
 
     private Attributes rebuildAttributes(final AttributesImpl newAttributes, final int index, final String path,
                                          final LibraryType libraryType) {
@@ -229,10 +229,10 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
             getContentHandler().startElement(namespaceURI, localName, qName, versionClientLibs(localName, attrs));
         }
 
-		public void characters(char[] ch, int start, int length) throws SAXException {
-			char[] versionClientLibsChars = versionClientLibs(ch, start, length, new VersionableClientlibsTransformer());
-			int newLength = length - (ch.length - versionClientLibsChars.length);
-			getContentHandler().characters(versionClientLibsChars, start, newLength);
-		}
-	}
+        public void characters(char[] ch, int start, int length) throws SAXException {
+            char[] versionClientLibsChars = versionClientLibs(ch, start, length, new VersionableClientlibsTransformer());
+            int newLength = length - (ch.length - versionClientLibsChars.length);
+            getContentHandler().characters(versionClientLibsChars, start, newLength);
+        }
+    }
 }
