@@ -150,7 +150,7 @@
         <dependency>
             <groupId>com.day.cq</groupId>
             <artifactId>cq-rewriter</artifactId>
-            <version>5.7.18</version>
+            <version>5.7.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
