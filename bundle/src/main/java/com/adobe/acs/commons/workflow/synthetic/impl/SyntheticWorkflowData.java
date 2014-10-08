@@ -25,17 +25,16 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
 
 public class SyntheticWorkflowData implements WorkflowData {
-    private final SyntheticMetaDataMap metaDataMap;
     private final String payloadType;
     private final Object payload;
 
-    public SyntheticWorkflowData(final String path, final Map<String, Object> metaDataMap) {
-        this.payloadType = "JCR_PATH";
-        this.payload = path;
-        this.metaDataMap = new SyntheticMetaDataMap(metaDataMap);
+    private final MetaDataMap metaDataMap = new SyntheticMetaDataMap();
+
+    public SyntheticWorkflowData(final String payloadType, final Object payload) {
+        this.payloadType = payloadType;
+        this.payload = payload;
     }
 
     @Override

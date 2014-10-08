@@ -26,8 +26,9 @@ import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticRestart
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticTerminateWorkflowException;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.exec.WorkflowProcess;
+import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -41,12 +42,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
 
@@ -80,16 +79,17 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                       final boolean autoSaveAfterEachWorkflowProcess,
                       final boolean autoSaveAtEnd) throws WorkflowException {
 
+        final long start = System.currentTimeMillis();
+
         final Session session = resourceResolver.adaptTo(Session.class);
         final WorkflowSession workflowSession = this.getWorkflowSession(session);
 
-        final SyntheticWorkItem workItem = new SyntheticWorkItem(
-                new SyntheticWorkflowData(payloadPath, new HashMap<String, Object>()));
+        // Create the WorkflowData obj; This will persist through all WF Process Steps
+        final WorkflowData workflowData = new SyntheticWorkflowData("JCR_PATH", payloadPath);
 
-        workItem.setTimeStarted(new Date());
-
-        final List<WorkItem> workItems = new ArrayList<WorkItem>();
-        workItems.add(workItem);
+        // Create the Workflow obj; This will persist through all WF Process Steps
+        // The Workflow MetadataMap will leverage the WorkflowData's MetadataMap as these two maps should be in sync
+        final SyntheticWorkflow workflow = new SyntheticWorkflow("Synthetic Workflow: " + payloadPath, workflowData);
 
         try {
             for (final String workflowProcessLabel : workflowProcessLabels) {
@@ -97,17 +97,24 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
                 if(workflowProcess != null) {
 
-                    final SyntheticWorkflow workflow = new SyntheticWorkflow(workflowProcessLabel, workItems, workItem.getWorkflowData());
+                    // Each Workflow Process Step gets its own workItem whose life starts and ends w the WF Process
+                    final SyntheticWorkItem workItem = new SyntheticWorkItem(workflowData);
                     workItem.setWorkflow(workflow);
 
-                    // Used to pass in per-model parameters
-                    final SyntheticMetaDataMap workflowProcessMetaDataMap = new SyntheticMetaDataMap(metaDataMaps.get(workflowProcessLabel));
+                    // Used to pass in per-Step parameters
+                    final MetaDataMap workflowProcessMetaDataMap = new SyntheticMetaDataMap(metaDataMaps.get(workflowProcessLabel));
 
                     if (workflowProcess == null) {
                         log.warn("Synthetic Workflow could not find a Workflow Model with label [ {} ]", workflowProcessLabel);
                     } else {
                         try {
+                            // Execute the WF
                             workflowProcess.execute(workItem, workflowSession, workflowProcessMetaDataMap);
+                            workItem.setTimeEnded(new Date());
+
+                            log.trace("Synthetic workflow execution of [ {} ] executed in [ {} ] ms",
+                                    workflowProcessLabel,
+                                    workItem.getTimeEnded().getTime() - workItem.getTimeStarted().getTime());
                         } catch (SyntheticCompleteWorkflowException ex) {
                             log.info("Synthetic workflow execution stopped via complete() for [ {} ]", payloadPath);
                         } catch (SyntheticTerminateWorkflowException ex) {
@@ -146,7 +153,9 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                     autoSaveAfterEachWorkflowProcess, autoSaveAtEnd);
         }
 
-        workItem.setTimeEnded(new Date());
+        log.info("Synthetic workflow execution of payload [ {} ] completed in [ {} ] ms",
+                payloadPath,
+                System.currentTimeMillis() - start);
     }
 
     /**

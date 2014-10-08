@@ -25,6 +25,7 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
+import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,12 @@ public class SetDataWorkflowProcess implements WorkflowProcess {
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        workItem.getWorkflowData().getMetaDataMap().put("test-key", "test value");
+        workItem.getWorkflowData().getMetaDataMap().put("workflowdata", "set on workflowdata");
+        workItem.getWorkflow().getMetaDataMap().put("workflow", "set on workflow");
+        workItem.getMetaDataMap().put("workitem", "local to work item");
+
+        // WorkItem map is scoped only to this WorkItem step
+        String actual = workItem.getMetaDataMap().get("workitem", String.class);
+        Assert.assertEquals("local to work item", actual);
     }
 }

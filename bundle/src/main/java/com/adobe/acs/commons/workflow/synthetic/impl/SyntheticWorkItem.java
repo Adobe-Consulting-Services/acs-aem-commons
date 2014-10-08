@@ -33,24 +33,23 @@ public class SyntheticWorkItem implements WorkItem {
     private Date timeStarted = null;
     private Date timeEnded = null;
     private final UUID uuid = UUID.randomUUID();
-    private WorkflowData workflowData;
 
     private Workflow workflow;
+    private WorkflowData workflowData;
+    private MetaDataMap metaDataMap = new SyntheticMetaDataMap();
 
-    public SyntheticWorkItem(WorkflowData workflowData) {
+    public SyntheticWorkItem(final WorkflowData workflowData) {
         this.workflowData = workflowData;
+        this.timeStarted = new Date();
     }
 
-    public void setTimeStarted(Date date) {
-        this.timeStarted = date;
-    }
-
-    public void setTimeEnded(Date date) {
-        this.timeEnded = date;
-    }
-
-    public void setWorkflow(Workflow workflow) {
+    public void setWorkflow(final SyntheticWorkflow workflow) {
+        workflow.setActiveWorkItem(this);
         this.workflow = workflow;
+    }
+
+    public void setTimeEnded(final Date timeEnded) {
+        this.timeEnded = timeEnded;
     }
 
     @Override
@@ -90,9 +89,15 @@ public class SyntheticWorkItem implements WorkItem {
         return dictionary;
     }
 
+    /**
+     * This metadata map is local to this Workflow Item. This Map will change with each
+     * WorkflowProcess step.
+     *
+     * @return the WorkItem's MetaDataMap
+     */
     @Override
     public MetaDataMap getMetaDataMap() {
-        return this.getWorkflowData().getMetaDataMap();
+        return this.metaDataMap;
     }
 
     @Override

@@ -31,15 +31,20 @@ import java.util.*;
 
 public class SyntheticWorkflow implements Workflow {
     private final String id;
-    private final List<WorkItem> workItems;
-    private final WorkflowData workflowData;
     private final Date timeStarted;
 
-    public SyntheticWorkflow(String id, List<WorkItem> workItems, WorkflowData workflowData) {
+    private final WorkflowData workflowData;
+    private SyntheticWorkItem activeWorkItem;
+
+    public SyntheticWorkflow(final String id,
+                             final WorkflowData workflowData) {
         this.id = id;
-        this.workItems = workItems;
         this.workflowData = workflowData;
         this.timeStarted = new Date();
+    }
+
+    public void setActiveWorkItem(final SyntheticWorkItem workItem) {
+        this.activeWorkItem = workItem;
     }
 
     @Override
@@ -49,11 +54,11 @@ public class SyntheticWorkflow implements Workflow {
 
     @Override
     public List<WorkItem> getWorkItems() {
-        return this.workItems;
+        return Arrays.asList(new WorkItem[] { this.activeWorkItem });
     }
 
     @Override
-    public List<WorkItem> getWorkItems(WorkItemFilter workItemFilter) {
+    public List<WorkItem> getWorkItems(final WorkItemFilter workItemFilter) {
         final List<WorkItem> filtered = new ArrayList<WorkItem>();
 
         for(final WorkItem workItem : this.getWorkItems()) {

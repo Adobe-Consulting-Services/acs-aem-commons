@@ -38,14 +38,37 @@ public class ReadDataWorkflowProcess implements WorkflowProcess {
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        final String expected = "test value";
-        String actual = workItem.getWorkflowData().getMetaDataMap().get("test-key", String.class);
-        Assert.assertEquals(expected, actual);
 
-        actual = workItem.getWorkflow().getWorkflowData().getMetaDataMap().get("test-key", String.class);
-        Assert.assertEquals(expected, actual);
+        // Test Workflow Data Map
+        String actual = workItem.getWorkflowData().getMetaDataMap().get("workflowdata", String.class);
+        Assert.assertEquals("set on workflowdata", actual);
 
-        actual = workItem.getMetaDataMap().get("test-key", String.class);
-        Assert.assertEquals(expected, actual);
+        actual = workItem.getWorkflowData().getMetaDataMap().get("workflow", String.class);
+        Assert.assertEquals("set on workflow", actual);
+
+        actual = workItem.getWorkflowData().getMetaDataMap().get("workitem", String.class);
+        Assert.assertNull(actual);
+
+
+        // Test Workflow Map
+        actual = workItem.getWorkflow().getMetaDataMap().get("workflowdata", String.class);
+        Assert.assertEquals("set on workflowdata", actual);
+
+        actual = workItem.getWorkflow().getMetaDataMap().get("workflow", String.class);
+        Assert.assertEquals("set on workflow", actual);
+
+        actual = workItem.getWorkflow().getMetaDataMap().get("workitem", String.class);
+        Assert.assertNull(actual);
+
+
+        // Test WorkItem
+        actual = workItem.getMetaDataMap().get("workflowdata", String.class);
+        Assert.assertNull(actual);
+
+        actual = workItem.getMetaDataMap().get("workflow", String.class);
+        Assert.assertNull(actual);
+
+        actual = workItem.getMetaDataMap().get("workitem", String.class);
+        Assert.assertNull(actual);
     }
 }
