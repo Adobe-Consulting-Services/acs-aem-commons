@@ -67,6 +67,7 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
     private static final String JS_TYPE = "text/javascript";
 
     private static final String CONDITIONAL_COMMENT_REGEX = "^(<!--\\[if(.)*\\]>)((\\s*)?((.*)(\\s*)?)+)(<!\\[endif]-->)$";
+    private static final Pattern CONDITIONAL_COMMENT_PATTERN = Pattern.compile(CONDITIONAL_COMMENT_REGEX);
 
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
@@ -91,9 +92,8 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
 
     private char[] versionClientLibs(final char[] chars, int pos, int len, Transformer transformer) {
         char[] outputChar = chars;
-        String section = StringUtils.trim(new String(chars, pos, len));
-        Pattern pattern = Pattern.compile(CONDITIONAL_COMMENT_REGEX);
-        Matcher matcher = pattern.matcher(section);
+        final String section = StringUtils.trim(new String(chars, pos, len));
+        final Matcher matcher = CONDITIONAL_COMMENT_PATTERN.matcher(section);
         if (matcher.matches()) {
             try {
                 String parsedConditionalMarkup = parseConditionalMarkup(matcher.group(3), transformer);
