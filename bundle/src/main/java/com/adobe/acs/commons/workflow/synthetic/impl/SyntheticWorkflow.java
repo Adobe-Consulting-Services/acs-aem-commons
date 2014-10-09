@@ -27,13 +27,20 @@ import com.day.cq.workflow.exec.filter.WorkItemFilter;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.cq.workflow.model.WorkflowModel;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
 
 public class SyntheticWorkflow implements Workflow {
     private final String id;
+
     private final Date timeStarted;
 
     private final WorkflowData workflowData;
+
     private SyntheticWorkItem activeWorkItem;
 
     public SyntheticWorkflow(final String id,
@@ -43,26 +50,26 @@ public class SyntheticWorkflow implements Workflow {
         this.timeStarted = new Date();
     }
 
-    public void setActiveWorkItem(final SyntheticWorkItem workItem) {
+    public final void setActiveWorkItem(final SyntheticWorkItem workItem) {
         this.activeWorkItem = workItem;
     }
 
     @Override
-    public String getId() {
+    public final String getId() {
         return this.id;
     }
 
     @Override
-    public List<WorkItem> getWorkItems() {
-        return Arrays.asList(new WorkItem[] { this.activeWorkItem });
+    public final List<WorkItem> getWorkItems() {
+        return Arrays.asList(new WorkItem[]{this.activeWorkItem});
     }
 
     @Override
-    public List<WorkItem> getWorkItems(final WorkItemFilter workItemFilter) {
+    public final List<WorkItem> getWorkItems(final WorkItemFilter workItemFilter) {
         final List<WorkItem> filtered = new ArrayList<WorkItem>();
 
-        for(final WorkItem workItem : this.getWorkItems()) {
-            if(workItemFilter.doInclude(workItem)) {
+        for (final WorkItem workItem : this.getWorkItems()) {
+            if (workItemFilter.doInclude(workItem)) {
                 filtered.add(workItem);
             }
         }
@@ -71,46 +78,46 @@ public class SyntheticWorkflow implements Workflow {
     }
 
     @Override
-    public WorkflowModel getWorkflowModel() {
+    public final WorkflowModel getWorkflowModel() {
         return null;
     }
 
     @Override
-    public boolean isActive() {
+    public final boolean isActive() {
         return true;
     }
 
     @Override
-    public String getState() {
+    public final String getState() {
         return "Synthetic Running";
     }
 
     @Override
-    public String getInitiator() {
+    public final String getInitiator() {
         return "Synthetic Workflow";
     }
 
     @Override
-    public Date getTimeStarted() {
+    public final Date getTimeStarted() {
         return this.timeStarted;
     }
 
     @Override
-    public Date getTimeEnded() {
+    public final Date getTimeEnded() {
         return null;
     }
 
     @Override
-    public WorkflowData getWorkflowData() {
+    public final WorkflowData getWorkflowData() {
         return this.workflowData;
     }
 
     @Deprecated
     @Override
-    public Dictionary<String, String> getMetaData() {
+    public final Dictionary<String, String> getMetaData() {
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
 
-        for(String key : this.getMetaDataMap().keySet()) {
+        for (String key : this.getMetaDataMap().keySet()) {
             dictionary.put(key, this.getMetaDataMap().get(key, String.class));
         }
 
@@ -118,7 +125,7 @@ public class SyntheticWorkflow implements Workflow {
     }
 
     @Override
-    public MetaDataMap getMetaDataMap() {
+    public final MetaDataMap getMetaDataMap() {
         return this.getWorkflowData().getMetaDataMap();
     }
 }

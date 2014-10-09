@@ -28,6 +28,7 @@ import java.util.Hashtable;
 
 public class SyntheticWorkflowData implements WorkflowData {
     private final String payloadType;
+
     private final Object payload;
 
     private final MetaDataMap metaDataMap = new SyntheticMetaDataMap();
@@ -38,21 +39,21 @@ public class SyntheticWorkflowData implements WorkflowData {
     }
 
     @Override
-    public Object getPayload() {
+    public final Object getPayload() {
         return this.payload;
     }
 
     @Override
-    public String getPayloadType() {
+    public final String getPayloadType() {
         return this.payloadType;
     }
 
     @Override
     @Deprecated
-    public Dictionary<String, String> getMetaData() {
+    public final Dictionary<String, String> getMetaData() {
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
 
-        for(String key : this.getMetaDataMap().keySet()) {
+        for (String key : this.getMetaDataMap().keySet()) {
             dictionary.put(key, this.getMetaDataMap().get(key, String.class));
         }
 
@@ -60,7 +61,7 @@ public class SyntheticWorkflowData implements WorkflowData {
     }
 
     @Override
-    public MetaDataMap getMetaDataMap() {
+    public final MetaDataMap getMetaDataMap() {
         return this.metaDataMap;
     }
 }

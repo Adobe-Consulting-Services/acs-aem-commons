@@ -19,7 +19,7 @@
  */
 
 /**
- * Synthetic AEM Workflow APIs
+ * Synthetic AEM Workflow APIs.
  */
 @aQute.bnd.annotation.Version("1.0.0")
 package com.adobe.acs.commons.workflow.synthetic;

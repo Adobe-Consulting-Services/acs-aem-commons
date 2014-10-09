@@ -40,10 +40,29 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
      *
      * @throws com.day.cq.workflow.WorkflowException
      */
-    void start(ResourceResolver resourceResolver,
+    void execute(ResourceResolver resourceResolver,
                String payloadPath,
                String[] workflowProcessLabels,
                Map<String, Map<String, Object>> metaDataMaps,
                boolean autoSaveAfterEachWorkflowProcess,
                boolean autoSaveAtEnd) throws WorkflowException;
+
+
+    /**
+     * Process a payload path using using the provided Workflow Processes.
+     *
+     * Convenience method for calling:
+     *
+     *  > execute(resourceResolver, payloadPath, workflowProcessLabels, null, false, false);
+     *
+     * @param resourceResolver the resourceResolver object that provides access to the JCR for WF operations
+     * @param payloadPath the path to execute the workflow against
+     * @param workflowProcessLabels the process.labels of the workflow to execute in order against the payloadPath
+     *                              resource
+     *
+     * @throws com.day.cq.workflow.WorkflowException
+     */
+    void execute(ResourceResolver resourceResolver,
+               String payloadPath,
+               String[] workflowProcessLabels) throws WorkflowException;
 }

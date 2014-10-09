@@ -20,22 +20,30 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
-import com.day.cq.workflow.exec.*;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.cq.workflow.model.WorkflowNode;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.UUID;
 
 public class SyntheticWorkItem implements WorkItem {
     private static final String CURRENT_ASSIGNEE = "Synthetic Workflow";
 
     private Date timeStarted = null;
+
     private Date timeEnded = null;
+
     private final UUID uuid = UUID.randomUUID();
 
     private Workflow workflow;
+
     private WorkflowData workflowData;
+
     private MetaDataMap metaDataMap = new SyntheticMetaDataMap();
 
     public SyntheticWorkItem(final WorkflowData workflowData) {
@@ -43,46 +51,46 @@ public class SyntheticWorkItem implements WorkItem {
         this.timeStarted = new Date();
     }
 
-    public void setWorkflow(final SyntheticWorkflow workflow) {
+    public final void setWorkflow(final SyntheticWorkflow workflow) {
         workflow.setActiveWorkItem(this);
         this.workflow = workflow;
     }
 
-    public void setTimeEnded(final Date timeEnded) {
+    public final void setTimeEnded(final Date timeEnded) {
         this.timeEnded = timeEnded;
     }
 
     @Override
-    public String getId() {
+    public final String getId() {
         return uuid.toString() + "_" + this.getWorkflowData().getPayload();
     }
 
     @Override
-    public Date getTimeStarted() {
+    public final Date getTimeStarted() {
         return this.timeStarted;
     }
 
     @Override
-    public Date getTimeEnded() {
+    public final Date getTimeEnded() {
         return this.timeEnded;
     }
 
     @Override
-    public WorkflowData getWorkflowData() {
+    public final WorkflowData getWorkflowData() {
         return this.workflowData;
     }
 
     @Override
-    public String getCurrentAssignee() {
+    public final String getCurrentAssignee() {
         return CURRENT_ASSIGNEE;
     }
 
     @Deprecated
     @Override
-    public Dictionary<String, String> getMetaData() {
+    public final Dictionary<String, String> getMetaData() {
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
 
-        for(String key : this.getMetaDataMap().keySet()) {
+        for (String key : this.getMetaDataMap().keySet()) {
             dictionary.put(key, this.getMetaDataMap().get(key, String.class));
         }
 
@@ -96,19 +104,19 @@ public class SyntheticWorkItem implements WorkItem {
      * @return the WorkItem's MetaDataMap
      */
     @Override
-    public MetaDataMap getMetaDataMap() {
+    public final MetaDataMap getMetaDataMap() {
         return this.metaDataMap;
     }
 
     @Override
-    public Workflow getWorkflow() {
+    public final Workflow getWorkflow() {
         return this.workflow;
     }
 
     /* Unimplemented Methods */
 
     @Override
-    public WorkflowNode getNode() {
+    public final WorkflowNode getNode() {
         return null;
     }
 

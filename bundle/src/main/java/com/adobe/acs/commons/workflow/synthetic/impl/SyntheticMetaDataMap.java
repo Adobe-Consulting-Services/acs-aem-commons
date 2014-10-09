@@ -33,11 +33,11 @@ public class SyntheticMetaDataMap implements MetaDataMap {
     private ValueMap metaDataMap;
 
     public SyntheticMetaDataMap() {
-        this.metaDataMap = new ValueMapDecorator( new HashMap<String, Object>());
+        this.metaDataMap = new ValueMapDecorator(new HashMap<String, Object>());
     }
 
     public SyntheticMetaDataMap(Map<String, Object> map) {
-        if(map == null) {
+        if (map == null) {
             map = new HashMap<String, Object>();
         }
 
@@ -45,72 +45,72 @@ public class SyntheticMetaDataMap implements MetaDataMap {
     }
 
     @Override
-    public <T> T get(final String s, final Class<T> tClass) {
+    public final <T> T get(final String s, final Class<T> tClass) {
         return this.metaDataMap.get(s, tClass);
     }
 
     @Override
-    public <T> T get(final String s, final T t) {
+    public final <T> T get(final String s, final T t) {
         return this.metaDataMap.get(s, t);
     }
 
     @Override
-    public int size() {
+    public final int size() {
         return this.metaDataMap.size();
     }
 
     @Override
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return this.metaDataMap.isEmpty();
     }
 
     @Override
-    public boolean containsKey(final Object o) {
+    public final boolean containsKey(final Object o) {
         return this.metaDataMap.containsKey(o);
     }
 
     @Override
-    public boolean containsValue(final Object o) {
+    public final boolean containsValue(final Object o) {
         return this.containsValue(o);
     }
 
     @Override
-    public Object get(final Object o) {
+    public final Object get(final Object o) {
         return this.metaDataMap.get(o);
     }
 
     @Override
-    public Object put(final String s, final Object o) {
+    public final Object put(final String s, final Object o) {
         return this.metaDataMap.put(s, o);
     }
 
     @Override
-    public Object remove(final Object o) {
+    public final Object remove(final Object o) {
         return this.metaDataMap.remove(o);
     }
 
     @Override
-    public void putAll(final Map<? extends String, ?> map) {
+    public final void putAll(final Map<? extends String, ?> map) {
         this.metaDataMap.putAll(map);
     }
 
     @Override
-    public void clear() {
+    public final void clear() {
         this.metaDataMap.clear();
     }
 
     @Override
-    public Set<String> keySet() {
+    public final Set<String> keySet() {
         return this.metaDataMap.keySet();
     }
 
     @Override
-    public Collection<Object> values() {
+    public final Collection<Object> values() {
         return this.metaDataMap.values();
     }
 
     @Override
-    public Set<Entry<String, Object>> entrySet() {
+    public final Set<Entry<String, Object>> entrySet() {
         return this.metaDataMap.entrySet();
     }
 }

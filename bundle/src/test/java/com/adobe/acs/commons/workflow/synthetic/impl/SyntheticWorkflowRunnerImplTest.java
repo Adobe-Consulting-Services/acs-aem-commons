@@ -20,10 +20,15 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
+import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.CompleteWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.ReadDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.RestartWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.SetDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFArgsWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFDataWorkflowProcess;
+import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +40,10 @@ import javax.jcr.Session;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,7 +63,7 @@ public class SyntheticWorkflowRunnerImplTest {
     }
 
     @Test
-    public void testStart_WFData() throws Exception {
+    public void testExecute_WFData() throws Exception {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "test");
@@ -62,14 +71,14 @@ public class SyntheticWorkflowRunnerImplTest {
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
-        swr.start(resourceResolver,
+        swr.execute(resourceResolver,
                 "/content/test",
                 new String[] {"test"},
-                metadata, false, false);
+                null, false, false);
     }
 
     @Test
-    public void testStart_PassingDataBetweenProcesses() throws Exception {
+    public void testExecute_PassingDataBetweenProcesses() throws Exception {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "set");
@@ -81,7 +90,7 @@ public class SyntheticWorkflowRunnerImplTest {
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
-        swr.start(resourceResolver,
+        swr.execute(resourceResolver,
                 "/content/test",
                 new String[] {"set", "read"},
                 metadata, false, false);
@@ -89,7 +98,7 @@ public class SyntheticWorkflowRunnerImplTest {
 
 
     @Test
-    public void testStart_ProcessArgs() throws Exception {
+    public void testExecute_ProcessArgs() throws Exception {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "wf-args");
@@ -104,9 +113,123 @@ public class SyntheticWorkflowRunnerImplTest {
 
         metadata.put("wf-args", wfArgs);
 
-        swr.start(resourceResolver,
+        swr.execute(resourceResolver,
                 "/content/test",
                 new String[]{ "wf-args" },
                 metadata, false, false);
+    }
+
+    @Test
+    public void testExecute_Restart() throws Exception {
+        Map<Object, Object> map = new HashMap<Object, Object>();
+
+        map.put("process.label", "restart");
+        RestartWorkflowProcess restartWorkflowProcess = spy(new RestartWorkflowProcess());
+        swr.bindWorkflowProcesses(restartWorkflowProcess, map);
+
+        /** Restart */
+
+        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+
+        Map<String, Object> wfArgs = new HashMap<String, Object>();
+        metadata.put("restart", wfArgs);
+
+        swr.execute(resourceResolver,
+                "/content/test",
+                new String[]{ "restart" },
+                metadata, false, false);
+
+        verify(restartWorkflowProcess, times(3)).execute(any(WorkItem.class), any(WorkflowSession.class),
+                any(MetaDataMap.class));
+
+    }
+
+
+    @Test
+    public void testExecute_Complete() throws Exception {
+        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
+
+        Map<Object, Object> map = new HashMap<Object, Object>();
+
+        map.put("process.label", "complete");
+        CompleteWorkflowProcess completeWorkflowProcess = spy(new CompleteWorkflowProcess());
+        swr.bindWorkflowProcesses(completeWorkflowProcess, map);
+
+        /** Restart */
+
+        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+
+        Map<String, Object> wfArgs = new HashMap<String, Object>();
+        metadata.put("complete", wfArgs);
+
+        swr.execute(resourceResolver,
+                "/content/test",
+                new String[]{ "complete" },
+                metadata, true, false);
+
+        verify(completeWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
+                any(MetaDataMap.class));
+
+        verify(session, times(1)).save();
+
+    }
+
+
+    @Test
+    public void testExecute_Complete_autoSaveAtEnd() throws Exception {
+        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
+
+        Map<Object, Object> map = new HashMap<Object, Object>();
+
+        map.put("process.label", "complete");
+        CompleteWorkflowProcess completeWorkflowProcess = spy(new CompleteWorkflowProcess());
+        swr.bindWorkflowProcesses(completeWorkflowProcess, map);
+
+        /** Restart */
+
+        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+
+        Map<String, Object> wfArgs = new HashMap<String, Object>();
+        metadata.put("complete", wfArgs);
+
+        swr.execute(resourceResolver,
+                "/content/test",
+                new String[]{ "complete" },
+                metadata, false, true);
+
+        verify(completeWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
+                any(MetaDataMap.class));
+
+        verify(session, times(1)).save();
+
+    }
+
+    @Test
+    public void testExecute_Complete_noSave() throws Exception {
+        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
+
+        Map<Object, Object> map = new HashMap<Object, Object>();
+
+        map.put("process.label", "complete");
+        CompleteWorkflowProcess completeWorkflowProcess = spy(new CompleteWorkflowProcess());
+        swr.bindWorkflowProcesses(completeWorkflowProcess, map);
+
+        /** Restart */
+
+        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+
+        Map<String, Object> wfArgs = new HashMap<String, Object>();
+        metadata.put("complete", wfArgs);
+
+        swr.execute(resourceResolver,
+                "/content/test",
+                new String[]{ "complete" },
+                metadata, false, false);
+
+        verify(completeWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
+                any(MetaDataMap.class));
+
+        verify(session, times(0)).save();
+
     }
 }
