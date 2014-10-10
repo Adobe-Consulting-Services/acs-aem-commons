@@ -19,10 +19,13 @@
  */
 package com.adobe.acs.commons.designer;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Enum representing the possible target regions for a client library within an HTML page.
  *
  */
+@ProviderType
 public enum PageRegion {
     /**
      * The head section.

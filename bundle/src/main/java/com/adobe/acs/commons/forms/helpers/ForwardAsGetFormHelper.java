@@ -19,19 +19,24 @@
  */
 package com.adobe.acs.commons.forms.helpers;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.adobe.acs.commons.forms.Form;
 import com.day.cq.wcm.api.Page;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.resource.Resource;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 
 /**
  * Interface used for working with ACS-AEM-Commons forms.
  */
+@ProviderType
 public interface ForwardAsGetFormHelper extends FormHelper {
     public final String REQUEST_ATTR_FORM_KEY = ForwardAsGetFormHelper.class.getName() + "__Form_";
 

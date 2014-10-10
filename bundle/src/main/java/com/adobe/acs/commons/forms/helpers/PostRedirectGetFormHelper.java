@@ -19,14 +19,18 @@
  */
 package com.adobe.acs.commons.forms.helpers;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.adobe.acs.commons.forms.Form;
 import com.day.cq.wcm.api.Page;
+
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 
 import java.io.IOException;
 
+@ProviderType
 public interface PostRedirectGetFormHelper extends FormHelper {
     public final static String KEY_FORM_NAME = "n";
     public final static String KEY_FORM = "f";

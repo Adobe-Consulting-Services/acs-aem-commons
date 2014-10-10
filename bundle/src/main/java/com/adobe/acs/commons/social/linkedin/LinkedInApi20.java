@@ -35,6 +35,8 @@ import org.scribe.oauth.OAuthService;
 import org.scribe.utils.OAuthEncoder;
 import org.scribe.utils.Preconditions;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Scribe API class for the LinkedIn OAuth 2.0 endpoint.
  *
@@ -42,6 +44,7 @@ import org.scribe.utils.Preconditions;
  * so as not to require changes to Scribe and to be compatible with Scribe 1.3.0, shipped 
  * with CQ 5.6.x.
  */
+@ProviderType
 public final class LinkedInApi20 extends DefaultApi20 {
     private static final String ACCESS_TOKEN_URL = "https://www.linkedin.com/uas/oauth2/accessToken";
 

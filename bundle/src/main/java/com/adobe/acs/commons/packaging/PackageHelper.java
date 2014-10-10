@@ -20,16 +20,20 @@
 
 package com.adobe.acs.commons.packaging;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.day.jcr.vault.fs.api.PathFilterSet;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.PackageException;
 import com.day.jcr.vault.packaging.Version;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -38,6 +42,7 @@ import java.util.Map;
 /**
  * Helper interface for dynamic package creation.
  */
+@ProviderType
 public interface PackageHelper {
     /**
      * JCR Path to default ACS thumbnail resource.

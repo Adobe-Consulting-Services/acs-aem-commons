@@ -19,7 +19,10 @@
  */
 package com.adobe.acs.commons.util;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.day.cq.commons.jcr.JcrConstants;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -32,9 +35,11 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.servlet.RequestDispatcher;
+
 import java.io.IOException;
 import java.io.InputStream;
 
+@ProviderType
 public class ResourceDataUtil {
     public static final String ENCODING_UTF_8 = "UTF-8";
     private static final Logger log = LoggerFactory.getLogger(ResourceDataUtil.class);

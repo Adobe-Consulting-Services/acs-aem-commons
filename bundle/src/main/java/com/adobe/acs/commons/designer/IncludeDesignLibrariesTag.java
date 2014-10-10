@@ -31,6 +31,7 @@ import org.apache.sling.scripting.jsp.util.TagUtil;
 import tldgen.BodyContentType;
 import tldgen.Tag;
 import tldgen.TagAttribute;
+import aQute.bnd.annotation.ProviderType;
 
 import com.day.cq.wcm.api.designer.Design;
 
@@ -38,6 +39,7 @@ import com.day.cq.wcm.api.designer.Design;
  * JSP Tag which includes client libraries based on the design.
  *
  */
+@ProviderType
 @SuppressWarnings("serial")
 @Tag(bodyContentType = BodyContentType.EMPTY, value = "includeClientLibraries")
 public final class IncludeDesignLibrariesTag extends TagSupport {

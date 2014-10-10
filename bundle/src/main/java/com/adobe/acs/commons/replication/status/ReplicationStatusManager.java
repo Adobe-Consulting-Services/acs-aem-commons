@@ -24,9 +24,13 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
+import aQute.bnd.annotation.ProviderType;
+
 import javax.jcr.RepositoryException;
+
 import java.util.Calendar;
 
+@ProviderType
 public interface ReplicationStatusManager {
 
     /**

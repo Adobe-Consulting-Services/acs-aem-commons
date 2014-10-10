@@ -22,6 +22,7 @@ package com.adobe.acs.commons.dam;
 import org.apache.commons.lang.StringUtils;
 
 import tldgen.Function;
+import aQute.bnd.annotation.ProviderType;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
@@ -29,6 +30,7 @@ import com.day.cq.dam.api.DamConstants;
 /**
  * DAM JSP functions.
  */
+@ProviderType
 public final class DAMFunctions {
 
     private DAMFunctions() {

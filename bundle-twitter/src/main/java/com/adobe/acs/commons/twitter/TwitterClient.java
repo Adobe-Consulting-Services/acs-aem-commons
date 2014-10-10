@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.twitter;
 
 import twitter4j.Twitter;
+import aQute.bnd.annotation.ProviderType;
 
 import com.day.cq.wcm.webservicesupport.Configuration;
 
@@ -31,6 +32,7 @@ import com.day.cq.wcm.webservicesupport.Configuration;
  * 
  * Note that these clients always use only Application authentication.
  */
+@ProviderType
 public interface TwitterClient {
 
     /**
