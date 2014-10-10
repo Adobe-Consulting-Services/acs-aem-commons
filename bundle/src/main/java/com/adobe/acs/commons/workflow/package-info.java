@@ -20,5 +20,5 @@
 /**
  * AEM Workflow APIs
  */
-@aQute.bnd.annotation.Version("1.0.0")
+@aQute.bnd.annotation.Version("1.0.1")
 package com.adobe.acs.commons.workflow;

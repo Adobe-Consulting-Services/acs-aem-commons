@@ -20,7 +20,7 @@
 /**
  * This package provides Linked In integration
  */
-@Version("1.0.0")
+@Version("1.0.1")
 package com.adobe.acs.commons.social.linkedin;
 
 import aQute.bnd.annotation.Version;
