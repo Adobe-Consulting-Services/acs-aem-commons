@@ -27,6 +27,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import java.util.Map;
 
 public interface SyntheticWorkflowRunner extends WorkflowService {
+    String PROCESS_ARGS = "PROCESS_ARGS";
+
     /**
      * Process a payload path using using the provided Workflow Processes.
      *
@@ -34,7 +36,7 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
      * @param payloadPath the path to execute the workflow against
      * @param workflowProcessLabels the process.labels of the workflow to execute in order against the payloadPath
      *                              resource
-     * @param metaDataMaps the WF args metadata maps; each workflowProcessLabel can have one map
+     * @param processArgs the WF args metadata maps; each workflowProcessLabel can have one map
      * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
      * @param autoSaveAtEnd persist changes to JCR after all Workflow Process complete
      *
@@ -43,7 +45,7 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
     void execute(ResourceResolver resourceResolver,
                String payloadPath,
                String[] workflowProcessLabels,
-               Map<String, Map<String, Object>> metaDataMaps,
+               Map<String, Map<String, Object>> processArgs,
                boolean autoSaveAfterEachWorkflowProcess,
                boolean autoSaveAtEnd) throws WorkflowException;
 

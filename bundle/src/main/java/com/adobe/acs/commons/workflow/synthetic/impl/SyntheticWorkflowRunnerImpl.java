@@ -87,14 +87,14 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     public final void execute(final ResourceResolver resourceResolver,
                         final String payloadPath,
                         final String[] workflowProcessLabels,
-                        Map<String, Map<String, Object>> metaDataMaps,
+                        Map<String, Map<String, Object>> processArgs,
                         final boolean autoSaveAfterEachWorkflowProcess,
                         final boolean autoSaveAtEnd) throws WorkflowException {
 
         final long start = System.currentTimeMillis();
 
-        if (metaDataMaps == null) {
-            metaDataMaps = new HashMap<String, Map<String, Object>>();
+        if (processArgs == null) {
+            processArgs = new HashMap<String, Map<String, Object>>();
         }
 
         int count = 0;
@@ -102,7 +102,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
             count++;
 
             try {
-                run(resourceResolver, payloadPath, workflowProcessLabels, metaDataMaps,
+                run(resourceResolver, payloadPath, workflowProcessLabels, processArgs,
                         autoSaveAfterEachWorkflowProcess, autoSaveAtEnd);
 
                 log.info("Synthetic workflow execution of payload [ {} ] completed in [ {} ] ms",
