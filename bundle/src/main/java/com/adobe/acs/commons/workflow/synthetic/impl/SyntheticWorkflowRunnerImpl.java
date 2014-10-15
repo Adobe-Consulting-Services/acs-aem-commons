@@ -21,7 +21,6 @@
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
-import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticCompleteWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticRestartWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticTerminateWorkflowException;
 import com.day.cq.workflow.WorkflowException;
@@ -164,10 +163,8 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                         log.trace("Synthetic workflow execution of [ {} ] executed in [ {} ] ms",
                                 workflowProcessLabel,
                                 workItem.getTimeEnded().getTime() - workItem.getTimeStarted().getTime());
-                    } catch (SyntheticCompleteWorkflowException ex) {
-                        log.info("Synthetic workflow execution stopped via complete() for [ {} ]", payloadPath);
-                        break;
                     } catch (SyntheticTerminateWorkflowException ex) {
+                        // Terminate entire Workflow execution for this payload
                         log.info("Synthetic workflow execution stopped via terminate() for [ {} ]", payloadPath);
                         break;
                     } finally {

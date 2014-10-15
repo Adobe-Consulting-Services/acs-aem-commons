@@ -29,18 +29,15 @@ import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TerminateDataWorkflowProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(TerminateDataWorkflowProcess.class);
+public class GoNextWorkflowProcess implements WorkflowProcess {
+    private static final Logger log = LoggerFactory.getLogger(GoNextWorkflowProcess.class);
 
-    public TerminateDataWorkflowProcess() {
+    public GoNextWorkflowProcess() {
 
     }
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        log.debug("Terminate Workflow Process");
-
-        workflowSession.terminateWorkflow(workItem.getWorkflow());
-        Assert.assertTrue(false);
+        Assert.assertTrue(true);
     }
 }

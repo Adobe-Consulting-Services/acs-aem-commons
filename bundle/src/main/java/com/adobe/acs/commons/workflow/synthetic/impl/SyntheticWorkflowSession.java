@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
-import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticCompleteWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticRestartWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticTerminateWorkflowException;
 import com.day.cq.security.Authorizable;
@@ -47,6 +46,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     private static final String UNSUPPORTED_OPERATION_MESSAGE = "Operation not supported by Synthetic Workflow";
 
     private final Session session;
+
     private final SyntheticWorkflowRunnerImpl workflowService;
 
     public SyntheticWorkflowSession(SyntheticWorkflowRunnerImpl workflowService, Session session) {
@@ -66,17 +66,25 @@ public class SyntheticWorkflowSession implements WorkflowSession {
 
     @Override
     public final void terminateWorkflow(final Workflow workflow) throws WorkflowException {
-        throw new SyntheticTerminateWorkflowException("Synthetic workflow terminated");
+        if (workflow instanceof SyntheticWorkflow) {
+            throw new SyntheticTerminateWorkflowException("Synthetic workflow terminated");
+        } else {
+            throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        }
     }
 
     @Override
     public final void complete(final WorkItem workItem, final Route route) throws WorkflowException {
-        throw new SyntheticCompleteWorkflowException("Synthetic workflow completed");
+        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
     @Override
     public final void restartWorkflow(final Workflow workflow) throws WorkflowException {
-        throw new SyntheticRestartWorkflowException("Synthetic workflow restarted");
+        if (workflow instanceof SyntheticWorkflow) {
+            throw new SyntheticRestartWorkflowException("Synthetic workflow restarted");
+        } else {
+            throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        }
     }
 
     @Override

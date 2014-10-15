@@ -20,10 +20,11 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
-import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.CompleteWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.NoNextWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.ReadDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.RestartWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.SetDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.TerminateDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFArgsWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFDataWorkflowProcess;
 import com.day.cq.workflow.WorkflowSession;
@@ -144,18 +145,18 @@ public class SyntheticWorkflowRunnerImplTest {
 
     }
 
-
     @Test
-    public void testExecute_Complete() throws Exception {
+    public void testExecute_Terminate() throws Exception {
         when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
-        map.put("process.label", "complete");
-        CompleteWorkflowProcess completeWorkflowProcess = spy(new CompleteWorkflowProcess());
-        swr.bindWorkflowProcesses(completeWorkflowProcess, map);
+        map.put("process.label", "terminate");
+        TerminateDataWorkflowProcess terminateDataWorkflowProcess = spy(new TerminateDataWorkflowProcess());
+        swr.bindWorkflowProcesses(terminateDataWorkflowProcess, map);
 
-        /** Restart */
+        map.put("process.label", "nonext");
+        swr.bindWorkflowProcesses(new NoNextWorkflowProcess(), map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
@@ -164,40 +165,33 @@ public class SyntheticWorkflowRunnerImplTest {
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[]{ "complete" },
+                new String[]{ "terminate", "nonext" },
                 metadata, true, false);
-
-        verify(completeWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
-                any(MetaDataMap.class));
-
-        verify(session, times(1)).save();
 
     }
 
 
     @Test
-    public void testExecute_Complete_autoSaveAtEnd() throws Exception {
+    public void testExecute_Terminate_autoSaveAtEnd() throws Exception {
         when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
-        map.put("process.label", "complete");
-        CompleteWorkflowProcess completeWorkflowProcess = spy(new CompleteWorkflowProcess());
-        swr.bindWorkflowProcesses(completeWorkflowProcess, map);
-
-        /** Restart */
+        map.put("process.label", "terminate");
+        TerminateDataWorkflowProcess terminateDataWorkflowProcess = spy(new TerminateDataWorkflowProcess());
+        swr.bindWorkflowProcesses(terminateDataWorkflowProcess, map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
         Map<String, Object> wfArgs = new HashMap<String, Object>();
-        metadata.put("complete", wfArgs);
+        metadata.put("terminate", wfArgs);
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[]{ "complete" },
+                new String[]{ "terminate" },
                 metadata, false, true);
 
-        verify(completeWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
+        verify(terminateDataWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
                 any(MetaDataMap.class));
 
         verify(session, times(1)).save();
@@ -210,23 +204,21 @@ public class SyntheticWorkflowRunnerImplTest {
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
-        map.put("process.label", "complete");
-        CompleteWorkflowProcess completeWorkflowProcess = spy(new CompleteWorkflowProcess());
-        swr.bindWorkflowProcesses(completeWorkflowProcess, map);
-
-        /** Restart */
+        map.put("process.label", "terminate");
+        TerminateDataWorkflowProcess terminateDataWorkflowProcess = spy(new TerminateDataWorkflowProcess());
+        swr.bindWorkflowProcesses(terminateDataWorkflowProcess, map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
         Map<String, Object> wfArgs = new HashMap<String, Object>();
-        metadata.put("complete", wfArgs);
+        metadata.put("terminate", wfArgs);
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[]{ "complete" },
+                new String[]{ "terminate" },
                 metadata, false, false);
 
-        verify(completeWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
+        verify(terminateDataWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
                 any(MetaDataMap.class));
 
         verify(session, times(0)).save();

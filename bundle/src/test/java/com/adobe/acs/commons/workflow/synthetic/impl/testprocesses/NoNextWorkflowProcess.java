@@ -29,19 +29,16 @@ import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CompleteWorkflowProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(CompleteWorkflowProcess.class);
+public class NoNextWorkflowProcess implements WorkflowProcess {
+    private static final Logger log = LoggerFactory.getLogger(NoNextWorkflowProcess.class);
 
-    public CompleteWorkflowProcess() {
+    public NoNextWorkflowProcess() {
 
     }
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
 
-        workflowSession.complete(workItem, null);
-
-        // This should never be executed
         Assert.assertTrue(false);
     }
 }
