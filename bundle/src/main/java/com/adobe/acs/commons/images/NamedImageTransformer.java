@@ -20,11 +20,11 @@
 
 package com.adobe.acs.commons.images;
 
-import aQute.bnd.annotation.ConsumerType;
+import aQute.bnd.annotation.ProviderType;
 
 import com.day.image.Layer;
 
-@ConsumerType
+@ProviderType
 public interface NamedImageTransformer {
     /**
      * The OSGi config property used to identify the named transform.
