@@ -48,7 +48,8 @@
 
         <span>
 
-            <table class="data">
+            <%-- First Col --%>
+            <table class="data table-col-1">
                 <thead>
                 <tr>
                     <th>&nbsp;</th>
@@ -56,7 +57,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="workflowModel in formOptions.workflowModels">
+                <tr ng-repeat="workflowModel in formOptions.workflowModels.slice(0, formOptions.workflowModels.length / 2)">
                     <td class="action-col"><label><input
                             ng-checked="form.models.indexOf(workflowModel.id) >= 0"
                             ng-click="toggleModelSelection(workflowModel.id)"
@@ -64,9 +65,34 @@
                     <td
                             ng-click="toggleModelSelection(workflowModel.id)">{{ workflowModel.title }}</td>
                 </tr>
-                </tbody>
 
+                </tbody>
             </table>
+
+            <%-- Second Col --%>
+
+            <table class="data table-col-2">
+                <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>Workflow Model</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr
+                        ng-repeat="workflowModel in formOptions.workflowModels.slice((formOptions.workflowModels.length / 2) + 1, formOptions.workflowModels.length)">
+                    <td class="action-col"><label><input
+                            ng-checked="form.models.indexOf(workflowModel.id) >= 0"
+                            ng-click="toggleModelSelection(workflowModel.id)"
+                            type="checkbox"><span></span></label></td>
+                    <td
+                            ng-click="toggleModelSelection(workflowModel.id)">{{ workflowModel.title }}</td>
+                </tr>
+
+                </tbody>
+            </table>
+
+            <div style="clear: both;"></div>
 
             <div class="instructions">
             </div>

@@ -81,7 +81,7 @@ angular.module('workflowRemover', [])
                         $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
                     });
 
-                document.getElementById("container").scrollTo(0,0);
+                document.getElementById("scroll-top").scrollTop = 0;
             };
 
             $scope.remove = function () {
@@ -145,8 +145,6 @@ angular.module('workflowRemover', [])
                     $scope.form.models.push(workflowModelID);
                 }
             };
-
-
         }]);
 
 

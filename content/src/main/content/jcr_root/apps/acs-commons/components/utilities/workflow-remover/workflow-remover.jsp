@@ -56,7 +56,7 @@
 
 
         <div class="content">
-            <div class="content-container">
+            <div class="content-container" id="scroll-top">
                 <div class="content-container-inner">
 
                     <h1>Workflow Remover</h1>

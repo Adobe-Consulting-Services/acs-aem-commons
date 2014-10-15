@@ -21,12 +21,13 @@
 <div ng-show="status.state">
 
     <div class="section summary-section">
-        <h3>Status of Removal</h3>
+        <h3>Workflow Removal Status</h3>
 
         <section class="well">
 
             <ul>
-                <li>Status: <span style="text-transform: capitalize;">{{ status.state || 'Not Started'}}</span></li>
+                <li>Removal Status
+                    : <span style="text-transform: capitalize;">{{ status.state || 'Not Started'}}</span></li>
                 <li>Count: {{ status.count || 0 }}</li>
                 <li ng-show="status.startedAt">Started At: {{ status.startedAt }}</li>
                 <li ng-show="status.completedAt">Completed At: {{ status.completedAt }}</li>
