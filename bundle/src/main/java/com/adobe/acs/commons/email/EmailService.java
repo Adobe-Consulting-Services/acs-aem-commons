@@ -24,10 +24,13 @@ import java.util.Map;
 
 import javax.mail.internet.InternetAddress;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * A service interface for sending a generic template based Email Notification.
  * 
  */
+@ProviderType
 public interface EmailService {
 
     /**

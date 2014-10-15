@@ -25,9 +25,12 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@ProviderType
 public class Form {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(Form.class);

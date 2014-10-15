@@ -23,12 +23,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import tldgen.Function;
+import aQute.bnd.annotation.ProviderType;
 
 import com.adobe.granite.xss.XSSAPI;
 
 /**
  * XSSAPI JSP Function wrappers.
  */
+@ProviderType
 public final class XSSFunctions {
 
     private static final String LINK_PREFIX = "<a href='";

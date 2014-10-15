@@ -32,6 +32,7 @@ import org.apache.sling.scripting.jsp.util.TagUtil;
 import tldgen.BodyContentType;
 import tldgen.Tag;
 import tldgen.TagAttribute;
+import aQute.bnd.annotation.ProviderType;
 
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.adobe.acs.commons.wcm.impl.ComponentHelperImpl;
@@ -45,6 +46,7 @@ import com.day.cq.wcm.foundation.Placeholder;
  * for both Classic UI and Touch UI.
  *
  */
+@ProviderType
 @Tag(bodyContentType = BodyContentType.JSP, value = "placeholder")
 public final class PlaceholderTag extends BodyTagSupport {
 

@@ -19,10 +19,14 @@
  */
 package com.adobe.acs.commons.forms.components;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.adobe.acs.commons.forms.Form;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
+@ProviderType
 public interface MultiStepFormComponent {
 
 	/**

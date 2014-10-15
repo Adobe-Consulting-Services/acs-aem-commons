@@ -32,11 +32,13 @@ import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import aQute.bnd.annotation.ProviderType;
 import tldgen.Function;
 
 /**
  * JSP functions for working with MultiFieldPanel widget.
  */
+@ProviderType
 public final class MultiFieldPanelFunctions {
     private static final Logger log = LoggerFactory.getLogger(MultiFieldPanelFunctions.class);
 

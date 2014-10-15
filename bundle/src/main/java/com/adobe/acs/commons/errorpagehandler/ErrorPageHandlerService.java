@@ -23,11 +23,14 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Error Page Handling Service which facilitates the resolution of errors against authorable pages for discrete content trees.
  *
  * This service is used via the ACS-AEM-Commons error page handler implementation to create author-able error pages.
  */
+@ProviderType
 public interface ErrorPageHandlerService {
     int DEFAULT_STATUS_CODE = SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 

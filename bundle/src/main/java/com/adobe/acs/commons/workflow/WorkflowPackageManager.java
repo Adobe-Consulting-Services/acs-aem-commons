@@ -19,13 +19,18 @@
  */
 package com.adobe.acs.commons.workflow;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.WCMException;
+
 import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.RepositoryException;
+
 import java.util.List;
 
+@ProviderType
 public interface WorkflowPackageManager {
     /**
      * Creates a Workflow Package for the provided paths. The Workflow Page will include the provided paths and

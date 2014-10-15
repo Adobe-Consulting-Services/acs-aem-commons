@@ -20,5 +20,5 @@
 /**
  * Dynamic Error Page Handler.
  */
-@aQute.bnd.annotation.Version("1.1.0")
+@aQute.bnd.annotation.Version("1.1.1")
 package com.adobe.acs.commons.errorpagehandler;

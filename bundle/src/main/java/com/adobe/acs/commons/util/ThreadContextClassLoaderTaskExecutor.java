@@ -21,9 +21,12 @@ package com.adobe.acs.commons.util;
 
 import java.util.concurrent.Callable;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Utility class for executing a particular task with a set Thread Context Class Loader.
  */
+@ProviderType
 public final class ThreadContextClassLoaderTaskExecutor {
     
     private ThreadContextClassLoaderTaskExecutor() {
