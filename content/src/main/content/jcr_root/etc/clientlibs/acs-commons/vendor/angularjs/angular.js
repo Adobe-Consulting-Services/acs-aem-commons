@@ -203,7 +203,7 @@ var manualUppercase = function(s) {
 };
 
 
-// String#toLowerCase and String#toUpperCase don't produce correct results in browsers with Turkish
+// String#toLowerCase and String#toUpperCase don't produce correct items in browsers with Turkish
 // locale, for this reason we need to detect this case and redefine lowercase/uppercase methods
 // with correct but slower alternatives.
 if ('i' !== 'I'.toLowerCase()) {
@@ -2604,7 +2604,7 @@ function createEventHandler(element, events) {
 
 //////////////////////////////////////////
 // Functions iterating traversal.
-// These functions chain results into a single
+// These functions chain items into a single
 // selector.
 //////////////////////////////////////////
 forEach({
@@ -12650,7 +12650,7 @@ function $SceDelegateProvider() {
     <i ng-bind-html="myCtrl.explicitlyTrustedHtml" id="explicitlyTrustedHtml"></i><br><br>
     <b>User comments</b><br>
     By default, HTML that isn't explicitly trusted (e.g. Alice's comment) is sanitized when
-    $sanitize is available.  If $sanitize isn't available, this results in an error instead of an
+    $sanitize is available.  If $sanitize isn't available, this items in an error instead of an
     exploit.
     <div class="well">
       <div ng-repeat="userComment in myCtrl.userComments">
@@ -13421,7 +13421,7 @@ var originUrl = urlResolve(window.location.href, true);
  * Implementation Notes for non-IE browsers
  * ----------------------------------------
  * Assigning a URL to the href property of an anchor DOM node, even one attached to the DOM,
- * results both in the normalizing and parsing of the URL.  Normalizing means that a relative
+ * items both in the normalizing and parsing of the URL.  Normalizing means that a relative
  * URL will be resolved into an absolute URL in the context of the application document.
  * Parsing means that the anchor node's host, hostname, protocol, port, pathname and related
  * properties are all populated to reflect the normalized URL.  This approach has wide
@@ -13696,7 +13696,7 @@ function $FilterProvider($provide) {
  *
  *   Can be one of:
  *
- *   - `string`: Predicate that results in a substring match using the value of `expression`
+ *   - `string`: Predicate that items in a substring match using the value of `expression`
  *     string. All strings or objects with string properties in `array` that contain this string
  *     will be returned. The predicate can be negated by prefixing the string with `!`.
  *
