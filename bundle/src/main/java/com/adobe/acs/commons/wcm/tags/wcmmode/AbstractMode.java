@@ -24,6 +24,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import tldgen.TagAttribute;
+import aQute.bnd.annotation.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
 
@@ -33,6 +34,7 @@ import com.day.cq.wcm.api.WCMMode;
  * for a certain WcmMode.
  *
  */
+@ProviderType
 abstract class AbstractMode extends TagSupport {
 
     private static final long serialVersionUID = -5908186805353457797L;

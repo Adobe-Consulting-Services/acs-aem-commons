@@ -29,11 +29,14 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
+import aQute.bnd.annotation.ConsumerType;
+
 /**
  * Abstract base class to ease creating transformer pipeline components.
  * All methods are impelemented as pass-throughs to the next content handler.
  * Similar to Cocoon's AbstractSAXPipe.
  */
+@ConsumerType
 public abstract class AbstractTransformer implements Transformer {
 
     private ContentHandler contentHandler;

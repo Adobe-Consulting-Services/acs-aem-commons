@@ -28,11 +28,14 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Generic HttpServletResponseWrapper which will buffer the output content
  * to a buffer. Only 
  *
  */
+@ProviderType
 public final class BufferingResponse extends HttpServletResponseWrapper {
 
     private StringWriter stringWriter;

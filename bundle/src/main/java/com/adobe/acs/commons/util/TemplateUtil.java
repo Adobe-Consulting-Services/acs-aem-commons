@@ -24,6 +24,7 @@ import javax.annotation.CheckForNull;
 import org.apache.sling.api.resource.ValueMap;
 
 import tldgen.Function;
+import aQute.bnd.annotation.ProviderType;
 
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
@@ -31,6 +32,7 @@ import com.day.cq.wcm.api.Page;
 /**
  * Utility functions for working with CQ Templates.
  */
+@ProviderType
 public final class TemplateUtil {
 
     private TemplateUtil() {

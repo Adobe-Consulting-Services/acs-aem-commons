@@ -21,6 +21,7 @@ package com.adobe.acs.commons.wcm.tags.wcmmode;
 
 import tldgen.BodyContentType;
 import tldgen.Tag;
+import aQute.bnd.annotation.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
 
@@ -32,6 +33,7 @@ import com.day.cq.wcm.api.WCMMode;
  *
  * @see <a href="http://dev.day.com/docs/en/cq/current/javadoc/com/day/cq/wcm/api/WCMMode.html">WCMMode</a>
  */
+@ProviderType
 @Tag(bodyContentType = BodyContentType.JSP, value = "disabled")
 public final class DisabledMode extends AbstractMode {
 

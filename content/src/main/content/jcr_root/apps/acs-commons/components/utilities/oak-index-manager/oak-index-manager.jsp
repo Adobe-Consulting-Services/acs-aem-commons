@@ -96,7 +96,7 @@
                                     <th>Declaring Node Types</th>
                                     <th>Property Names</th>
                                     <th>Include Property Types</th>
-                                    <th>Exclude Property Types</th>
+                                    <th>Exclude Property Names</th>
                                     <th>Type</th>
                                     <th>Unique</th>
                                     <th>Async</th>

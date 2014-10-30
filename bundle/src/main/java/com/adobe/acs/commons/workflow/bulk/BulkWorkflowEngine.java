@@ -25,8 +25,11 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 
+import aQute.bnd.annotation.ProviderType;
+
 import javax.jcr.RepositoryException;
 
+@ProviderType
 public interface BulkWorkflowEngine {
     String SLING_RESOURCE_TYPE = "acs-commons/components/utilities/bulk-workflow-manager";
 

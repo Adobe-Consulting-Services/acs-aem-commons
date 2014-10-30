@@ -24,10 +24,13 @@ import java.util.List;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Service used to identify the latest version of the entire resource tree of the specified resources at the date specified and
  *  issue replication request to the agents specified.
  */
+@ProviderType
 public interface ReplicateVersion {
 
     /**

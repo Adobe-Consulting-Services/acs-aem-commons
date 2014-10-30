@@ -26,6 +26,7 @@ import javax.servlet.jsp.tagext.TagSupport;
 import tldgen.BodyContentType;
 import tldgen.Tag;
 import tldgen.TagAttribute;
+import aQute.bnd.annotation.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
 
@@ -44,6 +45,7 @@ import com.day.cq.wcm.api.WCMMode;
  *
  * @see <a href="http://dev.day.com/docs/en/cq/current/javadoc/com/day/cq/wcm/api/WCMMode.html">WCMMode</a>
  */
+@ProviderType
 @Tag(value = "setMode", bodyContentType = BodyContentType.JSP)
 public final class SetWCMMode extends TagSupport {
 

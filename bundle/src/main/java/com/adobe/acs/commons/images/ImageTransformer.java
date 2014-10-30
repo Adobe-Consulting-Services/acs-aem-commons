@@ -20,9 +20,13 @@
 
 package com.adobe.acs.commons.images;
 
+import aQute.bnd.annotation.ConsumerType;
+
 import com.day.image.Layer;
+
 import org.apache.sling.api.resource.ValueMap;
 
+@ConsumerType
 public interface ImageTransformer {
     /**
      * OSGi Property used to identify the ImageTransformer.

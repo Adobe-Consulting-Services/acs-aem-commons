@@ -19,9 +19,12 @@
  */
 package com.adobe.acs.commons.replication;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * The result of a replication.
  */
+@ProviderType
 public class ReplicationResult {
 
     private final Status status;

@@ -20,5 +20,5 @@
 /**
  * Miscellaneous WCM Utilities.
  */
-@aQute.bnd.annotation.Version("1.1.0")
+@aQute.bnd.annotation.Version("1.1.1")
 package com.adobe.acs.commons.wcm;

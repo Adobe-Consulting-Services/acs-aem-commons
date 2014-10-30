@@ -23,9 +23,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Util class to help with parsing URIs and PathInfos.
  */
+@ProviderType
 public final class PathInfoUtil {
 
     private PathInfoUtil() {

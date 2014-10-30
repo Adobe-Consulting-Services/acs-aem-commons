@@ -24,6 +24,9 @@ import javax.servlet.ServletRequest;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
+import aQute.bnd.annotation.ProviderType;
+
+@ProviderType
 public interface ComponentHelper {
     /**
      * Checks if Page equals in WCM Mode DESIGN.

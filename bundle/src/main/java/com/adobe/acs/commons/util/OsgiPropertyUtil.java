@@ -23,10 +23,13 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@ProviderType
 public class OsgiPropertyUtil {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(OsgiPropertyUtil.class);

@@ -23,11 +23,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@ProviderType
 public final class TextUtil {
     
     private static final Pattern RICH_TEXT_PATTERN = Pattern.compile("<[^>]+>");
