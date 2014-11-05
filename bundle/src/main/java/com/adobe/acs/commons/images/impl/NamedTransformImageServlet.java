@@ -126,8 +126,18 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             value = DEFAULT_ASSET_RENDITION_PICKER_REGEX)
     private static final String PROP_ASSET_RENDITION_PICKER_REGEX = "prop.asset-rendition-picker-regex";
 
+    @Property(
+            label = "Image Quality",
+            description = "Number between 0.0 and 1.0 that determines the image output quality." +
+            " GIF quality will be determined by multiplying 255 by this value.",
+            doubleValue = IMAGE_MAX_QUALITY)
+    private static final String PROP_IMAGE_QUALITY = "prop.image-quality";
+
     private static RenditionPatternPicker renditionPatternPicker =
             new RenditionPatternPicker(Pattern.compile(DEFAULT_ASSET_RENDITION_PICKER_REGEX));
+
+    private double imageQuality;
+    private double imageGifQuality;
 
     /**
      * Only accept requests that.
@@ -177,7 +187,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         // Transform the image
         layer = namedImageTransformer.transform(layer);
 
-        final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
+        final double quality = (mimeType.equals(MIME_TYPE_GIF) ? imageGifQuality : imageQuality);
         response.setContentType(mimeType);
 
         layer.write(mimeType, quality, response.getOutputStream());
@@ -303,6 +313,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                     DEFAULT_ASSET_RENDITION_PICKER_REGEX);
             renditionPatternPicker = new RenditionPatternPicker(DEFAULT_ASSET_RENDITION_PICKER_REGEX);
         }
+
+        imageQuality = PropertiesUtil.toDouble(properties.get(PROP_IMAGE_QUALITY), IMAGE_MAX_QUALITY);
+        imageGifQuality = Math.ceil(IMAGE_GIF_MAX_QUALITY * imageQuality);
     }
 
     protected final void bindNamedImageTransformers(final NamedImageTransformer service,
