@@ -42,7 +42,6 @@ public abstract class AbstractResultSerializer {
         json.put("type", result.getResultType());
         json.put("description", result.getDescription());
         json.put("path", result.getPath());
-        json.put("autoComplete", result.getPath());
 
         // Action
         action.put("uri", result.getActionURI());
@@ -50,6 +49,7 @@ public abstract class AbstractResultSerializer {
         action.put("target", result.getActionTarget().toString());
         action.put("xhr", false);
         action.put("script", result.getActionScript());
+        action.put("autoComplete", result.getAutoComplete());
 
         for (final Map.Entry<String, String> param : result.getActionParams().entrySet()) {
             actionParams.put(param.getKey(), param.getValue());

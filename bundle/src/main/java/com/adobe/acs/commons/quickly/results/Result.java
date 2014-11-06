@@ -51,7 +51,8 @@ public class Result {
         GET("get"),
         POST("post"),
         NOOP("noop"),
-        JS("js");
+        JS("js"),
+        CMD("cmd");
 
         private final String value;
 
@@ -95,6 +96,8 @@ public class Result {
 
     private Target actionTarget;
 
+    private String autoComplete;
+
     private Map<String, String> actionParams;
 
     private AuthoringUIMode authoringMode;
@@ -111,9 +114,18 @@ public class Result {
         this.setActionTarget(builder.actionTarget);
         this.setActionParams(builder.actionParams);
         this.setActionScript(builder.actionScript);
+        this.setAutoComplete(builder.autoComplete);
 
         this.setAuthoringMode(builder.authoringMode);
         this.setModes(builder.modes);
+    }
+
+    public String getAutoComplete() {
+        return autoComplete;
+    }
+
+    public void setAutoComplete(final String autoComplete) {
+        this.autoComplete = autoComplete;
     }
 
     public String getResultType() {
@@ -218,6 +230,8 @@ public class Result {
 
     public static class Builder {
 
+        private String autoComplete;
+
         private String resultType;
 
         private String title;
@@ -265,6 +279,11 @@ public class Result {
 
         public Builder description(String description) {
             this.description = description;
+            return this;
+        }
+
+        public Builder autoComplete(String autoComplete) {
+            this.autoComplete = autoComplete;
             return this;
         }
 

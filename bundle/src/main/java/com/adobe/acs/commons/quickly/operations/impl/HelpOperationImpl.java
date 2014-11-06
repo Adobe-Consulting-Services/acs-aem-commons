@@ -115,7 +115,8 @@ public class HelpOperationImpl extends AbstractOperation {
 
             operations.put(cmd, new Result.Builder(cmd)
                     .description(description)
-                    .actionMethod(Result.Method.NOOP)
+                    .autoComplete(cmd)
+                    .actionMethod(Result.Method.CMD)
                     .build());
 
             log.debug("Collected Quickly Operation [ {} ]", cmd);

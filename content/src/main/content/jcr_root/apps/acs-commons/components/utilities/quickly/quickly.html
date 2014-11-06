@@ -17,12 +17,10 @@
                     ng-show="results && results.length > 0">
                 <li ng-repeat="result in results"
                      ng-click="app.select(result)"
-                     ng-class="{
-                                    selected: result.selected,
+                     ng-class="{ selected: result.selected,
                                     noop: result.action.method === 'noop' || !result.action.method,
                                     action: result.action.method !== 'noop',
-                                    autocomplete: result.autoComplete
-                                }"
+                                    autocomplete: result.action.autoComplete }"
                      class="quickly-result">
 
                     <div class="quickly-result-icon {{result.type}}"></div>

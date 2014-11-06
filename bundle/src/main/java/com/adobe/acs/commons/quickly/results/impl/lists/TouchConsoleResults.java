@@ -57,14 +57,14 @@ public final class TouchConsoleResults extends AbstractAccessibleResults {
                 .description("Workflow administration")
                 .path("/libs/cq/workflow/content/console.html")
                 .actionURI("/libs/cq/workflow/content/console.html")
-                .classic()
+                .touch()
                 .build());
 
         results.add(new Result.Builder("inbox")
                 .description("My Inbox")
                 .path("/notifications.html")
                 .actionURI("/notifications.html")
-                .classic()
+                .touch()
                 .build());
 
         results.add(new Result.Builder("users")

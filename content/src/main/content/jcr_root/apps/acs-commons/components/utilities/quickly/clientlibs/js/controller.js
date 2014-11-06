@@ -79,13 +79,12 @@ quickly.controller('QuicklyCtrl',
 
     /* Working Actions */
 
-    $scope.app.selectRight = function() {
-       Action.right($scope.cmd, Results.getSelected($scope.results));
+    $scope.app.right = function() {
+       $scope.cmd = Action.right($scope.cmd, Results.getSelected($scope.results));
     };
 
     $scope.app.select = function() {
         if(!Action.select(Results.getSelected($scope.results), $scope.results)) {
-
             $scope.app.toggle();
         }
     };

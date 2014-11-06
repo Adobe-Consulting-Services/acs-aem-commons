@@ -68,8 +68,10 @@ quickly.factory('Action', ['Command', 'Results', 'UI', function(Command, Results
     return  {
 
         right: function(cmd, result) {
-            if(result.path) {
-                cmd = Command.updateParam(result.path);
+            if(result.action.method === 'cmd') {
+                cmd = result.action.autoComplete || '';
+            } else if(result.action.autoComplete) {
+                cmd = Command.updateParam(cmd, result.action.autoComplete);
 
                 UI.focusCommand();
                 UI.scrollCommandInputToEnd();

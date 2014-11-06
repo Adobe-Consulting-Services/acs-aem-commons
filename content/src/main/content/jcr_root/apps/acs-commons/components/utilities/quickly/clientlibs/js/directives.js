@@ -19,7 +19,7 @@
  */
 /*global quickly: false, angular: false, console: false */
 
-quickly.directive('ngEnter', ['UI', 'Results', function (UI, Results) {
+quickly.directive('ngEnter', function () {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {
             if(event.which === 13) {
@@ -31,7 +31,7 @@ quickly.directive('ngEnter', ['UI', 'Results', function (UI, Results) {
             }
         });
     };
-}]);
+});
 
 /*
  left = 37
@@ -40,7 +40,7 @@ quickly.directive('ngEnter', ['UI', 'Results', function (UI, Results) {
  down = 40
 */
 
-quickly.directive('ngUp', ['UI', 'Results', function (UI, Results) {
+quickly.directive('ngUp', ['UI', function (UI) {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {
             if(event.which === 38) {
@@ -56,7 +56,7 @@ quickly.directive('ngUp', ['UI', 'Results', function (UI, Results) {
     };
 }]);
 
-quickly.directive('ngDown', ['UI', 'Results', function (UI, Results) {
+quickly.directive('ngDown', ['UI', function (UI) {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {
             if(event.which === 40) {
@@ -72,15 +72,15 @@ quickly.directive('ngDown', ['UI', 'Results', function (UI, Results) {
     };
 }]);
 
-quickly.directive('ngRight', ['UI', 'Results', function (UI, Results) {
+quickly.directive('ngRight', function () {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {
-            var input = angular.element('acs-commons-quickly-cmd');
+            var input = angular.element('#acs-commons-quickly-cmd');
 
-            if(input && input.value && input.value.length > 0
+            if(input && input.val() && input.val().length > 0
                 && event.which === 39) {
 
-                if(input.selectionEnd === input.value.length) {
+                if(input.get(0) && (input.get(0).selectionEnd === input.val().length)) {
                     // only execute if cursor is at the end of the input
                     scope.$apply(function (){
                         scope.$eval(attrs.ngRight);
@@ -91,4 +91,4 @@ quickly.directive('ngRight', ['UI', 'Results', function (UI, Results) {
             }
         });
     };
-}]);
+});
