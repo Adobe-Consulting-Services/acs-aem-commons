@@ -69,8 +69,21 @@ quickly.factory('Command', function() {
             return '';
         },
 
+        getParams: function(cmd, strict, maxParams) {
+            var param = this.getParam(cmd, strict),
+                arr = param.split(/[\s]+/),
+                params = arr.splice(0, (maxParams || 10000));
+
+                params.push(arr.join(' '));
+                return params;
+        },
+
         hasOp: function(cmd) {
             return this.getOp(cmd) !== '';
+        },
+
+        hasParam: function(cmd, strict) {
+            return this.getParam(cmd, strict) !== '';
         },
 
         updateParam: function(cmd, param) {

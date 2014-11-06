@@ -38,6 +38,12 @@ quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStora
             var results = $localStorage.quickly.operations.back || [],
                 param = Command.getParam(cmd, true);
 
+            // Remove current page
+            if(results.length > 0) {
+                results = results.slice(1, results.length);
+            }
+
+
             return $filter('title')(results, param);
         },
 

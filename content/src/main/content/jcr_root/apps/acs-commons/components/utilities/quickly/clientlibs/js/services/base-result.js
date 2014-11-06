@@ -21,6 +21,18 @@
 /*global angular: false, quickly: false */
 quickly.factory('BaseResult', function() {
     return {
+        ACTION_METHODS: {
+            JS_OPERATION_ACTION: 'js-operation-action'
+        },
+
+        isNoopAction: function(result) {
+            return !result || !result.action || !result.action.method || result.action.method === 'noop';
+        },
+
+        isJsOperationAction: function(result) {
+            return result && result.action && result.action.method === this.ACTION_METHODS.JS_OPERATION_ACTION;
+        },
+
         build: function() {
             return {
                 title: '',

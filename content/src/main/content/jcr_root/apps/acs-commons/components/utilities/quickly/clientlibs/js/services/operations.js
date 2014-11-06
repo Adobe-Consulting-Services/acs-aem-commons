@@ -19,14 +19,16 @@
  */
 
 /*global angular: false, quickly: false, typeof: false */
-quickly.factory('Operations', ['Command', 'BackOperation', function(Command, BackOperation) {
+quickly.factory('Operations', ['Command', 'BaseResult', 'BackOperation', 'FavoritesOperation',
+    function(Command, BaseResult, BackOperation, FavoritesOperation) {
 
     /* Service Object */
 
     return {
 
         operations: [
-            BackOperation
+            BackOperation,
+            FavoritesOperation
         ],
 
         getResults: function(cmd) {
@@ -39,6 +41,23 @@ quickly.factory('Operations', ['Command', 'BackOperation', function(Command, Bac
                 cmdOp = Command.getOp(cmd);
                 if (operation && operation.accepts(cmdOp) && (typeof operation.getResults === 'function')) {
                     return operation.getResults(cmd);
+                }
+            }
+
+            return null;
+        },
+
+
+        process: function(cmd, result) {
+            var i = 0,
+                cmdOp,
+                operation;
+            for (; i < this.operations.length; i++) {
+                operation = this.operations[i];
+
+                cmdOp = Command.getOp(cmd);
+                if (operation && operation.accepts(cmdOp) && (typeof operation.process === 'function')) {
+                    return operation.process(cmd, result);
                 }
             }
 

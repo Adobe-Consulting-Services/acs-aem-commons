@@ -19,7 +19,7 @@
  */
 
 /*global angular: false, quickly: false */
-quickly.factory('Action', ['Command', 'Results', 'UI', function(Command, Results, UI) {
+quickly.factory('Action', ['Command', 'Operations', 'BaseResult', 'Results', 'UI', function(Command, Operations, BaseResult, Results, UI) {
         var buildForm = function(action) {
             var params = action.params || [],
                 form;
@@ -48,13 +48,14 @@ quickly.factory('Action', ['Command', 'Results', 'UI', function(Command, Results
             return form;
         },
 
-    process = function(result) {
+    process = function(cmd, result) {
         var form;
-        //if($scope.app.visible) {
 
-        if(!result || !result.action || !result.action.method || result.action.method === 'noop') {
+        if(BaseResult.isNoopAction(result)) {
             // Noop means do nothing!
             return false;
+        } else if(BaseResult.isJsOperationAction(result)) {
+            return Operations.process(cmd, result);
         } else {
             form = buildForm(result.action);
             UI.injectForm(form);
@@ -80,9 +81,9 @@ quickly.factory('Action', ['Command', 'Results', 'UI', function(Command, Results
             return cmd;
         },
 
-        select: function(result, results) {
+        select: function(cmd, result, results) {
             Results.select(result, results);
-            process(result);
+            process(cmd, result);
         }
 
     };

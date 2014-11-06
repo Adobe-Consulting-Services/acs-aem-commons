@@ -13,5 +13,6 @@ services/results.js
 services/ui.js
 
 services/operations/back.js
+services/operations/favorites.js
 
 inject.js
