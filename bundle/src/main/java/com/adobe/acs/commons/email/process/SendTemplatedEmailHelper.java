@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 - 2014 Adobe
+ * Copyright (C) 2014 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.email.impl;
+package com.adobe.acs.commons.email.process;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -46,8 +46,7 @@ import com.day.cq.wcm.api.Page;
 
 public class SendTemplatedEmailHelper {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(SendTemplatedEmailHelper.class);
+	private static final Logger log = LoggerFactory.getLogger(SendTemplatedEmailHelper.class);
 
 	private static final String PN_USER_EMAIL = "profile/email";
 
@@ -55,11 +54,13 @@ public class SendTemplatedEmailHelper {
 	 * Tests whether the payload is a DAM asset or a cq:Page for DAM asset
 	 * returns all properties at the metadata node for DAM assets 
 	 * for cq:Page returns all properties at the jcr:content node
-	 * 
-	 * @param payloadRes
-	 * @return
+	 * The Map<String, String> that is returned contains string representations
+	 * of each of the respective properties
+	 * @param payloadRes the payload as a resource
+	 * @param sdf used by the method to transform Date properties into Strings
+	 * @return Map<String, String> String representation of jcr properties
 	 */
-	public static Map<String, String> getPayloadProperties(Resource payloadRes,
+	protected final static Map<String, String> getPayloadProperties(Resource payloadRes,
 			SimpleDateFormat sdf) {
 
 		Map<String, String> emailParams = new HashMap<String, String>();
@@ -92,22 +93,20 @@ public class SendTemplatedEmailHelper {
 		return emailParams;
 	}
 
-	/***
+	/**
 	 * Gets email(s) based on the path to a principal If the path is a user it
 	 * returns an array with a single email if the path is a group returns an
 	 * array emails for each individual in the group
-	 * 
-	 * @param resourceResolver
-	 * @param sendToPath
-	 * @return - String[] of email(s) associated with account
-	 * @throws RepositoryException
+	 * @param resourceResolver 
+	 * @param principlePath path to a CQ user or group
+	 * @return String[] of email(s) associated with account
 	 */
-	public static String[] getEmailAddrs(ResourceResolver resourceResolver,
-			String userPath) {
+	protected final static String[] getEmailAddrsFromUserPath(ResourceResolver resourceResolver,
+			String principlePath) {
 		List<String> emailList = new LinkedList<String>();
 
 		try {
-			Resource authRes = resourceResolver.getResource(userPath);
+			Resource authRes = resourceResolver.getResource(principlePath);
 
 			if (authRes != null) {
 				Authorizable authorizable = authRes.adaptTo(Authorizable.class);

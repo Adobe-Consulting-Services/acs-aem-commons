@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 - 2014 Adobe
+ * Copyright (C) 2014 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.email.impl;
+package com.adobe.acs.commons.email.process;
 
 import static org.junit.Assert.*;
 
@@ -85,7 +85,7 @@ public class SendTemplatedEmailHelperTest {
 	    }
 	
 	 @Test
-	 public void testGetPayloadPropertiesNullResource() throws Exception {
+	 public void testGetPayloadProperties_NullResource() throws Exception {
 		 
 		 Resource payloadRes = mock(Resource.class);
 		 Map<String, String> props = SendTemplatedEmailHelper.getPayloadProperties(payloadRes, sdf);
@@ -93,7 +93,7 @@ public class SendTemplatedEmailHelperTest {
 	 }
 	 
 	 @Test
-	 public void testGetPayloadPropertiesAsset() throws Exception {
+	 public void testGetPayloadProperties_Asset() throws Exception {
 		 
 		 //set up jcr properties
 		 mockJcrProperties();
@@ -116,7 +116,7 @@ public class SendTemplatedEmailHelperTest {
 	 }
 	 
 	 @Test
-	 public void testGetPayloadPropertiesPage() throws Exception {
+	 public void testGetPayloadProperties_Page() throws Exception {
 		 
 		 //set up jcr properties
 		 mockJcrProperties();
@@ -147,12 +147,12 @@ public class SendTemplatedEmailHelperTest {
 		String userPath = "/doesnotexist";
 		
 		when(resolver.getResource(userPath)).thenReturn(null);
-		String[] emails = SendTemplatedEmailHelper.getEmailAddrs(resolver, userPath);
+		String[] emails = SendTemplatedEmailHelper.getEmailAddrsFromUserPath(resolver, userPath);
 		assertEquals(0, emails.length);
 	 }
 	 
 	 @Test
-	 public void testGetEmailAddrsUser() throws Exception {
+	 public void testGetEmailAddrs_User() throws Exception {
 		
 		String userPath = "/home/users/a/admin";
 		MockValue[] emailVal = new MockValue[]{new MockValue("admin@adobe.com")};
@@ -169,14 +169,14 @@ public class SendTemplatedEmailHelperTest {
 		when(adminUser.hasProperty(PN_EMAIL)).thenReturn(true);
 		when(adminUser.getProperty(PN_EMAIL)).thenReturn(emailVal);
 		
-		String[] emails = SendTemplatedEmailHelper.getEmailAddrs(resolver, userPath);
+		String[] emails = SendTemplatedEmailHelper.getEmailAddrsFromUserPath(resolver, userPath);
 		
 		assertEquals(1, emails.length);
 		assertEquals("admin@adobe.com", emails[0]);
 	 }
 	 
 	 @Test
-	 public void testGetEmailAddrsGroup() throws Exception {
+	 public void testGetEmailAddrs_Group() throws Exception {
 		
 		//mock group and users
 		String groupPath = "/home/users/g/group";
@@ -206,7 +206,7 @@ public class SendTemplatedEmailHelperTest {
 		when(groupRes.adaptTo(Group.class)).thenReturn(userGroup);
 		when(userGroup.getMembers()).thenReturn(groupMembers.iterator());
 		
-		String[] emails = SendTemplatedEmailHelper.getEmailAddrs(resolver, groupPath);
+		String[] emails = SendTemplatedEmailHelper.getEmailAddrsFromUserPath(resolver, groupPath);
 		assertEquals(2, emails.length);
 		assertEquals("user1@adobe.com", emails[0]);
 		assertEquals("user2@adobe.com", emails[1]);

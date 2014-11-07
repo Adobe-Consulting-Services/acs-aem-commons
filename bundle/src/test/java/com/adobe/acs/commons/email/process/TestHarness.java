@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2014 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,16 @@
  * limitations under the License.
  * #L%
  */
-/**
- * Email Service.
- */
-@aQute.bnd.annotation.Version("1.0.1")
-package com.adobe.acs.commons.email;
+package com.adobe.acs.commons.email.process;
+
+import java.util.Map;
+import org.apache.sling.api.resource.Resource;
+import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkItem;
+
+public interface TestHarness {
+	String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args);
+	
+	Map<String, String> getAdditionalParams(WorkItem workItem, WorkflowSession workflowSession, 
+			Resource payloadResource);
+}
