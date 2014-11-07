@@ -20,5 +20,5 @@
 /**
  * Image utilities.
  */
-@aQute.bnd.annotation.Version("1.1.2")
+@aQute.bnd.annotation.Version("1.2.0")
 package com.adobe.acs.commons.images;
