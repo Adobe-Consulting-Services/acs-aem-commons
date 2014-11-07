@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 public class ImageQualityTransformer {
     private static final Logger log = LoggerFactory.getLogger(ImageQualityTransformer.class);
 
+    public static final String TYPE = "quality";
+
     private static final String KEY_QUALITY = "quality";
 
     // Magic number used by AEM as the default/fallback quality
