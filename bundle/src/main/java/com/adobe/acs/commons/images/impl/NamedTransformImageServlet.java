@@ -32,7 +32,6 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.foundation.Image;
 import com.day.image.Layer;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -61,7 +60,6 @@ import javax.imageio.ImageIO;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -124,13 +122,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
 
-    private static final double IMAGE_GIF_MAX_QUALITY = 255;
-
-    private static final double IMAGE_MAX_QUALITY = 1.0;
-
-    private static final String MIME_TYPE_GIF = "image/gif";
-
     private static final String MIME_TYPE_PNG = "image/png";
+
+    private static final String TYPE_QUALITY = "quality";
 
     private Map<String, NamedImageTransformer> namedImageTransformers =
             new ConcurrentHashMap<String, NamedImageTransformer>();
@@ -198,14 +192,16 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Image image = this.resolveImage(request);
         final String mimeType = this.getMimeType(request, image);
         Layer layer = this.getLayer(image);
+
         // Transform the image
         layer = this.transform(layer, imageTransformersWithParams);
 
-        final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
+        // Get the quality
+        final double quality = this.getQuality(mimeType,
+                imageTransformersWithParams.get(TYPE_QUALITY, EMPTY_PARAMS));
+
         response.setContentType(mimeType);
-
         layer.write(mimeType, quality, response.getOutputStream());
-
         response.flushBuffer();
     }
 
@@ -219,6 +215,11 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     protected final Layer transform(Layer layer, final ValueMap transforms) {
 
         for (final String type : transforms.keySet()) {
+            if(StringUtils.equals(TYPE_QUALITY, type)) {
+                // Do not process the "quality" transform in the usual manner
+                continue;
+            }
+
             final ImageTransformer imageTransformer = this.imageTransformers.get(type);
             if (imageTransformer == null) {
                 log.warn("Skipping transform. Missing ImageTransformer for type: {}");
@@ -234,6 +235,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         return layer;
     }
+
 
     /**
      * Gets the NamedImageTransformers based on the Suffix segments in order.
@@ -390,6 +392,49 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         return layer;
     }
+
+
+    /**
+     * Computes the quality based on the "synthetic" Image Quality transform params
+     *
+     * Image Quality does not "transform" in the usual manner (it is not a simple layer manipulation)
+     * thus this ad-hoc method is required to handle quality manipulation transformations.
+     *
+     * If "quality" key is no available in "transforms" the default of 82 is used (magic AEM Product quality setting)
+     *
+     * @param mimeType the desired image mimeType
+     * @param transforms the map of image transform params
+     * @return
+     */
+    private double getQuality(final String mimeType, final ValueMap transforms) {
+        final String KEY = "quality";
+        final int DEFAULT_QUALITY = 82;
+        final int MAX_QUALITY = 100;
+        final int MIN_QUALITY = 0;
+        final String MIME_TYPE_GIF = "image/gif";
+        final int IMAGE_GIF_MAX_QUALITY = 255;
+
+        log.debug("Transforming with [ quality ]");
+
+        double quality = transforms.get(KEY, DEFAULT_QUALITY);
+
+        log.debug("quality: {}", quality);
+
+        if (quality > MAX_QUALITY) {
+            quality = DEFAULT_QUALITY;
+        } else if (quality < MIN_QUALITY) {
+            quality = MIN_QUALITY;
+        }
+
+        quality = quality / 100D;
+
+        if (StringUtils.equals(MIME_TYPE_GIF, mimeType)) {
+            quality = quality * IMAGE_GIF_MAX_QUALITY;
+        }
+
+        return quality;
+    }
+
 
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
