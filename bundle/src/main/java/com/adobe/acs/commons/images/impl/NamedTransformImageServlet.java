@@ -35,11 +35,17 @@ import com.day.image.Layer;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.request.RequestUtil;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
@@ -57,7 +63,10 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -123,7 +132,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final String MIME_TYPE_PNG = "image/png";
 
-    private Map<String, NamedImageTransformer> namedImageTransformers = new ConcurrentHashMap<String, NamedImageTransformer>();
+    private Map<String, NamedImageTransformer> namedImageTransformers =
+            new ConcurrentHashMap<String, NamedImageTransformer>();
 
     private Map<String, ImageTransformer> imageTransformers = new ConcurrentHashMap<String, ImageTransformer>();
 
@@ -188,7 +198,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Image image = this.resolveImage(request);
         final String mimeType = this.getMimeType(request, image);
         Layer layer = this.getLayer(image);
-        
         // Transform the image
         layer = this.transform(layer, imageTransformersWithParams);
 
@@ -232,7 +241,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @param request the SlingHttpServletRequest object
      * @return a list of the NamedImageTransformers specified by the HTTP Request suffix segments
      */
-    protected List<NamedImageTransformer> getNamedImageTransformers(final SlingHttpServletRequest request) {
+    protected final List<NamedImageTransformer> getNamedImageTransformers(final SlingHttpServletRequest request) {
         final List<NamedImageTransformer> transformers = new ArrayList<NamedImageTransformer>();
 
         String[] suffixes = PathInfoUtil.getSuffixSegments(request);
@@ -258,13 +267,14 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     /**
      * Collect and combine the image transformers and their params.
      *
-     * @param namedImageTransformers the named transformers and their params
+     * @param selectedNamedImageTransformers the named transformers and their params
      * @return the combined named image transformers and their params
      */
-    protected ValueMap getImageTransformersWithParams(final List<NamedImageTransformer> namedImageTransformers) {
+    protected final ValueMap getImageTransformersWithParams(
+            final List<NamedImageTransformer> selectedNamedImageTransformers) {
         final ValueMap params = new ValueMapDecorator(new LinkedHashMap<String, Object>());
 
-        for (final NamedImageTransformer namedImageTransformer : namedImageTransformers) {
+        for (final NamedImageTransformer namedImageTransformer : selectedNamedImageTransformers) {
             params.putAll(namedImageTransformer.getTransforms());
         }
 

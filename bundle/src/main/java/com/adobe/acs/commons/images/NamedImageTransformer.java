@@ -45,7 +45,7 @@ public interface NamedImageTransformer {
     Layer transform(Layer layer);
 
     /**
-     * @return
+     * @return the ImageTransforms types and their params for this Named Image Transform
      */
     Map<String, ValueMap> getTransforms();
 }
