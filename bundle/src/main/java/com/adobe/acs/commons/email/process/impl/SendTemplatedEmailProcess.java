@@ -35,19 +35,19 @@ import org.slf4j.LoggerFactory;
 @Properties({ @Property(label = "Workflow Label", name = "process.label", value = "Send Templated Email", description = "Sends a templated email using the ACS Commons Email Service") })
 @Service
 public class SendTemplatedEmailProcess extends AbstractSendTemplatedEmailProcess {
-	
-	private static final Logger log = LoggerFactory.getLogger(SendTemplatedEmailProcess.class);
-	@Override
+
+    private static final Logger log = LoggerFactory.getLogger(SendTemplatedEmailProcess.class);
+
+    @Override
     protected void activate(ComponentContext context) throws RepositoryException {
-    	//activate
-		log.debug("Send Templated Email Workflow Process activated.");
+        // activate
+        log.debug("Send Templated Email Workflow Process activated.");
     }
 
-	@Override
+    @Override
     protected void deactivate(ComponentContext context) {
-    	//deactivate
-		log.debug("Send Templated Email Workflow Process deactivated.");
+        // deactivate
+        log.debug("Send Templated Email Workflow Process deactivated.");
     }
-	
 
 }

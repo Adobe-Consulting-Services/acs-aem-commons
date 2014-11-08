@@ -25,8 +25,7 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 
 public interface TestHarness {
-	String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args);
-	
-	Map<String, String> getAdditionalParams(WorkItem workItem, WorkflowSession workflowSession, 
-			Resource payloadResource);
+    String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args);
+
+    Map<String, String> getAdditionalParams(WorkItem workItem, WorkflowSession workflowSession, Resource payloadResource);
 }

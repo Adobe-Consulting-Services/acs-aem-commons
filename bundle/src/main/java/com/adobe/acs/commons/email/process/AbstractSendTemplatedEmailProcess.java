@@ -23,7 +23,9 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.jcr.RepositoryException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -34,6 +36,7 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.acs.commons.wcm.AuthorUIHelper;
 import com.day.cq.commons.Externalizer;
@@ -46,327 +49,338 @@ import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
 /**
- * This abstract <code>AbstractSendTemplatedEmailProcess</code> class serves as the basis for
- * WorkFlow process steps that will send an email using {@link com.adobe.acs.commons.email.EmailService EmailService}
- * By default jcr properties from the payload are automatically added to the email parameter map. If the payload is
- * a cq:Page then the properties at the jcr:content level are added. If the payload is a dam:Asset then the properties
- * at the metadata node are added. In addition the parameters outlined in 
- * {@link com.adobe.acs.commons.email.process.SendTemplatedEmailConstants SendTemplatedEmailConstants}
- * are also automatically added. 
- * <br>
- * This process will send the email to a CQ user or members of a CQ group specified by the process argument 
- * {@link com.adobe.acs.commons.email.process.AbstractSendTemplatedEmailProcess.Arguments#SEND_TO SEND_TO} 
- * Implementing classes can override this logic by overriding the method:
+ * This abstract <code>AbstractSendTemplatedEmailProcess</code> class serves as
+ * the basis for WorkFlow process steps that will send an email using
+ * {@link com.adobe.acs.commons.email.EmailService EmailService} By default jcr
+ * properties from the payload are automatically added to the email parameter
+ * map. If the payload is a cq:Page then the properties at the jcr:content level
+ * are added. If the payload is a dam:Asset then the properties at the metadata
+ * node are added. In addition the parameters outlined in
+ * {@link com.adobe.acs.commons.email.process.SendTemplatedEmailConstants
+ * SendTemplatedEmailConstants} are also automatically added. <br>
+ * This process will send the email to a CQ user or members of a CQ group
+ * specified by the process argument
+ * {@link com.adobe.acs.commons.email.process.AbstractSendTemplatedEmailProcess.Arguments#SEND_TO
+ * SEND_TO} Implementing classes can override this logic by overriding the
+ * method:
  * {@link com.adobe.acs.commons.email.process.AbstractSendTemplatedEmailProcess#getEmailAddrs(com.day.cq.workflow.exec.WorkItem, org.apache.sling.api.resource.Resource, java.lang.String[])
  * getEmailAddrs() - method}<br>
- * Implementing classes can also add additional parameters by overriding the 
- * {@link com.adobe.acs.commons.email.process.AbstractSendTemplatedEmailProcess#getAdditionalParams(WorkItem, WorkflowSession, Resource) 
+ * Implementing classes can also add additional parameters by overriding the
+ * {@link com.adobe.acs.commons.email.process.AbstractSendTemplatedEmailProcess#getAdditionalParams(WorkItem, WorkflowSession, Resource)
  * getAdditionalParams() - method}
  * <p/>
  * <p/>
  * <p/>
- * <b>Process Configuration</b>
- * This process supports the following configuration arguments:
+ * <b>Process Configuration</b> This process supports the following
+ * configuration arguments:
  * <dl>
  * <dt><b>emailTemplate</b></dt>
- * <dd>String representing a path to the template to be used to send the email. If no template is set no email is sent.
- * </dd>
+ * <dd>String representing a path to the template to be used to send the email.
+ * If no template is set no email is sent.</dd>
  * <dt><b>sendTo</b></dt>
- * <dd>String representing a path to a user or group. If the path is a user an email will be sent to that user.
- * if the path is to a group then the email will be sent to all members of that group.
- * </dd>
+ * <dd>String representing a path to a user or group. If the path is a user an
+ * email will be sent to that user. if the path is to a group then the email
+ * will be sent to all members of that group.</dd>
  * <dt><b>dateFormat</b></dt>
- * <dd>An optional parameter to specify how jcr Date properties are converted to Strings. The format should be set using 
- * the {@link java.text.SimpleDateFormat java.text.SimpleDateFormat}. Defaults to <code>yyyy-MM-dd hh:mm a</code>
- * </dd>
+ * <dd>An optional parameter to specify how jcr Date properties are converted to
+ * Strings. The format should be set using the
+ * {@link java.text.SimpleDateFormat java.text.SimpleDateFormat}. Defaults to
+ * <code>yyyy-MM-dd hh:mm a</code></dd>
  * </dl>
- *
+ * 
  */
 @Component(componentAbstract = true)
 public abstract class AbstractSendTemplatedEmailProcess implements WorkflowProcess {
-	
-	private static final Logger log = LoggerFactory.getLogger(AbstractSendTemplatedEmailProcess.class);
-	
-	private static final String AUTHENTICATION_INFO_SESSION = "user.jcr.session";
-	
-	/**
-	 * Service used to send the email
-	 */
-	@Reference
-	protected EmailService emailService;
 
-	/**
-	 * Service used to generate a link to the payload on author environment
-	 */
-	@Reference
-	protected AuthorUIHelper authorUIHelper;
+    private static final Logger log = LoggerFactory.getLogger(AbstractSendTemplatedEmailProcess.class);
 
-	@Reference
-	protected ResourceResolverFactory resourceResolverFactory;
+    private static final String AUTHENTICATION_INFO_SESSION = "user.jcr.session";
 
-	/**
-	 * used to generate a link to the payload on publish environment
-	 */
-	@Reference
-	protected Externalizer externalizer;
-	
-	private SimpleDateFormat sdf;
-	
-	/**
-	 * The available arguments to this process implementation.
-	 */
-	protected enum Arguments {
-		PROCESS_ARGS("PROCESS_ARGS"), 
-		/**
-		 * emailTemplate - process argument
-		 */
-		TEMPLATE("emailTemplate"), 
-		/**
-		 * sendTo - process argument
-		 */
-		SEND_TO("sendTo"), 
-		
-		/**
-		 * dateFormat - process argument
-		 */
-		DATE_FORMAT("dateFormat");
+    /**
+     * Service used to send the email
+     */
+    @Reference
+    protected EmailService emailService;
 
-		private String argumentName;
+    /**
+     * Service used to generate a link to the payload on author environment
+     */
+    @Reference
+    protected AuthorUIHelper authorUIHelper;
 
-		Arguments(String argumentName) {
-			this.argumentName = argumentName;
-		}
+    @Reference
+    protected ResourceResolverFactory resourceResolverFactory;
 
-		public String getArgumentName() {
-			return this.argumentName;
-		}
+    /**
+     * used to generate a link to the payload on publish environment
+     */
+    @Reference
+    protected Externalizer externalizer;
 
-	}
-	
-	@Override
-	public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaData) throws WorkflowException {
+    private SimpleDateFormat sdf;
 
-		final WorkflowData workflowData = workItem.getWorkflowData();
-		final String type = workflowData.getPayloadType();
+    /**
+     * The available arguments to this process implementation.
+     */
+    protected enum Arguments {
+        PROCESS_ARGS("PROCESS_ARGS"),
+        /**
+         * emailTemplate - process argument
+         */
+        TEMPLATE("emailTemplate"),
+        /**
+         * sendTo - process argument
+         */
+        SEND_TO("sendTo"),
 
-		// Check if the payload is a path in the JCR
-		if (!StringUtils.equals(type, "JCR_PATH")) {
-			return;
-		}
+        /**
+         * dateFormat - process argument
+         */
+        DATE_FORMAT("dateFormat");
 
-		String[] args = buildArguments(metaData);
+        private String argumentName;
 
-		// process arguments
-		String emailTemplate = getValueFromArgs(Arguments.TEMPLATE.getArgumentName(), args);
+        Arguments(String argumentName) {
+            this.argumentName = argumentName;
+        }
 
-		if (emailTemplate == null) {
-			log.warn("Invalid process arguments, returning");
-			return;
-		}
+        public String getArgumentName() {
+            return this.argumentName;
+        }
 
-		// set date format to be used in emails
-		String sdfParam = getValueFromArgs(Arguments.DATE_FORMAT.getArgumentName(), args);
-		sdf = getSimpleDateFormat(sdfParam);
+    }
 
-		// Get the path to the JCR resource from the payload
-		final String payloadPath = workflowData.getPayload().toString();
+    @Override
+    public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaData)
+            throws WorkflowException {
 
-		// Get ResourceResolver
-		final Map<String, Object> authInfo = new HashMap<String, Object>();
-		authInfo.put(AUTHENTICATION_INFO_SESSION, workflowSession.getSession());
-		final ResourceResolver resourceResolver;
-		
-		try {
-			resourceResolver = resourceResolverFactory.getResourceResolver(authInfo);
-			Resource payloadRes = resourceResolver.getResource(payloadPath);
+        final WorkflowData workflowData = workItem.getWorkflowData();
+        final String type = workflowData.getPayloadType();
 
-			// Email Parameter map
-			Map<String, String> emailParams = new HashMap<String, String>();
+        // Check if the payload is a path in the JCR
+        if (!StringUtils.equals(type, "JCR_PATH")) {
+            return;
+        }
 
-			// Set jcr path
-			emailParams.put(SendTemplatedEmailConstants.JCR_PATH, payloadPath);
+        String[] args = buildArguments(metaData);
 
-			// Get Payload params
-			Map<String, String> payloadProp = SendTemplatedEmailHelper.getPayloadProperties(payloadRes, sdf);
-			if (payloadProp != null) {
-				emailParams.putAll(payloadProp);
-			}
+        // process arguments
+        String emailTemplate = getValueFromArgs(Arguments.TEMPLATE.getArgumentName(), args);
 
-			// Get Url params
-			Map<String, String> urlParams = getURLs(payloadRes);
-			if (urlParams != null) {
-				emailParams.putAll(urlParams);
-			}
+        if (emailTemplate == null) {
+            log.warn("Invalid process arguments, returning");
+            return;
+        }
 
-			 //Get Additional Parameters to add
-			 Map<String, String> wfParams = getAdditionalParams(workItem, workflowSession, payloadRes); 
-			 if(wfParams != null) {
-				 emailParams.putAll(wfParams); 
-			  }
+        // set date format to be used in emails
+        String sdfParam = getValueFromArgs(Arguments.DATE_FORMAT.getArgumentName(), args);
+        sdf = getSimpleDateFormat(sdfParam);
 
-			// get email addresses based on CQ user or group
-			String[] emailTo = getEmailAddrs(workItem, payloadRes, args);
+        // Get the path to the JCR resource from the payload
+        final String payloadPath = workflowData.getPayload().toString();
 
-			List<String> failureList = emailService.sendEmail(emailTemplate, emailParams, emailTo);
+        // Get ResourceResolver
+        final Map<String, Object> authInfo = new HashMap<String, Object>();
+        authInfo.put(AUTHENTICATION_INFO_SESSION, workflowSession.getSession());
+        final ResourceResolver resourceResolver;
 
-			if (failureList.isEmpty()) {
-				log.info("Email sent successfully to {} recipients",
-						emailTo.length);
-			} else {
-				log.error("Email sent failed");
-			}
+        try {
+            resourceResolver = resourceResolverFactory.getResourceResolver(authInfo);
+            Resource payloadRes = resourceResolver.getResource(payloadPath);
 
-		} catch (LoginException e) {
-			log.error(
-					"Could not acquire a ResourceResolver object from the Workflow Session's JCR Session: {}",
-					e);
-		}
-	}
+            // Email Parameter map
+            Map<String, String> emailParams = new HashMap<String, String>();
 
-	/***
-	 * Gets a String[] of email addresses to send the email to. By default calls
-	 * {@link com.adobe.acs.commons.email.process.SendTemplatedEmailHelper#getEmailAddrsFromUserPath(ResourceResolver, String)}
-	 * Protected so that it can be overridden by implementing classes to add unique logic to where emails are routed to.
-	 * @param workItem the current WorkItem in the workflow
-	 * @param payloadResource the current payload as a Resource
-	 * @param args process arguments configured by the workflow step
-	 * @return String[] of email addresses
-	 */
-	protected String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args) {
-		ResourceResolver resolver = payloadResource.getResourceResolver();
-		String sendToUser = getValueFromArgs(Arguments.SEND_TO.getArgumentName(), args);
-		return SendTemplatedEmailHelper.getEmailAddrsFromUserPath(resolver, sendToUser);
-	}
-	
-	/***
-	 * Returns a Map<String, String> of additional parameters that will be added to the full
-	 * list of email parameters that is sent to the EmailService. By default adds the Workflow Title:
-	 * {@link com.adobe.acs.commons.email.process.SendTemplatedEmailConstants#WF_MODEL_TITLE WF_MODEL_TITLE} 
-	 * and adds the Workflow Step Title: {@link com.adobe.acs.commons.email.process.SendTemplatedEmailConstants#WF_STEP_TITLE WF_STEP_TITLE}
-	 * Protected so that implementing classes can override and add additional parameters.
-	 * @param workItem
-	 * @param workflowSession
-	 * @param payloadResource
-	 * @return Map<String, String> of additional parameters to be added to email params
-	 */
-	protected Map<String, String> getAdditionalParams(WorkItem workItem, WorkflowSession workflowSession, Resource payloadResource) {
-		Map<String, String> wfParams = new HashMap<String, String>();
-		
-		try {
-			wfParams.put(SendTemplatedEmailConstants.WF_STEP_TITLE, workItem.getNode().getTitle());
-			wfParams.put(SendTemplatedEmailConstants.WF_MODEL_TITLE, workItem.getWorkflow().getWorkflowModel().getTitle());
-		} catch (Exception e) {
-			log.warn("Error getting workflow title and workflow step title {}" , e);
-		}
-		
-		return wfParams;
-	}
-	
-	/***
-	 * Gets value from workflow process arguments
-	 * @param key
-	 * @param arguments
-	 * @return String of the argument value or null if not found
-	 */
-	protected String getValueFromArgs(String key, String arguments[]) {
-		for (String str : arguments) {
-			String trimmedStr = str.trim();
-			if (trimmedStr.startsWith(key + ":")) {
-				return trimmedStr.substring((key + ":").length());
-			}
-		}
-		return null;
-	}
-	
-	/***
-	 * Uses the AuthorUIHelper to generate links to the payload on author
-	 * Uses Externalizer to generate links to the payload on publish
-	 * @param payloadRes
-	 * @return 
-	 */
-	private Map<String, String> getURLs(Resource payloadRes) {
+            // Set jcr path
+            emailParams.put(SendTemplatedEmailConstants.JCR_PATH, payloadPath);
 
-		Map<String, String> urlParams = new HashMap<String, String>();
-		if (payloadRes == null) {
-			return urlParams;
-		}
+            // Get Payload params
+            Map<String, String> payloadProp = SendTemplatedEmailHelper.getPayloadProperties(payloadRes, sdf);
+            if (payloadProp != null) {
+                emailParams.putAll(payloadProp);
+            }
 
-		String payloadPath = payloadRes.getPath();
-		ResourceResolver resolver = payloadRes.getResourceResolver();
+            // Get Url params
+            Map<String, String> urlParams = getURLs(payloadRes);
+            if (urlParams != null) {
+                emailParams.putAll(urlParams);
+            }
 
-		if (DamUtil.isAsset(payloadRes)) {
-			// add author url
-			String assetDetailsUrl = authorUIHelper.generateEditAssetLink(
-					payloadPath, true, resolver);
-			urlParams.put(SendTemplatedEmailConstants.AUTHOR_LINK, assetDetailsUrl);
+            // Get Additional Parameters to add
+            Map<String, String> wfParams = getAdditionalParams(workItem, workflowSession, payloadRes);
+            if (wfParams != null) {
+                emailParams.putAll(wfParams);
+            }
 
-			// add publish url
-			String publishUrl = externalizer.publishLink(resolver, payloadPath);
-			urlParams.put(SendTemplatedEmailConstants.PUBLISH_LINK, publishUrl);
+            // get email addresses based on CQ user or group
+            String[] emailTo = getEmailAddrs(workItem, payloadRes, args);
 
-		} else {
+            List<String> failureList = emailService.sendEmail(emailTemplate, emailParams, emailTo);
 
-			// add absolute author url
-			String assetDetailsUrl = authorUIHelper.generateEditPageLink(
-					payloadPath, true, resolver);
-			urlParams.put(SendTemplatedEmailConstants.AUTHOR_LINK, assetDetailsUrl);
+            if (failureList.isEmpty()) {
+                log.info("Email sent successfully to {} recipients", emailTo.length);
+            } else {
+                log.error("Email sent failed");
+            }
 
-			// add publish url
-			String publishUrl = externalizer.publishLink(resolver, payloadPath
-					+ ".html");
-			urlParams.put(SendTemplatedEmailConstants.PUBLISH_LINK, publishUrl);
-		}
+        } catch (LoginException e) {
+            log.error("Could not acquire a ResourceResolver object from the Workflow Session's JCR Session: {}", e);
+        }
+    }
 
-		return urlParams;
-	}
+    /***
+     * Gets a String[] of email addresses to send the email to. By default calls
+     * {@link com.adobe.acs.commons.email.process.SendTemplatedEmailHelper#getEmailAddrsFromUserPath(ResourceResolver, String)}
+     * Protected so that it can be overridden by implementing classes to add
+     * unique logic to where emails are routed to.
+     * 
+     * @param workItem
+     *            the current WorkItem in the workflow
+     * @param payloadResource
+     *            the current payload as a Resource
+     * @param args
+     *            process arguments configured by the workflow step
+     * @return String[] of email addresses
+     */
+    protected String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args) {
+        ResourceResolver resolver = payloadResource.getResourceResolver();
+        String sendToUser = getValueFromArgs(Arguments.SEND_TO.getArgumentName(), args);
+        return SendTemplatedEmailHelper.getEmailAddrsFromUserPath(resolver, sendToUser);
+    }
 
-	/***
-	 * 
-	 * @param metaData
-	 * @return
-	 */
-	private String[] buildArguments(MetaDataMap metaData) {
-		// the 'old' way, ensures backward compatibility
-		String processArgs = metaData.get(
-				Arguments.PROCESS_ARGS.getArgumentName(), String.class);
-		if (processArgs != null && !processArgs.equals("")) {
-			return processArgs.split(",");
-		} else {
-			return new String[0];
-		}
-	}
+    /***
+     * Returns a Map<String, String> of additional parameters that will be added
+     * to the full list of email parameters that is sent to the EmailService. By
+     * default adds the Workflow Title:
+     * {@link com.adobe.acs.commons.email.process.SendTemplatedEmailConstants#WF_MODEL_TITLE
+     * WF_MODEL_TITLE} and adds the Workflow Step Title:
+     * {@link com.adobe.acs.commons.email.process.SendTemplatedEmailConstants#WF_STEP_TITLE
+     * WF_STEP_TITLE} Protected so that implementing classes can override and
+     * add additional parameters.
+     * 
+     * @param workItem
+     * @param workflowSession
+     * @param payloadResource
+     * @return Map<String, String> of additional parameters to be added to email
+     *         params
+     */
+    protected Map<String, String> getAdditionalParams(WorkItem workItem, WorkflowSession workflowSession,
+            Resource payloadResource) {
+        Map<String, String> wfParams = new HashMap<String, String>();
 
-	/***
-	 * Set the format to be used for displaying dates in the email Defaults to
-	 * format of 'yyyy-MM-dd hh:mm a'
-	 * 
-	 * @param formatString
-	 *            - workflow process argument to override default format
-	 * @return SimpleDateFormat that will be used to convert jcr Date properties
-	 *         to Strings
-	 */
-	private SimpleDateFormat getSimpleDateFormat(String formatString) {
-		SimpleDateFormat defaultFormat = new SimpleDateFormat(
-				"yyyy-MM-dd hh:mm a");
+        try {
+            wfParams.put(SendTemplatedEmailConstants.WF_STEP_TITLE, workItem.getNode().getTitle());
+            wfParams.put(SendTemplatedEmailConstants.WF_MODEL_TITLE, workItem.getWorkflow().getWorkflowModel()
+                    .getTitle());
+        } catch (Exception e) {
+            log.warn("Error getting workflow title and workflow step title {}", e);
+        }
 
-		if (formatString == null || formatString.isEmpty()) {
-			return defaultFormat;
-		}
+        return wfParams;
+    }
 
-		try {
-			return new SimpleDateFormat(formatString);
-		} catch (IllegalArgumentException e) {
-			// invalid pattern
-			return defaultFormat;
-		}
-	}
-	
+    /***
+     * Gets value from workflow process arguments
+     * 
+     * @param key
+     * @param arguments
+     * @return String of the argument value or null if not found
+     */
+    protected String getValueFromArgs(String key, String arguments[]) {
+        for (String str : arguments) {
+            String trimmedStr = str.trim();
+            if (trimmedStr.startsWith(key + ":")) {
+                return trimmedStr.substring((key + ":").length());
+            }
+        }
+        return null;
+    }
+
+    /***
+     * Uses the AuthorUIHelper to generate links to the payload on author Uses
+     * Externalizer to generate links to the payload on publish
+     * 
+     * @param payloadRes
+     * @return
+     */
+    private Map<String, String> getURLs(Resource payloadRes) {
+
+        Map<String, String> urlParams = new HashMap<String, String>();
+        if (payloadRes == null) {
+            return urlParams;
+        }
+
+        String payloadPath = payloadRes.getPath();
+        ResourceResolver resolver = payloadRes.getResourceResolver();
+
+        if (DamUtil.isAsset(payloadRes)) {
+            // add author url
+            String assetDetailsUrl = authorUIHelper.generateEditAssetLink(payloadPath, true, resolver);
+            urlParams.put(SendTemplatedEmailConstants.AUTHOR_LINK, assetDetailsUrl);
+
+            // add publish url
+            String publishUrl = externalizer.publishLink(resolver, payloadPath);
+            urlParams.put(SendTemplatedEmailConstants.PUBLISH_LINK, publishUrl);
+
+        } else {
+
+            // add absolute author url
+            String assetDetailsUrl = authorUIHelper.generateEditPageLink(payloadPath, true, resolver);
+            urlParams.put(SendTemplatedEmailConstants.AUTHOR_LINK, assetDetailsUrl);
+
+            // add publish url
+            String publishUrl = externalizer.publishLink(resolver, payloadPath + ".html");
+            urlParams.put(SendTemplatedEmailConstants.PUBLISH_LINK, publishUrl);
+        }
+
+        return urlParams;
+    }
+
+    /***
+     * 
+     * @param metaData
+     * @return
+     */
+    private String[] buildArguments(MetaDataMap metaData) {
+        // the 'old' way, ensures backward compatibility
+        String processArgs = metaData.get(Arguments.PROCESS_ARGS.getArgumentName(), String.class);
+        if (processArgs != null && !processArgs.equals("")) {
+            return processArgs.split(",");
+        } else {
+            return new String[0];
+        }
+    }
+
+    /***
+     * Set the format to be used for displaying dates in the email Defaults to
+     * format of 'yyyy-MM-dd hh:mm a'
+     * 
+     * @param formatString
+     *            - workflow process argument to override default format
+     * @return SimpleDateFormat that will be used to convert jcr Date properties
+     *         to Strings
+     */
+    private SimpleDateFormat getSimpleDateFormat(String formatString) {
+        SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
+
+        if (formatString == null || formatString.isEmpty()) {
+            return defaultFormat;
+        }
+
+        try {
+            return new SimpleDateFormat(formatString);
+        } catch (IllegalArgumentException e) {
+            // invalid pattern
+            return defaultFormat;
+        }
+    }
+
     protected void activate(ComponentContext context) throws RepositoryException {
-    	//activate
+        // activate
     }
 
     protected void deactivate(ComponentContext context) {
-    	//deactivate
+        // deactivate
     }
 
 }

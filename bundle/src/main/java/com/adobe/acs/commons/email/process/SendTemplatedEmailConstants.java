@@ -22,8 +22,8 @@ package com.adobe.acs.commons.email.process;
 import aQute.bnd.annotation.ProviderType;
 
 /**
- * Defines additional keys that are available
- * for templates when using the SendTemplatedEmailProcess
+ * Defines additional keys that are available for templates when using the
+ * SendTemplatedEmailProcess
  */
 @ProviderType
 public final class SendTemplatedEmailConstants {
@@ -31,36 +31,35 @@ public final class SendTemplatedEmailConstants {
     private SendTemplatedEmailConstants() {
 
     }
-    
+
     /**
-     * absolute URL string to the payload on the author environment
-     * includes the editor extension, i.e 'cf#' or 'editor.html' for pages 
-     * 'damadmin#' or 'assetdetails.html' for assets
-     * To be used in the template as: <code>${authorLink}</code>
+     * absolute URL string to the payload on the author environment includes the
+     * editor extension, i.e 'cf#' or 'editor.html' for pages 'damadmin#' or
+     * 'assetdetails.html' for assets To be used in the template as:
+     * <code>${authorLink}</code>
      */
-	public static final String AUTHOR_LINK = "authorLink";
+    public static final String AUTHOR_LINK = "authorLink";
 
-	/**
-	 * absolute URL link to the payload on publish. 
-	 * To be used in the template as: <code>${publishLink}</code>
-	 */
-	public static final String PUBLISH_LINK = "publishLink";
+    /**
+     * absolute URL link to the payload on publish. To be used in the template
+     * as: <code>${publishLink}</code>
+     */
+    public static final String PUBLISH_LINK = "publishLink";
 
-	/**
-	 * the payload path 
-	 * To be used in the template as: <code>${jcr:Path}</code>
-	 */
-	public static final String JCR_PATH = "jcr:Path";
-	
-	/**
-	 * the title of the current workflow model
-	 * To be used in the template as: <code>${wfModelTitle}</code>
-	 */
-	public static final String WF_MODEL_TITLE = "wfModelTitle";
-	
-	/**
-	 * the title of the current step in the workflow
-	 * To be used in the template as: <code>${wfStepTitle}</code>
-	 */
-	public static final String WF_STEP_TITLE = "wfStepTitle";
+    /**
+     * the payload path To be used in the template as: <code>${jcr:Path}</code>
+     */
+    public static final String JCR_PATH = "jcr:Path";
+
+    /**
+     * the title of the current workflow model To be used in the template as:
+     * <code>${wfModelTitle}</code>
+     */
+    public static final String WF_MODEL_TITLE = "wfModelTitle";
+
+    /**
+     * the title of the current step in the workflow To be used in the template
+     * as: <code>${wfStepTitle}</code>
+     */
+    public static final String WF_STEP_TITLE = "wfStepTitle";
 }

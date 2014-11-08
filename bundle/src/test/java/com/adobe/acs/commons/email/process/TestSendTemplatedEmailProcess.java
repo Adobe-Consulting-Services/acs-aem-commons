@@ -27,14 +27,15 @@ import com.day.cq.workflow.exec.WorkItem;
 public class TestSendTemplatedEmailProcess extends AbstractSendTemplatedEmailProcess {
 
     private TestHarness harness;
-    
+
     @Override
     protected String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args) {
-    	return this.harness.getEmailAddrs(workItem, payloadResource, args);
+        return this.harness.getEmailAddrs(workItem, payloadResource, args);
     }
-    
+
     @Override
-    protected Map<String, String> getAdditionalParams(WorkItem workItem, WorkflowSession workflowSession, Resource payloadResource) {
-    	return this.harness.getAdditionalParams(workItem, workflowSession, payloadResource);
+    protected Map<String, String> getAdditionalParams(WorkItem workItem, WorkflowSession workflowSession,
+            Resource payloadResource) {
+        return this.harness.getAdditionalParams(workItem, workflowSession, payloadResource);
     }
 }
