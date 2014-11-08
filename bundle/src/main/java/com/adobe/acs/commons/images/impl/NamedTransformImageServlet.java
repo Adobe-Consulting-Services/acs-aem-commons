@@ -250,13 +250,17 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             return transformers;
         }
 
-        log.error("Suffixed: {}", suffixes);
-        suffixes = (String[]) ArrayUtils.subarray(suffixes, 0, suffixes.length - 1);
+        int endIndex = suffixes.length - 1;
+        // Its OK to check; the above check ensures there are 2+ segments
+        if (StringUtils.isNumeric(PathInfoUtil.getSuffixSegment(request, suffixes.length - 2))) {
+            endIndex--;
+        }
+
+        suffixes = (String[]) ArrayUtils.subarray(suffixes, 0, endIndex);
 
         for (final String transformerName : suffixes) {
             final NamedImageTransformer transformer = this.namedImageTransformers.get(transformerName);
             if (transformer != null) {
-                log.error("Adding from suffix: {}", transformerName);
                 transformers.add(transformer);
             }
         }
@@ -277,8 +281,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         for (final NamedImageTransformer namedImageTransformer : selectedNamedImageTransformers) {
             params.putAll(namedImageTransformer.getTransforms());
         }
-
-        log.error("w params {}", params);
 
         return params;
     }
