@@ -21,12 +21,21 @@ package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.day.image.Layer;
+import org.apache.sling.api.resource.ValueMap;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class StaticNamedImageTransformer implements NamedImageTransformer {
 
     @Override
     public Layer transform(final Layer layer) {
         return layer;
+    }
+
+    @Override
+    public Map<String, ValueMap> getTransforms() {
+        return new LinkedHashMap<String, ValueMap>();
     }
 
 }
