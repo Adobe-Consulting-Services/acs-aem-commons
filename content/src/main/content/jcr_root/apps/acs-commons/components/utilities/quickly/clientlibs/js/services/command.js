@@ -69,13 +69,17 @@ quickly.factory('Command', function() {
             return '';
         },
 
-        getParams: function(cmd, strict, maxParams) {
+        getParams: function(cmd, strict, max) {
             var param = this.getParam(cmd, strict),
-                arr = param.split(/[\s]+/),
-                params = arr.splice(0, (maxParams || 10000));
+                all = param.trim().split(/\s+|^\n/),
+                full = all.slice(0, max), // all options
+                params = all.slice(max, all.length).join(' '); // the params
 
-                params.push(arr.join(' '));
-                return params;
+            if(params && params.length > 0) {
+                full.push(params);
+            }
+
+            return full;
         },
 
         hasOp: function(cmd) {

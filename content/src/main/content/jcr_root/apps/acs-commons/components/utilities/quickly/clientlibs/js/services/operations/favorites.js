@@ -64,10 +64,11 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
                     result.action.method = BaseResult.ACTION_METHODS.JS_OPERATION_ACTION;
                     result.action.params.method = REMOVE_METHOD;
                 });
+            } else {
+                param = Command.getParam(cmd, true);
             }
 
-
-            return $filter('title')(results, param);
+            return $filter('title')(results, param.trim());
         },
 
         process: function(cmd, result) {
@@ -92,7 +93,8 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
 
         isRemoveFavoriteCmd: function(cmd) {
             var params = Command.getParams(cmd, true, 2);
-            return (params.length === 2 && params[0] === REMOVE_CMD);
+            return ((params.length === 1 || params.length === 2)
+                && params[0] === REMOVE_CMD);
         },
 
         addFavorite: function() {
