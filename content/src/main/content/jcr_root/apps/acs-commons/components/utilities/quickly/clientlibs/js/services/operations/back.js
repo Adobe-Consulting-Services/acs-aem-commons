@@ -19,11 +19,15 @@
  */
 
 /*global angular: false, quickly: false, JSON: false, document: false */
-quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Command', 'Result',
-    function($timeout, $window, $filter, $localStorage, Command, Result) {
+quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Init', 'Command', 'Result',
+    function($timeout, $window, $filter, $localStorage, Init, Command, Result) {
 
     var MAX_SIZE = 50,
         initialized = false;
+
+    function getStorageId() {
+        return Init.getData().user + '-back';
+    }
 
     return  {
 
@@ -35,7 +39,7 @@ quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStora
         },
 
         getResults: function(cmd) {
-            var results = $localStorage.quickly.operations.back || [],
+            var results = $localStorage.quickly.operations[getStorageId()] || [],
                 param = Command.getParam(cmd, true);
 
             // Remove current page
@@ -48,47 +52,42 @@ quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStora
         },
 
         init: function() {
+            var entry,
+                history,
+                storageId = getStorageId(),
+                i = 0,
+                j = 1;
 
-            $timeout(function() {
+            $localStorage.quickly = $localStorage.quickly || {
+                operations: {}
+            };
 
-                var entry,
-                    history,
-                    i = 0,
-                    j = 1;
-
-                $localStorage.quickly = $localStorage.quickly || {
-                    operations: {}
-                };
-
-                history = $localStorage.quickly.operations.back || [];
+            history = $localStorage.quickly.operations[storageId] || [];
 
 
-                /* Create the result for the current visited page */
-                entry = Result.build();
-                entry.title = document.title || '??? Page';
-                entry.action.uri = ($window.location.pathname + $window.location.search + $window.location.hash) || '';
-                entry.description = entry.action.uri;
+            /* Create the result for the current visited page */
+            entry = Result.build();
+            entry.title = document.title || '??? Page';
+            entry.action.uri = ($window.location.pathname + $window.location.search + $window.location.hash) || '';
+            entry.description = entry.action.uri;
 
-                /* Add to the local storage history */
+            /* Add to the local storage history */
 
-                if(entry.title && entry.action.uri) {
-                    for(i = 0; i <  history.length && j < MAX_SIZE; i += 1) {
-                        if(history[i].action && history[i].action.uri === entry.action.uri) {
-                            // Remove from history; will add to the front of the list below
-                            history.splice(i, 1);
-                        }
+            if(entry.title && entry.action.uri) {
+                for(i = 0; i <  history.length && j < MAX_SIZE; i += 1) {
+                    if(history[i].action && history[i].action.uri === entry.action.uri) {
+                        // Remove from history; will add to the front of the list below
+                        history.splice(i, 1);
                     }
-
-                    // Add history onto the front
-                    history.unshift(entry);
                 }
 
+                // Add history onto the front
+                history.unshift(entry);
+            }
 
-                $localStorage.quickly.operations.back = history;
+            $localStorage.quickly.operations[storageId] = history;
 
-                initialized = true;
-
-            }, 2500);
+            initialized = true;
         }
     };
 }]);

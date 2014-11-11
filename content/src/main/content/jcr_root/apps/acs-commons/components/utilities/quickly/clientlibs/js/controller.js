@@ -21,8 +21,8 @@
 /*global quickly: false, angular: false, console: false */
 
 quickly.controller('QuicklyCtrl',
-        ['$scope', '$http', '$timeout', 'Action', 'Command', 'Operations', 'Results', 'UI',
-        function($scope, $http, $timeout, Action, Command, Operations, Results, UI){
+        ['$scope', '$http', '$timeout', 'Action', 'Command', 'Init', 'Operations', 'Results', 'UI',
+        function($scope, $http, $timeout, Action, Command, Init, Operations, Results, UI){
 
     $scope.app = {
         visible: false,
@@ -95,8 +95,12 @@ quickly.controller('QuicklyCtrl',
         // Prevent flickering onload
         UI.init();
 
-        // Init all operations
-        Operations.init();
+        // Initialize the app
+        Init.init().then(function() {
+            // Init all operations
+            Operations.init();
+        });
+
     };
 
     init();

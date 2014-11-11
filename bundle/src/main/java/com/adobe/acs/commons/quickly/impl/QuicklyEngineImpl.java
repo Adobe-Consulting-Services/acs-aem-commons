@@ -51,7 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component(
-        label = "ACS AEM Commons - Quickly",
+        label = "ACS AEM Commons - Quickly Engine",
         metatype = true
 )@Reference(
         name = "operations",
@@ -69,7 +69,7 @@ public class QuicklyEngineImpl implements QuicklyEngine {
 
     private static final String[] DEFAULT_RESULT_MODES = { };
     @Property(label = "Quickly Result Modes",
-            description = "The modes ..",
+            description = "",
             value = { })
     public static final String PROP_RESULT_MODES = "result.modes";
 
@@ -127,7 +127,6 @@ public class QuicklyEngineImpl implements QuicklyEngine {
         return json;
     }
 
-
     protected void bindOperations(final Operation service, final Map<Object, Object> props) {
         final String cmd = PropertiesUtil.toString(props.get(Operation.PROP_CMD), null);
 
@@ -145,7 +144,6 @@ public class QuicklyEngineImpl implements QuicklyEngine {
             operations.remove(cmd);
         }
     }
-
 
     @Activate
     protected void activate(Map<String, String> map) {

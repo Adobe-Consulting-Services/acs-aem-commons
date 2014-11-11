@@ -6,9 +6,10 @@ directives.js
 filters.js
 
 services/action.js
-services/result.js
 services/command.js
+services/init.js
 services/operations.js
+services/result.js
 services/results.js
 services/ui.js
 

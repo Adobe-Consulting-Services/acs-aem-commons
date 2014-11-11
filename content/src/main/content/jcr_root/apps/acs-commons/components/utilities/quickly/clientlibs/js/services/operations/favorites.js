@@ -19,8 +19,8 @@
  */
 
 /*global angular: false, quickly: false, JSON: false, console: false */
-quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Command', 'Result',
-    function($timeout, $window, $filter, $localStorage, Command, Result) {
+quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Init', 'Command', 'Result',
+    function($timeout, $window, $filter, $localStorage, Init, Command, Result) {
 
     var MAX_SIZE = 100,
         REMOVE_CMD = 'rm',
@@ -35,6 +35,10 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
         ADD_FAVORITE_RESULT.action.method = Result.ACTION_METHODS.JS_OPERATION_ACTION;
         ADD_FAVORITE_RESULT.action.params.method = ADD_METHOD;
 
+    function getStorageId() {
+        return Init.getData().user + '-favorites';
+    }
+
     return  {
 
         cmd: ['*'],
@@ -45,7 +49,7 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
         },
 
         getResults: function(cmd) {
-            var results = $localStorage.quickly.operations.favorites || [],
+            var results = $localStorage.quickly.operations[getStorageId()] || [],
                 params = Command.getParams(cmd, true, 2),
                 param = '';
 
@@ -147,9 +151,9 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
                 operations: {}
             };
 
-            $localStorage.quickly.operations.favorites = $localStorage.quickly.operations.favorites || [];
+            $localStorage.quickly.operations[getStorageId()] = $localStorage.quickly.operations[getStorageId()] || [];
 
-            return $localStorage.quickly.operations.favorites;
+            return $localStorage.quickly.operations[getStorageId()];
         }
 
     };
