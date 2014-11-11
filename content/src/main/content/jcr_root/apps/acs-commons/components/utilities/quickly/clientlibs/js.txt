@@ -6,7 +6,7 @@ directives.js
 filters.js
 
 services/action.js
-services/base-result.js
+services/result.js
 services/command.js
 services/operations.js
 services/results.js

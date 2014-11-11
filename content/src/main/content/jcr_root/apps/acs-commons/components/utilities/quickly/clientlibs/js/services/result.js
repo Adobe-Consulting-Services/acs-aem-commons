@@ -19,7 +19,7 @@
  */
 
 /*global angular: false, quickly: false */
-quickly.factory('BaseResult', function() {
+quickly.factory('Result', function() {
     return {
         ACTION_METHODS: {
             JS_OPERATION_ACTION: 'js-operation-action'

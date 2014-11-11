@@ -19,8 +19,8 @@
  */
 
 /*global angular: false, quickly: false, typeof: false */
-quickly.factory('Operations', ['Command', 'BaseResult', 'BackOperation', 'FavoritesOperation',
-    function(Command, BaseResult, BackOperation, FavoritesOperation) {
+quickly.factory('Operations', ['Command', 'Result', 'BackOperation', 'FavoritesOperation',
+    function(Command, Result, BackOperation, FavoritesOperation) {
 
     /* Service Object */
 

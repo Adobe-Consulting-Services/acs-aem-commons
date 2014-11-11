@@ -19,8 +19,8 @@
  */
 
 /*global angular: false, quickly: false, JSON: false, document: false */
-quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Command', 'BaseResult',
-    function($timeout, $window, $filter, $localStorage, Command, BaseResult) {
+quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Command', 'Result',
+    function($timeout, $window, $filter, $localStorage, Command, Result) {
 
     var MAX_SIZE = 50,
         initialized = false;
@@ -64,7 +64,7 @@ quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStora
 
 
                 /* Create the result for the current visited page */
-                entry = BaseResult.build();
+                entry = Result.build();
                 entry.title = document.title || '??? Page';
                 entry.action.uri = ($window.location.pathname + $window.location.search + $window.location.hash) || '';
                 entry.description = entry.action.uri;

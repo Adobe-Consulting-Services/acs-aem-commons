@@ -19,8 +19,8 @@
  */
 
 /*global angular: false, quickly: false, JSON: false, console: false */
-quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Command', 'BaseResult',
-    function($timeout, $window, $filter, $localStorage, Command, BaseResult) {
+quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Command', 'Result',
+    function($timeout, $window, $filter, $localStorage, Command, Result) {
 
     var MAX_SIZE = 100,
         REMOVE_CMD = 'rm',
@@ -28,11 +28,11 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
         ADD_METHOD = 'add',
         REMOVE_METHOD = 'rm',
 
-        ADD_FAVORITE_RESULT = BaseResult.build();
+        ADD_FAVORITE_RESULT = Result.build();
 
         ADD_FAVORITE_RESULT.title = 'Add Favorite';
         ADD_FAVORITE_RESULT.description = "Add this page to your favorites";
-        ADD_FAVORITE_RESULT.action.method = BaseResult.ACTION_METHODS.JS_OPERATION_ACTION;
+        ADD_FAVORITE_RESULT.action.method = Result.ACTION_METHODS.JS_OPERATION_ACTION;
         ADD_FAVORITE_RESULT.action.params.method = ADD_METHOD;
 
     return  {
@@ -61,7 +61,7 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
 
                 // Mark remove results as handling client side
                 angular.forEach(results, function(result) {
-                    result.action.method = BaseResult.ACTION_METHODS.JS_OPERATION_ACTION;
+                    result.action.method = Result.ACTION_METHODS.JS_OPERATION_ACTION;
                     result.action.params.method = REMOVE_METHOD;
                 });
             } else {
@@ -72,7 +72,7 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
         },
 
         process: function(cmd, result) {
-            if(BaseResult.isJsOperationAction(result)) {
+            if(Result.isJsOperationAction(result)) {
                 if(this.isRemoveFavorite(result)) {
                     return this.removeFavorite(result);
                 } else if(this.isAddFavorite(result)) {
@@ -104,7 +104,7 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
                 j = 1;
 
             /* Create the result for the current favorite'd page */
-            entry = BaseResult.build();
+            entry = Result.build();
             entry.title = document.title || 'Favorite\'d Page';
             entry.action.uri = ($window.location.pathname + $window.location.search + $window.location.hash) || '';
             entry.description = entry.action.uri;

@@ -18,8 +18,8 @@
  * #L%
  */
 
-/*global angular: false, quickly: false, console: false */
-quickly.factory('Results', ['$http', '$q', 'Operations', 'UI', function($http, $q, Operations, UI) {
+/*global angular: false, quickly: false */
+quickly.factory('Results', ['$http', '$q', 'Operations', function($http, $q, Operations) {
 
     var selectFirstResult = function(results) {
             var i = 0;

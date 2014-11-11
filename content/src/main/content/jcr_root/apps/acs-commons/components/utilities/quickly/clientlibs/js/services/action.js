@@ -19,7 +19,7 @@
  */
 
 /*global angular: false, quickly: false */
-quickly.factory('Action', ['Command', 'Operations', 'BaseResult', 'Results', 'UI', function(Command, Operations, BaseResult, Results, UI) {
+quickly.factory('Action', ['Command', 'Operations', 'Result', 'Results', 'UI', function(Command, Operations, Result, Results, UI) {
         var buildForm = function(action) {
             var params = action.params || [],
                 form;
@@ -51,10 +51,10 @@ quickly.factory('Action', ['Command', 'Operations', 'BaseResult', 'Results', 'UI
     process = function(cmd, result) {
         var form;
 
-        if(BaseResult.isNoopAction(result)) {
+        if(Result.isNoopAction(result)) {
             // Noop means do nothing!
             return false;
-        } else if(BaseResult.isJsOperationAction(result)) {
+        } else if(Result.isJsOperationAction(result)) {
             return Operations.process(cmd, result);
         } else {
             form = buildForm(result.action);
