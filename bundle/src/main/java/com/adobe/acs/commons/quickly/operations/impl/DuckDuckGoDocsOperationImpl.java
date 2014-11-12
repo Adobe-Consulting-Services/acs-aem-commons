@@ -24,6 +24,7 @@ import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.Action;
 import com.day.cq.commons.ProductInfo;
 import com.day.cq.commons.ProductInfoService;
 import org.apache.commons.lang.StringUtils;
@@ -90,8 +91,9 @@ public class DuckDuckGoDocsOperationImpl extends AbstractOperation {
 
         final Result result = new Result.Builder("docs.adobe.com")
                 .description("http://docs.adobe.com")
-                .actionURI("http://docs.adobe.com")
-                .actionTarget(Result.Target.BLANK)
+                .action(new Action.Builder()
+                        .uri("http://docs.adobe.com")
+                        .target(Action.Target.BLANK).build())
                 .build();
 
         results.add(result);
@@ -110,9 +112,11 @@ public class DuckDuckGoDocsOperationImpl extends AbstractOperation {
 
         final Result result = new Result.Builder("Search AEM documentation")
                 .description("Search for: " + cmd.getParam())
-                .actionURI("https://duckduckgo.com")
-                .actionTarget(Result.Target.BLANK)
-                .actionParams(params)
+                .action(new Action.Builder()
+                        .uri("https://duckduckgo.com")
+                        .target(Action.Target.BLANK)
+                        .params(params)
+                        .build())
                 .build();
 
         results.add(result);

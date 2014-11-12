@@ -44,6 +44,5 @@ public abstract class AbstractAccessibleResults {
         return results;
     }
 
-
     public abstract List<Result> getResults();
 }

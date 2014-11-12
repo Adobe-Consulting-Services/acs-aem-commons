@@ -21,6 +21,7 @@
                                     noop: result.action.method === 'noop' || !result.action.method,
                                     action: result.action.method !== 'noop',
                                     autocomplete: result.action.autoComplete }"
+                     ng-over="app.over(result)"
                      class="quickly-result">
 
                     <div class="quickly-result-icon {{result.type}}"></div>

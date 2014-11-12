@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.quickly.results.impl.lists;
 
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.Action;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,84 +37,84 @@ public class ClassicConsoleResults extends AbstractAccessibleResults {
         results.add(new Result.Builder("sites")
                 .description("Web page administration")
                 .path("/siteadmin")
-                .actionURI("/siteadmin")
+                .action(new Action.Builder().uri("/siteadmin").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("dam")
                 .description("DAM administration")
                 .path("/damadmin")
-                .actionURI("/damadmin")
+                .action(new Action.Builder().uri("/damadmin").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("wf")
                 .description("Workflow administration")
                 .path("/libs/cq/workflow/content/console.html")
-                .actionURI("/libs/cq/workflow/content/console.html")
+                .action(new Action.Builder().uri("/libs/cq/workflow/content/console.html").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("tools")
                 .description("AEM Tools")
                 .path("/miscadmin")
-                .actionURI("/miscadmin")
+                .action(new Action.Builder().uri("/miscadmin").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("inbox")
                 .description("My Inbox")
                 .path("/inbox")
-                .actionURI("/inbox")
+                .action(new Action.Builder().uri("/inbox").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("users")
                 .description("User and Group administration")
                 .path("/useradmin")
-                .actionURI("/useradmin")
+                .action(new Action.Builder().uri("/useradmin").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("campaigns")
                 .description("Campaign administration")
                 .path("/mcmadmin")
-                .actionURI("/mcmadmin")
+                .action(new Action.Builder().uri("/mcmadmin").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("soco")
                 .description("Soco administration")
                 .path("/socoadmin")
-                .actionURI("/socoadmin")
+                .action(new Action.Builder().uri("/socoadmin").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("publications")
                 .description("DPS administration")
                 .path("/publishingadmin")
-                .actionURI("/publishingadmin")
+                .action(new Action.Builder().uri("/publishingadmin").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("manuscripts")
                 .description("Manuscript administration")
                 .path("/manuscriptsadmin")
-                .actionURI("/manuscriptsadmin")
+                .action(new Action.Builder().uri("/manuscriptsadmin").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("tools")
                 .description("AEM Tools")
                 .path("/miscadmin")
-                .actionURI("/miscadmin")
+                .action(new Action.Builder().uri("/miscadmin").build())
                 .classic()
                 .build());
 
         results.add(new Result.Builder("tags")
                 .description("Tag administration")
                 .path("/tagging")
-                .actionURI("/tagging")
+                .action(new Action.Builder().uri("/tagging").build())
                 .classic()
                 .build());
 

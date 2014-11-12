@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.quickly.results.impl.lists;
 
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.Action;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class DevConsoleResults {
         results.add(new Result.Builder("crxde")
                 .description("CRXDE Lite")
                 .path("/crxde")
-                .actionURI("/crx/de/index.jsp")
+                .action(new Action.Builder().uri("/crx/de/index.jsp").build())
                 .dev()
                 .build());
 

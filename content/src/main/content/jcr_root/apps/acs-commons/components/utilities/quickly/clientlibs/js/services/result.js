@@ -45,6 +45,13 @@ quickly.factory('Result', function() {
                     method: 'get',
                     target: '_self',
                     params: {}
+                },
+                secondaryAction: {
+                    uri: '#',
+                    script: null,
+                    method: 'get',
+                    target: '_self',
+                    params: {}
                 }
             };
         }

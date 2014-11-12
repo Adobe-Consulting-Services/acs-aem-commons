@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.quickly.results.impl.lists;
 
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.Action;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,32 +34,32 @@ public class OpsConsoleResults  {
         /* Ops */
         results.add(new Result.Builder("packmgr")
                 .description("CRX package manager")
-                .actionURI("/crx/packmgr/index.jsp")
+                .action(new Action.Builder().uri("/crx/packmgr/index.jsp").build())
                 .build());
 
         results.add(new Result.Builder("system/bundles")
                 .description("System Console > Bundles")
-                .actionURI("/system/console/bundles")
+                .action(new Action.Builder().uri("/system/console/bundles").build())
                 .build());
 
         results.add(new Result.Builder("system/components")
                 .description("System Console > Components")
-                .actionURI("/system/console/components")
+                .action(new Action.Builder().uri("/system/console/components").build())
                 .build());
 
         results.add(new Result.Builder("system/configmgr")
                 .description("System Console > Config manager")
-                .actionURI("/system/console/configMgr")
+                .action(new Action.Builder().uri("/system/console/configMgr").build())
                 .build());
 
         results.add(new Result.Builder("system/jmx")
                 .description("System Console > JMX")
-                .actionURI("/system/console/jmx")
+                .action(new Action.Builder().uri("/system/console/jmx").build())
                 .build());
 
         results.add(new Result.Builder("system/slinglog")
                 .description("System Console > Logs")
-                .actionURI("/system/console/slinglog")
+                .action(new Action.Builder().uri("/system/console/slinglog").build())
                 .build());
 
         return results;

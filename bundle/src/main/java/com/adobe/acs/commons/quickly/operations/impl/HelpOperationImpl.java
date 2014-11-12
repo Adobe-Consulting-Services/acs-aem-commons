@@ -24,6 +24,8 @@ import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.Action;
+import com.adobe.acs.commons.quickly.results.Action.Method;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -115,8 +117,8 @@ public class HelpOperationImpl extends AbstractOperation {
 
             operations.put(cmd, new Result.Builder(cmd)
                     .description(description)
-                    .autoComplete(cmd)
-                    .actionMethod(Result.Method.CMD)
+                    .action(new Action.Builder().method(Method.CMD).build())
+                            //.secondaryAction(new ResultAction.Builder().method(Method.CMD).build())
                     .build());
 
             log.debug("Collected Quickly Operation [ {} ]", cmd);

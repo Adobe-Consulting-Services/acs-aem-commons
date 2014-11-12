@@ -72,6 +72,21 @@ quickly.directive('ngDown', ['UI', function (UI) {
     };
 }]);
 
+
+quickly.directive('ngOver', ['UI', function (UI) {
+    return function (scope, element, attrs) {
+        element.bind("mouseover", function (event) {
+            scope.$apply(function (){
+                scope.$eval(attrs.ngOver);
+            });
+
+            UI.scrollResults(scope.results);
+
+            event.preventDefault();
+        });
+    };
+}]);
+
 quickly.directive('ngRight', function () {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {

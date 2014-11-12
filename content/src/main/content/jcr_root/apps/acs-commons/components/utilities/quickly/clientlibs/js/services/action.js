@@ -70,8 +70,8 @@ quickly.factory('Action', ['Command', 'Operations', 'Result', 'Results', 'UI', f
 
         right: function(cmd, result) {
             if(result.action.method === 'cmd') {
-                cmd = result.action.autoComplete || '';
-            } else if(result.action.autoComplete) {
+                cmd = result.secondaryAction.enabled || '';
+            } else if(result.secondaryAction.autoComplete) {
                 cmd = Command.updateParam(cmd, result.action.autoComplete);
 
                 UI.focusCommand();
@@ -83,8 +83,8 @@ quickly.factory('Action', ['Command', 'Operations', 'Result', 'Results', 'UI', f
 
         select: function(cmd, result, results) {
             Results.select(result, results);
+
             process(cmd, result);
         }
-
     };
 }]);

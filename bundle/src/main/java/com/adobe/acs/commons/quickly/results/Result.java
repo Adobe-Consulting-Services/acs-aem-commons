@@ -20,50 +20,13 @@
 
 package com.adobe.acs.commons.quickly.results;
 
-
 import com.day.cq.wcm.api.AuthoringUIMode;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Result {
-
-    public enum Target {
-        BLANK("_blank"),
-        TOP("_top"),
-        SELF("_self");
-
-        private final String value;
-
-        Target(final String value) {
-            this.value = value;
-        }
-
-        public String toString() {
-            return this.value;
-        }
-    }
-
-    public enum Method {
-        GET("get"),
-        POST("post"),
-        NOOP("noop"),
-        JS("js"),
-        CMD("cmd");
-
-        private final String value;
-
-        Method(final String value) {
-            this.value = value;
-        }
-
-        public String toString() {
-            return this.value;
-        }
-    }
 
     public enum Mode {
         DEV("dev"),
@@ -80,69 +43,51 @@ public class Result {
         }
     }
 
-    private String resultType;
-
-    private String title;
-
-    private String description;
-
-    private String path;
-
-    private String actionURI;
-
-    private Method actionMethod;
-
-    private String actionScript;
-
-    private Target actionTarget;
-
-    private String autoComplete;
-
-    private Map<String, String> actionParams;
-
+    private Action action;
     private AuthoringUIMode authoringMode;
-
+    private String description;
     private List<Mode> modes;
+    private String path;
+    private String resultType;
+    private Action secondaryAction;
+    private String title;
 
     private Result(final Builder builder) {
         this.setResultType(builder.resultType);
         this.setTitle(builder.title);
         this.setDescription(builder.description);
         this.setPath(builder.path);
-        this.setActionURI(builder.actionURI);
-        this.setActionMethod(builder.actionMethod);
-        this.setActionTarget(builder.actionTarget);
-        this.setActionParams(builder.actionParams);
-        this.setActionScript(builder.actionScript);
-        this.setAutoComplete(builder.autoComplete);
-
+        this.setAction(builder.action);
+        this.setSecondaryAction(builder.secondaryAction);
         this.setAuthoringMode(builder.authoringMode);
         this.setModes(builder.modes);
     }
 
-    public String getAutoComplete() {
-        return autoComplete;
+    /* Action */
+
+    public Action getAction() {
+        return action;
     }
 
-    public void setAutoComplete(final String autoComplete) {
-        this.autoComplete = autoComplete;
+    public void setAction(final Action action) {
+        if (action == null) {
+            this.action = new Action.Builder().build();
+        } else {
+            this.action = action;
+        }
     }
 
-    public String getResultType() {
-        return resultType;
+    /* Authoring UI Mode */
+
+    public AuthoringUIMode getAuthoringMode() {
+        return authoringMode;
     }
 
-    public void setResultType(final String resultType) {
-        this.resultType = resultType;
+    public void setAuthoringMode(final AuthoringUIMode authoringMode) {
+        this.authoringMode = authoringMode;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(final String title) {
-        this.title = title;
-    }
+    /* Description */
 
     public String getDescription() {
         return description;
@@ -152,65 +97,7 @@ public class Result {
         this.description = description;
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(final String path) {
-        this.path = path;
-    }
-
-    public String getActionURI() {
-        return actionURI;
-    }
-
-    public void setActionURI(final String action) {
-        this.actionURI = action;
-    }
-
-    public Method getActionMethod() {
-        return this.actionMethod;
-    }
-
-    public void setActionMethod(final Method actionMethod) {
-        this.actionMethod = actionMethod;
-    }
-
-    public Target getActionTarget() {
-        return this.actionTarget;
-    }
-
-    public void setActionTarget(final Target actionTarget) {
-        this.actionTarget = actionTarget;
-    }
-
-    public String getActionScript() {
-        return actionScript;
-    }
-
-    public void setActionScript(final String actionScript) {
-        this.actionScript = actionScript;
-    }
-
-    public Map<String, String> getActionParams() {
-        if (actionParams == null) {
-            return new HashMap<String, String>();
-        } else {
-            return actionParams;
-        }
-    }
-
-    public void setActionParams(final Map<String, String> actionParams) {
-        this.actionParams = actionParams;
-    }
-
-    public AuthoringUIMode getAuthoringMode() {
-        return authoringMode;
-    }
-
-    public void setAuthoringMode(final AuthoringUIMode authoringMode) {
-        this.authoringMode = authoringMode;
-    }
+    /* Quickly Modes */
 
     public List<Mode> getModes() {
         return this.modes;
@@ -228,52 +115,82 @@ public class Result {
         }
     }
 
+    /* Path */
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(final String path) {
+        this.path = path;
+    }
+
+    /* Result Type */
+
+    public String getResultType() {
+        return resultType;
+    }
+
+    public void setResultType(final String resultType) {
+        this.resultType = resultType;
+    }
+
+    /* Secondary Action */
+
+    public Action getSecondaryAction() {
+        return secondaryAction;
+    }
+
+    public void setSecondaryAction(final Action secondaryAction) {
+        if (secondaryAction == null) {
+            this.secondaryAction = new Action.Builder().build();
+        } else {
+            this.secondaryAction = secondaryAction;
+        }
+    }
+
+    /* Title */
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(final String title) {
+        this.title = title;
+    }
+
+    /**
+     * Result Builder
+     */
     public static class Builder {
 
-        private String autoComplete;
-
+        private Action action;
+        private AuthoringUIMode authoringMode = null;
+        private String description;
+        private List<Mode> modes = new ArrayList<Mode>();
+        private String path;
         private String resultType;
-
+        private Action secondaryAction;
         private String title;
 
-        private String description;
-
-        private String path;
-
-        private String actionURI;
-
-        private Method actionMethod = Method.GET;
-
-        private Target actionTarget = Target.SELF;
-
-        private String actionScript;
-
-        private Map<String, String> actionParams;
-
-        private AuthoringUIMode authoringMode = null;
-
-        private List<Mode> modes = new ArrayList<Mode>();
-
+        /**
+         * Constructor
+         * @param title initialized Result w a title
+         */
         public Builder(String title) {
             this.title = title;
         }
 
+        /**
+         * Build method
+         * @return the built Result obj
+         */
         public Result build() {
             return new Result(this);
         }
 
-        public Builder resultType(String resultType) {
-            this.resultType = resultType;
-            return this;
-        }
-
-        public Builder title(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public Builder path(String path) {
-            this.path = path;
+        public Builder action(Action action) {
+            this.action = action;
             return this;
         }
 
@@ -282,36 +199,27 @@ public class Result {
             return this;
         }
 
-        public Builder autoComplete(String autoComplete) {
-            this.autoComplete = autoComplete;
+        public Builder path(String path) {
+            this.path = path;
             return this;
         }
 
-        public Builder actionURI(String actionURI) {
-            this.actionURI = actionURI;
+        public Builder resultType(String resultType) {
+            this.resultType = resultType;
             return this;
         }
 
-        public Builder actionMethod(Method actionMethod) {
-            this.actionMethod = actionMethod;
+        public Builder secondaryAction(Action secondaryAction) {
+            this.secondaryAction = secondaryAction;
             return this;
         }
 
-        public Builder actionTarget(Target actionTarget) {
-            this.actionTarget = actionTarget;
+        public Builder title(String title) {
+            this.title = title;
             return this;
         }
 
-        public Builder actionParams(Map<String, String> actionParams) {
-            this.actionParams = actionParams;
-            return this;
-        }
-
-        public Builder actionScript(String actionScript) {
-            this.actionScript = actionScript;
-            this.actionMethod = Method.JS;
-            return this;
-        }
+        /* Parameter-less Setters */
 
         public Builder classic() {
             this.authoringMode = AuthoringUIMode.CLASSIC;

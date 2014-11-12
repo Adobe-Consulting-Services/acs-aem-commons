@@ -77,6 +77,10 @@ quickly.controller('QuicklyCtrl',
         Results.down($scope.results);
     };
 
+    $scope.app.over = function(result) {
+        Results.select(result, $scope.results);
+    };
+
     /* Working Actions */
 
     $scope.app.right = function() {

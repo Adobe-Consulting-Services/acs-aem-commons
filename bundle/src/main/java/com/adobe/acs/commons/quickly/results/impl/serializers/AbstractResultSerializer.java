@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.quickly.results.impl.serializers;
 
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.Action;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -35,29 +36,36 @@ public abstract class AbstractResultSerializer {
     public JSONObject toJSON(final Result result, final ValueMap config) throws JSONException {
 
         final JSONObject json = new JSONObject();
-        final JSONObject action = new JSONObject();
-        final JSONObject actionParams = new JSONObject();
 
         json.put("title", result.getTitle());
         json.put("type", result.getResultType());
         json.put("description", result.getDescription());
         json.put("path", result.getPath());
 
-        // Action
-        action.put("uri", result.getActionURI());
-        action.put("method", result.getActionMethod().toString());
-        action.put("target", result.getActionTarget().toString());
-        action.put("xhr", false);
-        action.put("script", result.getActionScript());
-        action.put("autoComplete", result.getAutoComplete());
+        json.put("action", this.toJSON(result.getAction()));
+        json.put("secondaryAction", this.toJSON(result.getSecondaryAction()));
 
-        for (final Map.Entry<String, String> param : result.getActionParams().entrySet()) {
-            actionParams.put(param.getKey(), param.getValue());
+        return json;
+    }
+
+    public JSONObject toJSON(final Action action) throws JSONException {
+
+        final JSONObject json = new JSONObject();
+        final JSONObject params = new JSONObject();
+
+        if(action != null) {
+            json.put("uri", action.getUri());
+            json.put("method", action.getMethod());
+            json.put("target", action.getTarget());
+            json.put("xhr", false);
+            json.put("script", action.getScript());
+
+            for (final Map.Entry<String, String> param : action.getParams().entrySet()) {
+                params.put(param.getKey(), param.getValue());
+            }
         }
 
-        action.put("params", actionParams);
-
-        json.put("action", action);
+        json.put("params", params);
 
         return json;
     }

@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.quickly.results.impl.lists;
 
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.Action;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,77 +36,78 @@ public final class TouchConsoleResults extends AbstractAccessibleResults {
         results.add(new Result.Builder("projects")
                 .description("Project administration")
                 .path("/projects.html")
-                .actionURI("/projects.html")
+                .action(new Action.Builder().uri("/projects.html").build())
                 .touch()
                 .build());
 
         results.add(new Result.Builder("sites")
                 .description("Web page administration")
                 .path("/content")
-                .actionURI("/sites.html/content")
+                .action(new Action.Builder().uri("/sites.html/content").build())
                 .touch()
                 .build());
 
         results.add(new Result.Builder("dam")
                 .description("DAM administration")
                 .path("/content/dam")
-                .actionURI("/assets.html/content/dam")
+                .action(new Action.Builder().uri("/assets.html/content/dam").build())
                 .touch()
                 .build());
 
         results.add(new Result.Builder("wf")
                 .description("Workflow administration")
                 .path("/libs/cq/workflow/content/console.html")
-                .actionURI("/libs/cq/workflow/content/console.html")
+                .action(new Action.Builder().uri("/libs/cq/workflow/content/console.html").build())
                 .touch()
                 .build());
 
         results.add(new Result.Builder("inbox")
                 .description("My Inbox")
                 .path("/notifications.html")
-                .actionURI("/notifications.html")
+                .action(new Action.Builder().uri("/notifications.html").build())
                 .touch()
                 .build());
 
         results.add(new Result.Builder("users")
                 .description("User administration")
                 .path("/libs/granite/security/content/useradmin.html")
-                .actionURI("/libs/granite/security/content/useradmin.html")
+                .action(new Action.Builder().uri("/libs/granite/security/content/useradmin.html").build())
                 .touch()
                 .build());
 
         results.add(new Result.Builder("groups")
                 .description("Group administration")
                 .path("/libs/granite/security/content/groupadmin.html")
-                .actionURI("/libs/granite/security/content/groupadmin.html")
+                .action(new Action.Builder().uri("/libs/granite/security/content/groupadmin.html").build())
                 .touch()
                 .build());
 
         results.add(new Result.Builder("communities")
                 .description("Communities administration")
                 .path("/communities.html")
-                .actionURI("/communities.html")
+                .action(new Action.Builder().uri("/communities.html").build())
                 .touch()
                 .build());
 
         results.add(new Result.Builder("publications")
                 .description("DPS administration")
                 .path("/aem/publications.html/content/publications")
-                .actionURI("/aem/publications.html/content/publications")
+                .action(new Action.Builder().uri("/aem/publications.html/content/publications").build())
+
                 .touch()
                 .build());
 
         results.add(new Result.Builder("tools")
                 .description("AEM Tools")
                 .path("/miscadmin")
-                .actionURI("/miscadmin")
+                .action(new Action.Builder().uri("/miscadmin").build())
                 .touch()
                 .build());
 
         results.add(new Result.Builder("tags")
                 .description("Tag administration")
                 .path("/tagging")
-                .actionURI("/tagging")
+                .action(new Action.Builder().uri("/tagging").build())
                 .touch()
                 .build());
 

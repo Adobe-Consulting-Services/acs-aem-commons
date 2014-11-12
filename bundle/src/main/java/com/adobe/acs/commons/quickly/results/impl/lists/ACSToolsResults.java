@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.quickly.results.impl.lists;
 
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.Action;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,28 +36,28 @@ public class ACSToolsResults extends AbstractAccessibleResults {
         results.add(new Result.Builder("fiddle")
                 .description("AEM Fiddle")
                 .path("/etc/acs-tools/aem-fiddle")
-                .actionURI("/etc/acs-tools/aem-fiddle.html")
+                .action(new Action.Builder().uri("/etc/acs-tools/aem-fiddle.html").build())
                 .dev()
                 .build());
 
         results.add(new Result.Builder("explainquery")
                 .description("Explain Query")
                 .path("/etc/acs-tools/explain-query")
-                .actionURI("/etc/acs-tools/explain-query.html")
+                .action(new Action.Builder().uri("/etc/acs-tools/explain-query.html").build())
                 .dev()
                 .build());
 
         results.add(new Result.Builder("jspcodedisplay")
                 .description("JSP Code Display")
                 .path("/etc/acs-tools/jsp-code-display")
-                .actionURI("/etc/acs-tools/jsp-code-display.html")
+                .action(new Action.Builder().uri("/etc/acs-tools/jsp-code-display.html").build())
                 .dev()
                 .build());
 
         results.add(new Result.Builder("queryeditor")
                 .description("Query Editor")
                 .path("/etc/acs-tools/query-editor")
-                .actionURI("/etc/acs-tools/query-editor.html")
+                .action(new Action.Builder().uri("/etc/acs-tools/query-editor.html").build())
                 .dev()
                 .build());
 

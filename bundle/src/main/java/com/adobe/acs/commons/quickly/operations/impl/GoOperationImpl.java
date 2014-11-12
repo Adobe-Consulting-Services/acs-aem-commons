@@ -24,6 +24,7 @@ import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.Action;
 import com.adobe.acs.commons.quickly.results.impl.lists.ACSToolsResults;
 import com.adobe.acs.commons.quickly.results.impl.lists.ClassicConsoleResults;
 import com.adobe.acs.commons.quickly.results.impl.lists.DevConsoleResults;
@@ -121,13 +122,18 @@ public class GoOperationImpl extends AbstractOperation {
 
         shortcuts.add(new Result.Builder("touch")
                 .description("Switch to Touch UI")
-                .actionScript("document.cookie='cq-authoring-mode=TOUCH;path=/;'")
+                .action(new Action.Builder()
+                    .script("document.cookie='cq-authoring-mode=TOUCH;path=/;'")
+                    .build())
                 .classic()
                 .build());
 
         shortcuts.add(new Result.Builder("classic")
                 .description("Switch to Classic UI")
-                .actionScript("document.cookie='cq-authoring-mode=CLASSIC;path=/;'")
+                .action(new Action.Builder()
+                        .script("document.cookie='cq-authoring-mode=CLASSIC;path=/;'")
+                        .build())
+                .classic()
                 .touch()
                 .build());
 
