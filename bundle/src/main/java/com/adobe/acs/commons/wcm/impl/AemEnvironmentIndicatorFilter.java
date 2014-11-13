@@ -192,8 +192,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         } else if (StringUtils.endsWith(request.getHeader("Referer"), "/editor.html" + request.getRequestURI())) {
             // Do not apply to pages loaded in the TouchUI editor.html
             return false;
+        } else if (StringUtils.endsWith(request.getHeader("Referer"), "/cf")) {
+            // Do not apply to pages loaded in the Classic Content Finder
+            return false;
         }
-
         return true;
     }
 
