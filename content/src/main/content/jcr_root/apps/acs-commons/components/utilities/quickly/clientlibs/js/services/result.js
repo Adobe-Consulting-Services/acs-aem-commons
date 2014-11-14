@@ -18,7 +18,7 @@
  * #L%
  */
 
-/*global angular: false, quickly: false */
+/*global angular: false, quickly: false, _: false */
 quickly.factory('Result', function() {
     return {
         ACTION_METHODS: {
@@ -33,8 +33,8 @@ quickly.factory('Result', function() {
             return result && result.action && result.action.method === this.ACTION_METHODS.JS_OPERATION_ACTION;
         },
 
-        build: function() {
-            return {
+        build: function(overlay) {
+            var result = {
                 title: '',
                 path: '',
                 description: '',
@@ -54,6 +54,8 @@ quickly.factory('Result', function() {
                     params: {}
                 }
             };
+
+            return _.merge(result, overlay || {});
         }
     };
 });

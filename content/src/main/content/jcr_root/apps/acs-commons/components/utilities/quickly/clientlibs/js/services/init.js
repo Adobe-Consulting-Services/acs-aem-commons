@@ -21,7 +21,8 @@
 /*global angular: false, quickly: false */
 quickly.factory('Init', ['$http', function($http) {
     var data = {
-        user: 'unknown'
+        user: 'unknown',
+        throttle: 200
     };
 
     return {

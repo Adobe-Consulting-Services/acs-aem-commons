@@ -49,6 +49,7 @@ public class QuicklyInitServlet extends SlingSafeMethodsServlet {
 
         try {
             json.put("user", request.getResourceResolver().getUserID());
+            json.put("throttle", 200);
             response.getWriter().write(json.toString());
         } catch (JSONException e) {
             response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);

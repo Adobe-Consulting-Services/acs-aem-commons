@@ -18,9 +18,9 @@
  * #L%
  */
 
-/*global angular: false, quickly: false, JSON: false, document: false */
-quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Init', 'Command', 'Result',
-    function($timeout, $window, $filter, $localStorage, Init, Command, Result) {
+/*global angular: false, quickly: false, JSON: false, _: false */
+quickly.factory('BackOperation', ['$document', '$timeout', '$window', '$filter', '$localStorage', 'Init', 'Command', 'Result',
+    function($document, $timeout, $window, $filter, $localStorage, Init, Command, Result) {
 
     var MAX_SIZE = 50,
         initialized = false;
@@ -47,13 +47,13 @@ quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStora
                 results = results.slice(1, results.length);
             }
 
-
             return $filter('title')(results, param);
         },
 
         init: function() {
             var entry,
                 history,
+                uri,
                 storageId = getStorageId(),
                 i = 0,
                 j = 1;
@@ -66,26 +66,33 @@ quickly.factory('BackOperation', ['$timeout', '$window', '$filter', '$localStora
 
 
             /* Create the result for the current visited page */
-            entry = Result.build();
-            entry.title = document.title || '??? Page';
-            entry.action.uri = ($window.location.pathname + $window.location.search + $window.location.hash) || '';
-            entry.description = entry.action.uri;
+            uri = ($window.location.pathname + $window.location.search + $window.location.hash) || '#';
 
-            /* Add to the local storage history */
-
-            if(entry.title && entry.action.uri) {
-                for(i = 0; i <  history.length && j < MAX_SIZE; i += 1) {
-                    if(history[i].action && history[i].action.uri === entry.action.uri) {
-                        // Remove from history; will add to the front of the list below
-                        history.splice(i, 1);
+            if(!_.isEmpty(uri)) {
+                entry = Result.build({
+                    title: $document.attr('title') || 'Page missing title',
+                    description: uri,
+                    action: {
+                        uri: uri
                     }
+                });
+
+                /* Add to the local storage history */
+
+                if(entry.title && entry.action.uri) {
+                    for(i = 0; i <  history.length && j < MAX_SIZE; i += 1) {
+                        if(history[i].action && history[i].action.uri === entry.action.uri) {
+                            // Remove from history; will add to the front of the list below
+                            history.splice(i, 1);
+                        }
+                    }
+
+                    // Add history onto the front
+                    history.unshift(entry);
                 }
 
-                // Add history onto the front
-                history.unshift(entry);
+                $localStorage.quickly.operations[storageId] = history;
             }
-
-            $localStorage.quickly.operations[storageId] = history;
 
             initialized = true;
         }

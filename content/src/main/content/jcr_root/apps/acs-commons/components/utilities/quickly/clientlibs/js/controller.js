@@ -26,28 +26,19 @@ quickly.controller('QuicklyCtrl',
 
     $scope.app = {
         visible: false,
-        timeout: 0,
-        timeoutThrottle: 500
+        throttledResults: 0
     };
 
-    // initialized via $scope.app.reset()
+    // Initialized via $scope.app.reset()
     $scope.cmd = '';
     $scope.action = {};
     $scope.result = {};
     $scope.results = [];
 
     /* Watchers */
-    $scope.$watch('cmd', function(newValue, oldValue) {
-
+    $scope.$watch('cmd', function(cmd) {
         if($scope.app.visible) {
-            // Cancel any existing promises of result retrieval
-            $timeout.cancel($scope.app.timeout);
-
-            $scope.app.timeout = $timeout(function() {
-                    $scope.app.getResults($scope.cmd);
-                },
-                $scope.app.timeoutThrottle
-            );
+            $scope.app.getResults(cmd);
         }
     });
 
@@ -126,8 +117,8 @@ quickly.controller('QuicklyCtrl',
 
         // Initialize the app
         Init.init().then(function() {
-          // Init all operations after app initializes
-          Operations.init();
+            // Init all operations after app initialize
+            Operations.init();
         });
     };
 

@@ -18,10 +18,12 @@
  * #L%
  */
 
-/*global angular: false, quickly: false */
+/*global angular: false, quickly: false, _: false */
 quickly.factory('Results', ['$http', '$q', 'Operations', function($http, $q, Operations) {
 
-    var selectFirstResult = function(results) {
+    var lastResultTime = 0,
+
+        selectFirstResult = function(results) {
             var i = 0;
 
             if(results) {
@@ -35,7 +37,41 @@ quickly.factory('Results', ['$http', '$q', 'Operations', function($http, $q, Ope
             }
 
             return results;
+        },
+
+        getServerResults = function (cmd) {
+            var requestTime = new Date().getTime();
+
+            return $http({
+                method: 'GET',
+                url: '/bin/quickly.json',
+                params: {
+                    t: requestTime,
+                    cmd: cmd
+                }
+            }).then(function (response) {
+                if (requestTime <= lastResultTime) {
+                    // This check prevents previous slow running queries from
+                    // overwriting items of faster later queries
+                    return;
+                }
+
+                lastResultTime = requestTime;
+                return selectFirstResult(response.data.results || []);
+            });
+        },
+
+        getJsOperationResults = function (cmd) {
+            var operationResults = Operations.getResults(cmd);
+
+            if(operationResults !== null) {
+                return $q.when(selectFirstResult(operationResults));
+            } else {
+                return null;
+            }
         };
+
+    /* Service Object */
 
     return {
 
@@ -87,47 +123,17 @@ quickly.factory('Results', ['$http', '$q', 'Operations', function($http, $q, Ope
         },
 
         getResults: function (cmd) {
-            var requestTime = new Date().getTime(),
-                operationResults = null;
+            var results;
 
-            if (!cmd) {
-                return $q.when([]);
-            } else {
+            if(cmd) {
+                results = getJsOperationResults(cmd);
 
-                // Try Client-side Operations first
-
-                operationResults = Operations.getResults(cmd);
-
-                if(operationResults !== null) {
-                    return $q.when(selectFirstResult(operationResults));
+                if(results === null) {
+                    results = getServerResults(cmd);
                 }
-
-                // Only go to Server if a client side operation did not provide results
-
-                return $http({
-                    method: 'GET',
-                    url: '/bin/quickly.json',
-                    params: {
-                        t: requestTime,
-                        cmd: cmd
-                    }
-                }).then(function (response) {
-                    var results;
-
-                    if (requestTime <= this.resultTime) {
-                        // This check prevents previous slow running queries from
-                        // overwriting items of faster later queries
-                        return;
-                    }
-
-                    this.resultTime = requestTime;
-                    results = response.data.results || [];
-
-                    results = selectFirstResult(results);
-
-                    return results;
-                });
             }
+
+            return results || $q.when([]);
         }
     };
 }]);

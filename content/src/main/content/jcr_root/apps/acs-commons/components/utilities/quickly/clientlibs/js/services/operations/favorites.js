@@ -18,9 +18,9 @@
  * #L%
  */
 
-/*global angular: false, quickly: false, JSON: false, console: false */
-quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Init', 'Command', 'Result',
-    function($timeout, $window, $filter, $localStorage, Init, Command, Result) {
+/*global angular: false, quickly: false, JSON: false, _: false */
+quickly.factory('FavoritesOperation', ['$document', '$timeout', '$window', '$filter', '$localStorage', 'Init', 'Command', 'Result',
+    function($document, $timeout, $window, $filter, $localStorage, Init, Command, Result) {
 
     var initialized = true,
 
@@ -30,13 +30,16 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
         ADD_METHOD = 'add',
         REMOVE_METHOD = 'rm',
 
-        ADD_FAVORITE_RESULT = Result.build();
-
-        ADD_FAVORITE_RESULT.title = 'Add Favorite';
-        ADD_FAVORITE_RESULT.description = "Add this page to your favorites";
-        ADD_FAVORITE_RESULT.action.method = Result.ACTION_METHODS.JS_OPERATION_ACTION;
-        ADD_FAVORITE_RESULT.action.params.method = ADD_METHOD;
-
+        ADD_FAVORITE_RESULT = Result.build({
+            title: 'Add Favorite',
+            description: 'Add this page to your favorites',
+            action: {
+                method: Result.ACTION_METHODS.JS_OPERATION_ACTION,
+                params: {
+                    method: ADD_METHOD
+                }
+            }
+        });
 
         function getStorageId() {
             return Init.getData().user + '-favorites';
@@ -68,8 +71,14 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
 
                 // Mark remove results as handling client side
                 angular.forEach(results, function(result) {
-                    result.action.method = Result.ACTION_METHODS.JS_OPERATION_ACTION;
-                    result.action.params.method = REMOVE_METHOD;
+                    _.merge(result, {
+                        action: {
+                            method: Result.ACTION_METHODS.JS_OPERATION_ACTION,
+                            params: {
+                                method: REMOVE_METHOD
+                            }
+                        }
+                    });
                 });
             } else {
                 param = Command.getParam(cmd, true);
@@ -106,28 +115,36 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
 
         addFavorite: function() {
             var entry,
+                uri,
                 favorites = this.getFavorites(),
                 i = 0,
                 j = 1;
 
-            /* Create the result for the current favorite'd page */
-            entry = Result.build();
-            entry.title = document.title || 'Favorite\'d Page';
-            entry.action.uri = ($window.location.pathname + $window.location.search + $window.location.hash) || '';
-            entry.description = entry.action.uri;
+            uri = ($window.location.pathname + $window.location.search + $window.location.hash) || '';
 
-            /* Add to the local storage favorites */
-
-            if(entry.title && entry.action.uri) {
-                for (i = 0; i < favorites.length && j < MAX_SIZE; i += 1) {
-                    if (favorites[i].action && favorites[i].action.uri === entry.action.uri) {
-                        // Remove from favorites; will add to the front of the list below
-                        favorites.splice(i, 1);
+            if(!_.isEmpty(uri)) {
+                /* Create the result for the current favorite'd page */
+                entry = Result.build({
+                    title: $document.attr('title') || 'Favorite\'d Page',
+                    description: uri,
+                    action: {
+                        uri: uri
                     }
-                }
+                });
 
-                // Add favorite onto the front
-                favorites.unshift(entry);
+                /* Add to the local storage favorites */
+
+                if(entry.title && entry.action.uri) {
+                    for (i = 0; i < favorites.length && j < MAX_SIZE; i += 1) {
+                        if (favorites[i].action && favorites[i].action.uri === entry.action.uri) {
+                            // Remove from favorites; will add to the front of the list below
+                            favorites.splice(i, 1);
+                        }
+                    }
+
+                    // Add favorite onto the front
+                    favorites.unshift(entry);
+                }
             }
 
             return true;
