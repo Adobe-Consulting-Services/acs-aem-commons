@@ -34,151 +34,148 @@ import org.mockito.MockitoAnnotations;
 import com.day.cq.commons.Externalizer;
 
 public class AuthorUIHelperImplTest {
-	
-	@Mock
-	private Externalizer externalizer;
-	
-	@InjectMocks
-	private AuthorUIHelperImpl authorUIHelper;
-	
-	private Map<String,String> osgiConfig;
-	
-	private static String pagePath = "/content/main/testPage";
-	
-	
-	private static String assetPath = "/content/dam/testAsset.jpg";
-	
-	@Before
-	public final void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-		
-		//set up config service
-		osgiConfig = new HashMap<String,String>();
-		
-	    }
-	
-	@Test
+
+    @Mock
+    private Externalizer externalizer;
+
+    @InjectMocks
+    private AuthorUIHelperImpl authorUIHelper;
+
+    private Map<String, String> osgiConfig;
+
+    private static String pagePath = "/content/main/testPage";
+
+    private static String assetPath = "/content/dam/testAsset.jpg";
+
+    @Before
+    public final void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        //set up config service
+        osgiConfig = new HashMap<String, String>();
+
+    }
+
+    @Test
     public void testIsTouchUIDefault() {
-		authorUIHelper.activate(osgiConfig);
-		assertTrue(authorUIHelper.isTouchUI());
-	}
-	
-	@Test
+        authorUIHelper.activate(osgiConfig);
+        assertTrue(authorUIHelper.isTouchUI());
+    }
+
+    @Test
     public void testIsTouchUIClassic() {
-		
-		osgiConfig.put("isTouch", "false");
-		authorUIHelper.activate(osgiConfig);
-		assertFalse(authorUIHelper.isTouchUI());
-	}
-	
-	@Test
+
+        osgiConfig.put("isTouch", "false");
+        authorUIHelper.activate(osgiConfig);
+        assertFalse(authorUIHelper.isTouchUI());
+    }
+
+    @Test
     public void testGenerateEditPageLinkDefault() {
-		String TOUCH_PAGE_URL_REL = "/editor.html/content/main/testPage.html";
-		String TOUCH_PAGE_URL_ABS = "http://localhost:4502/editor.html/content/main/testPage.html";
-		when(externalizer.authorLink(null, TOUCH_PAGE_URL_REL)).thenReturn(TOUCH_PAGE_URL_ABS);
-		
-		authorUIHelper.activate(osgiConfig);
-		String relAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
-		String absAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, true, null);
-		assertEquals(TOUCH_PAGE_URL_REL, relAuthorPageLink);
-		assertEquals(TOUCH_PAGE_URL_ABS, absAuthorPageLink);
-	}
-	
-	@Test
+        String TOUCH_PAGE_URL_REL = "/editor.html/content/main/testPage.html";
+        String TOUCH_PAGE_URL_ABS = "http://localhost:4502/editor.html/content/main/testPage.html";
+        when(externalizer.authorLink(null, TOUCH_PAGE_URL_REL)).thenReturn(TOUCH_PAGE_URL_ABS);
+
+        authorUIHelper.activate(osgiConfig);
+        String relAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
+        String absAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, true, null);
+        assertEquals(TOUCH_PAGE_URL_REL, relAuthorPageLink);
+        assertEquals(TOUCH_PAGE_URL_ABS, absAuthorPageLink);
+    }
+
+    @Test
     public void testGenerateEditPageLinkOverride() {
-		String TOUCH_PAGE_URL_OVERRIDE = "/override.html/content/main/testPage.html";
-		
-		//override touch ui page editor
-		osgiConfig.put("wcmEditorTouchURL", "/override.html");
-		authorUIHelper.activate(osgiConfig);
-		String overrideAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
-		assertEquals(TOUCH_PAGE_URL_OVERRIDE, overrideAuthorPageLink);
-	}
-	
-	@Test
+        String TOUCH_PAGE_URL_OVERRIDE = "/override.html/content/main/testPage.html";
+
+        //override touch ui page editor
+        osgiConfig.put("wcmEditorTouchURL", "/override.html");
+        authorUIHelper.activate(osgiConfig);
+        String overrideAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
+        assertEquals(TOUCH_PAGE_URL_OVERRIDE, overrideAuthorPageLink);
+    }
+
+    @Test
     public void testGenerateEditPageLinkClassic() {
-		String CLASSIC_PAGE_URL_REL = "/cf#/content/main/testPage.html";
-		String CLASSIC_PAGE_URL_ABS = "http://localhost:4502/cf#/content/main/testPage.html";
-		
-		when(externalizer.authorLink(null, CLASSIC_PAGE_URL_REL)).thenReturn(CLASSIC_PAGE_URL_ABS);
-		osgiConfig.put("isTouch", "false");
-		authorUIHelper.activate(osgiConfig);
-		
-		String relAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
-		String absAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, true, null);
-		assertEquals(CLASSIC_PAGE_URL_REL, relAuthorPageLink);
-		assertEquals(CLASSIC_PAGE_URL_ABS, absAuthorPageLink);
-	}
-	
-	@Test
+        String CLASSIC_PAGE_URL_REL = "/cf#/content/main/testPage.html";
+        String CLASSIC_PAGE_URL_ABS = "http://localhost:4502/cf#/content/main/testPage.html";
+
+        when(externalizer.authorLink(null, CLASSIC_PAGE_URL_REL)).thenReturn(CLASSIC_PAGE_URL_ABS);
+        osgiConfig.put("isTouch", "false");
+        authorUIHelper.activate(osgiConfig);
+
+        String relAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
+        String absAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, true, null);
+        assertEquals(CLASSIC_PAGE_URL_REL, relAuthorPageLink);
+        assertEquals(CLASSIC_PAGE_URL_ABS, absAuthorPageLink);
+    }
+
+    @Test
     public void testGenerateEditPageLinkOverrideClassic() {
-		String CLASSIC_PAGE_URL_OVERRIDE = "/override.html/content/main/testPage.html";
-		
-		//override classic ui page editor
-		osgiConfig.put("isTouch", "false");
-		osgiConfig.put("wcmEditorClassicURL", "/override.html");
-		
-		authorUIHelper.activate(osgiConfig);
-		String overrideAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
-		assertEquals(CLASSIC_PAGE_URL_OVERRIDE, overrideAuthorPageLink);
-	}
-	
-	@Test
+        String CLASSIC_PAGE_URL_OVERRIDE = "/override.html/content/main/testPage.html";
+
+        //override classic ui page editor
+        osgiConfig.put("isTouch", "false");
+        osgiConfig.put("wcmEditorClassicURL", "/override.html");
+
+        authorUIHelper.activate(osgiConfig);
+        String overrideAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
+        assertEquals(CLASSIC_PAGE_URL_OVERRIDE, overrideAuthorPageLink);
+    }
+
+    @Test
     public void testGenerateEditAssetLinkDefault() {
-		String TOUCH_ASSET_URL_REL = "/assetdetails.html/content/dam/testAsset.jpg";
-		String TOUCH_ASSET_URL_ABS = "http://localhost:4502/assetdetails.html/content/dam/testAsset.jpg";
-		when(externalizer.authorLink(null, TOUCH_ASSET_URL_REL)).thenReturn(TOUCH_ASSET_URL_ABS);
-		
-		authorUIHelper.activate(osgiConfig);
-		String relAuthorAssetLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);
-		String absAuthorAssetLink = authorUIHelper.generateEditAssetLink(assetPath, true, null);
-		assertEquals(TOUCH_ASSET_URL_REL, relAuthorAssetLink);
-		assertEquals(TOUCH_ASSET_URL_ABS, absAuthorAssetLink);
-	}
-	
-	
-	@Test
+        String TOUCH_ASSET_URL_REL = "/assetdetails.html/content/dam/testAsset.jpg";
+        String TOUCH_ASSET_URL_ABS = "http://localhost:4502/assetdetails.html/content/dam/testAsset.jpg";
+        when(externalizer.authorLink(null, TOUCH_ASSET_URL_REL)).thenReturn(TOUCH_ASSET_URL_ABS);
+
+        authorUIHelper.activate(osgiConfig);
+        String relAuthorAssetLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);
+        String absAuthorAssetLink = authorUIHelper.generateEditAssetLink(assetPath, true, null);
+        assertEquals(TOUCH_ASSET_URL_REL, relAuthorAssetLink);
+        assertEquals(TOUCH_ASSET_URL_ABS, absAuthorAssetLink);
+    }
+
+    @Test
     public void testGenerateEditAssetLinkOverride() {
-		String TOUCH_ASSET_URL_OVERRIDE = "/override.html/content/dam/testAsset.jpg";
-		
-		//override touch ui page editor
-		osgiConfig.put("damEditorTouchURL", "/override.html");
-		authorUIHelper.activate(osgiConfig);
-		String overrideAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);
-		assertEquals(TOUCH_ASSET_URL_OVERRIDE, overrideAuthorPageLink);
-	}
-	
-	
-	@Test
+        String TOUCH_ASSET_URL_OVERRIDE = "/override.html/content/dam/testAsset.jpg";
+
+        //override touch ui page editor
+        osgiConfig.put("damEditorTouchURL", "/override.html");
+        authorUIHelper.activate(osgiConfig);
+        String overrideAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);
+        assertEquals(TOUCH_ASSET_URL_OVERRIDE, overrideAuthorPageLink);
+    }
+
+    @Test
     public void testGenerateEditAssetLinkClassic() {
-		String CLASSIC_ASSET_URL_REL = "/damadmin#/content/dam/testAsset.jpg";
-		String CLASSIC_ASSET_URL_ABS = "http://localhost:4502/damadmin#/content/dam/testAsset.jpg";
-		
-		when(externalizer.authorLink(null, CLASSIC_ASSET_URL_REL)).thenReturn(CLASSIC_ASSET_URL_ABS);
-		osgiConfig.put("isTouch", "false");
-		authorUIHelper.activate(osgiConfig);
-		
-		String relAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);
-		String absAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, true, null);
-		assertEquals(CLASSIC_ASSET_URL_REL, relAuthorPageLink);
-		assertEquals(CLASSIC_ASSET_URL_ABS, absAuthorPageLink);
-	}
-	
-	@Test
+        String CLASSIC_ASSET_URL_REL = "/damadmin#/content/dam/testAsset.jpg";
+        String CLASSIC_ASSET_URL_ABS = "http://localhost:4502/damadmin#/content/dam/testAsset.jpg";
+
+        when(externalizer.authorLink(null, CLASSIC_ASSET_URL_REL)).thenReturn(CLASSIC_ASSET_URL_ABS);
+        osgiConfig.put("isTouch", "false");
+        authorUIHelper.activate(osgiConfig);
+
+        String relAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);
+        String absAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, true, null);
+        assertEquals(CLASSIC_ASSET_URL_REL, relAuthorPageLink);
+        assertEquals(CLASSIC_ASSET_URL_ABS, absAuthorPageLink);
+    }
+
+    @Test
     public void testGenerateAssetPageLinkOverrideClassic() {
-		String CLASSIC_ASSET_URL_OVERRIDE = "/override.html/content/dam/testAsset.jpg";
-		
-		//override classic ui asset editor
-		osgiConfig.put("isTouch", "false");
-		osgiConfig.put("damEditorClassicURL", "/override.html");
-		
-		authorUIHelper.activate(osgiConfig);
-		String overrideAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);
-		assertEquals(CLASSIC_ASSET_URL_OVERRIDE, overrideAuthorPageLink);
-	}
-	
-	 @After
-	 public final void tearDown() {
-		 Mockito.reset();
-	  }
+        String CLASSIC_ASSET_URL_OVERRIDE = "/override.html/content/dam/testAsset.jpg";
+
+        //override classic ui asset editor
+        osgiConfig.put("isTouch", "false");
+        osgiConfig.put("damEditorClassicURL", "/override.html");
+
+        authorUIHelper.activate(osgiConfig);
+        String overrideAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);
+        assertEquals(CLASSIC_ASSET_URL_OVERRIDE, overrideAuthorPageLink);
+    }
+
+    @After
+    public final void tearDown() {
+        Mockito.reset();
+    }
 }
