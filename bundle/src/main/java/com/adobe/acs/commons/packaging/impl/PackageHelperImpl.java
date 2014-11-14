@@ -63,7 +63,7 @@ import java.util.Map;
 )
 @Service
 public final class PackageHelperImpl implements PackageHelper {
-    private static final Logger log = LoggerFactory.getLogger(ACLPackagerServletImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PackageHelperImpl.class);
 
     private static final String NN_THUMBNAIL = "thumbnail.png";
 
