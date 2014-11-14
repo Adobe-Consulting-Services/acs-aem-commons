@@ -198,7 +198,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
             emailParams.put(SendTemplatedEmailConstants.JCR_PATH, payloadPath);
 
             // Get Payload params
-            Map<String, String> payloadProp = SendTemplatedEmailHelper.getPayloadProperties(payloadRes, sdf);
+            Map<String, String> payloadProp = SendTemplatedEmailUtils.getPayloadProperties(payloadRes, sdf);
             if (payloadProp != null) {
                 emailParams.putAll(payloadProp);
             }
@@ -233,7 +233,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
 
     /***
      * Gets a String[] of email addresses to send the email to. By default calls
-     * {@link com.adobe.acs.commons.email.process.impl.SendTemplatedEmailHelper#getEmailAddrsFromUserPath(ResourceResolver, String)}
+     * {@link com.adobe.acs.commons.email.process.impl.SendTemplatedEmailUtils#getEmailAddrsFromUserPath(ResourceResolver, String)}
      * Protected so that it can be overridden by implementing classes to add
      * unique logic to where emails are routed to.
      * 
@@ -248,7 +248,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
     protected String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args) {
         ResourceResolver resolver = payloadResource.getResourceResolver();
         String sendToUser = getValueFromArgs(Arguments.SEND_TO.getArgumentName(), args);
-        return SendTemplatedEmailHelper.getEmailAddrsFromUserPath(resolver, sendToUser);
+        return SendTemplatedEmailUtils.getEmailAddrsFromUserPath(resolver, sendToUser);
     }
 
     /***

@@ -45,9 +45,9 @@ import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.wcm.api.Page;
 
-public class SendTemplatedEmailHelper {
+public class SendTemplatedEmailUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(SendTemplatedEmailHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(SendTemplatedEmailUtils.class);
 
     private static final String PN_USER_EMAIL = "profile/email";
 

@@ -49,7 +49,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.adobe.acs.commons.email.process.impl.SendTemplatedEmailHelper;
+import com.adobe.acs.commons.email.process.impl.SendTemplatedEmailUtils;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.commons.util.DamUtil;
@@ -58,8 +58,8 @@ import com.day.cq.wcm.api.Page;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ SendTemplatedEmailHelper.class, DamUtil.class, ResourceUtil.class })
-public class SendTemplatedEmailHelperTest {
+@PrepareForTest({ SendTemplatedEmailUtils.class, DamUtil.class, ResourceUtil.class })
+public class SendTemplatedEmailUtilsTest {
 
     private SimpleDateFormat sdf;
 
@@ -93,7 +93,7 @@ public class SendTemplatedEmailHelperTest {
     public void testGetPayloadProperties_NullResource() throws Exception {
 
         Resource payloadRes = mock(Resource.class);
-        Map<String, String> props = SendTemplatedEmailHelper.getPayloadProperties(payloadRes, sdf);
+        Map<String, String> props = SendTemplatedEmailUtils.getPayloadProperties(payloadRes, sdf);
         assertEquals(0, props.size());
     }
 
@@ -111,7 +111,7 @@ public class SendTemplatedEmailHelperTest {
 
         // mock valueMap
         when(ResourceUtil.getValueMap(mdRes)).thenReturn(vmap);
-        Map<String, String> props = SendTemplatedEmailHelper.getPayloadProperties(payloadRes, sdf);
+        Map<String, String> props = SendTemplatedEmailUtils.getPayloadProperties(payloadRes, sdf);
 
         assertEquals(props.get(PN_CALENDAR), CALENDAR_TOSTRING);
         assertEquals(props.get(PN_TITLE), STR_TOSTRING);
@@ -135,7 +135,7 @@ public class SendTemplatedEmailHelperTest {
 
         // mock valueMap
         when(ResourceUtil.getValueMap(jcrRes)).thenReturn(vmap);
-        Map<String, String> props = SendTemplatedEmailHelper.getPayloadProperties(payloadRes, sdf);
+        Map<String, String> props = SendTemplatedEmailUtils.getPayloadProperties(payloadRes, sdf);
 
         assertEquals(props.get(PN_CALENDAR), CALENDAR_TOSTRING);
         assertEquals(props.get(PN_TITLE), STR_TOSTRING);
@@ -150,7 +150,7 @@ public class SendTemplatedEmailHelperTest {
         String userPath = "/doesnotexist";
 
         when(resolver.getResource(userPath)).thenReturn(null);
-        String[] emails = SendTemplatedEmailHelper.getEmailAddrsFromUserPath(resolver, userPath);
+        String[] emails = SendTemplatedEmailUtils.getEmailAddrsFromUserPath(resolver, userPath);
         assertEquals(0, emails.length);
     }
 
@@ -171,7 +171,7 @@ public class SendTemplatedEmailHelperTest {
         when(adminUser.hasProperty(PN_EMAIL)).thenReturn(true);
         when(adminUser.getProperty(PN_EMAIL)).thenReturn(emailVal);
 
-        String[] emails = SendTemplatedEmailHelper.getEmailAddrsFromUserPath(resolver, userPath);
+        String[] emails = SendTemplatedEmailUtils.getEmailAddrsFromUserPath(resolver, userPath);
 
         assertEquals(1, emails.length);
         assertEquals("admin@adobe.com", emails[0]);
@@ -208,7 +208,7 @@ public class SendTemplatedEmailHelperTest {
         when(groupRes.adaptTo(Group.class)).thenReturn(userGroup);
         when(userGroup.getMembers()).thenReturn(groupMembers.iterator());
 
-        String[] emails = SendTemplatedEmailHelper.getEmailAddrsFromUserPath(resolver, groupPath);
+        String[] emails = SendTemplatedEmailUtils.getEmailAddrsFromUserPath(resolver, groupPath);
         assertEquals(2, emails.length);
         assertEquals("user1@adobe.com", emails[0]);
         assertEquals("user2@adobe.com", emails[1]);
