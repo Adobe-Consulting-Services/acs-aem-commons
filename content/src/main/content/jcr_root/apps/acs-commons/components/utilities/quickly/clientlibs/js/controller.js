@@ -18,11 +18,11 @@
  * #L%
  */
 
-/*global quickly: false, angular: false, console: false */
+/*global quickly: false, angular: false, _: false */
 
 quickly.controller('QuicklyCtrl',
-        ['$scope', '$http', '$timeout', 'Action', 'Command', 'Init', 'Operations', 'Results', 'UI',
-        function($scope, $http, $timeout, Action, Command, Init, Operations, Results, UI){
+        ['$scope', '$http', '$timeout', 'Command', 'Init', 'Operations', 'Results',
+        function($scope, $http, $timeout, Command, Init, Operations, Results){
 
     $scope.app = {
         visible: false,
@@ -30,7 +30,10 @@ quickly.controller('QuicklyCtrl',
         timeoutThrottle: 500
     };
 
+    // initialized via $scope.app.reset()
     $scope.cmd = '';
+    $scope.action = {};
+    $scope.result = {};
     $scope.results = [];
 
     /* Watchers */
@@ -51,61 +54,83 @@ quickly.controller('QuicklyCtrl',
     $scope.app.getResults = function(cmd) {
         Results.getResults(cmd).then(function(results) {
             $scope.results = results || [];
-            UI.resetResultScroll();
+            $scope.result = Results.getSelected($scope.results);
         });
     };
 
-    $scope.app.toggle = function() {
-        if(UI.isResetOnToggle()) {
-            $scope.cmd = '';
-            $scope.results = [];
-        }
+    $scope.app.toggle = function(force) {
+        $scope.app.reset();
 
-        $scope.app.visible = !$scope.app.visible;
-        if($scope.app.visible) {
-            UI.focusCommand();
+        if(_.isUndefined(force)) {
+            $scope.app.visible = !$scope.app.visible;
+        } else {
+            $scope.app.visible = force;
         }
+    };
+
+    $scope.app.reset = function() {
+        $scope.cmd = '';
+        $scope.result = null;
+        $scope.results = [];
+        $scope.action = {
+            empty: true,
+            params: {}
+        };
+    };
+
+    // Called after a quickly operation is complete; reset and hides quickly
+    $scope.app.complete = function() {
+        $scope.app.toggle(false);
+        $scope.app.reset();
     };
 
     /* Navigation */
 
     $scope.app.up = function() {
         Results.up($scope.results);
+        $scope.result = Results.getSelected($scope.results);
     };
 
     $scope.app.down = function() {
         Results.down($scope.results);
+        $scope.result = Results.getSelected($scope.results);
     };
 
     $scope.app.over = function(result) {
         Results.select(result, $scope.results);
+        $scope.result = Results.getSelected($scope.results);
     };
 
     /* Working Actions */
 
     $scope.app.right = function() {
-       $scope.cmd = Action.right($scope.cmd, Results.getSelected($scope.results));
+       //$scope.cmd = Action.right($scope.cmd, Results.getSelected($scope.results));
     };
 
     $scope.app.select = function() {
-        if(!Action.select($scope.cmd, Results.getSelected($scope.results), $scope.results)) {
-            $scope.app.toggle();
+        if($scope.result) {
+            if(Operations.process($scope.cmd, $scope.result)) {
+                // Processed via JS Operations
+                $scope.app.complete();
+            } else {
+                // Processed via Form Operation
+                $scope.action = $scope.result.action;
+            }
         }
     };
 
     /* Initialization */
 
     var init = function() {
-        // Prevent flickering onload
-        UI.init();
+        $scope.app.reset();
 
         // Initialize the app
         Init.init().then(function() {
-            // Init all operations
-            Operations.init();
+          // Init all operations after app initializes
+          Operations.init();
         });
-
     };
 
     init();
+
 }]);

@@ -22,7 +22,9 @@
 quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$localStorage', 'Init', 'Command', 'Result',
     function($timeout, $window, $filter, $localStorage, Init, Command, Result) {
 
-    var MAX_SIZE = 100,
+    var initialized = true,
+
+        MAX_SIZE = 100,
         REMOVE_CMD = 'rm',
 
         ADD_METHOD = 'add',
@@ -35,9 +37,10 @@ quickly.factory('FavoritesOperation', ['$timeout', '$window', '$filter', '$local
         ADD_FAVORITE_RESULT.action.method = Result.ACTION_METHODS.JS_OPERATION_ACTION;
         ADD_FAVORITE_RESULT.action.params.method = ADD_METHOD;
 
-    function getStorageId() {
-        return Init.getData().user + '-favorites';
-    }
+
+        function getStorageId() {
+            return Init.getData().user + '-favorites';
+        }
 
     return  {
 

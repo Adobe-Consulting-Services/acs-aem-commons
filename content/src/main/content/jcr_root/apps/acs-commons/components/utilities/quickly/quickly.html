@@ -3,6 +3,7 @@
 <div id="acs-commons-quickly-app">
     <div id="acs-commons-quickly-ctrl" ng-controller="QuicklyCtrl">
         <div id="acs-commons-quickly"
+             init
              ng-show="app.visible"
              ng-enter="app.select()"
              ng-up="app.up()"
@@ -10,17 +11,17 @@
              ng-right="app.right()">
 
             <div class="quickly-cmd-wrapper">
-                <input id="acs-commons-quickly-cmd" ng-model="cmd" class="quickly-cmd" type="text"/>
+                <input id="acs-commons-quickly-cmd" ng-model="cmd" command-input class="quickly-cmd" type="text"/>
             </div>
 
             <ul class="quickly-results"
+                    results
                     ng-show="results && results.length > 0">
                 <li ng-repeat="result in results"
                      ng-click="app.select(result)"
                      ng-class="{ selected: result.selected,
                                     noop: result.action.method === 'noop' || !result.action.method,
-                                    action: result.action.method !== 'noop',
-                                    autocomplete: result.action.autoComplete }"
+                                    action: result.action.method !== 'noop' }"
                      ng-over="app.over(result)"
                      class="quickly-result">
 
@@ -35,7 +36,10 @@
                 </li>
             </ul>
 
-            <div id="quickly-result-form"></div>
+            <action-form
+                    data="action"
+                    hide="app.complete()"></action-form>
+
         </div>
     </div>
 </div>

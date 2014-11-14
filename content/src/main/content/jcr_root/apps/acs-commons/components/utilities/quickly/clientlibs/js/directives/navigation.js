@@ -40,7 +40,7 @@ quickly.directive('ngEnter', function () {
  down = 40
 */
 
-quickly.directive('ngUp', ['UI', function (UI) {
+quickly.directive('ngUp', function () {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {
             if(event.which === 38) {
@@ -48,15 +48,15 @@ quickly.directive('ngUp', ['UI', function (UI) {
                     scope.$eval(attrs.ngUp);
                 });
 
-                UI.scrollResults(scope.results);
+                //UI.scrollResults(scope.results);
 
                 event.preventDefault();
             }
         });
     };
-}]);
+});
 
-quickly.directive('ngDown', ['UI', function (UI) {
+quickly.directive('ngDown', function () {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {
             if(event.which === 40) {
@@ -64,28 +64,28 @@ quickly.directive('ngDown', ['UI', function (UI) {
                     scope.$eval(attrs.ngDown);
                 });
 
-                UI.scrollResults(scope.results);
+                //UI.scrollResults(scope.results);
 
                 event.preventDefault();
             }
         });
     };
-}]);
+});
 
 
-quickly.directive('ngOver', ['UI', function (UI) {
+quickly.directive('ngOver', function () {
     return function (scope, element, attrs) {
         element.bind("mouseover", function (event) {
             scope.$apply(function (){
                 scope.$eval(attrs.ngOver);
             });
 
-            UI.scrollResults(scope.results);
+            //UI.scrollResults(scope.results);
 
             event.preventDefault();
         });
     };
-}]);
+});
 
 quickly.directive('ngRight', function () {
     return function (scope, element, attrs) {

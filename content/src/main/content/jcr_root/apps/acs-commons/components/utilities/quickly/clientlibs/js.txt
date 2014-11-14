@@ -2,16 +2,19 @@
 
 app.js
 controller.js
-directives.js
 filters.js
 
-services/action.js
 services/command.js
 services/init.js
 services/operations.js
-services/result.js
 services/results.js
-services/ui.js
+services/result.js
+
+directives/action-form.js
+directives/command-input.js
+directives/init-quickly.js
+directives/results.js
+directives/navigation.js
 
 services/operations/back.js
 services/operations/favorites.js

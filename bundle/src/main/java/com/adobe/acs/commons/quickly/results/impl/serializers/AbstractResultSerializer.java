@@ -23,6 +23,7 @@ package com.adobe.acs.commons.quickly.results.impl.serializers;
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.Action;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
@@ -51,7 +52,6 @@ public abstract class AbstractResultSerializer {
     public JSONObject toJSON(final Action action) throws JSONException {
 
         final JSONObject json = new JSONObject();
-        final JSONObject params = new JSONObject();
 
         if(action != null) {
             json.put("uri", action.getUri());
@@ -59,13 +59,9 @@ public abstract class AbstractResultSerializer {
             json.put("target", action.getTarget());
             json.put("xhr", false);
             json.put("script", action.getScript());
-
-            for (final Map.Entry<String, String> param : action.getParams().entrySet()) {
-                params.put(param.getKey(), param.getValue());
-            }
         }
 
-        json.put("params", params);
+        json.put("params", new JSONObject(action.getParams()));
 
         return json;
     }
