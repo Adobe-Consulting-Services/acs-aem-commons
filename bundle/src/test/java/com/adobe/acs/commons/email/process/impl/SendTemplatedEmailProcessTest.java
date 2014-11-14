@@ -17,13 +17,16 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.email.process;
+package com.adobe.acs.commons.email.process.impl;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.jcr.Session;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -36,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.acs.commons.wcm.AuthorUIHelper;
 import com.day.cq.commons.Externalizer;

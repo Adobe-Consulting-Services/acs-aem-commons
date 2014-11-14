@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.email.process;
+package com.adobe.acs.commons.email.process.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.sling.api.resource.Resource;
@@ -168,7 +169,7 @@ public class SendTemplatedEmailHelper {
                 returnMap.put(entry.getKey(), fmtDate);
             } else if (value instanceof String[]) {
                 // concatenate string array
-                String strValue = concatStrings((String[]) value);
+                String strValue = StringUtils.join((String[]) value, ", ");
                 returnMap.put(entry.getKey(), strValue);
 
             } else {
@@ -187,27 +188,6 @@ public class SendTemplatedEmailHelper {
         }
 
         return null;
-    }
-
-    /***
-     * Concatenates the values of a string array into a comma separated list.
-     * 
-     * @param strArray
-     * @return
-     */
-    private static String concatStrings(String[] strArray) {
-        String returnStr = "";
-
-        for (String valString : strArray) {
-            String tmp = valString.concat(", ");
-            returnStr = returnStr.concat(tmp);
-        }
-
-        if (returnStr.length() > 2) {
-            // remove trailing comma
-            return returnStr.substring(0, returnStr.length() - 2);
-        }
-        return returnStr;
     }
 
     /***

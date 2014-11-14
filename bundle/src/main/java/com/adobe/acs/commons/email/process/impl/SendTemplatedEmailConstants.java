@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.email.process;
+package com.adobe.acs.commons.email.process.impl;
 
 import aQute.bnd.annotation.ProviderType;
 

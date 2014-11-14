@@ -17,15 +17,28 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.email.process;
+package com.adobe.acs.commons.email.process.impl;
 
 import java.util.Map;
+
 import org.apache.sling.api.resource.Resource;
+
+import com.adobe.acs.commons.email.process.impl.SendTemplatedEmailProcess;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 
-public interface TestHarness {
-    String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args);
+public class TestSendTemplatedEmailProcess extends SendTemplatedEmailProcess {
 
-    Map<String, String> getAdditionalParams(WorkItem workItem, WorkflowSession workflowSession, Resource payloadResource);
+    private TestHarness harness;
+
+    @Override
+    protected String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args) {
+        return this.harness.getEmailAddrs(workItem, payloadResource, args);
+    }
+
+    @Override
+    protected Map<String, String> getAdditionalParams(WorkItem workItem, WorkflowSession workflowSession,
+            Resource payloadResource) {
+        return this.harness.getAdditionalParams(workItem, workflowSession, payloadResource);
+    }
 }
