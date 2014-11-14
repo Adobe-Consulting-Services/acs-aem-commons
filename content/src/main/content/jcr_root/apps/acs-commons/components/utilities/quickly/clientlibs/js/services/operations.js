@@ -47,7 +47,6 @@ quickly.factory('Operations', ['Command', 'Result', 'BackOperation', 'FavoritesO
             return null;
         },
 
-
         process: function(cmd, result) {
             var i = 0,
                 cmdOp,

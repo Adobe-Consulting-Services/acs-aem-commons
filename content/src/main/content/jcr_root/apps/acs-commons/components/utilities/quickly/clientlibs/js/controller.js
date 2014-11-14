@@ -58,13 +58,13 @@ quickly.controller('QuicklyCtrl',
         });
     };
 
-    $scope.app.toggle = function(force) {
+    $scope.app.toggle = function(visible) {
         $scope.app.reset();
 
-        if(_.isUndefined(force)) {
+        if(_.isUndefined(visible)) {
             $scope.app.visible = !$scope.app.visible;
         } else {
-            $scope.app.visible = force;
+            $scope.app.visible = visible;
         }
     };
 

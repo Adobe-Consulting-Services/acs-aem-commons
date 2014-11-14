@@ -20,11 +20,11 @@
 
 /*global quickly: false, angular: false, _: false, console: false */
 
-quickly.directive('actionForm', ['$timeout', function ($timeout) {
+quickly.directive('actionForm', ['$rootScope', '$q', '$timeout', function ($rootScope, $q, $timeout) {
     return {
         restrict: 'E',
         scope: {
-            hide: '&',
+            complete: '&',
             action: '=data'
         },
         template: '<form action="{{ action.uri }}" method="{{ action.method }}" target="{{ action.target }}" ng-onsubmit="{{ action.script }}" ng-hide="true">' +
@@ -38,7 +38,11 @@ quickly.directive('actionForm', ['$timeout', function ($timeout) {
                     // _.defer to ensure the template has rendered before submitting the form
                     _.defer(function() {
                         element.submit();
-                        scope.hide();
+
+                        // $timeout combats ng redraw issues when this tab looses focus; else quickly will not disappear
+                        $timeout(function() {
+                            scope.complete();
+                        }, 100);
                     });
 
                 }
