@@ -106,12 +106,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
 
-    private static final double IMAGE_GIF_MAX_QUALITY = 255;
-
-    private static final double IMAGE_MAX_QUALITY = 1.0;
-
-    private static final String MIME_TYPE_GIF = "image/gif";
-
     private static final String MIME_TYPE_PNG = "image/png";
 
     private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();
@@ -173,14 +167,14 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Image image = this.resolveImage(request);
         final String mimeType = this.getMimeType(request, image);
         Layer layer = this.getLayer(image);
-        
+
+        response.setContentType(mimeType);
+
         // Transform the image
         layer = namedImageTransformer.transform(layer);
 
-        final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
-        response.setContentType(mimeType);
-
-        layer.write(mimeType, quality, response.getOutputStream());
+        // Write the image to the response
+        namedImageTransformer.writeImage(layer, mimeType, response.getOutputStream());
 
         response.flushBuffer();
     }

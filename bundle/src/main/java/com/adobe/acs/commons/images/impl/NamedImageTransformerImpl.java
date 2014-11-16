@@ -22,6 +22,7 @@ package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
+import com.adobe.acs.commons.images.transformers.impl.adhoc.ImageQualityTransformer;
 import com.adobe.acs.commons.util.OsgiPropertyUtil;
 import com.adobe.acs.commons.util.TypeUtil;
 import com.adobe.acs.commons.wcm.ComponentHelper;
@@ -39,6 +40,8 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -85,7 +88,6 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
 
     private LinkedHashMap<String, ValueMap> transforms = new LinkedHashMap<String, ValueMap>();
 
-
     /**
      * @inheritDoc
      */
@@ -105,11 +107,21 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
         return layer;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public final void writeImage(Layer layer, String mimeType, OutputStream outputStream) throws IOException {
+        final ValueMap transformParams = this.transforms.get(ImageQualityTransformer.TYPE);
+        final double quality = ImageQualityTransformer.getQuality(mimeType, transformParams);
+
+        layer.write(mimeType, quality, outputStream);
+    }
+
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
         this.transformName = PropertiesUtil.toString(properties.get(PROP_NAME), DEFAULT_TRANSFORM_NAME);
 
-        log.info("Registering Named Image Transfomer: {}", this.transformName);
+        log.info("Registering Named Image Transformer: {}", this.transformName);
 
         final Map<String, String> map = OsgiPropertyUtil.toMap(PropertiesUtil.toStringArray(
                 properties.get(PROP_TRANSFORMS), new String[]{}), ":", true, null);

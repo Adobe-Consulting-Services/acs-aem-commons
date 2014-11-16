@@ -24,6 +24,9 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.day.image.Layer;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 @ProviderType
 public interface NamedImageTransformer {
     /**
@@ -40,4 +43,15 @@ public interface NamedImageTransformer {
      * transform parameters) the layer unmodified
      */
     Layer transform(Layer layer);
+
+
+    /**
+     * Write the image to the provide output stream.
+     *
+     * @param layer the Image
+     * @param mimeType the mimeType indicating the Image format the layer will be written out as
+     * @param outputStream the output stream
+     */
+    void writeImage(Layer layer, String mimeType, OutputStream outputStream) throws IOException;
+
 }
