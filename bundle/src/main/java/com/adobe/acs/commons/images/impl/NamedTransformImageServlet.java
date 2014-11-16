@@ -215,7 +215,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     protected final Layer transform(Layer layer, final ValueMap transforms) {
 
         for (final String type : transforms.keySet()) {
-            if(StringUtils.equals(TYPE_QUALITY, type)) {
+            if (StringUtils.equals(TYPE_QUALITY, type)) {
                 // Do not process the "quality" transform in the usual manner
                 continue;
             }
@@ -235,7 +235,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         return layer;
     }
-
 
     /**
      * Gets the NamedImageTransformers based on the Suffix segments in order.
@@ -343,8 +342,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * Gets the mimeType of the image.
      * - The last segments suffix is looked at first and used
      * - if the last suffix segment's "extension" is .orig or .original then use the underlying resources mimeType
-     * - else look up the mimetype to use based on this "extension"
-     * - default to the resource's mimetype if the requested mimetype by extension is not supported.
+     * - else look up the mimeType to use based on this "extension"
+     * - default to the resource's mimeType if the requested mimeType by extension is not supported.
      *
      * @param image the image to get the mimeType for
      * @return the string representation of the image's mimeType
@@ -407,34 +406,33 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @return
      */
     private double getQuality(final String mimeType, final ValueMap transforms) {
-        final String KEY = "quality";
-        final int DEFAULT_QUALITY = 82;
-        final int MAX_QUALITY = 100;
-        final int MIN_QUALITY = 0;
-        final String MIME_TYPE_GIF = "image/gif";
-        final int IMAGE_GIF_MAX_QUALITY = 255;
+        final String key = "quality";
+        final int defaultQuality = 82;
+        final int maxQuality = 100;
+        final int minQuality = 0;
+        final int maxQualityGIF = 255;
+        final double oneHundred = 100D;
 
         log.debug("Transforming with [ quality ]");
 
-        double quality = transforms.get(KEY, DEFAULT_QUALITY);
+        double quality = transforms.get(key, defaultQuality);
 
         log.debug("quality: {}", quality);
 
-        if (quality > MAX_QUALITY) {
-            quality = DEFAULT_QUALITY;
-        } else if (quality < MIN_QUALITY) {
-            quality = MIN_QUALITY;
+        if (quality > maxQuality) {
+            quality = defaultQuality;
+        } else if (quality < minQuality) {
+            quality = minQuality;
         }
 
-        quality = quality / 100D;
+        quality = quality / oneHundred;
 
-        if (StringUtils.equals(MIME_TYPE_GIF, mimeType)) {
-            quality = quality * IMAGE_GIF_MAX_QUALITY;
+        if (StringUtils.equals("image/gif", mimeType)) {
+            quality = quality * maxQualityGIF;
         }
 
         return quality;
     }
-
 
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
