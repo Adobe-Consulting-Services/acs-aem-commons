@@ -27,17 +27,24 @@ import com.day.cq.replication.ReplicationResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.io.JSONWriter;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -49,9 +56,24 @@ import java.util.Map;
 @SlingServlet(resourceTypes = "acs-commons/components/utilities/dispatcher-flush/configuration",
         selectors = "flush", methods = "POST")
 public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
+    private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherServlet.class);
 
     @Reference
     private DispatcherFlusher dispatcherFlusher;
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
+    private static final boolean DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = true;
+
+    private boolean flushWithAdminResourceResolver = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER;
+
+    @Property(label = "Flush with Admin Resource Resolver",
+            description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of "
+                    + "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the "
+                    + "users JCR permissions. [ Default: true ]",
+            boolValue = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER)
+    public static final String PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = "flush-with-admin-resource-resolver";
 
     @Override
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -71,9 +93,22 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
         final List<FlushResult> overallResults = new ArrayList<FlushResult>();
         boolean caughtException = false;
 
+        ResourceResolver flushingResourceResolver = null;
+
         try {
             if (paths.length > 0) {
-                final Map<Agent, ReplicationResult> results = dispatcherFlusher.flush(resourceResolver,
+
+                if (flushWithAdminResourceResolver) {
+                    // Use the admin resource resolver for replication to ensure all
+                    // replication permission checks are OK
+                    // Make sure to close this resource resolver
+                    flushingResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                } else {
+                    // Use the HTTP Request's resource resolver; don't close this resource resolver
+                    flushingResourceResolver = resourceResolver;
+                }
+
+                final Map<Agent, ReplicationResult> results = dispatcherFlusher.flush(flushingResourceResolver,
                         replicationActionType, true, paths);
 
                 for (final Map.Entry<Agent, ReplicationResult> entry : results.entrySet()) {
@@ -83,8 +118,17 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
                     overallResults.add(new FlushResult(agent, result));
                 }
             }
-        } catch (ReplicationException ex) {
+        } catch (ReplicationException e) {
+            log.error("Replication exception occurred during Dispatcher Flush request.", e);
             caughtException = true;
+        } catch (LoginException e) {
+            log.error("Could not obtain an Admin Resource Resolver during Dispatcher Flush request.", e);
+            caughtException = true;
+        } finally {
+            if (flushWithAdminResourceResolver && flushingResourceResolver != null) {
+                // Close the admin resource resolver if opened by this servlet
+                flushingResourceResolver.close();
+            }
         }
 
         if (request.getRequestPathInfo().getExtension().equals("json")) {
@@ -120,6 +164,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
         }
 
         private final String agentId;
+
         private final boolean success;
 
         @Override
@@ -128,4 +173,10 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
         }
     }
 
+    @Activate
+    protected final void activate(final Map<String, String> config) {
+        this.flushWithAdminResourceResolver = PropertiesUtil.toBoolean(
+                config.get(PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER),
+                DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER);
+    }
 }
