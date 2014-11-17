@@ -406,7 +406,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @param transforms the map of image transform params
      * @return
      */
-    private double getQuality(final String mimeType, final ValueMap transforms) {
+    protected final double getQuality(final String mimeType, final ValueMap transforms) {
         final String key = "quality";
         final int defaultQuality = 82;
         final int maxQuality = 100;
@@ -418,12 +418,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
         double quality = transforms.get(key, defaultQuality);
 
-        log.debug("quality: {}", quality);
-
-        if (quality > maxQuality) {
+        if (quality > maxQuality || quality < minQuality) {
             quality = defaultQuality;
-        } else if (quality < minQuality) {
-            quality = minQuality;
         }
 
         quality = quality / oneHundred;
