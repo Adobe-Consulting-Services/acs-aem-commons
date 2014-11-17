@@ -106,7 +106,7 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
         return layer;
     }
 
-    public final Map<String, ValueMap> getTransforms() {
+    public final Map<String, ValueMap> getImageTransforms() {
         return this.transforms;
     }
 

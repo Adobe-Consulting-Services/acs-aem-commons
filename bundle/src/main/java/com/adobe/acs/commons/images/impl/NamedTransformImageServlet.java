@@ -32,6 +32,7 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.foundation.Image;
 import com.day.image.Layer;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -208,13 +209,13 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     /**
      * Execute the ImageTransformers as specified by the Request's suffix segments against the Image layer.
      *
-     * @param layer      the Image layer
-     * @param transforms the transforms and their params
+     * @param layer the Image layer
+     * @param imageTransformersWithParams the transforms and their params
      * @return the transformed Image layer
      */
-    protected final Layer transform(Layer layer, final ValueMap transforms) {
+    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams) {
 
-        for (final String type : transforms.keySet()) {
+        for (final String type : imageTransformersWithParams.keySet()) {
             if (StringUtils.equals(TYPE_QUALITY, type)) {
                 // Do not process the "quality" transform in the usual manner
                 continue;
@@ -226,7 +227,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 continue;
             }
 
-            final ValueMap transformParams = transforms.get(type, EMPTY_PARAMS);
+            final ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
 
             if (transformParams != null) {
                 layer = imageTransformer.transform(layer, transformParams);
@@ -280,7 +281,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final ValueMap params = new ValueMapDecorator(new LinkedHashMap<String, Object>());
 
         for (final NamedImageTransformer namedImageTransformer : selectedNamedImageTransformers) {
-            params.putAll(namedImageTransformer.getTransforms());
+            params.putAll(namedImageTransformer.getImageTransforms());
         }
 
         return params;
