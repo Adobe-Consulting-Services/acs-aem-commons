@@ -545,20 +545,33 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies.
      * <p/>
      * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
-     *
      * @param request
      * @param response
      */
     @Override
-    public void doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response) {
-        if (componentHelper.isDisabledMode(request)) {
-            return;
-        } else if (getStatusCode(request) != SlingHttpServletResponse.SC_NOT_FOUND) {
-            return;
+    public boolean doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Status code: {}", this.getStatusCode(request));
+            log.debug("Is anonymous: {}", isAnonymousRequest(request));
+            log.debug("Is browser request: {}", AuthUtil.isBrowserRequest(request));
         }
 
-        if (isAnonymousRequest(request) && AuthUtil.isBrowserRequest(request)) {
+        if (this.getStatusCode(request) == SlingHttpServletResponse.SC_NOT_FOUND
+                && this.isAnonymousRequest(request)
+                && AuthUtil.isBrowserRequest(request)) {
+
+            log.debug("Authenticate the request");
+
+            // Authenticate Request
             authenticateRequest(request, response);
+
+            return false;
+
+        } else {
+            log.debug("Allow error page handler to handle request");
+
+            return true;
         }
     }
 
