@@ -88,7 +88,7 @@ import java.util.Map;
 })
 @Service
 public class JcrPackageReplicationStatusEventHandler implements JobProcessor, EventHandler, ClusterAware {
-    private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
     private enum ReplicatedAt {
         CURRENT_TIME,
@@ -100,7 +100,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
             "cq:PageContent",
             "dam:AssetContent",
             "rep:User",
-            "rep:Group"
+            "rep:Group",
+            "sling:OrderedFolder/nt:unstructured"
     };
 
     private String[] replicationStatusNodeTypes = DEFAULT_REPLICATION_STATUS_NODE_TYPES;
@@ -113,7 +114,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
                     "cq:PageContent",
                     "dam:AssetContent",
                     "rep:User",
-                    "rep:Group"
+                    "rep:Group",
+                    "sling:OrderedFolder/nt:unstructured"
             })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
 
@@ -279,15 +281,35 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
      * @throws RepositoryException
      */
     private boolean accept(final Resource resource) throws RepositoryException {
-        if (resource != null && !ResourceUtil.isNonExistingResource(resource)) {
-            final Node node = resource.adaptTo(Node.class);
+        if (resource == null || ResourceUtil.isNonExistingResource(resource)) {
+            return false;
+        }
 
-            if (node != null) {
-                for (final String nodeType : this.replicationStatusNodeTypes) {
-                    if (node.isNodeType(nodeType)) {
-                        return true;
+        for (final String nodeTypes : this.replicationStatusNodeTypes) {
+            final String[] hierarchyNodeTypes = StringUtils.split(nodeTypes, "/");
+
+            boolean match = true;
+            Resource walkingResource = resource;
+
+            for(int i = (hierarchyNodeTypes.length - 1); i >= 0; i--) {
+
+                if(walkingResource == null) {
+                    match = false;
+                    break;
+                } else {
+                    final Node node = walkingResource.adaptTo(Node.class);
+
+                    if (node == null || !node.isNodeType(hierarchyNodeTypes[i])) {
+                        match = false;
+                        break;
                     }
+
+                    walkingResource = walkingResource.getParent();
                 }
+            }
+
+            if(match) {
+                return true;
             }
         }
 

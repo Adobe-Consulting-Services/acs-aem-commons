@@ -69,6 +69,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final List<String> contentPaths = new ArrayList<String>();
         contentPaths.add("/content/foo");
         contentPaths.add("/content/bar");
+        contentPaths.add("/content/dam/folder/jcr:content");
 
         final String packagePath = "/etc/packages/acs-commons/test.zip";
         final Resource packageResource = mock(Resource.class);
@@ -80,8 +81,13 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
         final Resource contentResource1 = mock(Resource.class);
         final Resource contentResource2 = mock(Resource.class);
+        final Resource contentResource3 = mock(Resource.class);
+        final Resource contentResource3parent = mock(Resource.class);
+
         final Node contentNode1 = mock(Node.class);
         final Node contentNode2 = mock(Node.class);
+        final Node contentNode3 = mock(Node.class);
+        final Node contentNode3parent = mock(Node.class);
 
         final String[] paths = new String[] { packagePath };
 
@@ -112,6 +118,14 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(contentResource2.adaptTo(Node.class)).thenReturn(contentNode2);
         when(contentNode2.isNodeType("dam:AssetContent")).thenReturn(true);
 
+        when(adminResourceResolver.getResource("/content/dam/folder/jcr:content")).thenReturn(contentResource3);
+        when(contentResource3.adaptTo(Node.class)).thenReturn(contentNode3);
+        when(contentNode3.isNodeType("nt:unstructured")).thenReturn(true);
+
+        when(contentResource3.getParent()).thenReturn(contentResource3parent);
+        when(contentResource3parent.adaptTo(Node.class)).thenReturn(contentNode3parent);
+        when(contentNode3parent.isNodeType("sling:OrderedFolder")).thenReturn(true);
+
         jcrPackageReplicationStatusEventHandler.process(event);
 
         verify(replicationStatusManager, times(1)).setReplicationStatus(
@@ -119,6 +133,6 @@ public class JcrPackageReplicationStatusEventHandlerTest {
                 eq("Package Replication"),
                 eq(calendar),
                 eq(ReplicationStatusManager.Status.ACTIVATED),
-                eq(contentResource1), eq(contentResource2));
+                eq(contentResource1), eq(contentResource2), eq(contentResource3));
     }
 }
