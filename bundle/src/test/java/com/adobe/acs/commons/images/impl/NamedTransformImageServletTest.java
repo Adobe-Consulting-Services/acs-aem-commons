@@ -20,9 +20,12 @@
 
 package com.adobe.acs.commons.images.impl;
 
+import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
+import com.day.image.Layer;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,22 +34,40 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NamedTransformImageServletTest {
-    final String TEST_TRANSFORM_NAME = "test";
+
+    final String NAMED_TRANSFORM_FEATURE = "feature";
+    final String NAMED_TRANSFORM_SMALL = "small";
+
+    final String IMAGE_TRANSFORM_RESIZE = "resize";
+    final String IMAGE_TRANSFORM_GREYSCALE = "greyscale";
 
     @Spy
-    private NamedImageTransformer mockNamedImageTransformer = new StaticNamedImageTransformer();
+    private FeaturedNamedImageTransformer featureImageTransformer = new FeaturedNamedImageTransformer();
 
     @Spy
-    private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();;
+    private SmallNamedImageTransformer smallImageTransformer = new SmallNamedImageTransformer();
+
+    @Spy
+    private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();
+
+    @Spy
+    private EmptyImageTransformer resizeImageTransformer = new EmptyImageTransformer();
+
+    @Spy
+    private EmptyImageTransformer greyscaleImageTransformer = new EmptyImageTransformer();
+
+    @Spy
+    private Map<String, ImageTransformer> imageTransformers = new HashMap<String, ImageTransformer>();
 
     @InjectMocks
     private NamedTransformImageServlet servlet;
@@ -57,21 +78,20 @@ public class NamedTransformImageServletTest {
     public void setUp() throws Exception {
         servlet = new NamedTransformImageServlet();
 
-        namedImageTransformers.put(TEST_TRANSFORM_NAME, mockNamedImageTransformer);
+        imageTransformers.put(IMAGE_TRANSFORM_RESIZE, resizeImageTransformer);
+        imageTransformers.put(IMAGE_TRANSFORM_GREYSCALE, greyscaleImageTransformer);
+
+        namedImageTransformers.put(NAMED_TRANSFORM_FEATURE, featureImageTransformer);
+        namedImageTransformers.put(NAMED_TRANSFORM_SMALL, smallImageTransformer);
 
         mockRequest = new MockSlingHttpServletRequest(
                 "/path",
                 "",
                 "transform",
-                TEST_TRANSFORM_NAME + "/" + new Random().nextInt() + "/image.png",
+                NAMED_TRANSFORM_FEATURE + "/" + new Random().nextInt() + "/image.png",
                 "");
 
         MockitoAnnotations.initMocks(this);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
     }
 
     @Test
@@ -101,12 +121,61 @@ public class NamedTransformImageServletTest {
                 "/path",
                 "",
                 "transform",
-                TEST_TRANSFORM_NAME + "/" + new Random().nextInt() + "/foo",
+                NAMED_TRANSFORM_FEATURE + "/" + new Random().nextInt() + "/foo",
                 "");
 
         final boolean result = servlet.accepts(request);
 
         assertFalse(result);
+    }
+
+    @Test
+    public void testAccepts_multipleTransforms() throws Exception {
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(
+                "/path",
+                "",
+                "transform",
+                NAMED_TRANSFORM_FEATURE + "/" + NAMED_TRANSFORM_SMALL + "/image.png",
+                "");
+
+        final boolean result = servlet.accepts(request);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void test_getImageTransformersWithParams() {
+
+        List<NamedImageTransformer> selectedNamedImageTransformers = new ArrayList<NamedImageTransformer>();
+        selectedNamedImageTransformers.add(featureImageTransformer);
+        selectedNamedImageTransformers.add(smallImageTransformer);
+
+        final ValueMap imageTransformersWithParams = servlet.getImageTransformersWithParams(selectedNamedImageTransformers);
+
+        assertEquals(IMAGE_TRANSFORM_RESIZE, imageTransformersWithParams.keySet().toArray()[0]);
+        ValueMap resize = (ValueMap) imageTransformersWithParams.values().toArray()[0];
+        assertEquals("width", resize.keySet().toArray()[0]);
+        assertEquals("10", resize.values().toArray()[0]);
+        assertEquals(1, resize.keySet().size());
+
+        assertEquals(IMAGE_TRANSFORM_GREYSCALE, imageTransformersWithParams.keySet().toArray()[1]);
+        ValueMap greyscale = (ValueMap) imageTransformersWithParams.values().toArray()[1];
+        assertEquals("greyscale", greyscale.keySet().toArray()[0]);
+        assertEquals("true", greyscale.values().toArray()[0]);
+    }
+
+    @Test
+    public void test_multipleTransforms() throws Exception {
+        List<NamedImageTransformer> selectedNamedImageTransformers = new ArrayList<NamedImageTransformer>();
+        selectedNamedImageTransformers.add(featureImageTransformer);
+        selectedNamedImageTransformers.add(smallImageTransformer);
+
+        final ValueMap imageTransformersWithParams = servlet.getImageTransformersWithParams(selectedNamedImageTransformers);
+
+        servlet.transform(mock(Layer.class), imageTransformersWithParams);
+
+        org.mockito.Mockito.verify(resizeImageTransformer, times(1)).transform(any(Layer.class), any(ValueMap.class));
+        org.mockito.Mockito.verify(greyscaleImageTransformer, times(1)).transform(any(Layer.class), any(ValueMap.class));
     }
 
     /* Testing for resolveImage requires too much orchestration/mocking to be useful */

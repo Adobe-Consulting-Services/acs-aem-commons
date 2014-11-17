@@ -47,5 +47,5 @@ public interface NamedImageTransformer {
     /**
      * @return the ImageTransforms types and their params for this Named Image Transform
      */
-    Map<String, ValueMap> getTransforms();
+    Map<String, ValueMap> getImageTransforms();
 }
