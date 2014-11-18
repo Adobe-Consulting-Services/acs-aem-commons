@@ -24,6 +24,7 @@ import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
 import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.impl.serializers.OpenResultSerializerImpl;
 import com.adobe.acs.commons.util.TextUtil;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
@@ -144,7 +145,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
             results.add(new Result.Builder(title)
                     .path(page.getPath())
                     .description(description)
-                    .resultType("open")
+                    .resultType(OpenResultSerializerImpl.TYPE)
                     .build());
         }
 

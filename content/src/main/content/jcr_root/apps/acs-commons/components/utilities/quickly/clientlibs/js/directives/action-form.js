@@ -27,23 +27,37 @@ quickly.directive('actionForm', ['$rootScope', '$q', '$timeout', function ($root
             complete: '&',
             action: '=data'
         },
-        template: '<form action="{{ action.uri }}" method="{{ action.method }}" target="{{ action.target }}" ng-onsubmit="{{ action.script }}" ng-hide="true">' +
-            '<input ng-repeat="(name, value) in action.params" name="{{ name }}" value="{{ value }}" type="hidden"/>' +
-        '</form>',
+        template: '<form ng-hide="true"></form>',
         replace: true,
         link: function (scope, element) {
             scope.$watch('action', function(action) {
                 if (!_.isEmpty(action) && !action.empty) {
-                    // Submit form
-                    // _.defer to ensure the template has rendered before submitting the form
-                    _.defer(function() {
-                        element.submit();
 
-                        // $timeout combats ng redraw issues when this tab looses focus; else quickly will not disappear
-                        $timeout(function() {
-                            scope.complete();
-                        }, 100);
-                    });
+                    // Build the form
+
+                    // Use this method over template as template has timing issues that encourage the browser to open
+                    // new windows in entire new windows instead of new tabs
+                    element.attr('action', action.uri)
+                            .attr('method', action.method)
+                            .attr('onsubmit', action.script)
+                            .attr('target', action.target);
+
+                    element.children('input').remove();
+
+                    angular.forEach(action.params, function(value, key) {
+                        this.append(angular.element('input')
+                            .attr('type', 'hidden')
+                            .attr('name', key)
+                            .attr('value', value));
+                    }, element);
+
+                    // Submit form
+                    element.submit();
+
+                    // $timeout combats ng redraw issues when this tab looses focus; else quickly will not disappear
+                    $timeout(function() {
+                        scope.complete();
+                    }, 100);
 
                 }
             });

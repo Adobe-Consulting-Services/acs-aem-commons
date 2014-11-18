@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.quickly.results.impl.serializers;
 
+import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultSerializer;
 import com.day.cq.wcm.api.AuthoringUIMode;
@@ -30,6 +31,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(
         label = "ACS AEM Commons - Quickly - Open Result Serializer"
@@ -41,27 +44,23 @@ import org.apache.sling.commons.json.JSONObject;
                 propertyPrivate = true
         )
 })
-@Service
+@Service(value = ResultSerializer.class)
 public class OpenResultSerializerImpl extends AbstractResultSerializer implements ResultSerializer {
+    private static final Logger log = LoggerFactory.getLogger(OpenResultSerializerImpl.class);
 
     public static final String TYPE = "OPEN";
 
     public JSONObject toJSON(final Result result, final ValueMap config) throws JSONException {
         final AuthoringUIMode authoringUIMode = config.get(AuthoringUIMode.class.getName(), AuthoringUIMode.TOUCH);
 
-        final JSONObject json = super.toJSON(result, config);
-        final JSONObject action = json.getJSONObject("action");
-
         if(authoringUIMode != null && AuthoringUIMode.CLASSIC.equals(authoringUIMode)) {
             // Classic
-            action.put("uri", "/cf#" + json.get("path") + ".html");
+            result.getAction().setUri("/cf#" + result.getPath() + ".html");
         } else {
             // TouchUI
-            action.put("uri", "/editor.html" + json.get("path") + ".html");
+            result.getAction().setUri("/editor.html" + result.getPath() + ".html");
         }
 
-        json.put("action", action);
-
-        return json;
+        return super.toJSON(result, config);
     }
 }

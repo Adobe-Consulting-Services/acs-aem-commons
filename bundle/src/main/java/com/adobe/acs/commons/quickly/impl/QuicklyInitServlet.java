@@ -38,6 +38,8 @@ import java.io.IOException;
         paths = "/bin/quickly.init.json"
 )
 public class QuicklyInitServlet extends SlingSafeMethodsServlet {
+    @Reference
+    private QuicklyEngine quicklyEngine;
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)

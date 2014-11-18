@@ -22,6 +22,7 @@ package com.adobe.acs.commons.quickly.results;
 
 import com.day.cq.wcm.api.AuthoringUIMode;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,11 +129,11 @@ public class Result {
     /* Result Type */
 
     public String getResultType() {
-        return resultType;
+        return StringUtils.upperCase(resultType);
     }
 
     public void setResultType(final String resultType) {
-        this.resultType = resultType;
+        this.resultType = StringUtils.upperCase(resultType);
     }
 
     /* Secondary Action */

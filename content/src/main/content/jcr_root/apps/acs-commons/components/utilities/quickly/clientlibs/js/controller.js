@@ -21,8 +21,8 @@
 /*global quickly: false, angular: false, _: false */
 
 quickly.controller('QuicklyCtrl',
-        ['$scope', '$http', '$timeout', 'Command', 'Init', 'Operations', 'Results',
-        function($scope, $http, $timeout, Command, Init, Operations, Results){
+        ['$scope', '$http', '$timeout', 'Command', 'Init', 'Operations', 'Result', 'Results',
+        function($scope, $http, $timeout, Command, Init, Operations, Result, Results){
 
     $scope.app = {
         visible: false,
@@ -100,7 +100,10 @@ quickly.controller('QuicklyCtrl',
 
     $scope.app.select = function() {
         if($scope.result) {
-            if(Operations.process($scope.cmd, $scope.result)) {
+            if(Result.isNoopAction($scope.result)) {
+                // Don't do anything; Is NOOP so just close/reset quickly
+                $scope.app.complete();
+            } else if(Operations.process($scope.cmd, $scope.result)) {
                 // Processed via JS Operations
                 $scope.app.complete();
             } else {

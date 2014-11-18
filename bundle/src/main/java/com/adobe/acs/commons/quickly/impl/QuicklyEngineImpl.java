@@ -28,13 +28,7 @@ import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultBuilder;
 import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.AuthoringUIModeService;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ValueMap;
@@ -52,7 +46,8 @@ import java.util.Map;
 
 @Component(
         label = "ACS AEM Commons - Quickly Engine",
-        metatype = true
+        metatype = true,
+        policy = ConfigurationPolicy.REQUIRE
 )@Reference(
         name = "operations",
         referenceInterface = Operation.class,
@@ -90,22 +85,21 @@ public class QuicklyEngineImpl implements QuicklyEngine {
 
         for (final Operation operation : operations.values()) {
             if (operation.accepts(request, cmd)) {
-                return this.getJSONResults(request, operation.getResults(request, response, cmd));
+                return this.getJSONResults(cmd, request, operation.getResults(request, response, cmd));
             }
         }
 
         /* Default Command */
 
         final Command defaultCmd = new Command(defaultOperation.getCmd() + " " + cmd.toString());
-        return this.getJSONResults(request, defaultOperation.getResults(request, response, defaultCmd));
+        return this.getJSONResults(cmd, request, defaultOperation.getResults(request, response, defaultCmd));
     }
 
-    private JSONObject getJSONResults(SlingHttpServletRequest request, final Collection<Result> results) throws
+    private JSONObject getJSONResults(Command cmd, SlingHttpServletRequest request, final Collection<Result> results) throws
             JSONException {
         final JSONObject json = new JSONObject();
 
         json.put(KEY_RESULTS, new JSONArray());
-
 
         final ValueMap requestConfig = new ValueMapDecorator(new HashMap<String, Object>());
 
@@ -117,7 +111,7 @@ public class QuicklyEngineImpl implements QuicklyEngine {
                 authoringUIModeService.getAuthoringUIMode(request));
 
         for (final Result result : results) {
-            final JSONObject tmp = resultBuilder.toJSON(result, requestConfig);
+            final JSONObject tmp = resultBuilder.toJSON(cmd, result, requestConfig);
 
             if (tmp != null) {
                 json.accumulate(KEY_RESULTS, tmp);

@@ -72,6 +72,26 @@ quickly.directive('ngDown', function () {
     };
 });
 
+/*
+ quickly.directive('ngRight', function () {
+ return function (scope, element, attrs) {
+ element.bind("keydown keypress", function (event) {
+
+ if(element.val().length > 0 && event.which === 39) {
+
+ if(element.get(0).selectionEnd === element.val().length) {
+ // only execute if cursor is at the end of the input
+ scope.$apply(function (){
+ scope.$eval(attrs.ngRight);
+ });
+ }
+
+ event.preventDefault();
+ }
+ });
+ };
+ });
+ */
 
 quickly.directive('ngOver', function () {
     return function (scope, element, attrs) {
@@ -83,27 +103,6 @@ quickly.directive('ngOver', function () {
             //UI.scrollResults(scope.results);
 
             event.preventDefault();
-        });
-    };
-});
-
-quickly.directive('ngRight', function () {
-    return function (scope, element, attrs) {
-        element.bind("keydown keypress", function (event) {
-            var input = angular.element('#acs-commons-quickly-cmd');
-
-            if(input && input.val() && input.val().length > 0
-                && event.which === 39) {
-
-                if(input.get(0) && (input.get(0).selectionEnd === input.val().length)) {
-                    // only execute if cursor is at the end of the input
-                    scope.$apply(function (){
-                        scope.$eval(attrs.ngRight);
-                    });
-                }
-
-                event.preventDefault();
-            }
         });
     };
 });

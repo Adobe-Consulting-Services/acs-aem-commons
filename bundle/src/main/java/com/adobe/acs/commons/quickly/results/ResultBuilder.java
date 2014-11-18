@@ -20,11 +20,12 @@
 
 package com.adobe.acs.commons.quickly.results;
 
+import com.adobe.acs.commons.quickly.Command;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 
 public interface ResultBuilder {
 
-    JSONObject toJSON(Result result, ValueMap config) throws JSONException;
+    JSONObject toJSON(Command cmd, Result result, ValueMap config) throws JSONException;
 }

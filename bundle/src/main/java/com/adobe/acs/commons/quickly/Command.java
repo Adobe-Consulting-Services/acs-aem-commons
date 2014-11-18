@@ -25,11 +25,14 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Command {
     private static final Logger log = LoggerFactory.getLogger(Command.class);
 
+    private static final String[] PUNCTUATIONS = { "!" };
     public static final String REQUEST_PARAM_CMD = "cmd";
 
     private final String raw;
@@ -40,20 +43,34 @@ public class Command {
 
     private final String[] params;
 
+    private final String[] punctuation;
+
     public Command(final SlingHttpServletRequest request) {
         this(request.getParameter(REQUEST_PARAM_CMD));
     }
 
     public Command(final String raw) {
         this.raw = StringUtils.stripToEmpty(raw);
-        this.operation = StringUtils.stripToEmpty(StringUtils.lowerCase(StringUtils.substringBefore(this.raw, " ")));
-        this.param = StringUtils.stripToEmpty(StringUtils.removeStart(this.raw, this.operation));
+
+        String opWithPunctuation = StringUtils.stripToEmpty(StringUtils.lowerCase(StringUtils.substringBefore(this.raw, " ")));
+        int punctuationIndex = StringUtils.indexOfAny(opWithPunctuation, PUNCTUATIONS);
+
+        if(punctuationIndex > 0) {
+            this.punctuation = StringUtils.substring(opWithPunctuation, punctuationIndex).split("(?!^)");
+            this.operation = StringUtils.substring(opWithPunctuation, 0, punctuationIndex);
+        } else {
+            this.punctuation = new String[]{};
+            this.operation = opWithPunctuation;
+        }
+
+        this.param = StringUtils.stripToEmpty(StringUtils.removeStart(this.raw, opWithPunctuation));
         this.params = StringUtils.split(this.param);
 
         if(log.isTraceEnabled()) {
             log.trace("Raw: {}", this.raw);
             log.trace("Operation: {}", this.operation);
-            log.trace("Param: {}", this.params);
+            log.trace("Punctuation: {}", Arrays.toString(this.punctuation));
+            log.trace("Param: {}", this.param);
             log.trace("Params: {}", Arrays.toString(this.params));
         }
     }
@@ -69,4 +86,7 @@ public class Command {
     public String toString() { return this.raw; }
 
     public String[] getParams() { return this.params; }
+
+    public String[] getPunctuation() { return this.punctuation; }
+
 }

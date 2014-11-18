@@ -20,12 +20,14 @@
 
 package com.adobe.acs.commons.quickly.operations.impl;
 
+import aQute.bnd.annotation.component.Activate;
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.Action;
 import com.adobe.acs.commons.quickly.results.Action.Method;
+import com.adobe.acs.commons.quickly.results.impl.lists.HelpResults;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -55,22 +57,15 @@ import java.util.Map;
                 propertyPrivate = true
         )
 })
-@Reference(
-        name = "operations",
-        referenceInterface = Operation.class,
-        policy = ReferencePolicy.DYNAMIC,
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        target = "(!(cmd=help))"
-)
 @Service
 public class HelpOperationImpl extends AbstractOperation {
+    private static final Logger log = LoggerFactory.getLogger(HelpOperationImpl.class);
+
     public static final String CMD = "help";
 
     public static final String CMD_ALIAS = "?";
 
-    private static final Logger log = LoggerFactory.getLogger(HelpOperationImpl.class);
-
-    private Map<String, Result> operations = new HashMap<String, Result>();
+    private static List<Result> operations = new HelpResults().getResults();
 
     @Override
     public boolean accepts(final SlingHttpServletRequest request,
@@ -90,7 +85,7 @@ public class HelpOperationImpl extends AbstractOperation {
                                          final SlingHttpServletResponse response,
                                          final Command cmd) {
 
-        return new ArrayList<Result>(operations.values());
+        return new ArrayList<Result>(operations);
     }
 
     @Override
@@ -100,37 +95,12 @@ public class HelpOperationImpl extends AbstractOperation {
 
         final List<Result> results = new ArrayList<Result>();
 
-        for (final Result result : operations.values()) {
+        for (final Result result : operations) {
             if (StringUtils.startsWithIgnoreCase(result.getTitle(), cmd.getParam())) {
                 results.add(result);
             }
         }
 
         return results;
-    }
-
-    protected void bindOperations(final Operation service, final Map<Object, Object> props) {
-        final String cmd = PropertiesUtil.toString(props.get(Operation.PROP_CMD), null);
-
-        if (cmd != null) {
-            final String description = PropertiesUtil.toString(props.get(Operation.PROP_DESCRIPTION), null);
-
-            operations.put(cmd, new Result.Builder(cmd)
-                    .description(description)
-                    .action(new Action.Builder().method(Method.CMD).build())
-                            //.secondaryAction(new ResultAction.Builder().method(Method.CMD).build())
-                    .build());
-
-            log.debug("Collected Quickly Operation [ {} ]", cmd);
-        }
-    }
-
-    protected void unbindOperations(final Operation service, final Map<Object, Object> props) {
-        final String cmd = PropertiesUtil.toString(props.get(Operation.PROP_CMD), null);
-
-        if (cmd != null) {
-            log.debug("Discarded Quickly Operation [ {} ]", cmd);
-            operations.remove(cmd);
-        }
     }
 }

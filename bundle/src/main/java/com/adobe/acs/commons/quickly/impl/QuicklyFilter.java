@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.quickly.impl;
 
+import com.adobe.acs.commons.quickly.QuicklyEngine;
 import com.adobe.acs.commons.util.BufferingResponse;
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import org.apache.commons.lang.StringUtils;
@@ -76,6 +77,9 @@ public class QuicklyFilter implements Filter {
     private static final String HTML_FILE = "/apps/acs-commons/components/utilities/quickly/inject.html";
 
     private static String appHTML = "";
+
+    @Reference
+    private QuicklyEngine quicklyEngine;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;

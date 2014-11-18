@@ -20,7 +20,9 @@
 
 package com.adobe.acs.commons.quickly.results.impl;
 
+import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.QuicklyEngine;
+import com.adobe.acs.commons.quickly.results.Action;
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultBuilder;
 import com.adobe.acs.commons.quickly.results.ResultSerializer;
@@ -29,6 +31,7 @@ import com.day.cq.wcm.api.AuthoringUIMode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -64,7 +67,7 @@ public class ResultBuilderImpl implements ResultBuilder {
     private ResultSerializer defaultResultSerialize;
 
     @Override
-    public JSONObject toJSON(final Result result, final ValueMap config) throws JSONException {
+    public JSONObject toJSON(final Command cmd, Result result, final ValueMap config) throws JSONException {
 
         if (!this.acceptsAuthoringUIMode(result,
                 config.get(AuthoringUIMode.class.getName(), AuthoringUIMode.TOUCH))) {
@@ -78,9 +81,17 @@ public class ResultBuilderImpl implements ResultBuilder {
             return null;
         }
 
-        final ResultSerializer serializer = resultSerializers.get(StringUtils.lowerCase(result.getResultType()));
+        // Apply punctuation rules
+        result = this.processPunctuation(cmd.getPunctuation(), result);
+
+        ResultSerializer serializer = null;
+
+        if(resultSerializers.containsKey(result.getResultType())) {
+            serializer = resultSerializers.get(result.getResultType());
+        }
 
         if (serializer != null) {
+            //log.trace("Serializing results using Result Serializer [ {} ] w/ [ {} ]", result.getResultType(), serializer.getClass().getSimpleName());
             return serializer.toJSON(result, config);
         } else {
             log.trace("Could not find Quickly Result Serializer for type [ {} ]", result.getResultType());
@@ -125,12 +136,33 @@ public class ResultBuilderImpl implements ResultBuilder {
         return false;
     }
 
+    protected final Result processPunctuation(final String[] punctuation, final Result result) {
+        for(final String p : punctuation) {
+
+            if("!".equals(p)) {
+                if(Action.Method.GET.equals(result.getAction().getMethod())
+                        || Action.Method.POST.equals(result.getAction().getMethod())) {
+
+                    result.getAction().setTarget(Action.Target.BLANK);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    @Deactivate
+    protected void deactivate(Map<String, String> map) {
+        resultSerializers = new HashMap<String, ResultSerializer>();
+    }
+
     // Bind
     protected void bindResultSerializers(final ResultSerializer service, final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get(ResultSerializer.PROP_TYPE), null);
 
         if (type != null) {
-            resultSerializers.put(StringUtils.lowerCase(type), service);
+            resultSerializers.put(type.toUpperCase(), service);
+            log.info("Collected Result Serializer [ {} ]", type.toUpperCase());
         }
     }
 
@@ -139,7 +171,8 @@ public class ResultBuilderImpl implements ResultBuilder {
         final String type = PropertiesUtil.toString(props.get(ResultSerializer.PROP_TYPE), null);
 
         if (type != null) {
-            resultSerializers.remove(StringUtils.lowerCase(type));
+            resultSerializers.remove(type.toUpperCase());
+            log.info("Discarded Result Serializer [ {} ]", type.toUpperCase());
         }
     }
 }
