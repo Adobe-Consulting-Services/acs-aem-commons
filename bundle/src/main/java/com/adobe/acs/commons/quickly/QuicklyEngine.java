@@ -25,6 +25,9 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 
+import aQute.bnd.annotation.ProviderType;
+
+@ProviderType
 public interface QuicklyEngine {
     String CONFIG_RESULTS = "results";
 

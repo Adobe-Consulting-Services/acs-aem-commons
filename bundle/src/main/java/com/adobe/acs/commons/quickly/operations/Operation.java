@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.quickly.operations;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.results.Result;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -28,8 +29,8 @@ import org.apache.sling.commons.json.JSONException;
 
 import java.util.Collection;
 
+@ProviderType
 public interface Operation {
-
 
     final String PROP_CMD = "cmd";
     final String PROP_DESCRIPTION = "description";

@@ -20,11 +20,13 @@
 
 package com.adobe.acs.commons.quickly.results;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.quickly.Command;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 
+@ProviderType
 public interface ResultSerializer {
     public static final String PROP_TYPE = "type";
 
