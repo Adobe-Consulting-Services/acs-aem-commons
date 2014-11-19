@@ -55,13 +55,6 @@ public class ClassicConsoleResults extends AbstractAccessibleResults {
                 .classic()
                 .build());
 
-        results.add(new Result.Builder("tools")
-                .description("AEM Tools")
-                .path("/miscadmin")
-                .action(new Action.Builder().uri("/miscadmin").build())
-                .classic()
-                .build());
-
         results.add(new Result.Builder("inbox")
                 .description("My Inbox")
                 .path("/inbox")
