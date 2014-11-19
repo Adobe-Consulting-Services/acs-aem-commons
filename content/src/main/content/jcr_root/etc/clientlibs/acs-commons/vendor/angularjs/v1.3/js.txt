@@ -1,7 +1,0 @@
-angular.min.js
-angular-animate.min.js
-angular-cookies.min.js
-angular-resource.min.js
-angular-sanitize.min.js
-
-ngStorage.min.js
