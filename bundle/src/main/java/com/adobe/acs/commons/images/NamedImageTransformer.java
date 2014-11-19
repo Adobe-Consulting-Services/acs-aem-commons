@@ -23,6 +23,9 @@ package com.adobe.acs.commons.images;
 import aQute.bnd.annotation.ProviderType;
 
 import com.day.image.Layer;
+import org.apache.sling.api.resource.ValueMap;
+
+import java.util.Map;
 
 @ProviderType
 public interface NamedImageTransformer {
@@ -40,4 +43,9 @@ public interface NamedImageTransformer {
      * transform parameters) the layer unmodified
      */
     Layer transform(Layer layer);
+
+    /**
+     * @return the ImageTransforms types and their params for this Named Image Transform
+     */
+    Map<String, ValueMap> getImageTransforms();
 }
