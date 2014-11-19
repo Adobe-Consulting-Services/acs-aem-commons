@@ -33,6 +33,15 @@ public class HelpResults extends AbstractAccessibleResults {
 
         /* Help : These should be dynamically created in the future */
 
+        results.add(new Result.Builder("Quickly is in Beta")
+                .description("Please report issues at the ACS AEM Commons GitHub site.")
+                .action(new Action.Builder()
+                        .uri("https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues")
+                        .method(Action.Method.GET)
+                        .target(Action.Target.BLANK)
+                        .build())
+                .build());
+
         results.add(new Result.Builder("help")
                 .description("This menu, also available via the '?' command.")
                 .action(new Action.Builder().method(Action.Method.NOOP).build())

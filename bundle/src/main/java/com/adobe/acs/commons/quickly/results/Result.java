@@ -27,6 +27,9 @@ import org.apache.commons.lang.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a Quickly Result
+ */
 public class Result {
 
     public enum Mode {

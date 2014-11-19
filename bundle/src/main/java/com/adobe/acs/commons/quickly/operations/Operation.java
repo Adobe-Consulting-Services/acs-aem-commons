@@ -35,10 +35,31 @@ public interface Operation {
     final String PROP_CMD = "cmd";
     final String PROP_DESCRIPTION = "description";
 
+    /**
+     * Checks if the Operation should handle the Command/Request.
+     *
+     * @param slingRequest the Request object
+     * @param cmd the Command
+     * @return true is the Operation handles the Command
+     */
     boolean accepts(SlingHttpServletRequest slingRequest, Command cmd);
 
+    /**
+     * Returns a list of Results.
+     *
+     * @param request the Request object
+     * @param response the Response object
+     * @param cmd the Command
+     * @return list of Results
+     * @throws JSONException
+     */
     Collection<Result> getResults(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                   Command cmd) throws JSONException;
 
+    /**
+     * Returns the command operation this Operation is registered for.
+     *
+     * @return the command operation
+     */
     String getCmd();
 }

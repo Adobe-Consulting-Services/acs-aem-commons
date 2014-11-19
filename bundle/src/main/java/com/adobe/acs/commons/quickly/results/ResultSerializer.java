@@ -21,7 +21,6 @@
 package com.adobe.acs.commons.quickly.results;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.quickly.Command;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -30,6 +29,14 @@ import org.apache.sling.commons.json.JSONObject;
 public interface ResultSerializer {
     public static final String PROP_TYPE = "type";
 
+    /**
+     * Turns a Result object into a JSON object
+     *
+     * @param result the Result
+     * @param config configuration used by ResultSerializer implementations
+     * @return the JSON representation of the result
+     * @throws JSONException
+     */
     JSONObject toJSON(Result result, ValueMap config) throws JSONException;
 
 }

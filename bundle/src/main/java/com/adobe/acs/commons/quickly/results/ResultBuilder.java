@@ -29,5 +29,14 @@ import org.apache.sling.commons.json.JSONObject;
 @ProviderType
 public interface ResultBuilder {
 
+    /**
+     * Turns the Result combination into a JSON object by way of ResultSerializers.
+     *
+     * @param cmd the Command
+     * @param result the Result
+     * @param config configuration used by ResultSerializer implementations
+     * @return the JSON representation of the result
+     * @throws JSONException
+     */
     JSONObject toJSON(Command cmd, Result result, ValueMap config) throws JSONException;
 }

@@ -23,6 +23,9 @@ package com.adobe.acs.commons.quickly.results;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents a Result Action or Secondary Action
+ */
 public class Action {
 
     public enum Target {

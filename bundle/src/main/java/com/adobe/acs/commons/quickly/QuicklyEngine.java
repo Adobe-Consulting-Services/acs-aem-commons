@@ -31,6 +31,14 @@ import aQute.bnd.annotation.ProviderType;
 public interface QuicklyEngine {
     String CONFIG_RESULTS = "results";
 
+    /**
+     *
+     * @param slingRequest the Request object
+     * @param slingResponse the Response object
+     * @param cmd the Command
+     * @return
+     * @throws JSONException
+     */
     JSONObject execute(SlingHttpServletRequest slingRequest,
                        SlingHttpServletResponse slingResponse,
                        Command cmd) throws JSONException;

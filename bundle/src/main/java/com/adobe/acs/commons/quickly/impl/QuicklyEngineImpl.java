@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component(
-        label = "ACS AEM Commons - Quickly Engine",
+        label = "ACS AEM Commons - Quickly",
         metatype = true,
         policy = ConfigurationPolicy.REQUIRE
 )@Reference(
@@ -63,8 +63,9 @@ public class QuicklyEngineImpl implements QuicklyEngine {
     private ValueMap config;
 
     private static final String[] DEFAULT_RESULT_MODES = { };
-    @Property(label = "Quickly Result Modes",
-            description = "",
+    @Property(label = "Result Modes",
+            description = "Additive - options: [ dev ], [ blank is the baseline ]",
+            cardinality = 100,
             value = { })
     public static final String PROP_RESULT_MODES = "result.modes";
 
