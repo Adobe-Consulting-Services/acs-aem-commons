@@ -36,44 +36,45 @@
     <cq:includeClientLib css="acs-commons.bulk-workflow-manager.app"/>
 </head>
 
-<body id="acs-commons-bulk-workflow-manager-app">
+<body>
+    <div id="acs-commons-bulk-workflow-manager-app">
+        <header class="top">
 
-    <header class="top">
+            <div class="logo">
+                <a href="/"><i class="icon-marketingcloud medium"></i></a>
+            </div>
 
-        <div class="logo">
-            <a href="/"><i class="icon-marketingcloud medium"></i></a>
-        </div>
+            <nav class="crumbs">
+                <a href="/miscadmin">Tools</a>
+                <a href="${pagePath}.html">Bulk Workflow Manager</a>
+            </nav>
+        </header>
 
-        <nav class="crumbs">
-            <a href="/miscadmin">Tools</a>
-            <a href="${pagePath}.html">Bulk Workflow Manager</a>
-        </nav>
-    </header>
+        <div class="page"
+             role="main"
+             ng-controller="MainCtrl"
+             ng-init="app.uri = '${resourcePath}'; init();">
 
-    <div class="page"
-         role="main"
-         ng-controller="MainCtrl"
-         ng-init="app.uri = '${resourcePath}'; init();">
+            <div class="content">
+                <div class="content-container">
+                    <div class="content-container-inner">
 
-        <div class="content">
-            <div class="content-container">
-                <div class="content-container-inner">
+                        <h1>Bulk Workflow Manager</h1>
 
-                    <h1>Bulk Workflow Manager</h1>
+                        <%@include file="includes/notifications.jsp" %>
 
-                    <%@include file="includes/notifications.jsp" %>
+                        <%@include file="includes/form.jsp" %>
 
-                    <%@include file="includes/form.jsp" %>
+                        <%@include file="includes/status.jsp" %>
 
-                    <%@include file="includes/status.jsp" %>
+                        <cq:includeClientLib js="acs-commons.bulk-workflow-manager.app"/>
 
-                    <cq:includeClientLib js="acs-commons.bulk-workflow-manager.app"/>
-
-                    <%-- Register angular app; Decreases chances of collisions w other angular apps on the page (ex. via injection) --%>
-                    <script type="text/javascript">
-                        angular.bootstrap(document.getElementById('acs-commons-bulk-workflow-manager-app'),
-                                ['bulkWorkflowManagerApp']);
-                    </script>
+                        <%-- Register angular app; Decreases chances of collisions w other angular apps on the page (ex. via injection) --%>
+                        <script type="text/javascript">
+                            angular.bootstrap(document.getElementById('acs-commons-bulk-workflow-manager-app'),
+                                    ['bulkWorkflowManagerApp']);
+                        </script>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,0 +1,12 @@
+#base=..
+
+angular.min.js
+angular-animate.min.js
+angular-aria.min.js
+angular-cookies.min.js
+angular-loader.min.js
+angular-messages.min.js
+angular-resource.min.js
+angular-route.min.js
+angular-sanitize.min.js
+angular-touch.min.js

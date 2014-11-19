@@ -51,7 +51,7 @@ angular.module('bulkWorkflowManagerApp',[])
             return;
         }
 
-        $scope.results = {};
+        $scope.items = {};
 
         $http({
             method: 'POST',

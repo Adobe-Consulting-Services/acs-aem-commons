@@ -276,7 +276,7 @@ if (typeof JSON !== 'object') {
                     return 'null';
                 }
 
-// Make an array to hold the partial results of stringifying this object value.
+// Make an array to hold the partial items of stringifying this object value.
 
                 gap += indent;
                 partial = [];

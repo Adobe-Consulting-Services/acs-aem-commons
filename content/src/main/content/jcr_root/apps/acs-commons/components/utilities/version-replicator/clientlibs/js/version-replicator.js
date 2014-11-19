@@ -36,7 +36,7 @@ CQ.Ext.onReady(function () {
     /* Template */
 
     resultTemplate = new CQ.Ext.XTemplate(
-        '<h4>Version replication initiated with the following results</h4>',
+        '<h4>Version replication initiated with the following items</h4>',
         '<ul>',
             '<tpl for="result">',
                 '<li>{path} [ <strong>{status}</strong>',

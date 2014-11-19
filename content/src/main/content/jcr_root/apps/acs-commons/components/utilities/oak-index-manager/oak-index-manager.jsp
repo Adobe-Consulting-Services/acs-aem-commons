@@ -37,19 +37,19 @@
     <cq:includeClientLib css="acs-commons.oak-index-manager.app"/>
 </head>
 
-<body id="acs-commons-oak-index-manager-app">
+<body>
+    <div id="acs-commons-oak-index-manager-app">
+        <header class="top">
 
-    <header class="top">
+            <div class="logo">
+                <a href="/"><i class="icon-marketingcloud medium"></i></a>
+            </div>
 
-        <div class="logo">
-            <a href="/"><i class="icon-marketingcloud medium"></i></a>
-        </div>
-
-        <nav class="crumbs">
-            <a href="/miscadmin">Tools</a>
-            <a href="${pagePath}.html">Oak Index Manager</a>
-        </nav>
-    </header>
+            <nav class="crumbs">
+                <a href="/miscadmin">Tools</a>
+                <a href="${pagePath}.html">Oak Index Manager</a>
+            </nav>
+        </header>
 
 <c:choose>
     <c:when test="${hasOakIndex}">
@@ -170,6 +170,7 @@
             </script>
 
         </div>
+
     </c:when>
     <c:otherwise>
         <div class="unsupported large alert notice">
@@ -181,5 +182,7 @@
         </div>
     </c:otherwise>
 </c:choose>
+
+    </div>
 </body>
 </html>
