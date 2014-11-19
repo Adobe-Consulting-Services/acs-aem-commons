@@ -18,27 +18,31 @@
  * #L%
  */
 
-package com.adobe.acs.commons.images;
+package com.adobe.acs.commons.images.impl;
 
-import aQute.bnd.annotation.ConsumerType;
-
+import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.day.image.Layer;
-
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 
-@ConsumerType
-public interface ImageTransformer {
-    /**
-     * OSGi Property used to identify the ImageTransformer.
-     */
-    String PROP_TYPE = "type";
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-    /**
-     * Transform the provided layer using the transformation parameters provided in properties.
-     *
-     * @param layer the image layer to transform
-     * @param properties transformation parameters
-     * @return the transformed layer; or if layer could not be transformed (invalid properties) the layer unmodified
-     */
-    Layer transform(Layer layer, ValueMap properties);
+public class SmallNamedImageTransformer implements NamedImageTransformer {
+
+    @Override
+    public Layer transform(final Layer layer) {
+        return layer;
+    }
+
+    @Override
+    public Map<String, ValueMap> getImageTransforms() {
+        final Map<String, ValueMap> small = new LinkedHashMap<String, ValueMap>();
+
+        ValueMap inner = new ValueMapDecorator(new LinkedHashMap<String, Object>());
+        inner.put("width", "10");
+        small.put("resize", inner);
+
+        return small;
+    }
 }

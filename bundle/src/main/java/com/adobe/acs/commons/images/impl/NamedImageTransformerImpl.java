@@ -39,14 +39,15 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component(
         label = "ACS AEM Commons - Named Image Transformer Factory",
-        description = "Instances of this factory define registered Named Image transfomers which are comprised of "
-                + "ordered, parameterized image transformers.",
+        description = "Instances of this factory define registered Named Image transformers which are comprised of "
+                + "ordered, parameter-ized image transformers.",
         configurationFactory = true,
         metatype = true
 )
@@ -83,8 +84,8 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
             value = { })
     private static final String PROP_TRANSFORMS = "transforms";
 
-    private LinkedHashMap<String, ValueMap> transforms = new LinkedHashMap<String, ValueMap>();
-
+    private Map<String, ValueMap> transforms =
+            Collections.synchronizedMap(new LinkedHashMap<String, ValueMap>());
 
     /**
      * @inheritDoc
@@ -105,11 +106,15 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
         return layer;
     }
 
+    public final Map<String, ValueMap> getImageTransforms() {
+        return this.transforms;
+    }
+
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
         this.transformName = PropertiesUtil.toString(properties.get(PROP_NAME), DEFAULT_TRANSFORM_NAME);
 
-        log.info("Registering Named Image Transfomer: {}", this.transformName);
+        log.info("Registering Named Image Transformer: {}", this.transformName);
 
         final Map<String, String> map = OsgiPropertyUtil.toMap(PropertiesUtil.toStringArray(
                 properties.get(PROP_TRANSFORMS), new String[]{}), ":", true, null);
