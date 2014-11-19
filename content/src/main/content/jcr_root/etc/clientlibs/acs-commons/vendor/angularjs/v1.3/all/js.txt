@@ -1,6 +1,6 @@
 #base=..
 
-# angular.min.js ~> provided via .core embed
+angular.min.js
 angular-animate.min.js
 angular-aria.min.js
 angular-cookies.min.js
