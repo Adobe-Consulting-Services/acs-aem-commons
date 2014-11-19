@@ -55,7 +55,7 @@ quickly.factory('FavoritesOperation', ['$document', '$timeout', '$window', '$fil
         },
 
         getResults: function(cmd) {
-            var results = $localStorage.quickly.operations[getStorageId()] || [],
+            var results = _.clone($localStorage.quickly.operations[getStorageId()] || [], true),
                 params = Command.getParams(cmd, true, 2),
                 param = '';
 
