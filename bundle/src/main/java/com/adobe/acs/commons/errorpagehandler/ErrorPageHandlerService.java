@@ -72,12 +72,15 @@ public interface ErrorPageHandlerService {
     /**
      * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies .
      *
-     * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
+     * Invokes the AEM Login Selector Autheticator on 404'ing requests made by anonymous users.
      *
      * @param request
      * @param response
+     *
+     * @return true if the error page handler should process the 404; false is the AEM authenticator has been invoked
+     * and responsible for processing the request further
      */
-    void doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response);
+    boolean doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response);
 
     /**
      * Returns the Exception Message (Stacktrace) from the Request

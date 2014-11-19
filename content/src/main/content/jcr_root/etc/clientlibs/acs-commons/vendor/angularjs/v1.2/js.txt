@@ -1,4 +1,0 @@
-angular.min.js
-angular-animate.min.js
-angular-cookies.min.js
-angular-sanitize.min.js
