@@ -178,5 +178,43 @@ public class NamedTransformImageServletTest {
         org.mockito.Mockito.verify(greyscaleImageTransformer, times(1)).transform(any(Layer.class), any(ValueMap.class));
     }
 
+    @Test
+    public void test_getQuality() throws Exception {
+        ValueMap qualityTransforms = new ValueMapDecorator(new HashMap<String, Object>());
+
+        qualityTransforms.put("quality", 0);
+        assertEquals(0D, servlet.getQuality("image/jpg", qualityTransforms), 0);
+
+        qualityTransforms.put("quality", 100);
+        assertEquals(1D, servlet.getQuality("image/jpg", qualityTransforms), 0);
+
+        qualityTransforms.put("quality", 50);
+        assertEquals(0.5D, servlet.getQuality("image/jpg", qualityTransforms), 0);
+
+        qualityTransforms.put("quality", 101);
+        assertEquals(.82D, servlet.getQuality("image/jpg", qualityTransforms), 0);
+
+        qualityTransforms.put("quality", -1);
+        assertEquals(.82D, servlet.getQuality("image/jpg", qualityTransforms), 0);
+
+        /* Gifs */
+        
+        qualityTransforms.put("quality", 0);
+        assertEquals(0D, servlet.getQuality("image/gif", qualityTransforms), 0);
+
+        qualityTransforms.put("quality", 100);
+        assertEquals(255D, servlet.getQuality("image/gif", qualityTransforms), 0);
+
+        qualityTransforms.put("quality", 50);
+        assertEquals(127.5D, servlet.getQuality("image/gif", qualityTransforms), 0);
+
+        qualityTransforms.put("quality", 101);
+        assertEquals(209.1D, servlet.getQuality("image/gif", qualityTransforms), 0);
+
+        qualityTransforms.put("quality", -1);
+        assertEquals(209.1D, servlet.getQuality("image/gif", qualityTransforms), 0);
+
+    }
+
     /* Testing for resolveImage requires too much orchestration/mocking to be useful */
 }

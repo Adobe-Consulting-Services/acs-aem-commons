@@ -61,7 +61,6 @@ import javax.imageio.ImageIO;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -124,13 +123,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
 
-    private static final double IMAGE_GIF_MAX_QUALITY = 255;
-
-    private static final double IMAGE_MAX_QUALITY = 1.0;
-
-    private static final String MIME_TYPE_GIF = "image/gif";
-
     private static final String MIME_TYPE_PNG = "image/png";
+
+    private static final String TYPE_QUALITY = "quality";
 
     private Map<String, NamedImageTransformer> namedImageTransformers =
             new ConcurrentHashMap<String, NamedImageTransformer>();
@@ -198,14 +193,16 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Image image = this.resolveImage(request);
         final String mimeType = this.getMimeType(request, image);
         Layer layer = this.getLayer(image);
+
         // Transform the image
         layer = this.transform(layer, imageTransformersWithParams);
 
-        final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
+        // Get the quality
+        final double quality = this.getQuality(mimeType,
+                imageTransformersWithParams.get(TYPE_QUALITY, EMPTY_PARAMS));
+
         response.setContentType(mimeType);
-
         layer.write(mimeType, quality, response.getOutputStream());
-
         response.flushBuffer();
     }
 
@@ -219,6 +216,11 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams) {
 
         for (final String type : imageTransformersWithParams.keySet()) {
+            if (StringUtils.equals(TYPE_QUALITY, type)) {
+                // Do not process the "quality" transform in the usual manner
+                continue;
+            }
+
             final ImageTransformer imageTransformer = this.imageTransformers.get(type);
             if (imageTransformer == null) {
                 log.warn("Skipping transform. Missing ImageTransformer for type: {}");
@@ -341,8 +343,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * Gets the mimeType of the image.
      * - The last segments suffix is looked at first and used
      * - if the last suffix segment's "extension" is .orig or .original then use the underlying resources mimeType
-     * - else look up the mimetype to use based on this "extension"
-     * - default to the resource's mimetype if the requested mimetype by extension is not supported.
+     * - else look up the mimeType to use based on this "extension"
+     * - default to the resource's mimeType if the requested mimeType by extension is not supported.
      *
      * @param image the image to get the mimeType for
      * @return the string representation of the image's mimeType
@@ -389,6 +391,44 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
 
         return layer;
+    }
+
+
+    /**
+     * Computes the quality based on the "synthetic" Image Quality transform params
+     *
+     * Image Quality does not "transform" in the usual manner (it is not a simple layer manipulation)
+     * thus this ad-hoc method is required to handle quality manipulation transformations.
+     *
+     * If "quality" key is no available in "transforms" the default of 82 is used (magic AEM Product quality setting)
+     *
+     * @param mimeType the desired image mimeType
+     * @param transforms the map of image transform params
+     * @return
+     */
+    protected final double getQuality(final String mimeType, final ValueMap transforms) {
+        final String key = "quality";
+        final int defaultQuality = 82;
+        final int maxQuality = 100;
+        final int minQuality = 0;
+        final int maxQualityGIF = 255;
+        final double oneHundred = 100D;
+
+        log.debug("Transforming with [ quality ]");
+
+        double quality = transforms.get(key, defaultQuality);
+
+        if (quality > maxQuality || quality < minQuality) {
+            quality = defaultQuality;
+        }
+
+        quality = quality / oneHundred;
+
+        if (StringUtils.equals("image/gif", mimeType)) {
+            quality = quality * maxQualityGIF;
+        }
+
+        return quality;
     }
 
     @Activate
