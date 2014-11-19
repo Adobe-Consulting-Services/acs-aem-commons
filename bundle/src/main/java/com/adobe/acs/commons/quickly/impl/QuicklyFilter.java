@@ -71,7 +71,7 @@ public class QuicklyFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(QuicklyFilter.class);
 
     private static final String[] REJECT_PATH_PREFIXES = new String[]{
-            "/libs/granite/core/content/login"
+            "/libs/granite/core/content/login",
     };
 
     private static final String HTML_FILE = "/apps/acs-commons/components/utilities/quickly/inject.html";
@@ -96,6 +96,11 @@ public class QuicklyFilter implements Filter {
 
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
+
+        if(!accepts(request)) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
 
         final BufferingResponse capturedResponse = new BufferingResponse(response);
 
@@ -132,7 +137,6 @@ public class QuicklyFilter implements Filter {
     }
 
     private boolean accepts(final HttpServletRequest request) {
-
         if (!StringUtils.equalsIgnoreCase("get", request.getMethod())) {
             // Only inject on GET requests
             return false;
