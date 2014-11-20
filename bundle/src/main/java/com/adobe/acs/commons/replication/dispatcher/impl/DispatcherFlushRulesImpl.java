@@ -265,7 +265,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
         for (final Map.Entry<String, String> entry : configuredRules.entrySet()) {
             final Pattern pattern = Pattern.compile(entry.getKey());
-            rules.put(pattern, entry.getValue().split(","));
+            rules.put(pattern, entry.getValue().split("&"));
         }
 
         return rules;
