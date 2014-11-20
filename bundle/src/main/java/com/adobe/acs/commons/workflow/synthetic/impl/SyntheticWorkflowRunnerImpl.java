@@ -58,7 +58,7 @@ import java.util.Map;
         policy = ReferencePolicy.DYNAMIC,
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
 )
-@Service
+@Service(value = SyntheticWorkflowRunner.class)
 public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowRunnerImpl.class);
 
