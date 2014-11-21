@@ -43,31 +43,36 @@ quickly.directive('init', [ '$document', '$timeout', function ($document, $timeo
     isDismiss = function(event) {
         // Escape key
         return event.keyCode === 27;
+    },
+
+    contains = function(element, target) {
+        return $(target).closest(element).length > 0;
     };
 
-    return function(scope, element, attr) {
+    return function(scope, element) {
 
         $document.on('keypress', function(event) {
-
             if(isToggle(event)) {
                 scope.app.toggle();
                 scope.$apply();
-
-                event.preventDefault();
-            } else if(isDismiss(event) && scope.app.visible) {
-                event.app.toggle(false);
-                event.$apply();
 
                 event.preventDefault();
             }
         });
 
         $document.on('keydown', function(event) {
-            if(isDismiss(event) && scope.app.visible) {
+            if(scope.app.visible && isDismiss(event)) {
                 scope.app.toggle();
                 scope.$apply();
 
                 event.preventDefault();
+            }
+        });
+
+        $document.on('click', function(event) {
+            if(scope.app.visible && !contains(element, event.target)) {
+                scope.app.toggle(false);
+                scope.$apply();
             }
         });
 
