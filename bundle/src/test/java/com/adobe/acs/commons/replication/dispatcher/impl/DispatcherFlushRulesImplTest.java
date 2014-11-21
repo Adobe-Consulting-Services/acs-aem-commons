@@ -116,7 +116,7 @@ public class DispatcherFlushRulesImplTest {
         validFlushRules.put("/a/.*", "/b");
         validFlushRules.put("/b/.*", "/c");
         validFlushRules.put("/c/d/.*", "/e/f");
-        validFlushRules.put("/c/a/.*", "/e/f,/g/h");
+        validFlushRules.put("/c/a/.*", "/e/f&/g/h");
 
         final Map<Pattern, String[]> expected = new LinkedHashMap<Pattern, String[]>();
         expected.put(Pattern.compile("/a/.*"), new String[] { "/b" });
@@ -431,5 +431,4 @@ public class DispatcherFlushRulesImplTest {
 
         verifyNoMoreInteractions(dispatcherFlusher);
     }
-
 }
