@@ -43,10 +43,6 @@ quickly.directive('init', [ '$document', '$timeout', function ($document, $timeo
     isDismiss = function(event) {
         // Escape key
         return event.keyCode === 27;
-    },
-
-    contains = function(element, target) {
-        return $(target).closest(element).length > 0;
     };
 
     return function(scope, element) {
@@ -70,7 +66,7 @@ quickly.directive('init', [ '$document', '$timeout', function ($document, $timeo
         });
 
         $document.on('click', function(event) {
-            if(scope.app.visible && !contains(element, event.target)) {
+            if(scope.app.visible && !element[0].contains(event.target)) {
                 scope.app.toggle(false);
                 scope.$apply();
             }
