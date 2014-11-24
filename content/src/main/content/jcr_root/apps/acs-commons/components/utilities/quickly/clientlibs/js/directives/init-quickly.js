@@ -45,29 +45,30 @@ quickly.directive('init', [ '$document', '$timeout', function ($document, $timeo
         return event.keyCode === 27;
     };
 
-    return function(scope, element, attr) {
+    return function(scope, element) {
 
         $document.on('keypress', function(event) {
-
             if(isToggle(event)) {
                 scope.app.toggle();
                 scope.$apply();
-
-                event.preventDefault();
-            } else if(isDismiss(event) && scope.app.visible) {
-                event.app.toggle(false);
-                event.$apply();
 
                 event.preventDefault();
             }
         });
 
         $document.on('keydown', function(event) {
-            if(isDismiss(event) && scope.app.visible) {
+            if(scope.app.visible && isDismiss(event)) {
                 scope.app.toggle();
                 scope.$apply();
 
                 event.preventDefault();
+            }
+        });
+
+        $document.on('click', function(event) {
+            if(scope.app.visible && !element[0].contains(event.target)) {
+                scope.app.toggle(false);
+                scope.$apply();
             }
         });
 
