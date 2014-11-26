@@ -79,7 +79,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     // Magic number pushes filter lower in the chain so it executes after the OOTB WCM Debug Filter
     // In AEM6 this must execute after WCM Developer Mode Filter which requires overriding the service.ranking via a
     // sling:OsgiConfig node
-    static final int FILTER_ORDER = 100000;
+    static final int FILTER_ORDER = 1000000;
 
     static final String BLANK_HTML = "/dev/null";
 
