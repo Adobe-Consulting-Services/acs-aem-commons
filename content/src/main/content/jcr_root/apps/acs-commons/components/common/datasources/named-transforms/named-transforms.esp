@@ -1,0 +1,46 @@
+<%
+/* global resource, request, sling, Packages */
+var ArrayList = Packages.java.util.ArrayList
+  , NamedImageTransformer = Packages.com.adobe.acs.commons.images.NamedImageTransformer
+  , SimpleDataSource = Packages.com.adobe.granite.ui.components.ds.SimpleDataSource
+  , ValueMapResource = Packages.com.adobe.granite.ui.components.ds.ValueMapResource
+  , ResourceMetadata = Packages.org.apache.sling.api.resource.ResourceMetadata
+  , ValueMapDecorator = Packages.org.apache.sling.api.wrappers.ValueMapDecorator
+
+
+// Build a List<Resource> because we need an Iterator for SimpleDataSource
+var resourceList = new ArrayList()
+
+sling
+.getServices(NamedImageTransformer, null)
+.sort(function (transformerA, transformerB) {
+  // sort alphabetically..
+  var nameA = transformerA.getTransformName().toLowerCase()
+    , nameB = transformerB.getTransformName().toLowerCase()
+
+  if (nameA < nameB) {
+    return -1
+  }
+  if (nameA > nameB) {
+    return 1
+  }
+  return 0
+})
+.map(function (transformer) {
+  // ..then, map to ValueMapResource
+  var transformName = transformer.getTransformName()
+  var map = {
+   'value': transformName,
+   'text': transformName
+  }
+
+  return new ValueMapResource(resource.getResourceResolver(), new ResourceMetadata(), '', new ValueMapDecorator(map))
+}).forEach(function (valueMapResource) {
+  // ..and put in the list
+  resourceList.add(valueMapResource)
+})
+
+
+request.setAttribute('com.adobe.granite.ui.components.ds.DataSource', new SimpleDataSource(resourceList.iterator()))
+
+%>
