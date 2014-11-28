@@ -45,6 +45,14 @@ public interface NamedImageTransformer {
     Layer transform(Layer layer);
 
     /**
+     * Returns the name of this transform as defined in this instance's OSGi configuration. The transform name is also
+     * used to construct URLs for the <code>NamedTransformImageServlet</code>
+     *
+     * @return the transform name
+     */
+    String getTransformName();
+
+    /**
      * @return the ImageTransforms types and their params for this Named Image Transform
      */
     Map<String, ValueMap> getImageTransforms();

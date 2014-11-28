@@ -106,6 +106,14 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
         return layer;
     }
 
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public String getTransformName() {
+        return this.transformName;
+    }
+
     public final Map<String, ValueMap> getImageTransforms() {
         return this.transforms;
     }

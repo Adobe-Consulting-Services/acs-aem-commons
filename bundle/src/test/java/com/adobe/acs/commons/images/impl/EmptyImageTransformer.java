@@ -30,4 +30,10 @@ public class EmptyImageTransformer implements ImageTransformer {
     public Layer transform(Layer layer, ValueMap properties) {
         return layer;
     }
+
+    @Override
+    public String getTransformName() {
+        return StaticNamedImageTransformer.class.getName();
+    }
+
 }
