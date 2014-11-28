@@ -31,9 +31,4 @@ public class EmptyImageTransformer implements ImageTransformer {
         return layer;
     }
 
-    @Override
-    public String getTransformName() {
-        return StaticNamedImageTransformer.class.getName();
-    }
-
 }

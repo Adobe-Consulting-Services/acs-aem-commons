@@ -35,6 +35,11 @@ public class EmptyNamedImageTransformer implements NamedImageTransformer {
     }
 
     @Override
+    public String getTransformName() {
+        return EmptyNamedImageTransformer.class.getSimpleName();
+    }
+
+    @Override
     public Map<String, ValueMap> getImageTransforms() {
         final Map<String, ValueMap> transforms = new LinkedHashMap<String, ValueMap>();
 

@@ -36,6 +36,11 @@ public class SmallNamedImageTransformer implements NamedImageTransformer {
     }
 
     @Override
+    public String getTransformName() {
+        return SmallNamedImageTransformer.class.getSimpleName();
+    }
+
+    @Override
     public Map<String, ValueMap> getImageTransforms() {
         final Map<String, ValueMap> small = new LinkedHashMap<String, ValueMap>();
 
