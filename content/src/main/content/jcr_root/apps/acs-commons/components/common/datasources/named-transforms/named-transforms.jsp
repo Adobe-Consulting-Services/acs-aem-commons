@@ -23,10 +23,9 @@
     // sort alphabetically by name
     Arrays.sort(namedImageTransforms, new Comparator<NamedImageTransformer>() {
 
-        @Override
-        public int compare(NamedImageTransformer left, NamedImageTransformer right) {
-            String nameA = left.getTransformName().toLowerCase();
-            String nameB = left.getTransformName().toLowerCase();
+        public int compare(NamedImageTransformer a, NamedImageTransformer b) {
+            String nameA = a.getTransformName().toLowerCase();
+            String nameB = b.getTransformName().toLowerCase();
 
             return nameA.compareTo(nameB);
         }
@@ -34,21 +33,21 @@
 
     // Create list of ValueMapResource's
     for (NamedImageTransformer transform : namedImageTransforms) {
-        String transformName = transform.getTransformName();
-        Map map = new HashMap();
+        final String transformName = transform.getTransformName();
+        final Map map = new HashMap();
+
         map.put("text", transformName);
         map.put("value", transformName);
 
-        resourceList.add(new ValueMapResource(resource.getResourceResolver(), new ResourceMetadata(), "",
+        resourceList.add(new ValueMapResource(resourceResolver,
+                new ResourceMetadata(),
+                "",
                 new ValueMapDecorator(map)));
     }
 
-    DataSource ds;
-    // if no matching nodes where found
-    if (resourceList.size() == 0){
-        // return empty datasource
-        ds = EmptyDataSource.instance();
-    } else {
+    DataSource ds = EmptyDataSource.instance();
+
+    if (resourceList.size() > 0){
         // create a new datasource object
         ds = new SimpleDataSource(resourceList.iterator());
     }
