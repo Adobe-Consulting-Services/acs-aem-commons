@@ -21,6 +21,11 @@ package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.rewriter.AbstractTransformer;
 import com.day.cq.commons.PathInfo;
+import com.day.cq.rewriter.htmlparser.HtmlParser;
+import com.day.cq.rewriter.htmlparser.SAXWriter;
+import com.day.cq.rewriter.pipeline.Generator;
+import com.day.cq.rewriter.pipeline.Serializer;
+import com.day.cq.rewriter.processor.ProcessingContext;
 import com.day.cq.widget.HtmlLibrary;
 import com.day.cq.widget.HtmlLibraryManager;
 import com.day.cq.widget.LibraryType;
@@ -30,6 +35,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
 import org.slf4j.Logger;
@@ -37,6 +44,10 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
+
+import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component(
         label = "ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter",
@@ -54,6 +65,9 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
 
     private static final String CSS_TYPE = "text/css";
     private static final String JS_TYPE = "text/javascript";
+
+    private static final String CONDITIONAL_COMMENT_REGEX = "^(<!--\\[if(.)*\\]>)((\\s*)?((.*)(\\s*)?)+)(<!\\[endif]-->)$";
+    private static final Pattern CONDITIONAL_COMMENT_PATTERN = Pattern.compile(CONDITIONAL_COMMENT_REGEX);
 
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
@@ -74,6 +88,61 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
         } else {
             return attrs;
         }
+    }
+
+    private char[] versionClientLibs(final char[] chars, int pos, int len, Transformer transformer) {
+        char[] outputChar = chars;
+        final String section = StringUtils.trim(new String(chars, pos, len));
+        final Matcher matcher = CONDITIONAL_COMMENT_PATTERN.matcher(section);
+        if (matcher.matches()) {
+            try {
+                String parsedConditionalMarkup = parseConditionalMarkup(matcher.group(3), transformer);
+                outputChar = StringUtils.replace(new String(chars), matcher.group(3), parsedConditionalMarkup).toCharArray();
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
+        return outputChar;
+    }
+
+    @SuppressWarnings("deprecation")
+    private String parseConditionalMarkup(String input, Transformer transformer) throws IOException {
+        final StringWriter out = new StringWriter();
+        final Serializer serializer = new SAXWriter();
+        final ProcessingContext pc = getDummyProcessingContext(out);
+        serializer.init(pc, null);
+        transformer.setContentHandler(serializer);
+        final Generator generator = new HtmlParser();
+        generator.setContentHandler(transformer);
+        PrintWriter writer = generator.getWriter();
+        writer.write(input);
+        return out.getBuffer().toString();
+    }
+
+    @SuppressWarnings("deprecation")
+    private ProcessingContext getDummyProcessingContext(final Writer out) {
+        return new ProcessingContext() {
+
+            public OutputStream getOutputStream() throws IOException {
+                return null;
+            }
+
+            public String getContentType() {
+                return null;
+            }
+
+            public PrintWriter getWriter() {
+                return new PrintWriter(out);
+            }
+
+            public SlingHttpServletRequest getRequest() {
+                return null;
+            }
+
+            public SlingHttpServletResponse getResponse() {
+                return null;
+            }
+        };
     }
 
     private Attributes rebuildAttributes(final AttributesImpl newAttributes, final int index, final String path,
@@ -158,6 +227,12 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
                                  final Attributes attrs)
                 throws SAXException {
             getContentHandler().startElement(namespaceURI, localName, qName, versionClientLibs(localName, attrs));
+        }
+
+        public void characters(char[] ch, int start, int length) throws SAXException {
+            char[] versionClientLibsChars = versionClientLibs(ch, start, length, new VersionableClientlibsTransformer());
+            int newLength = length - (ch.length - versionClientLibsChars.length);
+            getContentHandler().characters(versionClientLibsChars, start, newLength);
         }
     }
 }
