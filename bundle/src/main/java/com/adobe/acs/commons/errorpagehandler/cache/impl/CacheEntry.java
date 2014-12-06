@@ -42,7 +42,11 @@ class CacheEntry {
     }
 
     public final String getData() {
-        return data;
+        if (data == null) {
+            return "";
+        } else {
+            return data;
+        }
     }
 
     public final void setData(final String data) {
@@ -102,10 +106,6 @@ class CacheEntry {
     }
 
     final int getBytes() {
-        if (getData() == null) {
-            return 0;
-        } else {
-            return getData().getBytes(Charset.forName("UTF-8")).length;
-        }
+        return getData().getBytes(Charset.forName("UTF-8")).length;
     }
 }
