@@ -110,7 +110,7 @@ public class EnsurePropertyIndex {
         if (def.unique) {
             indexNode.setProperty(PN_UNIQUE, true);
         } else if (indexNode.hasProperty(PN_ASYNC)) {
-        	if(indexNode.hasNode(PN_UNIQUE)){
+        	if(indexNode.hasProperty(PN_UNIQUE)){
         		indexNode.getProperty(PN_UNIQUE).remove();	
         	}
         }
