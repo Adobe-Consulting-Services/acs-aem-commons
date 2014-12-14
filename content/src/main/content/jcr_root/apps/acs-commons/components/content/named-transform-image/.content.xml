@@ -3,5 +3,5 @@
     jcr:description="Named Transform Image Component lets authors select a named transform configuration in an image edit dialog"
     jcr:primaryType="cq:Component"
     jcr:title="Named Transform Image"
-    sling:resourceSuperType="wcm/foundation/components/image"
+    sling:resourceSuperType="foundation/components/image"
     componentGroup="General"/>
