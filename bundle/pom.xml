@@ -55,6 +55,7 @@
                             org.apache.sling.models.*;resolution:=optional,
                             *
                         </Import-Package>
+                        <Sling-Model-Packages>com.adobe.acs.commons.version.model</Sling-Model-Packages>
                     </instructions>
                 </configuration>
             </plugin>

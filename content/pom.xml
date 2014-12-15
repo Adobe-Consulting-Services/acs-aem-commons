@@ -78,7 +78,7 @@
                 <configuration>
                     <sourceJsFolder>src/main/content/jcr_root</sourceJsFolder>
                     <failOnIssues>true</failOnIssues>
-                    <predefinedVars>jQuery,window,$</predefinedVars>
+                    <predefinedVars>jQuery,window,$,jsPlumb</predefinedVars>
                     <excludes>
                         <exclude>**/extensions/**/*.js</exclude>
                         <exclude>**/vendor/**/*.js</exclude>

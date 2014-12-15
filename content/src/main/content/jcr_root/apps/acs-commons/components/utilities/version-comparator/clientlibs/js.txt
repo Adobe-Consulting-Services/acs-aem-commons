@@ -1,0 +1,4 @@
+#base=js
+
+vendor/jquery.jsPlumb-1.7.2-min.js
+app.js
