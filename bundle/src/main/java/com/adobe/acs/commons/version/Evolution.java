@@ -2,6 +2,7 @@ package com.adobe.acs.commons.version;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,6 +38,15 @@ public class Evolution {
 
 	public List<EvolutionEntry> getVersionEntries() {
 		return versionEntries;
+	}
+
+	public Date getVersionDate() {
+		try {
+			return version.getCreated().getTime();
+		} catch (RepositoryException e) {
+			log.warn("Could not get created date from version", e);
+		}
+		return null;
 	}
 
 	public String getVersionName() {
