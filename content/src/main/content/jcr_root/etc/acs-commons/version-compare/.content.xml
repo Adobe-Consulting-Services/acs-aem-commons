@@ -4,5 +4,5 @@
     <jcr:content
         jcr:primaryType="cq:PageContent"
         jcr:title="Version Compare"
-        sling:resourceType="acs-commons/components/utilities/version-comparator"/>
+        sling:resourceType="acs-commons/components/utilities/version-compare"/>
 </jcr:root>

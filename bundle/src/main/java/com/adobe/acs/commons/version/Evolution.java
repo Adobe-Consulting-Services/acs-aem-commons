@@ -12,7 +12,6 @@ import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.version.Version;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
@@ -86,7 +85,7 @@ public class Evolution {
 		Collections.sort(keys);
 		for (String key : keys) {
 			Property property = r.adaptTo(Node.class).getProperty(key);
-			String relPath = StringUtils.substringAfterLast(property.getPath(), "jcr:frozenNode").replaceFirst("/", "");
+			String relPath = config.getRelativePropertyName(property.getPath());
 			if (config.handleProperty(relPath)) {
 				versionEntries.add(new EvolutionEntry(property, version, config));
 			}
@@ -95,7 +94,7 @@ public class Evolution {
 		while (iter.hasNext()) {
 			depth++;
 			Resource child = iter.next();
-			String relPath = StringUtils.substringAfterLast(child.getPath(), "jcr:frozenNode/");
+			String relPath = config.getRelativeResourceName(child.getPath());
 			if (config.handleResource(relPath)) {
 				versionEntries.add(new EvolutionEntry(child, version, config));
 				populate(child, depth);
