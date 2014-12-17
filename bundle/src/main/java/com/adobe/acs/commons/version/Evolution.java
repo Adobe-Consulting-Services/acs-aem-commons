@@ -12,6 +12,7 @@ import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.version.Version;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
@@ -25,9 +26,11 @@ public class Evolution {
 	private final List<EvolutionEntry> versionEntries = new ArrayList<EvolutionEntry>();
 	private final Resource versionResource;
 	private final Version version;
+	private final EvolutionConfig config;
 
-	public Evolution(Version version, Resource resource) {
+	public Evolution(Version version, Resource resource, EvolutionConfig config) {
 		this.version = version;
+		this.config = config;
 		this.versionResource = resource;
 		try {
 			populate(versionResource, 0);
@@ -82,39 +85,22 @@ public class Evolution {
 		List<String> keys = new ArrayList<String>(map.keySet());
 		Collections.sort(keys);
 		for (String key : keys) {
-			if (handleProperty(key)) {
-				Property property = r.adaptTo(Node.class).getProperty(key);
-				versionEntries.add(new EvolutionEntry(property, version));
+			Property property = r.adaptTo(Node.class).getProperty(key);
+			String relPath = StringUtils.substringAfterLast(property.getPath(), "jcr:frozenNode").replaceFirst("/", "");
+			if (config.handleProperty(relPath)) {
+				versionEntries.add(new EvolutionEntry(property, version, config));
 			}
 		}
 		Iterator<Resource> iter = r.getChildren().iterator();
 		while (iter.hasNext()) {
 			depth++;
 			Resource child = iter.next();
-			if (handleResource(child)) {
-				versionEntries.add(new EvolutionEntry(child, version));
+			String relPath = StringUtils.substringAfterLast(child.getPath(), "jcr:frozenNode/");
+			if (config.handleResource(relPath)) {
+				versionEntries.add(new EvolutionEntry(child, version, config));
 				populate(child, depth);
 			}
 			depth--;
 		}
 	}
-
-	// TODO make ignored properties configurable
-	private boolean handleProperty(String key) {
-		if (key.startsWith("jcr:primaryType") || key.startsWith("jcr:frozenPrimaryType") || key.startsWith("jcr:frozenUuid")
-				|| key.startsWith("jcr:created") || key.startsWith("jcr:createdBy") || key.startsWith("jcr:lastModified")
-				|| key.startsWith("jcr:uuid") || key.startsWith("jcr:uuid") || key.startsWith("jcr:frozenMixinTypes")
-				|| key.startsWith("cq:lastModifiedBy") || key.startsWith("cq:parentPath") || key.startsWith("cq:lastModified")
-				|| key.startsWith("cq:lastModified") || key.startsWith("cq:lastModified") || key.startsWith("cq:childrenOrder")
-				|| key.startsWith("cq:name") || key.startsWith("cq:siblingOrder")) {
-			return false;
-		}
-		return true;
-	}
-
-	// TODO make ignored resources configurable
-	private boolean handleResource(Resource resource) {
-		return true;
-	}
-
 }

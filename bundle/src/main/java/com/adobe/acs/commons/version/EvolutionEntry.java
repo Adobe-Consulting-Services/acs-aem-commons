@@ -5,7 +5,6 @@ import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.version.Version;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +13,11 @@ public class EvolutionEntry {
 
 	private static final Logger log = LoggerFactory.getLogger(EvolutionEntry.class);
 
+	private static int MAX_CHARS = 200;
+	private static String V_ADDED = "added";
+	private static String V_CHANGED = "changed";
+	private static String V_REMOVED = "removed";
+	
 	private EvolutionEntryType type;
 	private String name;
 	private Object value;
@@ -22,27 +26,30 @@ public class EvolutionEntry {
 	private Version version;
 	private String relativePath;
 	private Property property;
+	private EvolutionConfig config;
 
-	public EvolutionEntry(Resource resource, Version version) {
+	public EvolutionEntry(Resource resource, Version version, EvolutionConfig config) {
+		this.config = config;
 		this.type = EvolutionEntryType.RESOURCE;
 		this.name = resource.getName();
-		this.depth = StringUtils.countMatches(StringUtils.substringAfterLast(resource.getPath(), "jcr:frozenNode"), "/");
+		this.depth = config.getDepthForPath(resource.getPath());
 		this.path = resource.getParent().getName();
 		this.version = version;
 		this.value = null;
-		this.relativePath = StringUtils.substringAfterLast(resource.getPath(), "jcr:frozenNode/");
+		this.relativePath = config.getRelativeResourceName(resource.getPath());
 	}
 
-	public EvolutionEntry(Property property, Version version) {
+	public EvolutionEntry(Property property, Version version, EvolutionConfig config) {
 		try {
+			this.config = config;
 			this.property = property;
 			this.type = EvolutionEntryType.PROPERTY;
 			this.name = property.getName();
-			this.depth = StringUtils.countMatches(StringUtils.substringAfterLast(property.getPath(), "jcr:frozenNode"), "/");
+			this.depth = config.getDepthForPath(property.getPath());
 			this.version = version;
 			this.path = property.getParent().getName();
-			this.value = EvolutionHelper.printProperty(property);
-			this.relativePath = StringUtils.substringAfterLast(property.getPath(), "jcr:frozenNode").replaceFirst("/", "");
+			this.value = config.printProperty(property);
+			this.relativePath = config.getRelativePropertyName(property.getPath());
 		} catch (Exception e) {
 			log.error("Could not inititalize VersionEntry", e);
 		}
@@ -65,23 +72,19 @@ public class EvolutionEntry {
 	}
 
 	public String getValueString() {
-		return EvolutionHelper.printObject(value);
+		return config.printObject(value);
 	}
 	
 	public String getValueStringShort() {
 		String value = getValueString();
-		if(value.length() > 200){
-			return value.substring(0, 200) + "...";	
+		if(value.length() > MAX_CHARS){
+			return value.substring(0, MAX_CHARS) + "...";	
 		}
 		return value;
 	}
 
 	public int getDepth() {
 		return depth - 1;
-	}
-
-	public String getIndentation() {
-		return StringUtils.repeat("--", depth);
 	}
 
 	public boolean isCurrent() {
@@ -97,11 +100,11 @@ public class EvolutionEntry {
 
 	public String getStatus() {
 		if (isAdded()) {
-			return "added";
+			return V_ADDED;
 		} else if (isWillBeRemoved()) {
-			return "removed";
+			return V_REMOVED;
 		} else if (isChanged()) {
-			return "changed";
+			return V_CHANGED;
 		} else {
 			return "";
 		}
@@ -144,8 +147,8 @@ public class EvolutionEntry {
 				return false;
 			}
 			Property prop = version.getLinearPredecessor().getFrozenNode().getProperty(relativePath);
-			String currentValue = EvolutionHelper.printProperty(prop);
-			String oldValue = EvolutionHelper.printProperty(property);
+			String currentValue = config.printProperty(prop);
+			String oldValue = config.printProperty(property);
 			return !currentValue.equals(oldValue);
 		} catch (Exception e) {
 			e.printStackTrace();

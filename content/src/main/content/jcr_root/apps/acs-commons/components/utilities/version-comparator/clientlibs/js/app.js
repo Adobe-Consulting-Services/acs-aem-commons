@@ -37,14 +37,6 @@ angular.module('versionComparator', [])
             }, timeout);
         };
         
-        $scope.resource = function() {
-        
-        };
-
-		$scope.analyse = function(){
-			$scope.addNotification("success", "Button clicked", "You successfully clicked the button");
-		};
-		
 		$scope.addConnection = function(params) {
 			$scope.connections.push(params);
 		};

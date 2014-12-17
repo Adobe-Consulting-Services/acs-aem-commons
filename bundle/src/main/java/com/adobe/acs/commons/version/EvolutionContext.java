@@ -24,9 +24,11 @@ public class EvolutionContext {
 	private ResourceResolver resolver = null;
 	private VersionManager versionManager = null;
 	private List<Evolution> versions = new ArrayList<Evolution>();
+	private EvolutionConfig config;
 
-	public EvolutionContext(Resource resource) {
+	public EvolutionContext(Resource resource, EvolutionConfig config) {
 		this.resource = resource;
+		this.config = config;
 		populateEvolutions();
 	}
 
@@ -44,7 +46,7 @@ public class EvolutionContext {
 				Version next = iter.next();
 				String versionPath = next.getFrozenNode().getPath();
 				Resource versionResource = resolver.resolve(versionPath);
-				versions.add(new Evolution(next, versionResource));
+				versions.add(new Evolution(next, versionResource, config));
 				log.debug("Version={} added to EvolutionItem", next.getName());
 			}
 		} catch (UnsupportedRepositoryOperationException e1){

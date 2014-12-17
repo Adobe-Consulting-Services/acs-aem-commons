@@ -20,7 +20,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <title>Version Comparator | ACS AEM Commons</title>
+    <title>Version Compare | ACS AEM Commons</title>
 
     <link rel="shortcut icon" href="${favicon}"/>
 
@@ -39,7 +39,7 @@
 
             <nav class="crumbs">
                 <a href="/miscadmin">Tools</a>
-                <a href="${pagePath}.html">Version Comparator</a>
+                <a href="${pagePath}.html">Version Compare</a>
             </nav>
         </header>
 
@@ -67,7 +67,7 @@
 	                        <strong>NOTICE</strong><div>Please note, the current state of this tool does only show linear version paths.</div>
                         </div>
 
-                        <h1>Version Comparator</h1>
+                        <h1>Version Compare</h1>
                         
                         <div class="search">
                         	<input type="text" placeholder="Enter URL to Resource" ng-model="app.resource">
