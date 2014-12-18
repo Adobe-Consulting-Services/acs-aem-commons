@@ -75,7 +75,7 @@ public class ErrorPageCacheImplTest {
 
     public void testGet() throws Exception {
         /**
-         * Implemented in PowerMoockErrorPageCacheImplTest
+         * Implemented in PowerMockErrorPageCacheImplTest
          *
          * Powermock was having problems running with @Spy'ed vars in this Test.
          */
