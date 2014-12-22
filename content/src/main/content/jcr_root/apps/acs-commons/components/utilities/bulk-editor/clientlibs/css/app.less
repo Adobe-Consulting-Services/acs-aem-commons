@@ -1,0 +1,65 @@
+#acs-commons-bulk-editor {
+  .content-container {
+    width: 100%;
+
+    .content-container-inner {
+      width: 95%;
+      margin: 0 auto;
+      
+      .search {
+		width: 80%;
+      }
+    }
+  }
+
+  .section {
+    margin: 2em 0;
+
+    h2 {
+      margin-bottom: .5em;
+    }
+  }
+
+  .options {
+    float: left;
+    margin: 10px;
+    
+    .result {
+        max-height: 200px;
+        overflow-y: scroll;
+        max-width: 350px;    
+    }
+  }
+  
+  .resultinfo {
+    margin-top: 10px;
+  }
+  
+  input[type=text], input[type=password], 
+  input[type=email], input[type=url], 
+  input[type=tel], input[type^="date"], 
+  input[type="time"] {
+    &.wide {
+      width: 300px;
+    }
+  }  
+
+  .notifications {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 750px;
+    z-index: 1000;
+  }
+  
+  table.data {
+    td {
+      padding: 5px !important;
+    }
+    th {
+      padding: 5px !important;
+    }    
+  }
+}
