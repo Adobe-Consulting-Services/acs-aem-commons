@@ -19,22 +19,22 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
+import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
-import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.search.QueryBuilder;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
@@ -59,10 +59,10 @@ import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -71,6 +71,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component(
         label = "ACS AEM Commons - Error Page Handler",
@@ -86,6 +88,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     public static final String DEFAULT_ERROR_PAGE_NAME = "errors";
 
     public static final String ERROR_PAGE_PROPERTY = "errorPages";
+
+    private static final String REDIRECT_TO_LOGIN = "redirect-to-login";
+    private static final String RESPOND_WITH_404 = "respond-with-404";
 
     /* Enable/Disable */
     private static final boolean DEFAULT_ENABLED = true;
@@ -141,6 +146,33 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                     + " Example: /content/geometrixx/en:errors [Optional]",
             cardinality = Integer.MAX_VALUE)
     private static final String PROP_SEARCH_PATHS = "paths";
+
+    /* Not Found Default Behavior */
+    private static final String DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR = "Redirect to Login";
+    private String notFoundBehavior = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR;
+
+    @Property(
+            label = "Not Found Behavior",
+            description = "Default resource not found behavior. [Default: Respond with 404]",
+            options = {
+                    @PropertyOption(name = "Redirect to Login", value = REDIRECT_TO_LOGIN),
+                    @PropertyOption(name = "Respond with 404", value = RESPOND_WITH_404)
+            })
+    private static final String PROP_NOT_FOUND_DEFAULT_BEHAVIOR = "not-found.behavior";
+
+
+    /* Not Found Path Patterns */
+    private static final String[] DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS = {};
+    private ArrayList<Pattern> notFoundExclusionPatterns = new ArrayList<Pattern>();
+
+    @Property(
+            label = "Not Found Exclusions",
+            description = "Regex path patterns that will act in the \"other\" (redirect-to-login vs. "
+                    + " respond-with-404) way to the \"Not Found Behavior\". This allows the usual Not Found behavior"
+                    + " to be defined via \"not-found.behavior\" with specific exclusions defined here. [Optional]",
+            cardinality = Integer.MAX_VALUE)
+    private static final String PROP_NOT_FOUND_EXCLUSION_PATH_PATTERNS = "not-found.exclusion-path-patterns";
+
 
     private static final int DEFAULT_TTL = 60 * 5; // 5 minutes
 
@@ -558,23 +590,62 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             log.debug("Status code: {}", this.getStatusCode(request));
             log.debug("Is anonymous: {}", isAnonymousRequest(request));
             log.debug("Is browser request: {}", AuthUtil.isBrowserRequest(request));
+            log.debug("Default 404 Behavior: {}", this.notFoundBehavior);
+        }
+
+        String path = request.getResource().getPath();
+        if (StringUtils.isBlank(path)) {
+            path = request.getPathInfo();
         }
 
         if (this.getStatusCode(request) == SlingHttpServletResponse.SC_NOT_FOUND
                 && this.isAnonymousRequest(request)
-                && AuthUtil.isBrowserRequest(request)) {
+                && AuthUtil.isBrowserRequest(request)
+                && this.isRedirectToLogin(path)) {
 
             log.debug("Authenticate the request");
 
             // Authenticate Request
-            // If the authenticator cannot be found, then process
-            // as a normal 404
+            // If an authenticator cannot be found, then process as a normal 404
             return !authenticateRequest(request, response);
 
         } else {
             log.debug("Allow error page handler to handle request");
 
             return true;
+        }
+    }
+
+    /**
+     * Determines if the request should redirect to login or respond with 404 based on the Error Page Handler's config.
+     *
+     * @param path the request path
+     * @return true to indicate a redirect to login, false to indicate a respond w 404
+     */
+    private boolean isRedirectToLogin(final String path) {
+        if (StringUtils.equals(REDIRECT_TO_LOGIN, this.notFoundBehavior)) {
+            // Default behavior redirect to login
+            for (final Pattern p : this.notFoundExclusionPatterns) {
+                final Matcher m = p.matcher(path);
+                if (m.matches()) {
+                    // Path is an exclusion to "redirect to login" ~> "respond w/ 404"
+                    return false;
+                }
+            }
+            // Path did NOT match exclusions for "redirect to login" ~> "redirect to login"
+            return true;
+        } else {
+            // Default behavior is to respond w/ 404
+            for (final Pattern p : this.notFoundExclusionPatterns) {
+                final Matcher m = p.matcher(path);
+                if (m.matches()) {
+                    // Path is an exclusion to "respond w/ 404" ~> "redirect to login"
+                    return true;
+                }
+            }
+
+            // Path did NOT match exclusions for "respond w/ 404" ~> "respond w/ 404"
+            return false;
         }
     }
 
@@ -713,6 +784,19 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 PropertiesUtil.toStringArray(config.get(legacyPrefix + PROP_SEARCH_PATHS),
                         DEFAULT_SEARCH_PATHS)));
 
+        /** Not Found Handling **/
+        this.notFoundBehavior = PropertiesUtil.toString(config.get(PROP_NOT_FOUND_DEFAULT_BEHAVIOR),
+                DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR);
+
+        String[] tmpNotFoundExclusionPatterns = PropertiesUtil.toStringArray(
+                config.get(PROP_NOT_FOUND_EXCLUSION_PATH_PATTERNS), DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS);
+
+        this.notFoundExclusionPatterns = new ArrayList<Pattern>();
+        for (final String tmpPattern : tmpNotFoundExclusionPatterns) {
+            this.notFoundExclusionPatterns.add(Pattern.compile(tmpPattern));
+        }
+
+
         /** Error Page Cache **/
 
         int ttl = PropertiesUtil.toInteger(config.get(PROP_TTL),
@@ -774,18 +858,26 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             this.errorImageExtensions[i] = StringUtils.lowerCase(errorImageExtensions[i], Locale.ENGLISH);
         }
 
-        log.debug("Enabled: {}", this.enabled);
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
 
-        log.debug("System Error Page Path: {}", this.systemErrorPagePath);
-        log.debug("Error Page Extension: {}", this.errorPageExtension);
-        log.debug("Fallback Error Page Name: {}", this.fallbackErrorName);
+        pw.println();
+        pw.printf("Enabled: %s", this.enabled).println();
+        pw.printf("System Error Page Path: %s", this.systemErrorPagePath).println();
+        pw.printf("Error Page Extension: %s", this.errorPageExtension).println();
+        pw.printf("Fallback Error Page Name: %s", this.fallbackErrorName).println();
 
-        log.debug("Cache - TTL: {}", ttl);
-        log.debug("Cache - Serve Authenticated: {}", serveAuthenticatedFromCache);
+        pw.printf("Resource Not Found - Behavior: {}", this.notFoundBehavior);
+        pw.printf("Resource Not Found - Exclusion Path Patterns {}", Arrays.toString(tmpNotFoundExclusionPatterns));
 
-        log.debug("Error Images - Enabled: {}", this.errorImagesEnabled);
-        log.debug("Error Images - Path: {}", this.errorImagePath);
-        log.debug("Error Images - Extensions: {}", Arrays.toString(this.errorImageExtensions));
+        pw.printf("Cache - TTL: %s", ttl).println();
+        pw.printf("Cache - Serve Authenticated: %s", serveAuthenticatedFromCache).println();
+
+        pw.printf("Error Images - Enabled: %s", this.errorImagesEnabled).println();
+        pw.printf("Error Images - Path: %s", this.errorImagePath).println();
+        pw.printf("Error Images - Extensions: %s", Arrays.toString(this.errorImageExtensions)).println();
+
+        log.debug(sw.toString());
     }
 
     /**
@@ -808,8 +900,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 continue;
             }
 
-            String key = StringUtils.strip((String) tmp.getKey());
-            String val = StringUtils.strip((String) tmp.getValue());
+            String key = StringUtils.strip(tmp.getKey());
+            String val = StringUtils.strip(tmp.getValue());
 
             // Only accept absolute paths
             if (StringUtils.isBlank(key) || !StringUtils.startsWith(key, "/")) {
