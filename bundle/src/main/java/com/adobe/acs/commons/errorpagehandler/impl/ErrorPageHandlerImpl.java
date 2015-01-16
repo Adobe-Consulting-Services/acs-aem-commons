@@ -77,8 +77,7 @@ import java.util.regex.Pattern;
 @Component(
         label = "ACS AEM Commons - Error Page Handler",
         description = "Error Page Handling module which facilitates the resolution of errors "
-                + "against author-able "
-                + "pages for discrete content trees.",
+                + "against author-able pages for discrete content trees.",
         immediate = false, metatype = true)
 @Service
 public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
@@ -148,15 +147,15 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private static final String PROP_SEARCH_PATHS = "paths";
 
     /* Not Found Default Behavior */
-    private static final String DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR = "Redirect to Login";
+    private static final String DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR = RESPOND_WITH_404;
     private String notFoundBehavior = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR;
 
     @Property(
             label = "Not Found Behavior",
             description = "Default resource not found behavior. [Default: Respond with 404]",
             options = {
-                    @PropertyOption(name = "Redirect to Login", value = REDIRECT_TO_LOGIN),
-                    @PropertyOption(name = "Respond with 404", value = RESPOND_WITH_404)
+                    @PropertyOption(value = "Redirect to Login", name = REDIRECT_TO_LOGIN),
+                    @PropertyOption(value = "Respond with 404", name = RESPOND_WITH_404)
             })
     private static final String PROP_NOT_FOUND_DEFAULT_BEHAVIOR = "not-found.behavior";
 
@@ -585,25 +584,26 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      */
     @Override
     public boolean doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        String path = request.getResource().getPath();
+
+        if (StringUtils.isBlank(path)) {
+            path = request.getPathInfo();
+        }
+
 
         if (log.isDebugEnabled()) {
             log.debug("Status code: {}", this.getStatusCode(request));
             log.debug("Is anonymous: {}", isAnonymousRequest(request));
             log.debug("Is browser request: {}", AuthUtil.isBrowserRequest(request));
-            log.debug("Default 404 Behavior: {}", this.notFoundBehavior);
-        }
+            log.debug("Is redirect To login page: {}", this.isRedirectToLogin(path));
 
-        String path = request.getResource().getPath();
-        if (StringUtils.isBlank(path)) {
-            path = request.getPathInfo();
+            log.debug("Default 404 Behavior: {}", this.notFoundBehavior);
         }
 
         if (this.getStatusCode(request) == SlingHttpServletResponse.SC_NOT_FOUND
                 && this.isAnonymousRequest(request)
                 && AuthUtil.isBrowserRequest(request)
                 && this.isRedirectToLogin(path)) {
-
-            log.debug("Authenticate the request");
 
             // Authenticate Request
             // If an authenticator cannot be found, then process as a normal 404
@@ -623,16 +623,20 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @return true to indicate a redirect to login, false to indicate a respond w 404
      */
     private boolean isRedirectToLogin(final String path) {
+        log.debug("Not Found Behavior: {}", this.notFoundBehavior);
+
         if (StringUtils.equals(REDIRECT_TO_LOGIN, this.notFoundBehavior)) {
             // Default behavior redirect to login
             for (final Pattern p : this.notFoundExclusionPatterns) {
                 final Matcher m = p.matcher(path);
                 if (m.matches()) {
                     // Path is an exclusion to "redirect to login" ~> "respond w/ 404"
+                    log.debug("Path is an exclusion to \"redirect to login\" ~> \"respond w/ 404\"");
                     return false;
                 }
             }
             // Path did NOT match exclusions for "redirect to login" ~> "redirect to login"
+            log.debug("Path did NOT match exclusions for \"redirect to login\" ~> \"redirect to login\"");
             return true;
         } else {
             // Default behavior is to respond w/ 404
@@ -640,11 +644,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 final Matcher m = p.matcher(path);
                 if (m.matches()) {
                     // Path is an exclusion to "respond w/ 404" ~> "redirect to login"
+                    log.debug("Path is an exclusion to \"respond w/ 404\" ~> \"redirect to login\"");
                     return true;
                 }
             }
 
             // Path did NOT match exclusions for "respond w/ 404" ~> "respond w/ 404"
+            log.debug("Path did NOT match exclusions for \"respond w/ 404\" ~> \"respond w/ 404\"");
             return false;
         }
     }
@@ -867,8 +873,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         pw.printf("Error Page Extension: %s", this.errorPageExtension).println();
         pw.printf("Fallback Error Page Name: %s", this.fallbackErrorName).println();
 
-        pw.printf("Resource Not Found - Behavior: {}", this.notFoundBehavior);
-        pw.printf("Resource Not Found - Exclusion Path Patterns {}", Arrays.toString(tmpNotFoundExclusionPatterns));
+        pw.printf("Resource Not Found - Behavior: %s", this.notFoundBehavior).println();
+        pw.printf("Resource Not Found - Exclusion Path Patterns %s", Arrays.toString(tmpNotFoundExclusionPatterns)).println();
 
         pw.printf("Cache - TTL: %s", ttl).println();
         pw.printf("Cache - Serve Authenticated: %s", serveAuthenticatedFromCache).println();
