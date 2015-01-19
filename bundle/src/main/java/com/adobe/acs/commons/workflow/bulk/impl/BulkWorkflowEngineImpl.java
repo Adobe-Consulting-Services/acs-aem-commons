@@ -326,7 +326,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     /**
      * Stops the bulk workflow process using the OSGi Component deactivated stop state.
-     * <p/>
+     * <p>
      * Allows the system to know to resume this when the OSGi Component is activated.
      *
      * @param resource the jcr:content configuration resource
@@ -479,7 +479,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     /**
      * Advance to the next batch and update all properties on the current and next batch nodes accordingly.
-     * <p/>
+     * <p>
      * This method assumes the current batch has been verified as complete.
      *
      * @param resource the bulk workflow manager content resource

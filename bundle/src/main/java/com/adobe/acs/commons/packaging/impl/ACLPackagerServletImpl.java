@@ -309,7 +309,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
     /**
      * Determines if the resource's path matches any of the include patterns
-     * <p/>
+     * <p>
      * If includePatterns is null or empty all resources are expected to be included.
      *
      * @param resource        the resource whose path to evaluate

@@ -346,7 +346,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /**
      * Gets the resource object for the provided path.
-     * <p/>
+     * <p>
      * Performs checks to ensure resource exists and is accessible to user.
      *
      * @param resourceResolver
@@ -384,7 +384,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /**
      * Get the Error Page's name (all lowercase) that should be used to render the page for this error.
-     * <p/>
+     * <p>
      * This looks at the Status code delivered via by Sling into the error page content
      *
      * @param request
@@ -527,7 +527,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /**
      * Add extension as configured via OSGi Component Property.
-     * <p/>
+     * <p>
      * Defaults to .html
      *
      * @param path
@@ -577,7 +577,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /**
      * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies.
-     * <p/>
+     * <p>
      * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
      * @param request
      * @param response
@@ -707,7 +707,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /**
      * Reset response attributes to support printing out a new page (rather than one that potentially errored out).
      * This includes clearing clientlib inclusion state, and resetting the response.
-     * <p/>
+     * <p>
      * If the response is committed, and it hasnt been closed by code, check the response AND jsp buffer sizes and
      * ensure they are large enough to NOT force a buffer flush.
      *

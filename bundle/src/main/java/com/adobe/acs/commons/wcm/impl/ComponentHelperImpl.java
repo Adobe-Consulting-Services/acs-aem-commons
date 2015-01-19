@@ -288,9 +288,9 @@ public final class ComponentHelperImpl implements ComponentHelper {
     /**
      * "Intelligently" determines the WCMEditType to use based on the
      * DropTarget.
-     * <p/>
+     * <p>
      * Inspects the DropTarget's Groups and Accepts to make this determination.
-     * <p/>
+     * <p>
      * If no match can be found, defaults to TEXT
      *
      * @param dropTarget the drop target

@@ -178,7 +178,7 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
 
     /**
      * Derives the form from the request's Query Parameters as best it can
-     * <p/>
+     * <p>
      * Falls back to an empty form if it runs into problems.
      * Fallback is due to ease of (inadvertent) tampering with query params
      *

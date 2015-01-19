@@ -26,7 +26,7 @@ import aQute.bnd.annotation.ProviderType;
 /**
  * This is a wrapper class that allows the "canned" list to be extends to include
  * custom Types:
- * <p/>
+ * <p>
  * public class CustomEditTypes extends ComponentEditType {
  * public static final Type CUSTOM = new ComponentEditType.Type("CUSTOM");
  * }

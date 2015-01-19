@@ -40,10 +40,10 @@ public final class TextUtil {
 
     /**
      * Returns first non-null value from the parameter list
-     * <p/>
+     * <p>
      * Ex. TextUtil.getFirstNonNull(x.getLastModifiedDate(),
      * x.getCreatedDate())
-     * <p/>
+     * <p>
      * If getLastModifiedDate() returns null, and getCreatedDate() returns not-null,
      * the value for getCreatedDate() is returned.
      *
@@ -69,7 +69,7 @@ public final class TextUtil {
 
     /**
      * Returns the first non-null and non-empty String from the parameter list of strings.
-     * <p/>
+     * <p>
      * Ex. TextUtil.getFirstNonEmpty(x.getPageTitle(),
      * x.getNavigationTitle(),
      * x.getTitle(),
@@ -108,11 +108,11 @@ public final class TextUtil {
 
     /**
      * Returns first non-null value from the resource property value map.
-     * <p/>
+     * <p>
      * Ex. TextUtil.getFirstProperty(Date.class,
      * "jcr:lastModified",
      * "jcr:created")
-     * <p/>
+     * <p>
      * If getLastModifiedDate() returns null, and getCreatedDate() returns not-null,
      * the value for getCreatedDate() is returned.
      *
