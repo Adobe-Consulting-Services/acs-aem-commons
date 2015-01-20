@@ -46,6 +46,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Component(
@@ -68,7 +69,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     private static final int MAX_RESTART_COUNT = 3;
 
-    private Map<String, WorkflowProcess> workflowProcesses = new HashMap<String, WorkflowProcess>();
+    private Map<String, WorkflowProcess> workflowProcesses = new ConcurrentHashMap<String, WorkflowProcess>();
 
     /**
      * {@inheritDoc}
@@ -235,7 +236,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     @Deactivate
     protected final void deactivate(final Map<String, Object> config) {
         log.trace("Deactivating Synthetic Workflow Runner");
-        this.workflowProcesses = new HashMap<String, WorkflowProcess>();
+        this.workflowProcesses = new ConcurrentHashMap<String, WorkflowProcess>();
     }
 
     protected final void bindWorkflowProcesses(final WorkflowProcess service, final Map<Object, Object> props) {
