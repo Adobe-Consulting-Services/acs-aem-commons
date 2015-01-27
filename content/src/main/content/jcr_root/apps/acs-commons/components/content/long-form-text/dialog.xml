@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+        jcr:primaryType="cq:Dialog"
+        activeTab="0"
+        title="Long Form Text"
+        xtype="tabpanel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <tab1
+                jcr:primaryType="cq:Widget"
+                title="Text"
+                xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <long-form-text
+                        jcr:primaryType="cq:Widget"
+                        fieldLabel="Text"
+                        fieldDescription=""
+                        defaultValue=""
+                        hideLabel="{Boolean}true"
+                        name="./text"
+                        xtype="richtext">
+                    <rtePlugins jcr:primaryType="nt:unstructured">
+                        <table
+                                jcr:primaryType="nt:unstructured"
+                                features="*"/>
+                        <edit
+                                jcr:primaryType="nt:unstructured"
+                                features="[paste-plaintext]"
+                                defaultPasteMode="plaintext"/>
+                    </rtePlugins>
+                </long-form-text>
+            </items>
+        </tab1>
+    </items>
+</jcr:root>
