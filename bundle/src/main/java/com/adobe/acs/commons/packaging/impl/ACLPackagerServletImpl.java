@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.util.AemCapabilityHelper;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.jcr.vault.fs.api.PathFilterSet;
@@ -28,8 +29,10 @@ import com.day.jcr.vault.fs.filter.DefaultPathFilter;
 import com.day.jcr.vault.fs.io.AccessControlHandling;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -105,15 +108,25 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
 
     private static final boolean DEFAULT_INCLUDE_CONFIGURATION = false;
 
-    private static final String QUERY = "SELECT * FROM [rep:ACL]";
-
     private static final String QUERY_LANG = Query.JCR_SQL2;
+
+    private static final String CQ5_QUERY = "SELECT * FROM [rep:ACL]";
+
+    private static final String[] CQ5_QUERIES = new String[] {CQ5_QUERY};
+
+    // rep:ACE covers rep:GrantACE and rep:DenyACE
+    private static final String AEM6_QUERY_ACE = "SELECT * FROM [rep:ACE] where [rep:principalName] is not null";
+
+    private static final String[] AEM6_QUERIES = new String[] {AEM6_QUERY_ACE};
 
     private static final String ACL_PACKAGE_THUMBNAIL_RESOURCE_PATH =
             "/apps/acs-commons/components/utilities/packager/acl-packager/definition/package-thumbnail.png";
 
     @Reference
     private PackageHelper packageHelper;
+
+    @Reference
+    private AemCapabilityHelper aemCapabilityHelper;
 
     @Override
     public final void doPost(final SlingHttpServletRequest request,
@@ -217,36 +230,60 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
     private List<PathFilterSet> findResources(final ResourceResolver resourceResolver,
                                               final List<String> principalNames,
                                               final List<Pattern> includePatterns) {
+        boolean isOak = true;
+        try {
+            isOak = aemCapabilityHelper.isOak();
+        } catch (RepositoryException e) {
+            isOak = true;
+        }
 
         final Set<Resource> resources = new TreeSet<Resource>(resourceComparator);
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
-        final Iterator<Resource> repPolicies = resourceResolver.findResources(QUERY, QUERY_LANG);
+        String[] queries = CQ5_QUERIES;
+        if (isOak) {
+            queries = AEM6_QUERIES;
+        }
 
-        while (repPolicies.hasNext()) {
-            final Resource repPolicy = repPolicies.next();
+        for (final String query : queries) {
+            final Iterator<Resource> hits = resourceResolver.findResources(query, QUERY_LANG);
 
-            if (this.isIncluded(repPolicy, includePatterns)) {
-                log.debug("Included by pattern [ {} ]", repPolicy.getPath());
-            } else {
-                continue;
-            }
+            while (hits.hasNext()) {
+                final Resource hit = hits.next();
+                Resource repPolicy = null;
 
-            final Iterator<Resource> aces = repPolicy.listChildren();
+                if (isOak) {
+                    // If Oak, get the parent node since the query is for the Grant/Deny nodes
+                    if (hit.getParent() != null) {
+                        repPolicy = hit.getParent();
+                    }
+                } else {
+                    // If not Oak, then the rep:ACL is the hit
+                    repPolicy = hit;
+                }
 
-            while (aces.hasNext()) {
-                final Resource ace = aces.next();
-                final ValueMap props = ace.adaptTo(ValueMap.class);
-                final String repPrincipalName = props.get("rep:principalName", String.class);
+                if (this.isIncluded(repPolicy, includePatterns)) {
+                    log.debug("Included by pattern [ {} ]", repPolicy.getPath());
+                } else {
+                    continue;
+                }
 
-                if (principalNames == null
-                        || principalNames.isEmpty()
-                        || principalNames.contains(repPrincipalName)) {
+                final Iterator<Resource> aces = repPolicy.listChildren();
 
-                    resources.add(repPolicy);
+                while (aces.hasNext()) {
+                    final Resource ace = aces.next();
+                    final ValueMap props = ace.adaptTo(ValueMap.class);
+                    final String repPrincipalName = props.get("rep:principalName", String.class);
 
-                    log.debug("Included by principal [ {} ]", repPolicy.getPath());
-                    break;
+                    if (principalNames == null
+                            || principalNames.isEmpty()
+                            || principalNames.contains(repPrincipalName)) {
+
+                        resources.add(repPolicy);
+
+                        log.debug("Included by principal [ {} ]", repPolicy.getPath());
+                        break;
+                    }
                 }
             }
         }
@@ -317,14 +354,29 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
      * @return true if the resource's path matches any of the include patterns
      */
     private boolean isIncluded(final Resource resource, final List<Pattern> includePatterns) {
-        if (includePatterns == null || includePatterns.isEmpty()) {
-            return true;
+        if (resource == null) {
+            // Resource is null; so dont accept this
+            return false;
         }
 
-        for (final Pattern pattern : includePatterns) {
-            final Matcher matcher = pattern.matcher(resource.getPath());
-            if (matcher.matches()) {
-                return true;
+        final ValueMap properties = resource.adaptTo(ValueMap.class);
+        if (properties == null
+                || !StringUtils.equals("rep:ACL", properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
+            // ONLY accept the resource is a rep:ACL node
+           return false;
+        }
+
+        if (includePatterns == null || includePatterns.isEmpty()) {
+            // If patterns are empty then accept everything!
+            return true;
+        } else {
+            // Else check the patterns
+            for (final Pattern pattern : includePatterns) {
+                final Matcher matcher = pattern.matcher(resource.getPath());
+                if (matcher.matches()) {
+                    // Accept the resource on the first match
+                    return true;
+                }
             }
         }
 
