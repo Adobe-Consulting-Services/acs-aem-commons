@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.util.AemCapabilityHelper;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.Version;
@@ -76,9 +77,14 @@ public class ACLPackagerServletImplTest {
     @Mock
     PackageHelper packageHelper;
 
-    @Mock JcrPackage jcrPackage;
+    @Mock
+    JcrPackage jcrPackage;
 
-    @Mock Session session;
+    @Mock
+    AemCapabilityHelper aemCapabilityHelper;
+
+    @Mock
+    Session session;
 
     @InjectMocks
     ACLPackagerServletImpl aclPackagerServlet;
@@ -111,6 +117,8 @@ public class ACLPackagerServletImplTest {
         when(packageHelper.getSuccessJSON(any(JcrPackage.class))).thenReturn("{\"status\": \"success\"}");
         when(packageHelper.getErrorJSON(any(String.class))).thenReturn("{\"status\": \"error\"}");
         when(packageHelper.getPathFilterSetPreviewJSON(any(Collection.class))).thenReturn("{\"status\": \"preview\"}");
+
+        when(aemCapabilityHelper.isOak()).thenReturn(true);
     }
 
     @After
