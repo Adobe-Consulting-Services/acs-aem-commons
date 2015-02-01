@@ -29,10 +29,8 @@ import com.day.jcr.vault.fs.filter.DefaultPathFilter;
 import com.day.jcr.vault.fs.io.AccessControlHandling;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -357,11 +355,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
         if (resource == null) {
             // Resource is null; so dont accept this
             return false;
-        }
-
-        final ValueMap properties = resource.adaptTo(ValueMap.class);
-        if (properties == null
-                || !StringUtils.equals("rep:ACL", properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
+        } else if (!resource.isResourceType("rep:ACL")) {
             // ONLY accept the resource is a rep:ACL node
            return false;
         }
