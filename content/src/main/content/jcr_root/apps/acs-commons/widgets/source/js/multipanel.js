@@ -72,7 +72,7 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
                 return;
             }
 
-            pData[i.key] = i.getValue();
+            pData[i.key] = i.getValue().replace(/"/g, '&quot;');
         });
 
         return $.isEmptyObject(pData) ? "" : JSON.stringify(pData);
