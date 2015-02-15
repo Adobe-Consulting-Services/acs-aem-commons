@@ -18,7 +18,7 @@
  * #L%
  */
 /*global CQ: false, ACS: false */
-CQ.Ext.ns("ACS.CQ");
+CQ.Ext.ns("ACS.CQ"); 
 /**
  * @class ACS.CQ.MultiFieldPanel
  * @extends CQ.form.Panel
@@ -71,8 +71,13 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
             if(i.xtype === "label" || i.xtype === "hidden" || !i.hasOwnProperty("key")){
                 return;
             }
-
-            pData[i.key] = i.getValue();
+            var predata = i.getValue();
+            if(predata && (typeof predata === "string"
+                    || (typeof predata === "object" && predata.constructor === String))) {
+                pData[i.key] = predata.replace(/"/g, '&quot;'); 
+            } else {
+                pData[i.key] = predata;
+            }
         });
 
         return $.isEmptyObject(pData) ? "" : JSON.stringify(pData);
