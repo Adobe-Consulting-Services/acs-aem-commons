@@ -28,7 +28,14 @@ import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultBuilder;
 import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.AuthoringUIModeService;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ValueMap;
@@ -43,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component(
         label = "ACS AEM Commons - Quickly",
@@ -78,10 +86,10 @@ public class QuicklyEngineImpl implements QuicklyEngine {
     @Reference
     private ResultBuilder resultBuilder;
 
-    private Map<String, Operation> operations = new HashMap<String, Operation>();
+    private Map<String, Operation> operations = new ConcurrentHashMap<String, Operation>();
 
     @Override
-    public JSONObject execute(final SlingHttpServletRequest request, SlingHttpServletResponse response,
+    public final JSONObject execute(final SlingHttpServletRequest request, SlingHttpServletResponse response,
                               final Command cmd) throws JSONException {
 
         for (final Operation operation : operations.values()) {
@@ -122,7 +130,7 @@ public class QuicklyEngineImpl implements QuicklyEngine {
         return json;
     }
 
-    protected void bindOperations(final Operation service, final Map<Object, Object> props) {
+    protected final void bindOperations(final Operation service, final Map<Object, Object> props) {
         final String cmd = PropertiesUtil.toString(props.get(Operation.PROP_CMD), null);
 
         if (cmd != null) {
@@ -131,7 +139,7 @@ public class QuicklyEngineImpl implements QuicklyEngine {
         }
     }
 
-    protected void unbindOperations(final Operation service, final Map<Object, Object> props) {
+    protected final void unbindOperations(final Operation service, final Map<Object, Object> props) {
         final String cmd = PropertiesUtil.toString(props.get(Operation.PROP_CMD), null);
 
         if (cmd != null) {
@@ -141,7 +149,7 @@ public class QuicklyEngineImpl implements QuicklyEngine {
     }
 
     @Activate
-    protected void activate(Map<String, String> map) {
+    protected final void activate(Map<String, String> map) {
         config = new ValueMapDecorator(new HashMap<String, Object>());
 
         config.put(CONFIG_RESULTS,

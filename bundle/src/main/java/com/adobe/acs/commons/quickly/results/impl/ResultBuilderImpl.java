@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component(
         label = "ACS AEM Commons - Quickly - Result Builder"
@@ -61,7 +62,7 @@ import java.util.Map;
 public class ResultBuilderImpl implements ResultBuilder {
     private static final Logger log = LoggerFactory.getLogger(ResultBuilderImpl.class);
 
-    private Map<String, ResultSerializer> resultSerializers = new HashMap<String, ResultSerializer>();
+    private Map<String, ResultSerializer> resultSerializers = new ConcurrentHashMap<String, ResultSerializer>();
 
     @Reference(target = "(" + ResultSerializer.PROP_TYPE + "=" + GenericResultSerializerImpl.TYPE + ")")
     private ResultSerializer defaultResultSerialize;
@@ -86,7 +87,7 @@ public class ResultBuilderImpl implements ResultBuilder {
 
         ResultSerializer serializer = null;
 
-        if(resultSerializers.containsKey(result.getResultType())) {
+        if (resultSerializers.containsKey(result.getResultType())) {
             serializer = resultSerializers.get(result.getResultType());
         }
 
@@ -137,10 +138,10 @@ public class ResultBuilderImpl implements ResultBuilder {
     }
 
     protected final Result processPunctuation(final String[] punctuation, final Result result) {
-        for(final String p : punctuation) {
+        for (final String p : punctuation) {
 
-            if("!".equals(p)) {
-                if(Action.Method.GET.equals(result.getAction().getMethod())
+            if ("!".equals(p)) {
+                if (Action.Method.GET.equals(result.getAction().getMethod())
                         || Action.Method.POST.equals(result.getAction().getMethod())) {
 
                     result.getAction().setTarget(Action.Target.BLANK);
@@ -152,12 +153,12 @@ public class ResultBuilderImpl implements ResultBuilder {
     }
 
     @Deactivate
-    protected void deactivate(Map<String, String> map) {
-        resultSerializers = new HashMap<String, ResultSerializer>();
+    protected final void deactivate(Map<String, String> map) {
+        resultSerializers = new ConcurrentHashMap<String, ResultSerializer>();
     }
 
     // Bind
-    protected void bindResultSerializers(final ResultSerializer service, final Map<Object, Object> props) {
+    protected final void bindResultSerializers(final ResultSerializer service, final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get(ResultSerializer.PROP_TYPE), null);
 
         if (type != null) {
@@ -167,7 +168,7 @@ public class ResultBuilderImpl implements ResultBuilder {
     }
 
     // Unbind
-    protected void unbindResultSerializers(final ResultSerializer service, final Map<Object, Object> props) {
+    protected final void unbindResultSerializers(final ResultSerializer service, final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get(ResultSerializer.PROP_TYPE), null);
 
         if (type != null) {
