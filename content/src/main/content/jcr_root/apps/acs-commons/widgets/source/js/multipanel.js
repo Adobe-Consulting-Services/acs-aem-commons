@@ -72,7 +72,8 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
                 return;
             }
             var predata = i.getValue();
-            if(predata && (typeof predata=="string" || (typeof predata=="object" && predata.constructor===String))) {
+            if(predata && (typeof predata === "string"
+                    || (typeof predata === "object" && predata.constructor === String))) {
                 pData[i.key] = predata.replace(/"/g, '&quot;'); 
             } else {
                 pData[i.key] = predata;
