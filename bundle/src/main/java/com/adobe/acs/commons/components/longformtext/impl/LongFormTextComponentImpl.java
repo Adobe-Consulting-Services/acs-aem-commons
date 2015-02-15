@@ -58,7 +58,17 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
                 final NodeList children = body.getChildNodes();
 
                 for (int i = 0; i < children.getLength(); i++) {
-                    final String outerHTML = lsSerializer.writeToString(children.item(i));
+
+                    final org.w3c.dom.Node child = children.item(i);
+                    if(child == null) {
+                        log.warn("Found a null dom node.") ;
+                        continue;
+                    } else if (child.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
+                        log.warn("Found a dom node is not an element; skipping") ;
+                        continue;
+                    }
+
+                    final String outerHTML = lsSerializer.writeToString(child);
 
                     if (StringUtils.isNotBlank(outerHTML)) {
                         paragraphs.add(outerHTML);
@@ -68,7 +78,7 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
                 log.debug("HTML to parse does not have a single body tag.");
             }
         } catch (Exception e) {
-            log.debug("Article encounter a parser error: {}", e.getMessage());
+            log.debug("Long Form Text encounter a parser error: {}", e.getMessage());
         }
 
         return paragraphs.toArray(new String[paragraphs.size()]);
