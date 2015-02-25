@@ -10,6 +10,8 @@
     final String[] textParagraphs =
             longFormTextComponent.getTextParagraphs(properties.get("text", ""));
 
+    int index = 0;
+
     pageContext.setAttribute("paragraphElement",
             xssAPI.encodeForHTMLAttr(component.getProperties().get("paragraphElement", String.class)));
     pageContext.setAttribute("paragraphCSS",
@@ -24,7 +26,7 @@
 %><wcmmode:edit>
     <%-- Updating underlying state on GET request, but ONLY on AEM Author (Edit Mode).
          Typically this is not done, but required to clean up removed paragraph resources --%>
-    <% longFormTextComponent.mergeArticleParagraphSystems(resource, textParagraphs.length); %>
+    <% longFormTextComponent.mergeParagraphSystems(resource, textParagraphs.length); %>
 </wcmmode:edit>
 <c:choose>
     <c:when test="${!wcmmode:isEdit(pageContext) && empty text}">
@@ -35,6 +37,9 @@
     </c:when>
     <c:otherwise>
         <c:forEach var="text" items="${textParagraphs}" varStatus="paragraph">
+            <c:set var="index" value="<%= ++index %>"/>
+            <c:set var="includeParsys" value="<%= longFormTextComponent.hasContents(resource, index) %>"/>
+
             <c:choose>
                 <c:when test="${!empty paragraphElement && !empty paragraphCSS}">
                     <${paragraphElement} class="${paragraphCSS}">${text}</${paragraphElement}>
@@ -47,8 +52,10 @@
                 </c:otherwise>
             </c:choose>
 
-            <cq:include path="${inlineParPrefix}${paragraph.index + 1}"
-                        resourceType="${component.resourceType}/long-form-text-parsys"/>
+            <c:if test="${wcmmode:isEdit(pageContext) || includeParsys}">
+                <cq:include path="${inlineParPrefix}${index}"
+                            resourceType="${component.resourceType}/long-form-text-parsys"/>
+            </c:if>
         </c:forEach>
     </c:otherwise>
 </c:choose>

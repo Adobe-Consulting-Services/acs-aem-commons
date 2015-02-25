@@ -13,18 +13,28 @@ public interface LongFormTextComponent {
      *
      * Note: this method does not support intelligence for managing nested <p>'s in <p>'s
      *
-     * @param longFormText The HTML text to split
+     * @param text The HTML text to split
      * @return A string array of HTML paragraphs including the surrounding <p>...</p>
      */
-    String[] getTextParagraphs(String longFormText);
+    String[] getTextParagraphs(String text);
 
     /**
-     * Housekeeping for the Long Form Article text responsible for merging dangling par resource up when
+     * Housekeeping for the Long Form Text responsible for merging dangling par resource up when
      * the number of <p> decreases.
      *
-     * @param articleTextResource
-     * @param numParagraphCount
+     * @param resource the long form text resource
+     * @param numParagraphCount the number of text paragraphs
      * @throws javax.jcr.RepositoryException
      */
-    void mergeArticleParagraphSystems(Resource articleTextResource, int numParagraphCount) throws RepositoryException;
+    void mergeParagraphSystems(Resource resource, int numParagraphCount) throws RepositoryException;
+
+
+    /**
+     * Determines if the specified long form text parsys has content.
+     *
+     * @param resource the long form text resource
+     * @param index the index of the long-form-text parsys to inspect
+     * @return true to include the parsys
+     */
+    boolean hasContents(Resource resource, int index);
 }

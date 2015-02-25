@@ -27,7 +27,7 @@ import java.util.List;
 
 
 @Component(
-        label = "ACS AEM Commons - Components - Long-form Text",
+        label = "ACS AEM Commons - Components - Long-Form Text",
         description = "Provides support for the ACS AEM Commons Long-form Text Component."
 )
 @Service
@@ -38,11 +38,11 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
     private HtmlParser htmlParser;
 
     @Override
-    public final String[] getTextParagraphs(final String longFormText) {
+    public final String[] getTextParagraphs(final String text) {
         List<String> paragraphs = new ArrayList<String>();
 
         try {
-            final Document doc = htmlParser.parse(null, IOUtils.toInputStream(longFormText), "UTF-8");
+            final Document doc = htmlParser.parse(null, IOUtils.toInputStream(text), "UTF-8");
             doc.getDocumentElement().normalize();
 
             final DOMImplementationLS domImplementation = (DOMImplementationLS) doc.getImplementation();
@@ -84,22 +84,24 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
         return paragraphs.toArray(new String[paragraphs.size()]);
     }
 
+
+
     @Override
-    public final void mergeArticleParagraphSystems(final Resource articleTextResource,
-                                                   final int textParagraphSize) throws RepositoryException {
-        if (articleTextResource == null
-                || ResourceUtil.isNonExistingResource(articleTextResource)
-                || !this.isModifiable(articleTextResource)) {
+    public final void mergeParagraphSystems(final Resource resource,
+                                            final int textParagraphSize) throws RepositoryException {
+        if (resource == null
+                || ResourceUtil.isNonExistingResource(resource)
+                || !this.isModifiable(resource)) {
             // Nothing to merge, or user does not have access to merge
             return;
         }
 
-        final List<Resource> children = IteratorUtils.toList(articleTextResource.getChildren().iterator());
+        final List<Resource> children = IteratorUtils.toList(resource.getChildren().iterator());
 
-        final Node targetNode = this.getOrCreateLastParagraphSystemResource(articleTextResource, textParagraphSize);
+        final Node targetNode = this.getOrCreateLastParagraphSystemResource(resource, textParagraphSize);
 
         if (targetNode == null) {
-            log.info("Could not find last target node to merge article text inline par resources: {}",
+            log.info("Could not find last target node to merge long-form-text text inline par resources: {}",
                     textParagraphSize);
             return;
         }
@@ -113,6 +115,13 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
         }
     }
 
+    @Override
+    public boolean hasContents(final Resource resource, final int index) {
+        final Resource parResource = resource.getChild(LONG_FORM_TEXT_PAR + index);
+
+        return parResource != null && parResource.listChildren().hasNext();
+    }
+
     private void moveChildrenToNode(Resource resource, Node targetNode) throws RepositoryException {
         for (Resource child : resource.getChildren()) {
 
@@ -124,22 +133,22 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
             JcrUtil.copy(child.adaptTo(Node.class), targetNode, uniqueNode.getName(), true);
         }
 
-        // Remove the old article-par- node
+        // Remove the old long-form-text-par- node
         resource.adaptTo(Node.class).remove();
 
         // Save all changes
         targetNode.getSession().save();
     }
 
-    private Node getOrCreateLastParagraphSystemResource(final Resource articleTextResource,
+    private Node getOrCreateLastParagraphSystemResource(final Resource resource,
                                                         final int lastIndex) throws RepositoryException {
         final String resourceName = LONG_FORM_TEXT_PAR + lastIndex;
-        final Resource lastResource = articleTextResource.getChild(resourceName);
+        final Resource lastResource = resource.getChild(resourceName);
         if (lastResource != null) {
             return lastResource.adaptTo(Node.class);
         }
 
-        final Node parentNode = articleTextResource.adaptTo(Node.class);
+        final Node parentNode = resource.adaptTo(Node.class);
 
         if (parentNode == null) {
             return null;
