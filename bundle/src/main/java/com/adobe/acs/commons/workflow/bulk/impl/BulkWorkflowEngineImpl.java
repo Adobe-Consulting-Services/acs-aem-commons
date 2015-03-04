@@ -31,11 +31,7 @@ import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.model.WorkflowModel;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -43,6 +39,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +72,15 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     private static final int SAVE_THRESHOLD = 1000;
 
+    private static final boolean DEFAULT_AUTO_RESUME = false;
+    private boolean autoResume = DEFAULT_AUTO_RESUME;
+    @Property(label = "Auto-Resume",
+            description = "Stopping the ACS AEM Commons bundle will stop any executing Bulk Workflow processing. "
+            + "By default when the bundle starts, it will not attempt to auto-resume stopped via deactivation bulk workflow jobs "
+            + "as the query for this may be expensive in very large repositories. ",
+            boolValue = DEFAULT_AUTO_RESUME)
+    public static final String PROP_AUTO_RESUME = "auto-resume";
+    
     @Reference
     private WorkflowService workflowService;
 
@@ -700,31 +706,37 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     @Activate
     protected final void activate(final Map<String, String> config) {
-        jobs = new ConcurrentHashMap<String, String>();
+        this.jobs = new ConcurrentHashMap<String, String>();
 
-        ResourceResolver adminResourceResolver = null;
+        this.autoResume = PropertiesUtil.toBoolean(config.get(PROP_AUTO_RESUME), DEFAULT_AUTO_RESUME);
 
-        try {
-            adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+        if (this.autoResume) {
+            log.info("Looking for any Bulk Workflow Manager pages to resume processing.");
+            
+            ResourceResolver adminResourceResolver = null;
 
-            final String query = "SELECT * FROM [cq:PageContent] WHERE [sling:resourceType] = "
-                    + "'" + SLING_RESOURCE_TYPE + "'"
-                    + " AND [" + KEY_STATE + "] = '" + STATE_STOPPED_DEACTIVATED + "'";
+            try {
+                adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
-            log.debug("Finding bulk workflows to reactivate using query: {}", query);
+                final String query = "SELECT * FROM [cq:PageContent] WHERE [sling:resourceType] = "
+                        + "'" + SLING_RESOURCE_TYPE + "'"
+                        + " AND [" + KEY_STATE + "] = '" + STATE_STOPPED_DEACTIVATED + "'";
 
-            final Iterator<Resource> resources = adminResourceResolver.findResources(query, Query.JCR_SQL2);
+                log.debug("Finding bulk work flows to reactivate using query: {}", query);
 
-            while (resources.hasNext()) {
-                final Resource resource = resources.next();
-                log.info("Automatically resuming bulk workflow at [ {} ]", resource.getPath());
-                this.resume(resource);
-            }
-        } catch (LoginException e) {
-            log.error("{}", e.getMessage());
-        } finally {
-            if (adminResourceResolver != null) {
-                adminResourceResolver.close();
+                final Iterator<Resource> resources = adminResourceResolver.findResources(query, Query.JCR_SQL2);
+
+                while (resources.hasNext()) {
+                    final Resource resource = resources.next();
+                    log.info("Automatically resuming bulk workflow at [ {} ]", resource.getPath());
+                    this.resume(resource);
+                }
+            } catch (LoginException e) {
+                log.error("Could not obtain resource resolver for finding stopped Bulk Workflow jobs", e);
+            } finally {
+                if (adminResourceResolver != null) {
+                    adminResourceResolver.close();
+                }
             }
         }
     }
