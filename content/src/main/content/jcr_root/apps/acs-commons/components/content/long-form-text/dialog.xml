@@ -12,7 +12,7 @@
             <items jcr:primaryType="cq:WidgetCollection">
                 <long-form-text
                         jcr:primaryType="cq:Widget"
-                        script="rte.long-form.json.jsp"
+                        script="rte.long-form-text.json.jsp"
                         xtype="slingscriptinclude"/>
             </items>
         </tab1>
