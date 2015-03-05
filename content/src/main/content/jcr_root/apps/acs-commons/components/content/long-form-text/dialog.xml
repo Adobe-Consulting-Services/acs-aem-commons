@@ -12,22 +12,8 @@
             <items jcr:primaryType="cq:WidgetCollection">
                 <long-form-text
                         jcr:primaryType="cq:Widget"
-                        fieldLabel="Text"
-                        fieldDescription=""
-                        defaultValue=""
-                        hideLabel="{Boolean}true"
-                        name="./text"
-                        xtype="richtext">
-                    <rtePlugins jcr:primaryType="nt:unstructured">
-                        <table
-                                jcr:primaryType="nt:unstructured"
-                                features="*"/>
-                        <edit
-                                jcr:primaryType="nt:unstructured"
-                                features="[paste-plaintext]"
-                                defaultPasteMode="plaintext"/>
-                    </rtePlugins>
-                </long-form-text>
+                        script="rte.long-form.json.jsp"
+                        xtype="slingscriptinclude"/>
             </items>
         </tab1>
     </items>
