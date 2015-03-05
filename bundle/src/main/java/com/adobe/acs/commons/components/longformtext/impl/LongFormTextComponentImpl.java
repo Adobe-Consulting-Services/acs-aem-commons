@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.components.longformtext.impl;
 
 import com.adobe.acs.commons.components.longformtext.LongFormTextComponent;
@@ -24,7 +43,6 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Component(
         label = "ACS AEM Commons - Components - Long-Form Text",
@@ -60,11 +78,11 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
                 for (int i = 0; i < children.getLength(); i++) {
 
                     final org.w3c.dom.Node child = children.item(i);
-                    if(child == null) {
-                        log.warn("Found a null dom node.") ;
+                    if (child == null) {
+                        log.warn("Found a null dom node.");
                         continue;
                     } else if (child.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
-                        log.warn("Found a dom node is not an element; skipping") ;
+                        log.warn("Found a dom node is not an element; skipping");
                         continue;
                     }
 
@@ -75,15 +93,14 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
                     }
                 }
             } else {
-                log.debug("HTML to parse does not have a single body tag.");
+                log.debug("HTML does not have a single body tag. Cannot parse as expected.");
             }
         } catch (Exception e) {
-            log.debug("Long Form Text encounter a parser error: {}", e.getMessage());
+            log.warn("Long Form Text encountered a parser error: {}", e);
         }
 
         return paragraphs.toArray(new String[paragraphs.size()]);
     }
-
 
 
     @Override
