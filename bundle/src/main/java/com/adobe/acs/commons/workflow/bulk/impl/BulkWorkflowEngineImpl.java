@@ -277,7 +277,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                         }
                     }
                 } catch (Exception e) {
-                    log.error("Error processing periodic execution: {}", e.getMessage());
+                    log.error("Error processing periodic execution: {}", e);
 
                     try {
                         if (contentResource != null) {
