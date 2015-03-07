@@ -313,7 +313,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
             resource.getResourceResolver().commit();
 
         } catch (Exception e) {
-            log.error("Error starting bulk workflow management. {}", e.getMessage());
+            log.error("Error starting bulk workflow management. {}", e);
         }
 
         log.info("Completed starting of Bulk Workflow Manager");
@@ -581,7 +581,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
     }
 
     /**
-     * Retrieves the active worklfows for the batch.
+     * Retrieves the active workflows for the batch.
      *
      * @param resourceResolver the resource resolver
      * @param workflowMap      the map tracking what batch items are under WF
@@ -616,7 +616,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                     dirty = true;
                 }
             } catch (WorkflowException e) {
-                log.error("Could not get workflow with id [ {} ]. {}", workflowId, e.getMessage());
+                log.error("Could not get workflow with id [ {} ]. {}", workflowId, e);
             }
         }
 
@@ -671,7 +671,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                 }
 
             } catch (WorkflowException e) {
-                log.error("Could not get workflow with id [ {} ]. {}", workflowId, e.getMessage());
+                log.error("Could not get workflow with id [ {} ]. {}", workflowId, e);
             }
         }
 
@@ -760,11 +760,11 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                 } catch (Exception e) {
                     this.scheduler.removeJob(jobName);
                     jobs.remove(path);
-                    log.error("Performed a hard stop for [ {} ] at de-activation due to: ", jobName, e.getMessage());
+                    log.error("Performed a hard stop for [ {} ] at de-activation due to: ", jobName, e);
                 }
             }
         } catch (org.apache.sling.api.resource.LoginException e) {
-            log.error("Could not acquire a resource resolver: {}", e.getMessage());
+            log.error("Could not acquire a resource resolver: {}", e);
         } finally {
             if (resourceResolver != null) {
                 resourceResolver.close();
