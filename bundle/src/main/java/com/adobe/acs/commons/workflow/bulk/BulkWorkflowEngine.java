@@ -35,6 +35,8 @@ public interface BulkWorkflowEngine {
 
     String SLING_FOLDER = "sling:Folder";
 
+    String BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH = "/etc/acs-commons/bulk-workflow-manager";
+    
     int DEFAULT_INTERVAL = 10;
 
     long DEFAULT_ESTIMATED_TOTAL = 1000000;

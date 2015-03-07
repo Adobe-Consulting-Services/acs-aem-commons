@@ -64,6 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component(
         label = "ACS AEM Commons - Bulk Workflow Engine",
+        metatype = true,
         immediate = true
 )
 @Service
@@ -72,15 +73,15 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     private static final int SAVE_THRESHOLD = 1000;
 
-    private static final boolean DEFAULT_AUTO_RESUME = false;
+    private static final boolean DEFAULT_AUTO_RESUME = true;
     private boolean autoResume = DEFAULT_AUTO_RESUME;
     @Property(label = "Auto-Resume",
             description = "Stopping the ACS AEM Commons bundle will stop any executing Bulk Workflow processing. "
-            + "By default when the bundle starts, it will not attempt to auto-resume stopped via deactivation bulk workflow jobs "
-            + "as the query for this may be expensive in very large repositories. ",
+                    + "When auto-resume is enabled, it will attempt to resume 'stopped via deactivation' bulk workflow jobs "
+                    + "under " + BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH + ". [ Default: true ] ",
             boolValue = DEFAULT_AUTO_RESUME)
     public static final String PROP_AUTO_RESUME = "auto-resume";
-    
+
     @Reference
     private WorkflowService workflowService;
 
@@ -332,7 +333,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     /**
      * Stops the bulk workflow process using the OSGi Component deactivated stop state.
-     * <p>
+     * <p/>
      * Allows the system to know to resume this when the OSGi Component is activated.
      *
      * @param resource the jcr:content configuration resource
@@ -485,7 +486,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     /**
      * Advance to the next batch and update all properties on the current and next batch nodes accordingly.
-     * <p>
+     * <p/>
      * This method assumes the current batch has been verified as complete.
      *
      * @param resource the bulk workflow manager content resource
@@ -711,25 +712,26 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
         this.autoResume = PropertiesUtil.toBoolean(config.get(PROP_AUTO_RESUME), DEFAULT_AUTO_RESUME);
 
         if (this.autoResume) {
-            log.info("Looking for any Bulk Workflow Manager pages to resume processing.");
-            
+            log.info("Looking for any Bulk Workflow Manager pages to resume processing under: {}", BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH);
+
             ResourceResolver adminResourceResolver = null;
 
             try {
                 adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                final Resource root = adminResourceResolver.getResource(BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH);
 
-                final String query = "SELECT * FROM [cq:PageContent] WHERE [sling:resourceType] = "
-                        + "'" + SLING_RESOURCE_TYPE + "'"
-                        + " AND [" + KEY_STATE + "] = '" + STATE_STOPPED_DEACTIVATED + "'";
+                if (root != null) {
+                    final ResumableResourceVisitor visitor = new ResumableResourceVisitor();
+                    visitor.accept(root);
 
-                log.debug("Finding bulk work flows to reactivate using query: {}", query);
+                    final List<Resource> resources = visitor.getResumableResources();
 
-                final Iterator<Resource> resources = adminResourceResolver.findResources(query, Query.JCR_SQL2);
-
-                while (resources.hasNext()) {
-                    final Resource resource = resources.next();
-                    log.info("Automatically resuming bulk workflow at [ {} ]", resource.getPath());
-                    this.resume(resource);
+                    log.debug("Found {} resumable resource(s)", resources.size());
+                    
+                    for (final Resource resource : resources) {
+                        log.info("Automatically resuming bulk workflow at [ {} ]", resource.getPath());
+                        this.resume(resource);
+                    }
                 }
             } catch (LoginException e) {
                 log.error("Could not obtain resource resolver for finding stopped Bulk Workflow jobs", e);
