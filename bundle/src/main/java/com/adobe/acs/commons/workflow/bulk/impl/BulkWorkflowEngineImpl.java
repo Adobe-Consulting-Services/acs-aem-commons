@@ -71,6 +71,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowEngineImpl.class);
 
+    private static final String BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH = "/etc/acs-commons/bulk-workflow-manager";
+
     private static final int SAVE_THRESHOLD = 1000;
 
     private static final boolean DEFAULT_AUTO_RESUME = true;
@@ -727,7 +729,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                     final List<Resource> resources = visitor.getResumableResources();
 
                     log.debug("Found {} resumable resource(s)", resources.size());
-                    
+
                     for (final Resource resource : resources) {
                         log.info("Automatically resuming bulk workflow at [ {} ]", resource.getPath());
                         this.resume(resource);

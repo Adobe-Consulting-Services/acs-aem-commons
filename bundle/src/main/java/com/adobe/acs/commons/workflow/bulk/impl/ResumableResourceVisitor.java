@@ -38,6 +38,7 @@ import java.util.List;
 public class ResumableResourceVisitor extends AbstractResourceVisitor {
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowEngineImpl.class);
 
+    private static final String BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH = "/etc/acs-commons/bulk-workflow-manager";
     private static final String NT_PAGE_CONTENT = "cq:PageContent";
     private static final String[] ACCEPTED_PRIMARY_TYPES = new String[] { NameConstants.NT_PAGE, NT_PAGE_CONTENT };
     private List<Resource> resources = new ArrayList<Resource>();
@@ -45,13 +46,15 @@ public class ResumableResourceVisitor extends AbstractResourceVisitor {
     public final List<Resource> getResumableResources() {
         return this.resources;
     }
-    
+
     @Override
     public final void accept(final Resource resource) {
+        // Only accept the Root folder and cq:Page and cq:PageContent nodes; All other structures are uninteresting
+        // to this functionality and may be very large
         final ValueMap properties = resource.adaptTo(ValueMap.class);
         final String primaryType = properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class);
 
-        if (BulkWorkflowEngine.BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH.equals(resource.getPath())) {
+        if (BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH.equals(resource.getPath())) {
             super.accept(resource);
         } else if (ArrayUtils.contains(ACCEPTED_PRIMARY_TYPES, primaryType)) {
             super.accept(resource);
@@ -62,8 +65,11 @@ public class ResumableResourceVisitor extends AbstractResourceVisitor {
     protected void visit(final Resource resource) {
         final ValueMap properties = resource.adaptTo(ValueMap.class);
         
+        // Ensure jcr:primaryType = cq:PageContent
         if(NT_PAGE_CONTENT.equals(properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
+            // Ensure the sling:resourceType is that of Bulk Workflow Manager Page
             if(BulkWorkflowEngine.SLING_RESOURCE_TYPE.equals(properties.get(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, String.class))) {
+                // Ensure the Bulk Workflow Manager Page has been marked as "Stopped by Bundle Deactivation"
                 if(BulkWorkflowEngine.STATE_STOPPED_DEACTIVATED.equals(properties.get(BulkWorkflowEngine.KEY_STATE, String.class))) {
                     this.resources.add(resource);
                 }
