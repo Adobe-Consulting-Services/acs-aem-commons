@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.dam;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.api.RenditionPicker;
@@ -31,6 +33,7 @@ import java.util.regex.Pattern;
  * RenditionPicker that picks Assets based on a Regex pattern that matches against
  * Rendition names.
  */
+@ProviderType
 public class RenditionPatternPicker implements RenditionPicker {
 
     private final Pattern pattern;
@@ -61,9 +64,9 @@ public class RenditionPatternPicker implements RenditionPicker {
 
     /**
      * Gets the rendition which matches against the constructor's Regex pattern.
-     * <p/>
+     * <p>
      * If no matches are made and an Original exists, returns the Original.
-     * <p/>
+     * <p>
      * If no matches are made and an Original doesn't exist, return the first Rendition.
      *
      * @param asset Asset whose Renditions will be selected.

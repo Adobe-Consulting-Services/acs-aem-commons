@@ -82,7 +82,7 @@ public class InitFormServlet extends SlingAllMethodsServlet {
             response.getWriter().write(json.toString());
 
         } catch (WorkflowException e) {
-            log.error("Could not create workflow model drop-down due to: {}", e.getMessage());
+            log.error("Could not create workflow model drop-down due to: {}", e);
 
             HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not collect Workflows",

@@ -29,7 +29,7 @@
             currentPage.getName());
 %>
 
-<h1>ACL Packager</h1>
+<h1>AEM Packager</h1>
 
 <h2><%= xssAPI.encodeForHTML(pageTitle) %></h2>
 

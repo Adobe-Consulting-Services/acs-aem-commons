@@ -52,9 +52,10 @@ import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Component(
         label = "ACS AEM Commons - Package Helper",
@@ -62,7 +63,7 @@ import java.util.Set;
 )
 @Service
 public final class PackageHelperImpl implements PackageHelper {
-    private static final Logger log = LoggerFactory.getLogger(ACLPackagerServletImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PackageHelperImpl.class);
 
     private static final String NN_THUMBNAIL = "thumbnail.png";
 
@@ -119,8 +120,8 @@ public final class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public Version getNextVersion(final JcrPackageManager jcrPackageManager,
-                                        final String groupName, final String name,
-                                        final String version) throws RepositoryException {
+                                  final String groupName, final String name,
+                                  final String version) throws RepositoryException {
         final Node packageRoot = jcrPackageManager.getPackageRoot(false);
         final Version configVersion = Version.create(version);
 
@@ -145,7 +146,8 @@ public final class PackageHelperImpl implements PackageHelper {
                         || jcrPackage.getDefinition() == null
                         || jcrPackage.getDefinition().getId() == null) {
 
-                    log.warn("Could not covert node [ {} ] into a proper JCR Package, moving to next node", child.getPath());
+                    log.warn("Could not covert node [ {} ] into a proper JCR Package, moving to next node",
+                            child.getPath());
                     continue;
 
                 } else if (!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
@@ -217,8 +219,8 @@ public final class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public void removePackage(final JcrPackageManager jcrPackageManager,
-                                    final String groupName, final String name,
-                                    final String version) throws RepositoryException {
+                              final String groupName, final String name,
+                              final String version) throws RepositoryException {
         final PackageId packageId = new PackageId(groupName, name, version);
         final JcrPackage jcrPackage = jcrPackageManager.open(packageId);
 
@@ -233,10 +235,31 @@ public final class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public JcrPackage createPackage(final Set<Resource> resources, final Session session,
-                                          final String groupName, final String name, String version,
-                                          final ConflictResolution conflictResolution,
-                                          final Map<String, String> packageDefinitionProperties)
+    public JcrPackage createPackage(final Collection<Resource> resources, final Session session,
+                                    final String groupName, final String name, String version,
+                                    final ConflictResolution conflictResolution,
+                                    final Map<String, String> packageDefinitionProperties)
+            throws IOException, RepositoryException {
+
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
+
+        for (final Resource resource : resources) {
+            pathFilterSets.add(new PathFilterSet(resource.getPath()));
+        }
+
+        return this.createPackageFromPathFilterSets(pathFilterSets, session, groupName, name, version,
+                conflictResolution, packageDefinitionProperties);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public JcrPackage createPackageFromPathFilterSets(final Collection<PathFilterSet> pathFilterSets,
+                                                      final Session session,
+                                                      final String groupName, final String name, String version,
+                                                      final ConflictResolution conflictResolution,
+                                                      final Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException {
 
         final JcrPackageManager jcrPackageManager = packaging.getPackageManager(session);
@@ -251,8 +274,8 @@ public final class PackageHelperImpl implements PackageHelper {
         final JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
         final DefaultWorkspaceFilter workspaceFilter = new DefaultWorkspaceFilter();
 
-        for (final Resource resource : resources) {
-            workspaceFilter.add(new PathFilterSet(resource.getPath()));
+        for (final PathFilterSet pathFilterSet : pathFilterSets) {
+            workspaceFilter.add(pathFilterSet);
         }
 
         jcrPackageDefinition.setFilter(workspaceFilter, true);
@@ -269,10 +292,12 @@ public final class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public List<String> getContents(final JcrPackage jcrPackage) throws IOException, RepositoryException, PackageException {
+    public List<String> getContents(final JcrPackage jcrPackage) throws IOException,
+            RepositoryException, PackageException {
 
-        JcrPackageCoverageProgressListener jcrPackageCoverageProgressListener = new JcrPackageCoverageProgressListener();
-        
+        JcrPackageCoverageProgressListener jcrPackageCoverageProgressListener =
+                new JcrPackageCoverageProgressListener();
+
         ImportOptions importOptions = new ImportOptions();
         importOptions.setDryRun(true);
         importOptions.setListener(jcrPackageCoverageProgressListener);
@@ -307,17 +332,31 @@ public final class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public String getPreviewJSON(final Set<Resource> resources) throws JSONException {
+    public String getPreviewJSON(final Collection<Resource> resources) throws JSONException {
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
+
+        for (Resource resource : resources) {
+            pathFilterSets.add(new PathFilterSet(resource.getPath()));
+        }
+
+        return this.getPathFilterSetPreviewJSON(pathFilterSets);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets) throws JSONException {
         final JSONObject json = new JSONObject();
 
         json.put("status", "preview");
         json.put("path", "Not applicable (Preview)");
         json.put("filterSets", new JSONArray());
 
-        for (final Resource resource : resources) {
+        for (final PathFilterSet pathFilterSet : pathFilterSets) {
             final JSONObject tmp = new JSONObject();
             tmp.put("importMode", "Not applicable (Preview)");
-            tmp.put("rootPath", resource.getPath());
+            tmp.put("rootPath", pathFilterSet.getRoot());
 
             json.accumulate("filterSets", tmp);
         }

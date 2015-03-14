@@ -20,9 +20,13 @@
 
 package com.adobe.acs.commons.images;
 
+import aQute.bnd.annotation.ConsumerType;
+
 import com.day.image.Layer;
+
 import org.apache.sling.api.resource.ValueMap;
 
+@ConsumerType
 public interface ImageTransformer {
     /**
      * OSGi Property used to identify the ImageTransformer.
@@ -34,7 +38,7 @@ public interface ImageTransformer {
      *
      * @param layer the image layer to transform
      * @param properties transformation parameters
-     * @return the transformered layer; or if layer could not be transformed (invalid properties) the layer unmodified
+     * @return the transformed layer; or if layer could not be transformed (invalid properties) the layer unmodified
      */
     Layer transform(Layer layer, ValueMap properties);
 }

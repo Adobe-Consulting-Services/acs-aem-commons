@@ -23,12 +23,14 @@ import javax.servlet.ServletRequest;
 import javax.servlet.jsp.PageContext;
 
 import tldgen.Function;
+import aQute.bnd.annotation.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
 
 /**
  * JSP function classes from the wcmmode tag namespace.
  */
+@ProviderType
 public final class WCMModeFunctions {
 
     private WCMModeFunctions() {

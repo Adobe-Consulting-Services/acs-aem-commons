@@ -26,29 +26,29 @@
     String[] tweets = properties.get("tweets", new String[0]);
     int limit = properties.get("limit", 0);
     List<String> tweetList = Arrays.asList(tweets);
-    if (limit > 0) {
+    if (limit < tweetList.size()) {
         tweetList = tweetList.subList(0, limit);
     }
 
-    request.setAttribute("tweets", tweetList);
+    pageContext.setAttribute("tweets", tweetList);
 %>
 <c:choose>
     <c:when test="${empty properties.username}">
         <wcm:placeholder>Please provide a Twitter username.</wcm:placeholder>
     </c:when>
     <c:otherwise>
-        <ul>
-            <c:choose>
-                <c:when test="${fn:length(tweets) gt 0}">
-                    <c:forEach var="tweet" items="${tweets}">
-                        <li>${xss:filterHTML(xssAPI, tweet)}</li>
-                    </c:forEach>
-                </c:when>
-                <c:when test="${wcmmode:isEdit(pageContext)}">
-                    The Twitter timeline for user: '${xss:encodeForHTML(xssAPI, properties.username)}' hasn't been fetched yet.
-                </c:when>
-            </c:choose>
-        </ul>
+        <c:choose>
+            <c:when test="${fn:length(tweets) gt 0}">
+                <ul>
+                <c:forEach var="tweet" items="${tweets}">
+                    <li>${xss:filterHTML(xssAPI, tweet)}</li>
+                </c:forEach>
+                </ul>
+            </c:when>
+            <c:when test="${wcmmode:isEdit(pageContext)}">
+                The Twitter timeline for user: '${xss:encodeForHTML(xssAPI, properties.username)}' hasn't been fetched yet.
+            </c:when>
+        </c:choose>
     </c:otherwise>
 </c:choose>
 

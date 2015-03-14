@@ -42,11 +42,19 @@ class CacheEntry {
     }
 
     public final String getData() {
-        return data;
+        if (data == null) {
+            return "";
+        } else {
+            return data;
+        }
     }
 
     public final void setData(final String data) {
-        this.data = data;
+        if (data == null) {
+            this.data = "";
+        } else {
+            this.data = data;
+        }
     }
 
     public final int getHits() {
@@ -96,7 +104,7 @@ class CacheEntry {
     final int getTotal() {
         return this.hits.get() + this.misses.get();
     }
-    
+
     final int getBytes() {
         return getData().getBytes(Charset.forName("UTF-8")).length;
     }

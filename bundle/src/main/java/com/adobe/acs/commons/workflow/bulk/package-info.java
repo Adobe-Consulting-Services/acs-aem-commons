@@ -20,4 +20,4 @@
 /**
  * Bulk Workflow Management.
  */
-@aQute.bnd.annotation.Version("1.0.0") package com.adobe.acs.commons.workflow.bulk;
+@aQute.bnd.annotation.Version("1.0.1") package com.adobe.acs.commons.workflow.bulk;

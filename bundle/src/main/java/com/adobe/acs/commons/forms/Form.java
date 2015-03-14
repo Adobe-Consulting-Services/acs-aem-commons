@@ -25,9 +25,12 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@ProviderType
 public class Form {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(Form.class);
@@ -59,7 +62,7 @@ public class Form {
 
     /**
      * Get the Form's name
-     * <p/>
+     * <p>
      * This should uniquely identify a Form on a Page
      *
      * @return
@@ -70,9 +73,9 @@ public class Form {
 
     /**
      * Sets the Form name
-     * <p/>
+     * <p>
      * Typically this setter is not used and Form names are set in constructor.
-     * <p/>
+     * <p>
      * This can be helpful for changing the flow or using Form X to populate Form Y
      *
      * @param name
@@ -191,7 +194,7 @@ public class Form {
 
     /**
      * Sets an error
-     * <p/>
+     * <p>
      * This is used if no corresponding error message/data is required to be associated; and the only information required is that an error occurred against key X.
      *
      * @param key

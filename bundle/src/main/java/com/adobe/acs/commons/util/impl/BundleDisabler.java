@@ -40,7 +40,7 @@ import java.util.Map;
 
 /**
  * Component disabler service
- * <p/>
+ * <p>
  * In the AEM security checklist, there are some bundles which should be disabled in production environents.
  * Whilst these bundles can be manually stopped, this component will do that as part of a deployment.  It will also
  * ensure that if they are manually started once more, then they will be immediately stopped.

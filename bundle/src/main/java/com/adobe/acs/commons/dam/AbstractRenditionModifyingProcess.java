@@ -31,6 +31,8 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import aQute.bnd.annotation.ConsumerType;
+
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.commons.process.AbstractAssetWorkflowProcess;
@@ -51,6 +53,7 @@ import com.day.image.Layer;
  * </ul>
  *
  */
+@ConsumerType
 public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWorkflowProcess {
 
     private static final int MAX_GIF_QUALITY = 255;

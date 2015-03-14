@@ -19,16 +19,21 @@
  */
 package com.adobe.acs.commons.forms.helpers;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.adobe.acs.commons.forms.Form;
 import com.day.cq.wcm.api.Page;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 
+@ProviderType
 public interface FormHelper {
     String EXTENSION = ".html";
 
@@ -71,7 +76,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided resource's path
-     * <p/>
+     * <p>
      * Appends ".post.html" to the resource's path.
      *
      * @param resource
@@ -81,7 +86,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided resource's path
-     * <p/>
+     * <p>
      * Appends ".html/<suffix>" to the resource's path.
      *
      * @param resource
@@ -92,7 +97,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided page's path
-     * <p/>
+     * <p>
      * Appends ".html/<suffix>/<formSelector>" to the page's path.
      *
      * @param page
@@ -102,7 +107,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided page's path
-     * <p/>
+     * <p>
      * Appends ".html/<suffix>/<formSelector>" to the page's path.
      *
      * @param page
@@ -113,7 +118,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided path
-     * <p/>
+     * <p>
      * Appends ".html/<suffix>" to the path.
      *
      * @param path
@@ -123,7 +128,7 @@ public interface FormHelper {
 
     /**
      * Builds the form's action URI based on the provided path
-     * <p/>
+     * <p>
      * Appends ".html/<suffix>/<formSelector>" to the path.
      *
      * @param path
@@ -134,7 +139,7 @@ public interface FormHelper {
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
+     * <p>
      * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
      * in the implementing FormHelper
      *
@@ -151,7 +156,7 @@ public interface FormHelper {
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
+     * <p>
      * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
      * in the implementing FormHelper
      *
@@ -168,7 +173,7 @@ public interface FormHelper {
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
+     * <p>
      * - Wraps implementing `.renderForm(..)` method (sendRedirect or forwardAsGet) in the implementing FormHelper
      *
      * @param form
@@ -184,7 +189,7 @@ public interface FormHelper {
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
+     * <p>
      * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
      * in the implementing FormHelper
      *
@@ -202,7 +207,7 @@ public interface FormHelper {
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
+     * <p>
      * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
      * in the implementing FormHelper
      *
@@ -221,7 +226,7 @@ public interface FormHelper {
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
-     * <p/>
+     * <p>
      * - Wraps implementing FormHelper's `render(..)` method (sendRedirect or forwardAsGet)
      * in the implementing FormHelper
      *

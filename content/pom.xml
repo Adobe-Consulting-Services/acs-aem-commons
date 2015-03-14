@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>1.7.5-SNAPSHOT</version>
+        <version>1.9.7-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -211,6 +211,18 @@
             <artifactId>day-commons-jstl</artifactId>
             <version>1.1.4</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.day.cq.dam</groupId>
+            <artifactId>cq-dam-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.day.cq.dam</groupId>
+            <artifactId>cq-dam-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.day.cq.dam</groupId>
+            <artifactId>cq-dam-video</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

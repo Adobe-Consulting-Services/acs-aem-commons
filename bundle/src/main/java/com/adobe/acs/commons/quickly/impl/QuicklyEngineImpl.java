@@ -1,0 +1,159 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+package com.adobe.acs.commons.quickly.impl;
+
+import com.adobe.acs.commons.quickly.Command;
+import com.adobe.acs.commons.quickly.QuicklyEngine;
+import com.adobe.acs.commons.quickly.operations.Operation;
+import com.adobe.acs.commons.quickly.operations.impl.GoOperationImpl;
+import com.adobe.acs.commons.quickly.results.Result;
+import com.adobe.acs.commons.quickly.results.ResultBuilder;
+import com.day.cq.wcm.api.AuthoringUIMode;
+import com.day.cq.wcm.api.AuthoringUIModeService;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.commons.json.JSONArray;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Component(
+        label = "ACS AEM Commons - Quickly",
+        metatype = true,
+        policy = ConfigurationPolicy.REQUIRE
+)@Reference(
+        name = "operations",
+        referenceInterface = Operation.class,
+        policy = ReferencePolicy.DYNAMIC,
+        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
+)
+@Service
+public class QuicklyEngineImpl implements QuicklyEngine {
+    private static final Logger log = LoggerFactory.getLogger(QuicklyEngineImpl.class);
+
+    private static final String KEY_RESULTS = "results";
+
+    private ValueMap config;
+
+    private static final String[] DEFAULT_RESULT_MODES = { };
+    @Property(label = "Result Modes",
+            description = "Additive - options: [ dev ], [ blank is the baseline ]",
+            cardinality = 100,
+            value = { })
+    public static final String PROP_RESULT_MODES = "result.modes";
+
+    @Reference
+    private AuthoringUIModeService authoringUIModeService;
+
+    @Reference(target = "(cmd=" + GoOperationImpl.CMD + ")")
+    private Operation defaultOperation;
+
+    @Reference
+    private ResultBuilder resultBuilder;
+
+    private Map<String, Operation> operations = new ConcurrentHashMap<String, Operation>();
+
+    @Override
+    public final JSONObject execute(final SlingHttpServletRequest request, SlingHttpServletResponse response,
+                              final Command cmd) throws JSONException {
+
+        for (final Operation operation : operations.values()) {
+            if (operation.accepts(request, cmd)) {
+                return this.getJSONResults(cmd, request, operation.getResults(request, response, cmd));
+            }
+        }
+
+        /* Default Command */
+
+        final Command defaultCmd = new Command(defaultOperation.getCmd() + " " + cmd.toString());
+        return this.getJSONResults(cmd, request, defaultOperation.getResults(request, response, defaultCmd));
+    }
+
+    private JSONObject getJSONResults(Command cmd, SlingHttpServletRequest request, final Collection<Result> results) throws
+            JSONException {
+        final JSONObject json = new JSONObject();
+
+        json.put(KEY_RESULTS, new JSONArray());
+
+        final ValueMap requestConfig = new ValueMapDecorator(new HashMap<String, Object>());
+
+        // Collect all items collected from OSGi Properties
+        requestConfig.putAll(this.config);
+
+        // Add Request specific configurations
+        requestConfig.put(AuthoringUIMode.class.getName(),
+                authoringUIModeService.getAuthoringUIMode(request));
+
+        for (final Result result : results) {
+            final JSONObject tmp = resultBuilder.toJSON(cmd, result, requestConfig);
+
+            if (tmp != null) {
+                json.accumulate(KEY_RESULTS, tmp);
+            }
+        }
+
+        return json;
+    }
+
+    protected final void bindOperations(final Operation service, final Map<Object, Object> props) {
+        final String cmd = PropertiesUtil.toString(props.get(Operation.PROP_CMD), null);
+
+        if (cmd != null) {
+            log.debug("Collected Quickly Operation [ {} ]", cmd);
+            operations.put(cmd, service);
+        }
+    }
+
+    protected final void unbindOperations(final Operation service, final Map<Object, Object> props) {
+        final String cmd = PropertiesUtil.toString(props.get(Operation.PROP_CMD), null);
+
+        if (cmd != null) {
+            log.debug("Discarded Quickly Operation [ {} ]", cmd);
+            operations.remove(cmd);
+        }
+    }
+
+    @Activate
+    protected final void activate(Map<String, String> map) {
+        config = new ValueMapDecorator(new HashMap<String, Object>());
+
+        config.put(CONFIG_RESULTS,
+                PropertiesUtil.toStringArray(map.get(PROP_RESULT_MODES), DEFAULT_RESULT_MODES));
+
+    }
+}

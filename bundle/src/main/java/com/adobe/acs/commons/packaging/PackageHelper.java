@@ -20,23 +20,29 @@
 
 package com.adobe.acs.commons.packaging;
 
+import aQute.bnd.annotation.ProviderType;
+
+import com.day.jcr.vault.fs.api.PathFilterSet;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.PackageException;
 import com.day.jcr.vault.packaging.Version;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Helper interface for dynamic package creation.
  */
+@ProviderType
 public interface PackageHelper {
     /**
      * JCR Path to default ACS thumbnail resource.
@@ -103,6 +109,26 @@ public interface PackageHelper {
 
     /**
      *
+     * @param pathFilterSets the pathFilterSets that define package
+     * @param session JCR Session obj; must have access to create packages under /etc/packages
+     * @param groupName package group name
+     * @param name package name
+     * @param version package version
+     * @param conflictResolution determines how package creation will be handled in the event of an existing package
+     *                           of the same package group, package name, and version class
+     * @param packageDefinitionProperties properties that will be added to the package definition
+     * @return the jcr package that was created, or null
+     * @throws IOException
+     * @throws RepositoryException
+     */
+    JcrPackage createPackageFromPathFilterSets(final Collection<PathFilterSet> pathFilterSets, final Session session,
+                             final String groupName, final String name, String version,
+                             final ConflictResolution conflictResolution,
+                             final Map<String, String> packageDefinitionProperties)
+            throws IOException, RepositoryException;
+
+    /**
+     *
      * @param resources the resources to include in the package
      * @param session JCR Session obj; must have access to create packages under /etc/packages
      * @param groupName package group name
@@ -115,7 +141,7 @@ public interface PackageHelper {
      * @throws IOException
      * @throws RepositoryException
      */
-    JcrPackage createPackage(final Set<Resource> resources, final Session session,
+    JcrPackage createPackage(final Collection<Resource> resources, final Session session,
                                      final String groupName, final String name, String version,
                                      final ConflictResolution conflictResolution,
                                      final Map<String, String> packageDefinitionProperties)
@@ -146,7 +172,17 @@ public interface PackageHelper {
      * @return a string representation of JSON to write to response
      * @throws JSONException
      */
-    String getPreviewJSON(final Set<Resource> resources) throws JSONException;
+    String getPreviewJSON(final Collection<Resource> resources) throws JSONException;
+
+
+    /**
+     * Returns the JSON to return reporting what the packager definition will include for the filterSets.
+     *
+     * @param pathFilterSets the pathFilterSets of the package
+     * @return a string representation of JSON to write to response
+     * @throws JSONException
+     */
+    String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets) throws JSONException;
 
 
     /**

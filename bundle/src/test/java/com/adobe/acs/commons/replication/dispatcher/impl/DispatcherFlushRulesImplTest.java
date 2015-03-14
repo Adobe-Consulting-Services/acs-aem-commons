@@ -40,7 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -56,10 +56,10 @@ public class DispatcherFlushRulesImplTest {
     private DispatcherFlusher dispatcherFlusher;
 
     @Spy
-    private Map<Pattern, String> hierarchicalFlushRules = new LinkedHashMap<Pattern, String>();
+    private Map<Pattern, String[]> hierarchicalFlushRules = new LinkedHashMap<Pattern, String[]>();
 
     @Spy
-    private Map<Pattern, String> resourceOnlyFlushRules = new LinkedHashMap<Pattern, String>();
+    private Map<Pattern, String[]> resourceOnlyFlushRules = new LinkedHashMap<Pattern, String[]>();
 
     @Mock
     private ResourceResolverFactory resourceResolverFactory;
@@ -116,21 +116,27 @@ public class DispatcherFlushRulesImplTest {
         validFlushRules.put("/a/.*", "/b");
         validFlushRules.put("/b/.*", "/c");
         validFlushRules.put("/c/d/.*", "/e/f");
+        validFlushRules.put("/c/a/.*", "/e/f&/g/h");
 
-        final Map<Pattern, String> expected = new LinkedHashMap<Pattern, String>();
-        expected.put(Pattern.compile("/a/.*"), "/b");
-        expected.put(Pattern.compile("/b/.*"), "/c");
-        expected.put(Pattern.compile("/c/d/.*"), "/e/f");
+        final Map<Pattern, String[]> expected = new LinkedHashMap<Pattern, String[]>();
+        expected.put(Pattern.compile("/a/.*"), new String[] { "/b" });
+        expected.put(Pattern.compile("/b/.*"), new String[] { "/c" });
+        expected.put(Pattern.compile("/c/d/.*"), new String[] { "/e/f" });
+        expected.put(Pattern.compile("/c/a/.*"), new String[] { "/e/f", "/g/h" });
 
-        final Map<Pattern, String> actual = dispatcherFlushRules.configureFlushRules(validFlushRules);
+        final Map<Pattern, String[]> actual = dispatcherFlushRules.configureFlushRules(validFlushRules);
+
+        final Pattern[] expectedPatterns = expected.keySet().toArray(new Pattern[0]);
+        final Pattern[] actualPatterns = actual.keySet().toArray(new Pattern[0]);
+        final String[][] expectedValues = expected.values().toArray(new String[0][0]);
+        final String[][] actualValues = actual.values().toArray(new String[0][0]);
 
         assertEquals(expected.size(), actual.size());
 
         for(int i = 0; i < expected.size(); i++) {
-            assertEquals(expected.keySet().toArray(new Pattern[]{})[i].pattern(),
-                    actual.keySet().toArray(new Pattern[]{})[i].pattern());
-            assertEquals(expected.values().toArray(new String[]{})[i], actual.values().toArray(new String[]{})[i]);
+            assertEquals(expectedPatterns[i].pattern(), actualPatterns[i].pattern());
         }
+        assertArrayEquals(expectedValues, actualValues);
     }
 
     @Test
@@ -222,7 +228,7 @@ public class DispatcherFlushRulesImplTest {
 
     @Test
     public void testPreprocess_notAccepts_NonMatchingPath() throws Exception {
-        this.hierarchicalFlushRules.put(Pattern.compile("/content/foo.*"), "/content/target");
+        this.hierarchicalFlushRules.put(Pattern.compile("/content/foo.*"), new String[] { "/content/target" });
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons");
@@ -239,7 +245,7 @@ public class DispatcherFlushRulesImplTest {
 
     @Test
     public void testPreprocess_success_hierarchical() throws Exception {
-        hierarchicalFlushRules.put(Pattern.compile("/content/acs-aem-commons/.*"), "/content/target");
+        hierarchicalFlushRules.put(Pattern.compile("/content/acs-aem-commons/.*"), new String[] { "/content/target", "/content/target2" });
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/page");
@@ -262,12 +268,21 @@ public class DispatcherFlushRulesImplTest {
         // Private impl class; no access to test for instanceof
         assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
 
+        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+                eq(false),
+                agentFilterCaptor.capture(),
+                eq("/content/target2"));
+
+        assertEquals(DispatcherFlushFilter.FlushType.Hierarchical, agentFilterCaptor.getValue().getFlushType());
+        // Private impl class; no access to test for instanceof
+        assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
+
         verifyNoMoreInteractions(dispatcherFlusher);
     }
 
     @Test
     public void testPreprocess_success_resourceOnly() throws Exception {
-        resourceOnlyFlushRules.put(Pattern.compile("/content/acs-aem-commons/.*"), "/content/target");
+        resourceOnlyFlushRules.put(Pattern.compile("/content/acs-aem-commons/.*"), new String[] { "/content/target" });
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/page");
@@ -295,8 +310,8 @@ public class DispatcherFlushRulesImplTest {
 
     @Test
     public void testPreprocess_success_hierarchicalAndResourceOnly() throws Exception {
-        hierarchicalFlushRules.put(Pattern.compile("/content/.*"), "/content/hierarchical");
-        resourceOnlyFlushRules.put(Pattern.compile("/content/.*"), "/content/resource-only");
+        hierarchicalFlushRules.put(Pattern.compile("/content/.*"), new String[] { "/content/hierarchical" });
+        resourceOnlyFlushRules.put(Pattern.compile("/content/.*"), new String[] { "/content/resource-only" });
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/page");
@@ -334,7 +349,7 @@ public class DispatcherFlushRulesImplTest {
 
     @Test
     public void testPreprocess_success_translation1() throws Exception {
-        hierarchicalFlushRules.put(Pattern.compile("/content/acs-aem-commons/(.*)"), "/content/target/$1");
+        hierarchicalFlushRules.put(Pattern.compile("/content/acs-aem-commons/(.*)"), new String[] { "/content/target/$1" });
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/page");
@@ -362,7 +377,7 @@ public class DispatcherFlushRulesImplTest {
 
     @Test
     public void testPreprocess_success_translation2() throws Exception {
-        hierarchicalFlushRules.put(Pattern.compile("/content/acs-aem-commons/(.*)/(.*)"), "/content/target/$1/acs-aem-commons/$2");
+        hierarchicalFlushRules.put(Pattern.compile("/content/acs-aem-commons/(.*)/(.*)"), new String[] { "/content/target/$1/acs-aem-commons/$2" });
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/en/page");
@@ -391,7 +406,7 @@ public class DispatcherFlushRulesImplTest {
 
     @Test
     public void testPreprocess_success_resourceonly_translation2() throws Exception {
-        resourceOnlyFlushRules.put(Pattern.compile("/content/acs-aem-commons/(.*)/(.*)"), "/content/target/$1/acs-aem-commons/$2");
+        resourceOnlyFlushRules.put(Pattern.compile("/content/acs-aem-commons/(.*)/(.*)"), new String[] { "/content/target/$1/acs-aem-commons/$2" });
 
         final ReplicationAction replicationAction = mock(ReplicationAction.class);
         when(replicationAction.getPath()).thenReturn("/content/acs-aem-commons/en/page");
@@ -416,5 +431,4 @@ public class DispatcherFlushRulesImplTest {
 
         verifyNoMoreInteractions(dispatcherFlusher);
     }
-
 }

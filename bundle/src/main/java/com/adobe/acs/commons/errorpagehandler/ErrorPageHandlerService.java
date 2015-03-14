@@ -23,11 +23,14 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Error Page Handling Service which facilitates the resolution of errors against authorable pages for discrete content trees.
  *
  * This service is used via the ACS-AEM-Commons error page handler implementation to create author-able error pages.
  */
+@ProviderType
 public interface ErrorPageHandlerService {
     int DEFAULT_STATUS_CODE = SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
@@ -69,12 +72,15 @@ public interface ErrorPageHandlerService {
     /**
      * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies .
      *
-     * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
+     * Invokes the AEM Login Selector Autheticator on 404'ing requests made by anonymous users.
      *
      * @param request
      * @param response
+     *
+     * @return true if the error page handler should process the 404; false is the AEM authenticator has been invoked
+     * and responsible for processing the request further
      */
-    void doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response);
+    boolean doHandle404(SlingHttpServletRequest request, SlingHttpServletResponse response);
 
     /**
      * Returns the Exception Message (Stacktrace) from the Request

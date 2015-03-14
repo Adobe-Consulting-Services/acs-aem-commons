@@ -25,9 +25,12 @@ import java.util.Locale;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * A generic list of title/value pairs.
  */
+@ProviderType
 public interface GenericList {
 
     /**

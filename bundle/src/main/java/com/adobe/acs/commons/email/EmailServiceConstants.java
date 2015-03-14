@@ -19,10 +19,13 @@
  */
 package com.adobe.acs.commons.email;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Defines special keys for the replacement variable map
  * passed to EmailService.sendEmail().
  */
+@ProviderType
 public final class EmailServiceConstants {
 
     private EmailServiceConstants() {

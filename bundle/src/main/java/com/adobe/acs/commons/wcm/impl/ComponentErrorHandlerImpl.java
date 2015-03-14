@@ -50,6 +50,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 @Component(
@@ -75,11 +76,15 @@ import java.util.Map;
 public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter {
     private static final Logger log = LoggerFactory.getLogger(ComponentErrorHandlerImpl.class.getName());
 
-    // Magic number pushes filter lower in the chain so it executes after the
-    // OOTB WCM Debug Filter
-    static final int FILTER_ORDER = 1001;
+    // Magic number pushes filter lower in the chain so it executes after the OOTB WCM Debug Filter
+    // In AEM6 this must execute after WCM Developer Mode Filter which requires overriding the service.ranking via a
+    // sling:OsgiConfig node
+    static final int FILTER_ORDER = 1000000;
 
     static final String BLANK_HTML = "/dev/null";
+
+    static final String REQ_ATTR_PREVIOUSLY_PROCESSED =
+            ComponentErrorHandlerImpl.class.getName() + "_previouslyProcessed";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -181,7 +186,8 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
         final ComponentContext componentContext = WCMUtils.getComponentContext(request);
 
-        if (componentContext == null || componentContext.isRoot()) {
+        if (componentContext == null
+                || componentContext.isRoot()) {
             chain.doFilter(request, response);
         } else if (editModeEnabled
                 && (componentHelper.isEditMode(slingRequest)
@@ -195,8 +201,9 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
             // Preview Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, previewErrorHTMLPath);
         } else if (publishModeEnabled
-                && componentHelper.isDisabledMode(slingRequest)) {
-            // Publish Modes
+                && componentHelper.isDisabledMode(slingRequest)
+                && !this.isFirstInChain(slingRequest)) {
+            // Publish Modes; Requires special handling in Published Modes - do not process first filter chain
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, publishErrorHTMLPath);
         } else {
             // Normal Behavior
@@ -312,6 +319,15 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         return true;
     }
 
+    private boolean isFirstInChain(final SlingHttpServletRequest request) {
+        if (request.getAttribute(REQ_ATTR_PREVIOUSLY_PROCESSED) != null) {
+            return false;
+        } else {
+            request.setAttribute(REQ_ATTR_PREVIOUSLY_PROCESSED, true);
+            return true;
+        }
+    }
+
     @Override
     public final void destroy() {
         editModeEnabled = false;
@@ -364,10 +380,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         suppressedResourceTypes = PropertiesUtil.toStringArray(config.get(PROP_SUPPRESSED_RESOURCE_TYPES),
                 DEFAULT_SUPPRESSED_RESOURCE_TYPES);
 
-        log.info("Suppressed Resource Types:");
-        for (final String tmp : suppressedResourceTypes) {
-            log.info(" > {}", tmp);
-        }
+        log.info("Suppressed Resource Types: {}", Arrays.toString(suppressedResourceTypes));
     }
 
     @Override

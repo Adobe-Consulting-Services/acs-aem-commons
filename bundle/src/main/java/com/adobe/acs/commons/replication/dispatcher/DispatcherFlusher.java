@@ -20,11 +20,14 @@
 
 package com.adobe.acs.commons.replication.dispatcher;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationResult;
+
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.Map;
@@ -32,6 +35,7 @@ import java.util.Map;
 /**
  * Service used to issue Dispatcher Flush requests.
  */
+@ProviderType
 public interface DispatcherFlusher {
 
     /**
