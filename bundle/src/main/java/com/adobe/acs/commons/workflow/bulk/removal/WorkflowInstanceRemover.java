@@ -37,10 +37,12 @@ public interface WorkflowInstanceRemover {
     }
 
     /**
+     * Removes workflow instances that match the parameter criteria.
+     *
      * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
      * @param modelIds WF Models to remove
      * @param statuses WF Statuses to remove
-     * @param payloads Regex; WF Payloads to remove
+     * @param payloads Regexes; WF Payloads to remove
      * @param olderThan UTC time in milliseconds; only delete WF's started after this time
      * @return the number of WF instances removed
      */
@@ -52,12 +54,14 @@ public interface WorkflowInstanceRemover {
 
 
     /**
+     * Removes workflow instances that match the parameter criteria.
+     *
      * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
      * @param modelIds WF Models to remove
      * @param statuses WF Statuses to remove
-     * @param payloads Regex; WF Payloads to remove
+     * @param payloads Regexes; WF Payloads to remove
      * @param olderThan UTC time in milliseconds; only delete WF's started after this time
-     * @param limit
+     * @param batchSize
      * @return the number of WF instances removed
      */
     int removeWorkflowInstances(final ResourceResolver resourceResolver,
@@ -65,6 +69,6 @@ public interface WorkflowInstanceRemover {
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
                                 final Calendar olderThan,
-                                final int limit) throws PersistenceException, WorkflowRemovalException;
+                                final int batchSize) throws PersistenceException, WorkflowRemovalException;
 
 }

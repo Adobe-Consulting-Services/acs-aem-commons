@@ -44,8 +44,6 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final int BATCH_SIZE = 1000;
 
-
-
     /**
      * {@inheritDoc}
      */
@@ -54,7 +52,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                              final Collection<String> statuses,
                                              final Collection<Pattern> payloads,
                                              final Calendar olderThan) throws PersistenceException, WorkflowRemovalException {
-        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, Integer.MAX_VALUE);
+        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, BATCH_SIZE);
     }
 
     /**
@@ -79,15 +77,6 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         int workflowRemovedCount = 0;
 
         for (final Resource folder : sortedFolders) {
-
-
-            try {
-                log.debug(".....");
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
 
             int remaining = 0;
 
@@ -140,10 +129,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                             if (!match) {
                                 // Not a match; skip to next workflow instance
-                                if (log.isTraceEnabled()) {
-                                    log.trace("Workflow instance [ {} ] has non-matching payload path [ {} ]",
-                                            instance.getPath(), payload);
-                                }
+                                log.trace("Workflow instance [ {} ] has non-matching payload path [ {} ]",
+                                        instance.getPath(), payload);
                                 remaining++;
                                 continue;
                             }
@@ -155,6 +142,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                     try {
                         instance.adaptTo(Node.class).remove();
                         log.trace("Removed workflow instance at [ {} ]", instance.getPath());
+
                         workflowRemovedCount++;
                         count++;
                     } catch (RepositoryException e) {
@@ -162,7 +150,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                 instance.getPath(), e);
                     }
 
-                    if (count % BATCH_SIZE == 0) {
+                    if (count % batchSize == 0) {
                         this.batchComplete(resourceResolver, checkedCount, workflowRemovedCount);
 
                         log.debug("Removed a running total of [ {} ] workflow instances", count);
