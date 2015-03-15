@@ -63,8 +63,6 @@ public class WorkflowInstanceFolderComparator implements Comparator<Resource> {
 
             result = this.compare(seg1, seg2);
 
-            log.debug("{} vs {} => " + result, seg1, seg2);
-
             if (result != 0) {
                 return result;
             }

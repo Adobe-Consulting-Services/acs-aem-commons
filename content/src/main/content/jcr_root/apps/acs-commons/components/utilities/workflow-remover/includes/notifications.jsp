@@ -23,7 +23,9 @@
             ng-show="app.running">
         <div class="alert large notice">
             <strong>Workflow Removal Executing</strong>
-            <div>Please be patient as workflow removal runs.</div>
+            <div>
+                Please be patient as workflow removal runs. The removal status below will update removal progress.
+            </div>
         </div>
     </div>
 </div>

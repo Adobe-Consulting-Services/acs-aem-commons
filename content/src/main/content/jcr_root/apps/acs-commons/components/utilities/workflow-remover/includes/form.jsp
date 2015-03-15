@@ -21,7 +21,7 @@
 <form
         novalidate
         name="params"
-        ng-show="data.status.state !== 'running'"
+        ng-show="!app.running"
         ng-submit="remove(params.$valid)">
 
     <div class="form-row">
@@ -37,7 +37,7 @@
                            ng-click="toggleStatusSelection(status)"><span>{{status}}</span></label>
             </div>
 
-            <div class="instructions">
+            <div class="instructions">{{data.status.status}}
             </div>
         </span>
     </div>
@@ -95,6 +95,7 @@
             <div style="clear: both;"></div>
 
             <div class="instructions">
+                If no Workflow Models are selected, Workflow Instances will not be filtered by Workflow Model.
             </div>
         </span>
     </div>

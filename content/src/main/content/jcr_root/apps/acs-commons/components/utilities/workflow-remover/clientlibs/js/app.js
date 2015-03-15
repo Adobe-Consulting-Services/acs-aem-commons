@@ -18,7 +18,7 @@
  * #L%
  */
 
-/*global angular: false, JSON: false */
+/*global angular: false, moment: false, JSON: false */
 
 angular.module('workflowRemover', [])
     .controller('MainCtrl', ['$scope', '$http', '$timeout',
@@ -52,7 +52,7 @@ angular.module('workflowRemover', [])
                     url: encodeURI($scope.app.resource + '.init.json')
                 }).
                     success(function (data, status, headers, config) {
-                        $scope.formOptions = data || {};
+                        $scope.formOptions = data.form || {};
                     }).
                     error(function (data, status, headers, config) {
                         $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
@@ -64,14 +64,30 @@ angular.module('workflowRemover', [])
             $scope.getStatus = function () {
                 $http({
                     method: 'GET',
-                    url: encodeURI($scope.app.resource + '.json')
+                    url: encodeURI($scope.app.resource + '/status.json')
                 }).
                     success(function (data, status, headers, config) {
+                        var startedAtMoment, completedAtMoment;
+
                         $scope.status = data || {};
 
-                        if ($scope.status.state === 'complete') {
+                        startedAtMoment = moment($scope.status.startedAt);
+
+                        $scope.status.startedAt = startedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
+
+                        if ($scope.status.status === 'complete') {
                             $scope.app.running = false;
-                        } else if ($scope.status.state === 'running') {
+
+                            completedAtMoment = moment($scope.status.completedAt);
+
+                            $scope.status.completedAt = completedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
+                            $scope.status.timeTaken = completedAtMoment.diff(startedAtMoment, 'seconds');
+
+                        } else if ($scope.status.status === 'running') {
+                            $scope.app.running = true;
+
+                            $scope.status.timeTaken = moment().diff(startedAtMoment, 'seconds');
+
                             $scope.app.refresh = $timeout(function () {
                                 $scope.getStatus();
                             }, 3000);

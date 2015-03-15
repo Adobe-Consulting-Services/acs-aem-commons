@@ -28,6 +28,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
@@ -41,7 +42,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 @SlingServlet(
-        label = "ACS AEM Commons - Workflow Remover - Init Servlet",
+        label = "ACS AEM Commons - Workflow Instance Remover - Init Servlet",
         methods = { "GET" },
         resourceTypes = { "acs-commons/components/utilities/workflow-remover" },
         selectors = { "init" },
@@ -49,8 +50,9 @@ import java.util.Arrays;
 )
 public class InitServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(InitServlet.class);
-    private static final String[] WORKFLOW_STATUSES = new String[]{"COMPLETED", "ABORTED", "RUNNING",
-            "SUSPENDED", "STALE"};
+
+    private static final String[] WORKFLOW_STATUSES = new String[]{ "COMPLETED", "ABORTED", "RUNNING",
+            "SUSPENDED", "STALE" };
 
     @Reference
     private WorkflowService workflowService;
@@ -62,36 +64,52 @@ public class InitServlet extends SlingSafeMethodsServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
+
+        final JSONObject json = new JSONObject();
+
+        try {
+            // Only populate the form if removal is not running.
+            json.put("form", this.getFormJSONObject(request.getResourceResolver()));
+
+            response.getWriter().write(json.toString());
+        } catch (Exception e) {
+            response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(e.getMessage());
+        }
+    }
+
+    /**
+     * Get the JSON data to populate the Workflow Removal form
+     *
+     * @param resourceResolver
+     * @return
+     * @throws WorkflowException
+     * @throws JSONException
+     */
+    private final JSONObject getFormJSONObject(final ResourceResolver resourceResolver) throws WorkflowException,
+            JSONException {
+
         final JSONObject json = new JSONObject();
 
         final WorkflowSession workflowSession = workflowService.getWorkflowSession(
-                request.getResourceResolver().adaptTo(Session.class));
+                resourceResolver.adaptTo(Session.class));
 
         final WorkflowModel[] workflowModels;
-        try {
-            workflowModels = workflowSession.getModels();
 
-            for (final WorkflowModel workflowModel : workflowModels) {
-                JSONObject jsonWorkflow = new JSONObject();
-                try {
-                    jsonWorkflow.put("title", workflowModel.getTitle());
-                    jsonWorkflow.put("id", workflowModel.getId());
-                    json.accumulate("workflowModels", jsonWorkflow);
-                } catch (JSONException e) {
-                    log.error("Could not add workflow [ {} - {} ] to Workflow Models dropdown JSON object",
-                            workflowModel.getTitle(), workflowModel.getId());
-                }
-            }
+        workflowModels = workflowSession.getModels();
 
-            try {
-                json.put("statuses", new JSONArray(Arrays.asList(WORKFLOW_STATUSES)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        for (final WorkflowModel workflowModel : workflowModels) {
+            JSONObject jsonWorkflow = new JSONObject();
 
-            response.getWriter().write(json.toString());
-        } catch (WorkflowException e) {
-            response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            jsonWorkflow.put("title", workflowModel.getTitle());
+            jsonWorkflow.put("id", workflowModel.getId());
+            json.accumulate("workflowModels", jsonWorkflow);
+
+
         }
+
+        json.put("statuses", new JSONArray(Arrays.asList(WORKFLOW_STATUSES)));
+
+        return json;
     }
 }

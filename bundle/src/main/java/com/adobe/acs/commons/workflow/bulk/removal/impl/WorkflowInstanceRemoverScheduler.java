@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -29,6 +30,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -44,7 +46,7 @@ import java.util.regex.Pattern;
 
 
 @Component(
-        label = "ACS AEM Commons - Workflow Instance Remover Scheduled Service",
+        label = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service",
         metatype = true,
         configurationFactory = true
 )
@@ -119,12 +121,22 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
             final long start = System.currentTimeMillis();
-            int count = workflowInstanceRemover.removeWorkflowInstances(adminResourceResolver, models, statuses,
-                    payloads, olderThan);
+
+            int count = workflowInstanceRemover.removeWorkflowInstances(
+                    adminResourceResolver,
+                    models,
+                    statuses,
+                    payloads,
+                    olderThan);
+
             log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);
 
-        } catch (LoginException ex) {
-            log.error("Login Exception when getting admin resource resolver", ex);
+        } catch (LoginException e) {
+            log.error("Login Exception when getting admin resource resolver", e);
+        } catch (PersistenceException e) {
+            log.error("Persistence Exception when saving Workflow Instances removal", e);
+        } catch (WorkflowRemovalException e) {
+            log.warn("Workflow Removal Exception occurred preventing the removal process from starting.", e);
         } finally {
             if (adminResourceResolver != null) {
                 adminResourceResolver.close();

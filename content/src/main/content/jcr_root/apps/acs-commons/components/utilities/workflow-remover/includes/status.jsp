@@ -18,19 +18,33 @@
   ~ #L%
   --%>
 
-<div ng-show="status.state">
+<div ng-show="app.running || status.status === 'complete'">
 
     <div class="section summary-section">
         <h3>Workflow Removal Status</h3>
 
         <section class="well">
 
+            <h4 ng-show="!app.running &&  status.status === 'complete'">Previous Workflow Removal Status</h4>
+
             <ul>
-                <li>Removal Status
-                    : <span style="text-transform: capitalize;">{{ status.state || 'Not Started'}}</span></li>
-                <li>Count: {{ status.count || 0 }}</li>
-                <li ng-show="status.startedAt">Started At: {{ status.startedAt }}</li>
-                <li ng-show="status.completedAt">Completed At: {{ status.completedAt }}</li>
+                <li>Workflow instance removal status
+                    : <span style="text-transform: capitalize;">{{ status.status || 'Not Started'}}</span></li>
+
+                <li ng-show="app.running">WF instances checked: {{ status.checkedCount || 0 }}</li>
+                <li ng-hide="app.running">Total WF instances checked: {{ status.checkedCount || 0 }}</li>
+
+                <li ng-show="app.running">WF instances removed : {{ status.count || 0 }}</li>
+                <li ng-hide="app.running">Total WF instances removed: {{ status.count || 0 }}</li>
+
+                <li ng-show="status.initiatedBy">Initiated by: {{ status.initiatedBy }}</li>
+
+                <li ng-show="status.startedAt">Started at: {{ status.startedAt }}</li>
+
+                <li ng-show="status.completedAt">Started at: {{ status.completedAt }}</li>
+
+                <li>Time taken: {{ status.timeTaken }} seconds</li>
+
             </ul>
 
         </section>
