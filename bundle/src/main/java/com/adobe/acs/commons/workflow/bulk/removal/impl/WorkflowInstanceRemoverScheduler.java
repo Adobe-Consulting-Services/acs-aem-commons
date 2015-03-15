@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     private WorkflowInstanceRemover workflowInstanceRemover;
 
 
-    private static final String[] DEFAULT_WORKFLOW_STATUSES = { "COMPLETE", "ABORTED" };
+    private static final String[] DEFAULT_WORKFLOW_STATUSES = {"COMPLETE", "ABORTED"};
 
     private List<String> statuses = new ArrayList<String>();
 
@@ -86,7 +86,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     public static final String PROP_WORKFLOW_STATUSES = "workflow.statuses";
 
 
-    private static final String[] DEFAULT_WORKFLOW_MODELS = { };
+    private static final String[] DEFAULT_WORKFLOW_MODELS = {};
 
     private List<String> models = new ArrayList<String>();
 
@@ -96,7 +96,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     public static final String PROP_WORKFLOW_MODELS = "workflow.models";
 
 
-    private static final String[] DEFAULT_WORKFLOW_PAYLOADS = { };
+    private static final String[] DEFAULT_WORKFLOW_PAYLOADS = {};
 
     private List<Pattern> payloads = new ArrayList<Pattern>();
 
@@ -114,7 +114,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     public static final String PROP_WORKFLOWS_OLDER_THAN = "workflow.older-than";
 
     @Override
-    public void run() {
+    public final void run() {
 
         ResourceResolver adminResourceResolver = null;
         try {
@@ -145,11 +145,15 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     }
 
     @Activate
-    protected void activate(final Map<String, String> config) {
-        statuses = Arrays.asList(PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_STATUSES), DEFAULT_WORKFLOW_STATUSES));
-        models = Arrays.asList(PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_MODELS), DEFAULT_WORKFLOW_MODELS));
+    protected final void activate(final Map<String, String> config) {
+        statuses = Arrays.asList(PropertiesUtil.toStringArray(
+                config.get(PROP_WORKFLOW_STATUSES), DEFAULT_WORKFLOW_STATUSES));
 
-        final String[] payloadsArray = PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_PAYLOADS), DEFAULT_WORKFLOW_PAYLOADS);
+        models = Arrays.asList(PropertiesUtil.toStringArray(
+                config.get(PROP_WORKFLOW_MODELS), DEFAULT_WORKFLOW_MODELS));
+
+        final String[] payloadsArray =
+                PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_PAYLOADS), DEFAULT_WORKFLOW_PAYLOADS);
 
         for (String payload : payloadsArray) {
             Pattern p = Pattern.compile(payload);
@@ -167,7 +171,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     }
 
     @Deactivate
-    protected void deactivate(final Map<String, String> config) {
+    protected final void deactivate(final Map<String, String> config) {
         olderThan = null;
         statuses = new ArrayList<String>();
         models = new ArrayList<String>();

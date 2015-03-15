@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal;
 
+import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowInstanceFolderComparator;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -1,6 +1,25 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceFolderComparator;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
 import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
 import org.apache.commons.collections.CollectionUtils;
@@ -47,23 +66,25 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     /**
      * {@inheritDoc}
      */
-    public final int removeWorkflowInstances(final ResourceResolver resourceResolver,
+    public int removeWorkflowInstances(final ResourceResolver resourceResolver,
                                              final Collection<String> modelIds,
                                              final Collection<String> statuses,
                                              final Collection<Pattern> payloads,
-                                             final Calendar olderThan) throws PersistenceException, WorkflowRemovalException {
+                                             final Calendar olderThan)
+            throws PersistenceException, WorkflowRemovalException {
         return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, BATCH_SIZE);
     }
 
     /**
      * {@inheritDoc}
      */
-    public final int removeWorkflowInstances(final ResourceResolver resourceResolver,
+    public int removeWorkflowInstances(final ResourceResolver resourceResolver,
                                              final Collection<String> modelIds,
                                              final Collection<String> statuses,
                                              final Collection<Pattern> payloads,
                                              final Calendar olderThan,
-                                             final int batchSize) throws PersistenceException, WorkflowRemovalException {
+                                             final int batchSize)
+            throws PersistenceException, WorkflowRemovalException {
 
         final long start = System.currentTimeMillis();
 
@@ -158,7 +179,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                 }
             }
 
-            if (remaining == 0 && !StringUtils.startsWith(folder.getName(), WORKFLOW_FOLDER_FORMAT.format(new Date()))) {
+            if (remaining == 0
+                    && !StringUtils.startsWith(folder.getName(), WORKFLOW_FOLDER_FORMAT.format(new Date()))) {
                 // Dont remove folders w items and dont remove any of "today's" folders
                 try {
                     folder.adaptTo(Node.class).remove();

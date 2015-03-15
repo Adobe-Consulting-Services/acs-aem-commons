@@ -1,5 +1,24 @@
-package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
+package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
 import org.apache.commons.lang.StringUtils;
@@ -39,6 +58,8 @@ public class RemoveServlet extends SlingAllMethodsServlet {
     private static final String PARAM_OLDER_THAN = "olderThan";
 
     private static final String PARAM_LIMIT = "limit";
+
+    private static final int MS_IN_SECOND = 1000;
 
 
     @Reference
@@ -82,10 +103,10 @@ public class RemoveServlet extends SlingAllMethodsServlet {
             final Long ts = params.optLong(PARAM_OLDER_THAN);
             if (ts != null && ts > 0) {
                 olderThan = Calendar.getInstance();
-                olderThan.setTimeInMillis(ts * 1000);
+                olderThan.setTimeInMillis(ts * MS_IN_SECOND);
             }
 
-            final Long limit = params.optLong(PARAM_LIMIT, 1000);
+            final Long limit = params.optLong(PARAM_LIMIT, MS_IN_SECOND);
 
             workflowInstanceRemover.removeWorkflowInstances(request.getResourceResolver(),
                     models,

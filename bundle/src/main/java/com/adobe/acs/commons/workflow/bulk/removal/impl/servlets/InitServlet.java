@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ import java.util.Arrays;
 public class InitServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(InitServlet.class);
 
-    private static final String[] WORKFLOW_STATUSES = new String[]{ "COMPLETED", "ABORTED", "RUNNING",
-            "SUSPENDED", "STALE" };
+    private static final String[] WORKFLOW_STATUSES = new String[]{"COMPLETED", "ABORTED", "RUNNING",
+            "SUSPENDED", "STALE"};
 
     @Reference
     private WorkflowService workflowService;
@@ -79,14 +79,14 @@ public class InitServlet extends SlingSafeMethodsServlet {
     }
 
     /**
-     * Get the JSON data to populate the Workflow Removal form
+     * Get the JSON data to populate the Workflow Removal form.
      *
      * @param resourceResolver
      * @return
      * @throws WorkflowException
      * @throws JSONException
      */
-    private final JSONObject getFormJSONObject(final ResourceResolver resourceResolver) throws WorkflowException,
+    private JSONObject getFormJSONObject(final ResourceResolver resourceResolver) throws WorkflowException,
             JSONException {
 
         final JSONObject json = new JSONObject();

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk.removal;
+package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
