@@ -328,7 +328,7 @@
             <dependency>
                 <groupId>com.adobe.granite</groupId>
                 <artifactId>com.adobe.granite.replication.core</artifactId>
-                <version>5.16.20</version>
+                <version>5.12.2</version>
                 <scope>provided</scope>
             </dependency>
         </dependencies>
