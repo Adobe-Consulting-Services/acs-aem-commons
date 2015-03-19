@@ -212,7 +212,7 @@
         <dependency>
             <groupId>com.day.cq.wcm</groupId>
             <artifactId>cq-wcm-workflow</artifactId>
-            <version>5.7.8</version>
+            <version>5.7.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
