@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+    allowedparents="*/parsys"
+    componentGroup="ACS Commons Workflow"
+    jcr:description="A process to activate a resource, specifying the agent(s) to trigger."
+    jcr:primaryType="cq:Component"
+    jcr:title="Selective Activate Page/Asset" 
+    sling:resourceSuperType="/apps/acs-commons/components/workflow/select-agent">
+    
+</jcr:root>

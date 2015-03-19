@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -17,13 +20,13 @@
     <inceptionYear>2013</inceptionYear>
     <licenses>
         <license>
-          <name>The Apache Software License, Version 2.0</name>
+            <name>The Apache Software License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
     <organization>
-      <name>Adobe</name>
-      <url>http://www.adobe.com/</url>
+        <name>Adobe</name>
+        <url>http://www.adobe.com/</url>
     </organization>
     
     <prerequisites>
@@ -174,35 +177,34 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>1.5</version>
                 </plugin>
-                 <plugin>
-                     <artifactId>maven-release-plugin</artifactId>
-                     <version>3.0-r1585899</version>
-                     <configuration>
-                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                         <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
-                     </configuration>
-                     <dependencies>
-                         <dependency>
-                             <groupId>org.apache.maven.release</groupId>
-                             <artifactId>maven-release-oddeven-policy</artifactId>
-                             <version>3.0-r1585899</version>
-                         </dependency>
-                     </dependencies>
-                 </plugin>
-                 <plugin>
-                     <groupId>org.apache.maven.plugins</groupId>
-                     <artifactId>maven-failsafe-plugin</artifactId>
-                     <version>2.17</version>
-                  </plugin>
+                <plugin>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>3.0-r1585899</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.release</groupId>
+                            <artifactId>maven-release-oddeven-policy</artifactId>
+                            <version>3.0-r1585899</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.17</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
 
     <scm>
         <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
-
+        <tag>HEAD</tag>
+    </scm>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -319,6 +321,18 @@
                 <version>5.6.2</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.commons.json</artifactId>
+                <version>2.0.6</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.adobe.granite</groupId>
+                <artifactId>com.adobe.granite.replication.core</artifactId>
+                <version>5.5.8</version>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -355,7 +369,7 @@
                                     <goal>pmd</goal>
                                     <goal>cpd</goal>
                                     <!-- build will fail on warnings -->
-                                    <goal>check</goal> 
+                                    <goal>check</goal>
                                 </goals>
                             </execution>
                         </executions>
