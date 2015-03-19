@@ -24,12 +24,10 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.Constants;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.ReplicationOptions;
-import com.day.cq.wcm.workflow.process.ActivatePageProcess;
 import com.day.cq.wcm.workflow.process.DeactivatePageProcess;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;

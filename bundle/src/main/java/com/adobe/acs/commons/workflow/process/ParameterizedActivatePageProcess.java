@@ -24,7 +24,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.Constants;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
@@ -53,35 +52,35 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 //@formatter:on
 public class ParameterizedActivatePageProcess extends ActivatePageProcess {
 
-	private static final String AGENT_ARG = "replicationAgent";
-	
-	private transient ThreadLocal<String[]>	agentId = new ThreadLocal<String[]>();
+    private static final String AGENT_ARG = "replicationAgent";
 
-	@Override
-	public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap args) throws WorkflowException {
-		agentId.set(args.get(AGENT_ARG, new String[]{}));
-		super.execute(workItem, workflowSession, args);
+    private transient ThreadLocal<String[]> agentId = new ThreadLocal<String[]>();
 
-	}
+    @Override
+    public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap args) throws WorkflowException {
+        agentId.set(args.get(AGENT_ARG, new String[] {}));
+        super.execute(workItem, workflowSession, args);
 
-	@Override
-	protected ReplicationOptions prepareOptions(ReplicationOptions opts) {
+    }
 
-		if (opts == null) {
-			opts = new ReplicationOptions();
-		}
-		opts.setFilter(new AgentFilter() {
+    @Override
+    protected ReplicationOptions prepareOptions(ReplicationOptions opts) {
 
-			@Override
-			public boolean isIncluded(Agent agent) {
-				
-				if (ArrayUtils.isEmpty(agentId.get())) {
-					return false;
-				}
-				return ArrayUtils.contains(agentId.get(), agent.getId());
-			}
-		});
-		return opts;
-	}
+        if (opts == null) {
+            opts = new ReplicationOptions();
+        }
+        opts.setFilter(new AgentFilter() {
+
+            @Override
+            public boolean isIncluded(Agent agent) {
+
+                if (ArrayUtils.isEmpty(agentId.get())) {
+                    return false;
+                }
+                return ArrayUtils.contains(agentId.get(), agent.getId());
+            }
+        });
+        return opts;
+    }
 
 }
