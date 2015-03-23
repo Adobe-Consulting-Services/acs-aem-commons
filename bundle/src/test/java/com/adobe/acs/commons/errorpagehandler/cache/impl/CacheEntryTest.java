@@ -20,8 +20,6 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
@@ -30,17 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-
 public class CacheEntryTest {
-    @Before
-    public void setUp() throws Exception {
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
-    }
 
     @Test
     public void testGetData() throws Exception {
@@ -60,6 +48,18 @@ public class CacheEntryTest {
 
         final String expResult = "hello world";
         cacheEntry.setData(expResult);
+
+        final String result = cacheEntry.getData();
+
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testSetData_Null() throws Exception {
+        CacheEntry cacheEntry = new CacheEntry();
+
+        final String expResult = "";
+        cacheEntry.setData(null);
 
         final String result = cacheEntry.getData();
 
@@ -204,6 +204,30 @@ public class CacheEntryTest {
 
         final int expResult = hits + misses;
         final int result = cacheEntry.getTotal();
+
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testGetBytes() throws Exception {
+        CacheEntry cacheEntry = new CacheEntry();
+
+        final int expResult = 11;
+        cacheEntry.setData("hello world");
+
+        final int result = cacheEntry.getBytes();
+
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testGetBytes_Null() throws Exception {
+        CacheEntry cacheEntry = new CacheEntry();
+
+        final int expResult = 0;
+        cacheEntry.setData(null);
+
+        final int result = cacheEntry.getBytes();
 
         assertEquals(expResult, result);
     }

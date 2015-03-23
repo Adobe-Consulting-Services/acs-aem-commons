@@ -39,7 +39,7 @@ public class SyntheticWorkflow implements Workflow {
 
     private final Date timeStarted;
 
-    private final WorkflowData workflowData;
+    private WorkflowData workflowData;
 
     private SyntheticWorkItem activeWorkItem;
 
@@ -110,6 +110,10 @@ public class SyntheticWorkflow implements Workflow {
     @Override
     public final WorkflowData getWorkflowData() {
         return this.workflowData;
+    }
+
+    public final void setWorkflowData(final WorkflowData workflowData) {
+        this.workflowData = workflowData;
     }
 
     @Deprecated

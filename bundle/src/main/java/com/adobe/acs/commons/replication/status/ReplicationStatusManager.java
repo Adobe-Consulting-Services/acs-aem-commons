@@ -49,7 +49,7 @@ public interface ReplicationStatusManager {
 
     /**
      * Marks the resources at the provides paths with the parameterized replication status.
-     * <p/>
+     * <p>
      * Only resources that are of the OSGi Property parameterized "node-types" are candidates for Replication Status
      * updates. All other resources will be quietly skipped.
      *
@@ -67,7 +67,7 @@ public interface ReplicationStatusManager {
 
     /**
      * Marks the resources at the provides paths with the parameterized replication status.
-     * <p/>
+     * <p>
      * Only resources that are of the OSGi Property parameterized "node-types" are candidates for Replication Status
      * updates. All other resources will be quietly skipped.
      *

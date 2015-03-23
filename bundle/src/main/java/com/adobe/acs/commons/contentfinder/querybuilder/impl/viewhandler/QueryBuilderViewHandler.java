@@ -83,7 +83,7 @@ public final class QueryBuilderViewHandler extends ViewHandler {
 
     /**
      * Assume query should be treated as a QueryBuilder query, rather than a GQL query
-     * <p/>
+     * <p>
      * This intelligently converts default Fulltext and Limit parameters to QueryBuilder equivalents
      *
      * @param request

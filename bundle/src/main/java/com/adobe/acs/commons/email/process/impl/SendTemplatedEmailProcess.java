@@ -73,9 +73,9 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  * Implementing classes can also add additional parameters by overriding the
  * {@link com.adobe.acs.commons.email.process.impl.SendTemplatedEmailProcess#getAdditionalParams(WorkItem, WorkflowSession, Resource)
  * getAdditionalParams() - method}
- * <p/>
- * <p/>
- * <p/>
+ * <p>
+ * <p>
+ * <p>
  * <b>Process Configuration</b> This process supports the following
  * configuration arguments:
  * <dl>

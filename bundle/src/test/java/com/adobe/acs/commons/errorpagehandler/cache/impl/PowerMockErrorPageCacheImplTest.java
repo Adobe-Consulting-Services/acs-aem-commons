@@ -100,4 +100,20 @@ public class PowerMockErrorPageCacheImplTest {
 
         assertEquals("hello new world", data);
     }
+
+
+    @Test
+    public void testGet_Null() throws Exception {
+        mockStatic(ResourceDataUtil.class);
+
+        SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
+        SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
+
+        when(ResourceDataUtil.getIncludeAsString("/content/world", request,
+                response)).thenReturn(null);
+
+        String data = errorPageCache.get("/content/world", request, response);
+
+        assertEquals("", data);
+    }
 }

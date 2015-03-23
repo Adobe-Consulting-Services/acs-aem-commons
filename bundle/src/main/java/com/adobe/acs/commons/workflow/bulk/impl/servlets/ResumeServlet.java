@@ -68,7 +68,7 @@ public class ResumeServlet extends SlingAllMethodsServlet {
 
             response.sendRedirect(request.getResourceResolver().map(request.getResource().getPath()) + ".status.json");
         } catch (JSONException e) {
-            log.error("Could not resume Bulk Workflow due to: {}", e.getMessage());
+            log.error("Could not resume Bulk Workflow due to: {}", e);
 
             HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not resume Bulk Workflow.",

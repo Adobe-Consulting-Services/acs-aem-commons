@@ -50,7 +50,7 @@ public final class ContentFinderHitBuilder {
 
     /**
      * Builds the result object that will representing a CF view record for the provided hit.
-     * <p/>
+     * <p>
      * This method will generate the result object data points based on if the hit is:
      * 1) a Page
      * 2) an Asset
