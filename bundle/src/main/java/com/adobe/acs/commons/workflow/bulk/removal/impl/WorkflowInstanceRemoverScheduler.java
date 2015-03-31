@@ -21,7 +21,6 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -43,7 +42,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 
 @Component(
         label = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service",

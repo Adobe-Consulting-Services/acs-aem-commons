@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal;
 
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -81,7 +81,7 @@ public interface WorkflowInstanceRemover {
      * @param statuses WF Statuses to remove
      * @param payloads Regexes; WF Payloads to remove
      * @param olderThan UTC time in milliseconds; only delete WF's started after this time
-     * @param batchSize
+     * @param batchSize number of workflow instances to delete per JCR save
      * @return the number of WF instances removed
      */
     int removeWorkflowInstances(final ResourceResolver resourceResolver,

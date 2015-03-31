@@ -21,7 +21,7 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;

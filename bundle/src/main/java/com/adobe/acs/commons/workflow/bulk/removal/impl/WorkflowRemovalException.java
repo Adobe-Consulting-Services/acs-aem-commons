@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions;
+package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 public class WorkflowRemovalException extends Exception {
 
@@ -27,5 +27,3 @@ public class WorkflowRemovalException extends Exception {
     }
 
 }
-
-

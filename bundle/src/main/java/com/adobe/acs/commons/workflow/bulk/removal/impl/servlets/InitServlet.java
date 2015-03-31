@@ -94,18 +94,14 @@ public class InitServlet extends SlingSafeMethodsServlet {
         final WorkflowSession workflowSession = workflowService.getWorkflowSession(
                 resourceResolver.adaptTo(Session.class));
 
-        final WorkflowModel[] workflowModels;
-
-        workflowModels = workflowSession.getModels();
+        final WorkflowModel[] workflowModels = workflowSession.getModels();
 
         for (final WorkflowModel workflowModel : workflowModels) {
-            JSONObject jsonWorkflow = new JSONObject();
+            final JSONObject jsonWorkflow = new JSONObject();
 
             jsonWorkflow.put("title", workflowModel.getTitle());
             jsonWorkflow.put("id", workflowModel.getId());
             json.accumulate("workflowModels", jsonWorkflow);
-
-
         }
 
         json.put("statuses", new JSONArray(Arrays.asList(WORKFLOW_STATUSES)));
