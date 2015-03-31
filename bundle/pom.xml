@@ -203,6 +203,19 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.day.cq.wcm</groupId>
+            <artifactId>cq-wcm-workflow-api</artifactId>
+            <version>5.3.0</version>
+            <scope>provided</scope>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>com.day.cq.wcm</groupId>
+            <artifactId>cq-wcm-workflow</artifactId>
+            <version>5.6.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.commons.mime</artifactId>
             <version>2.1.4</version>
