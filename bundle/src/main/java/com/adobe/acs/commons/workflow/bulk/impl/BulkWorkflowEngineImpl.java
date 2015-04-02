@@ -31,11 +31,7 @@ import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.model.WorkflowModel;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -43,6 +39,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,13 +64,25 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component(
         label = "ACS AEM Commons - Bulk Workflow Engine",
+        metatype = true,
         immediate = true
 )
 @Service
 public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowEngineImpl.class);
 
+    private static final String BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH = "/etc/acs-commons/bulk-workflow-manager";
+
     private static final int SAVE_THRESHOLD = 1000;
+
+    private static final boolean DEFAULT_AUTO_RESUME = true;
+    private boolean autoResume = DEFAULT_AUTO_RESUME;
+    @Property(label = "Auto-Resume",
+            description = "Stopping the ACS AEM Commons bundle will stop any executing Bulk Workflow processing. "
+                    + "When auto-resume is enabled, it will attempt to resume 'stopped via deactivation' bulk workflow jobs "
+                    + "under " + BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH + ". [ Default: true ] ",
+            boolValue = DEFAULT_AUTO_RESUME)
+    public static final String PROP_AUTO_RESUME = "auto-resume";
 
     @Reference
     private WorkflowService workflowService;
@@ -271,7 +280,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                         }
                     }
                 } catch (Exception e) {
-                    log.error("Error processing periodic execution: {}", e.getMessage());
+                    log.error("Error processing periodic execution: {}", e);
 
                     try {
                         if (contentResource != null) {
@@ -307,7 +316,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
             resource.getResourceResolver().commit();
 
         } catch (Exception e) {
-            log.error("Error starting bulk workflow management. {}", e.getMessage());
+            log.error("Error starting bulk workflow management. {}", e);
         }
 
         log.info("Completed starting of Bulk Workflow Manager");
@@ -326,7 +335,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     /**
      * Stops the bulk workflow process using the OSGi Component deactivated stop state.
-     * <p>
+     * <p/>
      * Allows the system to know to resume this when the OSGi Component is activated.
      *
      * @param resource the jcr:content configuration resource
@@ -479,7 +488,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     /**
      * Advance to the next batch and update all properties on the current and next batch nodes accordingly.
-     * <p>
+     * <p/>
      * This method assumes the current batch has been verified as complete.
      *
      * @param resource the bulk workflow manager content resource
@@ -575,7 +584,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
     }
 
     /**
-     * Retrieves the active worklfows for the batch.
+     * Retrieves the active workflows for the batch.
      *
      * @param resourceResolver the resource resolver
      * @param workflowMap      the map tracking what batch items are under WF
@@ -610,7 +619,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                     dirty = true;
                 }
             } catch (WorkflowException e) {
-                log.error("Could not get workflow with id [ {} ]. {}", workflowId, e.getMessage());
+                log.error("Could not get workflow with id [ {} ]. {}", workflowId, e);
             }
         }
 
@@ -665,7 +674,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                 }
 
             } catch (WorkflowException e) {
-                log.error("Could not get workflow with id [ {} ]. {}", workflowId, e.getMessage());
+                log.error("Could not get workflow with id [ {} ]. {}", workflowId, e);
             }
         }
 
@@ -700,31 +709,38 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     @Activate
     protected final void activate(final Map<String, String> config) {
-        jobs = new ConcurrentHashMap<String, String>();
+        this.jobs = new ConcurrentHashMap<String, String>();
 
-        ResourceResolver adminResourceResolver = null;
+        this.autoResume = PropertiesUtil.toBoolean(config.get(PROP_AUTO_RESUME), DEFAULT_AUTO_RESUME);
 
-        try {
-            adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+        if (this.autoResume) {
+            log.info("Looking for any Bulk Workflow Manager pages to resume processing under: {}", BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH);
 
-            final String query = "SELECT * FROM [cq:PageContent] WHERE [sling:resourceType] = "
-                    + "'" + SLING_RESOURCE_TYPE + "'"
-                    + " AND [" + KEY_STATE + "] = '" + STATE_STOPPED_DEACTIVATED + "'";
+            ResourceResolver adminResourceResolver = null;
 
-            log.debug("Finding bulk workflows to reactivate using query: {}", query);
+            try {
+                adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                final Resource root = adminResourceResolver.getResource(BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH);
 
-            final Iterator<Resource> resources = adminResourceResolver.findResources(query, Query.JCR_SQL2);
+                if (root != null) {
+                    final ResumableResourceVisitor visitor = new ResumableResourceVisitor();
+                    visitor.accept(root);
 
-            while (resources.hasNext()) {
-                final Resource resource = resources.next();
-                log.info("Automatically resuming bulk workflow at [ {} ]", resource.getPath());
-                this.resume(resource);
-            }
-        } catch (LoginException e) {
-            log.error("{}", e.getMessage());
-        } finally {
-            if (adminResourceResolver != null) {
-                adminResourceResolver.close();
+                    final List<Resource> resources = visitor.getResumableResources();
+
+                    log.debug("Found {} resumable resource(s)", resources.size());
+
+                    for (final Resource resource : resources) {
+                        log.info("Automatically resuming bulk workflow at [ {} ]", resource.getPath());
+                        this.resume(resource);
+                    }
+                }
+            } catch (LoginException e) {
+                log.error("Could not obtain resource resolver for finding stopped Bulk Workflow jobs", e);
+            } finally {
+                if (adminResourceResolver != null) {
+                    adminResourceResolver.close();
+                }
             }
         }
     }
@@ -748,11 +764,11 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
                 } catch (Exception e) {
                     this.scheduler.removeJob(jobName);
                     jobs.remove(path);
-                    log.error("Performed a hard stop for [ {} ] at de-activation due to: ", jobName, e.getMessage());
+                    log.error("Performed a hard stop for [ {} ] at de-activation due to: ", jobName, e);
                 }
             }
         } catch (org.apache.sling.api.resource.LoginException e) {
-            log.error("Could not acquire a resource resolver: {}", e.getMessage());
+            log.error("Could not acquire a resource resolver: {}", e);
         } finally {
             if (resourceResolver != null) {
                 resourceResolver.close();

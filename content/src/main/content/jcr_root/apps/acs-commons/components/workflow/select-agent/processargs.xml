@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+    xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Panel"
+    jcr:title="Arguments"
+    xtype="panel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <arguments
+            jcr:primaryType="cq:Dialog"
+            title="Process Arguments"
+            xtype="dialogfieldset"
+            collapsed="false"
+            callapsible="false">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <agentToUse
+                    jcr:primaryType="cq:Widget"
+                    fieldDescription="Select the agent(s) which should be triggered for the replication request."
+                    fieldLabel="Replication Agents"
+                    name="./metaData/replicationAgent"
+                    type="checkbox"
+                    xtype="selection"
+                    options="$PATH.agentoptions.json" />
+            </items>
+        </arguments>
+    </items>
+</jcr:root>

@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>1.9.5-SNAPSHOT</version>
+        <version>1.9.7-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -200,6 +200,19 @@
             <groupId>com.day.cq.workflow</groupId>
             <artifactId>cq-workflow-api</artifactId>
             <version>5.5.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.day.cq.wcm</groupId>
+            <artifactId>cq-wcm-workflow-api</artifactId>
+            <version>5.3.0</version>
+            <scope>provided</scope>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>com.day.cq.wcm</groupId>
+            <artifactId>cq-wcm-workflow</artifactId>
+            <version>5.6.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -421,6 +434,13 @@
             <version>2.2.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.html</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
 
         <!--  Build Dependencies -->
         <dependency>
