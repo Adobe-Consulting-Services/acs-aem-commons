@@ -43,13 +43,13 @@ import java.net.URLDecoder;
 
 @SuppressWarnings("serial")
 @SlingServlet(
-        selectors = "overlay.cqinclude.name-prefix",
+        selectors = "overlay.cqinclude.namespace",
         extensions = "json",
         resourceTypes = "sling/servlet/default")
-public final class CQIncludeNamePropertyPrefixingServlet extends SlingSafeMethodsServlet implements OptingServlet {
-    private static final Logger log = LoggerFactory.getLogger(CQIncludeNamePropertyPrefixingServlet.class);
+public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsServlet implements OptingServlet {
+    private static final Logger log = LoggerFactory.getLogger(CQIncludePropertyNamespaceServlet.class);
 
-    private static final String REQ_ATTR = CQIncludeNamePropertyPrefixingServlet.class.getName() + ".processed";
+    private static final String REQ_ATTR = CQIncludePropertyNamespaceServlet.class.getName() + ".processed";
 
     private static final String AEM_CQ_INCLUDE_SELECTORS = "overlay.infinity";
 
@@ -112,10 +112,10 @@ public final class CQIncludeNamePropertyPrefixingServlet extends SlingSafeMethod
         private static final String PN_NAME = "name";
         private static final String NT_CQ_WIDGET = "cq:Widget";
 
-        private final String namePrefix;
+        private final String namespace;
 
-        public NamePropertyUpdater(final String namePrefix) {
-            this.namePrefix = namePrefix;
+        public NamePropertyUpdater(final String namespace) {
+            this.namespace = namespace;
         }
 
         @Override
@@ -126,7 +126,7 @@ public final class CQIncludeNamePropertyPrefixingServlet extends SlingSafeMethod
 
                 if (StringUtils.isNotBlank(nameValue)) {
                     try {
-                        jsonObject.put(PN_NAME, "./" + namePrefix + "/" + nameValue);
+                        jsonObject.put(PN_NAME, "./" + namespace + "/" + nameValue);
                     } catch (final JSONException e) {
                         log.error("Error updating the Name property of the JSON object", e);
                     }
