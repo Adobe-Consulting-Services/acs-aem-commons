@@ -105,9 +105,11 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                 run(resourceResolver, payloadPath, workflowProcessLabels, processArgs,
                         autoSaveAfterEachWorkflowProcess, autoSaveAtEnd);
 
-                log.info("Synthetic workflow execution of payload [ {} ] completed in [ {} ] ms",
-                        payloadPath,
-                        System.currentTimeMillis() - start);
+                if (log.isInfoEnabled()) {
+                    long duration = System.currentTimeMillis() - start;
+                    log.info("Synthetic workflow execution of payload [ {} ] completed in [ {} ] ms",
+                        payloadPath, duration);
+                }
 
                 return;
 
@@ -152,33 +154,29 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                 final MetaDataMap workflowProcessMetaDataMap =
                         new SyntheticMetaDataMap(metaDataMaps.get(workflowProcessLabel));
 
-                if (workflowProcess == null) {
-                    log.warn("Synthetic Workflow could not find a Workflow Model with label [ {} ]",
-                            workflowProcessLabel);
-                } else {
-                    try {
-                        // Execute the WF
-                        workflowProcess.execute(workItem, workflowSession, workflowProcessMetaDataMap);
-                        workItem.setTimeEnded(new Date());
 
-                        log.trace("Synthetic workflow execution of [ {} ] executed in [ {} ] ms",
-                                workflowProcessLabel,
-                                workItem.getTimeEnded().getTime() - workItem.getTimeStarted().getTime());
-                    } catch (SyntheticTerminateWorkflowException ex) {
-                        // Terminate entire Workflow execution for this payload
-                        log.info("Synthetic workflow execution stopped via terminate() for [ {} ]", payloadPath);
-                        break;
-                    } finally {
-                        try {
-                            if (autoSaveAfterEachWorkflowProcess && session.hasPendingChanges()) {
-                                session.save();
-                            }
-                        } catch (RepositoryException e) {
-                            log.error("Could not save at end of synthetic workflow execution process"
-                                    + " [ {} ] for payload path [ {} ]", workflowProcessLabel, payloadPath);
-                            log.error("Synthetic Workflow process save failed.", e);
-                            throw new WorkflowException(e);
+                try {
+                    // Execute the WF
+                    workflowProcess.execute(workItem, workflowSession, workflowProcessMetaDataMap);
+                    workItem.setTimeEnded(new Date());
+
+                    log.trace("Synthetic workflow execution of [ {} ] executed in [ {} ] ms",
+                            workflowProcessLabel,
+                            workItem.getTimeEnded().getTime() - workItem.getTimeStarted().getTime());
+                } catch (SyntheticTerminateWorkflowException ex) {
+                    // Terminate entire Workflow execution for this payload
+                    log.info("Synthetic workflow execution stopped via terminate() for [ {} ]", payloadPath);
+                    break;
+                } finally {
+                    try {
+                        if (autoSaveAfterEachWorkflowProcess && session.hasPendingChanges()) {
+                            session.save();
                         }
+                    } catch (RepositoryException e) {
+                        log.error("Could not save at end of synthetic workflow execution process"
+                                + " [ {} ] for payload path [ {} ]", workflowProcessLabel, payloadPath);
+                        log.error("Synthetic Workflow process save failed.", e);
+                        throw new WorkflowException(e);
                     }
                 }
             } else {

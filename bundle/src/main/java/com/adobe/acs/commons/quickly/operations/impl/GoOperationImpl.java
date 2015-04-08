@@ -114,7 +114,7 @@ public class GoOperationImpl extends AbstractOperation {
 
         shortcuts.addAll(new ClassicConsoleResults().getResults(resourceResolver));
         shortcuts.addAll(new TouchConsoleResults().getResults(resourceResolver));
-        shortcuts.addAll(new DevConsoleResults().getResults());
+        shortcuts.addAll(DevConsoleResults.getResults());
         shortcuts.addAll(new OpsConsoleResults().getResults());
         shortcuts.addAll(new ACSToolsResults().getResults(resourceResolver));
 

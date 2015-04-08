@@ -34,7 +34,9 @@ import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -51,6 +53,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +76,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
     private static final Logger log = LoggerFactory.getLogger(LastModifiedOperationImpl.class);
 
     public static final String CMD = "lastmod";
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy @ hh:mm aaa");
+    private static final Format DATE_FORMAT = FastDateFormat.getInstance("EEE, d MMM yyyy @ hh:mm aaa");
     private static final int MAX_QUERY_RESULTS = 25;
 
     private Map<String, Result> operations = new HashMap<String, Result>();

@@ -109,20 +109,18 @@ public class QuicklyFilter implements Filter {
         // Get contents
         final String contents = capturedResponse.getContents();
 
-        if (contents != null) {
-            if (StringUtils.contains(response.getContentType(), "html")) {
+        if (contents != null && StringUtils.contains(response.getContentType(), "html")) {
 
-                final int bodyIndex = contents.indexOf("</body>");
-                if (bodyIndex != -1) {
+            final int bodyIndex = contents.indexOf("</body>");
+            if (bodyIndex != -1) {
 
-                    final PrintWriter printWriter = response.getWriter();
+                final PrintWriter printWriter = response.getWriter();
 
-                    printWriter.write(contents.substring(0, bodyIndex));
-                    printWriter.write(appHTML);
-                    printWriter.write(contents.substring(bodyIndex));
+                printWriter.write(contents.substring(0, bodyIndex));
+                printWriter.write(appHTML);
+                printWriter.write(contents.substring(bodyIndex));
 
-                    return;
-                }
+                return;
             }
         }
 

@@ -51,15 +51,14 @@ public abstract class AbstractResultSerializer {
 
         final JSONObject json = new JSONObject();
 
-        if(action != null) {
+        if (action != null) {
             json.put("uri", action.getUri());
             json.put("method", action.getMethod());
             json.put("target", action.getTarget());
             json.put("xhr", false);
             json.put("script", action.getScript());
+            json.put("params", new JSONObject(action.getParams()));
         }
-
-        json.put("params", new JSONObject(action.getParams()));
 
         return json;
     }

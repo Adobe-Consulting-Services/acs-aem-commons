@@ -140,12 +140,10 @@ public class ResultBuilderImpl implements ResultBuilder {
     protected final Result processPunctuation(final String[] punctuation, final Result result) {
         for (final String p : punctuation) {
 
-            if ("!".equals(p)) {
-                if (Action.Method.GET.equals(result.getAction().getMethod())
-                        || Action.Method.POST.equals(result.getAction().getMethod())) {
+            if ("!".equals(p) && (Action.Method.GET.equals(result.getAction().getMethod())
+                        || Action.Method.POST.equals(result.getAction().getMethod()))) {
 
-                    result.getAction().setTarget(Action.Target.BLANK);
-                }
+                result.getAction().setTarget(Action.Target.BLANK);
             }
         }
 

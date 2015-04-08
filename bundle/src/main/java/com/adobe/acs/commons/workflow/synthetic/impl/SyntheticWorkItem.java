@@ -57,7 +57,11 @@ public class SyntheticWorkItem implements WorkItem {
     }
 
     public final void setTimeEnded(final Date timeEnded) {
-        this.timeEnded = timeEnded;
+        if (timeEnded == null) {
+            this.timeEnded = null;
+        } else {
+            this.timeEnded = (Date) timeEnded.clone();
+        }
     }
 
     @Override
@@ -67,12 +71,12 @@ public class SyntheticWorkItem implements WorkItem {
 
     @Override
     public final Date getTimeStarted() {
-        return this.timeStarted;
+        return this.timeStarted == null ? null : (Date) this.timeStarted.clone();
     }
 
     @Override
     public final Date getTimeEnded() {
-        return this.timeEnded;
+        return this.timeEnded == null ? null : (Date) this.timeEnded.clone();
     }
 
     @Override

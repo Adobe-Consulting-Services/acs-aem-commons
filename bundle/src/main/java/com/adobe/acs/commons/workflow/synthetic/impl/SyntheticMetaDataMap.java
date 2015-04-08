@@ -71,7 +71,7 @@ public class SyntheticMetaDataMap implements MetaDataMap {
 
     @Override
     public final boolean containsValue(final Object o) {
-        return this.containsValue(o);
+        return this.metaDataMap.containsValue(o);
     }
 
     @Override

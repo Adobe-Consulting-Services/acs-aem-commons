@@ -92,14 +92,14 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
      */
     public final Layer transform(Layer layer) {
 
-        for (final String type : this.transforms.keySet()) {
-            final ImageTransformer imageTransformer = this.imageTransformers.get(type);
+        for (final Map.Entry<String, ValueMap> entry : this.transforms.entrySet()) {
+            final ImageTransformer imageTransformer = this.imageTransformers.get(entry.getKey());
             if (imageTransformer == null) {
                 log.warn("Skipping transform. Missing ImageTransformer for type: {}");
                 continue;
             }
 
-            final ValueMap transformParams = this.transforms.get(type);
+            final ValueMap transformParams = entry.getValue();
             layer = imageTransformer.transform(layer, transformParams);
         }
 

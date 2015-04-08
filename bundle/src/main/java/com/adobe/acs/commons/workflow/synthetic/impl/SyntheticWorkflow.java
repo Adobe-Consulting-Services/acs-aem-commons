@@ -99,7 +99,7 @@ public class SyntheticWorkflow implements Workflow {
 
     @Override
     public final Date getTimeStarted() {
-        return this.timeStarted;
+        return (Date) this.timeStarted.clone();
     }
 
     @Override

@@ -42,7 +42,7 @@ public class ResumableResourceVisitor extends AbstractResourceVisitor {
     private static final String NT_PAGE_CONTENT = "cq:PageContent";
     private static final String[] ACCEPTED_PRIMARY_TYPES = new String[] { NameConstants.NT_PAGE, NT_PAGE_CONTENT };
     private List<Resource> resources = new ArrayList<Resource>();
-    
+
     public final List<Resource> getResumableResources() {
         return this.resources;
     }
@@ -60,22 +60,21 @@ public class ResumableResourceVisitor extends AbstractResourceVisitor {
             super.accept(resource);
         }
     }
-    
+
     @Override
     protected void visit(final Resource resource) {
         final ValueMap properties = resource.adaptTo(ValueMap.class);
         
-        // Ensure jcr:primaryType = cq:PageContent
-        if(NT_PAGE_CONTENT.equals(properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
-            // Ensure the sling:resourceType is that of Bulk Workflow Manager Page
-            if(BulkWorkflowEngine.SLING_RESOURCE_TYPE.equals(properties.get(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, String.class))) {
-                // Ensure the Bulk Workflow Manager Page has been marked as "Stopped by Bundle Deactivation"
-                if(BulkWorkflowEngine.STATE_STOPPED_DEACTIVATED.equals(properties.get(BulkWorkflowEngine.KEY_STATE, String.class))) {
-                    this.resources.add(resource);
-                }
-            }
+        // Ensure jcr:primaryType = cq:PageContent and 
+        // that the sling:resourceType is that of Bulk Workflow Manager Page and
+        // that the Bulk Workflow Manager Page has been marked as "Stopped by Bundle Deactivation"
+        if(NT_PAGE_CONTENT.equals(properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class)) &&
+                BulkWorkflowEngine.SLING_RESOURCE_TYPE.equals(properties.get(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, String.class)) &&
+                BulkWorkflowEngine.STATE_STOPPED_DEACTIVATED.equals(properties.get(BulkWorkflowEngine.KEY_STATE, String.class))) {
+
+                this.resources.add(resource);
         }
-        
+
         return;
     }
 }
