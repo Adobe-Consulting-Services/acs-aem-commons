@@ -20,9 +20,9 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@page session="false" %><%
 
-    pageContext.setAttribute("pagePath", resourceResolver.map(currentPage.getPath()));
-    pageContext.setAttribute("resourcePath", resourceResolver.map(resource.getPath()));
-    pageContext.setAttribute("favicon", resourceResolver.map(component.getPath() + "/clientlibs/images/favicon.ico"));
+    pageContext.setAttribute("pagePath", slingRequest.getContextPath() + resourceResolver.map(currentPage.getPath()));
+    pageContext.setAttribute("resourcePath", slingRequest.getContextPath() + resourceResolver.map(resource.getPath()));
+    pageContext.setAttribute("favicon", slingRequest.getContextPath() + resourceResolver.map(component.getPath() + "/clientlibs/images/favicon.ico"));
 
 %><!doctype html>
 <html>

@@ -29,7 +29,7 @@
     final I18n i18n = new I18n(slingRequest);
     final AgentManager agentManager = sling.getService(AgentManager.class);
     final Collection<Agent> agents = agentManager.getAgents().values();
-    final String action = resourceResolver.map(currentPage.getContentResource().getPath())
+    final String action = slingRequest.getContextPath() + resourceResolver.map(currentPage.getContentResource().getPath())
             + ".replicateversion.json";
 %>
 

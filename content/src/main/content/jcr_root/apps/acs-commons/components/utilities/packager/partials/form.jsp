@@ -20,12 +20,12 @@
 
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8" %><%
-    final String actionURI = resourceResolver.map(currentPage.getContentResource().getPath() + ".package.json");
+    final String actionURI = slingRequest.getContextPath() + resourceResolver.map(currentPage.getContentResource().getPath() + ".package.json");
 %>
 
 <hr/>
 
-<form id="packager-form" method="post" action="<%= xssAPI.encodeForHTMLAttr(actionURI) %>">
+<form id="packager-form" method="post" action="<%= xssAPI.getValidHref(actionURI) %>">
     <input class="button" name="preview" type="submit" value="Preview"/>
     <input class="button" name="create" type="submit" value="Create Package"/>
 </form>
