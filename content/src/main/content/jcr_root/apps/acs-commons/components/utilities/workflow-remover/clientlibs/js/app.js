@@ -101,12 +101,17 @@ angular.module('workflowRemover', [])
             };
 
             $scope.remove = function () {
+                var payload = angular.copy($scope.form);
                 $scope.app.running = true;
+
+                if (payload.olderThan) {
+                    payload.olderThan = moment(payload.olderThan, "YYYY-MM-DD HH:MM").valueOf();
+                }
 
                 $http({
                     method: 'POST',
                     url: encodeURI($scope.app.resource + '.remove.json'),
-                    data: 'params=' + JSON.stringify($scope.form),
+                    data: 'params=' + JSON.stringify(payload),
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                 }).
                     success(function (data, status, headers, config) {

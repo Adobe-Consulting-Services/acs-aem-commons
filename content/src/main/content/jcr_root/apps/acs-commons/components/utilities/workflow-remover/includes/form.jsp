@@ -44,8 +44,57 @@
 
 
     <div class="form-row">
+        <h4>Payload Paths</h4>
+
+        <span>
+            <table class="data">
+                <thead>
+                <tr>
+                    <th>Payload Path Regex</th>
+                    <th>&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="payload in form.payloads">
+                    <td><input type="text"
+                               ng-model="payload.pattern"/></td>
+                    <td class="action-col property-remove">
+                        <i      ng-show="form.payloads.length > 1"
+                                ng-click="form.payloads.splice($index, 1)"
+                                class="icon-minus-circle">Remove</i>
+                    </td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="2" class="property-add">
+                        <i ng-click="form.payloads.push({})"
+                           class="icon-add-circle withLabel">Add Payload Path Pattern</i>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </span>
+    </div>
+
+    <div class="form-row">
+        <h4>Older Than</h4>
+
+        <span>
+            <div class="datepicker" data-init="datepicker">
+                <input ng-model="form.olderThan" type="datetime">
+                <button class="icon-calendar small">Datetime picker</button>
+            </div>
+        </span>
+    </div>
+
+    <div class="form-row">
         <h4>Models</h4>
 
+        <div class="instructions">
+            If no Workflow Models are selected, Workflow Instances will not be filtered by Workflow Model.
+        </div>
+        
         <span>
 
             <%-- First Col --%>
@@ -94,60 +143,10 @@
 
             <div style="clear: both;"></div>
 
-            <div class="instructions">
-                If no Workflow Models are selected, Workflow Instances will not be filtered by Workflow Model.
-            </div>
         </span>
     </div>
 
-
-    <div class="form-row">
-        <h4>Payload Paths</h4>
-
-        <span>
-            <table class="data">
-                <thead>
-                    <tr>
-                        <th>Payload Path Regex</th>
-                        <th>&nbsp;</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="payload in form.payloads">
-                        <td><input type="text"
-                                   ng-model="payload.pattern"/></td>
-                        <td class="action-col property-remove">
-                            <i      ng-show="form.payloads.length > 1"
-                                    ng-click="form.payloads.splice($index, 1)"
-                                    class="icon-minus-circle">Remove</i>
-                        </td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="2" class="property-add">
-                            <i ng-click="form.payloads.push({})"
-                               class="icon-add-circle withLabel">Add Payload Path Pattern</i>
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-        </span>
-    </div>
-
-    <div class="form-row">
-        <h4>Older Than</h4>
-
-        <span>
-            <input type="text"
-                   ng-model="form.olderThan"/>
-
-            <div class="instructions">
-                UTC time in seconds (<a href="http://www.epochconverter.com/" target="_blank">epochconverter.com</a>)
-            </div>
-        </span>
-    </div>
-
+    <hr/>
 
     <div class="form-row">
         <div class="form-left-cell">&nbsp;</div>
