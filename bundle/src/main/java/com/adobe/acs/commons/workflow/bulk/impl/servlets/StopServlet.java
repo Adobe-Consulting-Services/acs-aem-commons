@@ -54,6 +54,6 @@ public class StopServlet extends SlingAllMethodsServlet {
 
         bulkWorkflowEngine.stop(request.getResource());
 
-        response.sendRedirect(request.getResourceResolver().map(request.getResource().getPath()) + ".status.json");
+        response.sendRedirect(request.getResourceResolver().map(request, request.getResource().getPath()) + ".status.json");
     }
 }

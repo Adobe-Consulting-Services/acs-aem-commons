@@ -29,7 +29,7 @@
     final I18n i18n = new I18n(slingRequest);
     final AgentManager agentManager = sling.getService(AgentManager.class);
     final Collection<Agent> agents = agentManager.getAgents().values();
-    final String action = slingRequest.getContextPath() + resourceResolver.map(currentPage.getContentResource().getPath())
+    final String action = resourceResolver.map(slingRequest, currentPage.getContentResource().getPath())
             + ".replicateversion.json";
 %>
 
@@ -106,7 +106,7 @@
                     if (agent.isEnabled() && agent.isValid()) {
                         %><option
                                 value="<%= agent.getId() %>"
-                                data-agent-path="<%= resourceResolver.map(agent.getConfiguration().getConfigPath()) %>">
+                                data-agent-path="<%= resourceResolver.map(slingRequest, agent.getConfiguration().getConfigPath()) %>">
                             <%= agent.getConfiguration().getName() %>
                         </option><%
                     }

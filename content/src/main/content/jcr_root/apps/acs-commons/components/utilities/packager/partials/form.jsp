@@ -20,7 +20,7 @@
 
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@page session="false" contentType="text/html" pageEncoding="utf-8" %><%
-    final String actionURI = slingRequest.getContextPath() + resourceResolver.map(currentPage.getContentResource().getPath() + ".package.json");
+    final String actionURI = resourceResolver.map(slingRequest, currentPage.getContentResource().getPath() + ".package.json");
 %>
 
 <hr/>

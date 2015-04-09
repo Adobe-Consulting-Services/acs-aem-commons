@@ -91,7 +91,7 @@ public class StartServlet extends SlingAllMethodsServlet {
             bulkWorkflowEngine.initialize(request.getResource(), map);
             bulkWorkflowEngine.start(request.getResource());
 
-            response.sendRedirect(request.getResourceResolver().map(request.getResource().getPath()) + ".status.json");
+            response.sendRedirect(request.getResourceResolver().map(request, request.getResource().getPath()) + ".status.json");
 
         } catch (JSONException e) {
             log.error("Could not parse HTTP Request params: {}", e);
