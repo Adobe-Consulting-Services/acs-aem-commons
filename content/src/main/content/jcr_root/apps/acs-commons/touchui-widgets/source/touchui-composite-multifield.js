@@ -18,7 +18,7 @@
  * #L%
  *
  * A sample component dialog using the Touch UI Multi Field
- * Not the usage of empty valued acs-aem-nested property
+ * Note the usage of empty valued acs-commons-nested property
  *
  * <code>
      <?xml version="1.0" encoding="UTF-8"?>
@@ -65,7 +65,7 @@
                                                 <field
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/foundation/form/fieldset"
-                                                acs-aem-nested=""
+                                                acs-commons-nested=""
                                                 name="./pages">
                                                     <layout
                                                     jcr:primaryType="nt:unstructured"
@@ -106,17 +106,18 @@
      </code>
 */
 
-
 (function () {
-    var DATA_ACS_AEM_NESTED = "data-acs-aem-nested",
+    var DATA_ACS_COMMONS_NESTED = "data-acs-commons-nested",
         CFFW = ".coral-Form-fieldwrapper",
-        _ = window._, CUI = window.CUI, Class = window.Class;
+        _ = window._, CUI = window.CUI,
+        Class = window.Class,
+        ACS_COMMONS_MULTIFIELD;
 
     //reads multifield data from server, creates the nested composite multifields and fills them
     function addDataInFields() {
         $(document).on("dialog-ready", function() {
-            var mName = $("[" + DATA_ACS_AEM_NESTED + "]").data("name"),
-                $fieldSets = $("[" + DATA_ACS_AEM_NESTED + "][class='coral-Form-fieldset']"),
+            var mName = $("[" + DATA_ACS_COMMONS_NESTED + "]").data("name"),
+                $fieldSets = $("[" + DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
                 $form = $fieldSets.closest("form.foundation-form"),
                 actionUrl = $form.attr("action") + ".json",
                 mValues, $field, name;
@@ -217,10 +218,11 @@
         return records;
     }
 
-    function submitAction() {
+    //collect data from widgets in multifield and POST them to CRX as JSON
+    function collectDataFromFields() {
         var $form = $(this).closest("form.foundation-form"),
-            mName = $("[" + DATA_ACS_AEM_NESTED + "]").data("name"),
-            $fieldSets = $("[" + DATA_ACS_AEM_NESTED + "][class='coral-Form-fieldset']"),
+            mName = $("[" + DATA_ACS_COMMONS_NESTED + "]").data("name"),
+            $fieldSets = $("[" + DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
             record, $fields, $field, name, $nestedMultiField;
 
         $fieldSets.each(function (i, fieldSet) {
@@ -262,19 +264,18 @@
         });
     }
 
-    //collect data from widgets in multifield and POST them to CRX as JSON
-    function collectDataFromFields(){
-        $(document).on("click", ".cq-dialog-submit", submitAction);
-    }
-
     $(document).ready(function () {
         addDataInFields();
-        collectDataFromFields();
+
+        $(document).on("dialog-ready", function() {
+            //$(document).on("click", ".cq-dialog-submit", submitAction);
+            document.querySelector('form.cq-dialog').addEventListener('submit', collectDataFromFields, true);
+        });
     });
 
     //extend otb multifield for adjusting event propagation when there are nested multifields
     //for working around the nested multifield add and reorder
-    CUI.Multifield = new Class({
+    ACS_COMMONS_MULTIFIELD = new Class({
         toString: "Multifield",
         extend: CUI.Multifield,
 
@@ -299,5 +300,5 @@
         }
     });
 
-    CUI.Widget.registry.register("multifield", CUI.Multifield);
+    CUI.Widget.registry.register("multifield", ACS_COMMONS_MULTIFIELD);
 }());
