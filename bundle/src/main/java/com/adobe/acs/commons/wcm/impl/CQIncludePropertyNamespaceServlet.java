@@ -30,7 +30,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.request.RequestUtil;
-import org.apache.sling.api.servlets.OptingServlet;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -43,10 +42,11 @@ import java.net.URLDecoder;
 
 @SuppressWarnings("serial")
 @SlingServlet(
+        label = "ACS AEM Commons - CQInclude Property Namespace",
         selectors = "overlay.cqinclude.namespace",
         extensions = "json",
         resourceTypes = "sling/servlet/default")
-public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsServlet implements OptingServlet {
+public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(CQIncludePropertyNamespaceServlet.class);
 
     private static final String REQ_ATTR = CQIncludePropertyNamespaceServlet.class.getName() + ".processed";
@@ -59,6 +59,15 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        if (!this.accepts(request)) {
+            response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write(new JSONObject().toString());
+        }
+
+        /* Servlet accepts this request */
         RequestUtil.setRequestAttribute(request, REQ_ATTR, true);
 
         final String prefix =
@@ -70,8 +79,6 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         final BufferingResponse bufferingResponse = new BufferingResponse(response);
         request.getRequestDispatcher(request.getResource(), options).forward(request, bufferingResponse);
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
 
         try {
             final JSONObject json = new JSONObject(bufferingResponse.getContents());
@@ -89,16 +96,18 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         }
     }
 
-    @Override
-    public boolean accepts(SlingHttpServletRequest request) {
+    private boolean accepts(SlingHttpServletRequest request) {
         if (request.getAttribute(REQ_ATTR) != null) {
             // Cyclic loop
+            log.warn("Identified a cyclic loop in the ACS Commons CQ Include Namespace prefix Servlet for [ {} ]",
+                    request.getRequestURI());
             return false;
         }
 
-        for (int i = 0; i < NAME_PROPERTY_SELECTOR_INDEX; i++) {
+        for (int i = 0; i <= NAME_PROPERTY_SELECTOR_INDEX; i++) {
             if (StringUtils.isBlank(PathInfoUtil.getSelector(request, i))) {
-                // Missing selectors
+                // Missing necessary selectors; the first N - 1 should be redundant since the selectors are specified
+                // in the Servlet registration
                 return false;
             }
         }
