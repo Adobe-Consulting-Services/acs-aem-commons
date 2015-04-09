@@ -110,8 +110,7 @@
     var DATA_ACS_COMMONS_NESTED = "data-acs-commons-nested",
         CFFW = ".coral-Form-fieldwrapper",
         _ = window._, CUI = window.CUI,
-        Class = window.Class,
-        ACS_COMMONS_MULTIFIELD;
+        Class = window.Class;
 
     //reads multifield data from server, creates the nested composite multifields and fills them
     function addDataInFields() {
@@ -275,7 +274,7 @@
 
     //extend otb multifield for adjusting event propagation when there are nested multifields
     //for working around the nested multifield add and reorder
-    ACS_COMMONS_MULTIFIELD = new Class({
+    CUI.Multifield = new Class({
         toString: "Multifield",
         extend: CUI.Multifield,
 
@@ -300,5 +299,5 @@
         }
     });
 
-    CUI.Widget.registry.register("multifield", ACS_COMMONS_MULTIFIELD);
+    CUI.Widget.registry.register("multifield", CUI.Multifield);
 }());
