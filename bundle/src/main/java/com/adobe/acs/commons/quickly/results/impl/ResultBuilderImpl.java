@@ -44,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,8 +86,12 @@ public class ResultBuilderImpl implements ResultBuilder {
 
         ResultSerializer serializer = null;
 
-        if (resultSerializers.containsKey(result.getResultType())) {
+        if (StringUtils.isNotBlank(result.getResultType()) && resultSerializers.containsKey(result.getResultType())) {
             serializer = resultSerializers.get(result.getResultType());
+        }
+
+        if (serializer == null) {
+            serializer = resultSerializers.get(GenericResultSerializerImpl.TYPE);
         }
 
         if (serializer != null) {
