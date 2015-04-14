@@ -25,15 +25,12 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @org.apache.felix.scr.annotations.Component(
-        label = "ACS AEM Commons - WCM Views",
+        label = "ACS AEM Commons - WCM Views Filter",
         metatype = true
 )
 @Properties({
@@ -52,9 +49,9 @@ import java.util.regex.Pattern;
 public class WCMViewsFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(WCMViewsFilter.class);
 
-    private static final String PN_WCM_VIEWS = "wcmViews";
+    public static final String PN_WCM_VIEWS = "wcmViews";
 
-    private static final String RP_WCM_VIEW = "wcm-view";
+    public static final String RP_WCM_VIEW = "wcm-view";
 
     private static final String ATTR_FILTER = WCMViewsFilter.class.getName() + ".first-wcmmode";
 
@@ -191,11 +188,11 @@ public class WCMViewsFilter implements Filter {
 
 
     private List<String> getComponentViews(final SlingHttpServletRequest request) {
-        final List<String> views = new ArrayList<String>();
+        final Set<String> views = new TreeSet<String>();
         final Resource resource = request.getResource();
 
         if (resource == null) {
-            return views;
+            return new ArrayList<String>(views);
         }
 
         final Component component = WCMUtils.getComponent(resource);
@@ -209,7 +206,7 @@ public class WCMViewsFilter implements Filter {
             views.addAll(Arrays.asList(properties.get(PN_WCM_VIEWS, new String[]{ })));
         }
 
-        return views;
+        return new ArrayList<String>(views);
     }
 
 

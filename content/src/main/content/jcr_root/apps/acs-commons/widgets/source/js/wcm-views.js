@@ -1,19 +1,20 @@
-/*global CQ: false, ACS: false */
-CQ.Ext.ns("ACS.CQ");
+/*global CQ: false, ACS: false, JSON: false, console: false */
+
+CQ.Ext.ns('ACS.CQ');
 
 ACS.CQ.WCMViews = {
-    SK_TAB_PANEL: "cq-sk-tabpanel",
-    WCM_VIEWS: "WCM_VIEWS",
+    SK_TAB_PANEL: 'cq-sk-tabpanel',
+    WCM_VIEWS: 'WCM_VIEWS',
 
     addTagsPanel: function (sidekick) {
         var CONTEXTS = CQ.wcm.Sidekick.CONTEXTS,
             tabPanel,
-            buttons;
+            getWCMViews;
 
         if (!sidekick) {
             return;
         } else if (($.inArray(this.WCM_VIEWS, CONTEXTS) !== -1)
-                || sidekick.panels[this.WCM_VIEWS]) {
+            || sidekick.panels[this.WCM_VIEWS]) {
             return;
         }
 
@@ -21,47 +22,55 @@ ACS.CQ.WCMViews = {
 
         tabPanel = sidekick.findById(this.SK_TAB_PANEL);
 
-        buttons = [
-            new CQ.Ext.Button({
-                name: "ONE",
-                text: "One",
-                context: CQ.wcm.Sidekick.WCM_VIEWS/*,
-                handler: function () {
-                    CQ.Util.reload(CQ.WCM.getContentWindow(),
-                        CQ.HTTP.externalize(sidekick.path + CQ.HTTP.EXTENSION_HTML + "?wcm-views=foo"));
-                }                                   */
+        getWCMViews = function () {
+            CQ.shared.HTTP.get(sidekick.path + '.wcm-views.json',
+                function (options, success, response) {
+                    var json,
+                        buttons = [];
 
-            }),
-            new CQ.Ext.Button({
-                name: "TWO",
-                text: "Two",
-                context: CQ.wcm.Sidekick.WCM_VIEWS
+                    console.log(response);
 
-            }),
-            new CQ.Ext.Button({
-                name: "THREE",
-                text: "Three",
-                context: CQ.wcm.Sidekick.WCM_VIEWS
+                    json = JSON.parse(response.responseText);
+                    
+                    $.each(json, function (index, view) {
 
-            })
-        ];
+                        var button = new CQ.Ext.Button({
+                            name: 'WCM_VIEWS_' + view.value.toUpperCase(),
+                            text: view.title,
+                            context: CQ.wcm.Sidekick.WCM_VIEWS,
+                            handler: function () {
+                                CQ.Util.reload(CQ.WCM.getContentWindow(),
+                                    CQ.HTTP.externalize(sidekick.path + CQ.HTTP.EXTENSION_HTML + '?wcm-views=' + view.value));
+                            }
+                        });
 
-        sidekick.panels[this.WCM_VIEWS] = new CQ.Ext.Panel({
-            "border": false,
-            "autoScroll": true,
-            "layout": "column",
-            items: buttons,
-            "id": "cq-sk-tab-" + this.WCM_VIEWS
-        });
+                        buttons.push(button);
+                    });
 
-        tabPanel.add({
-            "tabTip": "Tags",
-            "iconCls": "cq-sidekick-tab cq-cft-tab-icon full",
-            "items": sidekick.panels[this.WCM_VIEWS],
-            "layout": "fit"
-        });
+                    console.log('adding panels');
 
-        sidekick.doLayout();
+                    sidekick.panels[this.WCM_VIEWS] = new CQ.Ext.Panel({
+                        "border": false,
+                        "autoScroll": true,
+                        "layout": 'column',
+                        items: buttons,
+                        "id": 'cq-sk-tab-' + this.WCM_VIEWS
+                    });
+                    
+                    tabPanel.add({
+                        "tabTip": 'WCM Views',
+                        "iconCls": 'cq-sidekick-tab cq-cft-tab-icon full',
+                        "items": sidekick.panels[this.WCM_VIEWS],
+                        "layout": 'fit'
+                    });
+
+                    sidekick.doLayout();
+
+                }
+            );
+        };
+
+        getWCMViews();
     }
 };
 
