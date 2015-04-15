@@ -33,11 +33,10 @@ import org.apache.sling.api.resource.ValueMap;
 
 import com.adobe.acs.commons.genericlists.GenericList;
 import com.day.cq.wcm.api.NameConstants;
-import com.day.cq.wcm.commons.WCMUtils;
 
 public final class GenericListImpl implements GenericList {
 
-    static final String TMPL_GENERIC_LIST = "/apps/acs-commons/templates/utilities/genericlist";
+    static final String RT_GENERIC_LIST = "acs-commons/components/utilities/genericlist";
     static final String PN_VALUE = "value";
     static final String TITLE_PREFIX = NameConstants.PN_TITLE + ".";
 

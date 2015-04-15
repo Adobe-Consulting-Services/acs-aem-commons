@@ -22,6 +22,8 @@ package com.adobe.acs.commons.genericlists.impl;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Collections;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -56,16 +58,17 @@ public class GenericListJsonResourceProviderTest {
 
     private String goodMntPath = GenericListJsonResourceProvider.ROOT + "/good";
 
-    private String goodPagePath = GenericListJsonResourceProvider.LIST_ROOT + "/good";
+    private String goodPagePath = GenericListJsonResourceProvider.DEFAULT_LIST_ROOT + "/good";
 
     private String badMntPath = GenericListJsonResourceProvider.ROOT + "/bad";
 
-    private String badPagePath = GenericListJsonResourceProvider.LIST_ROOT + "/bad";
+    private String badPagePath = GenericListJsonResourceProvider.DEFAULT_LIST_ROOT + "/bad";
 
     private String nonExisting = GenericListJsonResourceProvider.ROOT + "/non-existing";
 
     @Before
     public void setup() {
+        provider.activate(Collections.<String, String>emptyMap());
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
         when(pageManager.getPage(goodPagePath)).thenReturn(validPage);
         when(pageManager.getPage(badPagePath)).thenReturn(invalidPage);

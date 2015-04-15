@@ -29,7 +29,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
 
 import com.adobe.acs.commons.genericlists.GenericList;
-import com.adobe.acs.commons.util.TemplateUtil;
 import com.day.cq.wcm.api.Page;
 
 @Component
@@ -52,8 +51,8 @@ public class GenericListAdapterFactory implements AdapterFactory {
             return null;
         }
         final Page page = (Page) obj;
-        if (TemplateUtil.hasTemplate(page, GenericListImpl.TMPL_GENERIC_LIST)
-                && page.getContentResource() != null
+        if (page.getContentResource() != null
+                && page.getContentResource().isResourceType(GenericListImpl.RT_GENERIC_LIST)
                 && page.getContentResource().getChild("list") != null) {
             return new GenericListImpl(page.getContentResource().getChild("list"));
         }
