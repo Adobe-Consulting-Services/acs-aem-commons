@@ -74,7 +74,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
 
                 jsonArray.put(json);
             } catch (JSONException e) {
-                log.error("Unable to build WCM Views JSON output");
+                log.error("Unable to build WCM Views JSON output.", e);
             }
         }
 
