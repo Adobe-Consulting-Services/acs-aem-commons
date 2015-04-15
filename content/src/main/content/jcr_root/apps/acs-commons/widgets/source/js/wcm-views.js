@@ -6,29 +6,25 @@ ACS.CQ.WCMViews = {
     SK_TAB_PANEL: 'cq-sk-tabpanel',
     WCM_VIEWS: 'WCM_VIEWS',
 
-    addTagsPanel: function (sidekick) {
-        var CONTEXTS = CQ.wcm.Sidekick.CONTEXTS,
-            tabPanel,
-            getWCMViews;
+    addWCMViewsPanel: function (sidekick) {
+        var tabPanel;
 
         if (!sidekick) {
             return;
-        } else if (($.inArray(this.WCM_VIEWS, CONTEXTS) !== -1)
+        } else if (($.inArray(this.WCM_VIEWS, CQ.wcm.Sidekick.CONTEXTS) !== -1)
             || sidekick.panels[this.WCM_VIEWS]) {
             return;
         }
 
-        CONTEXTS.push(this.WCM_VIEWS);
+        CQ.wcm.Sidekick.CONTEXTS.push(this.WCM_VIEWS);
 
         tabPanel = sidekick.findById(this.SK_TAB_PANEL);
 
-        getWCMViews = function () {
+        (function () {
             CQ.shared.HTTP.get(sidekick.path + '.wcm-views.json',
                 function (options, success, response) {
                     var json,
                         buttons = [];
-
-                    console.log(response);
 
                     json = JSON.parse(response.responseText);
 
@@ -68,30 +64,27 @@ ACS.CQ.WCMViews = {
 
                     });
 
-                    console.log('adding panels');
-
                     sidekick.panels[this.WCM_VIEWS] = new CQ.Ext.Panel({
-                        "border": false,
-                        "autoScroll": true,
-                        "layout": 'column',
+                        border: false,
+                        autoScroll: true,
+                        layout: 'column',
                         items: buttons,
-                        "id": 'cq-sk-tab-' + this.WCM_VIEWS
+                        id: 'cq-sk-tab-WCM_VIEWS',
+                        cls: 'cq-sidekick-buttons'
                     });
-                    
+
                     tabPanel.add({
-                        "tabTip": 'WCM Views',
-                        "iconCls": 'cq-sidekick-tab cq-cft-tab-icon full',
-                        "items": sidekick.panels[this.WCM_VIEWS],
-                        "layout": 'fit'
+                        tabTip: 'WCM Views',
+                        iconCls: 'cq-sidekick-tab cq-sidekick-tab-icon-wcm-views full',
+                        items: sidekick.panels[this.WCM_VIEWS],
+                        layout: 'fit'
                     });
 
                     sidekick.doLayout();
 
                 }
             );
-        };
-
-        getWCMViews();
+        }());
     }
 };
 
@@ -99,7 +92,7 @@ ACS.CQ.WCMViews = {
     var sidekick,
         SK_INTERVAL,
         uri = window.location.pathname;
-
+    
     if (uri.indexOf("/cf") === 0 || uri.indexOf("/content") === 0) {
         sidekick = ACS.CQ.WCMViews;
 
@@ -108,7 +101,7 @@ ACS.CQ.WCMViews = {
 
             if (sk && sk.findById(sidekick.SK_TAB_PANEL)) {
                 clearInterval(SK_INTERVAL);
-                sidekick.addTagsPanel(sk);
+                sidekick.addWCMViewsPanel(sk);
             }
         }, 250);
     }

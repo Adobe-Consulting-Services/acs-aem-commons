@@ -58,7 +58,6 @@ public class WCMViewsFilter implements Filter {
 
     public static final String WCM_VIEW_DISABLED = "disabled";
 
-
     private static final String ATTR_FILTER = WCMViewsFilter.class.getName() + ".first-wcmmode";
 
     private String[] includePathPrefixes = new String[]{};
