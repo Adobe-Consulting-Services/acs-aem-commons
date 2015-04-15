@@ -92,7 +92,7 @@ public class UrlFilter implements Filter {
     private static final Collection<String> PROPERTY_NAMES = Arrays.asList(PN_ALLOWED_SUFFIXES, PN_ALLOWED_EXTENSIONS,
             PN_ALLOWED_SELECTORS, PN_ALLOWED_SUFFIX_PATTERN, PN_ALLOWED_SELECTOR_PATTERN, PN_ALLOWED_EXTENSION_PATTERN);
 
-    private static final Logger logger = LoggerFactory.getLogger(UrlFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(UrlFilter.class);
 
     public void destroy() {
         // nothing to do
@@ -111,15 +111,15 @@ public class UrlFilter implements Filter {
 
             if (definitionComponent != null) {
                 String definitionPath = definitionComponent.getPath();
-                logger.debug("found url filter definition resource at {}", definitionPath);
+                log.debug("found url filter definition resource at {}", definitionPath);
                 ValueMap properties = definitionComponent.getProperties();
                 if (properties != null) {
                     if (checkSelector(pathInfo, properties) && checkSuffix(pathInfo, properties)
                             && checkExtension(pathInfo, properties)) {
-                        logger.debug("url filter definition resource at {} passed for request {}.",
+                        log.debug("url filter definition resource at {} passed for request {}.",
                                 definitionPath, slingRequest.getRequestPathInfo());
                     } else {
-                        logger.info("url filter definition resource at {} FAILED for request {}.",
+                        log.info("url filter definition resource at {} FAILED for request {}.",
                                 definitionPath, slingRequest.getRequestPathInfo());
                         slingResponse.sendError(403);
                         return;
@@ -153,16 +153,16 @@ public class UrlFilter implements Filter {
         String[] allowedValues = properties.get(allowedArrayPropertyName, String[].class);
         if (allowedValues != null) {
             if (allowedValues.length == 0) {
-                logger.debug("{} was empty, therefore not allowing any value.", allowedArrayPropertyName);
+                log.debug("{} was empty, therefore not allowing any value.", allowedArrayPropertyName);
                 return false;
             } else if (!ArrayUtils.contains(allowedValues, value)) {
-                logger.debug("{} did not contain our string {}. checking the pattern.", allowedArrayPropertyName, value);
+                log.debug("{} did not contain our string {}. checking the pattern.", allowedArrayPropertyName, value);
                 String allowedPattern = properties.get(allowedPatternPropertyName, String.class);
                 if (allowedPattern == null || !Pattern.matches(allowedPattern, value)) {
-                    logger.debug("allowedPattern ({}) did not match our string {}", allowedPattern, value);
+                    log.debug("allowedPattern ({}) did not match our string {}", allowedPattern, value);
                     return false;
                 } else {
-                    logger.debug("allowedPattern ({}) did match our string {}", allowedPattern, value);
+                    log.debug("allowedPattern ({}) did match our string {}", allowedPattern, value);
                     return true;
                 }
             } else {
@@ -171,7 +171,7 @@ public class UrlFilter implements Filter {
         } else {
             String allowedPattern = properties.get(allowedPatternPropertyName, String.class);
             if (allowedPattern != null && !Pattern.matches(allowedPattern, value)) {
-                logger.debug("allowedPattern ({}) did not match our string {}", allowedPattern, value);
+                log.debug("allowedPattern ({}) did not match our string {}", allowedPattern, value);
                 return false;
             } else {
                 return true;
