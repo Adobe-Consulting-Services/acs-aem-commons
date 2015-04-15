@@ -49,7 +49,7 @@
     if(StringUtils.isBlank(ajaxSelectors)) { ajaxSelectors = DEFAULT_SELECTOR; }
     if(StringUtils.isBlank(ajaxExtension)) { ajaxExtension = DEFAULT_EXTENSION; }
 
-    final String url = resourceResolver.map(resource.getPath()) + "." + ajaxSelectors + "." + ajaxExtension;
+    final String url = resourceResolver.map(slingRequest, resource.getPath()) + "." + ajaxSelectors + "." + ajaxExtension;
 
 %><% if(WCMMode.PREVIEW.equals(mode) || WCMMode.DISABLED.equals(mode)) { %>
     <div data-ajax-component data-url="<%= url %>" class="acs-ajax-component">

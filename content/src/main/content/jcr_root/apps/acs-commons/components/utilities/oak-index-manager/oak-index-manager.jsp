@@ -20,10 +20,11 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@page session="false" %><%
 
-    pageContext.setAttribute("pagePath", resourceResolver.map(currentPage.getPath()));
-    pageContext.setAttribute("resourcePath", resourceResolver.map(resource.getPath()));
+    pageContext.setAttribute("pagePath", resourceResolver.map(slingRequest, currentPage.getPath()));
+    pageContext.setAttribute("resourcePath", resourceResolver.map(slingRequest, resource.getPath()));
     pageContext.setAttribute("hasOakIndex", resourceResolver.getResource("/oak:index") != null);
-    pageContext.setAttribute("favicon", component.getPath() + "/clientlibs/images/favicon.ico");
+    pageContext.setAttribute("favicon", resourceResolver.map(slingRequest, 
+            component.getPath() + "/clientlibs/images/favicon.ico"));
 
 %><!doctype html><html>
 <head>
