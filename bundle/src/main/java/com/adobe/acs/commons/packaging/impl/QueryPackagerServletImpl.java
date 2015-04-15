@@ -21,6 +21,10 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.util.OsgiPropertyUtil;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.Hit;
 import com.day.jcr.vault.fs.io.AccessControlHandling;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
@@ -86,11 +90,16 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
     private static final String QUERY_PACKAGE_THUMBNAIL_RESOURCE_PATH =
             "/apps/acs-commons/components/utilities/packager/query-packager/definition/package-thumbnail.png";
 
+    private static final String QUERY_BUILDER = "queryBuilder";
+
     @Reference
     private Packaging packaging;
 
     @Reference
     private PackageHelper packageHelper;
+
+    @Reference
+    private QueryBuilder queryBuilder;
 
     @Override
     public final void doPost(final SlingHttpServletRequest request,
@@ -191,20 +200,34 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
 
         final List<Resource> resources = new ArrayList<Resource>();
 
-        Iterator<Resource> resourceIterator = resourceResolver.findResources(statement, language);
+        if (language.equals(QUERY_BUILDER)) {
+            final String[] lines = StringUtils.split(statement, '\n');
+            final Map<String, String> params = OsgiPropertyUtil.toMap(lines, "=", false, null, true);
 
-        while (resourceIterator.hasNext()) {
-            final Resource resource = resourceIterator.next();
+            // ensure all results are returned
+            params.put("p.limit", "-1");
 
-            if (resource != null) {
-                if (StringUtils.isNotBlank(relPath)) {
-                    final Resource relResource = resource.getChild(relPath);
-
-                    if (relResource != null) {
-                        resources.add(relResource);
+            final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+            final List<Hit> hits = query.getResult().getHits();
+            for (final Hit hit : hits) {
+                resources.add(hit.getResource());
+            }
+        } else {
+            Iterator<Resource> resourceIterator = resourceResolver.findResources(statement, language);
+    
+            while (resourceIterator.hasNext()) {
+                final Resource resource = resourceIterator.next();
+    
+                if (resource != null) {
+                    if (StringUtils.isNotBlank(relPath)) {
+                        final Resource relResource = resource.getChild(relPath);
+    
+                        if (relResource != null) {
+                            resources.add(relResource);
+                        }
+                    } else {
+                        resources.add(resource);
                     }
-                } else {
-                    resources.add(resource);
                 }
             }
         }

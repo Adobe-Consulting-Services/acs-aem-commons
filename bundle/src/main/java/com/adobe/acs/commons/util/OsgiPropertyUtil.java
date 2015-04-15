@@ -88,6 +88,27 @@ public class OsgiPropertyUtil {
      */
     public static Map<String, String> toMap(final String[] values, final String separator,
                                             final boolean allowValuelessKeys, final String defaultValue) {
+        return toMap(values, separator, allowValuelessKeys, defaultValue, false);
+    }
+
+    /**
+     * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;
+     *
+     * If a value is missing from a key/value pair, the entry is rejected only if allowValuelessKyes is false.
+     * To keep the valueless keys pass in allowValuelessKeys => true
+     *
+     * *
+     * @param values Array of key/value pairs in the format => [ a<separator>b, x<separator>y ] ... ex. ["dog:woof", "cat:meow"]
+     * @param separator separator between the values
+     * @param allowValuelessKeys true is keys are allowed without associated values
+     * @param defaultValue default value to use if a value for a key is not present and allowValuelessKeys is true
+     * @param allowMultipleSeparators if true, multiple separators are allowed per entry in which case only the first is considered.
+     *                                If false, entries with multiple separators are considered invalid
+     * @return
+     */
+    public static Map<String, String> toMap(final String[] values, final String separator,
+                                            final boolean allowValuelessKeys, final String defaultValue,
+                                            final boolean allowMultipleSeparators) {
 
         final Map<String, String> map = new LinkedHashMap<String, String>();
 
@@ -96,7 +117,7 @@ public class OsgiPropertyUtil {
         }
 
         for (final String value : values) {
-            final String[] tmp = StringUtils.split(value, separator);
+            final String[] tmp = StringUtils.split(value, separator, allowMultipleSeparators ? 2 : -1);
 
             if(tmp.length == 1 && allowValuelessKeys) {
                 if(StringUtils.startsWith(value, separator)) {

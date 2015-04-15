@@ -135,6 +135,19 @@ public class OsgiPropertyUtilTest {
     }
 
     @Test
+    public void testToMapWithMultipleSeparatorsAllowed() {
+        String[] values = {"key1:value1", "key2:val:ue2", "key3:value3"};
+        String separator = ":";
+        Map<String, String> expResult = new HashMap<String, String>();
+        expResult.put("key1", "value1");
+        expResult.put("key2", "val:ue2");
+        expResult.put("key3", "value3");
+
+        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator, false, null, true);
+        assertEquals(expResult, result);
+    }
+
+    @Test
     public void testToMapWithOnlyKey1() {
         String[] values = {"key1:value1", "key2:", "key3:value3"};
         String separator = ":";
