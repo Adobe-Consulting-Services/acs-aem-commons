@@ -1,4 +1,4 @@
-/*global CQ: false, ACS: false, JSON: false, console: false */
+/*global CQ: false, ACS: false, JSON: false, console: false; self: false, top: false */
 
 CQ.Ext.ns('ACS.CQ');
 
@@ -92,8 +92,9 @@ ACS.CQ.WCMViews = {
     var sidekick,
         SK_INTERVAL,
         uri = window.location.pathname;
-    
-    if (uri.indexOf("/cf") === 0 || uri.indexOf("/content") === 0) {
+
+    if (uri.indexOf("/cf") === 0
+        || (self === top && uri.indexOf("/content") === 0)) {
         sidekick = ACS.CQ.WCMViews;
 
         SK_INTERVAL = setInterval(function () {
