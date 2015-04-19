@@ -39,8 +39,8 @@ public class InfoWriterTest {
                 + "Long: 20 "
                 + "Double: 30.1 "
                 + "Boolean: true "
-                + "Calendar: Thu Jan 01 00:00:00 EST 2015 "
-                + "Date: Thu Jan 01 00:00:00 EST 2015";
+                + "Calendar: " + cal.getTime().toString() + " "
+                + "Date: " + cal.getTime().toString();
 
         iw.message("String: {} "
                         + "Integer: {} "
