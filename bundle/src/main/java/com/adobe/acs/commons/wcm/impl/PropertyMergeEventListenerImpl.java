@@ -92,7 +92,7 @@ public final class PropertyMergeEventListenerImpl implements EventHandler, Topol
     private static final String DEFAULT_PROPERTY_TYPE = PROPERTY_TYPE_STRING;
     private Class propertyType = String[].class;
     @Property(label = "Property Type",
-            description = "The property type of the Destinations and Source properties.",
+            description = "The property type of the Destinations and Source properties. [ Default: string ]",
             value = PROPERTY_TYPE_STRING,
             options = {
                     @PropertyOption(name = PROPERTY_TYPE_BOOLEAN, value = "Boolean"),
@@ -106,7 +106,7 @@ public final class PropertyMergeEventListenerImpl implements EventHandler, Topol
     private static final String[] DEFAULT_NODE_TYPES = new String[]{};
     private List<String> nodeTypes = new ArrayList<String>();
     @Property(label = "Node Types",
-            description = "The node types to merge tags against. Leave blank for any.",
+            description = "The node types to merge tags against. Leave blank for any. [ Default: blank ]",
             cardinality = Integer.MAX_VALUE,
             value = {})
     public static final String PROP_NODE_TYPES = "node-types";
@@ -114,7 +114,7 @@ public final class PropertyMergeEventListenerImpl implements EventHandler, Topol
     private static final String[] DEFAULT_RESOURCE_TYPES = new String[]{};
     private List<String> resourceTypes = new ArrayList<String>();
     @Property(label = "Resource Types",
-            description = "The resource types to merge tags against. Leave blank for any.",
+            description = "The resource types to merge tags against. Leave blank for any. [ Default: blank ]",
             cardinality = Integer.MAX_VALUE,
             value = {})
     public static final String PROP_RESOURCE_TYPES = "resource-types";
@@ -123,14 +123,14 @@ public final class PropertyMergeEventListenerImpl implements EventHandler, Topol
     private static final String DEFAULT_DESTINATION_PROPERTY = "";
     private String destinationProperty = DEFAULT_DESTINATION_PROPERTY;
     @Property(label = "Destination Property",
-            description = "The property to merge Tags into.",
+            description = "The property to merge Tags into. [ Required ]",
             value = DEFAULT_DESTINATION_PROPERTY)
     public static final String PROP_DESTINATION_PROPERTY = "destination-property";
 
 
     private static final String[] DEFAULT_SOURCE_PROPERTIES = new String[]{};
     @Property(label = "Source Properties",
-            description = "The properties to collect the tags for merging from.",
+            description = "The properties to collect the tags for merging from. [ Required ]",
             cardinality = Integer.MAX_VALUE,
             value = {})
     public static final String PROP_SOURCE_PROPERTIES = "source-properties";
@@ -140,7 +140,7 @@ public final class PropertyMergeEventListenerImpl implements EventHandler, Topol
     private static final boolean DEFAULT_ALLOW_DUPLICATES = false;
     private boolean allowDuplicates = DEFAULT_ALLOW_DUPLICATES;
     @Property(label = "Allow duplicates",
-            description = "True allows duplicate values to be added to the destination. "
+            description = "True allows duplicate values to be added to the destination. [ Default: false ]"
                     + "False forces a unique set of values.",
             boolValue = DEFAULT_ALLOW_DUPLICATES)
     public static final String PROP_ALLOW_DUPLICATES = "allow-duplicate-values";
