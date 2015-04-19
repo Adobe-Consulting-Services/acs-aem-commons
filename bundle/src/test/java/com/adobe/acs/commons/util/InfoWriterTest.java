@@ -85,10 +85,10 @@ public class InfoWriterTest {
     }
 
     @Test
-    public void testClose() throws Exception {
+    public void testEnd() throws Exception {
         String expected = StringUtils.repeat("-", 80);
 
-        iw.line();
+        iw.end();
 
         assertEquals(expected.concat(LS), iw.toString());
     }
@@ -124,7 +124,7 @@ public class InfoWriterTest {
         iw.title("Info Title");
         iw.message("This is line 1");
         iw.message("This is line 2");
-        iw.close();
+        iw.end();
 
         assertEquals(expected, iw.toString());
     }

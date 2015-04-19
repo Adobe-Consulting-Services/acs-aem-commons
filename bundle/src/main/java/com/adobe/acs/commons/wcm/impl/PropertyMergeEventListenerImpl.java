@@ -395,8 +395,7 @@ public final class PropertyMergeEventListenerImpl implements EventHandler, Topol
             log.warn("Property Merge source properties list is Empty.");
         }
 
-
-        iw.close();
+        iw.end();
         log.info(iw.toString());
     }
 

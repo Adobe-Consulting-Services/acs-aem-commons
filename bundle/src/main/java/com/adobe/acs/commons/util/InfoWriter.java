@@ -81,10 +81,10 @@ public final class InfoWriter {
     }
 
     /**
-     * Creates the opening line.
+     * Creates the closing line.
      */
-    public void close() {
-        pw.println(StringUtils.repeat("-", LINE_LENGTH));
+    public void end() {
+        this.line();
     }
 
     /**
@@ -95,7 +95,7 @@ public final class InfoWriter {
     }
 
     /**
-     * Creates an indented line.
+     * Creates an indented (with whitespace) line.
      * @param indent number of spaces to indent the line
      */
     public void line(int indent) {
