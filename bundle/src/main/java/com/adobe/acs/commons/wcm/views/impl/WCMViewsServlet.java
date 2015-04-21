@@ -69,7 +69,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
             final JSONObject json = new JSONObject();
 
             try {
-                json.put("title", StringUtils.capitalize(view));
+                json.put("title", StringUtils.capitalize(view) + " View");
                 json.put("value", view);
 
                 jsonArray.put(json);

@@ -101,7 +101,7 @@ public class WCMViewsFilter implements Filter {
 
         if (!this.accepts(slingRequest)) {
 
-            log.debug("WCM Filters does NOT accept [ {} ]", slingRequest.getResource().getPath());
+            log.trace("WCM Filters does NOT accept [ {} ]", slingRequest.getResource().getPath());
             chain.doFilter(request, response);
 
         } else if ((CollectionUtils.isEmpty(requestViews) && CollectionUtils.isNotEmpty(componentViews))
