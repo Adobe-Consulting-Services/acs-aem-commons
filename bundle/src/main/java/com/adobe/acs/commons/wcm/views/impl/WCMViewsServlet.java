@@ -42,7 +42,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
 
     private static final String[] DEFAULT_VIEWS = new String[]{};
     private Map<String, String[]> defaultViews = new HashMap<String, String[]>();
-    @Property(label = "Default Views",
+    @Property(label = "WCM Views by Path",
             description = "Views to add to the Sidekick by default. Takes format [/path=view-1,view-2]",
             cardinality = Integer.MAX_VALUE,
             value = {})
