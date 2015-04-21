@@ -1,6 +1,6 @@
 package com.adobe.acs.commons.wcm.views.impl;
 
-
+import com.adobe.acs.commons.util.OsgiPropertyUtil;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMMode;
@@ -8,6 +8,8 @@ import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -18,6 +20,7 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,11 +34,20 @@ import java.util.*;
         methods = {"GET"},
         resourceTypes = {"cq/Page"},
         selectors = {"wcm-views"},
-        extensions = {"json"}
+        extensions = {"json"},
+        metatype = true
 )
 public class WCMViewsServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(WCMViewsServlet.class);
 
+    private static final String[] DEFAULT_VIEWS = new String[]{};
+    private Map<String, String[]> defaultViews = new HashMap<String, String[]>();
+    @Property(label = "Default Views",
+            description = "Views to add to the Sidekick by default. Takes format [/path=view-1,view-2]",
+            cardinality = Integer.MAX_VALUE,
+            value = {})
+    public static final String PROP_DEFAULT_VIEWS = "wcm-views";
+    
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
             ServletException, IOException {
@@ -57,7 +69,16 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
         final WCMViewsResourceVisitor visitor = new WCMViewsResourceVisitor();
         visitor.accept(page.getContentResource());
 
-        final List<String> views = visitor.getWCMViews();
+        final Set<String> viewSet = new HashSet<String>(visitor.getWCMViews());
+
+        // Get the Views provided by the Servlet
+        for(final Map.Entry<String, String[]> entry : this.defaultViews.entrySet()) {
+            if(StringUtils.startsWith(page.getPath(), entry.getKey())) {
+                viewSet.addAll(Arrays.asList(entry.getValue()));
+            }
+        }
+        
+        final List<String> views = new ArrayList<String>(viewSet);
         
         Collections.sort(views);
 
@@ -108,4 +129,9 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
         }
     }
 
+    @Activate
+    protected final void activate(final Map<String, String> config) {
+        final String[] tmp = PropertiesUtil.toStringArray(config.get(PROP_DEFAULT_VIEWS), DEFAULT_VIEWS);
+        this.defaultViews = OsgiPropertyUtil.toMap(tmp, "=", ",");
+    }
 }
