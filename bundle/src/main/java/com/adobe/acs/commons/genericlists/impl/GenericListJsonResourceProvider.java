@@ -23,9 +23,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -36,6 +38,7 @@ import org.apache.sling.api.resource.ResourceProvider;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
 import org.apache.sling.commons.json.io.JSONWriter;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +51,8 @@ import com.day.cq.wcm.api.PageManager;
  * Resource provider which makes Generic Lists available as JSON String resources
  * for use with the Touch UI Metadata Asset Editor.
  */
-@Component
+@Component(metatype = true, label = "ACS AEM Commons - Generic List JSON Resource Provider",
+    description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
 @Service
 @Properties({ @Property(name = ResourceProvider.ROOTS, value = GenericListJsonResourceProvider.ROOT),
         @Property(name = ResourceProvider.OWNS_ROOTS, boolValue = true) })
@@ -58,11 +62,21 @@ public final class GenericListJsonResourceProvider implements ResourceProvider {
 
     static final String ROOT = "/mnt/acs-commons/lists";
 
-    static final String LIST_ROOT = "/etc/acs-commons/lists";
+    static final String DEFAULT_LIST_ROOT = "/etc/acs-commons/lists";
 
     private static final String EXTENSION = ".json";
 
     private static final int EXTENSION_LENGTH = EXTENSION.length();
+
+    @Property(label = "Generic List Root", description = "Root path under which generic lists can be found", value = DEFAULT_LIST_ROOT)
+    private static final String PROP_LIST_ROOT = "list.root";
+
+    private String listRoot;
+
+    @Activate
+    protected void activate(final Map<String, String> props) {
+        this.listRoot = PropertiesUtil.toString(props.get(PROP_LIST_ROOT), DEFAULT_LIST_ROOT);
+    }
 
     @Override
     public Resource getResource(ResourceResolver resourceResolver, HttpServletRequest request, String path) {
@@ -84,7 +98,7 @@ public final class GenericListJsonResourceProvider implements ResourceProvider {
             } else {
                 listPath = path.substring(ROOT.length());
             }
-            String fullListPath = LIST_ROOT + listPath;
+            String fullListPath = listRoot + listPath;
             Page listPage = resourceResolver.adaptTo(PageManager.class).getPage(fullListPath);
             if (listPage == null) {
                 return null;
