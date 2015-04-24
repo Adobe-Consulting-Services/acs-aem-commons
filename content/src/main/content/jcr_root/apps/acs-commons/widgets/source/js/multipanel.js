@@ -93,10 +93,6 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
                 return;
             }
 
-            if(!pData[i.key]){
-                return;
-            }
-
             i.setValue(pData[i.key]);
         });
     },
