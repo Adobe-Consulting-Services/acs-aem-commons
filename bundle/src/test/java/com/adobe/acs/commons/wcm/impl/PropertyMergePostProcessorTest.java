@@ -21,10 +21,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PropertyMergeEventListenerImplTest {
+public class PropertyMergePostProcessorTest {
 
     @InjectMocks
-    PropertyMergeEventListenerImpl propertyMerge = new PropertyMergeEventListenerImpl();
+    PropertyMergePostProcessor propertyMerge = new PropertyMergePostProcessor();
 
     @Mock
     Resource resource;
@@ -40,14 +40,8 @@ public class PropertyMergeEventListenerImplTest {
         doNothing().when(resourceResolver).commit();
     }
 
-
     @Test
     public void testMerge_NoDuplicates_String() throws Exception {
-
-        Map<String, String> config = new HashMap<String, String>();
-        config.put(propertyMerge.PROP_ALLOW_DUPLICATES, "false");
-
-        propertyMerge.activate(config);
 
         properties.put("cats", new String[]{ "felix", "hobbes", "fluffy" });
         properties.put("dogs", new String[]{ "snoopy", "ira", "fluffy" });
@@ -58,20 +52,15 @@ public class PropertyMergeEventListenerImplTest {
         propertyMerge.merge(resource,
                 "animals",
                 Arrays.asList("cats", "dogs", "fish"),
-                String.class);
+                String.class,
+                false);
 
         Assert.assertArrayEquals(new String[]{ "felix", "hobbes", "fluffy", "snoopy", "ira", "nemo" },
                 properties.get("animals", String[].class));
     }
 
-
     @Test
     public void testMerge_NoDuplicates_Long() throws Exception {
-
-        Map<String, String> config = new HashMap<String, String>();
-        config.put(propertyMerge.PROP_ALLOW_DUPLICATES, "false");
-
-        propertyMerge.activate(config);
 
         properties.put("odd", new Long[]{ 1L, 3L });
         properties.put("even", new Long[]{ 2L, 4L });
@@ -83,7 +72,8 @@ public class PropertyMergeEventListenerImplTest {
         propertyMerge.merge(resource,
                 "longs",
                 Arrays.asList("even", "odd", "duplicates"),
-                Long.class);
+                Long.class, 
+                false);
 
         Assert.assertArrayEquals(new Long[]{ 2L, 4L, 1L, 3L },
                 properties.get("longs", Long[].class));
@@ -91,11 +81,6 @@ public class PropertyMergeEventListenerImplTest {
 
     @Test
     public void testMerge_NoDuplicates_Double() throws Exception {
-
-        Map<String, String> config = new HashMap<String, String>();
-        config.put(propertyMerge.PROP_ALLOW_DUPLICATES, "false");
-
-        propertyMerge.activate(config);
 
         properties.put("tenths", new Double[]{ 1.1D, 1.2D });
         properties.put("hundredths", 3.01D);
@@ -107,20 +92,15 @@ public class PropertyMergeEventListenerImplTest {
         propertyMerge.merge(resource,
                 "doubles",
                 Arrays.asList("tenths", "hundredths", "duplicates"),
-                Double.class);
+                Double.class,
+                false);
 
         Assert.assertArrayEquals(new Double[]{ 1.1D, 1.2D, 3.01D },
                 properties.get("doubles", Double[].class));
     }
 
-
     @Test
     public void testMerge_NoDuplicates_Boolean() throws Exception {
-
-        Map<String, String> config = new HashMap<String, String>();
-        config.put(propertyMerge.PROP_ALLOW_DUPLICATES, "false");
-
-        propertyMerge.activate(config);
 
         properties.put("first", new Boolean[]{ true, false, true });
         properties.put("second", true);
@@ -131,20 +111,15 @@ public class PropertyMergeEventListenerImplTest {
         propertyMerge.merge(resource,
                 "booleans",
                 Arrays.asList("first", "second"),
-                Boolean.class);
+                Boolean.class, 
+                false);
 
         Assert.assertArrayEquals(new Boolean[]{ true, false },
                 properties.get("booleans", Boolean[].class));
     }
 
-
     @Test
     public void testMerge_NoDuplicates_Calendar() throws Exception {
-
-        Map<String, String> config = new HashMap<String, String>();
-        config.put(propertyMerge.PROP_ALLOW_DUPLICATES, "false");
-
-        propertyMerge.activate(config);
 
         Calendar january =  Calendar.getInstance();
         january.set(2015, Calendar.JANUARY, 1);
@@ -163,20 +138,15 @@ public class PropertyMergeEventListenerImplTest {
         propertyMerge.merge(resource,
                 "dates",
                 Arrays.asList("cold", "hot"),
-                Calendar.class);
+                Calendar.class,
+                false);
 
         Assert.assertArrayEquals(new Calendar[]{ january, september, july },
                 properties.get("dates", Calendar[].class));
     }
 
-
     @Test
     public void testMerge_Duplicates_String() throws Exception {
-
-        Map<String, String> config = new HashMap<String, String>();
-        config.put(propertyMerge.PROP_ALLOW_DUPLICATES, "true");
-
-        propertyMerge.activate(config);
 
         properties.put("cats", new String[]{ "felix", "hobbes", "fluffy" });
         properties.put("dogs", new String[]{ "snoopy", "ira", "fluffy" });
@@ -187,7 +157,8 @@ public class PropertyMergeEventListenerImplTest {
         propertyMerge.merge(resource,
                 "animals",
                 Arrays.asList("cats", "dogs", "fish"),
-                String.class);
+                String.class,
+                true);
 
         Assert.assertArrayEquals(new String[]{ "felix", "hobbes", "fluffy", "snoopy", "ira", "fluffy", "nemo" },
                 properties.get("animals", String[].class));
@@ -195,11 +166,6 @@ public class PropertyMergeEventListenerImplTest {
 
     @Test
     public void testMerge_Duplicates_Calendar() throws Exception {
-
-        Map<String, String> config = new HashMap<String, String>();
-        config.put(propertyMerge.PROP_ALLOW_DUPLICATES, "true");
-
-        propertyMerge.activate(config);
 
         Calendar january =  Calendar.getInstance();
         january.set(2015, Calendar.JANUARY, 1);
@@ -218,12 +184,12 @@ public class PropertyMergeEventListenerImplTest {
         propertyMerge.merge(resource,
                 "dates",
                 Arrays.asList("cold", "hot"),
-                Calendar.class);
+                Calendar.class,
+                true);
 
         Assert.assertArrayEquals(new Calendar[]{ january, september, july, september },
                 properties.get("dates", Calendar[].class));
     }
-
 }
 
 
