@@ -24,18 +24,26 @@ ACS.CQ.WCMViews = {
                 ACS.CQ.WCMViews.addWCMViewsPanel(sk);
             }
         }
-        
+
         check(this);
     },
-    
+
+    addWCMViewsCookie: function(name) {
+        CQ.HTTP.setCookie('acs-commons.wcm-views', name, '/', 100 * 365);
+    },
+
+    clearWCMViewsCookie: function() {
+        CQ.HTTP.clearCookie('acs-commons.wcm-views', '/');
+    },
+
     addWCMViewsPanel: function (sidekick) {
         var tabPanel,
             wcmViewsTab = CQ.Ext.getCmp('cq-sk-tab-WCM_VIEWS');
-        
+
         if (!sidekick) {
             return;
         } else if (wcmViewsTab && wcmViewsTab.items && wcmViewsTab.length > 0) {
-           // Nothing to do here
+            // Nothing to do here
             return;
         }
 
@@ -57,6 +65,8 @@ ACS.CQ.WCMViews = {
                         text: 'Default View',
                         context: CQ.wcm.Sidekick.WCM_VIEWS,
                         handler: function () {
+                            ACS.CQ.WCMViews.clearWCMViewsCookie();
+                            
                             CQ.Util.reload(CQ.WCM.getContentWindow(),
                                 CQ.HTTP.externalize(sidekick.path + CQ.HTTP.EXTENSION_HTML));
                         }
@@ -69,11 +79,12 @@ ACS.CQ.WCMViews = {
                             text: view.title,
                             context: CQ.wcm.Sidekick.WCM_VIEWS,
                             handler: function () {
+                                ACS.CQ.WCMViews.addWCMViewsCookie(view.value);
+
                                 CQ.Util.reload(CQ.WCM.getContentWindow(),
-                                    CQ.HTTP.externalize(sidekick.path + CQ.HTTP.EXTENSION_HTML + '?wcm-views=' + view.value));
+                                    CQ.HTTP.externalize(sidekick.path + CQ.HTTP.EXTENSION_HTML));
                             }
                         }));
-
                     });
 
                     /* Disabled */
@@ -82,8 +93,10 @@ ACS.CQ.WCMViews = {
                         text: 'Disable WCM Views',
                         context: CQ.wcm.Sidekick.WCM_VIEWS,
                         handler: function () {
+                            ACS.CQ.WCMViews.addWCMViewsCookie('disabled');
+
                             CQ.Util.reload(CQ.WCM.getContentWindow(),
-                                CQ.HTTP.externalize(sidekick.path + CQ.HTTP.EXTENSION_HTML + '?wcm-views=disabled'));
+                                CQ.HTTP.externalize(sidekick.path + CQ.HTTP.EXTENSION_HTML));
                         }
                     }));
 
