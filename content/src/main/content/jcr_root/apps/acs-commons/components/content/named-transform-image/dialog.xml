@@ -8,10 +8,19 @@
             jcr:primaryType="cq:Widget"
             path="/libs/wcm/foundation/components/image/dialog/items/image.infinity.json"
             xtype="cqinclude"/>
-        <advanced
-            jcr:primaryType="cq:Widget"
-            path="/libs/wcm/foundation/components/image/dialog/items/advanced.infinity.json"
-            xtype="cqinclude"/>
+        <advanced jcr:primaryType="cq:Widget" title="Advanced" xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <alt jcr:primaryType="cq:Widget"
+                     fieldLabel="Alt Text"
+                     name="./alt"
+                     xtype="textfield"/>
+                <linkURL jcr:primaryType="cq:Widget"
+                         fieldDescription="Drop files or pages from the Content Finder"
+                         fieldLabel="Link to"
+                         name="./linkURL"
+                         xtype="pathfield"/>
+            </items>
+        </advanced>
         <transform
             jcr:primaryType="cq:Widget"
             title="Image Transform"
