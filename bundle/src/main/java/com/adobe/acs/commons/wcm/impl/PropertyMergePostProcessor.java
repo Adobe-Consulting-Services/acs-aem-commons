@@ -17,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,31 +33,43 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     private static final Logger log = LoggerFactory.getLogger(PropertyMergePostProcessor.class);
 
     private static final String AT_SUFFIX = "@PropertyMerge";
+    private static final String ALLOW_DUPLICATES_SUFFIX = AT_SUFFIX + ".AllowDuplicates";
+    private static final String TYPE_HINT_SUFFIX = AT_SUFFIX + ".TypeHint";
 
     @Override
     public final void process(final SlingHttpServletRequest request,
                               final List<Modification> modifications) throws Exception {
 
-        final Map<String, List<String>> mappings = this.getDestinationToSourceMapping(request.getRequestParameterMap());
+        final List<PropertyMerge> propertyMerges = this.getPropertyMerges(request.getRequestParameterMap());
 
         final Resource resource = request.getResource();
 
-        for (final Map.Entry<String, List<String>> entry : mappings.entrySet()) {
-            final String destination = entry.getKey();
-            final List<String> sources = entry.getValue();
+        for (final PropertyMerge propertyMerge : propertyMerges) {
 
-            if (this.merge(resource, destination, sources, String.class, false)) {
+            if (this.merge(resource,
+                    propertyMerge.getDestination(),
+                    propertyMerge.getSources(),
+                    propertyMerge.getTypeHint(),
+                    propertyMerge.isAllowDuplicates())) {
                 modifications.add(Modification.onModified(resource.getPath()));
-                log.debug("Merged property values from {} into [ {} ]", sources, destination);
+                log.debug("Merged property values from {} into [ {} ]",
+                        propertyMerge.getSources(),
+                        propertyMerge.getDestination());
             }
         }
     }
 
-    private Map<String, List<String>> getDestinationToSourceMapping(final RequestParameterMap requestParameterMap) {
+    /**
+     * Gets the corresponding list of PropertyMerge directives from the RequestParams.
+     *
+     * @param requestParameterMap the Request Param Map
+     * @return a list of the PropertyMerge directives by Destination
+     */
+    private List<PropertyMerge> getPropertyMerges(final RequestParameterMap requestParameterMap) {
         final HashMap<String, List<String>> mapping = new HashMap<String, List<String>>();
 
-        // primaryTags@PropertyMerge=cq:tags
-        // secondaryTags@PropertyMerge=cq:tags
+        // Collect the Destination / Source mappings
+
         for (final RequestParameterMap.Entry<String, RequestParameter[]> entry : requestParameterMap.entrySet()) {
             if (!StringUtils.endsWith(entry.getKey(), AT_SUFFIX)) {
                 // Not a @PropertyMerge request param
@@ -82,27 +96,53 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             }
         }
 
-        return mapping;
+        // Convert the Mappings into PropertyMerge objects
+
+        final List<PropertyMerge> propertyMerges = new ArrayList<PropertyMerge>();
+
+        for (final Map.Entry<String, List<String>> entry : mapping.entrySet()) {
+            final String destination = entry.getKey();
+            final List<String> sources = entry.getValue();
+
+            RequestParameter allowDuplicatesParam = requestParameterMap.getValue(destination
+                    + ALLOW_DUPLICATES_SUFFIX);
+
+            final boolean allowDuplicates =
+                    allowDuplicatesParam != null ? Boolean.valueOf(allowDuplicatesParam.getString()) : false;
+
+            RequestParameter typeHintParam = requestParameterMap.getValue(destination
+                    + TYPE_HINT_SUFFIX);
+
+            final String typeHint =
+                    typeHintParam != null ? typeHintParam.getString() : String.class.getSimpleName();
+
+            propertyMerges.add(new PropertyMerge(destination, sources, allowDuplicates, typeHint));
+        }
+
+        return propertyMerges;
     }
 
 
     /**
      * Merges the values found in the the source properties into the destination property as a multi-value.
      * The values of the source properties and destination properties must all be the same property type.
-     * <p/>
+     *
      * The unique set of properties will be stored in
      *
      * @param resource    the resource to look for the source and destination properties on
      * @param destination the property to store the collected properties.
-     * @param sources
+     * @param sources  the properties to collect values from for merging
+     * @param typeHint the data type that should be used when reading and storing the data
+     * @param allowDuplicates true to allow duplicates values in the destination property; false to make values unique
+     * @return true if changes were made to the destination property
      */
     protected final <T> boolean merge(final Resource resource, final String destination,
-                                      final List<String> sources, final Class<T> klass,
+                                      final List<String> sources, final Class<T> typeHint,
                                       final boolean allowDuplicates) throws PersistenceException {
 
         // Create an empty array of type T
         @SuppressWarnings("unchecked")
-        final T[] emptyArray = (T[]) Array.newInstance(klass, 0);
+        final T[] emptyArray = (T[]) Array.newInstance(typeHint, 0);
 
         final ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
 
@@ -132,6 +172,62 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             return true;
         } else {
             return false;
+        }
+    }
+
+
+    /**
+     * Encapsulates a PropertyMerge configuration by Destination.
+     */
+    private class PropertyMerge {
+        private boolean allowDuplicates;
+        private Class typeHint;
+        private String destination;
+        private List<String> sources;
+
+        public PropertyMerge(String destination, List<String> sources, boolean allowDuplicates, String typeHint) {
+            this.destination = destination;
+            this.sources = sources;
+            this.allowDuplicates = allowDuplicates;
+            this.typeHint = this.convertTypeHint(typeHint);
+        }
+
+        /**
+         * Converts the String type hint to the corresponding class.
+         * If not valid conversion can be found, default to String.
+         *
+         * @param typeHintStr the String representation of the type hint
+         * @return the Class of the type hint
+         */
+        private Class convertTypeHint(final String typeHintStr) {
+            if (Boolean.class.getSimpleName().equalsIgnoreCase(typeHintStr)) {
+                return Boolean.class;
+            } else if (Double.class.getSimpleName().equalsIgnoreCase(typeHintStr)) {
+                return Double.class;
+            } else if (Long.class.getSimpleName().equalsIgnoreCase(typeHintStr)) {
+                return Long.class;
+            } else if (Date.class.getSimpleName().equalsIgnoreCase(typeHintStr)
+                    || Calendar.class.getSimpleName().equalsIgnoreCase(typeHintStr)) {
+                return Calendar.class;
+            } else {
+                return String.class;
+            }
+        }
+
+        public boolean isAllowDuplicates() {
+            return allowDuplicates;
+        }
+
+        public Class getTypeHint() {
+            return typeHint;
+        }
+
+        public String getDestination() {
+            return destination;
+        }
+
+        public List<String> getSources() {
+            return sources;
         }
     }
 }
