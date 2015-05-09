@@ -35,6 +35,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     private static final String AT_SUFFIX = "@PropertyMerge";
     private static final String ALLOW_DUPLICATES_SUFFIX = AT_SUFFIX + ".AllowDuplicates";
     private static final String TYPE_HINT_SUFFIX = AT_SUFFIX + ".TypeHint";
+    private static final String IGNORE_PREFIX = ":";
 
     @Override
     public final void process(final SlingHttpServletRequest request,
@@ -76,11 +77,12 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
                 continue;
             }
 
-            final String source = StringUtils.substringBefore(entry.getKey(), AT_SUFFIX);
+            final String source = StringUtils.removeStart(StringUtils.substringBefore(entry.getKey(), AT_SUFFIX), IGNORE_PREFIX);
 
             for (final RequestParameter requestParameter : entry.getValue()) {
                 if (requestParameter != null) {
-                    final String destination = StringUtils.stripToNull(requestParameter.getString());
+                    final String destination = StringUtils.removeStart(StringUtils.stripToNull(requestParameter
+                            .getString()), IGNORE_PREFIX);
 
                     if (destination != null) {
                         List<String> sources = mapping.get(destination);
@@ -104,13 +106,13 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             final String destination = entry.getKey();
             final List<String> sources = entry.getValue();
 
-            RequestParameter allowDuplicatesParam = requestParameterMap.getValue(destination
+            RequestParameter allowDuplicatesParam = requestParameterMap.getValue(IGNORE_PREFIX + destination
                     + ALLOW_DUPLICATES_SUFFIX);
 
             final boolean allowDuplicates =
                     allowDuplicatesParam != null ? Boolean.valueOf(allowDuplicatesParam.getString()) : false;
 
-            RequestParameter typeHintParam = requestParameterMap.getValue(destination
+            RequestParameter typeHintParam = requestParameterMap.getValue(IGNORE_PREFIX + destination
                     + TYPE_HINT_SUFFIX);
 
             final String typeHint =
