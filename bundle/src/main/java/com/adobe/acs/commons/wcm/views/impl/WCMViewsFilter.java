@@ -1,24 +1,7 @@
-/*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 package com.adobe.acs.commons.wcm.views.impl;
 
+import com.adobe.acs.commons.util.CookieUtil;
+import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.Component;
@@ -30,6 +13,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.Resource;
@@ -46,8 +30,14 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,13 +53,17 @@ import java.util.regex.Pattern;
         ),
         @Property(
                 name = "filter.order",
-                intValue = -500,
+                intValue = WCMViewsFilter.FILTER_ORDER,
                 propertyPrivate = true
         )
 })
 @Service
 public class WCMViewsFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(WCMViewsFilter.class);
+
+    public static final int FILTER_ORDER = -500;
+
+    public static final String COOKIE_WCM_VIEWS = "acs-commons.wcm-views";
 
     public static final String PN_WCM_VIEWS = "wcmViews";
 
@@ -79,28 +73,19 @@ public class WCMViewsFilter implements Filter {
 
     private static final String ATTR_FILTER = WCMViewsFilter.class.getName() + ".first-wcmmode";
 
-    private String[] includePathPrefixes = new String[]{};
+    private String[] includePathPrefixes = new String[]{"/content"};
     @Property(label = "Path Prefixes to Include",
-            description = "Include paths that begin with these path prefixes",
+            description = "Include paths that begin with these path prefixes. Default: [ /content ]",
             cardinality = Integer.MAX_VALUE,
-            value = {})
+            value = {"/content"})
     public static final String PROP_PATH_PREFIXES_INCLUDE = "path-prefixes.include";
 
-    private List<Pattern> resourceTypeExcludes = new ArrayList<Pattern>();
-    @Property(label = "Resource Types Exclude",
-            description = "Exclude resource types.",
-            cardinality = Integer.MAX_VALUE,
-            value = {})
-    public static final String PROP_RESOURCE_TYPES_EXCLUDE = "resource-types.exclude";
-
-
     private List<Pattern> resourceTypesIncludes = new ArrayList<Pattern>();
-    @Property(label = "Resource Types Includes",
-            description = "Include resource types.",
+    @Property(label = "Resource Types (Regex)",
+            description = "Resource types to apply WCM Views rules to. Leave blank for all. Default: [ <Blank> ]",
             cardinality = Integer.MAX_VALUE,
             value = {})
     public static final String PROP_RESOURCE_TYPES_INCLUDE = "resource-types.include";
-
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -120,17 +105,16 @@ public class WCMViewsFilter implements Filter {
 
         if (!this.accepts(slingRequest)) {
 
-            log.debug("WCM Filters does NOT accept [ {} ]", slingRequest.getResource().getPath());
+            log.trace("WCM Filters does NOT accept [ {} ]", slingRequest.getResource().getPath());
             chain.doFilter(request, response);
 
         } else if ((CollectionUtils.isEmpty(requestViews) && CollectionUtils.isNotEmpty(componentViews))
                 || (CollectionUtils.isNotEmpty(requestViews) && CollectionUtils.isEmpty(componentViews))
                 || (CollectionUtils.isNotEmpty(requestViews)
-                    && CollectionUtils.isNotEmpty(componentViews)
-                    && !CollectionUtils.containsAny(requestViews, componentViews))) {
+                && CollectionUtils.isNotEmpty(componentViews)
+                && !CollectionUtils.containsAny(requestViews, componentViews))) {
 
-            log.debug("{} containsAny {}", requestViews, componentViews);
-            log.debug("WCMView Empty/Not Empty -- Setting WCMMode [ {} ] for [ {} ]", WCMMode.DISABLED.name(),
+            log.trace("WCMView Empty/Not Empty -- Setting WCMMode [ {} ] for [ {} ]", WCMMode.DISABLED.name(),
                     slingRequest.getResource().getPath());
 
             this.processChain(slingRequest, response, chain, WCMMode.DISABLED, requestMode);
@@ -153,12 +137,13 @@ public class WCMViewsFilter implements Filter {
     }
 
     /**
-     * Performs the filter chain inclusion, setting the WCMMode before and after the inclusion
-     * @param request the request
+     * Performs the filter chain inclusion, setting the WCMMode before and after the inclusion.
+     *
+     * @param request  the request
      * @param response the response
-     * @param chain the filter chain
-     * @param before the WCMMode to apply before the filter chaining
-     * @param after the WCMMode to apply before the filter chaining
+     * @param chain    the filter chain
+     * @param before   the WCMMode to apply before the filter chaining
+     * @param after    the WCMMode to apply before the filter chaining
      * @throws IOException
      * @throws ServletException
      */
@@ -173,7 +158,7 @@ public class WCMViewsFilter implements Filter {
     }
 
     /**
-     * Determines if the filter should process this request
+     * Determines if the filter should process this request.
      *
      * @param request the request
      * @return true is the filter should attempt to process
@@ -183,8 +168,9 @@ public class WCMViewsFilter implements Filter {
         final Resource resource = request.getResource();
 
         // Only process requests that match the include path prefixes if any are provided
-        if (ArrayUtils.isNotEmpty(this.includePathPrefixes)
-                && !StringUtils.startsWithAny(request.getResource().getPath(), this.includePathPrefixes)) {
+        if (ArrayUtils.isEmpty(this.includePathPrefixes)) {
+            return false;
+        } else if (!StringUtils.startsWithAny(request.getResource().getPath(), this.includePathPrefixes)) {
             return false;
         }
 
@@ -192,7 +178,7 @@ public class WCMViewsFilter implements Filter {
         if (this.getRequestViews(request).contains(WCM_VIEW_DISABLED)) {
             return false;
         }
-        
+
         // Only process resources that are part of a Page
         if (pageManager.getContainingPage(request.getResource()) == null) {
             return false;
@@ -202,45 +188,40 @@ public class WCMViewsFilter implements Filter {
 
         if (node != null) {
             try {
-                // Do not process cq:Page or cq:PageContent nodes as this will break all sorts of things, 
+                // Do not process cq:Page or cq:PageContent nodes as this will break all sorts of things,
                 // and they dont have dropzone of their own
-                if (node.isNodeType("cq:Page")
-                        || node.isNodeType("cq:PageContent")) {
+                if (node.isNodeType(NameConstants.NT_PAGE) || node.isNodeType("cq:PageContent")) {
                     // Do not process Page node inclusions
                     return false;
-                } else if ("jcr:content".equals(node.getName())) {
+                } else if (JcrConstants.JCR_CONTENT.equals(node.getName())) {
                     // Do not process Page jcr:content nodes (that may not have the cq:PageContent jcr:primaryType)
                     return false;
                 }
             } catch (RepositoryException e) {
-                log.error("Repository exception prevented WCM Views Filter from determining if the resource is acceptable", e);
-                return false;
-            }
-        }
-        
-        for (final Pattern pattern : this.resourceTypeExcludes) {
-            final Matcher matcher = pattern.matcher(resource.getResourceType());
-
-            if (matcher.matches()) {
+                log.error("Repository exception prevented WCM Views Filter "
+                        + "from determining if the resource is acceptable", e);
                 return false;
             }
         }
 
-        /*
-        for (final Pattern pattern : this.resourceTypesIncludes) {
-            final Matcher matcher = pattern.matcher(resource.getResourceType());
+        if (CollectionUtils.isNotEmpty(this.resourceTypesIncludes)) {
+            for (final Pattern pattern : this.resourceTypesIncludes) {
+                final Matcher matcher = pattern.matcher(resource.getResourceType());
 
-            if (matcher.matches()) {
-                return true;
+                if (matcher.matches()) {
+                    return true;
+                }
             }
+
+            return false;
         }
 
-        */
         return true;
     }
 
     /**
-     * Gets or sets and gets the original WCMMode for the Request
+     * Gets or sets and gets the original WCMMode for the Request.
+     *
      * @param request the Request
      * @return the original WCMMode for the Request
      */
@@ -256,13 +237,16 @@ public class WCMViewsFilter implements Filter {
     }
 
     /**
-     * Get the WCM Views from the Request passed by QueryParam
+     * Get the WCM Views from the Request passed by QueryParam.
      * *
+     *
      * @param request the request
      * @return the WCM Views from the Request
      */
     private List<String> getRequestViews(final SlingHttpServletRequest request) {
         final List<String> views = new ArrayList<String>();
+
+        // Respect Query Parameters first
 
         final RequestParameter[] requestParameters = request.getRequestParameters(RP_WCM_VIEWS);
 
@@ -274,11 +258,23 @@ public class WCMViewsFilter implements Filter {
             }
         }
 
+        if (CollectionUtils.isNotEmpty(views)) {
+            return views;
+        }
+
+        // If not Query Params can be found, check Cookie
+
+        final Cookie cookie = CookieUtil.getCookie(request, COOKIE_WCM_VIEWS);
+
+        if (cookie != null && StringUtils.isNotBlank(cookie.getValue())) {
+            views.add(cookie.getValue());
+        }
+
         return views;
     }
 
     /**
-     * Get the WCM Views for the component; Looks at both the content resource for the special wcmViews property 
+     * Get the WCM Views for the component; Looks at both the content resource for the special wcmViews property
      * and looks up to the resourceType's cq:Component properties for wcmViews.
      *
      * @param request the request
@@ -309,20 +305,17 @@ public class WCMViewsFilter implements Filter {
 
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
-        String[] excludes = PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_TYPES_EXCLUDE), new String[]{});
-        this.resourceTypeExcludes = new ArrayList<Pattern>();
-
-        for (final String exclude : excludes) {
-            this.resourceTypeExcludes.add(Pattern.compile(exclude));
-        }
-
-        String[] includes = PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_TYPES_INCLUDE), new String[]{});
+        String[] includes = PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_TYPES_INCLUDE),
+                new String[]{});
         this.resourceTypesIncludes = new ArrayList<Pattern>();
 
         for (final String include : includes) {
-            this.resourceTypesIncludes.add(Pattern.compile(include));
+            if (StringUtils.isNotBlank(include)) {
+                this.resourceTypesIncludes.add(Pattern.compile(include));
+            }
         }
 
-        this.includePathPrefixes = PropertiesUtil.toStringArray(properties.get(PROP_PATH_PREFIXES_INCLUDE), new String[]{});
+        this.includePathPrefixes =
+                PropertiesUtil.toStringArray(properties.get(PROP_PATH_PREFIXES_INCLUDE), new String[]{});
     }
 }
