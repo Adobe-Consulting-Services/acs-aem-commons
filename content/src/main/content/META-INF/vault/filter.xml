@@ -37,6 +37,8 @@
         <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content/list/default_\d+"/>
         <include pattern="/etc/acs-commons/packagers"/>
         <include pattern="/etc/acs-commons/packagers/jcr:content"/>
+        <include pattern="/etc/acs-commons/workflow-remover"/>
+        <include pattern="/etc/acs-commons/workflow-remover/jcr:content"/>
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
 </workspaceFilter>
