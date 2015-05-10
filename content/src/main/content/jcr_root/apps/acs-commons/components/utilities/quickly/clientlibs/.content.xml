@@ -23,4 +23,5 @@
           xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
           jcr:primaryType="cq:ClientLibraryFolder"
           categories="[acs-commons.quickly]"
-          embed="[acs-commons.lodash,acs-commons.json2,acs-commons.angularjs.v1.3.all,acs-commons.angularjs.v1.3.modules.ng-storage]"/>
+          dependencies="[acs-commons.angularjs.v1.3.all]"
+          embed="[acs-commons.lodash,acs-commons.json2,acs-commons.angularjs.v1.3.modules.ng-storage]"/>
