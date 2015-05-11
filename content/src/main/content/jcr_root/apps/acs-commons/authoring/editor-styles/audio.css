@@ -20,5 +20,5 @@
 .sidepanel-opened .assetfinder-content-container article[data-asset-mimetype^="audio/"] .card .label {
     display: block;
     cursor: pointer;
-    opacity: 0.7;
+    opacity: 0.7 !important;
 }

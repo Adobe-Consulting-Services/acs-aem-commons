@@ -1,41 +1,62 @@
-<%@page session="false"%><%--
-  Copyright 1997-2008 Day Management AG
-  Barfuesserplatz 6, 4001 Basel, Switzerland
-  All Rights Reserved.
+<%@include file="/libs/foundation/global.jsp"%><%
+%><%@ page session="false"
+         import="com.day.cq.commons.Doctype,
+                 com.day.cq.wcm.api.components.DropTarget,
+                 com.day.cq.wcm.foundation.Image,
+                 com.day.cq.wcm.foundation.Placeholder,
+                 org.apache.commons.lang.StringUtils" %><%
+%><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
+%><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
+%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
 
-  This software is the confidential and proprietary information of
-  Day Management AG, ("Confidential Information"). You shall not
-  disclose such Confidential Information and shall use it only in
-  accordance with the terms of the license agreement you entered into
-  with Day.
-
-  ==============================================================================
-
-  Image component
-
-  Draws an image.
-
---%><%@ page import="com.day.cq.commons.Doctype,
-    com.day.cq.wcm.api.components.DropTarget,
-    com.day.cq.wcm.foundation.Image, com.day.cq.wcm.foundation.Placeholder" %><%
-%><%@include file="/libs/foundation/global.jsp"%><%
     Image image = new Image(resource);
-    image.setIsInUITouchMode(Placeholder.isAuthoringUIModeTouch(slingRequest));
 
-    //set src url that is handled by the named transform image servlet
-    image.setSrc(resource.getPath() + ".transform/" + properties.get("transform", "") + "/image.png");
+    final String transform = properties.get("transform", String.class);
+    final String linkURL = properties.get("linkURL", String.class);
 
-    //drop target css class = dd prefix + name of the drop target in the edit config
-    image.addCssClass(DropTarget.CSS_CLASS_PREFIX + "image");
-    image.loadStyleData(currentStyle);
-    image.setSelector(".img"); // use image script
-    image.setDoctype(Doctype.fromRequest(request));
-    // add design information if not default (i.e. for reference paras)
-    if (!currentDesign.equals(resourceDesign)) {
-        image.setSuffix(currentDesign.getId());
+    if (image.hasContent()) {
+
+        if (StringUtils.isNotBlank(transform)) {
+            final long imageTimestamp = image.getLastModified().getTimeInMillis();
+            final long pageTimestamp = currentPage.getLastModified().getTimeInMillis();
+            final long timestamp = imageTimestamp > pageTimestamp ? imageTimestamp : pageTimestamp;
+
+            image.setSrc(resource.getPath() + ".transform/" + transform + "/" + timestamp + "/image.png");
+        }
+
+        image.setIsInUITouchMode(Placeholder.isAuthoringUIModeTouch(slingRequest));
+        image.addCssClass(DropTarget.CSS_CLASS_PREFIX + "image");
+        image.loadStyleData(currentStyle);
+        image.setSelector(".img"); // use image script
+        image.setDoctype(Doctype.fromRequest(request));
+
+        if (StringUtils.isNotBlank(properties.get("alt", String.class))) {
+            image.setAlt(properties.get("alt", String.class));
+        }
+
+    } else {
+        image = null;
     }
-    String divId = "cq-image-jsp-" + resource.getPath();
-%><div id="<%= xssAPI.encodeForHTMLAttr(divId) %>"><% image.draw(out); %></div><%
-%><cq:text property="jcr:description" placeholder="" tagName="small" escapeXml="true"/>
 
-<%@include file="/libs/foundation/components/image/tracking-js.jsp"%>
+    pageContext.setAttribute("image", image);
+    pageContext.setAttribute("linkURL", linkURL);
+
+%><c:choose>
+    <c:when test="${wcmmode:isEdit(pageContext) && empty image}">
+        <wcm:placeholder classNames="cq-image-placeholder cq-block-placeholder" ddType="image"/>
+    </c:when>
+    <c:when test="${!wcmmode:isEdit(pageContext) && empty image}">
+        <%-- Component has not been configured on Publish; Hide the component --%>
+    </c:when>
+    <c:when test="${not empty linkURL}">
+        <a href="${xss:getValidHref(xssAPI, linkURL)}"><img
+                src="${xss:getValidHref(xssAPI, image.src)}"
+                class="cq-dd-image"
+                alt="${xss:encodeForHTMLAttr(xssAPI, image.alt)}"/></a>
+    </c:when>
+    <c:otherwise>
+        <img src="${xss:getValidHref(xssAPI, image.src)}"
+             class="cq-dd-image"
+             alt="${xss:encodeForHTMLAttr(xssAPI, image.alt)}"/>
+    </c:otherwise>
+</c:choose>

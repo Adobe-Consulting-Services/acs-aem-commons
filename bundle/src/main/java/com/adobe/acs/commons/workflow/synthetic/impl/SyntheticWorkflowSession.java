@@ -259,8 +259,8 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     }
 
     @Override
-    public final WorkflowData newWorkflowData(final String s, final Object o) {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+    public final WorkflowData newWorkflowData(final String payloadType, final Object payload) {
+        return new SyntheticWorkflowData(payloadType, payload);
     }
 
     @Deprecated
@@ -283,7 +283,12 @@ public class SyntheticWorkflowSession implements WorkflowSession {
 
     @Override
     public final void updateWorkflowData(final Workflow workflow, final WorkflowData workflowData) {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        if (workflow instanceof SyntheticWorkflow) {
+            final SyntheticWorkflow syntheticWorkflow = (SyntheticWorkflow) workflow;
+            syntheticWorkflow.setWorkflowData(workflowData);
+        } else {
+            throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        }
     }
 
     @Override

@@ -25,6 +25,7 @@ import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.ReadDataWorkf
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.RestartWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.SetDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.TerminateDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.UpdateWorkflowDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFArgsWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFDataWorkflowProcess;
 import com.day.cq.workflow.WorkflowSession;
@@ -97,6 +98,23 @@ public class SyntheticWorkflowRunnerImplTest {
                 metadata, false, false);
     }
 
+    @Test
+    public void testExecute_updateWorkflowData() throws Exception {
+        Map<Object, Object> map = new HashMap<Object, Object>();
+
+        map.put("process.label", "update");
+        swr.bindWorkflowProcesses(new UpdateWorkflowDataWorkflowProcess(), map);
+
+        map.put("process.label", "read");
+        swr.bindWorkflowProcesses(new ReadDataWorkflowProcess(), map);
+
+        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+
+        swr.execute(resourceResolver,
+                "/content/test",
+                new String[] {"update", "read"},
+                metadata, false, false);
+    }
 
     @Test
     public void testExecute_ProcessArgs() throws Exception {

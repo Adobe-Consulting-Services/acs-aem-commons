@@ -4,4 +4,4 @@
     jcr:primaryType="cq:Component"
     jcr:title="Named Transform Image"
     sling:resourceSuperType="foundation/components/image"
-    componentGroup="General"/>
+    componentGroup="ACS Commons"/>

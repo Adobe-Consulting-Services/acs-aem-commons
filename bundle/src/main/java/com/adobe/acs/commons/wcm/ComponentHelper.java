@@ -97,9 +97,9 @@ public interface ComponentHelper {
 
     /**
      * Wrapper for printEditBlock(...) with special handling for non-Authoring modes.
-     * <p/>
+     * <p>
      * Normal use: inclusion at top of component JSP before any markup is output:
-     * <p/>
+     * <p>
      * <% if(WCMHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.NONE,
      * StringUtils.isNotBlank(properties.get("foo", ""))) {
      * return; // Stops execution of the JSP; leaving only the Edit Block rendered in Authoring Mode or nothing in non-Authoring Modes
@@ -119,10 +119,10 @@ public interface ComponentHelper {
 
     /**
      * Print the DropTarget Edit Icon to the response.
-     * <p/>
+     * <p>
      * Allow the WCMHelper to automatically derive the placeholder icon based on
      * the DropTarget's Groups and Accepts properties.
-     * <p/>
+     * <p>
      * Only displays if an 'AND' of all 'visible' parameters evaluates to true.
      *
      * @param request
@@ -137,9 +137,9 @@ public interface ComponentHelper {
 
     /**
      * Print the DropTarget Edit Icon to the response.
-     * <p/>
+     * <p>
      * Specify the DropTarget Icon to display.
-     * <p/>
+     * <p>
      * Only displays if an 'AND' of all 'visible' parameters evaluates to true.
      *
      * @param request
@@ -183,7 +183,7 @@ public interface ComponentHelper {
     /**
      * Returns the HTML for creating DropTarget Edit Icon(s) for a specific
      * (named) DropTargets defined by a Component.
-     * <p/>
+     * <p>
      * Allows the developer to specific the EditType Icon to be used for the
      * Drop Target via editType parameter. If editType equals left null, the edit
      * type will be derived based on the DropTarget's Groups and Accepts
