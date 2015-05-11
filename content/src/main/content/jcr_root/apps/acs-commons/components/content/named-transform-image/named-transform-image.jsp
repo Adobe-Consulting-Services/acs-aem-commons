@@ -4,9 +4,7 @@
                  com.day.cq.wcm.api.components.DropTarget,
                  com.day.cq.wcm.foundation.Image,
                  com.day.cq.wcm.foundation.Placeholder,
-                 org.apache.commons.lang.StringUtils" %>
-<%@ page import="com.adobe.acs.commons.images.NamedImageTransformUrlService" %>
-<%
+                 org.apache.commons.lang.StringUtils" %><%
 %><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
 %><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
 %><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
@@ -23,9 +21,7 @@
             final long pageTimestamp = currentPage.getLastModified().getTimeInMillis();
             final long timestamp = imageTimestamp > pageTimestamp ? imageTimestamp : pageTimestamp;
 
-            final NamedImageTransformUrlService urlService = sling.getService(NamedImageTransformUrlService.class);
-            final String requestUrl = urlService.getRequestUrl(resource, transform, timestamp);
-            image.setSrc(requestUrl);
+            image.setSrc(resource.getPath() + ".transform/" + transform + "/" + timestamp + "/image.png");
         }
 
         image.setIsInUITouchMode(Placeholder.isAuthoringUIModeTouch(slingRequest));
