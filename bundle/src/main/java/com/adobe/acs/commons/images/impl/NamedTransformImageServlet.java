@@ -21,6 +21,7 @@ package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.dam.RenditionPatternPicker;
 import com.adobe.acs.commons.images.ImageTransformer;
+import com.adobe.acs.commons.images.NamedImageTransformUrlService;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.PathInfoUtil;
 import com.day.cq.commons.jcr.JcrConstants;
@@ -33,7 +34,6 @@ import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.foundation.Image;
 import com.day.image.Layer;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -118,6 +118,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     @Reference
     private MimeTypeService mimeTypeService;
+
+    @Reference
+    private NamedImageTransformUrlService namedImageTransformUrlService;
 
     private static final ValueMap EMPTY_PARAMS = new ValueMapDecorator(new LinkedHashMap<String, Object>());
 
@@ -246,19 +249,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     protected final List<NamedImageTransformer> getNamedImageTransformers(final SlingHttpServletRequest request) {
         final List<NamedImageTransformer> transformers = new ArrayList<NamedImageTransformer>();
 
-        String[] suffixes = PathInfoUtil.getSuffixSegments(request);
-        if (suffixes.length < 2) {
-            log.warn("Named Transform Image Servlet requires at least one named transform");
-            return transformers;
-        }
-
-        int endIndex = suffixes.length - 1;
-        // Its OK to check; the above check ensures there are 2+ segments
-        if (StringUtils.isNumeric(PathInfoUtil.getSuffixSegment(request, suffixes.length - 2))) {
-            endIndex--;
-        }
-
-        suffixes = (String[]) ArrayUtils.subarray(suffixes, 0, endIndex);
+        String[] suffixes = this.namedImageTransformUrlService.getTransformNames(request);
 
         for (final String transformerName : suffixes) {
             final NamedImageTransformer transformer = this.namedImageTransformers.get(transformerName);
