@@ -71,7 +71,7 @@
                                 name="./transform">
                                 <datasource
                                     jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="acs-commons/components/common/datasources/named-transforms"/>
+                                    sling:resourceType="acs-commons/datasources/named-image-transforms"/>
                             </transform>
                         </items>
                     </column>
