@@ -99,8 +99,8 @@ public class DataSourceBuilderImpl implements DataSourceBuilder {
                         if (dataProps != null) {
                             final JSONObject json = new JSONObject();
 
-                            json.put("title", dataProps.get(TEXT, ""));
-                            json.put("value", dataProps.get(VALUE, ""));
+                            json.put(TEXT, dataProps.get(TEXT, ""));
+                            json.put(VALUE, dataProps.get(VALUE, ""));
 
                             jsonArray.put(json);
                         }
