@@ -35,6 +35,11 @@ public class FeaturedNamedImageTransformer implements NamedImageTransformer {
     }
 
     @Override
+    public String getTransformName() {
+        return FeaturedNamedImageTransformer.class.getSimpleName();
+    }
+
+    @Override
     public Map<String, ValueMap> getImageTransforms() {
         final Map<String, ValueMap> feature = new LinkedHashMap<String, ValueMap>();
 

@@ -30,4 +30,5 @@ public class EmptyImageTransformer implements ImageTransformer {
     public Layer transform(Layer layer, ValueMap properties) {
         return layer;
     }
+
 }
