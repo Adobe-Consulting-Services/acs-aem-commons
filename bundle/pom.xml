@@ -440,8 +440,26 @@
             <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.scheduler</artifactId>
+            <version>2.3.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.discovery.api</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.servlets.post</artifactId>
+            <version>2.3.4</version>
+            <scope>provided</scope>
+        </dependency>
 
-
+        
         <!--  Build Dependencies -->
         <dependency>
             <groupId>com.google.code.tld-generator</groupId>
@@ -459,12 +477,6 @@
                     <groupId>javax.servlet.jsp</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.commons.scheduler</artifactId>
-            <version>2.3.4</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
