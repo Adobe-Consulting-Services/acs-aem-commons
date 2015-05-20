@@ -131,7 +131,9 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         protected void visit(JSONObject jsonObject) {
 
             if (StringUtils.equals(jsonObject.optString(JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)) {
-                final String nameValue = jsonObject.optString(PN_NAME);
+                String nameValue = jsonObject.optString(PN_NAME);
+
+                nameValue = StringUtils.removeStart(nameValue, "./");
 
                 if (StringUtils.isNotBlank(nameValue)) {
                     try {
