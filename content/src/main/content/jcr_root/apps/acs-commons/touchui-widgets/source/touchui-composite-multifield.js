@@ -268,7 +268,11 @@
 
         $(document).on("dialog-ready", function() {
             //$(document).on("click", ".cq-dialog-submit", submitAction);
-            document.querySelector('form.cq-dialog').addEventListener('submit', collectDataFromFields, true);
+            var dialog = document.querySelector('form.cq-dialog');
+
+            if(dialog){
+                dialog.addEventListener('submit', collectDataFromFields, true);
+            }
         });
     });
 
