@@ -62,7 +62,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
     private static final String[] DEFAULT_VIEWS = new String[]{};
     private Map<String, String[]> defaultViews = new HashMap<String, String[]>();
     @Property(label = "WCM Views by Path",
-            description = "Views to add to the Sidekick by default. Takes format [/path=view-1,view-2]",
+            description = "Views to add to the Sidekick by default. Takes format [/path=view-1;view-2]",
             cardinality = Integer.MAX_VALUE,
             value = {})
     public static final String PROP_DEFAULT_VIEWS = "wcm-views";
@@ -151,6 +151,6 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
     @Activate
     protected final void activate(final Map<String, String> config) {
         final String[] tmp = PropertiesUtil.toStringArray(config.get(PROP_DEFAULT_VIEWS), DEFAULT_VIEWS);
-        this.defaultViews = OsgiPropertyUtil.toMap(tmp, "=", ",");
+        this.defaultViews = OsgiPropertyUtil.toMap(tmp, "=", ";");
     }
 }
