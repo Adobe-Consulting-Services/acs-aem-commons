@@ -90,6 +90,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
 
     @Property(label = "Workflow Models",
             description = "Only remove Workflow Instances that belong to one of these WF Models.",
+            cardinality = Integer.MAX_VALUE,
             value = { })
     public static final String PROP_WORKFLOW_MODELS = "workflow.models";
 
@@ -100,6 +101,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
 
     @Property(label = "Payload Patterns",
             description = "Only remove Workflow Instances whose payloads match one of these regex patterns",
+            cardinality = Integer.MAX_VALUE,
             value = { })
     public static final String PROP_WORKFLOW_PAYLOADS = "workflow.payloads";
 
