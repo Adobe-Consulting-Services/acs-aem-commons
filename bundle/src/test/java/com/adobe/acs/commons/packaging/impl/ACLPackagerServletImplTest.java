@@ -304,6 +304,11 @@ public class ACLPackagerServletImplTest {
             return false;
         }
 
+        @Override
+        public boolean isResourceType(Resource resource, String resourceType) {
+            return resource.getResourceType().equals(resourceType);
+        }
+
         @SuppressWarnings("unchecked")
         public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
             return (AdapterType) session;
@@ -367,6 +372,11 @@ public class ACLPackagerServletImplTest {
         @Override
         public boolean hasChanges() {
             return false;
+        }
+
+        @Override
+        public boolean isResourceType(Resource resource, String resourceType) {
+            return resource.getResourceType().equals(resourceType);
         }
 
         @SuppressWarnings("unchecked")

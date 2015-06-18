@@ -70,7 +70,7 @@ public class GenericListAdapterFactoryTest {
         when(contentResource.getChild("list")).thenReturn(listResource);
         when(listResource.listChildren()).thenReturn(Arrays.asList(resourceOne, resourceTwo).iterator());
 
-        when(resourceOne.adaptTo(ValueMap.class)).thenAnswer(new Answer<ValueMap>() {
+        when(resourceOne.getValueMap()).thenAnswer(new Answer<ValueMap>() {
             @SuppressWarnings("serial")
             public ValueMap answer(InvocationOnMock invocation) throws Throwable {
                 return new ValueMapDecorator(new HashMap<String, Object>() {
@@ -82,7 +82,7 @@ public class GenericListAdapterFactoryTest {
                 });
             }
         });
-        when(resourceTwo.adaptTo(ValueMap.class)).thenAnswer(new Answer<ValueMap>() {
+        when(resourceTwo.getValueMap()).thenAnswer(new Answer<ValueMap>() {
             @SuppressWarnings("serial")
             public ValueMap answer(InvocationOnMock invocation) throws Throwable {
                 return new ValueMapDecorator(new HashMap<String, Object>() {
@@ -145,7 +145,7 @@ public class GenericListAdapterFactoryTest {
         Locale french = new Locale("fr");
         Locale swissFrench = new Locale("fr", "ch");
         Locale franceFrench = new Locale("fr", "fr");
-        
+
         GenericList list = adapterFactory.getAdapter(listPage, GenericList.class);
         assertNotNull(list);
         List<Item> items = list.getItems();
