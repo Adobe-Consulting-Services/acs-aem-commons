@@ -34,15 +34,15 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
 
+/**
+ * ACS AEM Commons - Image Transformer - RGB Shift
+ */
 //@formatter:off
-@Component(
-        label = "ACS AEM Commons - Image Transformer - RGB Shift"
-)
+@Component
 @Properties({
         @Property(
                 name = ImageTransformer.PROP_TYPE,
-                value = RGBShiftImageTransformerImpl.TYPE,
-                propertyPrivate = true
+                value = RGBShiftImageTransformerImpl.TYPE
         )
 })
 @Service

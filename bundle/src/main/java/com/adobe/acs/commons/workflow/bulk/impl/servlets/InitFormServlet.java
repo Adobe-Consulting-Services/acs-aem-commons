@@ -25,6 +25,7 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.model.WorkflowModel;
+
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -37,10 +38,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 
+/**
+ * ACS AEM Commons - Bulk Workflow Manager - Init Form Servlet
+ */
+@SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Bulk Workflow Manager - Init Form Servlet",
         methods = { "GET" },
         resourceTypes = { BulkWorkflowEngine.SLING_RESOURCE_TYPE },
         selectors = { "init-form" },

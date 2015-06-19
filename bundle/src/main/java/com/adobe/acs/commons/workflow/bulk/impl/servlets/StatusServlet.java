@@ -39,9 +39,11 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
 
+/**
+ * ACS AEM Commons - Bulk Workflow Manager - Status Servlet
+ */
 @SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Bulk Workflow Manager - Status Servlet",
         methods = { "GET" },
         resourceTypes = { BulkWorkflowEngine.SLING_RESOURCE_TYPE },
         selectors = { "status" },

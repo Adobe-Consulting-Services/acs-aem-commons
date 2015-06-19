@@ -24,6 +24,7 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.model.WorkflowModel;
+
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -33,23 +34,24 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * ACS AEM Commons - Workflow Instance Remover - Init Servlet
+ */
+@SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Workflow Instance Remover - Init Servlet",
         methods = { "GET" },
         resourceTypes = { "acs-commons/components/utilities/workflow-remover" },
         selectors = { "init" },
         extensions = { "json" }
 )
 public class InitServlet extends SlingSafeMethodsServlet {
-    private static final Logger log = LoggerFactory.getLogger(InitServlet.class);
 
     private static final String[] WORKFLOW_STATUSES = new String[]{"COMPLETED", "ABORTED", "RUNNING",
             "SUSPENDED", "STALE"};

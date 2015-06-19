@@ -22,7 +22,6 @@ package com.adobe.acs.commons.images.impl;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.day.image.Layer;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

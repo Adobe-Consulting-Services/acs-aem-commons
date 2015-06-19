@@ -31,7 +31,6 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +45,10 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-@Component(
-        label = "ACS AEM Commons - Workflow Instance Remover"
-)
+/**
+ * ACS AEM Commons - Workflow Instance Remover
+ */
+@Component
 @Service
 public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemover {
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceRemoverImpl.class);
@@ -102,7 +102,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             int remaining = 0;
 
             for (final Resource instance : folder.getChildren()) {
-                final ValueMap properties = ResourceUtil.getValueMap(instance);
+                final ValueMap properties = instance.getValueMap();
 
                 if (!StringUtils.equals(NT_CQ_WORKFLOW,
                         properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {

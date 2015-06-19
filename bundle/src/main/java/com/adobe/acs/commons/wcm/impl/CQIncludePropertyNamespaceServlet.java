@@ -40,9 +40,11 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.net.URLDecoder;
 
+/**
+ * ACS AEM Commons - CQInclude Property Namespace
+ */
 @SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - CQInclude Property Namespace",
         selectors = "overlay.cqinclude.namespace",
         extensions = "json",
         resourceTypes = "sling/servlet/default")

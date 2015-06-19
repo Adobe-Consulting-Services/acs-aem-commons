@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BoundedResizeTransformerImplTest {

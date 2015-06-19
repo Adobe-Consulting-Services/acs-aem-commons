@@ -25,9 +25,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Property Merge Sling POST Processor"
-)
+/**
+ * ACS AEM Commons - Property Merge Sling POST Processor
+ */
+@Component
 @Service
 public class PropertyMergePostProcessor implements SlingPostProcessor {
     private static final Logger log = LoggerFactory.getLogger(PropertyMergePostProcessor.class);

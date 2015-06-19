@@ -26,6 +26,7 @@ import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.commons.WCMUtils;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -45,9 +46,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.*;
 
+@SuppressWarnings("serial")
 @SlingServlet(
         label = "ACS AEM Commons - WCM Views Servlet",
         methods = {"GET"},
@@ -125,7 +128,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
         final Set<String> views = new TreeSet<String>();
 
         public final List<String> getWCMViews() {
-            return new ArrayList(this.views);
+            return new ArrayList<String>(this.views);
         }
 
         @Override
