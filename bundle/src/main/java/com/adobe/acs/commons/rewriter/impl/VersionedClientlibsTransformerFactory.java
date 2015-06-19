@@ -38,13 +38,14 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-@Component(
-        label = "ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter",
-        description = "Re-writes paths to CSS and JS clientlibs to include the md5 checksum as a "
-                + "selector; in the form: /path/to/clientlib.123456789.css")
+/**
+ * ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter
+ * Re-writes paths to CSS and JS clientlibs to include the md5 checksum as a "
+ * selector; in the form: /path/to/clientlib.123456789.css
+ */
+@Component
 @Property(name = "pipeline.type",
-        value = "versioned-clientlibs",
-        propertyPrivate = true)
+        value = "versioned-clientlibs")
 @Service
 public final class VersionedClientlibsTransformerFactory implements TransformerFactory {
     private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);

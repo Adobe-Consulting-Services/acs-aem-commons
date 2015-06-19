@@ -47,7 +47,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.OptingServlet;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
@@ -61,6 +61,7 @@ import javax.imageio.ImageIO;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -295,8 +296,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      */
     protected final Image resolveImage(final SlingHttpServletRequest request) {
         final Resource resource = request.getResource();
+        final ResourceResolver resourceResolver = request.getResourceResolver();
 
-        final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+        final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         final Page page = pageManager.getContainingPage(resource);
 
         if (DamUtil.isAsset(resource)) {
@@ -319,15 +321,15 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             return image;
 
         } else if (DamUtil.isRendition(resource)
-                || ResourceUtil.isA(resource, JcrConstants.NT_FILE)
-                || ResourceUtil.isA(resource, JcrConstants.NT_RESOURCE)) {
+                || resourceResolver.isResourceType(resource, JcrConstants.NT_FILE)
+                || resourceResolver.isResourceType(resource, JcrConstants.NT_RESOURCE)) {
             // For renditions; use the requested rendition
             final Image image = new Image(resource);
             image.set(Image.PN_REFERENCE, resource.getPath());
             return image;
 
         } else if (page != null) {
-            if (ResourceUtil.isA(resource, NameConstants.NT_PAGE)
+            if (resourceResolver.isResourceType(resource, NameConstants.NT_PAGE)
                     || StringUtils.equals(resource.getPath(), page.getContentResource().getPath())) {
                 // Is a Page or Page's Content Resource; use the Page's image resource
                 return new Image(page.getContentResource(), "image");

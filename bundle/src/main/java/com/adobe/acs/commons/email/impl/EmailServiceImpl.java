@@ -47,8 +47,11 @@ import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 
-@Component(label = "ACS AEM Commons - E-mail Service",
-    description = "A Generic Email service that sends an email to a given list of recipients.")
+/**
+ * ACS AEM Commons - E-mail Service
+ * A Generic Email service that sends an email to a given list of recipients.
+ */
+@Component
 @Service
 public final class EmailServiceImpl implements EmailService {
 
@@ -120,7 +123,6 @@ public final class EmailServiceImpl implements EmailService {
 
         return failureList;
     }
-
 
     private Email getEmail(String templatePath, Map<String, String> emailParams) {
         ResourceResolver resourceResolver = null;

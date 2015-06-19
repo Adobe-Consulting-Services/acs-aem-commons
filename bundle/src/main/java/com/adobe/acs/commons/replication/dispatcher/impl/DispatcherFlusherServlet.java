@@ -37,7 +37,6 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
@@ -83,7 +82,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         final Page currentPage = pageManager.getContainingPage(resource);
 
-        final ValueMap properties = ResourceUtil.getValueMap(resource);
+        final ValueMap properties = resource.getValueMap();
 
         /* Properties */
         final String[] paths = properties.get("paths", new String[0]);

@@ -25,8 +25,9 @@ import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.Action;
-import com.day.cq.commons.ProductInfo;
-import com.day.cq.commons.ProductInfoService;
+import com.adobe.granite.license.ProductInfo;
+import com.adobe.granite.license.ProductInfoService;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -44,20 +45,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-@Component(
-        label = "ACS AEM Commons - Quickly - DuckDuckGo Docs Operation"
-)
+/**
+ * ACS AEM Commons - Quickly - DuckDuckGo Docs Operation
+ */
+@Component
 @Properties({
         @Property(
                 name = Operation.PROP_CMD,
-                value = DuckDuckGoDocsOperationImpl.CMD,
-                propertyPrivate = true
+                value = DuckDuckGoDocsOperationImpl.CMD
         ),
         @Property(
                 name = Operation.PROP_DESCRIPTION,
-                value = "Search Docs",
-                propertyPrivate = true
+                value = "Search Docs"
         )
 })
 @Service
@@ -126,16 +125,19 @@ public class DuckDuckGoDocsOperationImpl extends AbstractOperation {
 
     @Activate
     protected void activate(Map<String, String> config) {
-        final ProductInfo productInfo = productInfoService.getInfo();
-
-        aemVersion = StringUtils.replace(productInfo.getShortVersion(), ".", "-");
-
-        if (StringUtils.startsWith(aemVersion, "5-")) {
-            // Only supported 5.x versions will be named CQ
-            productName = "cq";
-        } else {
-            // Future version will be named AEM
-            productName = "aem";
+        ProductInfo productInfo = null;
+        for (ProductInfo i : productInfoService.getInfos()) {
+            String shortName = i.getShortName();
+            // currently, this is always 'CQ' but let's futureproof a bit
+            if (shortName.equalsIgnoreCase("cq") || shortName.equalsIgnoreCase("aem")) {
+                productInfo = i;
+                break;
+            }
+        }
+        if (productInfo != null) {
+            // there's a bug in 6.1 GA which causes productInfo.getShortVersion() to return 6.0,
+            // so let's use this longer form.
+            aemVersion = String.format("%s-%s", productInfo.getVersion().getMajor(), productInfo.getVersion().getMinor());
         }
 
         log.debug("AEM Version: {}", aemVersion);

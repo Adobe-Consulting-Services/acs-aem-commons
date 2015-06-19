@@ -30,13 +30,11 @@ import org.apache.sling.commons.json.io.JSONWriter;
 import javax.jcr.RepositoryException;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - ContentFinder Result Hit Writer",
-        description = "QueryBuilder Hit Writer used for creating ContentFinder compatible results",
-        factory = "com.day.cq.search.result.ResultHitWriter/cf",
-        immediate = false,
-        metatype = false
-)
+/**
+ * ACS AEM Commons - ContentFinder Result Hit Writer
+ * QueryBuilder Hit Writer used for creating ContentFinder compatible results
+ */
+@Component(factory = "com.day.cq.search.result.ResultHitWriter/cf")
 public final class ContentFinderResultHitWriter implements ResultHitWriter {
 
     @Override

@@ -22,6 +22,7 @@ package com.adobe.acs.commons.quickly.impl;
 
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.QuicklyEngine;
+
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -30,12 +31,15 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 
-@SlingServlet(
-        label = "ACS AEM Commons - Quickly - Servlet End-point",
-        paths = "/bin/quickly.json"
-)
+/**
+ * ACS AEM Commons - Quickly - Servlet End-point
+ *
+ */
+@SuppressWarnings("serial")
+@SlingServlet(paths = "/bin/quickly.json")
 public class QuicklyServlet extends SlingSafeMethodsServlet {
 
     @Reference

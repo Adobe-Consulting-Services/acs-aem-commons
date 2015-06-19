@@ -22,7 +22,6 @@ package com.adobe.acs.commons.components.longformtext.impl;
 import com.adobe.acs.commons.components.longformtext.LongFormTextComponent;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
-import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -44,10 +43,11 @@ import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component(
-        label = "ACS AEM Commons - Components - Long-Form Text",
-        description = "Provides support for the ACS AEM Commons Long-form Text Component."
-)
+/**
+ * ACS AEM Commons - Components - Long-Form Text
+ * Provides support for the ACS AEM Commons Long-form Text Component.
+ */
+@Component
 @Service
 public class LongFormTextComponentImpl implements LongFormTextComponent {
     private static final Logger log = LoggerFactory.getLogger(LongFormTextComponentImpl.class);
@@ -113,8 +113,6 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
             return;
         }
 
-        final List<Resource> children = IteratorUtils.toList(resource.getChildren().iterator());
-
         final Node targetNode = this.getOrCreateLastParagraphSystemResource(resource, textParagraphSize);
 
         if (targetNode == null) {
@@ -123,7 +121,7 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
             return;
         }
 
-        for (final Resource child : children) {
+        for (final Resource child : resource.getChildren()) {
             int index = this.getResourceIndex(child);
 
             if (index > textParagraphSize) {

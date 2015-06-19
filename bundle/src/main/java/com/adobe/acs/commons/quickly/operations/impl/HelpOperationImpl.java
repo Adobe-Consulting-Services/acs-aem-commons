@@ -20,47 +20,33 @@
 
 package com.adobe.acs.commons.quickly.operations.impl;
 
-import aQute.bnd.annotation.component.Activate;
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
 import com.adobe.acs.commons.quickly.results.Result;
-import com.adobe.acs.commons.quickly.results.Action;
-import com.adobe.acs.commons.quickly.results.Action.Method;
 import com.adobe.acs.commons.quickly.results.impl.lists.HelpResults;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Quickly - Help Operation"
+/**
+ * ACS AEM Commons - Quickly - Help Operation
+ */
+@Component
+@Property(
+    name = Operation.PROP_CMD,
+    value = HelpOperationImpl.CMD
 )
-@Properties({
-        @Property(
-                name = Operation.PROP_CMD,
-                value = HelpOperationImpl.CMD,
-                propertyPrivate = true
-        )
-})
 @Service
 public class HelpOperationImpl extends AbstractOperation {
-    private static final Logger log = LoggerFactory.getLogger(HelpOperationImpl.class);
-
     public static final String CMD = "help";
 
     public static final String CMD_ALIAS = "?";

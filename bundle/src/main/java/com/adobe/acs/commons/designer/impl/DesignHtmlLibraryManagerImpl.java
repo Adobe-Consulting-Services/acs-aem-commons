@@ -39,11 +39,12 @@ import com.adobe.acs.commons.designer.PageRegion;
 import com.day.cq.wcm.api.designer.Design;
 import com.day.cq.widget.HtmlLibraryManager;
 
-@Component(
-        label = "ACS Commons - Design HTML Library Manager",
-        description = "Helper service used to expose configured Design-specific client libraries in JSPs.",
-        metatype = false,
-        immediate = false)
+/**
+ * ACS Commons - Design HTML Library Manager
+ * Helper service used to expose configured Design-specific client libraries in JSPs.
+ *
+ */
+@Component
 @Service
 public final class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
     private static final Logger log = LoggerFactory.getLogger(DesignHtmlLibraryManagerImpl.class);

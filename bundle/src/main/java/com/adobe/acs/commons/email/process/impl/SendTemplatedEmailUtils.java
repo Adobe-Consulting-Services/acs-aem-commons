@@ -157,7 +157,7 @@ public class SendTemplatedEmailUtils {
             return returnMap;
         }
 
-        ValueMap resMap = ResourceUtil.getValueMap(resource);
+        ValueMap resMap = resource.getValueMap();
 
         for (Map.Entry<String, Object> entry : resMap.entrySet()) {
 

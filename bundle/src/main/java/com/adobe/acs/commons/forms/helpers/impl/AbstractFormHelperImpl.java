@@ -44,14 +44,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component(label = "ACS AEM Commons - Forms - Abstract Form Helper",
-        description = "Abstract Form Helper. This provides common behaviors for handling POST-behaviors of the "
-        + "ACS AEM Commons Forms implementation.",
-        metatype = false,
-        componentAbstract = true)
-@Property(name = Constants.SERVICE_RANKING,
-        intValue = FormHelper.SERVICE_RANKING_BASE,
-        propertyPrivate = true)
+/**
+ * ACS AEM Commons - Forms - Abstract Form Helper
+ * Abstract Form Helper. This provides common behaviors for handling POST-behaviors of the
+ *  ACS AEM Commons Forms implementation.
+ */
+@Component(componentAbstract = true)
+@Property(name = Constants.SERVICE_RANKING, intValue = FormHelper.SERVICE_RANKING_BASE)
 public abstract class AbstractFormHelperImpl {
     private static final Logger log = LoggerFactory.getLogger(AbstractFormHelperImpl.class);
 

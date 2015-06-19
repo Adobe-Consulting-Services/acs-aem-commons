@@ -30,7 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -94,8 +93,8 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  * </dl>
  * 
  */
-@Component(label = "ACS AEM Commons - Workflow Process - Send Templated Email Workflow Process", description = "Uses the Email Service api to send an email based on workflow arguments")
-@Properties({ @Property(label = "Workflow Label", name = "process.label", value = "Send Templated Email", description = "Sends a templated email using the ACS Commons Email Service") })
+@Component
+@Property(label = "Workflow Label", name = "process.label", value = "Send Templated Email", description = "Sends a templated email using the ACS Commons Email Service")
 @Service
 public class SendTemplatedEmailProcess implements WorkflowProcess {
 

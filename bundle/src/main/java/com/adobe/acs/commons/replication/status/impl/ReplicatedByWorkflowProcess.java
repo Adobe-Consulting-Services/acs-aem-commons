@@ -35,7 +35,6 @@ import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -53,18 +52,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Workflow Process - Replicated By Workflow Initiator",
-        description = "Assigns the replicatedBy property to the Workflow Initiator"
+/**
+ * ACS AEM Commons - Workflow Process - Replicated By Workflow Initiator
+ * Assigns the replicatedBy property to the Workflow Initiator
+ */
+@Component
+@Property(
+        label = "Workflow Label",
+        name = "process.label",
+        value = "Set Replicated By Property to Workflow Initiator",
+        description = "Sets the Replicated By Property on the payload to the Workflow Initiator"
 )
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "Set Replicated By Property to Workflow Initiator",
-                description = "Sets the Replicated By Property on the payload to the Workflow Initiator"
-        )
-})
 @Service
 public class ReplicatedByWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(ReplicatedByWorkflowProcess.class);

@@ -43,10 +43,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component(label = "ACS AEM Commons - Forms - POST-Redirect-GET Form Helper",
-        description = "POST-Redirect-GET Form Helper",
-        metatype = false,
-        inherit = true)
+/**
+ * ACS AEM Commons - Forms - POST-Redirect-GET Form Helper
+ *
+ */
+@Component(inherit = true)
 @Property(label = "Service Ranking",
         name = Constants.SERVICE_RANKING,
         intValue = FormHelper.SERVICE_RANKING_POST_REDIRECT_GET)
