@@ -24,7 +24,6 @@ import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
@@ -33,16 +32,13 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.Rectangle;
 
-@Component(
-        label = "ACS AEM Commons - Image Transformer - Crop with Smart-Bounding"
-)
-@Properties({
-        @Property(
-                name = ImageTransformer.PROP_TYPE,
-                value = CropImageTransformerImpl.TYPE,
-                propertyPrivate = true
-        )
-})
+/**
+ * ACS AEM Commons - Image Transformer - Crop with Smart-Bounding
+ */
+@Component
+@Property(
+        name = ImageTransformer.PROP_TYPE,
+        value = CropImageTransformerImpl.TYPE)
 @Service
 public class CropImageTransformerImpl implements ImageTransformer {
     private static  final Logger log = LoggerFactory.getLogger(CropImageTransformerImpl.class);

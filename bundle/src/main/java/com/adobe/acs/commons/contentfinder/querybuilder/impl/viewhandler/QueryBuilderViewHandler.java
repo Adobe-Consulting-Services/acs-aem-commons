@@ -42,19 +42,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * ACS AEM Commons - GQL to Querybuilder View Handler
+ * Leverage Querybuilder to run ContentFinder queries
+ */
 @SuppressWarnings("serial")
-@Component(
-        label = "ACS AEM Commons - GQL to Querybuilder View Handler",
-        description = "Leverage Querybuilder to run ContentFinder queries",
-        metatype = false,
-        immediate = false
-)
+@Component
 @Properties({
         @Property(
                 label = "Servlet Paths",
                 name = "sling.servlet.paths",
-                value = "/bin/wcm/contentfinder/qb/view",
-                propertyPrivate = true
+                value = "/bin/wcm/contentfinder/qb/view"
         )
 })
 @Service

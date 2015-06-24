@@ -35,7 +35,6 @@ import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,7 +156,7 @@ public class SendTemplatedEmailUtils {
             return returnMap;
         }
 
-        ValueMap resMap = ResourceUtil.getValueMap(resource);
+        ValueMap resMap = resource.getValueMap();
 
         for (Map.Entry<String, Object> entry : resMap.entrySet()) {
 

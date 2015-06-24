@@ -30,14 +30,14 @@ import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(
-        label = "ACS AEM Commons - Image Transformer - Rotate"
-)
+/**
+ * ACS AEM Commons - Image Transformer - Rotate
+ */
+@Component
 @Properties({
         @Property(
                 name = ImageTransformer.PROP_TYPE,
-                value = RotateImageTransformerImpl.TYPE,
-                propertyPrivate = true
+                value = RotateImageTransformerImpl.TYPE
         )
 })
 @Service

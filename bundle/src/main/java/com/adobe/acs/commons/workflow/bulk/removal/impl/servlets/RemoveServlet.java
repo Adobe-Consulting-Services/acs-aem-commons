@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -33,14 +34,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * ACS AEM Commons - Workflow Instance Remover - Remove Servlet
+ */
+@SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Workflow Instance Remover - Remove Servlet",
         methods = { "POST" },
         resourceTypes = { "acs-commons/components/utilities/workflow-remover" },
         selectors = { "remove" },

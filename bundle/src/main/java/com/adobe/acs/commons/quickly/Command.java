@@ -25,9 +25,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class Command {
     private static final Logger log = LoggerFactory.getLogger(Command.class);

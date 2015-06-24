@@ -24,19 +24,15 @@ import com.adobe.acs.commons.workflow.bulk.BulkWorkflowEngine;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.NameConstants;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ResumableResourceVisitor extends AbstractResourceVisitor {
-    private static final Logger log = LoggerFactory.getLogger(BulkWorkflowEngineImpl.class);
 
     private static final String BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH = "/etc/acs-commons/bulk-workflow-manager";
     private static final String NT_PAGE_CONTENT = "cq:PageContent";

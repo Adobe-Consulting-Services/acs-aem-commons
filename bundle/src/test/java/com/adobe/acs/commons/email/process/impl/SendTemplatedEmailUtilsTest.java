@@ -110,7 +110,7 @@ public class SendTemplatedEmailUtilsTest {
         when(payloadRes.getChild(JcrConstants.JCR_CONTENT + "/" + DamConstants.METADATA_FOLDER)).thenReturn(mdRes);
 
         // mock valueMap
-        when(ResourceUtil.getValueMap(mdRes)).thenReturn(vmap);
+        when(mdRes.getValueMap()).thenReturn(vmap);
         Map<String, String> props = SendTemplatedEmailUtils.getPayloadProperties(payloadRes, sdf);
 
         assertEquals(props.get(PN_CALENDAR), CALENDAR_TOSTRING);
@@ -134,7 +134,7 @@ public class SendTemplatedEmailUtilsTest {
         when(payloadPage.getContentResource()).thenReturn(jcrRes);
 
         // mock valueMap
-        when(ResourceUtil.getValueMap(jcrRes)).thenReturn(vmap);
+        when(jcrRes.getValueMap()).thenReturn(vmap);
         Map<String, String> props = SendTemplatedEmailUtils.getPayloadProperties(payloadRes, sdf);
 
         assertEquals(props.get(PN_CALENDAR), CALENDAR_TOSTRING);

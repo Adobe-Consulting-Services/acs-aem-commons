@@ -55,20 +55,19 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Quickly - Last Modified Operation"
-)
+/**
+ * ACS AEM Commons - Quickly - Last Modified Operation
+ */
+@Component
 @Properties({
         @Property(
                 name = Operation.PROP_CMD,
-                value = LastModifiedOperationImpl.CMD,
-                propertyPrivate = true
+                value = LastModifiedOperationImpl.CMD
         )
 })
 @Service
@@ -78,8 +77,6 @@ public class LastModifiedOperationImpl extends AbstractOperation {
     public static final String CMD = "lastmod";
     private static final Format DATE_FORMAT = FastDateFormat.getInstance("EEE, d MMM yyyy @ hh:mm aaa");
     private static final int MAX_QUERY_RESULTS = 25;
-
-    private Map<String, Result> operations = new HashMap<String, Result>();
 
     @Reference
     private QueryBuilder queryBuilder;

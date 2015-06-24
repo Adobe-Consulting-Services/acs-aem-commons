@@ -22,6 +22,7 @@ package com.adobe.acs.commons.workflow.synthetic.impl.exceptions;
 
 import com.day.cq.workflow.WorkflowException;
 
+@SuppressWarnings("serial")
 public class SyntheticRestartWorkflowException extends WorkflowException {
 
     public SyntheticRestartWorkflowException(String message) {

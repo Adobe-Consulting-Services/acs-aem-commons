@@ -48,9 +48,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component(
-        label = "ACS AEM Commons - Quickly - Result Builder"
-)
+/**
+ * ACS AEM Commons - Quickly - Result Builder
+ */
+@Component
 @Reference(
         name = "resultSerializers",
         referenceInterface = ResultSerializer.class,

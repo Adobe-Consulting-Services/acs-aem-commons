@@ -15,7 +15,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;

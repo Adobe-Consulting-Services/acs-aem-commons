@@ -50,10 +50,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Workflow Package Manager",
-        description = "Manager for creating and working with Workflow Packages"
-)
+/**
+ * ACS AEM Commons - Workflow Package Manager
+ * Manager for creating and working with Workflow Packages
+ *
+ */
+@Component
 @Service
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);

@@ -25,13 +25,8 @@ import com.adobe.acs.commons.quickly.results.Action;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public abstract class AbstractResultSerializer {
-    private static final Logger log = LoggerFactory.getLogger(AbstractResultSerializer.class);
 
     public JSONObject toJSON(final Result result, final ValueMap config) throws JSONException {
         final JSONObject json = new JSONObject();

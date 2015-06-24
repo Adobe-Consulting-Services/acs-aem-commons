@@ -44,10 +44,11 @@ import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
 import com.day.cq.wcm.api.reference.ReferenceProvider;
 
-@Component(
-        label = "ACS AEM Commons - Pages Reference Provider",
-        description = "Reference provider that searches for  pages referenced inside any given page resource",
-        policy = ConfigurationPolicy.REQUIRE)
+/**
+ * ACS AEM Commons - Pages Reference Provider
+ * Reference provider that searches for  pages referenced inside any given page resource
+ */
+@Component(policy = ConfigurationPolicy.REQUIRE)
 @Service
 public final class PagesReferenceProvider implements ReferenceProvider {
 

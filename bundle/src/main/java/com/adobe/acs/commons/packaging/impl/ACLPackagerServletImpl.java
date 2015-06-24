@@ -60,11 +60,12 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * ACS AEM Commons - ACL Packager Servlet
+ * Servlet end-point used to create ACL CRX packages based on the underlying resource's configuration.
+ */
 @SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - ACL Packager Servlet",
-        description = "Servlet end-point used to create ACL CRX packages based on the underlying resource's "
-                + "configuration.",
         methods = { "POST" },
         resourceTypes = { "acs-commons/components/utilities/packager/acl-packager" },
         selectors = { "package" },

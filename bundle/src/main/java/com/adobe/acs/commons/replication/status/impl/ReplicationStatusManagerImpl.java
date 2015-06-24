@@ -38,10 +38,11 @@ import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
 import java.util.Calendar;
 
-@Component(
-        label = "ACS AEM Commons - Replication Status Manager",
-        description = "OSGi Service for changing the replication status of resources."
-)
+/**
+ * ACS AEM Commons - Replication Status Manager
+ * OSGi Service for changing the replication status of resources.
+ */
+@Component
 @Service
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);

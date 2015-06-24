@@ -26,15 +26,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
 
 public abstract class AbstractOperation implements Operation {
-    private static final Logger log = LoggerFactory.getLogger(AbstractOperation.class);
-
     /**
      * Gets results of the operation.
      *

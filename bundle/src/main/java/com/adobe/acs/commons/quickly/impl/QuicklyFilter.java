@@ -27,17 +27,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.Filter;
@@ -52,24 +47,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Quickly - App HTML Injection Filter",
-        description = "Injects the necessary HTML into the Request page.",
-        metatype = false,
-        policy = ConfigurationPolicy.OPTIONAL
-)
-@Properties({
-        @Property(
-                name = "pattern",
-                value = ".*",
-                propertyPrivate = true
-        )
-})
+/**
+ * ACS AEM Commons - Quickly - App HTML Injection Filter
+ * Injects the necessary HTML into the Request page.
+ */
+@Component(policy = ConfigurationPolicy.OPTIONAL)
+@Property(name = "pattern",
+          value = ".*")
 @Service
 
 public class QuicklyFilter implements Filter {
-    private static final Logger log = LoggerFactory.getLogger(QuicklyFilter.class);
-
     private static final String[] REJECT_PATH_PREFIXES = new String[]{
             "/libs/granite/core/content/login",
     };

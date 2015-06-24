@@ -17,11 +17,10 @@
  * limitations under the License.
  * #L%
  */
-
 package com.adobe.acs.commons.quickly.impl;
 
-import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.QuicklyEngine;
+
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -31,12 +30,15 @@ import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 
-@SlingServlet(
-        label = "ACS AEM Commons - Quickly - Init Servlet",
-        paths = "/bin/quickly.init.json"
-)
+/**
+ * ACS AEM Commons - Quickly - Init Servlet
+ *
+ */
+@SuppressWarnings("serial")
+@SlingServlet(paths = "/bin/quickly.init.json")
 public class QuicklyInitServlet extends SlingSafeMethodsServlet {
     @Reference
     private QuicklyEngine quicklyEngine;

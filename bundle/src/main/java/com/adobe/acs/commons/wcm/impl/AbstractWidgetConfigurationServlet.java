@@ -29,13 +29,13 @@ import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.json.jcr.JsonItemWriter;
 
+@SuppressWarnings("serial")
 public abstract class AbstractWidgetConfigurationServlet extends SlingSafeMethodsServlet {
 
     protected boolean matches(String componentPath, Resource resource) {

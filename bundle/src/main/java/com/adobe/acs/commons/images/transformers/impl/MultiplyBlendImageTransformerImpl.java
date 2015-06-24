@@ -37,15 +37,15 @@ import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.transformers.impl.composites.MultiplyBlendComposite;
 import com.day.image.Layer;
 
+/**
+ * ACS AEM Commons - Image Transformer - Multiply Color Blend
+ */
 //@formatter:off
-@Component(
-        label = "ACS AEM Commons - Image Transformer - Multiply Color Blend"
-)
+@Component
 @Properties({
         @Property(
                 name = ImageTransformer.PROP_TYPE,
-                value = MultiplyBlendImageTransformerImpl.TYPE,
-                propertyPrivate = true
+                value = MultiplyBlendImageTransformerImpl.TYPE
         )
 })
 @Service

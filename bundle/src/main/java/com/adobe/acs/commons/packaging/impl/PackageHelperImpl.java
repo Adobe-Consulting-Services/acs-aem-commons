@@ -57,10 +57,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Package Helper",
-        description = "Helper utility for creating CRX Packages and using the ACS AEM Commons packager. "
-)
+/**
+ * ACS AEM Commons - Package Helper
+ * Helper utility for creating CRX Packages and using the ACS AEM Commons packager.
+ */
+@Component
 @Service
 public final class PackageHelperImpl implements PackageHelper {
     private static final Logger log = LoggerFactory.getLogger(PackageHelperImpl.class);

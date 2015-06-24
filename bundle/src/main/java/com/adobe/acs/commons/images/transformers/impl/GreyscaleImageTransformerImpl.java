@@ -30,14 +30,14 @@ import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(
-        label = "ACS AEM Commons - Image Transformer - Greyscale"
-)
+/**
+ * ACS AEM Commons - Image Transformer - Greyscale
+ */
+@Component
 @Properties({
         @Property(
                 name = ImageTransformer.PROP_TYPE,
-                value = GreyscaleImageTransformerImpl.TYPE,
-                propertyPrivate = true
+                value = GreyscaleImageTransformerImpl.TYPE
         )
 })
 @Service

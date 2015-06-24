@@ -20,12 +20,9 @@
 
 package com.adobe.acs.commons.quickly.results.impl.serializers;
 
-import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultSerializer;
-import com.day.cq.wcm.api.AuthoringUIMode;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
@@ -34,24 +31,22 @@ import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(
-        label = "ACS AEM Commons - Quickly - Generic Result Serializer"
+/**
+ * ACS AEM Commons - Quickly - Generic Result Serializer
+ */
+@Component
+@Property(
+        name = ResultSerializer.PROP_TYPE,
+        value = GenericResultSerializerImpl.TYPE
 )
-@Properties({
-        @Property(
-                name = ResultSerializer.PROP_TYPE,
-                value = GenericResultSerializerImpl.TYPE,
-                propertyPrivate = true
-        )
-})
 @Service(value = ResultSerializer.class)
 public class GenericResultSerializerImpl extends AbstractResultSerializer implements ResultSerializer {
-        private static final Logger log = LoggerFactory.getLogger(GenericResultSerializerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(GenericResultSerializerImpl.class);
 
-        public static final String TYPE = "GENERIC";
+    public static final String TYPE = "GENERIC";
 
-        public JSONObject toJSON(final Result result, final ValueMap config) throws JSONException {
-                log.trace("Entering Generic Result Serializer for {}", result.getPath());
-                return super.toJSON(result, config);
-        }
+    public JSONObject toJSON(final Result result, final ValueMap config) throws JSONException {
+        log.trace("Entering Generic Result Serializer for {}", result.getPath());
+        return super.toJSON(result, config);
+    }
 }

@@ -34,16 +34,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Image Transformer - Resize",
-        description = "ImageTransformer that resizes the layer. Accepts two Integer params: height and width."
-                + "If either is left blank the missing dimension will be computed based on the original layer's "
-                + "aspect ratio")
+/**
+ * ACS AEM Commons - Image Transformer - Resize
+ * ImageTransformer that resizes the layer. Accepts two Integer params: height and width.
+ * If either is left blank the missing dimension will be computed based on the original layer's
+ * aspect ratio
+ */
+@Component
 @Properties({
         @Property(
                 name = ImageTransformer.PROP_TYPE,
-                value = ResizeImageTransformerImpl.TYPE,
-                propertyPrivate = true
+                value = ResizeImageTransformerImpl.TYPE
         )
 })
 @Service

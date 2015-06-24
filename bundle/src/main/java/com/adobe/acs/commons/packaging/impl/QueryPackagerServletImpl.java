@@ -53,11 +53,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ACS AEM Commons - Query Packager Servlet
+ * Servlet end-point used to create Query-based CRX packages based on the underlying resource's configuration.
+ */
 @SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Query Packager Servlet",
-        description = "Servlet end-point used to create Query-based CRX packages based on the underlying resource's "
-                + "configuration.",
         methods = { "POST" },
         resourceTypes = { "acs-commons/components/utilities/packager/query-packager" },
         selectors = { "package" },

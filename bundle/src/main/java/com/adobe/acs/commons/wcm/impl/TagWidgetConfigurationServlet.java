@@ -63,10 +63,6 @@ import com.adobe.granite.xss.XSSAPI;
 @SlingServlet(extensions = "json", selectors = "tagwidget", resourceTypes = "sling/servlet/default")
 public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
-    private static final int WIDGET_HEIGHT = 200;
-
-    private static final int WIDGET_WIDTH = 430;
-
     private static final String DEFAULT_CONFIG_NAME = "default";
 
     @Reference

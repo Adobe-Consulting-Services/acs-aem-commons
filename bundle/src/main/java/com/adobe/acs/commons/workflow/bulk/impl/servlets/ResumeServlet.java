@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.workflow.bulk.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.BulkWorkflowEngine;
+
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -32,10 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 
+/**
+ * ACS AEM Commons - Bulk Workflow Manager - Resume Servlet
+ */
+@SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Bulk Workflow Manager - Resume Servlet",
         methods = { "POST" },
         resourceTypes = { BulkWorkflowEngine.SLING_RESOURCE_TYPE },
         selectors = { "resume" },

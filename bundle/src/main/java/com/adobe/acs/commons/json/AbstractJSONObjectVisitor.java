@@ -17,18 +17,14 @@
  * limitations under the License.
  * #L%
  */
-
 package com.adobe.acs.commons.json;
 
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
 public abstract class AbstractJSONObjectVisitor {
-    private static final Logger log = LoggerFactory.getLogger(AbstractJSONObjectVisitor.class);
 
     /**
      * Visit the given JSON Object and all its descendants.

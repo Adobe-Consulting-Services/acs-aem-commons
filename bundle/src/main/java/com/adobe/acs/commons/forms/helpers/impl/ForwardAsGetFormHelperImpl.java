@@ -40,10 +40,10 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
-@Component(label = "ACS AEM Commons - Forms - Forward-as-GET Form Helper",
-        description = "Forward-as-GET Form Helper",
-        metatype = false,
-        inherit = true)
+/**
+ * ACS AEM Commons - Forms - Forward-as-GET Form Helper
+ */
+@Component(inherit = true)
 @Property(label = "Service Ranking",
         name = Constants.SERVICE_RANKING,
         intValue = FormHelper.SERVICE_RANKING_FORWARD_AS_GET)

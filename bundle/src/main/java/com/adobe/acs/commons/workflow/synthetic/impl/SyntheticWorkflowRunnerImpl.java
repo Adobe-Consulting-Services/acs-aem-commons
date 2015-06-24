@@ -48,11 +48,11 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
-@Component(
-        label = "ACS AEM Commons - Synthetic Workflow Runner",
-        description = "Facilitates the execution of synthetic workflow."
-)
+/**
+ * ACS AEM Commons - Synthetic Workflow Runner
+ * Facilitates the execution of synthetic workflow.
+ */
+@Component
 @Reference(
         name = "workflowProcesses",
         referenceInterface = WorkflowProcess.class,
