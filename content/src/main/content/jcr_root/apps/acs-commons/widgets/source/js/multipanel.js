@@ -84,13 +84,7 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
             if(i.xtype === "label" || i.xtype === "hidden" || !i.hasOwnProperty("key")){
                 return;
             }
-            var predata = i.getValue();
-            if(predata && (typeof predata === "string"
-                    || (typeof predata === "object" && predata.constructor === String))) {
-                pData[i.key] = predata.replace(/"/g, '&quot;'); 
-            } else {
-                pData[i.key] = predata;
-            }
+            pData[i.key] = i.getValue();
         });
 
         return $.isEmptyObject(pData) ? "" : JSON.stringify(pData);
