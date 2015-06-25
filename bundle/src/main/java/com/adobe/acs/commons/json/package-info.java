@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Image utilities.
+ * JSON Utilities
  */
 @aQute.bnd.annotation.Version("1.10.2")
 package com.adobe.acs.commons.json;
