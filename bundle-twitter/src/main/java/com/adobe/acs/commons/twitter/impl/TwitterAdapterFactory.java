@@ -27,7 +27,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +91,7 @@ public final class TwitterAdapterFactory implements AdapterFactory {
 
     private TwitterClient createTwitterClient(com.day.cq.wcm.webservicesupport.Configuration config) {
         Resource oauthConfig = config.getContentResource().listChildren().next();
-        ValueMap oauthProps = ResourceUtil.getValueMap(oauthConfig);
+        ValueMap oauthProps = oauthConfig.getValueMap();
         String consumerKey = oauthProps.get("oauth.client.id", String.class);
         String consumerSecret = oauthProps.get("oauth.client.secret", String.class);
 
