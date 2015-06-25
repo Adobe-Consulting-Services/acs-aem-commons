@@ -26,7 +26,7 @@
     String[] tweets = properties.get("tweets", new String[0]);
     int limit = properties.get("limit", 0);
     List<String> tweetList = Arrays.asList(tweets);
-    if (limit < tweetList.size()) {
+    if (limit > 0 && limit < tweetList.size()) {
         tweetList = tweetList.subList(0, limit);
     }
 
