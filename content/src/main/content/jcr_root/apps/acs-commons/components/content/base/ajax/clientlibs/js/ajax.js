@@ -20,14 +20,14 @@
 ;$(function() {
     $('[data-ajax-component]').each(function() {
         var $this = $(this),
-            url = $this.data('url');
-		var	queryDelimter = "?";
+            url = $this.data('url'),
+            queryDelimiter = "?";
 
-        if (url.indexOf(queryDelimter) > 0){
-            queryDelimter = "&";
-        };
+        if (url.indexOf(queryDelimiter) > 0) {
+            queryDelimiter = "&";
+        }
 
-        url += queryDelimter + "t=" + (new Date()).getTime();
+        url += queryDelimiter + "t=" + (new Date()).getTime();
         $.get(url).success(function(data) {
             if(!data.match(/\sdata-ajax-component/)) {
                 $this.replaceWith(data);
