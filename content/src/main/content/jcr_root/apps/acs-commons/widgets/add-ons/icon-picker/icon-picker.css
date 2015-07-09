@@ -1,0 +1,87 @@
+#CQ .graphic-selection .x-panel-bwrap {
+    display: none;
+}
+
+#CQ .graphic-selection-current-container {
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+#CQ .graphic-selection-list {
+    border-left: 1px solid #ccc;
+}
+
+#CQ .graphic-selection-item, #CQ .graphic-selection-current {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: block;
+    float: left;
+    width: 25%;
+    padding: 10px;
+    text-align: center;
+}
+
+#CQ .graphic-selection-current {
+    float: none;
+    cursor: pointer;
+}
+
+#CQ .graphic-selection-current * {
+    cursor: pointer;
+}
+
+#CQ .graphic-selection-item {
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+
+#CQ .graphic-selection-item.selected {
+    background: #ddd;
+}
+
+#CQ .graphic-selection-image {
+    text-align: center;
+}
+
+#CQ .graphic-selection-item img, #CQ .graphic-selection-current img {
+    max-width: 100%;
+    max-height: 125px;
+}
+
+#CQ .graphic-selection-current .graphic-selection-image {
+    height: 125px;
+    height: auto;
+}
+
+#CQ .graphic-selection .image-staging {
+    visibility: hidden;
+    right: 100%;
+    overflow: hidden;
+    z-index: -1000;
+}
+
+#CQ .graphic-selection.icon-selection {
+    max-height: 215px;
+    overflow: auto;
+}
+
+#CQ .graphic-selection.icon-selection .graphic-selection-list {
+    border-top: 1px solid #d0d0d0;
+}
+
+#CQ .graphic-selection.icon-selection .graphic-selection-item {
+    width: 10%;
+    float: left;
+}
+
+#CQ .graphic-selection.icon-selection .graphic-selection-item .fa {
+    font-style: normal;
+}
+
+#CQ .graphic-selection.icon-selection .graphic-selection-image {
+    min-height: 14px;
+}
+
+#CQ .graphic-selection.icon-selection .image-staging {
+    visibility: visible;
+}
