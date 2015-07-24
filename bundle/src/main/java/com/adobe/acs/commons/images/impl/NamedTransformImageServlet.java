@@ -194,7 +194,12 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Image image = this.resolveImage(request);
         final String mimeType = this.getMimeType(request, image);
         Layer layer = this.getLayer(image);
-
+        
+        if (layer == null) {
+            response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        
         // Transform the image
         layer = this.transform(layer, imageTransformersWithParams);
 
