@@ -20,9 +20,14 @@
 ;$(function() {
     $('[data-ajax-component]').each(function() {
         var $this = $(this),
-            url = $this.data('url');
+            url = $this.data('url'),
+            queryDelimiter = "?";
 
-        url += "?t=" + (new Date()).getTime();
+        if (url.indexOf(queryDelimiter) > 0) {
+            queryDelimiter = "&";
+        }
+
+        url += queryDelimiter + "t=" + (new Date()).getTime();
         $.get(url).success(function(data) {
             if(!data.match(/\sdata-ajax-component/)) {
                 $this.replaceWith(data);
