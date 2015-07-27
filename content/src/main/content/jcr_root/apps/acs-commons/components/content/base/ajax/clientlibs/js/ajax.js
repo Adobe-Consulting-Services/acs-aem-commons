@@ -26,7 +26,7 @@
         url += "?t=" + (new Date()).getTime();
 
         if (queryParams) {
-            url += "&" + decodeURI(queryParams);
+            url += "&" + queryParams;
         }
 
         $.get(url).success(function(data) {
