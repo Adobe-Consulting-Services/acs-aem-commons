@@ -14,7 +14,7 @@
                      fieldLabel="Alt Text"
                      name="./alt"
                      xtype="textfield"/>
-                <linkURL jcr:primaryType="cq:Widget"
+                <link-url jcr:primaryType="cq:Widget"
                          fieldDescription="Drop files or pages from the Content Finder"
                          fieldLabel="Link to"
                          name="./linkURL"

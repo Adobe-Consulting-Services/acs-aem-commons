@@ -42,7 +42,7 @@
                                 fieldDescription="(leave empty to use the title defined above)"
                                 fieldLabel="Alt Text"
                                 name="./alt"/>
-                            <linkURL
+                            <link-url
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/foundation/form/pathbrowser"
                                 fieldLabel="Link to"
