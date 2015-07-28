@@ -44,9 +44,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-    label = "ACS AEM Commons - WCM DataSource Builder"
-)
+/**
+ * ACS AEM Commons - WCM DataSource Builder
+ */
+@Component
 @Service
 public class DataSourceBuilderImpl implements DataSourceBuilder {
 
@@ -108,6 +109,9 @@ public class DataSourceBuilderImpl implements DataSourceBuilder {
                 }
             }
         }
+
+        slingResponse.setContentType("application/json; charset=UTF-8");
+        slingResponse.setCharacterEncoding("UTF-8");
 
         slingResponse.getWriter().write(jsonArray.toString());
     }
