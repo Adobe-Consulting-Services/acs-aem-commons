@@ -20,9 +20,15 @@
 ;$(function() {
     $('[data-ajax-component]').each(function() {
         var $this = $(this),
-            url = $this.data('url');
+            url = $this.data('url'),
+            queryParams = $this.data('ajax-query-parameters');
 
         url += "?t=" + (new Date()).getTime();
+
+        if (queryParams) {
+            url += "&" + queryParams;
+        }
+
         $.get(url).success(function(data) {
             if(!data.match(/\sdata-ajax-component/)) {
                 $this.replaceWith(data);
