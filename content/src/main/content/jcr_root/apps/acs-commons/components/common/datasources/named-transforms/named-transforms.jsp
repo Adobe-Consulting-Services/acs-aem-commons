@@ -4,14 +4,14 @@
                 com.adobe.acs.commons.wcm.datasources.DataSourceBuilder,
                 com.adobe.acs.commons.wcm.datasources.DataSourceOption,
                 java.util.ArrayList,
-
+                java.util.Arrays,
+                java.util.Comparator,
                 java.util.List" %><%
 
     final DataSourceBuilder dataSourceBuilder = sling.getService(DataSourceBuilder.class);
     final NamedImageTransformer[] namedImageTransforms = sling.getServices(NamedImageTransformer.class, null);
     final List<DataSourceOption> options = new ArrayList<DataSourceOption>();
 
-/*
     Arrays.sort(namedImageTransforms, new Comparator<NamedImageTransformer>() {
         public int compare(NamedImageTransformer a, NamedImageTransformer b) {
             String nameA = a.getTransformName().toLowerCase();
@@ -20,7 +20,7 @@
             return nameA.compareTo(nameB);
         }
     });
-             */
+
     for (final NamedImageTransformer transform : namedImageTransforms) {
         options.add(new DataSourceOption(transform.getTransformName(),
                                          transform.getTransformName()));

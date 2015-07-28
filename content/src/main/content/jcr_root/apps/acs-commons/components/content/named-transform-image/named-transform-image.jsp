@@ -21,7 +21,7 @@
             final long pageTimestamp = currentPage.getLastModified().getTimeInMillis();
             final long timestamp = imageTimestamp > pageTimestamp ? imageTimestamp : pageTimestamp;
 
-            image.setSrc(resource.getPath() + ".transform/" + transform + "/" + timestamp + "/image.png");
+            image.setSrc(resource.getPath() + ".transform/" + transform + "/" + timestamp + "/image." + image.getExtension());
         }
 
         image.setIsInUITouchMode(Placeholder.isAuthoringUIModeTouch(slingRequest));
