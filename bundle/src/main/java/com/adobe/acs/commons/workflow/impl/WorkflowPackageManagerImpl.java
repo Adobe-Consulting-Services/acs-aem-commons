@@ -47,6 +47,8 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -145,34 +147,39 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      */
     public final List<String> getPaths(final ResourceResolver resourceResolver,
                                        final String path) throws RepositoryException {
-        final List<String> paths = new ArrayList<String>();
+
+        final List<String> collectionPaths = new ArrayList<String>();
+
         final Resource resource = resourceResolver.getResource(path);
 
         if (resource == null) {
             log.warn("Requesting paths for a non-existent Resource [ {} ]; returning empty results.", path);
-            return paths;
+            return Collections.EMPTY_LIST;
+
         } else if (!isWorkflowPackage(resourceResolver, path)) {
             log.debug("Requesting paths for a non-Resource Collection  [ {} ]; returning provided path.", path);
-            paths.add(path);
-            return paths;
+            return Arrays.asList(new String[]{ path });
+
         } else {
-            // At this point we know the path points to a ResourceCollection Page, so look down the tree for the collection
+            final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+            final Page page = pageManager.getContainingPage(path);
 
-            final Node node = resource.adaptTo(Node.class);
-            final ResourceCollection resourceCollection =
-                    ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
+            if (page != null && page.getContentResource() != null) {
+                final Node node = page.getContentResource().adaptTo(Node.class);
 
-            if (resourceCollection != null) {
-                final List<Node> members = resourceCollection.list(workflowPackageTypes);
-                for (final Node member : members) {
-                    paths.add(member.getPath());
+                final ResourceCollection resourceCollection =
+                        ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
+
+                if (resourceCollection != null) {
+                    final List<Node> members = resourceCollection.list(workflowPackageTypes);
+                    for (final Node member : members) {
+                        collectionPaths.add(member.getPath());
+                    }
+                    return collectionPaths;
                 }
-            } else {
-                // Is not a workflow package; return a List of the provided payload path
-                paths.add(path);
             }
 
-            return paths;
+            return Arrays.asList(new String[]{ path });
         }
     }
 

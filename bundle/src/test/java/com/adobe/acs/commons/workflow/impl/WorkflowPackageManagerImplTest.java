@@ -100,13 +100,16 @@ public class WorkflowPackageManagerImplTest {
         when(workflowPackageResource.adaptTo(Node.class)).thenReturn(workflowPackageNode);
         when(workflowPackageNode.getSession()).thenReturn(session);
         when(pageManager.getPage(WORKFLOW_PACKAGE_PATH)).thenReturn(workflowPackagePage);
+        when(pageManager.getContainingPage(WORKFLOW_PACKAGE_PATH)).thenReturn(workflowPackagePage);
         when(workflowPackagePage.getContentResource()).thenReturn(contentResource);
         when(contentResource.isResourceType("cq/workflow/components/collection/page")).thenReturn(true);
         when(contentResource.getChild("vlt:definition")).thenReturn(mock(Resource.class));
+        when(contentResource.adaptTo(Node.class)).thenReturn(workflowPackageNode);
 
         // Normal Page Path
 
         when(pageManager.getPage(NORMAL_PAGE_PATH)).thenReturn(normalPage);
+        when(pageManager.getContainingPage(NORMAL_PAGE_PATH)).thenReturn(normalPage);
         when(normalPage.getContentResource()).thenReturn(normalPageContentResource);
         when(normalPageContentResource.isResourceType("cq/workflow/components/collection/page")).thenReturn(false);
     }
