@@ -51,8 +51,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ACS AEM Commons - Workflow Package Manager
- * Manager for creating and working with Workflow Packages
+ * ACS AEM Commons - Workflow Package Manager.
+ * Manager for creating and working with Workflow Packages.
  *
  */
 @Component
@@ -63,6 +63,8 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final String WORKFLOW_PACKAGE_TEMPLATE = "/libs/cq/workflow/templates/collectionpage";
 
     private static final String NT_VLT_DEFINITION = "vlt:PackageDefinition";
+
+    private static final String NN_VLT_DEFINITION = "vlt:definition";
 
     private static final String FILTER_RESOURCE_TYPE = "cq/workflow/components/collection/definition/resourcelist";
 
@@ -117,7 +119,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
                 WORKFLOW_PACKAGE_TEMPLATE, name, false);
         final Resource contentResource = page.getContentResource();
 
-        Node node = JcrUtil.createPath(contentResource.getPath() + "/vlt:definition", NT_VLT_DEFINITION, session);
+        Node node = JcrUtil.createPath(contentResource.getPath() + "/" + NN_VLT_DEFINITION, NT_VLT_DEFINITION, session);
         node = JcrUtil.createPath(node.getPath() + "/filter", JcrConstants.NT_UNSTRUCTURED, session);
         JcrUtil.setProperty(node, SLING_RESOURCE_TYPE, FILTER_RESOURCE_TYPE);
 
@@ -149,22 +151,29 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         if (resource == null) {
             log.warn("Requesting paths for a non-existent Resource [ {} ]; returning empty results.", path);
             return paths;
-        }
-
-        final Node node = resource.adaptTo(Node.class);
-        final ResourceCollection resourceCollection =
-                ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
-
-        if (resourceCollection != null) {
-            final List<Node> members = resourceCollection.list(workflowPackageTypes);
-            for (final Node member : members) {
-                paths.add(member.getPath());
-            }
-        } else {
-            // Is not a workflow package; return a List of the provided payload path
+        } else if (!isWorkflowPackage(resourceResolver, path)) {
+            log.debug("Requesting paths for a non-Resource Collection  [ {} ]; returning provided path.", path);
             paths.add(path);
+            return paths;
+        } else {
+            // At this point we know the path points to a ResourceCollection Page, so look down the tree for the collection
+
+            final Node node = resource.adaptTo(Node.class);
+            final ResourceCollection resourceCollection =
+                    ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
+
+            if (resourceCollection != null) {
+                final List<Node> members = resourceCollection.list(workflowPackageTypes);
+                for (final Node member : members) {
+                    paths.add(member.getPath());
+                }
+            } else {
+                // Is not a workflow package; return a List of the provided payload path
+                paths.add(path);
+            }
+
+            return paths;
         }
-        return paths;
     }
 
     /**
@@ -203,7 +212,15 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
             return false;
         }
 
-        return contentResource.isResourceType(WORKFLOW_PAGE_RESOURCE_TYPE);
+        if (!contentResource.isResourceType(WORKFLOW_PAGE_RESOURCE_TYPE)) {
+            return false;
+        }
+
+        if (contentResource.getChild(NN_VLT_DEFINITION) == null) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -225,6 +242,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     @Activate
     protected final void activate(final Map<String, String> config) {
-        workflowPackageTypes = PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
+        workflowPackageTypes =
+                PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
     }
 }
