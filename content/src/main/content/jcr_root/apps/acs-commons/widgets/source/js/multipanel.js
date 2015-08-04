@@ -68,8 +68,8 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
         ACS.CQ.MultiFieldPanel.superclass.afterRender.call(this);
 
         this.items.each(function(){
-            if(!this.contentBasedOptionsURL
-                || this.contentBasedOptionsURL.indexOf(CQ.form.Selection.PATH_PLACEHOLDER) < 0){
+            if(!this.contentBasedOptionsURL ||
+                this.contentBasedOptionsURL.indexOf(CQ.form.Selection.PATH_PLACEHOLDER) < 0){
                 return;
             }
 

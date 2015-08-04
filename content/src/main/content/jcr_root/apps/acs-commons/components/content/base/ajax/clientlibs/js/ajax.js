@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-;$(function() {
+$(function() {
     $('[data-ajax-component]').each(function() {
         var $this = $(this),
             url = $this.data('url'),
