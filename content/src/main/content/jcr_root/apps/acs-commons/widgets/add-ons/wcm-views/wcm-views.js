@@ -147,8 +147,8 @@ ACS.CQ.WCMViews = {
     var uri = window.location.pathname,
         INTERVAL;
     
-    if (uri.indexOf('/cf') === 0 
-            || (uri.indexOf('/content/') === 0 && self === top)) {
+    if (uri.indexOf('/cf') === 0 ||
+             (uri.indexOf('/content/') === 0 && self === top)) {
 
         INTERVAL = setInterval(function () {
             var sidekick = CQ.WCM.getSidekick();

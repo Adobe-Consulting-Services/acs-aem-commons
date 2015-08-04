@@ -109,8 +109,8 @@ quickly.factory('FavoritesOperation', ['$document', '$timeout', '$window', '$fil
 
         isRemoveFavoriteCmd: function(cmd) {
             var params = Command.getParams(cmd, true, 2);
-            return ((params.length === 1 || params.length === 2)
-                && params[0] === REMOVE_CMD);
+            return ((params.length === 1 || params.length === 2) &&
+                params[0] === REMOVE_CMD);
         },
 
         addFavorite: function() {
