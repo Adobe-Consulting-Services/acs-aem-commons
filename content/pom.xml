@@ -84,6 +84,7 @@
                     <excludes>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/components/content/base/ajax/loading-indicator-clientlibs/js/vendor/spin.min.js</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/extensions/contentfinder/audio.js</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/jquery.fonticonpicker/jquery.fonticonpicker.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-animate.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-animate.min.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-cookies.js</exclude>
