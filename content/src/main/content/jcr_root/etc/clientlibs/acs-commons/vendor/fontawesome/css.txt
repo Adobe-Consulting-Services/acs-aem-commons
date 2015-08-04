@@ -1,2 +1,2 @@
 #base=css
-font-awesome.min.css
+font-awesome.css

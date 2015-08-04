@@ -1,3 +1,26 @@
+/*
+ * #%L
+ * ACS AEM Commons Package
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+/*global CQ: false, ACS: false */
+/*jslint eval: true
+*/
+CQ.Ext.ns("ACS.CQ");
 ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
 
     /**
@@ -145,7 +168,7 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
      */
     getValue : function(){
         if(!this.rendered) {
-            return this.value != null ? this.value : "";
+            return this.value !== null ? this.value : "";
         }
 
         return this.hiddenField.getValue();
@@ -159,51 +182,53 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
      * @private
      */
     processPath: function(path) {
+        var options = [],
+            p,
+            url;
         if (this.optionsProvider) {
             // @since 5.3
-            if (path == undefined) path = null;
-            var options = [];
+            if (path === undefined) {
+                path = null;
+            }
             try {
-                if (typeof this.optionsProvider != "function") {
+                if (typeof this.optionsProvider !== "function") {
                     try {
-                        var p;
                         eval("p = " + this.optionsProvider);
                         options = p.call(this, path);
                     }
-                    catch (e) {
-                        CQ.Log.warn("Selection#processPath: failed to evaluate optionsProvider: " + e.message);
+                    catch (e1) {
+                        CQ.Log.warn("Selection#processPath: failed to evaluate optionsProvider: " + e1.message);
                     }
-                }
-                else {
+                } else {
                     options = this.optionsProvider.call(this, path);
                 }
                 this.setOptions(options);
             }
-            catch (e) {
-                CQ.Log.warn("Selection#processPath: " + e.message);
+            catch (e2) {
+                CQ.Log.warn("Selection#processPath: " + e2.message);
             }
-        }
-        else if (this.optionsCallback) {
+        } else if (this.optionsCallback) {
             // @deprecated
-            if (path == undefined) path = null;
+            if (path === undefined) {
+                path = null;
+            }
             try {
-                if (typeof this.optionsCallback != "function") {
+                if (typeof this.optionsCallback !== "function") {
                     try {
                         eval(this.optionsCallback).call(this, path);
                     }
-                    catch (e) {
-                        CQ.Log.warn("Selection#processPath: failed to evaluate optionsCallback: " + e.message);
+                    catch (e3) {
+                        CQ.Log.warn("Selection#processPath: failed to evaluate optionsCallback: " + e3.message);
                     }
                 }
                 else {
                     this.optionsCallback.call(this, path);
                 }
-            }
-            catch (e) {
-                CQ.Log.warn("Selection#processPath: failed to call optionsCallback: " + e.message);
+            } catch (e4) {
+                CQ.Log.warn("Selection#processPath: failed to call optionsCallback: " + e4.message);
             }
         } else if (this.contentBasedOptionsURL) {
-            var url = this.contentBasedOptionsURL;
+            url = this.contentBasedOptionsURL;
             url = url.replace(ACS.CQ.GraphicIconSelection.PATH_PLACEHOLDER_REGEX, path);
             this.setOptions(this.fetchOptions(url, this));
         }
@@ -223,39 +248,6 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
 </code></pre>
      */
     setOptions: function(options) {
-        // select and combo
-        // build store from options
-        /*
-        var storeConfig = {
-            fields: ["value", "text", CQ.shared.XSS.getXSSPropertyName("text"), "image"],
-            data: []
-        };
-        for (var i = 0; i < options.length; i++) {
-            var o = options[i];
-            if (o.text == '-') {
-                o.value = "menu-separator-item-value";  // Could be anything that's unlikely to match actual input
-            } else {
-                o.value = o.value != undefined ? o.value : "";
-            }
-            o.text = o.text ? CQ.I18n.getVarMessage(o.text) : o.value;
-            o[CQ.shared.XSS.getXSSPropertyName("text")] = CQ.shared.XSS.getXSSTablePropertyValue(o, "text") ? CQ.shared.XSS.getXSSTablePropertyValue(o, "text") : o.value;
-            o.image = o.image ? o.image : "";
-        }
-
-        if (this.sortDir) this.sortOptions(options);
-
-        for (var i = 0; i < options.length; i++) {
-            var o = options[i];
-            storeConfig.data.push([o.value, o.text, CQ.I18n.getVarMessage(o[CQ.shared.XSS.getXSSPropertyName("text")]), o.image]);
-        }
-
-        this.optionsConfig.store = new CQ.Ext.data.SimpleStore(storeConfig);
-        this.optionsConfig.listClass = CQ.Util.createId(CQ.DOM.encodeClass(this.name));
-        this.comboBox = new CQ.Ext.form.ComboBox(this.optionsConfig);
-        this.add(this.comboBox);
-        */
-
-
         if (this.rendered) {
             this.doLayout();
         }
@@ -266,13 +258,19 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
      * @private
      */
     sortOptions: function(o) {
-        if (this.sortDir != "ASC" && this.sortDir != "DESC") return;
-        var x = this.sortDir == "ASC" ? 1 : -1;
+        if (this.sortDir !== "ASC" && this.sortDir !== "DESC") {
+            return;
+        }
+        var x = this.sortDir === "ASC" ? 1 : -1;
         o.sort(function(a, b) {
-            var ta = a.text.toLowerCase();
-            var tb = b.text.toLowerCase();
-            if (ta > tb) return x;
-            if (ta < tb) return -x;
+            var ta = a.text.toLowerCase(),
+                tb = b.text.toLowerCase();
+            if (ta > tb) {
+                return x;
+            }
+            if (ta < tb) {
+                return -x;
+            }
             return 0;
         });
     },
@@ -323,18 +321,26 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
      * @private
      */
     fetchOptions: function(url, config) {
-        var options = [];
+        var options = [],
+            json,
+            optVF,
+            optTF,
+            optTFXSS,
+            root,
+            opt,
+            i;
 
         try {
-            var json = CQ.HTTP.eval(url);
+            json = CQ.HTTP.eval(url);
             if (config.optionsRoot) {
                 // convert ext format to our format
-                var optVF = config.optionsValueField || "value";
-                var optTF = config.optionsTextField || "text";
-                var optTFXSS = CQ.shared.XSS.getXSSPropertyName(optTF);
-                var root = (config.optionsRoot == ".") ? json : json[config.optionsRoot];
-                for (var i=0; i<root.length; i++) {
-                    var opt = {
+                optVF = config.optionsValueField || "value";
+                optTF = config.optionsTextField || "text";
+                optTFXSS = CQ.shared.XSS.getXSSPropertyName(optTF);
+                root = (config.optionsRoot === ".") ? json : json[config.optionsRoot];
+
+                for (i = 0; i < root.length; i++) {
+                    opt = {
                         value: root[i][optVF],
                         text: root[i][optTF],
                         text_xss: root[i][optTFXSS]
