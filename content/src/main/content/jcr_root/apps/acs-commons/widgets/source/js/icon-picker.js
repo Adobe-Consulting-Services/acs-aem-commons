@@ -193,7 +193,7 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
             try {
                 if (typeof this.optionsProvider !== "function") {
                     try {
-                        eval("p = " + this.optionsProvider);
+                        eval("p = " + this.optionsProvider); // jshint ignore:line
                         options = p.call(this, path);
                     }
                     catch (e1) {
@@ -215,7 +215,7 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
             try {
                 if (typeof this.optionsCallback !== "function") {
                     try {
-                        eval(this.optionsCallback).call(this, path);
+                        eval(this.optionsCallback).call(this, path); // jshint ignore:line
                     }
                     catch (e3) {
                         CQ.Log.warn("Selection#processPath: failed to evaluate optionsCallback: " + e3.message);
@@ -331,7 +331,7 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
             i;
 
         try {
-            json = CQ.HTTP.eval(url);
+            json = CQ.HTTP.eval(url); // jshint ignore:line
             if (config.optionsRoot) {
                 // convert ext format to our format
                 optVF = config.optionsValueField || "value";
@@ -358,7 +358,7 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
 
         var optionsToReturn = [];
 
-        for (var i=0; i<options.length; i++) {
+        for (i = 0; i < options.length; i++) {
             //if(options[i].value !== "") {
             optionsToReturn.push(options[i]);
             //}
@@ -368,7 +368,9 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
     },
 
     constructor: function(config) {
-        if (config.allowBlank != undefined) this.allowBlank = config.allowBlank;
+        if (config.allowBlank !== undefined) {
+            this.allowBlank = config.allowBlank;
+        }
 
         if (config.optionsCallback) {
             this.optionsCallback = config.optionsCallback;
@@ -463,7 +465,7 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
             }
         });
 
-        if (this.value != null) {
+        if (this.value !== null) {
             this.setValue(this.value);
         }
     },
