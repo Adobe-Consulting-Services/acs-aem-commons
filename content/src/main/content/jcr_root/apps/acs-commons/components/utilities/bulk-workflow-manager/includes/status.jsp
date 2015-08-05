@@ -58,11 +58,13 @@
 
     <div class="section progress-section">
         <div ng-show="data.status.percentComplete || data.status.percentComplete === 0">
-            <div class="progress">
-                <div class="bar"
-                     style="width: {{ data.status.percentComplete }}%;"></div>
+            <div class="coral-Progress">
+                <div class="coral-Progress-bar">
+                    <div class="coral-Progress-status"
+                         style="width: {{ data.status.percentComplete }}%;"></div>
+                 </div>
+                 <label class="coral-Progress-label">{{ data.status.percentComplete }}%</label>
             </div>
-            <label>{{ data.status.percentComplete }}%</label>
         </div>
     </div>
 
