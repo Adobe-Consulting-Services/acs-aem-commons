@@ -12,5 +12,4 @@ check_vanity_path.js
 validate_responsive_column_control_dialog.js
 add_dynamic_options_to_feed_importer.js
 add_language_titles_to_item_dialog.js
-wcm-views.js
 icon-picker.js
