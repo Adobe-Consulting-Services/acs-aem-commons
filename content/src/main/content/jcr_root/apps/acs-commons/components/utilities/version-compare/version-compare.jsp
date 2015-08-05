@@ -1,12 +1,4 @@
-<%@page session="false" contentType="text/html; charset=utf-8" 
-	pageEncoding="UTF-8"
-    import="org.apache.sling.api.resource.*,
-    java.util.*,
-    javax.jcr.*,
-    com.day.cq.search.*,
-    com.day.cq.wcm.api.*,
-    com.day.cq.dam.api.*,
-    com.adobe.acs.commons.version.model.EvolutionModel"%>
+<%@page session="false" contentType="text/html; charset=utf-8" pageEncoding="UTF-8"%>
 <%@taglib prefix="sling" uri="http://sling.apache.org/taglibs/sling" %>
 <%@taglib prefix="cq" uri="http://www.day.com/taglibs/cq/1.0" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -43,10 +35,10 @@
             </nav>
         </header>
 
-		<div class="page" role="main"
+        <div class="page" role="main"
                  ng-controller="MainCtrl"
                  ng-init="app.resource = '${model.resourcePath}'; app.home = '${currentPage.path}.html'; init();">
-		
+
             <div ng-show="notifications.length > 0"
                  class="notifications">
                 <div ng-repeat="notification in notifications">
@@ -57,74 +49,75 @@
                         <div>{{ notification.message }}</div>
                     </div>
                 </div>
-            </div>		
-		
-		    <div class="content">
+            </div>        
+
+            <div class="content">
                 <div class="content-container">
                     <div class="content-container-inner">
 
-						<div class="alert notice">
-	                        <strong>NOTICE</strong><div>Please note, the current state of this tool does only show linear version paths.</div>
+                        <div class="alert notice">
+                            <strong>NOTICE</strong><div>Please note, the current state of this tool only shows linear version paths.</div>
                         </div>
 
                         <h1>Version Compare</h1>
                         
                         <div class="search">
-                        	<input type="text" placeholder="Enter URL to Resource" ng-model="app.resource">
+                            <input type="text" placeholder="Enter URL to Resource" ng-model="app.resource">
                         </div>
 
                         <div style="float: right;">
                             <button class="primary" ng-click="analyse()">Show Versions</button>
                         </div>
-                        
+
+                   <c:if test="${!empty model.resourcePath}">
                         <section class="well">
-                        	<div class="options">
-                        		<h2>Configuration</h2>
-                        		<label><input type="checkbox" ng-model="app.paintConnections"><span>Paint Connections</span></label>
-                        	</div>
-							<div class="options">
-                        		<h2>Hide Versions</h2>
-                        		<c:forEach var="evolutionItem" items="${model.evolution.evolutionItems}" varStatus="evoCounter">
-									<label><input type="checkbox" ng-model="app.hideVersions['version-${evolutionItem.versionName}']"><span>${evolutionItem.versionName}</span></label>
-								</c:forEach>
-                        	</div>                        	
-                        	<div class="legend">
-                        		<h2>Legend</h2>
-								<div class="status-added">added</div>
-								<div class="status-changed">changed</div>
-								<div class="status-removed">removed in next version</div>
-							</div>
-						</section>
+                            <div class="options">
+                                <h2>Configuration</h2>
+                                <label><input type="checkbox" ng-model="app.paintConnections"><span>Paint Connections</span></label>
+                            </div>
+                            <div class="options">
+                                <h2>Hide Versions</h2>
+                                <c:forEach var="evolutionItem" items="${model.evolution.evolutionItems}" varStatus="evoCounter">
+                                    <label><input type="checkbox" ng-model="app.hideVersions['version-${evolutionItem.versionName}']"><span>${evolutionItem.versionName}</span></label>
+                                </c:forEach>
+                            </div>
+                            <div class="legend">
+                                <h2>Legend</h2>
+                                <div class="status-added">added</div>
+                                <div class="status-changed">changed</div>
+                                <div class="status-removed">removed in next version</div>
+                            </div>
+                        </section>
 
-						<section class="well">
-							<div class="content">
-							    <div>
-							        <c:forEach var="evolutionItem" items="${model.evolution.evolutionItems}" varStatus="evoCounter" >
-							            <div class="version current-${evolutionItem.current}" id="version-${evolutionItem.versionName}" ng-show="showVersion('version-${evolutionItem.versionName}')">
-							                <div class="version-header">
-							                	<div class="name"><c:out value="${evolutionItem.versionName}"/></div>
-							                	<div class="date"><fmt:formatDate type="both" value="${evolutionItem.versionDate}" /></div>
-							                </div>
-							                <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}" varStatus="entryCounter">
-								                <a href="#popover-${versionEntry.uniqueName}-${evoCounter.index}" data-toggle="popover" data-point-from="right" data-align-from="left">
-								                    <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status} depth-${versionEntry.depth}"
-								                    	 id="${versionEntry.uniqueName}-${evoCounter.index}" 
-								                    	 ng-init="addConnection({'source':'${versionEntry.uniqueName}-${evoCounter.index}', 'target':'${versionEntry.uniqueName}-${evoCounter.index + 1}', 'isCurrent':${evolutionItem.current}})">    
-								                        <span class="key"><c:out value="${versionEntry.name}"/>:</span>
-								                        <span class="value"><c:out value="${versionEntry.valueStringShort}"/></span>
-								                        <div id="popover-${versionEntry.uniqueName}-${evoCounter.index}" class="popover arrow-left"><c:out value="${versionEntry.valueString}"/></div>
-								                    </div>
-							                    </a> 
-							                </c:forEach>
-							            </div>
-							        </c:forEach>
-							        <c:if test="${empty model.evolution.evolutionItems}">
-							        	<h1>No versions could be found for this item.</h1>
-							        </c:if>
-							    </div>
-							</div>
-						</section>
-
+                        <section class="well">
+                            <div class="content">
+                                <div>
+                                    <c:forEach var="evolutionItem" items="${model.evolution.evolutionItems}" varStatus="evoCounter" >
+                                        <div class="version current-${evolutionItem.current}" id="version-${evolutionItem.versionName}" ng-show="showVersion('version-${evolutionItem.versionName}')">
+                                            <div class="version-header">
+                                                <div class="name"><c:out value="${evolutionItem.versionName}"/></div>
+                                                <div class="date"><fmt:formatDate type="both" value="${evolutionItem.versionDate}" /></div>
+                                            </div>
+                                            <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}" varStatus="entryCounter">
+                                                <a href="#popover-${versionEntry.uniqueName}-${evoCounter.index}" data-toggle="popover" data-point-from="right" data-align-from="left">
+                                                    <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status} depth-${versionEntry.depth}"
+                                                         id="${versionEntry.uniqueName}-${evoCounter.index}" 
+                                                         ng-init="addConnection({'source':'${versionEntry.uniqueName}-${evoCounter.index}', 'target':'${versionEntry.uniqueName}-${evoCounter.index + 1}', 'isCurrent':${evolutionItem.current}})">    
+                                                        <span class="key"><c:out value="${versionEntry.name}"/>:</span>
+                                                        <span class="value"><c:out value="${versionEntry.valueStringShort}"/></span>
+                                                        <div id="popover-${versionEntry.uniqueName}-${evoCounter.index}" class="popover arrow-left"><c:out value="${versionEntry.valueString}"/></div>
+                                                    </div>
+                                                </a> 
+                                            </c:forEach>
+                                        </div>
+                                    </c:forEach>
+                                    <c:if test="${empty model.evolution.evolutionItems}">
+                                        <h1>No versions could be found for this item.</h1>
+                                    </c:if>
+                                </div>
+                            </div>
+                        </section>
+                    </c:if>
                     </div>
                 </div>
             </div>
@@ -134,7 +127,7 @@
                 angular.bootstrap(document.getElementById('acs-commons-version-comparison'),
                         ['versionComparator']);
             </script>
-		</div>
+        </div>
 
     </div>
     
