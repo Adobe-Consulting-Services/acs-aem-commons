@@ -26,30 +26,30 @@
         <section class="well">
 
             <div class="left">
-                <ul>
-                    <li>Status: <span style="text-transform: capitalize;">{{ data.status.state }}</span></li>
-                    <li>Total: {{ data.status.total }}</li>
-                    <li>Complete: {{ data.status.complete }}</li>
-                    <li>Remaining: {{ data.status.remaining }}</li>
-                    <li>Current Batch: {{ data.status.currentBatch }}</li>
-                    <li>Current Batch Timeout: {{ data.status.batchTimeoutCount }}
+                <ul class="coral-List">
+                    <li class="coral-List-item">Status: <span style="text-transform: capitalize;">{{ data.status.state }}</span></li>
+                    <li class="coral-List-item">Total: {{ data.status.total }}</li>
+                    <li class="coral-List-item">Complete: {{ data.status.complete }}</li>
+                    <li class="coral-List-item">Remaining: {{ data.status.remaining }}</li>
+                    <li class="coral-List-item">Current Batch: {{ data.status.currentBatch }}</li>
+                    <li class="coral-List-item">Current Batch Timeout: {{ data.status.batchTimeoutCount }}
                             of {{ data.status.batchTimeout }}</li>
 
-                    <li ng-show="data.status.startedAt">Started At: {{ data.status.startedAt }}</li>
-                    <li ng-show="data.status.stoppedAt && !data.status.completedAt">Stopped At: {{ data.status.stoppedAt }}</li>
-                    <li ng-show="data.status.completedAt">Competed At: {{ data.status.completedAt }}</li>
+                    <li class="coral-List-item" ng-show="data.status.startedAt">Started At: {{ data.status.startedAt }}</li>
+                    <li class="coral-List-item" ng-show="data.status.stoppedAt && !data.status.completedAt">Stopped At: {{ data.status.stoppedAt }}</li>
+                    <li class="coral-List-item" ng-show="data.status.completedAt">Competed At: {{ data.status.completedAt }}</li>
                 </ul>
             </div>
 
             <div class="right">
-                <ul>
-                    <li>Batch Size: {{ data.status.batchSize }}</li>
-                    <li>Batch Timeout: {{ data.status.batchTimeout * data.status.interval }} seconds
+                <ul class="coral-List">
+                    <li class="coral-List-item">Batch Size: {{ data.status.batchSize }}</li>
+                    <li class="coral-List-item">Batch Timeout: {{ data.status.batchTimeout * data.status.interval }} seconds
                         ( multiplier: {{ data.status.batchTimeout }} )
                     </li>
-                    <li>Batch Interval: {{ data.status.interval }} seconds</li>
-                    <li>Workflow Model: {{ data.status.workflowModel }}</li>
-                    <li>Purge Workflow: {{ data.status.purgeWorkflow }}</li>
+                    <li class="coral-List-item">Batch Interval: {{ data.status.interval }} seconds</li>
+                    <li class="coral-List-item">Workflow Model: {{ data.status.workflowModel }}</li>
+                    <li class="coral-List-item">Purge Workflow: {{ data.status.purgeWorkflow }}</li>
                 </ul>
             </div>
             <div style="clear: both;"></div>
@@ -70,11 +70,13 @@
 
         <button ng-click="stop()"
                 role="button"
+                class="coral-Button"
                 ng-show="data.status.state === 'running'"
                 class="warning">Stop Bulk Workflow</button>
 
         <button ng-click="resume()"
                 role="button"
+                class="coral-Button"
                 ng-show="data.status.state.indexOf('stopped') === 0"
                 style="float: left;"
                 class="primary">Resume Bulk Workflow</button>
@@ -108,20 +110,20 @@
 
              <button ng-click="status(true)"
                      role="button"
-                     class="inline-button">Refresh now</button>
+                     class="coral-Button inline-button">Refresh now</button>
          </div>
 
-        <table class="data current-batch-table">
+        <table class="coral-Table" current-batch-table">
             <thead>
-                <tr>
-                    <th class="status-col">Status</th>
-                    <th>Payload</th>
+                <tr class="coral-Table-row">
+                    <th class="coral-Table-headerCell status-col">Status</th>
+                    <th class="coral-Table-headerCell">Payload</th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="item in data.status.currentBatchItems ">
-                    <td class="{{ item.state }}">{{ item.state || 'NOT STARTED' }}</td>
-                    <td>{{ item.path }}</td>
+                <tr class="coral-Table-row" ng-repeat="item in data.status.currentBatchItems ">
+                    <td class="coral-Table-cell {{ item.state }}">{{ item.state || 'NOT STARTED' }}</td>
+                    <td class="coral-Table-cell">{{ item.path }}</td>
                 </tr>
             </tbody>
         </table>

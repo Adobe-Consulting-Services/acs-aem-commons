@@ -25,7 +25,7 @@
     pageContext.setAttribute("favicon", resourceResolver.map(slingRequest, component.getPath() + "/clientlibs/images/favicon.ico"));
 
 %><!doctype html>
-<html>
+<html class="coral-App">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -36,17 +36,15 @@
     <cq:includeClientLib css="acs-commons.bulk-workflow-manager.app"/>
 </head>
 
-<body>
+<body class="coral--light">
     <div id="acs-commons-bulk-workflow-manager-app">
-        <header class="top">
-
-            <div class="logo">
-                <a href="/"><i class="icon-marketingcloud medium"></i></a>
-            </div>
-
-            <nav class="crumbs">
-                <a href="/miscadmin">Tools</a>
-                <a href="${pagePath}.html">Bulk Workflow Manager</a>
+        <header class="endor-Panel-header endor-BreadcrumbBar is-closed">
+            <nav class="endor-Crumbs">
+                <a class="endor-Crumbs-item" href="/">
+                    <i class="endor-Crumbs-item-icon coral-Icon coral-Icon--adobeExperienceManager coral-Icon--sizeM"></i>
+                </a>
+                <a class="endor-Crumbs-item" href="/miscadmin">Tools</a>
+                <a class="endor-Crumbs-item" href="${pagePath}.html">Bulk Workflow Manager</a>
             </nav>
         </header>
 

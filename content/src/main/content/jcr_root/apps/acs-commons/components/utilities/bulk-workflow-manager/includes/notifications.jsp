@@ -20,21 +20,26 @@
 
 <div ng-show="notifications.length > 0">
     <div ng-repeat="notification in notifications">
-        <div class="alert large {{ notification.type }}">
-            <button class="close" data-dismiss="alert">&times;</button>
-            <strong>{{ notification.title }}</strong>
-
-            <div>{{ notification.message }}</div>
+        <div class="coral-Alert coral-Alert--large coral-Alert--{{ notification.type }}">
+            <button type="button" class="coral-MinimalButton coral-Alert-closeButton" title="Close" data-dismiss="alert">
+                <i class="coral-Icon coral-Icon--sizeXS coral-Icon--close coral-MinimalButton-icon"></i>
+            </button>
+            <i class="coral-Alert-typeIcon coral-Icon coral-Icon--sizeS coral-Icon--alert"></i>
+            <strong class="coral-Alert-title">{{ notification.title }}</strong>
+            <div class="coral-Alert-message">{{ notification.message }}</div>
         </div>
     </div>
 </div>
 
 <div class="fixed-notifications">
     <div    ng-show="data.status.state === 'stopped'"
-            class="large alert notice">
-        <strong>Stopped</strong>
+            class="coral-Alert coral-Alert--large coral-Alert--notice">
+        <button type="button" class="coral-MinimalButton coral-Alert-closeButton" title="Close" data-dismiss="alert">
+            <i class="coral-Icon coral-Icon--sizeXS coral-Icon--close coral-MinimalButton-icon"></i>
+        </button>
+        <strong class="coral-Alert-title">Stopped</strong>
 
-        <div>
+        <div class="coral-Alert-message">
             The execution of this bulk workflow process was stopped.
             Press the &quot;Resume Bulk Worklfow&quot; button below to resume bulk workflow processing.
         </div>
@@ -42,10 +47,13 @@
 
 
     <div    ng-show="data.status.state === 'complete'"
-            class="large alert success">
-        <strong>Complete</strong>
+            class="coral-Alert coral-Alert--large coral-Alert--success">
+        <button type="button" class="coral-MinimalButton coral-Alert-closeButton" title="Close" data-dismiss="alert">
+            <i class="coral-Icon coral-Icon--sizeXS coral-Icon--close coral-MinimalButton-icon"></i>
+        </button>
+        <strong class="coral-Alert-title">Complete</strong>
 
-        <div>The execution of this bulk run is complete. Please review the
+        <div class="coral-Alert-message">The execution of this bulk run is complete. Please review the
             <a target="_blank" href="/libs/cq/workflow/content/console.html">workflow history</a>
             for any unsuccessful Workflow executions.</div>
     </div>
