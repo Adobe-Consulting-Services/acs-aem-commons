@@ -50,7 +50,6 @@
                     <instructions>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
                         <Import-Package>
-                            org.scribe*;version="[1.3.0,2)",
                             ch.qos.logback.*;resolution:=optional,
                             org.apache.sling.models.*;resolution:=optional,
                             *
