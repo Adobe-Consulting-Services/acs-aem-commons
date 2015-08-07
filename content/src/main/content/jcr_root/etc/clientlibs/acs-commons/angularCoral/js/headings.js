@@ -26,8 +26,8 @@ angular.module('acsCoral')
             H3 : "coral-Heading coral-Heading--3",
             H4 : "coral-Heading coral-Heading--4",
             H5 : "coral-Heading coral-Heading--5"
-    }
-    
+    };
+
     return {
         restrict: 'A',
         link : function(scope, $element, attrs) {
