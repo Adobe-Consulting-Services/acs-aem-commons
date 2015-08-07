@@ -23,7 +23,7 @@
     <div class="section summary-section">
         <h3>Summary</h3>
 
-        <section class="well">
+        <section class="coral-Well">
 
             <div class="left">
                 <ul class="coral-List">
