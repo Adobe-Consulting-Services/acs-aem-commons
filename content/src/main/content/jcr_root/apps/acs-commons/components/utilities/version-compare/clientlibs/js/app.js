@@ -19,7 +19,8 @@
  */
 /*global angular: false */
 
-angular.module('versionComparator', []).controller('MainCtrl', ['$scope', '$http', '$timeout', '$location',
+angular.module('versionComparator', ['acsCoral'])
+.controller('MainCtrl', ['$scope', '$http', '$timeout', '$location',
     function($scope, $http, $timeout, $location) {
 
         $scope.app = {
