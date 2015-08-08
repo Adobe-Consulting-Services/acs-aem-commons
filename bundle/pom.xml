@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>1.10.3-SNAPSHOT</version>
+        <version>1.10.5-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -50,10 +50,10 @@
                     <instructions>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
                         <Import-Package>
-                            org.scribe*;version="[1.3.0,2)",
                             com.adobe.cq.dialogconversion;resolution:=optional,
                             *
                         </Import-Package>
+                        <Sling-Model-Packages>com.adobe.acs.commons.version.model</Sling-Model-Packages>
                     </instructions>
                 </configuration>
             </plugin>
@@ -197,6 +197,12 @@
             <version>1.0.2</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -222,12 +228,6 @@
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.impl</artifactId>
             <version>1.0.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-            <version>1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

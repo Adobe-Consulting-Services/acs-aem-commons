@@ -1,0 +1,153 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+#acs-commons-version-comparison {
+  .content-container {
+    width: 100%;
+
+    .content-container-inner {
+      width: 95%;
+      margin: 0 auto;
+      
+      .search {
+		width: 80%;
+      }
+    }
+  }
+
+  .section {
+    margin: 2em 0;
+
+    h2 {
+      margin-bottom: .5em;
+    }
+  }
+
+  .notifications {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 750px;
+    z-index: 1000;
+  }
+  
+    .content {
+        font-size: 9pt;
+    }
+    td, th {
+        padding: 10px;
+        border: 1px solid grey; 
+    }
+    td {
+       vertical-align: top; 
+    }
+    th {
+        background-color: lightgrey;
+    }
+    .version-header {
+        font-size: 11pt;
+        font-weight: bold;
+        padding: 5px;
+        background-color: lightgrey;
+        
+        .name {
+            float: left;
+        }
+        .date {
+            text-align: right;
+        }
+    }
+    div.version {
+        border: 1px solid grey;
+        max-width: 240px;
+        margin: 10px;
+        float: left;
+        background-color: white;
+        
+        a {
+            display: block;
+            color: black;
+        }
+    }
+    
+    .version-entry{
+        border-top: 1px solid grey;
+        padding: 2px;
+        overflow: hidden;
+    }
+    span.key {
+        font-weight: bold;
+    }
+    .type-true {
+        /*border: 2px solid grey;*/
+    }
+    .options {
+        label {
+            padding-right: 15px;
+        }
+    }
+    .legend {
+        width: 200px;
+    }
+    .green, .status-added {
+        border-right: 5px solid green;
+    }
+    .red, .status-removed {
+        border-right: 5px solid red;
+    }
+    .orange, .status-changed {
+        border-right: 5px solid orange;
+    }
+    
+    .depth-0 {
+        padding-left: 10px;
+    }
+    .depth-1 {
+        padding-left: 25px;
+    }
+    .depth-2 {
+        padding-left: 40px;
+    }
+    .depth-3 {
+        padding-left: 55px;
+    }
+    .depth-4 {
+        padding-left: 60px;
+    }
+    .depth-5 {
+        padding-left: 75px;
+    }
+    .depth-6 {
+        padding-left: 90px;
+    }
+    .depth-7 {
+        padding-left: 105px;
+    }
+    .depth-8 {
+        padding-left: 120px;
+    }
+    
+    .search input[type=text] {
+        padding-left: 0.625rem;
+        padding-right: 0.625rem;
+    }
+
+}

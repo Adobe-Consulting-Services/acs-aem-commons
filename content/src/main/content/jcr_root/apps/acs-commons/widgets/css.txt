@@ -1,3 +1,4 @@
 #base=source/css
 
 cq-placeholders.less
+icon-picker.css
