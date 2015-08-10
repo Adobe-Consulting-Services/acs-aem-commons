@@ -122,6 +122,10 @@
 
   }
 
+  .well {
+    position: relative;
+  }
+
   .summary-section {
     .left,
     .right {
@@ -130,6 +134,22 @@
 
     .left {
       float: left;
+    }
+
+
+    .hard-reset {
+      position: absolute;
+      right: 1em;
+      bottom: 0;
+
+      a {
+        float: right;
+      }
+      p {
+        padding-top: 1em;
+        clear: right;
+        text-align: right;
+      }
     }
   }
 
@@ -146,7 +166,7 @@
     position: fixed;
     top: 4em;
     width: 960px;
-    margin: 0 aut0;
+    margin: 0 auto;
     z-index: 100000;
   }
 }

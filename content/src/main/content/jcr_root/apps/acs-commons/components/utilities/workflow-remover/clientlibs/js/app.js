@@ -127,6 +127,30 @@ angular.module('workflowRemover', [])
                 $scope.getStatus();
             };
 
+            $scope.reset = function () {
+                $http({
+                    method: 'POST',
+                    url: encodeURI($scope.app.resource + '/status'),
+                    data: 'checkedCount@Delete' +
+                        '&completedAt@Delete' +
+                        '&count@Delete' +
+                        '&initiatedBy@Delete' +
+                        '&startedAt@Delete' +
+                        '&status@Delete',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).
+                    success(function (data, status, headers, config) {
+                        $scope.app.running = false;
+                        $scope.getStatus();
+                        $scope.addNotification('info', 'INFO', 'Workflow removal status reset');
+                    }).
+                    error(function (data, status, headers, config) {
+                        $scope.addNotification('error', 'ERROR', 'Workflow removal status reset failed due to: ' + data);
+                    });
+
+                $scope.getStatus();
+            };
+
             $scope.addNotification = function (type, title, message) {
                 var timeout = 10000;
 
