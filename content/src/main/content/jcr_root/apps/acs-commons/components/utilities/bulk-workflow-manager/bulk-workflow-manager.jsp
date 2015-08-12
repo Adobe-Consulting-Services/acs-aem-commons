@@ -38,15 +38,7 @@
 
 <body class="coral--light">
     <div id="acs-commons-bulk-workflow-manager-app">
-        <header class="endor-Panel-header endor-BreadcrumbBar is-closed">
-            <nav class="endor-Crumbs">
-                <a class="endor-Crumbs-item" href="/">
-                    <i class="endor-Crumbs-item-icon coral-Icon coral-Icon--adobeExperienceManager coral-Icon--sizeM"></i>
-                </a>
-                <a class="endor-Crumbs-item" href="/miscadmin">Tools</a>
-                <a class="endor-Crumbs-item" href="${pagePath}.html">Bulk Workflow Manager</a>
-            </nav>
-        </header>
+        <header acs-coral-tools-header data-context-path="${request.contextPath}" data-page-path="${currentPage.path}.html" data-title="Bulk Workflow Manager"></header>
 
         <div class="page"
              role="main"

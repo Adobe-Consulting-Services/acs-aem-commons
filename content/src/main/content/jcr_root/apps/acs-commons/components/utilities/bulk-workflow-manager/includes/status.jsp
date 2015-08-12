@@ -21,35 +21,35 @@
 <div ng-hide="data.status.state === 'not started'">
 
     <div class="section summary-section">
-        <h3>Summary</h3>
+        <h3 acs-coral-heading>Summary</h3>
 
         <section class="coral-Well">
 
             <div class="left">
-                <ul class="coral-List">
-                    <li class="coral-List-item">Status: <span style="text-transform: capitalize;">{{ data.status.state }}</span></li>
-                    <li class="coral-List-item">Total: {{ data.status.total }}</li>
-                    <li class="coral-List-item">Complete: {{ data.status.complete }}</li>
-                    <li class="coral-List-item">Remaining: {{ data.status.remaining }}</li>
-                    <li class="coral-List-item">Current Batch: {{ data.status.currentBatch }}</li>
-                    <li class="coral-List-item">Current Batch Timeout: {{ data.status.batchTimeoutCount }}
+                <ul acs-coral-list>
+                    <li>Status: <span style="text-transform: capitalize;">{{ data.status.state }}</span></li>
+                    <li>Total: {{ data.status.total }}</li>
+                    <li>Complete: {{ data.status.complete }}</li>
+                    <li>Remaining: {{ data.status.remaining }}</li>
+                    <li>Current Batch: {{ data.status.currentBatch }}</li>
+                    <li>Current Batch Timeout: {{ data.status.batchTimeoutCount }}
                             of {{ data.status.batchTimeout }}</li>
 
-                    <li class="coral-List-item" ng-show="data.status.startedAt">Started At: {{ data.status.startedAt }}</li>
-                    <li class="coral-List-item" ng-show="data.status.stoppedAt && !data.status.completedAt">Stopped At: {{ data.status.stoppedAt }}</li>
-                    <li class="coral-List-item" ng-show="data.status.completedAt">Competed At: {{ data.status.completedAt }}</li>
+                    <li ng-show="data.status.startedAt">Started At: {{ data.status.startedAt }}</li>
+                    <li ng-show="data.status.stoppedAt && !data.status.completedAt">Stopped At: {{ data.status.stoppedAt }}</li>
+                    <li ng-show="data.status.completedAt">Competed At: {{ data.status.completedAt }}</li>
                 </ul>
             </div>
 
             <div class="right">
-                <ul class="coral-List">
-                    <li class="coral-List-item">Batch Size: {{ data.status.batchSize }}</li>
-                    <li class="coral-List-item">Batch Timeout: {{ data.status.batchTimeout * data.status.interval }} seconds
+                <ul acs-coral-list>
+                    <li>Batch Size: {{ data.status.batchSize }}</li>
+                    <li>Batch Timeout: {{ data.status.batchTimeout * data.status.interval }} seconds
                         ( multiplier: {{ data.status.batchTimeout }} )
                     </li>
-                    <li class="coral-List-item">Batch Interval: {{ data.status.interval }} seconds</li>
-                    <li class="coral-List-item">Workflow Model: {{ data.status.workflowModel }}</li>
-                    <li class="coral-List-item">Purge Workflow: {{ data.status.purgeWorkflow }}</li>
+                    <li>Batch Interval: {{ data.status.interval }} seconds</li>
+                    <li>Workflow Model: {{ data.status.workflowModel }}</li>
+                    <li>Purge Workflow: {{ data.status.purgeWorkflow }}</li>
                 </ul>
             </div>
             <div style="clear: both;"></div>

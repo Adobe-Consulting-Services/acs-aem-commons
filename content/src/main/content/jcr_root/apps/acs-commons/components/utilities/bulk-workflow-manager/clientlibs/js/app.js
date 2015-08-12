@@ -20,7 +20,7 @@
 
 /*global JSON: false, angular: false */
 
-angular.module('bulkWorkflowManagerApp',[])
+angular.module('bulkWorkflowManagerApp',['acsCoral'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout',
     function($scope, $http, $timeout) {
 
