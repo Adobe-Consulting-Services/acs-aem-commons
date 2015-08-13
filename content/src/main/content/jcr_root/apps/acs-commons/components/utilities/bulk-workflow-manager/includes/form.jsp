@@ -118,14 +118,13 @@
     <div class="coral-Form-fieldwrapper">
         <label class="coral-Form-fieldlabel">Purge Workflows</label>
 
-        <label class="coral-Checkbox">
-            <input class="coral-Checkbox-input" type="checkbox"
-                    name="purgeWorkflows"
-                    ng-model="form.checkWorkflow"
-                    checked>
-            <span class="coral-Checkbox-checkmark"></span>
-            <span class="coral-Checkbox-description">Delete completed workflow instances after each batch is processed.</span>
-        </label>
+        <label acs-coral-checkbox>
+            <input type="checkbox"
+                   name="purgeWorkflows"
+                   ng-model="form.checkWorkflow"
+                   checked>
+            <span>Delete completed workflow instances after each batch is processed.</span>
+    </label>
     </div>
 
 
