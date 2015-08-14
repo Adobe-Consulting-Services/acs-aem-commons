@@ -75,7 +75,7 @@ angular.module('workflowRemover', [])
 
                         $scope.status.startedAt = startedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
 
-                        if ($scope.status.status === 'complete') {
+                        if ($scope.status.status !== 'running') {
                             $scope.app.running = false;
 
                             completedAtMoment = moment($scope.status.completedAt);
@@ -83,7 +83,8 @@ angular.module('workflowRemover', [])
                             $scope.status.completedAt = completedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
                             $scope.status.timeTaken = completedAtMoment.diff(startedAtMoment, 'seconds');
 
-                        } else if ($scope.status.status === 'running') {
+                        } else {
+                            // Running
                             $scope.app.running = true;
 
                             $scope.status.timeTaken = moment().diff(startedAtMoment, 'seconds');
