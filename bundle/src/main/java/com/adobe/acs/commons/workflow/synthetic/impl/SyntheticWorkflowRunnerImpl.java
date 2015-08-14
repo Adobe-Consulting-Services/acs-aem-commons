@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
+import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticRestartWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticTerminateWorkflowException;
@@ -54,7 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 @Reference(
-        name = "workflowProcesses",
+        name = "workflowProcessesByLabel",
         referenceInterface = WorkflowProcess.class,
         policy = ReferencePolicy.DYNAMIC,
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
@@ -69,7 +70,9 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     private static final int MAX_RESTART_COUNT = 3;
 
-    private Map<String, WorkflowProcess> workflowProcesses = new ConcurrentHashMap<String, WorkflowProcess>();
+    private Map<String, WorkflowProcess> workflowProcessesByLabel = new ConcurrentHashMap<String, WorkflowProcess>();
+
+    private Map<String, WorkflowProcess> workflowProcessesByProcessName = new ConcurrentHashMap<String, WorkflowProcess>();
 
     /**
      * {@inheritDoc}
@@ -142,7 +145,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         final SyntheticWorkflow workflow = new SyntheticWorkflow("Synthetic Workflow: " + payloadPath, workflowData);
 
         for (final String workflowProcessLabel : workflowProcessLabels) {
-            final WorkflowProcess workflowProcess = this.workflowProcesses.get(workflowProcessLabel);
+            final WorkflowProcess workflowProcess = this.workflowProcessesByLabel.get(workflowProcessLabel);
 
             if (workflowProcess != null) {
 
@@ -197,6 +200,36 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     }
 
+    @Override
+    public void execute(final ResourceResolver resourceResolver,
+                        final String payloadPath,
+                        final SyntheticWorkflowModel syntheticWorkflowModel,
+                        final boolean autoSaveAfterEachWorkflowProcess,
+                        final boolean autoSaveAtEnd) throws WorkflowException {
+
+
+        final String[] modelNames = syntheticWorkflowModel.getWorkflowModelNames();
+        final Map<String, Map<String, Object>> modelConfig = syntheticWorkflowModel.getSyntheticWorkflowModelData();
+
+        execute(resourceResolver,
+                payloadPath,
+                modelNames,
+                modelConfig,
+                autoSaveAfterEachWorkflowProcess,
+                autoSaveAtEnd);
+    }
+
+    @Override
+    public SyntheticWorkflowModel getSyntheticWorkflowModel(final ResourceResolver resourceResolver,
+                                                            final String workflowModelId,
+                                                            final boolean ignoredIncompatibleTypes) throws WorkflowException {
+
+        final WorkflowSession workflowSession = this.getWorkflowSession(resourceResolver.adaptTo(Session.class));
+        return new SyntheticWorkflowModelImpl(workflowSession, workflowModelId, ignoredIncompatibleTypes);
+    }
+
+
+
     /**
      * Unsupported operation.
      *
@@ -234,22 +267,42 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     @Deactivate
     protected final void deactivate(final Map<String, Object> config) {
         log.trace("Deactivating Synthetic Workflow Runner");
-        this.workflowProcesses = new ConcurrentHashMap<String, WorkflowProcess>();
+        this.workflowProcessesByLabel = new ConcurrentHashMap<String, WorkflowProcess>();
     }
 
     protected final void bindWorkflowProcesses(final WorkflowProcess service, final Map<Object, Object> props) {
+        // Workflow Process Labels
         final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
         if (label != null) {
-            this.workflowProcesses.put(label, service);
-            log.debug("Synthetic Workflow Runner added Workflow Process [ {} ]", label);
+            this.workflowProcessesByLabel.put(label, service);
+            log.debug("Synthetic Workflow Runner added Workflow Process by Label [ {} ]", label);
+        }
+
+        // Workflow Process Name
+        if(service != null) {
+            final String processName = service.getClass().getCanonicalName();
+            if (processName != null) {
+                this.workflowProcessesByProcessName.put(processName, service);
+                log.debug("Synthetic Workflow Runner added Workflow Process by Process Name [ {} ]", processName);
+            }
         }
     }
 
     protected final void unbindWorkflowProcesses(final WorkflowProcess service, final Map<Object, Object> props) {
+        // Workflow Process Labels
         final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
         if (label != null) {
-            this.workflowProcesses.remove(label);
-            log.debug("Synthetic Workflow Runner removed Workflow Process [ {} ]", label);
+            this.workflowProcessesByLabel.remove(label);
+            log.debug("Synthetic Workflow Runner removed Workflow Process by Label [ {} ]", label);
+        }
+
+        // Workflow Process Name
+        if(service != null) {
+            final String processName = service.getClass().getCanonicalName();
+            if (processName != null) {
+                this.workflowProcessesByProcessName.remove(processName,);
+                log.debug("Synthetic Workflow Runner removed Workflow Process by Process Name [ {} ]", processName);
+            }
         }
     }
 }

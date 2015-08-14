@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic;
 
+import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowModelImpl;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -67,4 +68,12 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
     void execute(ResourceResolver resourceResolver,
                String payloadPath,
                String[] workflowProcessLabels) throws WorkflowException;
+
+    void execute(ResourceResolver resourceResolver,
+                 String payloadPath,
+                 SyntheticWorkflowModelImpl syntheticWorkflowModel) throws WorkflowException;
+
+    public String[] getWorkflowModelNames();
+
+    SyntheticWorkflowModel getSyntheticWorkflowModel(ResourceResolver resourceResolver, String workflowModelId);
 }

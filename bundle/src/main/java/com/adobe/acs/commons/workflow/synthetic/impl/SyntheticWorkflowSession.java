@@ -147,7 +147,9 @@ public class SyntheticWorkflowSession implements WorkflowSession {
 
     @Override
     public final WorkflowModel getModel(final String s) throws WorkflowException {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        final WorkflowSession workflowSession = workflowService.getWorkflowSession(this.getSession());
+
+        return workflowSession.getModel(s);
     }
 
     @Override
