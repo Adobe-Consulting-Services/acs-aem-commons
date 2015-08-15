@@ -8,7 +8,7 @@ public interface SyntheticWorkflowModel {
      *
      * @return
      */
-    String[] getWorkflowModelNames();
+    String[] getWorkflowProcessNames();
 
     /**
      *
