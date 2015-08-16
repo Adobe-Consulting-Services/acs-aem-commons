@@ -21,22 +21,14 @@
 <div class="fixed-notifications">
     <div class="running-notification"
             ng-show="app.running">
-        <div class="alert large notice">
-            <strong>Workflow Removal Executing</strong>
-            <div>
-                Please be patient as workflow removal runs. The removal status below will update removal progress.
-            </div>
+        <div acs-coral-alert data-alert-type="notice" data-alert-size="large" data-alert-title="Workflow Removal Executing">
+            Please be patient as workflow removal runs. The removal status below will update removal progress.
         </div>
     </div>
 </div>
 
 <div class="notifications" ng-show="notifications.length > 0">
     <div ng-repeat="notification in notifications">
-        <div class="alert large {{ notification.type }}">
-            <button class="close" data-dismiss="alert">&times;</button>
-            <strong>{{ notification.title }}</strong>
-
-            <div>{{ notification.message }}</div>
-        </div>
+        <div acs-coral-alert data-alert-type="{{ notification.type }}" data-alert-size="large" data-alert-title="{{ notification.title }}" data-alert-message="{{ notification.message }}"></div>
     </div>
 </div>

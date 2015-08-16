@@ -24,7 +24,8 @@
     pageContext.setAttribute("resourcePath", resourceResolver.map(slingRequest, resource.getPath()));
     pageContext.setAttribute("favicon", resourceResolver.map(slingRequest, component.getPath() + "/clientlibs/images/favicon.ico"));
 
-%><!doctype html><html>
+%><!doctype html>
+<html class="coral-App">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -36,19 +37,9 @@
     <cq:includeClientLib css="acs-commons.workflow-remover.app"/>
 </head>
 
-<body id="acs-commons-workflow-remover-app">
+<body class="coral--light" id="acs-commons-workflow-remover-app">
 
-    <header class="top">
-
-        <div class="logo">
-            <a href="/"><i class="icon-marketingcloud medium"></i></a>
-        </div>
-
-        <nav class="crumbs">
-            <a href="/miscadmin">Tools</a>
-            <a href="${pagePath}.html">Workflow Remover</a>
-        </nav>
-    </header>
+    <header acs-coral-tools-header data-context-path="${request.contextPath}" data-page-path="${currentPage.path}.html" data-title="Workflow Remover"></header>
 
      <div class="page" role="main"
              ng-controller="MainCtrl"
@@ -59,7 +50,7 @@
             <div class="content-container" id="scroll-top">
                 <div class="content-container-inner">
 
-                    <h1>Workflow Remover</h1>
+                    <h1 acs-coral-heading>Workflow Remover</h1>
 
                     <cq:include script="includes/notifications.jsp"/>
 

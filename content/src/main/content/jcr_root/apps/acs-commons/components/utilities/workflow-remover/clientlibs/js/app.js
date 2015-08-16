@@ -20,7 +20,7 @@
 
 /*global angular: false, moment: false, JSON: false */
 
-angular.module('workflowRemover', [])
+angular.module('workflowRemover', ['acsCoral'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout',
         function ($scope, $http, $timeout) {
 

@@ -21,13 +21,13 @@
 <div ng-show="app.running || status.status === 'complete'">
 
     <div class="section summary-section">
-        <h3>Workflow Removal Status</h3>
+        <h3 acs-coral-heading>Workflow Removal Status</h3>
 
-        <section class="well">
+        <section class="coral-Well">
 
-            <h4 ng-show="!app.running &&  status.status === 'complete'">Previous Workflow Removal Status</h4>
+            <h4 acs-coral-heading ng-show="!app.running &&  status.status === 'complete'">Previous Workflow Removal Status</h4>
 
-            <ul>
+            <ul acs-coral-list>
                 <li>Workflow instance removal status
                     : <span style="text-transform: capitalize;">{{ status.status || 'Not Started'}}</span></li>
 
