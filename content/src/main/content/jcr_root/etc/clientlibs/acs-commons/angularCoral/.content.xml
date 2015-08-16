@@ -3,5 +3,5 @@
     xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
     xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:ClientLibraryFolder"
-    categories="[acs-commons.coralui.angularjs]"
+    categories="[acs-commons.coralui2.angularjs]"
     dependencies="[acs-commons.angularjs]"/>
