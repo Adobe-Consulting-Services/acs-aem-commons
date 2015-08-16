@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
     /**
      * Process a payload path using using the provided Workflow Processes.
      *
-     * @param resourceResolver                 the resourceResolver object that provides access to the JCR for WF operations
+     * @param resourceResolver                 the resourceResolver object that provides access to the JCR for WF ops
      * @param payloadPath                      the path to execute the workflow against
-     * @param workflowProcessIdType            defines is the worlflow ProcessIds are process.labels or process class names
-     * @param workflowProcessIds               the process.labels or process names of the workflow to execute in order against the payloadPath
+     * @param workflowProcessIdType            defines is the WF ProcessIds are process.labels or process class names
+     * @param workflowProcessIds               the process.labels or process names of the WF to execute in order against the payloadPath
      *                                         resource
      * @param processArgs                      the WF args metadata maps; each workflowProcessLabel can have one map
      * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
@@ -112,7 +112,7 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
      * @param resourceResolver          the resourceResolver object that provides access to the JCR for WF operations
      * @param workflowModelId           the AEM Workflow Model ID
      * @param ignoreIncompatibleTypes   ignore incompatible workflow node types to the best of Synthetic Workflow ability
-     * @return                          the Synthetic Workflow Model  
+     * @return                          the Synthetic Workflow Model
      * @throws WorkflowException
      */
     SyntheticWorkflowModel getSyntheticWorkflowModel(ResourceResolver resourceResolver,

@@ -33,29 +33,29 @@ public class SyntheticRoute implements Route {
     public SyntheticRoute(boolean backRoute) {
         this.backRoute = backRoute;
     }
-    
+
     @Override
-    public String getId() {
+    public final String getId() {
         return "synthetic-route";
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return "Synthetic Route";
     }
 
     @Override
-    public boolean hasDefault() {
+    public final boolean hasDefault() {
         return false;
     }
 
     @Override
-    public List<WorkflowTransition> getDestinations() {
+    public final List<WorkflowTransition> getDestinations() {
         return new ArrayList<WorkflowTransition>();
     }
 
     @Override
-    public boolean isBackRoute() {
+    public final boolean isBackRoute() {
         return this.backRoute;
     }
 }

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,17 +73,18 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     private Map<String, WorkflowProcess> workflowProcessesByLabel = new ConcurrentHashMap<String, WorkflowProcess>();
 
-    private Map<String, WorkflowProcess> workflowProcessesByProcessName = new ConcurrentHashMap<String, WorkflowProcess>();
+    private Map<String, WorkflowProcess> workflowProcessesByProcessName =
+            new ConcurrentHashMap<String, WorkflowProcess>();
 
     @Reference
     private WorkflowService aemWorkflowService;
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public final void execute(final ResourceResolver resourceResolver, final String payloadPath,
-                         final String[] workflowProcessLabels) throws WorkflowException {
+                              final String[] workflowProcessLabels) throws WorkflowException {
         this.execute(resourceResolver, payloadPath, workflowProcessLabels, null, false, false);
     }
 
@@ -97,28 +98,27 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                               Map<String, Map<String, Object>> processArgs,
                               final boolean autoSaveAfterEachWorkflowProcess,
                               final boolean autoSaveAtEnd) throws WorkflowException {
-    
-        this.execute(resourceResolver, 
-                payloadPath, 
+
+        this.execute(resourceResolver,
+                payloadPath,
                 WorkflowProcessIdType.PROCESS_LABEL,
-                workflowProcessLabels, 
+                workflowProcessLabels,
                 processArgs,
-                autoSaveAfterEachWorkflowProcess, 
+                autoSaveAfterEachWorkflowProcess,
                 autoSaveAtEnd);
     }
-    
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public final void execute(final ResourceResolver resourceResolver,
-                        final String payloadPath,
-                        final WorkflowProcessIdType workflowProcessIdType,
-                        final String[] workflowProcessIds,
-                        Map<String, Map<String, Object>> processArgs,
-                        final boolean autoSaveAfterEachWorkflowProcess,
-                        final boolean autoSaveAtEnd) throws WorkflowException {
+                              final String payloadPath,
+                              final WorkflowProcessIdType workflowProcessIdType,
+                              final String[] workflowProcessIds,
+                              Map<String, Map<String, Object>> processArgs,
+                              final boolean autoSaveAfterEachWorkflowProcess,
+                              final boolean autoSaveAtEnd) throws WorkflowException {
 
         final long start = System.currentTimeMillis();
 
@@ -137,7 +137,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                 if (log.isInfoEnabled()) {
                     long duration = System.currentTimeMillis() - start;
                     log.info("Synthetic workflow execution of payload [ {} ] completed in [ {} ] ms",
-                        payloadPath, duration);
+                            payloadPath, duration);
                 }
 
                 return;
@@ -153,7 +153,6 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         } while (count < MAX_RESTART_COUNT);
     }
 
-    
     private void run(final ResourceResolver resourceResolver,
                      final String payloadPath,
                      final WorkflowProcessIdType workflowProcessIdType,
@@ -174,8 +173,8 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
         for (final String workflowProcessId : workflowProcessIds) {
             WorkflowProcess workflowProcess;
-            
-            if(WorkflowProcessIdType.PROCESS_LABEL.equals(workflowProcessIdType)) {
+
+            if (WorkflowProcessIdType.PROCESS_LABEL.equals(workflowProcessIdType)) {
                 workflowProcess = this.workflowProcessesByLabel.get(workflowProcessId);
             } else {
                 workflowProcess = this.workflowProcessesByProcessName.get(workflowProcessId);
@@ -235,12 +234,12 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     }
 
     @Override
-    public void execute(final ResourceResolver resourceResolver,
-                        final String payloadPath,
-                        final SyntheticWorkflowModel syntheticWorkflowModel,
-                        final boolean autoSaveAfterEachWorkflowProcess,
-                        final boolean autoSaveAtEnd) throws WorkflowException {
-        
+    public final void execute(final ResourceResolver resourceResolver,
+                              final String payloadPath,
+                              final SyntheticWorkflowModel syntheticWorkflowModel,
+                              final boolean autoSaveAfterEachWorkflowProcess,
+                              final boolean autoSaveAtEnd) throws WorkflowException {
+
         final String[] processNames = syntheticWorkflowModel.getWorkflowProcessNames();
         final Map<String, Map<String, Object>> processConfigs = syntheticWorkflowModel.getSyntheticWorkflowModelData();
 
@@ -254,16 +253,14 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     }
 
     @Override
-    public SyntheticWorkflowModel getSyntheticWorkflowModel(final ResourceResolver resourceResolver,
-                                                            final String workflowModelId,
-                                                            final boolean ignoreIncompatibleTypes) throws WorkflowException {
+    public final SyntheticWorkflowModel getSyntheticWorkflowModel(final ResourceResolver resourceResolver,
+                                                                  final String workflowModelId,
+                                                                  final boolean ignoreIncompatibleTypes)
+            throws WorkflowException {
 
-        
-        
         final WorkflowSession workflowSession = this.getWorkflowSession(resourceResolver.adaptTo(Session.class));
         return new SyntheticWorkflowModelImpl(workflowSession, workflowModelId, ignoreIncompatibleTypes);
     }
-
 
 
     /**
@@ -295,15 +292,17 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     }
 
     /**
-     * Getter for the AEM Workflow Service; This is only available at the Impl level and not part of the public SyntheticWorkflowRunner interface.
-     * The use of this service should be well understand as to prevent potential overhead of the the non-synthetic aspects of WF.
+     * Getter for the AEM Workflow Service; This is only available at the Impl level and not part of the public
+     * SyntheticWorkflowRunner interface.
+     * The use of this service should be well understand as to prevent potential overhead of the the non-synthetic
+     * aspects of WF.
      *
      * @return the AEM Workflow Service
      */
     public final WorkflowService getAEMWorkflowService() {
         return this.aemWorkflowService;
     }
-    
+
     @Deprecated
     @Override
     public final Dictionary<String, Object> getConfig() {
@@ -325,7 +324,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         }
 
         // Workflow Process Name
-        if(service != null) {
+        if (service != null) {
             final String processName = service.getClass().getCanonicalName();
             if (processName != null) {
                 this.workflowProcessesByProcessName.put(processName, service);
@@ -343,7 +342,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         }
 
         // Workflow Process Name
-        if(service != null) {
+        if (service != null) {
             final String processName = service.getClass().getCanonicalName();
             if (processName != null) {
                 this.workflowProcessesByProcessName.remove(processName);

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,26 +47,25 @@ import java.util.Map;
 
 public class SyntheticWorkflowSession implements WorkflowSession {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowSession.class);
-    
+
     private static final String UNSUPPORTED_OPERATION_MESSAGE = "Operation not supported by Synthetic Workflow";
 
     private final Session session;
 
     private final SyntheticWorkflowRunnerImpl workflowService;
-    
+
     private final List<Route> routes;
     private final List<Route> backRoutes;
 
     public SyntheticWorkflowSession(SyntheticWorkflowRunnerImpl workflowService, Session session) {
         this.workflowService = workflowService;
         this.session = session;
-        
+
         this.routes = new ArrayList<Route>();
         this.routes.add(new SyntheticRoute(false));
 
         this.backRoutes = new ArrayList<Route>();
         this.backRoutes.add(new SyntheticRoute(true));
-
     }
 
     @Override
@@ -166,7 +165,8 @@ public class SyntheticWorkflowSession implements WorkflowSession {
 
     @Override
     public final WorkflowModel getModel(final String modelId) throws WorkflowException {
-        final WorkflowSession workflowSession = this.workflowService.getAEMWorkflowService().getWorkflowSession(this.session);
+        final WorkflowSession workflowSession =
+                this.workflowService.getAEMWorkflowService().getWorkflowSession(this.session);
         return workflowSession.getModel(modelId);
     }
 
