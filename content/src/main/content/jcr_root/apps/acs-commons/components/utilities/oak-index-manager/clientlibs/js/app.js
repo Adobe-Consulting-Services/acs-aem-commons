@@ -20,7 +20,7 @@
 
 /*global angular: false */
 
-angular.module('oakIndexManager', [])
+angular.module('oakIndexManager', ['acsCoral'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout',
     function ($scope, $http, $timeout) {
 

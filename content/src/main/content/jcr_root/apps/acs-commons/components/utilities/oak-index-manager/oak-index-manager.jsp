@@ -26,7 +26,7 @@
     pageContext.setAttribute("favicon", resourceResolver.map(slingRequest, 
             component.getPath() + "/clientlibs/images/favicon.ico"));
 
-%><!doctype html><html>
+%><!doctype html><html class="coral-App">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -38,19 +38,9 @@
     <cq:includeClientLib css="acs-commons.oak-index-manager.app"/>
 </head>
 
-<body>
+<body class="coral--light">
     <div id="acs-commons-oak-index-manager-app">
-        <header class="top">
-
-            <div class="logo">
-                <a href="/"><i class="icon-marketingcloud medium"></i></a>
-            </div>
-
-            <nav class="crumbs">
-                <a href="/miscadmin">Tools</a>
-                <a href="${pagePath}.html">Oak Index Manager</a>
-            </nav>
-        </header>
+        <header acs-coral-tools-header data-context-path="${request.contextPath}" data-page-path="${currentPage.path}.html" data-title="Oak Index Manager"></header>
 
 <c:choose>
     <c:when test="${hasOakIndex}">
@@ -61,11 +51,9 @@
             <div ng-show="notifications.length > 0"
                  class="notifications">
                 <div ng-repeat="notification in notifications">
-                    <div class="alert {{ notification.type }}">
-                        <button class="close" data-dismiss="alert">&times;</button>
-                        <strong>{{ notification.title }}</strong>
-
-                        <div>{{ notification.message }}</div>
+                    <div acs-coral-alert
+                         data-alert-type="{{ notification.type }}"
+                         data-alert-title="{{ notification.title }}" data-alert-message="{{ notification.message }}">
                     </div>
                 </div>
             </div>
@@ -77,78 +65,82 @@
                         <h1>Oak Index Manager</h1>
 
                         <div class="search">
-                            <input ng-model="keyword" type="text" placeholder="Filter" class="filter-input">
-                            <button>Filter</button>
+                            <span class="coral-DecoratedTextfield filter-input">
+                                <i class="coral-DecoratedTextfield-icon coral-Icon coral-Icon--sizeXS coral-Icon--search"></i>
+                                <input ng-model="keyword"  placeholder="Filter" type="text" class="coral-DecoratedTextfield-input coral-Textfield">
+                            </span>
+                            <button class="coral-Button">Filter</button>
                         </div>
 
                         <div style="float: right;">
                             <div ng-show="app.running"
                                  class="running-indicator spinner large"></div>
-                            <button class="primary"
+                            <button class="coral-Button coral-Button--primary"
                                     ng-click="bulkReindex( (filtered | filter: { checked: true }) )">Bulk
                                 Reindex</button>
                         </div>
 
-                        <table class="data index-table">
+                        <table class="data index-table coral-Table coral-Table--hover">
                             <thead>
-                                <tr>
-                                    <th class="check"><label><input type="checkbox" ng-model="toggleChecks"><span></span></label></th>
-                                    <th>Node Name</th>
-                                    <th>Declaring Node Types</th>
-                                    <th>Property Names</th>
-                                    <th>Include Property Types</th>
-                                    <th>Exclude Property Names</th>
-                                    <th>Type</th>
-                                    <th>Unique</th>
-                                    <th>Async</th>
-                                    <th>Reindex</th>
+                                <tr class="coral-Table-row">
+                                    <th class="coral-Table-headerCell check"><label acs-coral-checkbox><input type="checkbox" ng-model="toggleChecks"><span></span></label></th>
+                                    <th class="coral-Table-headerCell">Node Name</th>
+                                    <th class="coral-Table-headerCell">Declaring Node Types</th>
+                                    <th class="coral-Table-headerCell">Property Names</th>
+                                    <th class="coral-Table-headerCell">Include Property Types</th>
+                                    <th class="coral-Table-headerCell">Exclude Property Names</th>
+                                    <th class="coral-Table-headerCell">Type</th>
+                                    <th class="coral-Table-headerCell">Unique</th>
+                                    <th class="coral-Table-headerCell">Async</th>
+                                    <th class="coral-Table-headerCell">Reindex</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr ng-repeat="index in filtered = ( indexes | filter : { $: keyword } | orderBy: '+name' )"
-                                    ng-class="{ reindexing: index.reindex }">
+                                    ng-class="{ reindexing: index.reindex }"
+                                    class="coral-Table-row">
 
-                                    <td>
-                                        <label><input type="checkbox" ng-model="index.checked"><span></span></label>
+                                    <td class="coral-Table-cell">
+                                        <label acs-coral-checkbox><input type="checkbox" ng-model="index.checked"><span></span></label>
                                     </td>
-                                    <td>
+                                    <td class="coral-Table-cell">
                                         {{ index.name }}
                                     </td>
-                                    <td>
+                                    <td class="coral-Table-cell">
                                         <div ng-repeat="declaringNodeType in index.declaringNodeTypes">{{ declaringNodeType }}</div>
                                     </td>
-                                    <td>
+                                    <td class="coral-Table-cell">
                                         <div ng-repeat="propertyName in index.propertyNames">{{ propertyName }}</div>
                                     </td>
-                                    <td>
+                                    <td class="coral-Table-cell">
                                         <div ng-repeat="includePropertyType in index.includePropertyTypes">{{
                                             includePropertyType }}</div>
                                     </td>
-                                    <td>
+                                    <td class="coral-Table-cell">
                                         <div ng-repeat="excludePropertyName in index.excludePropertyNames">{{
                                             excludePropertyName }}</div>
                                     </td>
-                                    <td>
+                                    <td class="coral-Table-cell">
                                         {{ index.type }}
                                     </td>
-                                    <td>
+                                    <td class="coral-Table-cell">
                                         {{ index.unique }}
                                     </td>
-                                    <td>
+                                    <td class="coral-Table-cell">
                                         {{ index.async }}
                                     </td>
-                                    <td class="reindex-status">
+                                    <td  class="coral-Table-cell reindex-status">
                                         <a href="#"
-                                           class="icon-refresh reindex-button"
+                                           class="reindex-button"
                                            ng-show="!index.reindex"
-                                           ng-click="reindex(index)">\U00F0AB</a>
+                                           ng-click="reindex(index)"><i class="coral-Icon coral-Icon--refresh"></i></a>
                                         <div ng-show="index.reindex" class="spinner"></div>
                                     </td>
                                 </tr>
 
-                                <tr ng-show="keyword && !filtered.length">
+                                <tr class="coral-Table-row" ng-show="keyword && !filtered.length">
                                     <td colspan="10"
-                                        class="empty-results">
+                                         class="coral-Table-cell empty-results">
 
                                         No matching indexes found
 
