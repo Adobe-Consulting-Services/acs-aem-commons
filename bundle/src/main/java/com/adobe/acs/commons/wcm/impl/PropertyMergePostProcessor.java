@@ -184,7 +184,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
      */
     private class PropertyMerge {
         private boolean allowDuplicates;
-        private Class typeHint;
+        private Class<?> typeHint;
         private String destination;
         private List<String> sources;
 
@@ -202,7 +202,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
          * @param typeHintStr the String representation of the type hint
          * @return the Class of the type hint
          */
-        private Class convertTypeHint(final String typeHintStr) {
+        private Class<?> convertTypeHint(final String typeHintStr) {
             if (Boolean.class.getSimpleName().equalsIgnoreCase(typeHintStr)) {
                 return Boolean.class;
             } else if (Double.class.getSimpleName().equalsIgnoreCase(typeHintStr)) {
@@ -221,7 +221,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             return allowDuplicates;
         }
 
-        public Class getTypeHint() {
+        public Class<?> getTypeHint() {
             return typeHint;
         }
 
