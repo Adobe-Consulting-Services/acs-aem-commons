@@ -27,9 +27,9 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class OsgiPropertyUtilTest {
+public class ParameterUtilTest {
 
-    public OsgiPropertyUtilTest() {
+    public ParameterUtilTest() {
     }
 
     @BeforeClass
@@ -56,7 +56,7 @@ public class OsgiPropertyUtilTest {
         String value = "key:value";
         String separator = ":";
         SimpleEntry<String, String> expResult = new SimpleEntry<String, String>("key", "value");
-        SimpleEntry<String, String> result = OsgiPropertyUtil.toSimpleEntry(value, separator);
+        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
         assertEquals(expResult, result);
     }
 
@@ -65,7 +65,7 @@ public class OsgiPropertyUtilTest {
         String value = "key:";
         String separator = ":";
         SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = OsgiPropertyUtil.toSimpleEntry(value, separator);
+        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
         assertEquals(expResult, result);
     }
 
@@ -74,7 +74,7 @@ public class OsgiPropertyUtilTest {
         String value = "key";
         String separator = ":";
         SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = OsgiPropertyUtil.toSimpleEntry(value, separator);
+        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
         assertEquals(expResult, result);
     }
 
@@ -83,7 +83,7 @@ public class OsgiPropertyUtilTest {
         String value = ":value";
         String separator = ":";
         SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = OsgiPropertyUtil.toSimpleEntry(value, separator);
+        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
         assertEquals(expResult, result);
     }
 
@@ -92,7 +92,7 @@ public class OsgiPropertyUtilTest {
         String value = "key:val:ue";
         String separator = ":";
         SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = OsgiPropertyUtil.toSimpleEntry(value, separator);
+        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
         assertEquals(expResult, result);
     }
 
@@ -101,7 +101,7 @@ public class OsgiPropertyUtilTest {
         String value = "key:value";
         String separator = "-";
         SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = OsgiPropertyUtil.toSimpleEntry(value, separator);
+        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
         assertEquals(expResult, result);
     }
 
@@ -118,7 +118,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key2", "value2");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator);
+        Map<String, String> result = ParameterUtil.toMap(values, separator);
         assertEquals(expResult, result);
     }
 
@@ -130,7 +130,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key1", "value1");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator);
+        Map<String, String> result = ParameterUtil.toMap(values, separator);
         assertEquals(expResult, result);
     }
 
@@ -143,7 +143,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key2", "val:ue2");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator, false, null, true);
+        Map<String, String> result = ParameterUtil.toMap(values, separator, false, null, true);
         assertEquals(expResult, result);
     }
 
@@ -155,7 +155,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key1", "value1");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator);
+        Map<String, String> result = ParameterUtil.toMap(values, separator);
         assertEquals(expResult, result);
     }
 
@@ -167,7 +167,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key1", "value1");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator);
+        Map<String, String> result = ParameterUtil.toMap(values, separator);
         assertEquals(expResult, result);
     }
 
@@ -179,7 +179,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key1", "value1");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator);
+        Map<String, String> result = ParameterUtil.toMap(values, separator);
         assertEquals(expResult, result);
     }
 
@@ -191,7 +191,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key1", "value1");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator);
+        Map<String, String> result = ParameterUtil.toMap(values, separator);
         assertEquals(expResult, result);
     }
 
@@ -207,7 +207,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key2", "value2");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator, true, "testing-default");
+        Map<String, String> result = ParameterUtil.toMap(values, separator, true, "testing-default");
         assertEquals(expResult, result);
     }
 
@@ -221,7 +221,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key2", "testing-default");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator, true, "testing-default");
+        Map<String, String> result = ParameterUtil.toMap(values, separator, true, "testing-default");
         assertEquals(expResult, result);
     }
 
@@ -234,7 +234,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key2", "testing-default");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator, true, "testing-default");
+        Map<String, String> result = ParameterUtil.toMap(values, separator, true, "testing-default");
         assertEquals(expResult, result);
     }
 
@@ -246,7 +246,7 @@ public class OsgiPropertyUtilTest {
         expResult.put("key1", "value1");
         expResult.put("key3", "value3");
 
-        Map<String, String> result = OsgiPropertyUtil.toMap(values, separator, true, "testing-default");
+        Map<String, String> result = ParameterUtil.toMap(values, separator, true, "testing-default");
         assertEquals(expResult, result);
     }
 }

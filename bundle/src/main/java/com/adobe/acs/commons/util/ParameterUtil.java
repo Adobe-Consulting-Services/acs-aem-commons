@@ -2,14 +2,14 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2013 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,22 +19,22 @@
  */
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ProviderType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import aQute.bnd.annotation.ProviderType;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Deprecated
 @ProviderType
-public class OsgiPropertyUtil {
+public class ParameterUtil {
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(OsgiPropertyUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(ParameterUtil.class);
 
-    private OsgiPropertyUtil() {
+    private ParameterUtil() {
 
     }
 
@@ -45,9 +45,18 @@ public class OsgiPropertyUtil {
      * @param separator separator between the values
      * @return Returns a SimpleEntry representing the key/value pair
      */
-    @Deprecated
     public static AbstractMap.SimpleEntry<String, String> toSimpleEntry(final String value, final String separator) {
-        return ParameterUtil.toSimpleEntry(value, separator);
+        final String[] tmp = StringUtils.split(value, separator);
+
+        if (tmp == null) {
+            return null;
+        }
+
+        if (tmp.length == 2) {
+            return new AbstractMap.SimpleEntry<String, String>(tmp[0], tmp[1]);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -60,9 +69,8 @@ public class OsgiPropertyUtil {
      * @param separator separator between the values
      * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => "meow"
      */
-    @Deprecated
     public static Map<String, String> toMap(final String[] values, final String separator) {
-        return ParameterUtil.toMap(values, separator, false, null);
+        return toMap(values, separator, false, null);
     }
 
     /**
@@ -78,10 +86,9 @@ public class OsgiPropertyUtil {
      * @param defaultValue default value to use if a value for a key is not present and allowValuelessKeys is true
      * @return
      */
-    @Deprecated
     public static Map<String, String> toMap(final String[] values, final String separator,
                                             final boolean allowValuelessKeys, final String defaultValue) {
-        return ParameterUtil.toMap(values, separator, allowValuelessKeys, defaultValue, false);
+        return toMap(values, separator, allowValuelessKeys, defaultValue, false);
     }
 
     /**
@@ -99,14 +106,32 @@ public class OsgiPropertyUtil {
      *                                If false, entries with multiple separators are considered invalid
      * @return
      */
-    @Deprecated
-    public static Map<String, String> toMap(final String[] values, 
-                                            final String separator,
-                                            final boolean allowValuelessKeys, 
-                                            final String defaultValue,
+    public static Map<String, String> toMap(final String[] values, final String separator,
+                                            final boolean allowValuelessKeys, final String defaultValue,
                                             final boolean allowMultipleSeparators) {
 
-       return ParameterUtil.toMap(values, separator, allowValuelessKeys, defaultValue, allowMultipleSeparators);
+        final Map<String, String> map = new LinkedHashMap<String, String>();
+
+        if (values == null || values.length < 1) {
+            return map;
+        }
+
+        for (final String value : values) {
+            final String[] tmp = StringUtils.split(value, separator, allowMultipleSeparators ? 2 : -1);
+
+            if(tmp.length == 1 && allowValuelessKeys) {
+                if(StringUtils.startsWith(value, separator)) {
+                    // Skip keyless values
+                    continue;
+                }
+
+                map.put(tmp[0], defaultValue);
+            } else if (tmp.length == 2) {
+                map.put(tmp[0], tmp[1]);
+            }
+        }
+
+        return map;
     }
 
     /**
@@ -117,10 +142,12 @@ public class OsgiPropertyUtil {
      * @param listSeparator separator between the values in each list
      * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => "meow"
      */
-    @Deprecated
-    public static Map<String, String[]> toMap(final String[] values, 
-                                              final String mapSeparator, 
-                                              final String listSeparator) {
-        return ParameterUtil.toMap(values, mapSeparator, listSeparator);
+    public static Map<String, String[]> toMap(final String[] values, final String mapSeparator, final String listSeparator) {
+        final Map<String, String> map = toMap(values, mapSeparator);
+        final Map<String, String[]> result = new LinkedHashMap<String, String[]>(map.size());
+        for (final Map.Entry<String, String> entry : map.entrySet()) {
+            result.put(entry.getKey(), StringUtils.split(entry.getValue(), listSeparator));
+        }
+        return result;
     }
 }

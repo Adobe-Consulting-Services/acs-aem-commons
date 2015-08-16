@@ -22,7 +22,7 @@ package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
-import com.adobe.acs.commons.util.OsgiPropertyUtil;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.TypeUtil;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.image.Layer;
@@ -124,13 +124,13 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
 
         log.info("Registering Named Image Transformer: {}", this.transformName);
 
-        final Map<String, String> map = OsgiPropertyUtil.toMap(PropertiesUtil.toStringArray(
+        final Map<String, String> map = ParameterUtil.toMap(PropertiesUtil.toStringArray(
                 properties.get(PROP_TRANSFORMS), new String[]{}), ":", true, null);
 
 
         for (final Map.Entry<String, String> entry : map.entrySet()) {
             final String[] params = StringUtils.split(entry.getValue(), "&");
-            final Map<String, String> values = OsgiPropertyUtil.toMap(params, "=", true, null);
+            final Map<String, String> values = ParameterUtil.toMap(params, "=", true, null);
 
             log.debug("ImageTransform params for [ {} ] ~> {}", entry.getKey(), values);
 

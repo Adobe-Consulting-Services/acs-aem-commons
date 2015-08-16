@@ -21,7 +21,7 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
-import com.adobe.acs.commons.util.OsgiPropertyUtil;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
@@ -203,7 +203,7 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
 
         if (language.equals(QUERY_BUILDER)) {
             final String[] lines = StringUtils.split(statement, '\n');
-            final Map<String, String> params = OsgiPropertyUtil.toMap(lines, "=", false, null, true);
+            final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
 
             // ensure all results are returned
             params.put("p.limit", "-1");
