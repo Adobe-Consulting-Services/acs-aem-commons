@@ -44,7 +44,7 @@ The best pull request are small and focused. Don't try to change the world in on
 
 ## Version Compatibility
 
-ACS AEM Commons is expected to be installable on AEM 5.6.1 and AEM 6.0. This means that all *required* OSGi dependencies must be available on 5.6.1. It is acceptable for some features to require AEM 6.0, for example a component written in Sightly. Contributors are strongly encouraged to be thoughtful about requiring 6.0.
+ACS AEM Commons is expected to be installable on AEM 6.0 and AEM 6.1. This means that all *required* OSGi dependencies must be available on 6.0. It is acceptable for some features to require AEM 6.1, but contributors are strongly encouraged to be thoughtful about requiring 6.1.
 
 ## Participating in Code Reviews
 
