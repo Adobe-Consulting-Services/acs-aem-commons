@@ -17,19 +17,15 @@
  * limitations under the License.
  * #L%
  */
-
 /*global angular: false */
-
-angular.module('oakIndexManager', ['acsCoral'])
-    .controller('MainCtrl', ['$scope', '$http', '$timeout',
-    function ($scope, $http, $timeout) {
+angular.module('acs-commons-oak-index-manager-app', ['acsCoral', 'ACS.Commons.notifications'])
+    .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
+    function ($scope, $http, $timeout, NotificationsService) {
 
         $scope.app = {
-            resource: '',
-            running: false
+            resource: ''
         };
 
-        $scope.notifications = [];
         $scope.indexes = [];
         $scope.async = {};
 
@@ -62,7 +58,7 @@ angular.module('oakIndexManager', ['acsCoral'])
 
                 }).
                 error(function (data, status, headers, config) {
-                    $scope.addNotification('error', 'ERROR', 'Unable to retrieve Oak indexes; Ensure you are running with elevated permissions and are on AEM6+');
+                    NotificationsService.add('error', 'ERROR', 'Unable to retrieve Oak indexes; Ensure you are running with elevated permissions and are on AEM6+');
                 });
         };
 
@@ -79,7 +75,7 @@ angular.module('oakIndexManager', ['acsCoral'])
 
                     if(reindexing && !data.reindex) {
                         $timeout.cancel(index.timeout);
-                        $scope.addNotification('success', 'SUCCESS', 'Reindex completed for: ' + index.name);
+                        NotificationsService.add('success', 'SUCCESS', 'Reindex completed for: ' + index.name);
                     }
                 }).
                 error(function (data, status, headers, config) {
@@ -88,7 +84,6 @@ angular.module('oakIndexManager', ['acsCoral'])
         };
 
         $scope.reindex = function (index) {
-            $scope.app.running = true;
             index.reindex = true;
 
             $http({
@@ -98,13 +93,11 @@ angular.module('oakIndexManager', ['acsCoral'])
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'}
             }).
                 success(function (data, status, headers, config) {
-                    $scope.app.running = false;
-                    $scope.addNotification('info', 'INFO', 'Reindex requested for: ' + index.name);
+                    NotificationsService.add('info', 'INFO', 'Reindex requested for: ' + index.name);
                 }).
                 error(function (data, status, headers, config) {
-                    $scope.app.running = false;
                     index.reindex = false;
-                    $scope.addNotification('error', 'ERROR', 'Reindex request failed for: ' + index.name);
+                    NotificationsService.add('error', 'ERROR', 'Reindex request failed for: ' + index.name);
                 });
 
             $scope.refresh(index);
@@ -122,11 +115,9 @@ angular.module('oakIndexManager', ['acsCoral'])
             }());
 
             if (!data) {
-                $scope.addNotification('help', 'HELP', 'Select one or more checkboxes in the index table to bulk reindex');
+                NotificationsService.add('help', 'HELP', 'Select one or more checkboxes in the index table to bulk reindex');
                 return;
             }
-
-            $scope.app.running = true;
 
             angular.forEach(bulkIndexes, function (index, key) {
                 index.reindex = true;
@@ -147,8 +138,6 @@ angular.module('oakIndexManager', ['acsCoral'])
                     if (data.success) {
                         $scope.addNotification('info', 'INFO', 'Bulk reindex requested for: ' + data.success.join(', '));
                     }
-
-                    $scope.app.running = false;
                 }).
                 error(function (data, status, headers, config) {
                     var i;
@@ -157,14 +146,12 @@ angular.module('oakIndexManager', ['acsCoral'])
                     }
 
                     if (data.success) {
-                        $scope.addNotification('info', 'INFO', 'Bulk reindex request succeeded for: ' + data.success.join(', '));
+                        NotificationsService.add('info', 'INFO', 'Bulk reindex request succeeded for: ' + data.success.join(', '));
                     }
 
                     if (data.error) {
-                        $scope.addNotification('error', 'ERROR', 'Bulk reindex request failed for: ' + data.error.join(', '));
+                        NotificationsService.add('error', 'ERROR', 'Bulk reindex request failed for: ' + data.error.join(', '));
                     }
-
-                    $scope.app.running = false;
                 });
 
         };
@@ -208,28 +195,10 @@ angular.module('oakIndexManager', ['acsCoral'])
                         $scope.refresh(index, count);
                     }, 2500 * count);
                 } else {
-                    $scope.addNotification('info', 'INFO', 'Reindex check timed out for : ' + index.name);
+                    NotificationsService.add('info', 'INFO', 'Reindex check timed out for : ' + index.name);
                     $timeout.cancel(index.timeout);
                 }
             }
-        };
-
-        $scope.addNotification = function (type, title, message) {
-            var timeout = 10000;
-
-            if (type === 'success') {
-                timeout = timeout / 2;
-            }
-
-            $scope.notifications.push({
-                type: type,
-                title: title,
-                message: message
-            });
-
-            $timeout(function () {
-                $scope.notifications.shift();
-            }, timeout);
         };
 
         $scope.init = function () {
