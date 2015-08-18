@@ -18,36 +18,29 @@
   ~ #L%
   --%>
 
-<div ng-show="app.running || status.status === 'complete'">
+<section class="coral-Well" 
+         ng-show="app.running || status.status === 'complete'">
+    
+    <h4 acs-coral-heading
+        ng-show="!app.running &&  status.status === 'complete'">Workflow removal status</h4>
 
-    <div class="section summary-section">
-        <h3 acs-coral-heading>Workflow Removal Status</h3>
+    <ul acs-coral-list>
+        <li>Workflow instance removal status
+            : <span style="text-transform: capitalize;">{{ status.status || 'Not Started'}}</span></li>
 
-        <section class="coral-Well">
+        <li ng-show="app.running">WF instances checked: {{ status.checkedCount || 0 }}</li>
+        <li ng-hide="app.running">Total WF instances checked: {{ status.checkedCount || 0 }}</li>
 
-            <h4 acs-coral-heading ng-show="!app.running &&  status.status === 'complete'">Previous Workflow Removal Status</h4>
+        <li ng-show="app.running">WF instances removed : {{ status.count || 0 }}</li>
+        <li ng-hide="app.running">Total WF instances removed: {{ status.count || 0 }}</li>
 
-            <ul acs-coral-list>
-                <li>Workflow instance removal status
-                    : <span style="text-transform: capitalize;">{{ status.status || 'Not Started'}}</span></li>
+        <li ng-show="status.initiatedBy">Initiated by: {{ status.initiatedBy }}</li>
 
-                <li ng-show="app.running">WF instances checked: {{ status.checkedCount || 0 }}</li>
-                <li ng-hide="app.running">Total WF instances checked: {{ status.checkedCount || 0 }}</li>
+        <li ng-show="status.startedAt">Started at: {{ status.startedAt }}</li>
 
-                <li ng-show="app.running">WF instances removed : {{ status.count || 0 }}</li>
-                <li ng-hide="app.running">Total WF instances removed: {{ status.count || 0 }}</li>
+        <li ng-show="status.completedAt">Started at: {{ status.completedAt }}</li>
 
-                <li ng-show="status.initiatedBy">Initiated by: {{ status.initiatedBy }}</li>
+        <li>Time taken: {{ status.timeTaken }} seconds</li>
+    </ul>
 
-                <li ng-show="status.startedAt">Started at: {{ status.startedAt }}</li>
-
-                <li ng-show="status.completedAt">Started at: {{ status.completedAt }}</li>
-
-                <li>Time taken: {{ status.timeTaken }} seconds</li>
-
-            </ul>
-
-        </section>
-    </div>
-
-</div>
+</section>
