@@ -41,12 +41,25 @@
 
                 <li ng-show="status.startedAt">Started at: {{ status.startedAt }}</li>
 
-                <li ng-show="status.completedAt">Started at: {{ status.completedAt }}</li>
+                <li ng-show="status.completedAt">Completed at: {{ status.completedAt }}</li>
 
                 <li>Time taken: {{ status.timeTaken }} seconds</li>
 
             </ul>
 
+
+            <div ng-hide="status.status === 'complete'"
+                 class="hard-reset">
+                <a      ng-click="reset()"
+                        class="button warning"
+                        role="button"
+                        href="#hard-reset-popover"
+                        data-toggle="popover"
+                        data-point-from="bottom"
+                        data-align-from="right">Hard Reset</a>
+
+                <p>Hard reset if workflow removal becomes stuck</p>
+            </div>
         </section>
     </div>
 

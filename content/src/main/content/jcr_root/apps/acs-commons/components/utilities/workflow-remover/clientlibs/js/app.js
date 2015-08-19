@@ -75,7 +75,7 @@ angular.module('workflowRemover', [])
 
                         $scope.status.startedAt = startedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
 
-                        if ($scope.status.status === 'complete') {
+                        if ($scope.status.status !== 'running') {
                             $scope.app.running = false;
 
                             completedAtMoment = moment($scope.status.completedAt);
@@ -83,7 +83,8 @@ angular.module('workflowRemover', [])
                             $scope.status.completedAt = completedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
                             $scope.status.timeTaken = completedAtMoment.diff(startedAtMoment, 'seconds');
 
-                        } else if ($scope.status.status === 'running') {
+                        } else {
+                            // Running
                             $scope.app.running = true;
 
                             $scope.status.timeTaken = moment().diff(startedAtMoment, 'seconds');
@@ -122,6 +123,30 @@ angular.module('workflowRemover', [])
                     error(function (data, status, headers, config) {
                         $scope.app.running = false;
                         $scope.addNotification('error', 'ERROR', 'Workflow removal failed due to: ' + data);
+                    });
+
+                $scope.getStatus();
+            };
+
+            $scope.reset = function () {
+                $http({
+                    method: 'POST',
+                    url: encodeURI($scope.app.resource + '/status'),
+                    data: 'checkedCount@Delete' +
+                        '&completedAt@Delete' +
+                        '&count@Delete' +
+                        '&initiatedBy@Delete' +
+                        '&startedAt@Delete' +
+                        '&status@Delete',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).
+                    success(function (data, status, headers, config) {
+                        $scope.app.running = false;
+                        $scope.getStatus();
+                        $scope.addNotification('info', 'INFO', 'Workflow removal status reset');
+                    }).
+                    error(function (data, status, headers, config) {
+                        $scope.addNotification('error', 'ERROR', 'Workflow removal status reset failed due to: ' + data);
                     });
 
                 $scope.getStatus();

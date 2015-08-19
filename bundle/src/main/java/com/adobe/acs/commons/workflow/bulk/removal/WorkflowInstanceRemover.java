@@ -53,6 +53,7 @@ public interface WorkflowInstanceRemover {
     enum Status {
         RUNNING,
         COMPLETE,
+        ERROR,
         UNKNOWN
     }
 
@@ -70,7 +71,7 @@ public interface WorkflowInstanceRemover {
                                 final Collection<String> modelIds,
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
-                                final Calendar olderThan) throws PersistenceException, WorkflowRemovalException;
+                                final Calendar olderThan) throws PersistenceException, WorkflowRemovalException, InterruptedException;
 
 
     /**
@@ -89,6 +90,6 @@ public interface WorkflowInstanceRemover {
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
                                 final Calendar olderThan,
-                                final int batchSize) throws PersistenceException, WorkflowRemovalException;
+                                final int batchSize) throws PersistenceException, WorkflowRemovalException, InterruptedException;
 
 }
