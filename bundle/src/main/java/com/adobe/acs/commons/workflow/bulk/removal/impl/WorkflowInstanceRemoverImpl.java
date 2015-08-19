@@ -21,7 +21,6 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -63,11 +62,13 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final String NT_CQ_WORKFLOW = "cq:Workflow";
 
-    private static final int BATCH_SIZE = 1000;
-
     private static final Pattern NN_SERVER_FOLDER_PATTERN = Pattern.compile("server\\d+");
 
     private static final Pattern NN_DATE_FOLDER_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}.*");
+    
+    private static final int BATCH_SIZE = 1000;
+
+    private static final int MAX_SAVE_RETRIES = 5;
 
     /**
      * {@inheritDoc}
@@ -77,7 +78,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                        final Collection<String> statuses,
                                        final Collection<Pattern> payloads,
                                        final Calendar olderThan)
-            throws PersistenceException, WorkflowRemovalException {
+            throws PersistenceException, WorkflowRemovalException, InterruptedException {
         return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, BATCH_SIZE);
     }
 
@@ -90,124 +91,138 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                        final Collection<Pattern> payloads,
                                        final Calendar olderThan,
                                        final int batchSize)
-            throws PersistenceException, WorkflowRemovalException {
+            throws PersistenceException, WorkflowRemovalException, InterruptedException {
 
-        final long start = System.currentTimeMillis();
+        try {
+            final long start = System.currentTimeMillis();
 
-        this.start(resourceResolver);
+            this.start(resourceResolver);
 
-        int count = 0;
-        int checkedCount = 0;
-        int workflowRemovedCount = 0;
+            int count = 0;
+            int checkedCount = 0;
+            int workflowRemovedCount = 0;
 
-        final List<Resource> containerFolders = this.getWorkflowInstanceFolders(resourceResolver);
+            final List<Resource> containerFolders = this.getWorkflowInstanceFolders(resourceResolver);
 
-        for (Resource containerFolder : containerFolders) {
-            final Collection<Resource> sortedFolders = this.getSortedAndFilteredFolders(containerFolder);
+            for (Resource containerFolder : containerFolders) {
+                final Collection<Resource> sortedFolders = this.getSortedAndFilteredFolders(containerFolder);
 
-            for (final Resource folder : sortedFolders) {
+                for (final Resource folder : sortedFolders) {
 
-                int remaining = 0;
+                    int remaining = 0;
 
-                for (final Resource instance : folder.getChildren()) {
-                    final ValueMap properties = instance.getValueMap();
+                    for (final Resource instance : folder.getChildren()) {
+                        final ValueMap properties = instance.getValueMap();
 
-                    if (!StringUtils.equals(NT_CQ_WORKFLOW,
-                            properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
+                        if (!StringUtils.equals(NT_CQ_WORKFLOW,
+                                properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
 
-                        // Only process cq:Workflow's
-                        remaining++;
-                        continue;
-                    }
+                            // Only process cq:Workflow's
+                            remaining++;
+                            continue;
+                        }
 
-                    checkedCount++;
+                        checkedCount++;
 
-                    final String status = properties.get(PN_STATUS, String.class);
-                    final String model = properties.get(PN_MODEL_ID, String.class);
-                    final Calendar startTime = properties.get(PN_STARTED_AT, Calendar.class);
-                    final String payload = properties.get(PN_PAYLOAD_PATH, String.class);
+                        final String status = properties.get(PN_STATUS, String.class);
+                        final String model = properties.get(PN_MODEL_ID, String.class);
+                        final Calendar startTime = properties.get(PN_STARTED_AT, Calendar.class);
+                        final String payload = properties.get(PN_PAYLOAD_PATH, String.class);
 
-                    if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(status)) {
-                        log.trace("Workflow instance [ {} ] has non-matching status of [ {} ]", instance.getPath(), status);
-                        remaining++;
-                        continue;
-                    } else if (CollectionUtils.isNotEmpty(modelIds) && !modelIds.contains(model)) {
-                        log.trace("Workflow instance [ {} ] has non-matching model of [ {} ]", instance.getPath(), model);
-                        remaining++;
-                        continue;
-                    } else if (olderThan != null && startTime != null && startTime.before(olderThan)) {
-                        log.trace("Workflow instance [ {} ] has non-matching start time of [ {} ]", instance.getPath(),
-                                startTime);
-                        remaining++;
-                        continue;
-                    } else {
+                        if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(status)) {
+                            log.trace("Workflow instance [ {} ] has non-matching status of [ {} ]", instance.getPath(), status);
+                            remaining++;
+                            continue;
+                        } else if (CollectionUtils.isNotEmpty(modelIds) && !modelIds.contains(model)) {
+                            log.trace("Workflow instance [ {} ] has non-matching model of [ {} ]", instance.getPath(), model);
+                            remaining++;
+                            continue;
+                        } else if (olderThan != null && startTime != null && startTime.before(olderThan)) {
+                            log.trace("Workflow instance [ {} ] has non-matching start time of [ {} ]", instance.getPath(),
+                                    startTime);
+                            remaining++;
+                            continue;
+                        } else {
 
-                        if (CollectionUtils.isNotEmpty(payloads)) {
-                            // Only evaluate payload patterns if they are provided
+                            if (CollectionUtils.isNotEmpty(payloads)) {
+                                // Only evaluate payload patterns if they are provided
 
-                            boolean match = false;
+                                boolean match = false;
 
-                            if (StringUtils.isNotEmpty(payload)) {
-                                for (final Pattern pattern : payloads) {
-                                    if (payload.matches(pattern.pattern())) {
-                                        // payload matches a pattern
-                                        match = true;
-                                        break;
+                                if (StringUtils.isNotEmpty(payload)) {
+                                    for (final Pattern pattern : payloads) {
+                                        if (payload.matches(pattern.pattern())) {
+                                            // payload matches a pattern
+                                            match = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!match) {
+                                        // Not a match; skip to next workflow instance
+                                        log.trace("Workflow instance [ {} ] has non-matching payload path [ {} ]",
+                                                instance.getPath(), payload);
+                                        remaining++;
+                                        continue;
                                     }
                                 }
+                            }
 
-                                if (!match) {
-                                    // Not a match; skip to next workflow instance
-                                    log.trace("Workflow instance [ {} ] has non-matching payload path [ {} ]",
-                                            instance.getPath(), payload);
-                                    remaining++;
-                                    continue;
-                                }
+                            // Only remove matching
+
+                            try {
+                                instance.adaptTo(Node.class).remove();
+                                log.trace("Removed workflow instance at [ {} ]", instance.getPath());
+
+                                workflowRemovedCount++;
+                                count++;
+                            } catch (RepositoryException e) {
+                                log.error("Could not remove workflow instance at [ {} ]. Continuing...",
+                                        instance.getPath(), e);
+                            }
+
+                            if (count % batchSize == 0) {
+                                this.batchComplete(resourceResolver, checkedCount, workflowRemovedCount);
+
+                                log.debug("Removed a running total of [ {} ] workflow instances", count);
                             }
                         }
+                    }
 
-                        // Only remove matching
-
+                    if (remaining == 0
+                            && !StringUtils.startsWith(folder.getName(), WORKFLOW_FOLDER_FORMAT.format(new Date()))) {
+                        // Dont remove folders w items and dont remove any of "today's" folders
                         try {
-                            instance.adaptTo(Node.class).remove();
-                            log.trace("Removed workflow instance at [ {} ]", instance.getPath());
-
-                            workflowRemovedCount++;
+                            folder.adaptTo(Node.class).remove();
+                            // Incrementing only count to trigger batch save and not total since is not a WF
                             count++;
                         } catch (RepositoryException e) {
-                            log.error("Could not remove workflow instance at [ {} ]. Continuing...",
-                                    instance.getPath(), e);
-                        }
-
-                        if (count % batchSize == 0) {
-                            this.batchComplete(resourceResolver, checkedCount, workflowRemovedCount);
-
-                            log.debug("Removed a running total of [ {} ] workflow instances", count);
+                            log.error("Could not remove workflow folder at [ {} ]", folder.getPath(), e);
                         }
                     }
                 }
 
-                if (remaining == 0
-                        && !StringUtils.startsWith(folder.getName(), WORKFLOW_FOLDER_FORMAT.format(new Date()))) {
-                    // Dont remove folders w items and dont remove any of "today's" folders
-                    try {
-                        folder.adaptTo(Node.class).remove();
-                        // Incrementing only count to trigger batch save and not total since is not a WF
-                        count++;
-                    } catch (RepositoryException e) {
-                        log.error("Could not remove workflow folder at [ {} ]", folder.getPath(), e);
-                    }
-                }
+                // Save final batch if needed, and update tracking nodes
+                this.complete(resourceResolver, checkedCount, workflowRemovedCount);
             }
+            log.info("Removed a total of [ {} ] workflow instances in [ {} ] ms", count,
+                    System.currentTimeMillis() - start);
 
-            // Save final batch if needed, and update tracking nodes
-            this.complete(resourceResolver, checkedCount, workflowRemovedCount);
+            return count;
+
+        } catch (PersistenceException e) {
+            log.error("Error persisting changes with Workflow Removal", e);
+            this.error(resourceResolver);
+            throw e;
+        } catch (WorkflowRemovalException e) {
+            log.error("Error with Workflow Removal", e);
+            this.error(resourceResolver);
+            throw e;
+        } catch (InterruptedException e) {
+            log.error("Errors in persistence retries during Workflow Removal", e);
+            this.error(resourceResolver);
+            throw e;
         }
-
-        log.info("Removed a total of [ {} ] workflow instances in [ {} ] ms", count,
-                System.currentTimeMillis() - start);
-
-        return count;
     }
 
     private Collection<Resource> getSortedAndFilteredFolders(Resource folderResource) {
@@ -220,10 +235,6 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             if (!folder.isResourceType(NT_SLING_FOLDER)) {
                 // Only process sling:Folders; eg. skip rep:Policy
                 continue;
-            }
-            if (!NN_DATE_FOLDER_PATTERN.matcher(folder.getName()).matches()) {
-                // Only process folders that looks like Date folders (not serverX)
-                continue;
             } else {
                 sortedCollection.add(folder);
             }
@@ -232,15 +243,34 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         return sortedCollection;
     }
 
-    private void save(ResourceResolver resourceResolver) throws PersistenceException {
-        if (resourceResolver.hasChanges()) {
-            final long start = System.currentTimeMillis();
-            resourceResolver.commit();
-            log.debug("Saving batch workflow instance removal in [ {} ] ms", System.currentTimeMillis() - start);
+    private void save(ResourceResolver resourceResolver) throws PersistenceException, InterruptedException {
+        int count = 0;
+
+        while (count++ <= MAX_SAVE_RETRIES) {
+            try {
+                if (resourceResolver.hasChanges()) {
+                    final long start = System.currentTimeMillis();
+                    resourceResolver.commit();
+                    log.debug("Saving batch workflow instance removal in [ {} ] ms", System.currentTimeMillis() - start);
+                }
+
+                // No changes or save did not error; return from loop
+                return;
+            } catch (PersistenceException ex) {
+                if (count <= MAX_SAVE_RETRIES) {
+                    // If error occurred within bounds of retries, keep retrying
+                    resourceResolver.refresh();
+                    log.warn("Could not persist Workflow Removal changes, trying again in {} ms", 1000 * count);
+                    Thread.sleep(1000 * count);
+                } else {
+                    // If error occurred outside bounds of returns, throw the exception to exist this method
+                    throw ex;
+                }
+            }
         }
     }
 
-    private void start(final ResourceResolver resourceResolver) throws PersistenceException, WorkflowRemovalException {
+    private void start(final ResourceResolver resourceResolver) throws PersistenceException, WorkflowRemovalException, InterruptedException {
 
         final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
@@ -264,7 +294,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     }
 
     private void batchComplete(final ResourceResolver resourceResolver, final int checked, final int count) throws
-            PersistenceException {
+            PersistenceException, InterruptedException {
         final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
@@ -276,13 +306,26 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     }
 
     private void complete(final ResourceResolver resourceResolver, final int checked, final int count) throws
-            PersistenceException {
+            PersistenceException, InterruptedException {
         final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
         mvm.put(PN_STATUS, StringUtils.lowerCase(Status.COMPLETE.toString()));
         mvm.put(PN_CHECKED_COUNT, checked);
         mvm.put(PN_COUNT, count);
+        mvm.put(PN_COMPLETED_AT, System.currentTimeMillis());
+
+        this.save(resourceResolver);
+    }
+
+    private void error(final ResourceResolver resourceResolver) throws
+            PersistenceException, InterruptedException {
+        final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
+        final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
+
+        mvm.put(PN_STATUS, StringUtils.lowerCase(Status.ERROR.toString()));
+        mvm.put(PN_CHECKED_COUNT, -1);
+        mvm.put(PN_COUNT, -1);
         mvm.put(PN_COMPLETED_AT, System.currentTimeMillis());
 
         this.save(resourceResolver);
