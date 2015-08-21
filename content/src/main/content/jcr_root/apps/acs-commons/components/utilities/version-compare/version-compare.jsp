@@ -76,7 +76,7 @@
                             </div>
                         </section>
 
-                        <section class="coral-Well">
+                        <section>
                             <div class="content">
                                 <div>
                                     <c:forEach var="evolutionItem" items="${model.evolution.evolutionItems}" varStatus="evoCounter" >
