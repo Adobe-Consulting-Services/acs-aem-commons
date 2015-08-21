@@ -3,5 +3,5 @@
     cq:defaultView="html"
     jcr:primaryType="cq:Component"
     jcr:title="Bulk Workflow Manager"
-    sling:resourceSuperType="foundation/components/page"
+    sling:resourceSuperType="acs-commons/components/utilities/app-page"
     componentGroup=".hidden"/>

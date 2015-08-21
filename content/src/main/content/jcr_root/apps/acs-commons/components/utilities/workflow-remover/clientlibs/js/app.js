@@ -20,9 +20,9 @@
 
 /*global angular: false, moment: false, JSON: false */
 
-angular.module('workflowRemover', [])
-    .controller('MainCtrl', ['$scope', '$http', '$timeout',
-        function ($scope, $http, $timeout) {
+angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.notifications'])
+    .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
+        function ($scope, $http, $timeout, NotificationsService) {
 
             $scope.app = {
                 resource: '',
@@ -41,9 +41,7 @@ angular.module('workflowRemover', [])
             $scope.status = {};
 
             $scope.formOptions = {};
-
-            $scope.notifications = [];
-
+            
             /* Methods */
 
             $scope.init = function () {
@@ -55,7 +53,8 @@ angular.module('workflowRemover', [])
                         $scope.formOptions = data.form || {};
                     }).
                     error(function (data, status, headers, config) {
-                        $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
+                        NotificationsService.add('error',
+                            'ERROR', 'Unable to initialize form');
                     });
 
                 $scope.getStatus();
@@ -75,17 +74,17 @@ angular.module('workflowRemover', [])
 
                         $scope.status.startedAt = startedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
 
-                        if ($scope.status.status !== 'running') {
-                            $scope.app.running = false;
+                        if ($scope.status.status === 'complete') {
+                            $scope.app.running = NotificationsService.running(false);
 
                             completedAtMoment = moment($scope.status.completedAt);
 
                             $scope.status.completedAt = completedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
                             $scope.status.timeTaken = completedAtMoment.diff(startedAtMoment, 'seconds');
 
-                        } else {
-                            // Running
-                            $scope.app.running = true;
+
+                        } else if ($scope.status.status === 'running') {
+                            $scope.app.running = NotificationsService.running(true);
 
                             $scope.status.timeTaken = moment().diff(startedAtMoment, 'seconds');
 
@@ -95,7 +94,8 @@ angular.module('workflowRemover', [])
                         }
                     }).
                     error(function (data, status, headers, config) {
-                        $scope.addNotification('error', 'ERROR', 'Unable to initialize form');
+                        NotificationsService.add('error',
+                            'ERROR', 'Unable to retrieve status');
                     });
 
                 document.getElementById("scroll-top").scrollTop = 0;
@@ -103,7 +103,7 @@ angular.module('workflowRemover', [])
 
             $scope.remove = function () {
                 var payload = angular.copy($scope.form);
-                $scope.app.running = true;
+                $scope.app.running = NotificationsService.running(true);
 
                 if (payload.olderThan) {
                     payload.olderThan = moment(payload.olderThan, "YYYY-MM-DD HH:MM").valueOf();
@@ -116,60 +116,19 @@ angular.module('workflowRemover', [])
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                 }).
                     success(function (data, status, headers, config) {
-                        $scope.app.running = false;
                         $scope.getStatus();
-                        $scope.addNotification('info', 'INFO', 'Workflow removal completed');
+                        $scope.app.running = NotificationsService.running(false);
+                        NotificationsService.add('info',
+                            'INFO', 'Workflow removal completed');                        
                     }).
                     error(function (data, status, headers, config) {
-                        $scope.app.running = false;
-                        $scope.addNotification('error', 'ERROR', 'Workflow removal failed due to: ' + data);
+                        $scope.app.running = NotificationsService.running(false);
+                        NotificationsService.add('error',
+                            'ERROR', 'Workflow removal failed due to: ' + data);
                     });
 
                 $scope.getStatus();
             };
-
-            $scope.reset = function () {
-                $http({
-                    method: 'POST',
-                    url: encodeURI($scope.app.resource + '/status'),
-                    data: 'checkedCount@Delete' +
-                        '&completedAt@Delete' +
-                        '&count@Delete' +
-                        '&initiatedBy@Delete' +
-                        '&startedAt@Delete' +
-                        '&status@Delete',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-                }).
-                    success(function (data, status, headers, config) {
-                        $scope.app.running = false;
-                        $scope.getStatus();
-                        $scope.addNotification('info', 'INFO', 'Workflow removal status reset');
-                    }).
-                    error(function (data, status, headers, config) {
-                        $scope.addNotification('error', 'ERROR', 'Workflow removal status reset failed due to: ' + data);
-                    });
-
-                $scope.getStatus();
-            };
-
-            $scope.addNotification = function (type, title, message) {
-                var timeout = 10000;
-
-                if (type === 'success') {
-                    timeout = timeout / 2;
-                }
-
-                $scope.notifications.push({
-                    type: type,
-                    title: title,
-                    message: message
-                });
-
-                $timeout(function () {
-                    $scope.notifications.shift();
-                }, timeout);
-            };
-
 
             /* Form Methods */
             $scope.toggleStatusSelection = function (status) {

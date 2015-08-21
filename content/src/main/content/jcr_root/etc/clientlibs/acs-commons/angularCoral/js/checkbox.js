@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2014 Adobe
+ * Copyright (C) 2013 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@
  * limitations under the License.
  * #L%
  */
+/*global angular: false */
+angular.module('acsCoral')
+.directive("acsCoralCheckbox", function() {
+    return {
+        restrict: 'A',
+        link : function(scope, $element, attrs) {
+            var $span = $element.find("span"),
+                $input = $element.find("input");
 
-#acs-commons-oak-index-manager-app {
-  .content-container-inner {
-    width: 95%;
-    margin: 0 auto;
-  }
-  
-  .acs-table-cell-refresh {
-    text-align: center;
-  }
-  
-  .acs-empty-results {
-    text-align: center;
-    padding: 1rem 0;
-  }
-}
+            $element.addClass("coral-Checkbox");
+            $input.addClass("coral-Checkbox-input");
+            $span.before('<span class="coral-Checkbox-checkmark"></span>');
+            $span.addClass("coral-Checkbox-description");
+        }
+    };
+});
