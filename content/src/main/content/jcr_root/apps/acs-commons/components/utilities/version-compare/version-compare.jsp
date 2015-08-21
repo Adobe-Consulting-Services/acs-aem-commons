@@ -60,6 +60,7 @@
                             <div class="options">
                                 <h2 acs-coral-heading>Configuration</h2>
                                 <label acs-coral-checkbox><input type="checkbox" ng-model="app.paintConnections"><span>Paint Connections</span></label>
+                                <label acs-coral-checkbox><input type="checkbox" ng-model="app.hideUnchanged"><span>Hide Unchanged</span></label>
                             </div>
                             <div class="options">
                                 <h2 acs-coral-heading>Hide Versions</h2>
@@ -88,6 +89,7 @@
                                                 <a href="#popover-${versionEntry.uniqueName}-${evoCounter.index}" data-toggle="popover" data-point-from="right" data-align-from="left">
                                                     <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status} depth-${versionEntry.depth}"
                                                          id="${versionEntry.uniqueName}-${evoCounter.index}" 
+                                                         ${versionEntry.status == "" ? "ng-show='!app.hideUnchanged'" : ""} 
                                                          ng-init="addConnection({'source':'${versionEntry.uniqueName}-${evoCounter.index}', 'target':'${versionEntry.uniqueName}-${evoCounter.index + 1}', 'isCurrent':${evolutionItem.current}})">    
                                                         <span class="key"><c:out value="${versionEntry.name}"/>:</span>
                                                         <span class="value"><c:out value="${versionEntry.valueStringShort}"/></span>

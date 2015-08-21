@@ -27,7 +27,8 @@ angular.module('versionComparator', ['acsCoral'])
             home : '',
             resource : '',
             paintConnections : false,
-            hideVersions : {}
+            hideVersions : {},
+            hideUnchanged : false
         };
 
         $scope.notifications = [];
