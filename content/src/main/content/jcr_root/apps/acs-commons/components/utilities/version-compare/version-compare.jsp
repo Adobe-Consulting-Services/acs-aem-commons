@@ -50,7 +50,7 @@
                         <h1 acs-coral-heading>Version Compare</h1>
                         
                         <div class="search">
-                            <input type="text" class="coral-Textfield" placeholder="Enter URL to Resource" ng-model="app.resource">
+                            <input type="text" class="coral-Textfield" placeholder="Enter path to resource" ng-model="app.resource">
                             <button class="coral-Button coral-Button--primary" ng-click="analyse()">Show Versions</button>
                         </div>
 
