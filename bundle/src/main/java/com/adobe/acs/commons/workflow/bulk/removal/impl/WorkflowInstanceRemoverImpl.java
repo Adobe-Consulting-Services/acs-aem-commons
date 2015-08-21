@@ -190,8 +190,10 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                     }
 
                     if (remaining == 0
+                            && NN_DATE_FOLDER_PATTERN.matcher(folder.getName()).matches()
                             && !StringUtils.startsWith(folder.getName(), WORKFLOW_FOLDER_FORMAT.format(new Date()))) {
                         // Dont remove folders w items and dont remove any of "today's" folders
+                        // MUST match the YYYY-MM-DD(.*) pattern; do not try to remove root folders
                         try {
                             folder.adaptTo(Node.class).remove();
                             // Incrementing only count to trigger batch save and not total since is not a WF
@@ -320,6 +322,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private void error(final ResourceResolver resourceResolver) throws
             PersistenceException, InterruptedException {
+        
+        resourceResolver.revert();
+
         final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 

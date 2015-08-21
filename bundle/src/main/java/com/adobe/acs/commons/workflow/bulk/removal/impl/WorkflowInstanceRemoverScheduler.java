@@ -113,6 +113,14 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             longValue = 0)
     public static final String PROP_WORKFLOWS_OLDER_THAN = "workflow.older-than";
 
+
+    private static final int DEFAULT_BATCH_SIZE = 1000;
+    private int batchSize = DEFAULT_BATCH_SIZE;
+    @Property(label = "Batch Size",
+            description = "Save removals to JCR in batches of this defined size.",
+            intValue = DEFAULT_BATCH_SIZE)
+    public static final String PROP_BATCH_SIZE = "batch-size";
+    
     @Override
     public final void run() {
 
@@ -127,7 +135,8 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
                     models,
                     statuses,
                     payloads,
-                    olderThan);
+                    olderThan, 
+                    batchSize);
 
             log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);
 
@@ -169,6 +178,11 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         if (olderThanTs > 0) {
             olderThan = Calendar.getInstance();
             olderThan.setTimeInMillis(olderThanTs);
+        }
+        
+        batchSize = PropertiesUtil.toInteger(config.get(PROP_BATCH_SIZE), DEFAULT_BATCH_SIZE);
+        if (batchSize < 1) {
+            batchSize = DEFAULT_BATCH_SIZE;
         }
     }
 
