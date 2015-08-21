@@ -192,4 +192,30 @@ public interface PackageHelper {
      * @return a string representation of JSON to write to response
      */
     String getErrorJSON(String msg);
+
+    /**
+     * Returns the JSON to return reporting what the packager definition will include for filterSet roots.
+     *
+     * @param paths the paths that represent the filterSet roots
+     * @return a string representation of JSON to write to response
+     * @throws JSONException
+     */
+    String getPreviewJSONForPaths(Collection<String> paths) throws JSONException;
+
+    /**
+    *
+    * @param paths the resources to include in the package
+    * @param session JCR Session obj; must have access to create packages under /etc/packages
+    * @param groupName package group name
+    * @param name package name
+    * @param version package version
+    * @param conflictResolution determines how package creation will be handled in the event of an existing package
+    *                           of the same package group, package name, and version class
+    * @param packageDefinitionProperties properties that will be added to the package definition
+    * @return the jcr package that was created, or null
+    * @throws IOException
+    * @throws RepositoryException
+    */
+    JcrPackage createPackageForPaths(Collection<String> paths, Session session, String groupName, String name,
+            String version, ConflictResolution conflictResolution, Map<String, String> packageDefinitionProperties) throws IOException, RepositoryException;
 }
