@@ -91,7 +91,11 @@
                                                          ng-init="addConnection({'source':'${versionEntry.uniqueName}-${evoCounter.index}', 'target':'${versionEntry.uniqueName}-${evoCounter.index + 1}', 'isCurrent':${evolutionItem.current}})">    
                                                         <span class="key"><c:out value="${versionEntry.name}"/>:</span>
                                                         <span class="value"><c:out value="${versionEntry.valueStringShort}"/></span>
-                                                        <div id="popover-${versionEntry.uniqueName}-${evoCounter.index}" class="popover arrow-left"><c:out value="${versionEntry.valueString}"/></div>
+                                                        <div id="popover-${versionEntry.uniqueName}-${evoCounter.index}" class="coral-Popover">
+                                                            <div class="coral-Popover-content u-coral-padding">
+                                                                <c:out value="${versionEntry.valueString}"/>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </a> 
                                             </c:forEach>
