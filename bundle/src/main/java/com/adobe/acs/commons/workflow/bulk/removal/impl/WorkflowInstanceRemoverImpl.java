@@ -105,6 +105,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             final List<Resource> containerFolders = this.getWorkflowInstanceFolders(resourceResolver);
 
             for (Resource containerFolder : containerFolders) {
+                log.debug("Checking [ {} ] for workflow instances to remove", containerFolder.getPath());
                 final Collection<Resource> sortedFolders = this.getSortedAndFilteredFolders(containerFolder);
 
                 for (final Resource folder : sortedFolders) {
@@ -172,7 +173,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                             try {
                                 instance.adaptTo(Node.class).remove();
-                                log.trace("Removed workflow instance at [ {} ]", instance.getPath());
+                                log.debug("Removed workflow instance at [ {} ]", instance.getPath());
 
                                 workflowRemovedCount++;
                                 count++;
@@ -184,16 +185,19 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                             if (count % batchSize == 0) {
                                 this.batchComplete(resourceResolver, checkedCount, workflowRemovedCount);
 
-                                log.debug("Removed a running total of [ {} ] workflow instances", count);
+                                log.info("Removed a running total of [ {} ] workflow instances", count);
                             }
                         }
                     }
 
                     if (remaining == 0
+                            && NN_DATE_FOLDER_PATTERN.matcher(folder.getName()).matches()
                             && !StringUtils.startsWith(folder.getName(), WORKFLOW_FOLDER_FORMAT.format(new Date()))) {
                         // Dont remove folders w items and dont remove any of "today's" folders
+                        // MUST match the YYYY-MM-DD(.*) pattern; do not try to remove root folders
                         try {
                             folder.adaptTo(Node.class).remove();
+                            log.debug("Removed empty workflow folder node [ {} ]", folder.getPath());
                             // Incrementing only count to trigger batch save and not total since is not a WF
                             count++;
                         } catch (RepositoryException e) {
@@ -320,6 +324,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private void error(final ResourceResolver resourceResolver) throws
             PersistenceException, InterruptedException {
+        
+        resourceResolver.revert();
+
         final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
