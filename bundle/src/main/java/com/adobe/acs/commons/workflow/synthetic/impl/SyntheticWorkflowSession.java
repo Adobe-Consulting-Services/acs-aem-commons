@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
+import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticCompleteWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticRestartWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticTerminateWorkflowException;
 import com.day.cq.security.Authorizable;
@@ -35,23 +36,37 @@ import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.exec.filter.WorkItemFilter;
 import com.day.cq.workflow.model.WorkflowModel;
 import com.day.cq.workflow.model.WorkflowModelFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import javax.jcr.version.VersionException;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 
 public class SyntheticWorkflowSession implements WorkflowSession {
+    private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowSession.class);
+
     private static final String UNSUPPORTED_OPERATION_MESSAGE = "Operation not supported by Synthetic Workflow";
 
     private final Session session;
 
     private final SyntheticWorkflowRunnerImpl workflowService;
 
+    private final List<Route> routes;
+    private final List<Route> backRoutes;
+
     public SyntheticWorkflowSession(SyntheticWorkflowRunnerImpl workflowService, Session session) {
         this.workflowService = workflowService;
         this.session = session;
+
+        this.routes = new ArrayList<Route>();
+        this.routes.add(new SyntheticRoute(false));
+
+        this.backRoutes = new ArrayList<Route>();
+        this.backRoutes.add(new SyntheticRoute(true));
     }
 
     @Override
@@ -67,7 +82,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     public final void terminateWorkflow(final Workflow workflow) throws WorkflowException {
         if (workflow instanceof SyntheticWorkflow) {
-            throw new SyntheticTerminateWorkflowException("Synthetic workflow terminated");
+            throw new SyntheticTerminateWorkflowException("Synthetic workflow [ " + workflow.getId() + " ] terminated");
         } else {
             throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
         }
@@ -75,13 +90,18 @@ public class SyntheticWorkflowSession implements WorkflowSession {
 
     @Override
     public final void complete(final WorkItem workItem, final Route route) throws WorkflowException {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        if (workItem instanceof SyntheticWorkItem) {
+            throw new SyntheticCompleteWorkflowException("Synthetic workflow [ "
+                    + workItem.getWorkflow().getId() + " : " + workItem.getId() + " ] completed");
+        } else {
+            throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        }
     }
 
     @Override
     public final void restartWorkflow(final Workflow workflow) throws WorkflowException {
         if (workflow instanceof SyntheticWorkflow) {
-            throw new SyntheticRestartWorkflowException("Synthetic workflow restarted");
+            throw new SyntheticRestartWorkflowException("Synthetic workflow [ " + workflow.getId() + " ] restarted");
         } else {
             throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
         }
@@ -146,8 +166,10 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     }
 
     @Override
-    public final WorkflowModel getModel(final String s) throws WorkflowException {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+    public final WorkflowModel getModel(final String modelId) throws WorkflowException {
+        final WorkflowSession workflowSession =
+                this.workflowService.getAEMWorkflowService().getWorkflowSession(this.session);
+        return workflowSession.getModel(modelId);
     }
 
     @Override
@@ -240,22 +262,26 @@ public class SyntheticWorkflowSession implements WorkflowSession {
 
     @Override
     public final List<Route> getRoutes(final WorkItem workItem) throws WorkflowException {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
+        return this.routes;
     }
 
     @Override
     public final List<Route> getRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
+        return this.routes;
     }
 
     @Override
     public final List<Route> getBackRoutes(final WorkItem workItem) throws WorkflowException {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        log.debug("Synthetic Workflow does not support back routes; Defaults to a single Synthetic Route");
+        return this.backRoutes;
     }
 
     @Override
     public final List<Route> getBackRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+        log.debug("Synthetic Workflow does not back support routes; Defaults to a single Synthetic Route");
+        return this.backRoutes;
     }
 
     @Override

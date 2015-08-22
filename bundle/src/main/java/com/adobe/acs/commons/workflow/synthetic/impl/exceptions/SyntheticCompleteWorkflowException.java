@@ -18,8 +18,14 @@
  * #L%
  */
 
-/**
- * Synthetic AEM Workflow APIs.
- */
-@aQute.bnd.annotation.Version("2.0.0")
-package com.adobe.acs.commons.workflow.synthetic;
+package com.adobe.acs.commons.workflow.synthetic.impl.exceptions;
+
+import com.day.cq.workflow.WorkflowException;
+
+@SuppressWarnings("serial")
+public class SyntheticCompleteWorkflowException extends WorkflowException {
+
+    public SyntheticCompleteWorkflowException(String message) {
+        super(message);
+    }
+}

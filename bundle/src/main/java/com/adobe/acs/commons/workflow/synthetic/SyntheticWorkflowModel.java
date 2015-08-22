@@ -18,8 +18,21 @@
  * #L%
  */
 
-/**
- * Synthetic AEM Workflow APIs.
- */
-@aQute.bnd.annotation.Version("2.0.0")
 package com.adobe.acs.commons.workflow.synthetic;
+
+import java.util.Map;
+
+public interface SyntheticWorkflowModel {
+
+    /**
+     *
+     * @return
+     */
+    String[] getWorkflowProcessNames();
+
+    /**
+     *
+     * @return
+     */
+    Map<String, Map<String, Object>> getSyntheticWorkflowModelData();
+}
