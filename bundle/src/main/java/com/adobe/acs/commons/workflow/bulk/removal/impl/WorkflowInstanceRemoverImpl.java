@@ -172,7 +172,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                             try {
                                 instance.adaptTo(Node.class).remove();
-                                log.trace("Removed workflow instance at [ {} ]", instance.getPath());
+                                log.debug("Removed workflow instance at [ {} ]", instance.getPath());
 
                                 workflowRemovedCount++;
                                 count++;
@@ -196,6 +196,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                         // MUST match the YYYY-MM-DD(.*) pattern; do not try to remove root folders
                         try {
                             folder.adaptTo(Node.class).remove();
+                            log.debug("Removed empty workflow folder node [ {} ]", folder.getPath());
                             // Incrementing only count to trigger batch save and not total since is not a WF
                             count++;
                         } catch (RepositoryException e) {
