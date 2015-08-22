@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
+import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticCompleteWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticRestartWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticTerminateWorkflowException;
 import com.day.cq.security.Authorizable;
@@ -81,7 +82,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     public final void terminateWorkflow(final Workflow workflow) throws WorkflowException {
         if (workflow instanceof SyntheticWorkflow) {
-            throw new SyntheticTerminateWorkflowException("Synthetic workflow terminated");
+            throw new SyntheticTerminateWorkflowException("Synthetic workflow [ " + workflow.getId() + " ] terminated");
         } else {
             throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
         }
@@ -90,7 +91,8 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     public final void complete(final WorkItem workItem, final Route route) throws WorkflowException {
         if (workItem instanceof SyntheticWorkItem) {
-            throw new SyntheticTerminateWorkflowException("Synthetic workflow complete");
+            throw new SyntheticCompleteWorkflowException("Synthetic workflow [ "
+                    + workItem.getWorkflow().getId() + " : " + workItem.getId() + " ] completed");
         } else {
             throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
         }
@@ -99,7 +101,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     public final void restartWorkflow(final Workflow workflow) throws WorkflowException {
         if (workflow instanceof SyntheticWorkflow) {
-            throw new SyntheticRestartWorkflowException("Synthetic workflow restarted");
+            throw new SyntheticRestartWorkflowException("Synthetic workflow [ " + workflow.getId() + " ] restarted");
         } else {
             throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
         }
@@ -260,25 +262,25 @@ public class SyntheticWorkflowSession implements WorkflowSession {
 
     @Override
     public final List<Route> getRoutes(final WorkItem workItem) throws WorkflowException {
-        log.info("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
+        log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
         return this.routes;
     }
 
     @Override
     public final List<Route> getRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
-        log.info("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
+        log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
         return this.routes;
     }
 
     @Override
     public final List<Route> getBackRoutes(final WorkItem workItem) throws WorkflowException {
-        log.info("Synthetic Workflow does not support back routes; Defaults to a single Synthetic Route");
+        log.debug("Synthetic Workflow does not support back routes; Defaults to a single Synthetic Route");
         return this.backRoutes;
     }
 
     @Override
     public final List<Route> getBackRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
-        log.info("Synthetic Workflow does not back support routes; Defaults to a single Synthetic Route");
+        log.debug("Synthetic Workflow does not back support routes; Defaults to a single Synthetic Route");
         return this.backRoutes;
     }
 

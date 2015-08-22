@@ -71,13 +71,13 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
             }
 
             // No issues with Workflow Model; Collect the Process type
-            log.info("Workflow node title [ {} ]", node.getTitle());
+            log.debug("Workflow node title [ {} ]", node.getTitle());
 
             if (this.isProcessType(node)) {
                 final String processName = node.getMetaDataMap().get("PROCESS", "");
 
                 if (StringUtils.isNotBlank(processName)) {
-                    log.info("Adding Workflow Process [ {} ] to Synthetic Workflow", processName);
+                    log.debug("Adding Workflow Process [ {} ] to Synthetic Workflow", processName);
                     syntheticWorkflowModel.put(processName, node.getMetaDataMap());
                 }
             }
