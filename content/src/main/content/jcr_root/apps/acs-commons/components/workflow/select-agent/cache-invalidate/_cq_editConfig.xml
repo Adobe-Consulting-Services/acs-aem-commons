@@ -4,7 +4,7 @@
     jcr:primaryType="cq:EditConfig">
     <cq:formParameters
     	jcr:primaryType="nt:unstructured"
-    	PROCESS="com.adobe.acs.commons.workflow.process.ParameterizedActivatePageProcess"
+    	PROCESS="com.adobe.acs.commons.workflow.process.impl.ParameterizedActivatePageProcess"
     	PROCESS_AUTO_ADVANCE="true"
     	jcr:description="A process to flush the cache of a resource; specifying the agent(s) to trigger."
     	jcr:title="Selective Cache Invalidate Page/Asset"
