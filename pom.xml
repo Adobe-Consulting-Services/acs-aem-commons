@@ -485,9 +485,9 @@
 
     <distributionManagement>
         <repository>
-            <id>${releaseRepository-Id}</id>
-            <name>${releaseRepository-Name}</name>
-            <url>${releaseRepository-URL}</url>
+            <id>bintray</id>
+            <name>acs-releases-acs-aem-commons</name>
+            <url>https://api.bintray.com/maven/acs/releases/acs-aem-commons</url>
         </repository>
         <snapshotRepository>
             <id>${snapshotRepository-Id}</id>
