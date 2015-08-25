@@ -192,5 +192,6 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         statuses = new ArrayList<String>();
         models = new ArrayList<String>();
         payloads = new ArrayList<Pattern>();
+        batchSize = DEFAULT_BATCH_SIZE;
     }
 }
