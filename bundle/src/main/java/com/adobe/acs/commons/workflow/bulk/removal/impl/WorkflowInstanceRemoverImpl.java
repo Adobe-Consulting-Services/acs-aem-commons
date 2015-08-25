@@ -56,6 +56,12 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final SimpleDateFormat WORKFLOW_FOLDER_FORMAT = new SimpleDateFormat("YYYY-MM-dd");
 
+    private static final String PN_MODEL_ID = "modelId";
+
+    private static final String PN_STARTED_AT = "startedAt";
+
+    private static final String PN_STATUS = "status";
+
     private static final String PAYLOAD_PATH = "data/payload/path";
 
     private static final String NT_SLING_FOLDER = "sling:Folder";
@@ -136,8 +142,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                         checkedCount++;
 
-                        final String model = properties.get(MODEL_ID, String.class);
-                        final Calendar startTime = this.getStatus().getStartedAtCal();
+                        final String status = properties.get(PN_STATUS, String.class);
+                        final String model = properties.get(PN_MODEL_ID, String.class);
+                        final Calendar startTime = properties.get(PN_STARTED_AT, Calendar.class);
                         final String payload = properties.get(PAYLOAD_PATH, String.class);
 
                         if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(status)) {
@@ -307,6 +314,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     private void batchComplete(final ResourceResolver resourceResolver, final int checked, final int count) throws
             PersistenceException, InterruptedException {
 
+        this.save(resourceResolver);
+        
         WorkflowRemovalStatus status = this.status.get();
         
         status.incrementChecked(checked);
@@ -317,6 +326,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private void complete(final ResourceResolver resourceResolver, final int checked, final int count) throws
             PersistenceException, InterruptedException {
+
+        this.save(resourceResolver);
 
         WorkflowRemovalStatus status = this.status.get();
 

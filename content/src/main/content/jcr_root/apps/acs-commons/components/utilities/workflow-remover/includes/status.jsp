@@ -39,7 +39,7 @@
 
     <ul acs-coral-list>
         <li>WF instances checked: {{ status.checkedCount || 0 }}</li>
-        <li>WF instances removed : {{ status.count || 0 }}</li>
+        <li>WF instances removed : {{ status.removedCount || 0 }}</li>
         <li>Initiated by: {{ status.initiatedBy }}</li>
         <li>Started at: {{ status.startedAt }}</li>
         <li ng-show="status.erredAt">Erred at: {{ status.erredAt }}</li>
