@@ -42,8 +42,7 @@
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list/default_\d+"/>
         <include pattern="/etc/acs-commons/packagers"/>
         <include pattern="/etc/acs-commons/packagers/jcr:content"/>
-        <include pattern="/etc/acs-commons/workflow-remover"/>
-        <include pattern="/etc/acs-commons/workflow-remover/jcr:content"/>
+        <include pattern="/etc/acs-commons/workflow-remover(.*)"/>
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
 </workspaceFilter>

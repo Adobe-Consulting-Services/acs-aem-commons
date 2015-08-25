@@ -26,7 +26,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -44,7 +43,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
@@ -57,7 +56,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final SimpleDateFormat WORKFLOW_FOLDER_FORMAT = new SimpleDateFormat("YYYY-MM-dd");
 
-    private static final String PN_PAYLOAD_PATH = "data/payload/path";
+    private static final String PAYLOAD_PATH = "data/payload/path";
 
     private static final String NT_SLING_FOLDER = "sling:Folder";
 
@@ -71,14 +70,15 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final int MAX_SAVE_RETRIES = 5;
     
-    private static final AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicReference<WorkflowRemovalStatus> status
+            = new AtomicReference<WorkflowRemovalStatus>();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean isRunning() {
-        return this.running.get();
+    public WorkflowRemovalStatus getStatus() {
+        return this.status.get();
     }
 
     /**
@@ -136,10 +136,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                         checkedCount++;
 
-                        final String status = properties.get(PN_STATUS, String.class);
-                        final String model = properties.get(PN_MODEL_ID, String.class);
-                        final Calendar startTime = properties.get(PN_STARTED_AT, Calendar.class);
-                        final String payload = properties.get(PN_PAYLOAD_PATH, String.class);
+                        final String model = properties.get(MODEL_ID, String.class);
+                        final Calendar startTime = this.getStatus().getStartedAtCal();
+                        final String payload = properties.get(PAYLOAD_PATH, String.class);
 
                         if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(status)) {
                             log.trace("Workflow instance [ {} ] has non-matching status of [ {} ]", instance.getPath(), status);
@@ -286,77 +285,58 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     }
 
     private void start(final ResourceResolver resourceResolver) throws PersistenceException, WorkflowRemovalException, InterruptedException {
-        final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
-        final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
-
-        if (this.isRunning()) {
+        boolean running = false;
+        
+        WorkflowRemovalStatus localStatus = this.getStatus();
+        
+        if(localStatus != null) {
+            running = localStatus.isRunning();
+        }
+        
+        if (running) {
             log.warn("Unable to start workflow instance removal; Workflow removal already running.");
             
             throw new WorkflowRemovalException("Workflow removal already started by "
-                    + mvm.put(PN_INITIATED_BY, "Unknown"));
+                    + this.getStatus().getInitiatedBy());
         } else {
+            this.status.set(new WorkflowRemovalStatus(resourceResolver));
             log.info("Starting workflow instance removal");
-
-            this.running.set(true);
-
-            mvm.put(PN_INITIATED_BY, resourceResolver.getUserID());
-            mvm.put(PN_STATUS, StringUtils.lowerCase(Status.RUNNING.toString()));
-            mvm.put(PN_STARTED_AT, System.currentTimeMillis());
-
-            mvm.put(PN_COUNT, 0);
-            mvm.put(PN_CHECKED_COUNT, 0);
-
-            mvm.remove(PN_COMPLETED_AT);
-
-            this.save(resourceResolver);
         }
     }
 
     private void batchComplete(final ResourceResolver resourceResolver, final int checked, final int count) throws
             PersistenceException, InterruptedException {
-        final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
-        final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
-        mvm.put(PN_STATUS, StringUtils.lowerCase(Status.RUNNING.toString()));
-        mvm.put(PN_CHECKED_COUNT, checked);
-        mvm.put(PN_COUNT, count);
-
-        this.save(resourceResolver);
+        WorkflowRemovalStatus status = this.status.get();
+        
+        status.incrementChecked(checked);
+        status.incrementRemoved(count);
+        
+        this.status.set(status);
     }
 
     private void complete(final ResourceResolver resourceResolver, final int checked, final int count) throws
             PersistenceException, InterruptedException {
+
+        WorkflowRemovalStatus status = this.status.get();
+
+        status.setRunning(false);
+        status.incrementChecked(checked);
+        status.incrementRemoved(count);
+        status.setCompletedAt(Calendar.getInstance());
         
-        this.running.set(false);
-
-        final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
-        final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
-
-        mvm.put(PN_STATUS, StringUtils.lowerCase(Status.COMPLETE.toString()));
-        mvm.put(PN_CHECKED_COUNT, checked);
-        mvm.put(PN_COUNT, count);
-        mvm.put(PN_COMPLETED_AT, System.currentTimeMillis());
-
-        this.save(resourceResolver);
-        
+        this.status.set(status);
     }
 
     private void error(final ResourceResolver resourceResolver) throws
             PersistenceException, InterruptedException {
 
-        this.running.set(false);
+        WorkflowRemovalStatus status = this.status.get();
 
-        resourceResolver.revert();
-
-        final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
-        final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
-
-        mvm.put(PN_STATUS, StringUtils.lowerCase(Status.ERROR.toString()));
-        mvm.put(PN_CHECKED_COUNT, -1);
-        mvm.put(PN_COUNT, -1);
-        mvm.put(PN_COMPLETED_AT, System.currentTimeMillis());
-
-        this.save(resourceResolver);
+        status.setRunning(false);
+        status.setErredAt(Calendar.getInstance());
+        
+        this.status.set(status);
     }
 
     private List<Resource> getWorkflowInstanceFolders(final ResourceResolver resourceResolver) {

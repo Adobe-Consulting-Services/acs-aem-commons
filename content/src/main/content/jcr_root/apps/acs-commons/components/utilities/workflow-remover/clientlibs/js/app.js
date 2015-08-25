@@ -67,37 +67,27 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                     url: encodeURI($scope.app.resource + '.status.json')
                 }).
                     success(function (data, status, headers, config) {
-                        var startedAtMoment, completedAtMoment;
 
-                        $scope.status = data || {};
+                        $scope.status = data || null;
                         $scope.app.running = NotificationsService.running($scope.status.running || false);
                         
-                        startedAtMoment = moment($scope.status.startedAt);
-
-                        $scope.status.startedAt = startedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
+                        if (!$scope.status) {
+                            // Not started
+                            return;
+                        }
 
                         if ($scope.app.running) {
                             
-                            $scope.status.timeTaken = moment().diff(startedAtMoment, 'seconds');
-
                             $scope.app.refresh = $timeout(function () {
                                 $scope.getStatus();
                             }, 3000);
                             
-                        } else if ($scope.status.status === 'complete') {
+                        } else if ($scope.status.erredAt) {
 
-                            completedAtMoment = moment($scope.status.completedAt);
-
-                            $scope.status.completedAt = completedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
-                            $scope.status.timeTaken = completedAtMoment.diff(startedAtMoment, 'seconds');
-                            
-                        } else {
-                            
                             NotificationsService.add('error',
-                                'ERROR', 'Invalid workflow removal status: ' + $scope.status.status);
+                                'ERROR', 'Workflow removal resulted in an error. Please check the AEM logs.');
                             
                         }
-
                      }).
                     error(function (data, status, headers, config) {
                         NotificationsService.add('error',

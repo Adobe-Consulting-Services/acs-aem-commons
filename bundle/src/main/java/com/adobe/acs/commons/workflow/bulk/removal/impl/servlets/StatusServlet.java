@@ -21,26 +21,17 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.WorkflowService;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.model.WorkflowModel;
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.jcr.Session;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * ACS AEM Commons - Workflow Instance Remover - Status Servlet
@@ -53,6 +44,7 @@ import java.util.Arrays;
         extensions = { "json" }
 )
 public class StatusServlet extends SlingSafeMethodsServlet {
+    private static final Logger log = LoggerFactory.getLogger(StatusServlet.class);
 
     @Reference
     private WorkflowInstanceRemover workflowInstanceRemover;
@@ -64,27 +56,14 @@ public class StatusServlet extends SlingSafeMethodsServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        JSONObject json = null;
-
         try {
-            boolean running = workflowInstanceRemover.isRunning();
-            
-            ValueMap properties = request.getResourceResolver().getResource(WorkflowInstanceRemover.WORKFLOW_REMOVAL_STATUS_PATH).adaptTo(ValueMap.class);
-            json = new JSONObject(properties);
-            
-            json.put(WorkflowInstanceRemover.PN_RUNNING, running);
-            
-            if(running) {
-                if(StringUtils.equalsIgnoreCase(properties.get(WorkflowInstanceRemover.PN_STATUS, String.class),  WorkflowInstanceRemover.Status.COMPLETE.name())) {
-                    json.put(WorkflowInstanceRemover.PN_STATUS, WorkflowInstanceRemover.Status.ERROR.name());
-                }
+            if (workflowInstanceRemover.getStatus() != null) {
+                response.getWriter().write(workflowInstanceRemover.getStatus().getJSON().toString());
             }
-
-            response.getWriter().write(json.toString());
         } catch (Exception e) {
+            log.error("Unable to create Workflow Removal status", e);
             response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(e.getMessage());
         }
     }
-    
 }
