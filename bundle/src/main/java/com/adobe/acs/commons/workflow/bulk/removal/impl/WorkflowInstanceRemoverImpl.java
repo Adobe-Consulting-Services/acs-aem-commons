@@ -290,9 +290,13 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
         if (this.isRunning()) {
+            log.warn("Unable to start workflow instance removal; Workflow removal already running.");
+            
             throw new WorkflowRemovalException("Workflow removal already started by "
                     + mvm.put(PN_INITIATED_BY, "Unknown"));
         } else {
+            log.info("Starting workflow instance removal");
+
             this.running.set(true);
 
             mvm.put(PN_INITIATED_BY, resourceResolver.getUserID());
