@@ -79,6 +79,27 @@
     </section>
 
     <section class="coral-Form-fieldset">
+        <h3 class="coral-Form-fieldset-legend">Batch size</h3>
+
+        <div class="coral-InputGroup" data-init="numberinput" data-min="1">
+          <span class="coral-InputGroup-button">
+            <button type="button" class="js-coral-NumberInput-decrementButton coral-Button coral-Button--secondary coral-Button--square" title="Decrement">
+                <i class="coral-Icon coral-Icon--sizeS coral-Icon--minus"></i>
+            </button>
+          </span>
+          <input ng-model="form.batchSize"
+                  type="text" 
+                  class="js-coral-NumberInput-input coral-InputGroup-input coral-Textfield">
+          <span class="coral-InputGroup-button">
+            <button type="button" class="js-coral-NumberInput-incrementButton coral-Button coral-Button--secondary coral-Button--square" title="Increment">
+                <i class="coral-Icon coral-Icon--sizeS coral-Icon--add"></i>
+            </button>
+          </span>
+        </div>
+    </section>
+    
+    
+    <section class="coral-Form-fieldset">
         <h3 class="coral-Form-fieldset-legend">Workflows older than</h3>
 
         <div class="coral-Datepicker coral-InputGroup" data-init="datepicker">

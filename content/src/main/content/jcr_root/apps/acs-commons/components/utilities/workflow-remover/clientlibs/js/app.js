@@ -35,7 +35,8 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                     { pattern: '' }
                 ],
                 models: [],
-                statuses: []
+                statuses: [],
+                batchSize: 1000
             };
 
             $scope.status = {};
@@ -63,36 +64,41 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
             $scope.getStatus = function () {
                 $http({
                     method: 'GET',
-                    url: encodeURI($scope.app.resource + '/status.json')
+                    url: encodeURI($scope.app.resource + '.status.json')
                 }).
                     success(function (data, status, headers, config) {
                         var startedAtMoment, completedAtMoment;
 
                         $scope.status = data || {};
-
+                        $scope.app.running = NotificationsService.running($scope.status.running || false);
+                        
                         startedAtMoment = moment($scope.status.startedAt);
 
                         $scope.status.startedAt = startedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
 
-                        if ($scope.status.status === 'complete') {
-                            $scope.app.running = NotificationsService.running(false);
-
-                            completedAtMoment = moment($scope.status.completedAt);
-
-                            $scope.status.completedAt = completedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
-                            $scope.status.timeTaken = completedAtMoment.diff(startedAtMoment, 'seconds');
-
-
-                        } else if ($scope.status.status === 'running') {
-                            $scope.app.running = NotificationsService.running(true);
-
+                        if ($scope.app.running) {
+                            
                             $scope.status.timeTaken = moment().diff(startedAtMoment, 'seconds');
 
                             $scope.app.refresh = $timeout(function () {
                                 $scope.getStatus();
                             }, 3000);
+                            
+                        } else if ($scope.status.status === 'complete') {
+
+                            completedAtMoment = moment($scope.status.completedAt);
+
+                            $scope.status.completedAt = completedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
+                            $scope.status.timeTaken = completedAtMoment.diff(startedAtMoment, 'seconds');
+                            
+                        } else {
+                            
+                            NotificationsService.add('error',
+                                'ERROR', 'Invalid workflow removal status: ' + $scope.status.status);
+                            
                         }
-                    }).
+
+                     }).
                     error(function (data, status, headers, config) {
                         NotificationsService.add('error',
                             'ERROR', 'Unable to retrieve status');

@@ -22,11 +22,11 @@
          ng-show="app.running || status.status === 'complete'">
     
     <h4 acs-coral-heading
-        ng-show="!app.running &&  status.status === 'complete'">Workflow removal status</h4>
+        ng-show="!app.running && status.status === 'complete'">Workflow removal status</h4>
 
     <ul acs-coral-list>
         <li>Workflow instance removal status
-            : <span style="text-transform: capitalize;">{{ status.status || 'Not Started'}}</span></li>
+            : <span style="text-transform: capitalize;">{{ status.status || 'Not Started' }}</span></li>
 
         <li ng-show="app.running">WF instances checked: {{ status.checkedCount || 0 }}</li>
         <li ng-hide="app.running">Total WF instances checked: {{ status.checkedCount || 0 }}</li>
@@ -38,7 +38,7 @@
 
         <li ng-show="status.startedAt">Started at: {{ status.startedAt }}</li>
 
-        <li ng-show="status.completedAt">Started at: {{ status.completedAt }}</li>
+        <li ng-show="!app.running && status.completedAt">Started at: {{ status.completedAt }}</li>
 
         <li>Time taken: {{ status.timeTaken }} seconds</li>
     </ul>

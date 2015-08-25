@@ -48,6 +48,8 @@ public interface WorkflowInstanceRemover {
 
     String PN_CHECKED_COUNT = "checkedCount";
 
+    String PN_RUNNING = "running";
+
     String PN_COUNT = "count";
 
     enum Status {
@@ -92,4 +94,9 @@ public interface WorkflowInstanceRemover {
                                 final Calendar olderThan,
                                 final int batchSize) throws PersistenceException, WorkflowRemovalException, InterruptedException;
 
+
+    /**
+     * @return true if the Worklow Removal is running
+     */
+    boolean isRunning();
 }

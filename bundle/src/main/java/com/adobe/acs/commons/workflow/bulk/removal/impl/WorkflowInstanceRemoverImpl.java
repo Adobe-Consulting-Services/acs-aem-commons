@@ -44,6 +44,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 /**
@@ -69,6 +70,16 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     private static final int BATCH_SIZE = 1000;
 
     private static final int MAX_SAVE_RETRIES = 5;
+    
+    private static final AtomicBoolean running = new AtomicBoolean(false);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isRunning() {
+        return this.running.get();
+    }
 
     /**
      * {@inheritDoc}
@@ -275,14 +286,14 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     }
 
     private void start(final ResourceResolver resourceResolver) throws PersistenceException, WorkflowRemovalException, InterruptedException {
-
         final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
-        if (StringUtils.equals(Status.RUNNING.toString(), mvm.get(PN_STATUS, String.class))) {
+        if (this.isRunning()) {
             throw new WorkflowRemovalException("Workflow removal already started by "
                     + mvm.put(PN_INITIATED_BY, "Unknown"));
         } else {
+            this.running.set(true);
 
             mvm.put(PN_INITIATED_BY, resourceResolver.getUserID());
             mvm.put(PN_STATUS, StringUtils.lowerCase(Status.RUNNING.toString()));
@@ -311,6 +322,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private void complete(final ResourceResolver resourceResolver, final int checked, final int count) throws
             PersistenceException, InterruptedException {
+        
+        this.running.set(false);
+
         final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
         final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
@@ -320,11 +334,14 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         mvm.put(PN_COMPLETED_AT, System.currentTimeMillis());
 
         this.save(resourceResolver);
+        
     }
 
     private void error(final ResourceResolver resourceResolver) throws
             PersistenceException, InterruptedException {
-        
+
+        this.running.set(false);
+
         resourceResolver.revert();
 
         final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
