@@ -20,25 +20,25 @@ public final class SynthesizedUtil {
     public static Resource buildSynthesizedResource(ResourceResolver resourceResolver, String path,
                                                     String resourceType, Map<String, Object> properties) {
 
-        SynthesizedResource synthieResource = new SynthesizedResource(resourceResolver, path, resourceType);
-        synthieResource.setValueMap(properties);
+        SynthesizedResource synthesizedResource = new SynthesizedResource(resourceResolver, path, resourceType);
+        synthesizedResource.setValueMap(properties);
 
-        return synthieResource;
+        return synthesizedResource;
     }
 
-    public static String render(String path, String resourceType, Map<String, Object> properties,
-                                SlingHttpServletRequest request, SlingHttpServletResponse response)
+    public static String renderSynthesized(String path, String resourceType, Map<String, Object> properties,
+                                           SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
-        Resource resource = buildSynthesizedResource(request.getResourceResolver(), path, resourceType, properties);
+        Resource synthesizedResource = buildSynthesizedResource(request.getResourceResolver(), path, resourceType, properties);
 
-        return renderResource(resource, SynthesizedSlingHttpServletRequest.METHOD_GET, "html", request, response);
+        return renderResource(synthesizedResource, SynthesizedSlingHttpServletRequest.METHOD_GET, "html", request, response);
     }
 
 
 
     public static String renderResource(Resource resource, String requestMethod, String requestExtension,
-                                              SlingHttpServletRequest request, SlingHttpServletResponse response)
+                                        SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
         SynthesizedSlingHttpServletRequest synthesizedRequest = new SynthesizedSlingHttpServletRequest(request)
@@ -59,7 +59,8 @@ public final class SynthesizedUtil {
 
     public static String renderResource(Resource resource, RequestDispatcherOptions requestDispatcherOptions,
                                         String decorationTagName, SlingHttpServletRequest request,
-                                        SlingHttpServletResponse response) throws ServletException, IOException {
+                                        SlingHttpServletResponse response)
+            throws ServletException, IOException {
 
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(resource, requestDispatcherOptions);
 
