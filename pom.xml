@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>1.10.5-SNAPSHOT</version>
+    <version>2.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -324,12 +324,6 @@
                 <version>1.5.2</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>org.apache.sling</groupId>
-                <artifactId>org.apache.sling.testing.jcr-mock</artifactId>
-                <version>1.1.8</version>
-                <scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -491,9 +485,9 @@
 
     <distributionManagement>
         <repository>
-            <id>${releaseRepository-Id}</id>
-            <name>${releaseRepository-Name}</name>
-            <url>${releaseRepository-URL}</url>
+            <id>bintray</id>
+            <name>acs-releases-acs-aem-commons</name>
+            <url>https://api.bintray.com/maven/acs/releases/acs-aem-commons</url>
         </repository>
         <snapshotRepository>
             <id>${snapshotRepository-Id}</id>
