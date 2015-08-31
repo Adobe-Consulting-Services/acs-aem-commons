@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>1.10.5-SNAPSHOT</version>
+        <version>2.0.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -246,7 +246,7 @@
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.jcr-mock</artifactId>
             <scope>test</scope>
-	    </dependency>
+	 </dependency>
         <!--  Build Dependencies -->
         <dependency>
             <groupId>com.google.code.tld-generator</groupId>

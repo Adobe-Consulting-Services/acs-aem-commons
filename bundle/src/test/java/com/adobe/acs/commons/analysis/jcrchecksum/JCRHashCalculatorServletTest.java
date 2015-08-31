@@ -56,14 +56,19 @@ public class JCRHashCalculatorServletTest {
     MockSlingHttpServletRequest request;
     ResourceResolver resourceResolver;
     MockSlingHttpServletResponse response;
+    Session session;
 
     @Before
     public void setUp() throws LoginException {
         response = new MockSlingHttpServletResponse();
+        session = MockJcr.newSession();
+        this.resourceResolver = mock(ResourceResolver.class);
+        when(this.resourceResolver.adaptTo(Session.class)).thenReturn(session);
     }
 
     @Test
     public void testWithNoPath() throws Exception {
+        this.resourceResolver = mock(ResourceResolver.class);
         this.request =
             new MockSlingHttpServletRequest("/bin/hashes", null, "txt", null,
                 null) {
@@ -80,13 +85,9 @@ public class JCRHashCalculatorServletTest {
 
     @Test
     public void testWithPath() throws Exception {
-        Session s = MockJcr.newSession();
-        s.getRootNode().addNode("content").addNode("foo", "cq:Page")
+        session.getRootNode().addNode("content").addNode("foo", "cq:Page")
             .addNode("jcr:content", "cq:PageContent")
             .setProperty("jcr:title", "Foo");
-
-        this.resourceResolver = mock(ResourceResolver.class);
-        when(this.resourceResolver.adaptTo(Session.class)).thenReturn(s);
 
         this.request =
             new MockSlingHttpServletRequest("/bin/hashes", null, "txt", null,
