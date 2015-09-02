@@ -18,4 +18,4 @@
  * #L%
  */
 
-package com.adobe.acs.commons.synthesizedsling;
+package com.adobe.acs.commons.synth;
