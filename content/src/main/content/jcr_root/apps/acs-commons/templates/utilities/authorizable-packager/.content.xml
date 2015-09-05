@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:description="Utility page for defining packages of Authorizable nodes (Users and Groups)."
+    jcr:primaryType="cq:Template"
+    jcr:title="Authorizable Packager"
+    allowedPaths="[/etc/acs-commons/packagers(/.*)?,/etc/packagers(/.*)?,/etc/packages(/.*)?]"
+    ranking="{Long}120">
+    <jcr:content
+        cq:designPath="/etc/designs/acs-commons"
+        jcr:primaryType="cq:PageContent"
+        sling:resourceType="acs-commons/components/utilities/packager/authorizable-packager"/>
+</jcr:root>

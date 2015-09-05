@@ -7,7 +7,7 @@
         cq:template="/libs/cq/cloudserviceconfigs/templates/servicepage"
         jcr:description="Focus on customer experiences. We'll take care of the code."
         jcr:primaryType="cq:PageContent"
-        jcr:title="Adobe Dynamic Tag Manager"
+        jcr:title="Adobe Dynamic Tag Manager (Deprecated)"
         sling:resourceType="cq/cloudserviceconfigs/components/servicepage"
         componentReference="acs-commons/components/utilities/dtm"
         description="Focus on customer experiences. We'll take care of the code."

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Dialog"
+    activeTab="0"
+    title="Authorizable Packager Configuration"
+    xtype="tabpanel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <tab1
+            jcr:primaryType="cq:Widget"
+            title="Authorizable Packager Configuration"
+            xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <package-name
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="authorizables"
+                    fieldDescription="Name of the package to created. [ Default: authorizables ]"
+                    fieldLabel="Package name"
+                    name="./packageName"
+                    xtype="textfield"/>
+                <package-group-name
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="Authorizables"
+                    fieldDescription="Package group to assign this package to. [ Default: Authorizables ]"
+                    fieldLabel="Package group name"
+                    name="./packageGroupName"
+                    xtype="textfield"/>
+                <package-version
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="1.0.0"
+                    fieldDescription="Package version to assign this package. This value is ignored is Conflict Resolution is set to IncrementValue. [ Default: 1.0.0 ]"
+                    fieldLabel="Package version"
+                    name="./packageVersion"
+                    xtype="textfield"/>
+                <package-description
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="Authorizable Package initially defined by a ACS AEM Commons - Authorizable Packager configuration."
+                    fieldDescription="Package description. Enter the purpose and scope of this package for future reference."
+                    fieldLabel="Package description"
+                    name="./packageDescription"
+                    xtype="textarea"/>
+                <package-acl-handling
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="Overwrite"
+                    fieldDescription="Dictates how package's ACLs will be installed on target systems. [ Default: Overwrite ]"
+                    fieldLabel="Package ACL handling"
+                    name="./packageACLHandling"
+                    type="select"
+                    xtype="selection">
+                    <options jcr:primaryType="cq:WidgetCollection">
+                        <overwrite
+                            jcr:primaryType="nt:unstructured"
+                            text="Overwrite"
+                            value="Overwrite"/>
+                        <merge
+                            jcr:primaryType="nt:unstructured"
+                            text="Merge"
+                            value="Merge"/>
+                        <mergePreserve
+                            jcr:primaryType="nt:unstructured"
+                            text="MergePreserve"
+                            value="MergePreserve"/>
+                    </options>
+                </package-acl-handling>
+                <conflict-resolution
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="IncrementVersion"
+                    fieldDescription="Determines how package creation will be handled in the event of an existing package of the same Package group, name and version. [ Default: IncrementVersion ]"
+                    fieldLabel="Conflict resolution"
+                    name="./conflictResolution"
+                    type="select"
+                    xtype="selection">
+                    <options jcr:primaryType="cq:WidgetCollection">
+                        <replace
+                            jcr:primaryType="nt:unstructured"
+                            text="Replace"
+                            value="Replace"/>
+                        <increment-version
+                            jcr:primaryType="nt:unstructured"
+                            text="Increment Version"
+                            value="IncrementVersion"/>
+                        <none
+                            jcr:primaryType="nt:unstructured"
+                            text="None"
+                            value="None"/>
+                    </options>
+                </conflict-resolution>
+                <authorizableIds
+                    jcr:primaryType="cq:Widget"
+                    fieldDescription="Click the '+' to add a new authorizable."
+                    fieldLabel="Authorizable IDs"
+                    name="./authorizableIds"
+                    xtype="multifield" />
+                <include-configuration
+                    jcr:primaryType="cq:Widget"
+                    defaultValue="false"
+                    fieldDescription="Include this page as part of the package. [ Default: false ]"
+                    fieldLabel="Include Authorizable Packager"
+                    inputValue="true"
+                    name="./includeConfiguration"
+                    type="checkbox"
+                    xtype="selection"/>
+            </items>
+        </tab1>
+    </items>
+</jcr:root>

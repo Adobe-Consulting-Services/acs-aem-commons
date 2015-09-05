@@ -23,7 +23,7 @@ package com.adobe.acs.commons.replication.dispatcher.impl;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter.FlushType;
-import com.adobe.acs.commons.util.OsgiPropertyUtil;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.Preprocessor;
 import com.day.cq.replication.ReplicationAction;
@@ -239,14 +239,14 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                         DEFAULT_REPLICATION_ACTION_TYPE_NAME));
 
         /* Flush Rules */
-        this.hierarchicalFlushRules = this.configureFlushRules(OsgiPropertyUtil.toMap(
+        this.hierarchicalFlushRules = this.configureFlushRules(ParameterUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES),
                         DEFAULT_HIERARCHICAL_FLUSH_RULES), "="));
 
         log.debug("Hierarchical flush rules: " + this.hierarchicalFlushRules);
 
         /* ResourceOnly Flush Rules */
-        this.resourceOnlyFlushRules = this.configureFlushRules(OsgiPropertyUtil.toMap(
+        this.resourceOnlyFlushRules = this.configureFlushRules(ParameterUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_ONLY_FLUSH_RULES),
                         DEFAULT_RESOURCE_ONLY_FLUSH_RULES), "="));
 

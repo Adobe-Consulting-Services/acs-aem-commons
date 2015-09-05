@@ -82,6 +82,7 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                             $scope.status.completedAt = completedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
                             $scope.status.timeTaken = completedAtMoment.diff(startedAtMoment, 'seconds');
 
+
                         } else if ($scope.status.status === 'running') {
                             $scope.app.running = NotificationsService.running(true);
 

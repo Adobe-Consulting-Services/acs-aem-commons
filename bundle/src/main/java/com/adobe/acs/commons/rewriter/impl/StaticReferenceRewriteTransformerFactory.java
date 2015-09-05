@@ -38,7 +38,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
 import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.adobe.acs.commons.util.OsgiPropertyUtil;
+import com.adobe.acs.commons.util.ParameterUtil;
 
 /**
  * Rewriter pipeline component which rewrites static references.
@@ -175,7 +175,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
         final String[] attrProp = PropertiesUtil
                 .toStringArray(properties.get(PROP_ATTRIBUTES), DEFAULT_ATTRIBUTES);
-        this.attributes = OsgiPropertyUtil.toMap(attrProp, ":", ",");
+        this.attributes = ParameterUtil.toMap(attrProp, ":", ",");
 
         this.prefixes = PropertiesUtil.toStringArray(properties.get(PROP_PREFIXES), new String[0]);
         this.staticHostPattern = PropertiesUtil.toString(properties.get(PROP_HOST_NAME_PATTERN), null);
