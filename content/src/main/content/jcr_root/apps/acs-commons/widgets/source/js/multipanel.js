@@ -53,7 +53,8 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
 
         this.add(this.panelValue);
 
-        var dialog = this.findParentByType('dialog');
+        var multifield = this.findParentByType('multifield'),
+            dialog = this.findParentByType('dialog');
 
         dialog.on('beforesubmit', function(){
             var value = this.getValue();
@@ -62,6 +63,40 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
                 this.panelValue.setValue(value);
             }
         },this);
+
+        dialog.on('loadcontent', function(){
+            if(_.isEmpty(multifield.dropTargets)){
+                multifield.dropTargets = [];
+            }
+
+            multifield.dropTargets = multifield.dropTargets.concat(this.getDropTargets());
+
+            _.each(multifield.dropTargets, function(target){
+                if (!target.highlight) {
+                    return;
+                }
+
+                var dialogZIndex = parseInt(dialog.el.getStyle("z-index"), 10);
+
+                if (!isNaN(dialogZIndex)) {
+                    target.highlight.zIndex = dialogZIndex + 1;
+                }
+            });
+        }, this);
+
+        if(dialog.acsInit){
+            return;
+        }
+
+        dialog.on('hide', function(){
+            var editable = CQ.utils.WCM.getEditables()[this.path];
+
+            //dialog caching is a real pain when there are multifield items; donot cache
+            delete editable.dialogs[CQ.wcm.EditBase.EDIT];
+            delete CQ.WCM.getDialogs()["editdialog-" + this.path];
+        }, dialog);
+
+        dialog.acsInit = true;
     },
 
     afterRender : function(){
@@ -101,7 +136,29 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
             }
 
             i.setValue(pData[i.key]);
+
+            i.fireEvent('loadcontent', this);
         });
+    },
+
+    getDropTargets : function() {
+        var targets = [], t;
+
+        this.items.each(function(){
+            if(!this.getDropTargets){
+                return;
+            }
+
+            t = this.getDropTargets();
+
+            if(_.isEmpty(t)){
+                return;
+            }
+
+            targets = targets.concat(t);
+        });
+
+        return targets;
     },
 
     validate: function(){
@@ -130,4 +187,28 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
     }
 });
 
-CQ.Ext.reg("multifieldpanel", ACS.CQ.MultiFieldPanel);	
+CQ.Ext.reg("multifieldpanel", ACS.CQ.MultiFieldPanel);
+
+//test function for intelsecurity loadcontent bugfix, not part of acs aem commons
+ACS.CQ.TestLoadStatesFn = function(){
+    var cValue = this.getValue(),
+        panel = this.findParentByType('multifieldpanel'),
+        state = panel.getComponent('state');
+
+    state.setValue(null);
+
+    if(_.isEmpty(cValue)){
+        return;
+    }
+
+    var india = [   { value : "TELANGANA", text : "Telangana"},
+            { value : "ANDHRA", text : "Andhra" }],
+        usa = [   { value : "TEXAS", text : "Texas"},
+            { value : "FLORIDA", text : "Florida" } ];
+
+    if(cValue == "INDIA"){
+        state.setOptions(india);
+    }else if(cValue == "USA"){
+        state.setOptions(usa);
+    }
+};
