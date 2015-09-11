@@ -104,32 +104,7 @@ public final class XSSFunctions {
      */
     @Function
     public static CharSequence getValidHref(XSSAPI xssAPI, String source) {
-        try {
-            final String testHtml = LINK_PREFIX + mangleNamespaces(source) + LINK_SUFFIX;
-
-            final String safeHtml = xssAPI.filterHTML(testHtml);
-            return safeHtml.substring(LINK_PREFIX.length(), safeHtml.length() - LINK_SUFFIX.length());
-        } catch (final Exception e) {
-            return "";
-        }
-    }
-
-    private static String mangleNamespaces(String absPath) {
-        if (absPath != null && absPath.contains(MANGLE_NAMESPACE_OUT_SUFFIX)) {
-            final Matcher m = MANGLE_NAMESPACE_PATTERN.matcher(absPath);
-
-            final StringBuffer buf = new StringBuffer();
-            while (m.find()) {
-                final String replacement = MANGLE_NAMESPACE_IN_PREFIX + m.group(1) + MANGLE_NAMESPACE_IN_SUFFIX;
-                m.appendReplacement(buf, replacement);
-            }
-
-            m.appendTail(buf);
-
-            absPath = buf.toString();
-        }
-
-        return absPath;
+        return xssAPI.getValidHref(source);
     }
 
     private XSSFunctions() {
