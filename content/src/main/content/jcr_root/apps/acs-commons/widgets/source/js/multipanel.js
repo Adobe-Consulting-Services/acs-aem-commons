@@ -19,6 +19,7 @@
  */
 /*global CQ: false, ACS: false */
 CQ.Ext.ns("ACS.CQ"); 
+
 /**
  * @class ACS.CQ.MultiFieldPanel
  * @extends CQ.form.Panel
@@ -27,14 +28,10 @@ CQ.Ext.ns("ACS.CQ");
  * key/value pairs serialized as a JSON object. The keys for each pair is defined by setting the
  * 'key' property on the field.</p>
  */
+
 ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
     panelValue: '',
 
-    /**
-     * @constructor
-     * Creates a new MultiFieldPanel.
-     * @param {Object} config The config object
-     */
     constructor: function(config){
         config = config || {};
         if (!config.layout) {
@@ -88,10 +85,18 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
             return;
         }
 
+        var tabPanel = multifield.findParentByType("tabpanel");
+
+        if(tabPanel){
+            tabPanel.on("tabchange", function(panel){
+                panel.doLayout();
+            });
+        }
+
         dialog.on('hide', function(){
             var editable = CQ.utils.WCM.getEditables()[this.path];
 
-            //dialog caching is a real pain when there are multifield items; donot cache
+            //dialog caching is a real pain when there are multifield items; remove from cache
             delete editable.dialogs[CQ.wcm.EditBase.EDIT];
             delete CQ.WCM.getDialogs()["editdialog-" + this.path];
         }, dialog);
@@ -188,27 +193,3 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
 });
 
 CQ.Ext.reg("multifieldpanel", ACS.CQ.MultiFieldPanel);
-
-//test function for intelsecurity loadcontent bugfix, not part of acs aem commons
-ACS.CQ.TestLoadStatesFn = function(){
-    var cValue = this.getValue(),
-        panel = this.findParentByType('multifieldpanel'),
-        state = panel.getComponent('state');
-
-    state.setValue(null);
-
-    if(_.isEmpty(cValue)){
-        return;
-    }
-
-    var india = [   { value : "TELANGANA", text : "Telangana"},
-            { value : "ANDHRA", text : "Andhra" }],
-        usa = [   { value : "TEXAS", text : "Texas"},
-            { value : "FLORIDA", text : "Florida" } ];
-
-    if(cValue == "INDIA"){
-        state.setOptions(india);
-    }else if(cValue == "USA"){
-        state.setOptions(usa);
-    }
-};
