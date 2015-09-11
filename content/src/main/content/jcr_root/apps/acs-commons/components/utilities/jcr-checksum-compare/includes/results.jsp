@@ -27,11 +27,47 @@
     pageContext.setAttribute("hosts", agentHosts.getHosts(AemPublishAgentFilter.AEM_PUBLISH_AGENT_FILTER));
 
 %>
-<c:forEach var="host" items="${hosts}">
+
+<%--
+<h4>Self</h4>
+<div id="diff_self}">
+    <pre>{{ results[0] }}</pre>
+</div>
+
+<hr/>
+
+<c:forEach var="host" items="${hosts}" varStatus="loop">
     <h4>${host}</h4>
     <div id="diff_${host}">
-        
+        {{ results[${loop.count}] }}
     </div>
     
     <hr/>
 </c:forEach>
+--%>
+
+<div class="coral-TabPanel coral-TabPanel--stacked" data-init="tabs">
+    <nav class="coral-TabPanel-navigation">
+
+        <a class="coral-TabPanel-tab" data-toggle="tab">Diff</a>
+
+        <a ng-repeat="host in hosts track by $index"
+           class="coral-TabPanel-tab {{ $index === 0 ? is-active : '' }}"
+           data-toggle="tab">{{ host.name }}</a>
+
+    </nav>
+    <div class="coral-TabPanel-content">
+
+        <section class="coral-TabPanel-pane">
+            <div diff
+                 inline="true"
+                 base-data="diff.baseData"
+                 new-data="diff.newData"></div>
+        </section>
+        <section ng-repeat="host in hosts track by $index"
+                 class="coral-TabPanel-pane"><pre>{{ host.data }}</pre></section>
+
+    </div>
+</div>
+
+

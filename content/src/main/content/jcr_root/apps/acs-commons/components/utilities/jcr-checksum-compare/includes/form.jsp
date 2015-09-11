@@ -43,32 +43,43 @@
         <h3 class="coral-Form-fieldset-legend">AEM Instances</h3>
 
         <ul class="coral-List coral-List--minimal">
-            <li class="coral-List-item">
-                <label class="coral-Checkbox">
-                    <input class="coral-Checkbox-input"
-                           ng-model="form.targets.self"
-                           ng-true-value="true" 
-                           ng-false-value="false"
-                           type="checkbox"
-                           value="self">
-                    <span class="coral-Checkbox-checkmark"></span>
-                    <span class="coral-Checkbox-description">Self</span>
-                </label>
-            </li>
-            <c:forEach var="host" items="${hosts}" varStatus="status">
-            <li class="coral-List-item">
+            <li     ng-repeat="host in hosts track by $index"
+                    class="coral-List-item">
                 <label class="coral-Checkbox">
                     <input class="coral-Checkbox-input"
                            type="checkbox"
-                           ng-model="form.targets.remote[${status.index}]"
-                           ng-true-value="'${host}'"
-                           ng-false-value=""
-                           value="${host}">
+                           ng-model="host.active"
+                           ng-true-value="true"
+                           ng-false-value="false">
                     <span class="coral-Checkbox-checkmark"></span>
-                    <span class="coral-Checkbox-description">${host}</span>
+                    <span class="coral-Checkbox-description">{{ host.name }}</span>
                 </label>
             </li>
-            </c:forEach>
+
+        </ul>
+    </section>
+
+
+
+
+
+    <section class="coral-Form-fieldset">
+        <h3 class="coral-Form-fieldset-legend">Diff</h3>
+
+        <ul class="coral-List coral-List--minimal">
+            <li     ng-repeat="host in hosts track by $index | filter: {data: '!!'}"
+                    class="coral-List-item">
+                <label class="coral-Checkbox">
+                    <input class="coral-Checkbox-input"
+                           type="checkbox"
+                           ng-model="host.diff"
+                           ng-true-value="true"
+                           ng-false-value="false">
+                    <span class="coral-Checkbox-checkmark"></span>
+                    <span class="coral-Checkbox-description">{{ host.name }}</span>
+                </label>
+            </li>
+
         </ul>
     </section>
 

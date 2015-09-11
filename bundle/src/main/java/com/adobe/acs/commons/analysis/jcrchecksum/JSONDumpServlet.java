@@ -20,16 +20,6 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import java.io.IOException;
-
-import javax.jcr.Node;
-import javax.jcr.Property;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.Value;
-import javax.jcr.util.TraversingItemVisitor.Default;
-import javax.servlet.ServletException;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Service;
@@ -38,13 +28,24 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.io.JSONWriter;
 
+import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Value;
+import javax.jcr.util.TraversingItemVisitor.Default;
+import javax.servlet.ServletException;
+import java.io.IOException;
+
 @SuppressWarnings("serial")
 @Component(metatype = false)
 @Service
 @Properties({
-    @org.apache.felix.scr.annotations.Property(name = "sling.servlet.paths", value = "/bin/jsondump", propertyPrivate = true),
-    @org.apache.felix.scr.annotations.Property(name = "sling.servlet.extensions", value = "json", propertyPrivate = true),
-    @org.apache.felix.scr.annotations.Property(name = "sling.servlet.methods", value = "GET", propertyPrivate = true) })
+        @org.apache.felix.scr.annotations.Property(
+                name = "sling.servlet.paths",
+                value = "/bin/acs-commons/jcr-compare.dump.json",
+                propertyPrivate = true)
+})
 public class JSONDumpServlet extends SlingSafeMethodsServlet {
 
     @Override

@@ -18,12 +18,20 @@
   ~ #L%
   --%>
 <%@include file="/libs/foundation/global.jsp" %><%
-%><%@page session="false" %><%
+%><%@page session="false"
+          import="com.adobe.acs.commons.replication.AemPublishAgentFilter,
+                  com.adobe.acs.commons.replication.AgentHosts,
+                  java.util.List, org.apache.sling.commons.json.JSONObject, org.apache.sling.commons.json.JSONArray, org.apache.commons.lang.StringUtils"%><%
+
+    AgentHosts agentHosts = sling.getService(AgentHosts.class);
+    List<String> hosts = agentHosts.getHosts(AemPublishAgentFilter.AEM_PUBLISH_AGENT_FILTER);
+
+    pageContext.setAttribute("hostNames", "['" + StringUtils.join(hosts, "', '") + "']");
 
 %><div class="page"
         role="main"
         ng-controller="MainCtrl"
-        ng-init="app.resource = '${resourcePath}';">
+        ng-init="app.resource = '${resourcePath}'; init(${hostNames});">
 
     <cq:include script="includes/form.jsp"/>
     <cq:include script="includes/results.jsp"/>

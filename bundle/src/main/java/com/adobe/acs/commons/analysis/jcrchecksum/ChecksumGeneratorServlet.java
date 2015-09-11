@@ -20,17 +20,6 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -40,13 +29,24 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 @SuppressWarnings("serial")
 @Component(metatype = false)
 @Service
 @Properties({
-    @Property(name = "sling.servlet.paths", value = "/bin/hashes", propertyPrivate = true),
-    @Property(name = "sling.servlet.extensions", value = "txt", propertyPrivate = true),
-    @Property(name = "sling.servlet.methods", value = "GET", propertyPrivate = true) })
+    @Property(name = "sling.servlet.paths",
+            value = "/bin/acs-commons/jcr-compare.hashes.txt",
+            propertyPrivate = true)
+})
 public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
 
     @Override
