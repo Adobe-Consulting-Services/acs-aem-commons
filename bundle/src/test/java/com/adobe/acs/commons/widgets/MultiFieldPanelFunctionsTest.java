@@ -77,4 +77,11 @@ public class MultiFieldPanelFunctionsTest {
                 "non-existing");
         assertEquals(0, actual.size());
     }
+
+    @Test
+    public void testResourceAdaptToValueMapNull() {
+        when(resource.adaptTo(ValueMap.class)).thenReturn(null);
+        List<Map<String, String>> actual = MultiFieldPanelFunctions.getMultiFieldPanelValues(resource, "single");
+        assertEquals(0, actual.size());
+    }
 }
