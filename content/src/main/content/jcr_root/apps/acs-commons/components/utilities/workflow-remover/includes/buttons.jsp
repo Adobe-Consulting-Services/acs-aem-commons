@@ -17,17 +17,18 @@
   ~ limitations under the License.
   ~ #L%
   --%>
-<%@include file="/libs/foundation/global.jsp" %><%
-%><%@page session="false" %><%
+<br clear="all"/>
 
-%><div class="page"
-        id="scroll-top"
-        role="main"
-        ng-controller="MainCtrl"
-        ng-init="app.resource = '${resourcePath}'; init();">
+<hr/>
 
-    <cq:include script="includes/status.jsp"/>
-    <cq:include script="includes/form.jsp"/>
-    <cq:include script="includes/buttons.jsp"/>
+<button type="submit"
+        role="button"
+        ng-click="remove()"
+        ng-hide="app.running"
+        class="coral-Button coral-Button--primary">Remove Workflows</button>
 
-</div>
+<button type="submit"
+        role="button"
+        ng-show="app.running"
+        ng-click="forceQuit()"
+        class="coral-Button coral-Button--warning">Force Quit</button>

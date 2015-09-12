@@ -5,8 +5,5 @@
         jcr:primaryType="cq:PageContent"
         jcr:title="Workflow Remover"
         sling:resourceType="acs-commons/components/utilities/workflow-remover">
-        <status
-                jcr:primaryType="nt:unstructured"
-                />
     </jcr:content>
 </jcr:root>

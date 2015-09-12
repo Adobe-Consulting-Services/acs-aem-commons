@@ -23,10 +23,11 @@ package com.adobe.acs.commons.workflow.bulk.removal.impl;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -43,7 +44,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
@@ -56,7 +60,13 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final SimpleDateFormat WORKFLOW_FOLDER_FORMAT = new SimpleDateFormat("YYYY-MM-dd");
 
-    private static final String PN_PAYLOAD_PATH = "data/payload/path";
+    private static final String PN_MODEL_ID = "modelId";
+
+    private static final String PN_STARTED_AT = "startedAt";
+
+    private static final String PN_STATUS = "status";
+
+    private static final String PAYLOAD_PATH = "data/payload/path";
 
     private static final String NT_SLING_FOLDER = "sling:Folder";
 
@@ -69,6 +79,27 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     private static final int BATCH_SIZE = 1000;
 
     private static final int MAX_SAVE_RETRIES = 5;
+    
+    private final AtomicReference<WorkflowRemovalStatus> status
+            = new AtomicReference<WorkflowRemovalStatus>();
+
+    private final AtomicBoolean forceQuit = new AtomicBoolean(false);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public WorkflowRemovalStatus getStatus() {
+        return this.status.get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void forceQuit() {
+        this.forceQuit.set(true);
+    }
 
     /**
      * {@inheritDoc}
@@ -78,7 +109,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                        final Collection<String> statuses,
                                        final Collection<Pattern> payloads,
                                        final Calendar olderThan)
-            throws PersistenceException, WorkflowRemovalException, InterruptedException {
+            throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
         return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, BATCH_SIZE);
     }
 
@@ -91,16 +122,16 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                        final Collection<Pattern> payloads,
                                        final Calendar olderThan,
                                        final int batchSize)
-            throws PersistenceException, WorkflowRemovalException, InterruptedException {
+            throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
+
+        int count = 0;
+        int checkedCount = 0;
+        int workflowRemovedCount = 0;
+
+        final long start = System.currentTimeMillis();
 
         try {
-            final long start = System.currentTimeMillis();
-
             this.start(resourceResolver);
-
-            int count = 0;
-            int checkedCount = 0;
-            int workflowRemovedCount = 0;
 
             final List<Resource> containerFolders = this.getWorkflowInstanceFolders(resourceResolver);
 
@@ -113,6 +144,11 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                     int remaining = 0;
 
                     for (final Resource instance : folder.getChildren()) {
+
+                        if (this.forceQuit.get()) {
+                            throw new WorkflowRemovalForceQuitException();
+                        }
+
                         final ValueMap properties = instance.getValueMap();
 
                         if (!StringUtils.equals(NT_CQ_WORKFLOW,
@@ -128,7 +164,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                         final String status = properties.get(PN_STATUS, String.class);
                         final String model = properties.get(PN_MODEL_ID, String.class);
                         final Calendar startTime = properties.get(PN_STARTED_AT, Calendar.class);
-                        final String payload = properties.get(PN_PAYLOAD_PATH, String.class);
+                        final String payload = properties.get(PAYLOAD_PATH, String.class);
 
                         if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(status)) {
                             log.trace("Workflow instance [ {} ] has non-matching status of [ {} ]", instance.getPath(), status);
@@ -215,18 +251,28 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             return count;
 
         } catch (PersistenceException e) {
+            this.forceQuit.set(false);
             log.error("Error persisting changes with Workflow Removal", e);
             this.error(resourceResolver);
             throw e;
         } catch (WorkflowRemovalException e) {
+            this.forceQuit.set(false);
             log.error("Error with Workflow Removal", e);
             this.error(resourceResolver);
             throw e;
         } catch (InterruptedException e) {
+            this.forceQuit.set(false);
             log.error("Errors in persistence retries during Workflow Removal", e);
             this.error(resourceResolver);
             throw e;
+        }  catch (WorkflowRemovalForceQuitException e) {
+            this.forceQuit.set(false);
+            // Uncommon instance of using Exception to control flow; Force quitting is an extreme condition.
+            log.info("Workflow removal was force quit. The removal state is unknown.");
+            this.forceQuit(resourceResolver);
+            throw e;
         }
+
     }
 
     private Collection<Resource> getSortedAndFilteredFolders(Resource folderResource) {
@@ -275,68 +321,79 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     }
 
     private void start(final ResourceResolver resourceResolver) throws PersistenceException, WorkflowRemovalException, InterruptedException {
+        // Ensure forceQuit does not have a left-over value when starting a new run
+        this.forceQuit.set(false);
 
-        final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
-        final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
+        boolean running = false;
 
-        if (StringUtils.equals(Status.RUNNING.toString(), mvm.get(PN_STATUS, String.class))) {
+        WorkflowRemovalStatus localStatus = this.getStatus();
+        
+        if(localStatus != null) {
+            running = localStatus.isRunning();
+        }
+        
+        if (running) {
+            log.warn("Unable to start workflow instance removal; Workflow removal already running.");
+            
             throw new WorkflowRemovalException("Workflow removal already started by "
-                    + mvm.put(PN_INITIATED_BY, "Unknown"));
+                    + this.getStatus().getInitiatedBy());
         } else {
-
-            mvm.put(PN_INITIATED_BY, resourceResolver.getUserID());
-            mvm.put(PN_STATUS, StringUtils.lowerCase(Status.RUNNING.toString()));
-            mvm.put(PN_STARTED_AT, System.currentTimeMillis());
-
-            mvm.put(PN_COUNT, 0);
-            mvm.put(PN_CHECKED_COUNT, 0);
-
-            mvm.remove(PN_COMPLETED_AT);
-
-            this.save(resourceResolver);
+            this.status.set(new WorkflowRemovalStatus(resourceResolver));
+            log.info("Starting workflow instance removal");
         }
     }
 
     private void batchComplete(final ResourceResolver resourceResolver, final int checked, final int count) throws
             PersistenceException, InterruptedException {
-        final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
-        final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
-
-        mvm.put(PN_STATUS, StringUtils.lowerCase(Status.RUNNING.toString()));
-        mvm.put(PN_CHECKED_COUNT, checked);
-        mvm.put(PN_COUNT, count);
 
         this.save(resourceResolver);
+        
+        WorkflowRemovalStatus status = this.status.get();
+        
+        status.setChecked(checked);
+        status.setRemoved(count);
+        
+        this.status.set(status);
     }
 
     private void complete(final ResourceResolver resourceResolver, final int checked, final int count) throws
             PersistenceException, InterruptedException {
-        final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
-        final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
-
-        mvm.put(PN_STATUS, StringUtils.lowerCase(Status.COMPLETE.toString()));
-        mvm.put(PN_CHECKED_COUNT, checked);
-        mvm.put(PN_COUNT, count);
-        mvm.put(PN_COMPLETED_AT, System.currentTimeMillis());
 
         this.save(resourceResolver);
+
+        WorkflowRemovalStatus status = this.status.get();
+
+        status.setRunning(false);
+        status.setChecked(checked);
+        status.setRemoved(count);
+        status.setCompletedAt(Calendar.getInstance());
+        
+        this.status.set(status);
     }
 
     private void error(final ResourceResolver resourceResolver) throws
             PersistenceException, InterruptedException {
+
+        WorkflowRemovalStatus status = this.status.get();
+
+        status.setRunning(false);
+        status.setErredAt(Calendar.getInstance());
         
-        resourceResolver.revert();
-
-        final Resource resource = resourceResolver.getResource(WORKFLOW_REMOVAL_STATUS_PATH);
-        final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
-
-        mvm.put(PN_STATUS, StringUtils.lowerCase(Status.ERROR.toString()));
-        mvm.put(PN_CHECKED_COUNT, -1);
-        mvm.put(PN_COUNT, -1);
-        mvm.put(PN_COMPLETED_AT, System.currentTimeMillis());
-
-        this.save(resourceResolver);
+        this.status.set(status);
     }
+
+    private void forceQuit(final ResourceResolver resourceResolver) {
+        WorkflowRemovalStatus status = this.status.get();
+
+        status.setRunning(false);
+        status.setForceQuitAt(Calendar.getInstance());
+
+        this.status.set(status);
+
+        // Reset force quit flag
+        this.forceQuit.set(false);
+    }
+
 
     private List<Resource> getWorkflowInstanceFolders(final ResourceResolver resourceResolver) {
         final List<Resource> folders = new ArrayList<Resource>();
@@ -361,5 +418,12 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         }
 
         return folders;
+    }
+
+
+    @Activate
+    @Deactivate
+    protected void reset(Map<String, Object> config) {
+        this.forceQuit.set(false);
     }
 }
