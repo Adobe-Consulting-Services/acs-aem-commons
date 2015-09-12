@@ -21,8 +21,7 @@
 <form   class="coral-Form coral-Form--vertical acs-form"
         novalidate
         name="params"
-        ng-show="!app.running"
-        ng-submit="remove(params.$valid)">
+        ng-hide="app.running">
 
     <section class="coral-Form-fieldset">
         <h3 class="coral-Form-fieldset-legend">Workflow statuses</h3>
@@ -97,8 +96,7 @@
           </span>
         </div>
     </section>
-    
-    
+
     <section class="coral-Form-fieldset">
         <h3 class="coral-Form-fieldset-legend">Workflows older than</h3>
 
@@ -163,14 +161,5 @@
             </li>
         </ul>        
     </section>
-
-    <br clear="all"/>
-
-    <hr/>
-    
-    <button type="submit"
-            role="button"
-            ng-hide="app.running"
-            class="coral-Button coral-Button--primary">Remove Workflows</button>
 
 </form>

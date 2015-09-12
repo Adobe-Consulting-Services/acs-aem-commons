@@ -61,26 +61,26 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                 $scope.getStatus();
             };
 
-            $scope.getStatus = function () {
+            $scope.getStatus = function (forceRunning) {
                 $http({
                     method: 'GET',
                     url: encodeURI($scope.app.resource + '.status.json')
                 }).
                     success(function (data, status, headers, config) {
 
-                        $scope.status = data || null;
-                        $scope.app.running = NotificationsService.running($scope.status.running || false);
-                        
-                        if (!$scope.status) {
-                            // Not started
-                            return;
+                        $scope.status = data || { running: false };
+
+                        if(forceRunning) {
+                            $scope.app.running = NotificationsService.running(forceRunning);
+                        } else {
+                            $scope.app.running =
+                                NotificationsService.running(($scope.status && $scope.status.running) || false);
                         }
 
                         if ($scope.app.running) {
-                            
                             $scope.app.refresh = $timeout(function () {
                                 $scope.getStatus();
-                            }, 3000);
+                            }, 2000);
                             
                         } else if ($scope.status.erredAt) {
 
@@ -98,7 +98,13 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
             };
 
             $scope.remove = function () {
-                var payload = angular.copy($scope.form);
+                var payload;
+
+                if ($scope.app.running) {
+                    return;
+                }
+
+                payload = angular.copy($scope.form);
                 $scope.app.running = NotificationsService.running(true);
 
                 if (payload.olderThan) {
@@ -115,16 +121,44 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                         $scope.getStatus();
                         $scope.app.running = NotificationsService.running(false);
                         NotificationsService.add('info',
-                            'INFO', 'Workflow removal completed');                        
+                            'INFO', 'Workflow removal complete');
                     }).
                     error(function (data, status, headers, config) {
-                        $scope.app.running = NotificationsService.running(false);
-                        NotificationsService.add('error',
-                            'ERROR', 'Workflow removal failed due to: ' + data);
+                        if (status === 599) {
+                            $scope.app.running = NotificationsService.running(false);
+                        } else {
+                            $scope.getStatus();
+                            $scope.app.running = NotificationsService.running(false);
+                            NotificationsService.add('error',
+                                'ERROR', 'Workflow removal failed due to: ' + data);
+                        }
                     });
 
-                $scope.getStatus();
+                $scope.getStatus(true);
             };
+
+
+            $scope.forceQuit = function () {
+                $http({
+                    method: 'POST',
+                    url: encodeURI($scope.app.resource + '.force-quit.json'),
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).
+                    success(function (data, status, headers, config) {
+                        $scope.app.running = NotificationsService.running(false);
+
+                        $scope.status = data || { running: false };
+
+                        NotificationsService.add('info',
+                            'INFO', 'Workflow removal has been force quit');
+                    }).
+                    error(function (data, status, headers, config) {
+                        $scope.getStatus();
+                        NotificationsService.add('error',
+                            'ERROR', 'Workflow removal failed to force quit: ' + data);
+                    });
+            };
+
 
             /* Form Methods */
             $scope.toggleStatusSelection = function (status) {

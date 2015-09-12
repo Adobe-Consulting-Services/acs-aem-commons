@@ -26,7 +26,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,29 +34,31 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 /**
- * ACS AEM Commons - Workflow Instance Remover - Status Servlet
+ * ACS AEM Commons - Workflow Instance Remover - Force Quit Servlet
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = { "GET" },
+        methods = { "POST" },
         resourceTypes = { "acs-commons/components/utilities/workflow-remover" },
-        selectors = { "status" },
+        selectors = { "force-quit" },
         extensions = { "json" }
 )
-public class StatusServlet extends SlingSafeMethodsServlet {
-    private static final Logger log = LoggerFactory.getLogger(StatusServlet.class);
+public class ForceQuitServlet extends SlingAllMethodsServlet {
+    private static final Logger log = LoggerFactory.getLogger(ForceQuitServlet.class);
 
     @Reference
     private WorkflowInstanceRemover workflowInstanceRemover;
     
     @Override
-    public final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+    public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         try {
+            workflowInstanceRemover.forceQuit();
+
             if (workflowInstanceRemover.getStatus() != null) {
                 response.getWriter().write(workflowInstanceRemover.getStatus().getJSON().toString());
             } else {
@@ -66,7 +68,7 @@ public class StatusServlet extends SlingSafeMethodsServlet {
                 response.getWriter().write(workflowStatus.getJSON().toString());
             }
         } catch (Exception e) {
-            log.error("Unable to create Workflow Removal status", e);
+            log.error("Unable to create Workflow Removal status after Force Quit", e);
             response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(e.getMessage());
         }

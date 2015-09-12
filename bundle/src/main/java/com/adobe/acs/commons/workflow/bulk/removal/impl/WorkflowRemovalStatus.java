@@ -35,6 +35,7 @@ public class WorkflowRemovalStatus {
     String KEY_CHECKED_COUNT = "checkedCount";
     String KEY_COMPLETED_AT = "completedAt";
     String KEY_DURATION = "duration";
+    String KEY_FORCE_QUIT_AT = "forceQuitAt";
     String KEY_ERRED_AT = "erredAt";
     String KEY_INITIATED_BY = "initiatedBy";
     String KEY_REMOVED_COUNT = "removedCount";
@@ -49,8 +50,10 @@ public class WorkflowRemovalStatus {
     private Calendar startedAt;
     private Calendar completedAt;
     private Calendar erredAt;
+    private Calendar forceQuitAt;
     private int checked = 0;
     private int removed = 0;
+
 
     public WorkflowRemovalStatus(ResourceResolver resourceResolver) {
         this.running = true;
@@ -104,16 +107,16 @@ public class WorkflowRemovalStatus {
         return checked;
     }
 
-    public final void incrementChecked(int checked) {
-        this.checked += checked;
+    public final void setChecked(int checked) {
+        this.checked = checked;
     }
 
     public final int getRemoved() {
         return removed;
     }
 
-    public final void incrementRemoved(int removed) {
-        this.removed += removed;
+    public final void setRemoved(int removed) {
+        this.removed = removed;
     }
 
     public String getErredAt() {
@@ -127,6 +130,19 @@ public class WorkflowRemovalStatus {
 
     public void setErredAt(Calendar erredAt) {
         this.erredAt = erredAt;
+    }
+
+    public void setForceQuitAt(final Calendar forceQuitAt) {
+        this.forceQuitAt = forceQuitAt;
+    }
+
+    public String getForceQuitAt() {
+        if (this.forceQuitAt == null) {
+            return null;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        return sdf.format(forceQuitAt.getTime());
     }
 
     private long getDuration(Calendar start, Calendar end) {
@@ -154,6 +170,9 @@ public class WorkflowRemovalStatus {
         if (this.getErredAt() != null) {
             json.put(KEY_ERRED_AT, this.getErredAt());
             json.put(KEY_DURATION, getDuration(this.startedAt, this.erredAt));
+        } else if (this.getForceQuitAt() != null) {
+            json.put(KEY_FORCE_QUIT_AT, this.getForceQuitAt());
+            json.put(KEY_DURATION, getDuration(this.startedAt, this.forceQuitAt));
         } else if (this.getCompletedAt() != null) {
             json.put(KEY_COMPLETED_AT, this.getCompletedAt());
             json.put(KEY_DURATION, getDuration(this.startedAt, this.completedAt));

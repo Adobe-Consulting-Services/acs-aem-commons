@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.workflow.bulk.removal;
 
 import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalException;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalForceQuitException;
 import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalStatus;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -50,7 +51,7 @@ public interface WorkflowInstanceRemover {
                                 final Collection<String> modelIds,
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
-                                final Calendar olderThan) throws PersistenceException, WorkflowRemovalException, InterruptedException;
+                                final Calendar olderThan) throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException;
 
 
     /**
@@ -69,7 +70,7 @@ public interface WorkflowInstanceRemover {
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
                                 final Calendar olderThan,
-                                final int batchSize) throws PersistenceException, WorkflowRemovalException, InterruptedException;
+                                final int batchSize) throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException;
 
 
     /**
@@ -78,4 +79,10 @@ public interface WorkflowInstanceRemover {
      * @return the workflow remover's status object 
      */
     WorkflowRemovalStatus getStatus();
+
+    /**
+     * Forces an interruption of the Workflow removal process.
+     * Any uncommited changes will be lost.
+     */
+    void forceQuit();
 }
