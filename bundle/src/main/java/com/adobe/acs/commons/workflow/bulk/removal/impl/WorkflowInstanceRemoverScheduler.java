@@ -145,9 +145,11 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         } catch (PersistenceException e) {
             log.error("Persistence Exception when saving Workflow Instances removal", e);
         } catch (WorkflowRemovalException e) {
-            log.error("Errors in persistence retries during Workflow Removal", e);
+            log.error("Workflow Removal exception during Workflow Removal", e);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("Interrupted Exception during Workflow Removal", e);
+        } catch (WorkflowRemovalForceQuitException e) {
+            log.info("Workflow Removal force quit", e);
         } finally {
             if (adminResourceResolver != null) {
                 adminResourceResolver.close();
