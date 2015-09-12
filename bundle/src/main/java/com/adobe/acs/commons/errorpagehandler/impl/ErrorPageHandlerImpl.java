@@ -22,6 +22,7 @@ package com.adobe.acs.commons.errorpagehandler.impl;
 import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
+import com.adobe.acs.commons.util.InfoWriter;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
@@ -259,17 +260,14 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         final ResourceResolver resourceResolver = errorResource.getResourceResolver();
         final String errorResourcePath = errorResource.getPath();
 
-        final boolean isError = this.getStatusCode(request) >= SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-
         // Get error page name to look for based on the error code/name
-        final String pageName = getErrorPageName(request);
         String errorsPath = null;
 
         // Try to find the closest real parent for the requested resource
-        final Resource parent = findFirstRealParentOrSelf(errorResource);
+        final Resource parent = findFirstRealParentOrSelf(request, errorResource);
         if (parent != null) {
             // Get content resource of the page
-            final Resource parentContentResource = parent.getChild("jcr:content");
+            final Resource parentContentResource = parent.getChild(JcrConstants.JCR_CONTENT);
 
             if (parentContentResource != null) {
                 final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(parentContentResource);
@@ -290,8 +288,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         if (StringUtils.isNotBlank(errorsPath)) {
             log.debug("Best matching errors path for request is: {}", errorsPath);
 
-
-            String errorPath = errorsPath + "/" + pageName;
+            String errorPath = errorsPath + "/" + getErrorPageName(request);
             page = getResource(resourceResolver, errorPath);
 
             // No error-specific page could be found, use the "default" error page
@@ -491,37 +488,63 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /**
      * Given the Request path, find the first Real Parent of the Request (even if the resource doesnt exist).
      *
-     * @param resource
+     * @param request the request object
+     * @param errorResource the error resource
      * @return
      */
-    private Resource findFirstRealParentOrSelf(Resource resource) {
-        if (resource == null) {
+    private Resource findFirstRealParentOrSelf(SlingHttpServletRequest request, Resource errorResource) {
+        if (errorResource == null) {
+            log.debug("Error resource is null");
             return null;
-        } else if (!ResourceUtil.isNonExistingResource(resource)) {
+        }
+
+        log.trace("Finding first real parent for [ {} ]", errorResource.getPath());
+
+        final ResourceResolver resourceResolver = errorResource.getResourceResolver();
+
+        // Get the lowest aggregate node ancestor for the errorResource
+        String path = StringUtils.substringBefore(errorResource.getPath(), JcrConstants.JCR_CONTENT);
+
+        Resource resource = errorResource;
+
+        if (!StringUtils.equals(path, errorResource.getPath())) {
+            // Only resolve the resource if the path of the errorResource is different from the cleaned up path; else
+            // we know the errorResource and what the path resolves to is the same
+            resource = resourceResolver.resolve(request, path);
+        }
+
+        // If the resource exists, then use it!
+        if (resource != null && !ResourceUtil.isNonExistingResource(resource)) {
+            log.debug("Found real aggregate resource at [ {} }", resource.getPath());
             return resource;
         }
 
-        final Resource parent = resource.getParent();
-        if (parent != null) {
-            return parent;
+        // Quick check for the Parent; Handles common case of deactivated pages
+        if (resource != null) {
+            final Resource parent = resource.getParent();
+            if (parent != null) {
+                log.debug("Found real aggregate resource via getParent() at [ {} ]", parent.getPath());
+                return parent;
+            }
         }
 
-        final ResourceResolver resourceResolver = resource.getResourceResolver();
-        final String path = resource.getPath();
-        final PathInfo pathInfo = new PathInfo(path);
+        // Start checking the path until the first real ancestor is found
+        final PathInfo pathInfo = new PathInfo(resource.getPath());
         String[] parts = StringUtils.split(pathInfo.getResourcePath(), '/');
 
         for (int i = parts.length - 1; i >= 0; i--) {
             String[] tmpArray = (String[]) ArrayUtils.subarray(parts, 0, i);
-            String tmpStr = "/".concat(StringUtils.join(tmpArray, '/'));
+            String candidatePath = "/".concat(StringUtils.join(tmpArray, '/'));
 
-            final Resource tmpResource = resourceResolver.getResource(tmpStr);
+            final Resource candidateResource = resourceResolver.resolve(request, candidatePath);
 
-            if (tmpResource != null) {
-                return tmpResource;
+            if (candidateResource != null && !ResourceUtil.isNonExistingResource(candidateResource)) {
+                log.debug("Found first real aggregate parent via path look-up at [ {} ]", candidateResource.getPath());
+                return candidateResource;
             }
         }
 
+        log.debug("Could not find real parent for [ {} ]", errorResource.getPath());
         return null;
     }
 
@@ -592,12 +615,20 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
 
         if (log.isDebugEnabled()) {
-            log.debug("Status code: {}", this.getStatusCode(request));
-            log.debug("Is anonymous: {}", isAnonymousRequest(request));
-            log.debug("Is browser request: {}", AuthUtil.isBrowserRequest(request));
-            log.debug("Is redirect To login page: {}", this.isRedirectToLogin(path));
 
-            log.debug("Default 404 Behavior: {}", this.notFoundBehavior);
+            InfoWriter iw = new InfoWriter();
+
+            iw.title("ACS AEM Commons - Error Page Handler 404 Handling");
+
+            iw.message("Status code: {}", this.getStatusCode(request));
+            iw.message("Is anonymous: {}", isAnonymousRequest(request));
+            iw.message("Is browser request: {}", AuthUtil.isBrowserRequest(request));
+            iw.message("Is redirect to login page: {}", this.isRedirectToLogin(path));
+            iw.message("Default 404 Behavior: {}", this.notFoundBehavior);
+
+            iw.line();
+
+            log.debug(iw.toString());
         }
 
         if (this.getStatusCode(request) == SlingHttpServletResponse.SC_NOT_FOUND
