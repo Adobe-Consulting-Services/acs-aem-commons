@@ -71,21 +71,11 @@ public class XSSFunctionsTest {
     }
 
     @Test
-    public void testGetValidHrefUnMangled() {
+    public void testGetValidHref() {
         final String test = "/content/foo.html";
-        final String expectedHtml = "<a href='/content/foo.html'></a>";
-        when(xssAPI.filterHTML(expectedHtml)).thenReturn(expectedHtml);
+        when(xssAPI.getValidHref(test)).thenReturn(test);
         XSSFunctions.getValidHref(xssAPI, test);
-        verify(xssAPI, only()).filterHTML(expectedHtml);
-    }
-
-    @Test
-    public void testGetValidHrefMangled() {
-        final String test = "/content/foo/jcr:content/bar.html";
-        final String expectedHtml = "<a href='/content/foo/_jcr_content/bar.html'></a>";
-        when(xssAPI.filterHTML(expectedHtml)).thenReturn(expectedHtml);
-        XSSFunctions.getValidHref(xssAPI, test);
-        verify(xssAPI, only()).filterHTML(expectedHtml);
+        verify(xssAPI, only()).getValidHref(test);
     }
 
     @Test

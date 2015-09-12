@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -28,6 +31,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,23 +47,34 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.webservicesupport.ConfigurationConstants;
 import com.day.cq.wcm.webservicesupport.ConfigurationManager;
 
-@Component
+@Component(metatype = true, label = "ACS AEM Commons - Twitter Client Adapter Factory",
+    description = "Adapter Factory to generate TwitterClient objects.")
 @Service
 @Properties({
         @Property(name = AdapterFactory.ADAPTABLE_CLASSES, value = { "com.day.cq.wcm.api.Page",
-                "com.day.cq.wcm.webservicesupport.Configuration" }),
+                "com.day.cq.wcm.webservicesupport.Configuration" }, propertyPrivate = true),
         @Property(name = AdapterFactory.ADAPTER_CLASSES, value = { "twitter4j.Twitter",
-                "com.adobe.acs.commons.twitter.TwitterClient" }) })
+                "com.adobe.acs.commons.twitter.TwitterClient" }, propertyPrivate = true) })
 public final class TwitterAdapterFactory implements AdapterFactory {
 
     private static final String CLOUD_SERVICE_NAME = "twitterconnect";
 
     private static final Logger log = LoggerFactory.getLogger(TwitterAdapterFactory.class);
 
+    @Property(label = "HTTP Proxy Host", description = "HTTP Proxy Host, leave blank for none")
+    private static final String PROP_HTTP_PROXY_HOST = "http.proxy.host";
+
+    @Property(label = "HTTP Proxy Port", description = "HTTP Proxy Port, leave 0 for none", intValue = 0)
+    private static final String PROP_HTTP_PROXY_PORT = "http.proxy.port";
+
     @Reference
     private ConfigurationManager configurationManager;
 
     private TwitterFactory factory;
+
+    private String httpProxyHost;
+
+    private int httpProxyPort;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -86,6 +101,10 @@ public final class TwitterAdapterFactory implements AdapterFactory {
         final ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.setUseSSL(true);
         builder.setApplicationOnlyAuthEnabled(true);
+        if (StringUtils.isNotBlank(httpProxyHost) && httpProxyPort > 0) {
+            builder.setHttpProxyHost(httpProxyHost);
+            builder.setHttpProxyPort(httpProxyPort);
+        }
         return builder.build();
     }
 
@@ -132,7 +151,9 @@ public final class TwitterAdapterFactory implements AdapterFactory {
     }
 
     @Activate
-    protected void activate() {
+    protected void activate(Map<String, Object> properties) {
+        this.httpProxyHost = PropertiesUtil.toString(properties.get(PROP_HTTP_PROXY_HOST), null);
+        this.httpProxyPort = PropertiesUtil.toInteger(properties.get(PROP_HTTP_PROXY_PORT), 0);
         this.factory = new TwitterFactory(buildConfiguration());
     }
 
