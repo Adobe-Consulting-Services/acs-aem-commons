@@ -33,6 +33,46 @@
         ng-controller="MainCtrl"
         ng-init="app.resource = '${resourcePath}'; init(${hostNames});">
 
-    <cq:include script="includes/form.jsp"/>
-    <cq:include script="includes/results.jsp"/>
+    <form class="coral-Form coral-Form--vertical acs-form"
+            novalidate
+            ng-show="!app.running">
+
+        <section class="coral-Form-fieldset">
+            <h3 class="coral-Form-fieldset-legend">Path</h3>
+
+            <input class="coral-Form-field coral-Textfield"
+                   ng-model="form.path"
+                   type="text"
+                   placeholder="Path to compare">
+        </section>
+
+
+        <section class="coral-Form-fieldset">
+            <h3 class="coral-Form-fieldset-legend">Path</h3>
+
+            <input class="coral-Form-field coral-Textfield"
+                   ng-model="form.path"
+                   type="text"
+                   placeholder="Path to compare">
+        </section>
+
+
+        <div class="coral-TabPanel coral-TabPanel--large" data-init="tabs">
+            <nav class="coral-TabPanel-navigation">
+                <a class="coral-TabPanel-tab is-active" data-toggle="tab">Content Comparison</a>
+                <a class="coral-TabPanel-tab" data-toggle="tab">Download JSON</a>
+            </nav>
+
+            <div class="coral-TabPanel-content">
+                <section class="coral-TabPanel-pane is-active">
+                    <cq:include script="includes/tab-content-hashes.jsp"/>
+                </section>
+
+                <section class="coral-TabPanel-pane">
+                    <cq:include script="includes/tab-json-dump.jsp"/>
+                </section>
+            </div>
+        </div>
+
+    </form>
 </div>

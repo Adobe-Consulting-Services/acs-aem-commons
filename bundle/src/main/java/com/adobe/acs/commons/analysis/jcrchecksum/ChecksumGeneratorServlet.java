@@ -20,17 +20,23 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.oak.commons.PropertiesUtil;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.servlet.ServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,31 +44,65 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
 @SuppressWarnings("serial")
-@Component(metatype = false)
-@Service
+@Component(
+        label = "ACS AEM Commons - JCR Checksum Servlet",
+        metatype = false
+)
 @Properties({
-    @Property(name = "sling.servlet.paths",
-            value = "/bin/acs-commons/jcr-compare.hashes.txt",
-            propertyPrivate = true)
+        @Property(
+                name = "sling.servlet.paths",
+                value = "/bin/acs-commons/jcr-compare.hashes.txt",
+                propertyPrivate = true)
 })
+@Service
 public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
+    private static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);
+
+    private static final String DEFAULT_ALLOW_ORIGIN = "*";
+
+    private String allowOrigin = DEFAULT_ALLOW_ORIGIN;
+
+    @Property(label = "Access-Control-Allow-Origin response header value",
+            description = "Set to the hostname(s) of the AEM Author environment",
+            value = DEFAULT_ALLOW_ORIGIN)
+    public static final String PROP_ALLOW_ORIGIN = "access-control-allow-origin";
+
+
+    private static final String PATH = "path";
+
+    private static final String QUERY = "query";
+
+    private static final String QUERY_TYPE = "queryType";
+
+    private static final String NODES_TYPES = "nodeTypes";
+
+    private static final String NODE_TYPE_EXCLUDES = "nodeTypeExcludes";
+
+    private static final String PROPERTY_EXCLUDES = "propertyExcludes";
+
+    private static final String SORT_VALUES_FOR = "sortValuesFor";
+
 
     @Override
     public void doGet(SlingHttpServletRequest request,
-        SlingHttpServletResponse response) {
+                      SlingHttpServletResponse response) {
+
         response.setContentType("text/plain");
 
-        String[] paths = request.getParameterValues("path");
-        String query = request.getParameter("query");
-        String queryType = request.getParameter("queryType");
-        String[] nodeTypes = request.getParameterValues("nodeTypes");
-        String[] nodeTypeExcludes =
-            request.getParameterValues("nodeTypeExcludes");
-        String[] propertyExcludes =
-            request.getParameterValues("propertyExcludes");
-        String[] ignoreOrder = request.getParameterValues("sortValuesFor");
+        if (StringUtils.isNotBlank(this.allowOrigin)) {
+            response.setHeader("Access-Control-Allow-Origin", this.allowOrigin);
+        }
+
+        String[] paths = request.getParameterValues(PATH);
+        String query = request.getParameter(QUERY);
+        String queryType = request.getParameter(QUERY_TYPE);
+        String[] nodeTypes = request.getParameterValues(NODES_TYPES);
+        String[] nodeTypeExcludes = request.getParameterValues(NODE_TYPE_EXCLUDES);
+        String[] propertyExcludes = request.getParameterValues(PROPERTY_EXCLUDES);
+        String[] ignoreOrder = request.getParameterValues(SORT_VALUES_FOR);
 
         ArrayList<String> pathArr = new ArrayList<String>();
         // add all paths from paths param first
@@ -73,67 +113,60 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
         }
         // add all query result params
         if (query != null) {
-            if (queryType == null) {
-                queryType = "xpath";
-            }
-            Iterator<Resource> resIter =
-                request.getResourceResolver().findResources(query, queryType);
-            while (resIter.hasNext()) {
-                Resource res = resIter.next();
+
+            queryType = StringUtils.defaultIfEmpty(queryType, "xpath");
+            Iterator<Resource> resources = request.getResourceResolver().findResources(query, queryType);
+
+            while (resources.hasNext()) {
+                Resource res = resources.next();
                 pathArr.add(res.getPath());
             }
         }
 
         try {
-            handleRequest(request, response, pathArr.toArray(new String[] {}),
-                nodeTypes, nodeTypeExcludes, propertyExcludes, ignoreOrder,
-                null);
+            handleRequest(request, response, pathArr.toArray(new String[]{}),
+                    nodeTypes, nodeTypeExcludes, propertyExcludes, ignoreOrder,
+                    null);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Unable to handle Checksum request", e);
         }
     }
 
-    protected void doPost(SlingHttpServletRequest request,
-        SlingHttpServletResponse response) {
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException {
         response.setContentType("text/plain");
 
         String[] paths = request.getParameterValues("path");
         String[] nodeTypes = request.getParameterValues("nodeTypes");
-        String[] nodeTypeExcludes =
-            request.getParameterValues("nodeTypeExcludes");
-        String[] propertyExcludes =
-            request.getParameterValues("propertyExcludes");
+        String[] nodeTypeExcludes = request.getParameterValues("nodeTypeExcludes");
+        String[] propertyExcludes = request.getParameterValues("propertyExcludes");
         String[] sortValuesFor = request.getParameterValues("sortValuesFor");
         InputStream is = null;
-        try {
-            is = request.getRequestParameter("data").getInputStream();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
         try {
+
+            is = request.getRequestParameter("data").getInputStream();
             handleRequest(request, response, paths, nodeTypes,
-                nodeTypeExcludes, propertyExcludes, sortValuesFor, is);
+                    nodeTypeExcludes, propertyExcludes, sortValuesFor, is);
+
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new ServletException(e);
         }
     }
 
     private void handleRequest(SlingHttpServletRequest request,
-        SlingHttpServletResponse response, String[] paths, String[] nodeTypes,
-        String[] nodeTypeExcludes, String[] excludes, String[] sortValuesFor,
-        InputStream pathInputStream) throws IOException {
+                               SlingHttpServletResponse response, String[] paths, String[] nodeTypes,
+                               String[] nodeTypeExcludes, String[] excludes, String[] sortValuesFor,
+                               InputStream pathInputStream) throws IOException {
         if (excludes == null) {
-            excludes = new String[] {};
+            excludes = new String[]{};
         }
+
         if (nodeTypes == null) {
-            nodeTypes = new String[] {};
+            nodeTypes = new String[]{};
         }
+
         if (sortValuesFor == null) {
-            sortValuesFor = new String[] {};
+            sortValuesFor = new String[]{};
         }
 
         PrintWriter out = response.getWriter();
@@ -153,20 +186,16 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
 
                 if (paths != null) {
                     for (String path : paths) {
-                        ChecksumGenerator.generateChecksums(session, path,
-                            opts, out);
+                        ChecksumGenerator.generateChecksums(session, path, opts, out);
                     }
                 }
+
                 if (pathInputStream != null) {
-                    BufferedReader br =
-                        new BufferedReader(new InputStreamReader(
-                            pathInputStream));
+                    BufferedReader br = new BufferedReader(new InputStreamReader(pathInputStream));
                     String path = null;
                     try {
                         while ((path = br.readLine()) != null) {
-                            ChecksumGenerator.generateChecksums(session, path,
-                                opts, out);
-                            // out.println(path);
+                            ChecksumGenerator.generateChecksums(session, path, opts, out);
                         }
                     } catch (Exception e) {
                         out.println(e);
@@ -178,5 +207,11 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
                 out.println(e.getMessage());
             }
         }
+    }
+
+    @Activate
+    protected final void activate(Map<String, Object> config) {
+        this.allowOrigin =
+                PropertiesUtil.toString(config.get(PROP_ALLOW_ORIGIN), DEFAULT_ALLOW_ORIGIN);
     }
 }

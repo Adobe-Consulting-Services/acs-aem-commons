@@ -35,71 +35,48 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
             };
 
             $scope.hosts = [{
-                name: 'Self',
-                uri: null,
+                name: 'Localhost',
+                uri: '',
                 data: '',
                 active: true
             }];
 
             $scope.diff = {
-                baseData: {
-                    name: 'base label',
-                    data: ''
-                },
-                newData: {
-                    name: 'new label',
-                    data: ''
-                }
+                left: null,
+                right: null
             };
 
             /* Methods */
 
             $scope.compare = function () {
                 // Clear results
-                $scope.results = [];
-
-                $scope.diffSelf();
-                $scope.diffRemote();
+                $scope.getHashes($scope.diff.left);
+                $scope.getHashes($scope.diff.right);
             };
 
-            $scope.diffSelf  = function () {
+            $scope.getHashes = function (host) {
+
+                $scope.app.running = NotificationsService.running(true);
 
                 $http({
                     method: 'GET',
-                    url: encodeURI($scope.app.servlet + '?path=' + $scope.form.path)
+                    url: encodeURI(host.uri + $scope.app.servlet
+                        + '?path=' + $scope.form.path
+                        + '&_=' + new Date().getTime())
                 }).
                     success(function (data, status, headers, config) {
-                        $scope.hosts[0].data = data || 'Empty Response';
+                        host.data = data;
+
+                        $scope.app.running = NotificationsService.running(false);
                     }).
                     error(function (data, status, headers, config) {
+                        host.data = 'ERROR: Unable to collect JCR diff data from ' + host.name;
+
                         NotificationsService.add('error',
-                            'ERROR', 'Unable to collect JCR diff data from ' + $scope.app.servlet);
+                            'ERROR', 'Unable to collect JCR diff data from ' + host.name);
+
+                        $scope.app.running = NotificationsService.running(false);
                     });
-            };
-
-            
-            $scope.diffRemote  = function () {
-
-                // Get external hosts
-                angular.forEach($scope.hosts, function (host, index) {
-
-                    if (host.active && host.uri && host.uri != '') {
-
-                        $http({
-                            method: 'GET',
-                            url: encodeURI(host.uri + $scope.app.servlet + '?path=' + $scope.form.path)
-                        }).
-                            success(function (data, status, headers, config) {
-                                host.data = data;
-                            }).
-                            error(function (data, status, headers, config) {
-                                host.data = 'Unable to collect JCR diff data';
-
-                                NotificationsService.add('error',
-                                    'ERROR', 'Unable to collect JCR diff data from ' + host.name);
-                            });
-                    }
-                });
             };
 
             $scope.init = function(hostNames) {
@@ -128,7 +105,7 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 var computeDiff = function() {
                     var sequenceMatcher, opCodes, diffData, baseAsLines, newAsLines;
 
-                    if (scope.baseData.data && scope.newData.data) {
+                    if (scope.baseData && scope.baseData.data && scope.newData && scope.newData.data) {
 
                         baseAsLines = difflib.stringAsLines(scope.baseData.data);
                         newAsLines = difflib.stringAsLines(scope.newData.data);
@@ -150,8 +127,7 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                         element.html(diffData);
 
                     } else {
-                        element.html('<h3>Nothing to diff<h3>');
-
+                        element.html('');
                     }
                 };
 
@@ -165,5 +141,3 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
              }
         };
     });
-
-
