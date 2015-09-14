@@ -279,7 +279,7 @@ public class ChecksumGeneratorTest {
         sb.append(page1.getPath()
             + "\t59280e67ad29ffeb22537f08a583585aa24af325\n");
         sb.append(asset1.getPath()
-            + "\t61c01dc05d4c3dfbd4846b19c17fcfbf2e3cecdc\n");
+            + "\td358a4ff33917a06b8568462d1d192b6a6e91672\n");
 
         assertEquals(sb.toString(), baos.toString());
     }

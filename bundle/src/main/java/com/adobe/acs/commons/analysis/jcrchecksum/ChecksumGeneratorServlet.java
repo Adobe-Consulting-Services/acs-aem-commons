@@ -20,16 +20,14 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
+import java.util.TreeSet;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.servlet.ServletException;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -37,7 +35,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 
 @SuppressWarnings("serial")
@@ -51,131 +48,46 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
 
     @Override
     public void doGet(SlingHttpServletRequest request,
-        SlingHttpServletResponse response) {
+        SlingHttpServletResponse response) throws IOException, ServletException {
         response.setContentType("text/plain");
 
-        String[] paths = request.getParameterValues("path");
-        String query = request.getParameter("query");
-        String queryType = request.getParameter("queryType");
-        String[] nodeTypes = request.getParameterValues("nodeTypes");
-        String[] nodeTypeExcludes =
-            request.getParameterValues("nodeTypeExcludes");
-        String[] propertyExcludes =
-            request.getParameterValues("propertyExcludes");
-        String[] ignoreOrder = request.getParameterValues("sortValuesFor");
-
-        ArrayList<String> pathArr = new ArrayList<String>();
-        // add all paths from paths param first
-        if (paths != null) {
-            for (String path : paths) {
-                pathArr.add(path);
-            }
-        }
-        // add all query result params
-        if (query != null) {
-            if (queryType == null) {
-                queryType = "xpath";
-            }
-            Iterator<Resource> resIter =
-                request.getResourceResolver().findResources(query, queryType);
-            while (resIter.hasNext()) {
-                Resource res = resIter.next();
-                pathArr.add(res.getPath());
-            }
-        }
-
-        try {
-            handleRequest(request, response, pathArr.toArray(new String[] {}),
-                nodeTypes, nodeTypeExcludes, propertyExcludes, ignoreOrder,
-                null);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        ServletInputProcessor sip =
+            new ServletInputProcessor(request, response);
+        handleRequest(request, response, sip);
     }
 
     protected void doPost(SlingHttpServletRequest request,
         SlingHttpServletResponse response) {
         response.setContentType("text/plain");
 
-        String[] paths = request.getParameterValues("path");
-        String[] nodeTypes = request.getParameterValues("nodeTypes");
-        String[] nodeTypeExcludes =
-            request.getParameterValues("nodeTypeExcludes");
-        String[] propertyExcludes =
-            request.getParameterValues("propertyExcludes");
-        String[] sortValuesFor = request.getParameterValues("sortValuesFor");
-        InputStream is = null;
+        ServletInputProcessor sip;
         try {
-            is = request.getRequestParameter("data").getInputStream();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            sip = new ServletInputProcessor(request, response);
+            handleRequest(request, response, sip);
+        } catch (Exception e) {
+            return;
         }
 
-        try {
-            handleRequest(request, response, paths, nodeTypes,
-                nodeTypeExcludes, propertyExcludes, sortValuesFor, is);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
     private void handleRequest(SlingHttpServletRequest request,
-        SlingHttpServletResponse response, String[] paths, String[] nodeTypes,
-        String[] nodeTypeExcludes, String[] excludes, String[] sortValuesFor,
-        InputStream pathInputStream) throws IOException {
-        if (excludes == null) {
-            excludes = new String[] {};
-        }
-        if (nodeTypes == null) {
-            nodeTypes = new String[] {};
-        }
-        if (sortValuesFor == null) {
-            sortValuesFor = new String[] {};
-        }
+        SlingHttpServletResponse response, ServletInputProcessor sip)
+        throws IOException {
 
         PrintWriter out = response.getWriter();
-        Session session;
+        Session session = request.getResourceResolver().adaptTo(Session.class);
 
-        session = request.getResourceResolver().adaptTo(Session.class);
-
-        if ((paths == null || paths.length == 0) && pathInputStream == null) {
-            out.println("ERROR: You must specify the path.");
-        } else {
-            try {
-                ChecksumGeneratorOptions opts = new ChecksumGeneratorOptions();
-                opts.setNodeTypeIncludes(nodeTypes);
-                opts.setNodeTypeExcludes(nodeTypeExcludes);
-                opts.setPropertyExcludes(excludes);
-                opts.setSortedMultiValueProperties(sortValuesFor);
-
-                if (paths != null) {
-                    for (String path : paths) {
-                        ChecksumGenerator.generateChecksums(session, path,
-                            opts, out);
-                    }
+        TreeSet<String> paths = sip.getPaths();
+        if (paths != null) {
+            for (String path : paths) {
+                if (path == null)
+                    continue;
+                try {
+                    ChecksumGenerator.generateChecksums(session, path,
+                        sip.getChecksumGeneratorOptions(), out);
+                } catch (RepositoryException e) {
+                    // do nothing as errors should have been printed to output
                 }
-                if (pathInputStream != null) {
-                    BufferedReader br =
-                        new BufferedReader(new InputStreamReader(
-                            pathInputStream));
-                    String path = null;
-                    try {
-                        while ((path = br.readLine()) != null) {
-                            ChecksumGenerator.generateChecksums(session, path,
-                                opts, out);
-                            // out.println(path);
-                        }
-                    } catch (Exception e) {
-                        out.println(e);
-                    } finally {
-                        br.close();
-                    }
-                }
-            } catch (RepositoryException e) {
-                out.println(e.getMessage());
             }
         }
     }
