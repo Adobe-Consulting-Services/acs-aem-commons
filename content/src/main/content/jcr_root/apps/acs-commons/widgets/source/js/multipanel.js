@@ -167,7 +167,19 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
     },
 
     validate: function(){
-        return true;
+        var valid = true;
+
+        this.items.each(function(i){
+            if(i.xtype === "label" || i.xtype === "hidden" || !i.hasOwnProperty("key")){
+                return;
+            }
+
+            if(!i.validate()){
+                valid = false;
+            }
+        });
+
+        return valid;
     },
 
     getName: function(){
