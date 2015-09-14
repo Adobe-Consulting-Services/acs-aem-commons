@@ -41,7 +41,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorServlet;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorServlet;
 import com.day.cq.widget.HtmlLibraryManager;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -18,8 +18,10 @@
  * #L%
  */
 
-package com.adobe.acs.commons.analysis.jcrchecksum;
+package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -64,13 +66,12 @@ public class JSONDumpServlet extends SlingSafeMethodsServlet {
         }
 
         response.setHeader("Content-Disposition", "filename=jcr-checksum" + filename + ".json");
-
-
         JSONWriter jsonWriter = new JSONWriter(response.getWriter());
 
         try {
 
-            this.collectJSON(session.getRootNode().getNode("." + path), jsonWriter);
+            ChecksumGeneratorOptions options = new DefaultChecksumGeneratorOptions(request);
+            this.generateJSON(session.getRootNode().getNode("." + path), jsonWriter, options);
 
         } catch (JSONVisitorException e) {
             throw new ServletException("Unable to create value JSON object", e);
@@ -81,13 +82,10 @@ public class JSONDumpServlet extends SlingSafeMethodsServlet {
         }
     }
 
-    private void collectJSON(Node node, JSONWriter jsonWriter) throws JSONVisitorException, RepositoryException {
-        this.generateJSON(node, jsonWriter);
-    }
+    private void generateJSON(Node node, JSONWriter jsonWriter,
+                              ChecksumGeneratorOptions options) throws JSONVisitorException, RepositoryException {
 
-    private void generateJSON(Node node, JSONWriter jsonWriter) throws JSONVisitorException, RepositoryException {
-
-        JSONVisitor v = new JSONVisitor(jsonWriter);
+        JSONVisitor v = new JSONVisitor(jsonWriter, options);
 
         try {
             jsonWriter.object();
@@ -99,11 +97,13 @@ public class JSONDumpServlet extends SlingSafeMethodsServlet {
     }
 
     private class JSONVisitor extends Default {
-        private JSONWriter jsonWriter;
+        private final ChecksumGeneratorOptions options;
+        private final JSONWriter jsonWriter;
 
-        public JSONVisitor(final JSONWriter jsonWriter) {
+        public JSONVisitor(final JSONWriter jsonWriter, final ChecksumGeneratorOptions options) {
             super(false, -1);
             this.jsonWriter = jsonWriter;
+            this.options = options;
         }
 
         @Override
@@ -118,7 +118,7 @@ public class JSONDumpServlet extends SlingSafeMethodsServlet {
         @Override
         protected void entering(Property property, int level) throws RepositoryException {
             try {
-                if (!ChecksumGeneratorOptions.DEFAULT_EXCLUDED_PROPERTIES.contains(property.getName())) {
+                if (!this.options.getExcludedProperties().contains(property.getName())) {
                     jsonWriter.key(property.getName());
 
                     if (property.isMultiple()) {

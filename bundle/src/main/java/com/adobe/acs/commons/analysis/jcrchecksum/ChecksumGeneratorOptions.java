@@ -20,210 +20,31 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
 import aQute.bnd.annotation.ProviderType;
 
-/**
- * Provides options to configure how to generate checksums using {@link ChecksumGenerator}.
- * 
- */
+import java.util.Set;
+
 @ProviderType
-public class ChecksumGeneratorOptions {
-    private HashSet<String> nodeTypeIncludes;
-    private HashSet<String> nodeTypeExcludes;
-    private HashSet<String> propertyExcludes;
-    private HashSet<String> sortMultiValues;
-    boolean doNotUseDefaultNodeTypeIncludes;
-    boolean doNotUseDefaultNodeTypeExcludes;
-    boolean doNotUseDefaultPropertyExcludes;
-    boolean doNotUseDefaultSortedMultiValueProperties;
+public interface ChecksumGeneratorOptions {
+    String DATA = "data";
 
-    /**
-     * Default nodetypes to use for the hash calculation.
-     */
-    public static final List<String> DEFAULT_INCLUDED_NODETYPES =
-        new ArrayList<String>();
+    String PATHS = "paths";
 
-    static {
-        DEFAULT_INCLUDED_NODETYPES.add("cq:PageContent");
-        DEFAULT_INCLUDED_NODETYPES.add("dam:AssetContent");
-    }
+    String QUERY = "query";
 
-    /**
-     * Default nodetypes to exclude from the hash calculation.
-     */
-    public static final List<String> DEFAULT_EXCLUDED_NODETYPES =
-        new ArrayList<String>();
+    String QUERY_TYPE = "queryType";
 
-    static {
-        DEFAULT_EXCLUDED_NODETYPES.add("rep:ACL");
-    }
+    String NODES_TYPES = "nodeTypes";
 
-    /**
-     * These JCR property names are the default ones that are excluded when
-     * generating a hash of a tree of nodes.
-     */
-    public static final List<String> DEFAULT_EXCLUDED_PROPERTIES =
-        new ArrayList<String>();
+    String NODE_TYPE_EXCLUDES = "excludeNodeTypes";
 
-    static {
-        DEFAULT_EXCLUDED_PROPERTIES.add("jcr:created");
-        DEFAULT_EXCLUDED_PROPERTIES.add("jcr:createdBy");
-        DEFAULT_EXCLUDED_PROPERTIES.add("jcr:uuid");
-        DEFAULT_EXCLUDED_PROPERTIES.add("jcr:lastModified");
-        DEFAULT_EXCLUDED_PROPERTIES.add("jcr:lastModifiedBy");
-        DEFAULT_EXCLUDED_PROPERTIES.add("cq:lastModified");
-        DEFAULT_EXCLUDED_PROPERTIES.add("cq:lastModifiedBy");
-        DEFAULT_EXCLUDED_PROPERTIES.add("cq:lastReplicated");
-        DEFAULT_EXCLUDED_PROPERTIES.add("cq:lastReplicatedBy");
-        DEFAULT_EXCLUDED_PROPERTIES.add("cq:lastReplicationAction");
-        DEFAULT_EXCLUDED_PROPERTIES.add("jcr:versionHistory");
-        DEFAULT_EXCLUDED_PROPERTIES.add("jcr:predecessors");
-        DEFAULT_EXCLUDED_PROPERTIES.add("jcr:baseVersion");
-        DEFAULT_EXCLUDED_PROPERTIES.add("jcr:lastModifiedBy");
-        DEFAULT_EXCLUDED_PROPERTIES.add("cq:lastModified");
-    }
+    String PROPERTY_EXCLUDES = "excludeProperties";
 
-    /**
-     * These JCR multi-value property names are the default ones that will have
-     * their values sorted before generating a checksum.
-     */
-    public static final List<String> DEFAULT_SORTED_MULTI_VALUES =
-        new ArrayList<String>();
+    String SORTED_PROPERTIES = "sortedProperties";
 
-    static {
-        DEFAULT_SORTED_MULTI_VALUES.add("cq:tags");
-    }
-
-    public void disableDefaultNodeTypeIncludes() {
-        this.doNotUseDefaultNodeTypeIncludes = true;
-    }
-
-    public void setNodeTypeIncludes(HashSet<String> nodeTypeIncludes) {
-        this.nodeTypeIncludes = new HashSet<String>();
-        this.nodeTypeIncludes.addAll(nodeTypeIncludes);
-    }
-
-    /**
-     * Sets the nodetypes to include in checksum generation.  An aggregate checksum would be generated
-     * for the nodes having the matching nodetypes. 
-     */
-    public void setNodeTypeIncludes(String[] nodeTypeIncludes) {
-        if (nodeTypeIncludes != null) {
-            this.nodeTypeIncludes = new HashSet<String>();
-
-            for (String nodeTypeExclude : nodeTypeIncludes)
-                this.nodeTypeIncludes.add(nodeTypeExclude);
-        }
-    }
-
-    public HashSet<String> getNodeTypeIncludes() {
-        HashSet<String> copyOfNodeTypeIncludes = new HashSet<String>();
-        if (this.nodeTypeIncludes != null)
-            copyOfNodeTypeIncludes.addAll(this.nodeTypeIncludes);
-
-        if (!this.doNotUseDefaultNodeTypeIncludes)
-            copyOfNodeTypeIncludes.addAll(DEFAULT_INCLUDED_NODETYPES);
-        return copyOfNodeTypeIncludes;
-    }
-
-    public void disableDefaultNodeTypeExcludes() {
-        this.doNotUseDefaultNodeTypeExcludes = true;
-    }
-
-    public void setNodeTypeExcludes(HashSet<String> nodeTypeExcludes) {
-        this.nodeTypeExcludes = new HashSet<String>();
-        this.nodeTypeExcludes.addAll(nodeTypeExcludes);
-    }
-
-    /**
-     * Sets the nodetypes to exclude from checksum generation
-     * 
-     * @param nodeTypeExcludess
-     */
-    public void setNodeTypeExcludes(String[] nodeTypeExcludes) {
-        if (nodeTypeExcludes != null) {
-            this.nodeTypeExcludes = new HashSet<String>();
-            for (String nodeTypeExclude : nodeTypeExcludes)
-                this.nodeTypeExcludes.add(nodeTypeExclude);
-        }
-    }
-
-    public HashSet<String> getNodeTypeExcludes() {
-        HashSet<String> copyOfNodeTypeExcludes = new HashSet<String>();
-        if (this.nodeTypeExcludes != null)
-            copyOfNodeTypeExcludes.addAll(this.nodeTypeExcludes);
-
-        if (!this.doNotUseDefaultNodeTypeExcludes)
-            copyOfNodeTypeExcludes.addAll(DEFAULT_EXCLUDED_NODETYPES);
-        return copyOfNodeTypeExcludes;
-    }
-
-    public void disableDefaultPropertyExcludes() {
-        this.doNotUseDefaultPropertyExcludes = true;
-    }
-
-    public void setPropertyExcludes(HashSet<String> propertyExcludes) {
-        this.propertyExcludes = new HashSet<String>();
-        this.propertyExcludes.addAll(propertyExcludes);
-    }
-
-    /**
-     * Sets the names of properties to exclude from checksum generation.
-     */
-    public void setPropertyExcludes(String[] propertyExcludes) {
-        if (propertyExcludes != null) {
-            this.propertyExcludes = new HashSet<String>();
-            for (String propertyExclude : propertyExcludes)
-                this.propertyExcludes.add(propertyExclude);
-        }
-    }
-
-    public HashSet<String> getPropertyExcludes() {
-        HashSet<String> copyOfPropertyExcludes = new HashSet<String>();
-        if (this.propertyExcludes != null)
-            copyOfPropertyExcludes.addAll(this.propertyExcludes);
-
-        if (!this.doNotUseDefaultPropertyExcludes)
-            copyOfPropertyExcludes.addAll(DEFAULT_EXCLUDED_PROPERTIES);
-        return copyOfPropertyExcludes;
-    }
-
-    public void disableDefaultSortedMultiValueProperties() {
-        this.doNotUseDefaultSortedMultiValueProperties = true;
-    }
-
-    public void setSortedMultiValueProperties(HashSet<String> sortMultiValues) {
-        this.sortMultiValues = new HashSet<String>();
-        this.sortMultiValues.addAll(sortMultiValues);
-    }
-
-    /**
-     * Sets the names of multi-value properties to sort values of during checksum generation.
-     * 
-     * @param sortMultiValues
-     */
-    public void setSortedMultiValueProperties(String[] sortMultiValues) {
-        if (sortMultiValues != null) {
-            this.sortMultiValues = new HashSet<String>();
-            for (String nodeType : sortMultiValues)
-                this.sortMultiValues.add(nodeType);
-        }
-    }
-
-    public HashSet<String> getSortedMultiValueProperties() {
-        HashSet<String> copyOfSortedMultiValueProperties =
-            new HashSet<String>();
-        if (this.sortMultiValues != null)
-            copyOfSortedMultiValueProperties.addAll(this.sortMultiValues);
-
-        if (!this.doNotUseDefaultSortedMultiValueProperties)
-            copyOfSortedMultiValueProperties
-                .addAll(DEFAULT_SORTED_MULTI_VALUES);
-        return copyOfSortedMultiValueProperties;
-    }
-
+    Set<String> getPaths();
+    Set<String> getIncludedNodeTypes();
+    Set<String> getExcludedNodeTypes();
+    Set<String> getExcludedProperties();
+    Set<String> getSortedProperties();
 }
