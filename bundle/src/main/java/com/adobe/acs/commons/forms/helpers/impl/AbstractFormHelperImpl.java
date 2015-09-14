@@ -292,7 +292,7 @@ public abstract class AbstractFormHelperImpl {
      * @param unencoded
      * @return
      */
-    protected final String encode(String unencoded) {
+    protected String encode(String unencoded) {
         if (StringUtils.isBlank(unencoded)) {
             return "";
         }
@@ -310,7 +310,7 @@ public abstract class AbstractFormHelperImpl {
      * @param encoded
      * @return
      */
-    protected final String decode(String encoded) {
+    protected String decode(String encoded) {
         if (StringUtils.isBlank(encoded)) {
             return "";
         }

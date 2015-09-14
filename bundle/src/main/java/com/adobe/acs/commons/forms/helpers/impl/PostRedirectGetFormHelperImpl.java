@@ -88,22 +88,22 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
     }
 
     @Override
-    public final void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response)
+    public void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response)
             throws IOException, JSONException {
         final String url = this.getRedirectPath(form, path, formSelector);
         response.sendRedirect(url);
     }
 
     @Override
-    public final void sendRedirect(Form form, Page page, String formSelector, SlingHttpServletResponse response)
+    public void sendRedirect(Form form, Page page, String formSelector, SlingHttpServletResponse response)
             throws IOException, JSONException {
         final String url = this.getRedirectPath(form, page, formSelector);
         response.sendRedirect(url);
     }
 
     @Override
-    public final void sendRedirect(Form form, Resource resource, String formSelector,
-                                   SlingHttpServletResponse response) throws IOException, JSONException {
+    public void sendRedirect(Form form, Resource resource, String formSelector,
+                             SlingHttpServletResponse response) throws IOException, JSONException {
         final String url = this.getRedirectPath(form, resource, formSelector);
         response.sendRedirect(url);
     }
@@ -168,7 +168,7 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      * @param request
      * @return
      */
-    protected final boolean doHandleGet(final String formName, final SlingHttpServletRequest request) {
+    protected boolean doHandleGet(final String formName, final SlingHttpServletRequest request) {
         //noinspection SimplifiableIfStatement
         if (StringUtils.equalsIgnoreCase("GET", request.getMethod())) {
             return (StringUtils.isNotBlank(request.getParameter(this.getGetLookupKey(formName))));
@@ -187,12 +187,11 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      * @param request
      * @return
      */
-    protected final Form getGetForm(final String formName, final SlingHttpServletRequest request) {
+    protected Form getGetForm(final String formName, final SlingHttpServletRequest request) {
         Map<String, String> data = new HashMap<String, String>();
         Map<String, String> errors = new HashMap<String, String>();
+        final String requestData = getRawFormData(formName, request);
 
-        // Get the QP lookup for this form
-        final String requestData = this.decode(request.getParameter(this.getGetLookupKey(formName)));
 
         if (StringUtils.isBlank(requestData)) {
             return new Form(formName, request.getResource().getPath());
@@ -227,6 +226,11 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
                 request.getResource().getPath(),
                 this.getProtectedData(data),
                 this.getProtectedErrors(errors));
+    }
+
+    protected String getRawFormData(String formName, SlingHttpServletRequest request) {
+        // Get the QP lookup for this form
+        return this.decode(request.getParameter(this.getGetLookupKey(formName)));
     }
 
     /**
@@ -282,7 +286,7 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      * @throws org.apache.sling.commons.json.JSONException
      *
      */
-    protected final String getRedirectPath(final Form form, final String path, final String formSelector) throws
+    protected String getRedirectPath(final Form form, final String path, final String formSelector) throws
             JSONException {
         String redirectPath = path;
         redirectPath += this.getSuffix();
@@ -304,10 +308,22 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      *
      */
     protected final String getQueryParameters(Form form) throws JSONException {
+        String params = "";
+        form = this.clean(form);
+
+        if (form.hasData() || form.hasErrors()) {
+            params = this.getGetLookupKey(form.getName());
+            params += "=";
+            params += getQueryParameterValue(form);
+        }
+
+        return params;
+    }
+
+    protected final String getQueryParameterValue(Form form) throws JSONException {
         boolean hasData = false;
         final JSONObject jsonData = new JSONObject();
 
-        String params = "";
         form = this.clean(form);
 
         jsonData.put(KEY_FORM_NAME, form.getName());
@@ -324,12 +340,7 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
             hasData = true;
         }
 
-        if (hasData) {
-            params = this.getGetLookupKey(form.getName());
-            params += "=";
-            params += this.encode(jsonData.toString());
-        }
+        return hasData ? this.encode(jsonData.toString()) : "";
 
-        return params;
     }
 }
