@@ -70,6 +70,7 @@ public class JSONGenerator {
         Node node = null;
 
         for(String path :paths) {
+            out.object();
             try {
                 if (session.itemExists(path)) {
                     Item item = session.getItem(path);
@@ -77,15 +78,14 @@ public class JSONGenerator {
                         node = (Node) item;
                     }
                 }
+                traverseTree(node, opts, out);
             } catch (PathNotFoundException e) {
-                return;
+                out.value("WARN: Path doesn't exist: " + path);
             } catch (RepositoryException e) {
-                throw e;
+                out.value("ERROR: Unable to read path: " + e.getMessage());
+            } finally {
+                out.endObject();
             }
-    
-            out.object();
-            traverseTree(node, opts, out);
-            out.endObject();
         }
     }
 

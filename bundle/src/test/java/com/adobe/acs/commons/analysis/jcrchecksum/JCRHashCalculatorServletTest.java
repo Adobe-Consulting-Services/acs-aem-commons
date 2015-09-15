@@ -76,6 +76,12 @@ public class JCRHashCalculatorServletTest {
                     return resourceResolver;
                 };
             };
+        this.response = new MockSlingHttpServletResponse() {
+            public void setHeader(String header, String value) {
+                //do nothing
+                return;
+            };
+        };
         servlet.doGet(request, response);
 
         assertEquals("text/plain", response.getContentType());
@@ -113,7 +119,12 @@ public class JCRHashCalculatorServletTest {
 
             public StringBuffer getOutput() {
                 return new StringBuffer().append(baos.toString());
-            }
+            };
+            
+            public void setHeader(String header, String value) {
+                //do nothing
+                return;
+            };
         };
         servlet.doGet(request, response);
         assertEquals("text/plain", response.getContentType());

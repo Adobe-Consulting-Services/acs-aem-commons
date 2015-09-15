@@ -76,9 +76,15 @@ public class JSONDumpServletTest {
                     return resourceResolver;
                 };
             };
+        this.response = new MockSlingHttpServletResponse() {
+                public void setHeader(String header, String value) {
+                    //do nothing
+                    return;
+                };
+            };
         servlet.doGet(request, response);
 
-        assertEquals("text/plain", response.getContentType());
+        assertEquals("application/json", response.getContentType());
         assertEquals("ERROR: You must specify the path.\n", response
             .getOutput().toString());
     }
@@ -102,6 +108,12 @@ public class JSONDumpServletTest {
                     } else {
                         return null;
                     }
+                };
+            };
+        this.response = new MockSlingHttpServletResponse() {
+                public void setHeader(String header, String value) {
+                    //do nothing
+                    return;
                 };
             };
         servlet.doGet(request, response);
