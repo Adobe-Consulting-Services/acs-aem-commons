@@ -20,9 +20,13 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.servlet.ServletException;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -37,11 +41,9 @@ import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.Map;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 
 @SuppressWarnings("serial")
 @Component(
@@ -72,8 +74,6 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
     public void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException {
         try {
             this.handleRequest(request, response);
-        } catch (IllegalArgumentException e) {
-            throw new ServletException(e);
         } catch (IOException e) {
             throw new ServletException(e);
         } catch (RepositoryException e) {
@@ -84,8 +84,6 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException {
         try {
             this.handleRequest(request, response);
-        } catch (IllegalArgumentException e) {
-            throw new ServletException(e);
         } catch (IOException e) {
             throw new ServletException(e);
         } catch (RepositoryException e) {
@@ -108,7 +106,12 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
         log.debug(options.toString());
 
         if (CollectionUtils.isEmpty(options.getPaths())) {
-            throw new IllegalArgumentException("At least one path must be specified");
+            try {
+                response.setStatus(400);
+                response.getWriter().print("ERROR: At least one path must be specified");
+            } catch (IOException ioe) {
+               throw ioe;
+            }
         }
 
         Session session = request.getResourceResolver().adaptTo(Session.class);

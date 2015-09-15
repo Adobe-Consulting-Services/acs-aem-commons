@@ -127,16 +127,16 @@ public class ChecksumGenerator {
 
         checkSums.append(node.getName());
         SortedSet<String> childSortSet = new TreeSet<String>();
-        boolean sortedChildren = false;
+        boolean hasOrderedChildren = false;
         try {
-            sortedChildren = node.getPrimaryNodeType().hasOrderableChildNodes();
+            hasOrderedChildren = node.getPrimaryNodeType().hasOrderableChildNodes();
         } catch (Exception e) {
         }
         while (nIt.hasNext()) {
             Node child = nIt.nextNode();
             if (!nodeTypeExcludes
                 .contains(child.getPrimaryNodeType().getName())) {
-                if (sortedChildren) {
+                if (hasOrderedChildren) {
                     checkSums.append(child.getName()).append("=");
                     checkSums.append(generateChecksums(child, opts, out));
                     // out.append("child: " +
@@ -148,7 +148,7 @@ public class ChecksumGenerator {
                 }
             }
         }
-        if (!sortedChildren) {
+        if (!hasOrderedChildren) {
             for (String childChksum : childSortSet) {
                 checkSums.append(childChksum);
             }

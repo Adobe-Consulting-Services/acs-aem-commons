@@ -24,9 +24,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-
 import javax.jcr.Session;
 
 import org.apache.sling.api.resource.LoginException;
@@ -41,17 +38,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorServlet;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.JSONDumpServlet;
 import com.day.cq.widget.HtmlLibraryManager;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JCRHashCalculatorServletTest {
+public class JSONDumpServletTest {
 
     @Mock
     private HtmlLibraryManager manager;
 
     @InjectMocks
-    public ChecksumGeneratorServlet servlet = new ChecksumGeneratorServlet();
+    public JSONDumpServlet servlet = new JSONDumpServlet();
 
     MockSlingHttpServletRequest request;
     ResourceResolver resourceResolver;
@@ -70,22 +67,23 @@ public class JCRHashCalculatorServletTest {
     public void testWithNoPath() throws Exception {
         this.resourceResolver = mock(ResourceResolver.class);
         this.request =
-            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.hashes", null, "txt", null,
+            new MockSlingHttpServletRequest("/bin/jsondump", null, "json", null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
                 };
             };
-            this.response = new MockSlingHttpServletResponse() {
+        this.response = new MockSlingHttpServletResponse() {
                 public void setHeader(String header, String value) {
-                //do nothing
-                return;
+                    //do nothing
+                    return;
+                };
             };
-        };
         servlet.doGet(request, response);
 
-        assertEquals("text/plain", response.getContentType());
-        assertEquals("ERROR: At least one path must be specified", response.getOutput().toString());
+        assertEquals("application/json", response.getContentType());
+        assertEquals("ERROR: At least one path must be specified", response
+            .getOutput().toString());
     }
 
     @Test
@@ -95,7 +93,7 @@ public class JCRHashCalculatorServletTest {
             .setProperty("jcr:title", "Foo");
 
         this.request =
-            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.hashes.txt", null, "txt", null,
+            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.dump", null, "json", null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
@@ -109,24 +107,17 @@ public class JCRHashCalculatorServletTest {
                     }
                 };
             };
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            final PrintWriter pw = new PrintWriter(baos);
-            this.response = new MockSlingHttpServletResponse() {
-                public PrintWriter getWriter() {
-                    return pw;
-                };
-                public StringBuffer getOutput() {
-                    return new StringBuffer().append(baos.toString());
-                };
+        this.response = new MockSlingHttpServletResponse() {
                 public void setHeader(String header, String value) {
-                //do nothing
-                return;
+                    //do nothing
+                    return;
+                };
             };
-        };
         servlet.doGet(request, response);
-        assertEquals("text/plain", response.getContentType());
+        assertEquals("application/json", response.getContentType());
         assertEquals(
-            "/content/foo/jcr:content\ta8f1f8a5182de6c3bba7ec1b85cf5e77f2cf5c87\n",
+            "{\"/content/foo/jcr:content\":{\"foo\":\"fi\",\"jcr:primaryType\":\"cq:PageContent\",\"jcr:title\":\"Foo\"}}",
             response.getOutput().toString());
     }
 }
+
