@@ -24,9 +24,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-
 import javax.jcr.Session;
 
 import org.apache.sling.api.resource.LoginException;
@@ -41,7 +38,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorServlet;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.JSONDumpServlet;
 import com.day.cq.widget.HtmlLibraryManager;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -85,7 +82,7 @@ public class JSONDumpServletTest {
         servlet.doGet(request, response);
 
         assertEquals("application/json", response.getContentType());
-        assertEquals("ERROR: You must specify the path.\n", response
+        assertEquals("ERROR: At least one path must be specified", response
             .getOutput().toString());
     }
 
@@ -96,14 +93,14 @@ public class JSONDumpServletTest {
             .setProperty("jcr:title", "Foo");
 
         this.request =
-            new MockSlingHttpServletRequest("/bin/jsondump", null, "json", null,
+            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.dump", null, "json", null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
                 };
 
                 public String[] getParameterValues(String name) {
-                    if (name.equals("path")) {
+                    if (name.equals("paths")) {
                         return new String[] { "/content" };
                     } else {
                         return null;

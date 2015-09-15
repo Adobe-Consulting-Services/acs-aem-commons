@@ -18,13 +18,18 @@
  * #L%
  */
 
-package com.adobe.acs.commons.analysis.jcrchecksum;
+package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
+import java.io.IOException;
+import java.util.Map;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.servlet.ServletException;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -36,19 +41,9 @@ import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.servlet.ServletException;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 
 @SuppressWarnings("serial")
 @Component(
@@ -76,61 +71,54 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
 
 
     @Override
-    public void doGet(SlingHttpServletRequest request,
-                      SlingHttpServletResponse response) {
+    public void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException {
+        try {
+            this.handleRequest(request, response);
+        } catch (IOException e) {
+            throw new ServletException(e);
+        } catch (RepositoryException e) {
+            throw new ServletException(e);
+        }
+    }
+
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException {
+        try {
+            this.handleRequest(request, response);
+        } catch (IOException e) {
+            throw new ServletException(e);
+        } catch (RepositoryException e) {
+            throw new ServletException(e);
+        }
+    }
+
+    private void handleRequest(SlingHttpServletRequest request,
+                               SlingHttpServletResponse response) throws IOException, RepositoryException {
 
         response.setContentType("text/plain");
 
         if (StringUtils.isNotBlank(this.allowOrigin)) {
             response.setHeader("Access-Control-Allow-Origin", this.allowOrigin);
         }
-        
-        try {
-            ServletInputProcessor sip = new ServletInputProcessor(request, response);
-            handleRequest(request, response, sip);
-        } catch (IOException e) {
-            log.error("Unable to handle Checksum request", e);
-        } catch (ServletException e) {
-            log.error("Unable to handle Checksum request", e);
+
+        String optionsName = request.getParameter("optionsName");
+        ChecksumGeneratorOptions options = ChecksumGeneratorOptionsFactory.getOptions(request, optionsName);
+
+        log.debug(options.toString());
+
+        if (CollectionUtils.isEmpty(options.getPaths())) {
+            try {
+                response.setStatus(400);
+                response.getWriter().print("ERROR: At least one path must be specified");
+            } catch (IOException ioe) {
+               throw ioe;
+            }
         }
 
-    }
-
-    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException {
-        response.setContentType("text/plain");
-
-        ServletInputProcessor sip;
-        try {
-            sip = new ServletInputProcessor(request, response);
-            handleRequest(request, response, sip);
-        } catch (Exception e) {
-            throw new ServletException(e);
-        }
-
-    }
-
-    private void handleRequest(SlingHttpServletRequest request,
-        SlingHttpServletResponse response, ServletInputProcessor sip)
-        throws IOException {
-
-
-
-        PrintWriter out = response.getWriter();
         Session session = request.getResourceResolver().adaptTo(Session.class);
 
-        TreeSet<String> paths = sip.getPaths();
-        if (paths != null) {
-            for (String path : paths) {
-                if (path == null)
-                    continue;
-
-                try {
-                    ChecksumGenerator.generateChecksums(session, path,
-                        sip.getChecksumGeneratorOptions(), out);
-                } catch (RepositoryException e) {
-                    // do nothing as errors should have been printed to output
-                }
-            }
+        for (final String path : options.getPaths()) {
+            log.debug("Generating checksum for path [ {} ]", path);
+            ChecksumGenerator.generateChecksums(session, path, options, response.getWriter());
         }
     }
 

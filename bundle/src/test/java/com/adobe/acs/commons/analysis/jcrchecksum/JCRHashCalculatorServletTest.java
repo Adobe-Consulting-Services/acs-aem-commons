@@ -41,7 +41,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorServlet;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorServlet;
 import com.day.cq.widget.HtmlLibraryManager;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -70,14 +70,14 @@ public class JCRHashCalculatorServletTest {
     public void testWithNoPath() throws Exception {
         this.resourceResolver = mock(ResourceResolver.class);
         this.request =
-            new MockSlingHttpServletRequest("/bin/hashes", null, "txt", null,
+            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.hashes", null, "txt", null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
                 };
             };
-        this.response = new MockSlingHttpServletResponse() {
-            public void setHeader(String header, String value) {
+            this.response = new MockSlingHttpServletResponse() {
+                public void setHeader(String header, String value) {
                 //do nothing
                 return;
             };
@@ -85,8 +85,7 @@ public class JCRHashCalculatorServletTest {
         servlet.doGet(request, response);
 
         assertEquals("text/plain", response.getContentType());
-        assertEquals("ERROR: You must specify the path.\n", response
-            .getOutput().toString());
+        assertEquals("ERROR: At least one path must be specified", response.getOutput().toString());
     }
 
     @Test
@@ -96,32 +95,30 @@ public class JCRHashCalculatorServletTest {
             .setProperty("jcr:title", "Foo");
 
         this.request =
-            new MockSlingHttpServletRequest("/bin/hashes", null, "txt", null,
+            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.hashes.txt", null, "txt", null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
                 };
 
                 public String[] getParameterValues(String name) {
-                    if (name.equals("path")) {
+                    if (name.equals("paths")) {
                         return new String[] { "/content" };
                     } else {
                         return null;
                     }
                 };
             };
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final PrintWriter pw = new PrintWriter(baos);
-        this.response = new MockSlingHttpServletResponse() {
-            public PrintWriter getWriter() {
-                return pw;
-            };
-
-            public StringBuffer getOutput() {
-                return new StringBuffer().append(baos.toString());
-            };
-            
-            public void setHeader(String header, String value) {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            final PrintWriter pw = new PrintWriter(baos);
+            this.response = new MockSlingHttpServletResponse() {
+                public PrintWriter getWriter() {
+                    return pw;
+                };
+                public StringBuffer getOutput() {
+                    return new StringBuffer().append(baos.toString());
+                };
+                public void setHeader(String header, String value) {
                 //do nothing
                 return;
             };

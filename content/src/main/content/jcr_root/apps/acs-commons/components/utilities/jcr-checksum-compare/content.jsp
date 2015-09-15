@@ -37,25 +37,6 @@
             novalidate
             ng-show="!app.running">
 
-        <section class="coral-Form-fieldset">
-            <h3 class="coral-Form-fieldset-legend">Path</h3>
-
-            <input class="coral-Form-field coral-Textfield"
-                   ng-model="form.path"
-                   type="text"
-                   placeholder="Path to compare">
-        </section>
-
-
-        <section class="coral-Form-fieldset">
-            <h3 class="coral-Form-fieldset-legend">Path</h3>
-
-            <input class="coral-Form-field coral-Textfield"
-                   ng-model="form.path"
-                   type="text"
-                   placeholder="Path to compare">
-        </section>
-
 
         <div class="coral-TabPanel coral-TabPanel--large" data-init="tabs">
             <nav class="coral-TabPanel-navigation">
@@ -65,7 +46,7 @@
 
             <div class="coral-TabPanel-content">
                 <section class="coral-TabPanel-pane is-active">
-                    <cq:include script="includes/tab-content-hashes.jsp"/>
+                    <cq:include script="includes/tab-checksum.jsp"/>
                 </section>
 
                 <section class="coral-TabPanel-pane">

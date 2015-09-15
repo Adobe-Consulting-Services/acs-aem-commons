@@ -45,6 +45,8 @@ import org.apache.sling.commons.json.io.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+
 import aQute.bnd.annotation.ProviderType;
 
 /**
@@ -61,7 +63,7 @@ public class JSONGenerator {
         JSONWriter out) throws RepositoryException, JSONException {
         Set<String> paths = new HashSet<String>();
         paths.add(path);
-        generateJSON(session, paths, new ChecksumGeneratorOptions(), out);
+        generateJSON(session, paths, new DefaultChecksumGeneratorOptions(), out);
     }
 
     public static void generateJSON(Session session, Iterable<String> paths,
@@ -91,8 +93,8 @@ public class JSONGenerator {
 
     private static void traverseTree(Node node, ChecksumGeneratorOptions opts,
         JSONWriter out) throws JSONException {
-        HashSet<String> nodeTypes = opts.getNodeTypeIncludes();
-        HashSet<String> nodeTypeExcludes = opts.getNodeTypeExcludes();
+        Set<String> nodeTypes = opts.getIncludedNodeTypes();
+        Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
         if (node != null) {
             String primaryNodeType;
             try {
@@ -146,9 +148,9 @@ public class JSONGenerator {
     private static void outputProperties(Node node,
         ChecksumGeneratorOptions opts, JSONWriter out)
         throws RepositoryException, JSONException, ValueFormatException {
-        HashSet<String> excludes = opts.getPropertyExcludes();
-        HashSet<String> sortValues = opts.getSortedMultiValueProperties();
-                
+        Set<String> excludes = opts.getExcludedProperties();
+        Set<String> sortValues = opts.getSortedProperties();
+
         SortedMap<String, Property> props = new TreeMap<String, Property>();
         PropertyIterator pi = node.getProperties();
         
@@ -230,7 +232,7 @@ public class JSONGenerator {
     private static void outputChildNodes(Node node,
         ChecksumGeneratorOptions opts, JSONWriter out)
         throws RepositoryException, JSONException {
-        HashSet<String> nodeTypeExcludes = opts.getNodeTypeExcludes();
+        Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
         
         NodeIterator nIt;
         nIt = node.getNodes();

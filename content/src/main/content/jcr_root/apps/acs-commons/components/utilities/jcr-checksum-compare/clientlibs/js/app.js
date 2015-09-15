@@ -31,7 +31,41 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
             };
 
             $scope.form = {
-                path: '/content/geometrixx/en/products',
+                checksum: {
+                    optionsName: 'REQUEST',
+                    paths: [
+                        { value: '/content' }
+                    ],
+                    queryType: 'None',
+                    nodeTypes: [
+                        { value: 'cq:PageContent' },
+                        { value: 'dam:AssetContent' }
+                    ],
+                    excludeNodeTypes: [
+                        { value: 'rep:ACL' }
+                    ],
+                    excludeProperties: [
+                        { value: 'jcr:created' },
+                        { value: 'jcr:createdBy'},
+                        { value: 'jcr:uuid' },
+                        { value: 'jcr:lastModified' },
+                        { value: 'jcr:lastModifiedBy' },
+                        { value: 'cq:lastModified' },
+                        { value: 'cq:lastModifiedBy' },
+                        { value: 'cq:lastReplicated' },
+                        { value: 'cq:lastReplicatedBy' },
+                        { value: 'cq:lastReplicationAction' },
+                        { value: 'jcr:versionHistory' },
+                        { value: 'jcr:predecessors' },
+                        { value: 'jcr:baseVersion' }
+                    ],
+                    sortedProperties: [
+                        { value: 'cq:tags' }
+                    ]
+                },
+                json: {
+                    path: null
+                }
             };
 
             $scope.hosts = [{
@@ -55,14 +89,27 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
             };
 
             $scope.getHashes = function (host) {
-
+                var params = angular.copy($scope.form.checksum);
                 $scope.app.running = NotificationsService.running(true);
+
+                // Add cache-buster
+                params._ = new Date().getTime();
+                params.paths = $scope.valueObjectsToArray(params.paths);
+                params.nodeTypes = $scope.valueObjectsToArray(params.nodeTypes);
+                params.excludeNodeTypes = $scope.valueObjectsToArray(params.excludeNodeTypes);
+                params.excludeProperties = $scope.valueObjectsToArray(params.excludeProperties);
+                params.sortedProperties = $scope.valueObjectsToArray(params.sortedProperties);
+
+                // Clean data
+                if (params.queryType.toLowerCase() === 'none') {
+                    delete params.queryType;
+                    delete params.query;
+                }
 
                 $http({
                     method: 'GET',
-                    url: encodeURI(host.uri + $scope.app.servlet
-                        + '?path=' + $scope.form.path
-                        + '&_=' + new Date().getTime())
+                    url: encodeURI(host.uri + $scope.app.servlet),
+                    params: params
                 }).
                     success(function (data, status, headers, config) {
                         host.data = data;
@@ -90,6 +137,18 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 }, $scope.hosts);
             };
 
+
+            $scope.valueObjectsToArray = function(objs) {
+                var arr = [];
+
+                angular.forEach(objs, function(obj) {
+                    if(obj.value) {
+                        arr.push(obj.value);
+                    }
+                });
+
+                return arr;
+            };
 
     }]).directive('diff', function () {
         return {

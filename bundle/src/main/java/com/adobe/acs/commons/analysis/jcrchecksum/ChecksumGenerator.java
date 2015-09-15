@@ -20,13 +20,11 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.Item;
 import javax.jcr.Node;
@@ -38,12 +36,13 @@ import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import aQute.bnd.annotation.ProviderType;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal
@@ -57,7 +56,7 @@ public class ChecksumGenerator {
 
     public static void generateChecksums(Session session, String path,
         PrintWriter out) throws RepositoryException {
-        generateChecksums(session, path, new ChecksumGeneratorOptions(), out);
+        generateChecksums(session, path, new DefaultChecksumGeneratorOptions(), out);
     }
 
     public static void generateChecksums(Session session, String path,
@@ -82,8 +81,8 @@ public class ChecksumGenerator {
 
     private static void traverseTree(Node node, ChecksumGeneratorOptions opts,
         PrintWriter out) {
-        HashSet<String> nodeTypes = opts.getNodeTypeIncludes();
-        HashSet<String> nodeTypeExcludes = opts.getNodeTypeExcludes();
+        Set<String> nodeTypes = opts.getIncludedNodeTypes();
+        Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
 
         if (node != null) {
             String primaryNodeType;
@@ -115,10 +114,10 @@ public class ChecksumGenerator {
         ChecksumGeneratorOptions opts, PrintWriter out)
         throws RepositoryException {
 
-        HashSet<String> nodeTypes = opts.getNodeTypeIncludes();
-        HashSet<String> nodeTypeExcludes = opts.getNodeTypeExcludes();
-        HashSet<String> excludes = opts.getPropertyExcludes();
-        HashSet<String> sortValues = opts.getSortedMultiValueProperties();
+        Set<String> nodeTypes = opts.getIncludedNodeTypes();
+        Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
+        Set<String> excludes = opts.getExcludedProperties();
+        Set<String> sortValues = opts.getSortedProperties();
 
         NodeIterator nIt;
         nIt = node.getNodes();
