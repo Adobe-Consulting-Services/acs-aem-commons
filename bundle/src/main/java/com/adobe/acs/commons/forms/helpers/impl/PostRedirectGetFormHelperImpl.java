@@ -57,12 +57,17 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
 
     @Override
     public final Form getForm(final String formName, final SlingHttpServletRequest request) {
+       return getForm(formName, request, null);
+    }
+
+    @Override
+    public final Form getForm(final String formName, final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
         if (this.doHandlePost(formName, request)) {
             log.debug("Getting FORM [ {} ] from POST parameters", formName);
             return this.getPostForm(formName, request);
         } else if (this.doHandleGet(formName, request)) {
             log.debug("Getting FORM [ {} ] from GET parameters", formName);
-            return this.getGetForm(formName, request);
+            return this.getGetForm(formName, request, response);
         }
 
         log.debug("Creating empty form for FORM [ {} ]", formName);
@@ -187,10 +192,10 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      * @param request
      * @return
      */
-    protected Form getGetForm(final String formName, final SlingHttpServletRequest request) {
+    protected Form getGetForm(final String formName, final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
         Map<String, String> data = new HashMap<String, String>();
         Map<String, String> errors = new HashMap<String, String>();
-        final String requestData = getRawFormData(formName, request);
+        final String requestData = getRawFormData(formName, request, response);
 
 
         if (StringUtils.isBlank(requestData)) {
@@ -228,7 +233,8 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
                 this.getProtectedErrors(errors));
     }
 
-    protected String getRawFormData(String formName, SlingHttpServletRequest request) {
+    protected String getRawFormData(final String formName, final SlingHttpServletRequest request,
+            final SlingHttpServletResponse response) {
         // Get the QP lookup for this form
         return this.decode(request.getParameter(this.getGetLookupKey(formName)));
     }

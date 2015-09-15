@@ -71,6 +71,11 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
     }
 
     @Override
+    public Form getForm(final String formName, final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        return getForm(formName, request, null);
+    }
+
+    @Override
     public final void forwardAsGet(final Form form, final Page page,
                              final SlingHttpServletRequest request,
                              final SlingHttpServletResponse response) throws ServletException, IOException {

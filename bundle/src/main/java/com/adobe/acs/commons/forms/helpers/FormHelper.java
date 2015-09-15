@@ -57,6 +57,17 @@ public interface FormHelper {
     Form getForm(String formName, SlingHttpServletRequest request);
 
     /**
+     * Gets the From from either the POST Requests parameters or the GET
+     * request's (synthetic) attributes.
+     *
+     * @param formName
+     * @param request
+     * @param response
+     * @return
+     */
+    Form getForm(final String formName, final SlingHttpServletRequest request, final SlingHttpServletResponse response);
+
+    /**
      * Returns a series of hidden fields used to persist multi-page form data
      * between forms.
      *

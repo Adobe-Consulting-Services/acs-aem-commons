@@ -87,8 +87,15 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
     }
 
     @Override
-    protected String getRawFormData(String formName, SlingHttpServletRequest request) {
+    protected String getRawFormData(final String formName, final SlingHttpServletRequest request,
+            final SlingHttpServletResponse response) {
         final Cookie cookie = findCookie(request, getGetLookupKey(formName));
+        if (response != null) {
+            cookie.setMaxAge(0);  // expire the cookie
+            response.addCookie(cookie);
+        } else {
+            log.warn("SlingHttpServletResponse required for removing cookie. Please use formHelper.getForm(\"" + formName + "\", slingRequest, slingResponse);");
+        }
         // Get the QP lookup for this form
         return this.decode(cookie.getValue());
     }
