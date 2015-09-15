@@ -129,6 +129,8 @@
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/modules/ng-storage/ngStorage.min.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/json/json2.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/lodash/lodash-v2.4.1.js</exclude>
+                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/jsdifflib/difflib.js</exclude>
+                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/jsdifflib/diffview.js</exclude>
                     </excludes>
                 </configuration>
             </plugin>
