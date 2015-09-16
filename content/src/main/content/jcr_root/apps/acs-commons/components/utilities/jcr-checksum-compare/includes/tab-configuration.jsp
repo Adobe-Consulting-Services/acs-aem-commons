@@ -14,7 +14,7 @@
                placeholder="Absolute path to compare">
     </div>
 
-    <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--addCircle"
+    <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
         ng-click="form.checksum.paths.push({ value: '' });">Add Path</a>
 </section>
 
@@ -52,12 +52,12 @@
                placeholder="Node type to calculate checksum">
     </div>
 
-    <a      class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--addCircle"
+    <a      class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
             ng-click="form.checksum.nodeTypes.push({ value: '' });">Add Node Type</a>
 </section>
 
 
-<%-- Exclude Properties --%>
+<%-- Exclude Node Types --%>
 <section class="coral-Form-fieldset acsCommons-Form-multifieldset">
     <h3 class="coral-Form-fieldset-legend">Node types to exclude</h3>
 
@@ -73,11 +73,9 @@
                placeholder="Node type to exclude"/>
     </div>
 
+    <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
+        ng-click="form.checksum.excludeNodeTypes.push({ value: '' });">Add Node Type to Exclude</a>
 
-    <button class="coral-Button coral-Button--square coral-Button--quiet acsCommons-Form-multifieldset-add"
-            ng-click="form.checksum.excludeNodeTypes.push({ value: '' });">
-        <i class="coral-Icon coral-Icon--add"></i>
-    </button>
 </section>
 
 
@@ -98,7 +96,7 @@
                placeholder="Property to exclude"/>
     </div>
 
-    <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--addCircle"
+    <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
         ng-click="form.checksum.excludeProperties.push({ value: '' });">Add Property to Exclude</a>
 </section>
 
@@ -120,39 +118,7 @@
                placeholder="Property to respect sort order of values"/>
     </div>
 
-    <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--addCircle"
+    <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
         ng-click="form.checksum.sortedProperties.push({ value: '' });">Add Sorted Property</a>
 </section>
 
-
-<%-- Comparison --%>
-
-<section class="coral-Form-fieldset">
-    <div class="coral-Form-fieldwrapper">
-        <label class="coral-Form-fieldlabel">Left</label>
-
-        <select ng-model="diff.left"
-                ng-options="host as host.name for host in hosts"></select>
-    </div>
-
-
-    <div class="coral-Form-fieldwrapper">
-        <label class="coral-Form-fieldlabel">Right</label>
-
-        <select ng-model="diff.right"
-                ng-options="host as host.name for host in hosts"></select>
-    </div>
-</section>
-
-<button type="submit"
-        role="button"
-        ng-hide="!diff.left || !diff.right || app.running"
-        ng-click="compare()"
-        class="coral-Button coral-Button--primary">Compare</button>
-
-<p></p>
-
-<div diff
-     inline="true"
-     base-data="diff.left"
-     new-data="diff.right"></div>

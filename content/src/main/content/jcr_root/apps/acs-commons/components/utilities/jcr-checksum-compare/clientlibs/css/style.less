@@ -4,8 +4,7 @@
     width: 100%;
     margin-bottom: .9375rem;
     border-collapse: collapse;
-    border-top: .0625rem solid #cbcbcb;
-    background-color: rgba(0, 0, 0, 0);
+    border: 1px solid #cbcbcb;
   }
 
   table.diff thead {
@@ -20,6 +19,7 @@
 
     tr th.texttitle {
       padding: .5rem .25rem;
+      font-weight: normal;
     }
   }
 
@@ -28,13 +28,37 @@
       display: table-row;
       background: #fafafa;
 
+      th {
+        border: 1px solid #cbcbcb;
+        background: #e6e6e6;
+        padding: .5rem .75rem;
+        color: rgb(75, 75, 75);
+      }
+
       td {
         display: table-cell;
         padding: 0 .625rem;
         vertical-align: middle;
         text-align: left;
+        padding: .5rem 1rem;
+        border-bottom: 1px solid #ddd;
+
+        &.insert {
+          cursor: pointer;
+        }
+
+        &.delete {
+          cursor: pointer;
+        }
       }
     }
+
+    th.author {
+      border: 1px solid #cbcbcb;
+      background: #e6e6e6;
+      color: rgb(75, 75, 75);
+    }
+
   }
 
   .acsCommons-Form-multifieldset {
@@ -49,11 +73,12 @@
     }
 
     .acsCommons-Form-multifieldset-add {
+      font-size: 1rem;
+      cursor: pointer;
+    }
 
+    .acsCommons-Form-multifieldset-add::before {
+      padding-right: .5rem;
     }
   }
-
-  }
-
-
-
+}

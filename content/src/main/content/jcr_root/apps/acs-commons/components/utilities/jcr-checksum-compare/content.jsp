@@ -21,7 +21,8 @@
 %><%@page session="false"
           import="com.adobe.acs.commons.replication.AemPublishAgentFilter,
                   com.adobe.acs.commons.replication.AgentHosts,
-                  java.util.List, org.apache.sling.commons.json.JSONObject, org.apache.sling.commons.json.JSONArray, org.apache.commons.lang.StringUtils"%><%
+                  java.util.List,
+                  org.apache.commons.lang.StringUtils"%><%
 
     AgentHosts agentHosts = sling.getService(AgentHosts.class);
     List<String> hosts = agentHosts.getHosts(AemPublishAgentFilter.AEM_PUBLISH_AGENT_FILTER);
@@ -40,17 +41,22 @@
 
         <div class="coral-TabPanel coral-TabPanel--large" data-init="tabs">
             <nav class="coral-TabPanel-navigation">
-                <a class="coral-TabPanel-tab is-active" data-toggle="tab">Content Comparison</a>
+                <a class="coral-TabPanel-tab is-active" data-toggle="tab">Configuration</a>
+                <a class="coral-TabPanel-tab" data-toggle="tab">Content Comparison</a>
                 <a class="coral-TabPanel-tab" data-toggle="tab">Download JSON</a>
             </nav>
 
             <div class="coral-TabPanel-content">
                 <section class="coral-TabPanel-pane is-active">
-                    <cq:include script="includes/tab-checksum.jsp"/>
+                    <cq:include script="includes/tab-configuration.jsp"/>
                 </section>
 
                 <section class="coral-TabPanel-pane">
-                    <cq:include script="includes/tab-json-dump.jsp"/>
+                    <cq:include script="includes/tab-content-comparison.jsp"/>
+                </section>
+
+                <section class="coral-TabPanel-pane">
+                    <cq:include script="includes/tab-download-json.jsp"/>
                 </section>
             </div>
         </div>

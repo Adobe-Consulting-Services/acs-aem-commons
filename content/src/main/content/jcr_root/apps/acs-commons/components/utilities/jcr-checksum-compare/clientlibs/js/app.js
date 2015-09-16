@@ -25,7 +25,8 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
         function ($scope, $http, $timeout, NotificationsService) {
 
             $scope.app = {
-                servlet: '/bin/acs-commons/jcr-compare.hashes.txt',
+                hashesURI: '/bin/acs-commons/jcr-compare.hashes.txt',
+                jsonURI: '/bin/acs-commons/jcr-compare.dump.json',
                 hostNames: [],
                 running: false
             };
@@ -34,7 +35,7 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 checksum: {
                     optionsName: 'REQUEST',
                     paths: [
-                        { value: '/content' }
+                        { value: '/content/geometrixx/en/products' }
                     ],
                     queryType: 'None',
                     nodeTypes: [
@@ -80,20 +81,18 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 right: null
             };
 
-            /* Methods */
-
-            $scope.compare = function () {
-                // Clear results
-                $scope.getHashes($scope.diff.left);
-                $scope.getHashes($scope.diff.right);
+            $scope.jsonData = {
+                left: null,
+                right: null
             };
 
-            $scope.getHashes = function (host) {
-                var params = angular.copy($scope.form.checksum);
-                $scope.app.running = NotificationsService.running(true);
+            /* Methods */
+
+            $scope.getParams = function(params) {
 
                 // Add cache-buster
                 params._ = new Date().getTime();
+
                 params.paths = $scope.valueObjectsToArray(params.paths);
                 params.nodeTypes = $scope.valueObjectsToArray(params.nodeTypes);
                 params.excludeNodeTypes = $scope.valueObjectsToArray(params.excludeNodeTypes);
@@ -101,20 +100,36 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 params.sortedProperties = $scope.valueObjectsToArray(params.sortedProperties);
 
                 // Clean data
-                if (params.queryType.toLowerCase() === 'none') {
+                if (!params.queryType || params.queryType.toLowerCase() === 'none') {
                     delete params.queryType;
                     delete params.query;
                 }
 
+                return params;
+            };
+
+            $scope.compare = function () {
+                // Clear results
+                $scope.diff.left.data = null;
+                $scope.diff.right.data = null;
+
+                $scope.getHashes($scope.diff.left);
+                $scope.getHashes($scope.diff.right);
+            };
+
+            $scope.getHashes = function (host) {
+                var params;
+
+                $scope.app.running = NotificationsService.running(true);
+                params  = $scope.getParams(angular.copy($scope.form.checksum));
+
                 $http({
                     method: 'GET',
-                    url: encodeURI(host.uri + $scope.app.servlet),
+                    url: encodeURI(host.uri + $scope.app.hashesURI),
                     params: params
                 }).
                     success(function (data, status, headers, config) {
                         host.data = data;
-
-                        $scope.app.running = NotificationsService.running(false);
                     }).
                     error(function (data, status, headers, config) {
                         host.data = 'ERROR: Unable to collect JCR diff data from ' + host.name;
@@ -122,9 +137,54 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                         NotificationsService.add('error',
                             'ERROR', 'Unable to collect JCR diff data from ' + host.name);
 
+                    }).
+                    finally(function() {
                         $scope.app.running = NotificationsService.running(false);
                     });
             };
+
+
+            /* JSON Comparison */
+
+            $scope.compareJSON = function (path) {
+                // Clear results
+                $scope.jsonData.left = null;
+                $scope.jsonData.right = null;
+                $scope.jsonData.path = path;
+
+                $scope.getJSON($scope.diff.left, true, path);
+                $scope.getJSON($scope.diff.right, false,  path);
+            };
+
+            $scope.getJSON = function (host, isLeft, path) {
+                var params;
+
+                $scope.app.running = NotificationsService.running(true);
+
+                params = $scope.getParams(angular.copy($scope.form.checksum));
+                params.paths = [ path ];
+
+                $http({
+                    method: 'GET',
+                    url: encodeURI(host.uri + $scope.app.jsonURI),
+                    params: params
+                }).
+                    success(function (data, status, headers, config) {
+                        if (isLeft) {
+                            $scope.jsonData.left = data;
+                        } else {
+                            $scope.jsonData.right = data;
+                        }
+                    }).
+                    error(function (data, status, headers, config) {
+                        NotificationsService.add('error',
+                            'ERROR', 'Unable to collect JCR JSON diff data from ' + host.name);
+                    }).
+                    finally(function() {
+                        $scope.app.running = NotificationsService.running(false);
+                    });
+            };
+
 
             $scope.init = function(hostNames) {
                 angular.forEach(hostNames, function(hostName) {
@@ -150,24 +210,24 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 return arr;
             };
 
-    }]).directive('diff', function () {
+    }]).directive('contentdiff', function ($compile) {
         return {
             restrict: 'A',
             scope: {
-                baseData: '=',
-                newData: '=',
+                left: '=',
+                right: '=',
                 inline: '@',
             },
             replace: false,
             link: function(scope, element, attrs) {
 
                 var computeDiff = function() {
-                    var sequenceMatcher, opCodes, diffData, baseAsLines, newAsLines;
+                    var sequenceMatcher, opCodes, diffData, baseAsLines, newAsLines, html;
 
-                    if (scope.baseData && scope.baseData.data && scope.newData && scope.newData.data) {
+                    if (scope.left && scope.left.data && scope.right && scope.right.data) {
 
-                        baseAsLines = difflib.stringAsLines(scope.baseData.data);
-                        newAsLines = difflib.stringAsLines(scope.newData.data);
+                        baseAsLines = difflib.stringAsLines(scope.left.data);
+                        newAsLines = difflib.stringAsLines(scope.right.data);
 
                         sequenceMatcher = new difflib.SequenceMatcher(baseAsLines, newAsLines);
                         opCodes = sequenceMatcher.get_opcodes();
@@ -177,26 +237,95 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                             baseTextLines: baseAsLines,
                             newTextLines: newAsLines,
                             opcodes: opCodes,
-                            baseTextName: scope.baseData.name,
-                            newTextName: scope.newData.name,
+                            baseTextName: scope.left.name,
+                            newTextName: scope.right.name,
                             contextSize: 100,
                             viewType: scope.inline ? 1 : 0
                         });
 
-                        element.html(diffData);
+
+                        html = angular.element(diffData);
+
+                        html.find('td.delete, td.insert').each(function() {
+                            var $this = angular.element(this),
+                                t = $this.text(),
+                                path = t.substr(0, t.indexOf('    '));
+                            $this.attr('ng-click', 'compareJSON(\'' + encodeURI(path) + '\')');
+                        });
+
+                        // Bind to the Controllers scope so compareJSON(..) resolves
+                        element.html($compile(html)(scope.$parent));
 
                     } else {
                         element.html('');
                     }
                 };
 
-                scope.$watch('baseData.data', function() {
-                   computeDiff();
+                scope.$watch('left.data', function() {
+                    if (scope.left && scope.right && scope.left.data && scope.right.data) {
+                        computeDiff();
+                    }
                 });
 
-                scope.$watch('newData.data', function() {
-                    computeDiff();
+                scope.$watch('right.data', function() {
+                    if (scope.left && scope.right && scope.left.data && scope.right.data) {
+                        computeDiff();
+                    }
                 });
              }
+        };
+    }).directive('jsondiff', function () {
+        return {
+            restrict: 'A',
+            scope: {
+                left: '=',
+                right: '=',
+                path: '@'
+            },
+            template: '<div id="jsonDiffModal" class="coral-Modal">' +
+                        '<div class="coral-Modal-header">' +
+                            '<i class="coral-Modal-typeIcon coral-Icon coral-Icon--sizeS"></i>' +
+                            '<h2 class="coral-Modal-title coral-Heading coral-Heading--2">{{ path }}</h2>' +
+                            '<button type="button" class="coral-MinimalButton coral-Modal-closeButton" title="Close" data-dismiss="modal">' +
+                                '<i class="coral-Icon coral-Icon--sizeXS coral-Icon--close coral-MinimalButton-icon "></i>' +
+                            '</button>' +
+                        '</div>' +
+                        '<div class="coral-Modal-body" id="json-diff">' +
+                            '<p id="json-diff"></p>' +
+
+                        '</div>' +
+                        '<div class="coral-Modal-footer">' +
+                            '<button type="button" class="coral-Button" data-dismiss="modal">Close</button>' +
+                        '</div>' +
+                    '</div>',
+            replace: false,
+            link: function(scope, element, attrs) {
+                var modal = new CUI.Modal({ element:'#jsonDiffModal', visible: false });
+
+                var computeDiff = function() {
+                    var $modal,
+                        delta = jsondiffpatch.diff(scope.left, scope.right);
+                    element.find('#json-diff').html(jsondiffpatch.formatters.html.format(delta));
+
+                    modal.show();
+
+                    // Fix centering
+                    $modal = angular.element('#jsonDiffModal');
+                    $modal.css('margin-left', -1 * ($modal.outerWidth() / 2));
+
+                };
+
+                scope.$watch('left', function() {
+                    if (scope.left && scope.right) {
+                        computeDiff();
+                    }
+                });
+
+                scope.$watch('right', function() {
+                    if (scope.left && scope.right) {
+                        computeDiff();
+                    }
+                });
+            }
         };
     });
