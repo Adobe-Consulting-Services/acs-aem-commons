@@ -188,12 +188,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
         final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
 
-        final ComponentContext componentContext = WCMUtils.getComponentContext(request);
-
-        if (componentContext == null
-                || componentContext.isRoot()) {
-            chain.doFilter(request, response);
-        } else if (editModeEnabled
+        if (editModeEnabled
                 && (componentHelper.isEditMode(slingRequest)
                 || componentHelper.isDesignMode(slingRequest)
                 || WCMMode.ANALYTICS.equals(WCMMode.fromRequest(slingRequest)))) {
