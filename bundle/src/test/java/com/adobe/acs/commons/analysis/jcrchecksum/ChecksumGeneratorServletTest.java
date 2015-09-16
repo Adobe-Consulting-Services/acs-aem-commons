@@ -47,8 +47,10 @@ import com.day.cq.widget.HtmlLibraryManager;
 @RunWith(MockitoJUnitRunner.class)
 public class ChecksumGeneratorServletTest {
 
-    private static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare.hashes";
-
+    private static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare";
+    
+    private static final String SERVLET_SELECTORS = "hashes";
+    
     private static final String SERVLET_EXTENSION = "txt";
 
     @Mock
@@ -74,7 +76,7 @@ public class ChecksumGeneratorServletTest {
     public void testWithNoPath() throws Exception {
         this.resourceResolver = mock(ResourceResolver.class);
         this.request =
-            new MockSlingHttpServletRequest(SERVLET_PATH, null, SERVLET_EXTENSION, null,
+            new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
@@ -99,7 +101,7 @@ public class ChecksumGeneratorServletTest {
             .setProperty("jcr:title", "Foo");
 
         this.request =
-            new MockSlingHttpServletRequest(SERVLET_PATH, null, SERVLET_EXTENSION, null,
+            new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
