@@ -22,6 +22,7 @@ package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentContext;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -46,6 +47,7 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -83,6 +85,7 @@ public class ComponentErrorHandlerImplTest {
     @Before
     public void setUp() throws Exception {
         when(request.getAttribute("com.day.cq.wcm.componentcontext")).thenReturn(componentContext);
+        when(componentContext.getComponent()).thenReturn(mock(Component.class));
         when(request.getResource()).thenReturn(resource);
 
         when(resource.getPath()).thenReturn("/content/test");
@@ -90,6 +93,9 @@ public class ComponentErrorHandlerImplTest {
         when(resource.isResourceType("acs-commons/test/demo")).thenReturn(true);
 
         when(response.getWriter()).thenReturn(responseWriter);
+        
+        when(request.getRequestURI()).thenReturn("/content/page.html");
+        when(response.getContentType()).thenReturn("text/html");
     }
 
     @After
