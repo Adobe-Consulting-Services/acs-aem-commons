@@ -47,6 +47,10 @@ import com.day.cq.widget.HtmlLibraryManager;
 @RunWith(MockitoJUnitRunner.class)
 public class JCRHashCalculatorServletTest {
 
+    private static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare.hashes";
+
+    private static final String SERVLET_EXTENSION = "txt";
+
     @Mock
     private HtmlLibraryManager manager;
 
@@ -70,7 +74,7 @@ public class JCRHashCalculatorServletTest {
     public void testWithNoPath() throws Exception {
         this.resourceResolver = mock(ResourceResolver.class);
         this.request =
-            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.hashes", null, "txt", null,
+            new MockSlingHttpServletRequest(SERVLET_PATH, null, SERVLET_EXTENSION, null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
@@ -95,7 +99,7 @@ public class JCRHashCalculatorServletTest {
             .setProperty("jcr:title", "Foo");
 
         this.request =
-            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.hashes.txt", null, "txt", null,
+            new MockSlingHttpServletRequest(SERVLET_PATH, null, SERVLET_EXTENSION, null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
