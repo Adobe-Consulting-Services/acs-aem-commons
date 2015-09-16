@@ -164,7 +164,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     @Property(label = "Suppressed Resource Types",
             description = "Resource types this Filter will ignore during Sling Includes.",
             cardinality = Integer.MAX_VALUE,
-            value = { })
+            value = {})
     public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress-resource-types";
 
 
@@ -173,8 +173,12 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     }
 
     @Override
-    public final void doFilter(ServletRequest request, ServletResponse response,
+    public final void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                                FilterChain chain) throws IOException, ServletException {
+
+        // We are in a Sling Filter, so these request/response objects are guarenteed to be of type Sling...
+        final SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
+        final SlingHttpServletResponse response = (SlingHttpServletResponse) servletResponse;
 
         if (!this.accepts(request, response)) {
             chain.doFilter(request, response);
@@ -294,10 +298,23 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         return "";
     }
 
-    protected final boolean accepts(final ServletRequest request, final ServletResponse response) {
-        // Ensure we are dealing with Sling Requests/Responses
-        if (!(request instanceof SlingHttpServletRequest)
-                || !(response instanceof SlingHttpServletResponse)) {
+    protected final boolean accepts(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+
+        if (!StringUtils.endsWith(request.getRequestURI(), ".html") ||
+                !StringUtils.contains(response.getContentType(), "html")) {
+            // Do not inject around non-HTML requests
+            return false;
+        }
+
+        final ComponentContext componentContext = WCMUtils.getComponentContext(request);
+        if (componentContext == null) {
+            // ComponentContext is null
+            return false;
+        } else if (componentContext.getComponent() == null) {
+            // Component is null
+            return false;
+        } else if (componentContext.isRoot()) {
+            // Suppress on root context
             return false;
         }
 
