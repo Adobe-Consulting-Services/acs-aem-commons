@@ -45,7 +45,7 @@ import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorServlet;
 import com.day.cq.widget.HtmlLibraryManager;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JCRHashCalculatorServletTest {
+public class ChecksumGeneratorServletTest {
 
     private static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare.hashes";
 
