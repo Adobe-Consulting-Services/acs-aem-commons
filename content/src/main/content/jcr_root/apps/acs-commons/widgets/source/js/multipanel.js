@@ -32,6 +32,11 @@ CQ.Ext.ns("ACS.CQ");
 ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
     panelValue: '',
 
+    /**
+     * @constructor
+     * Creates a new MultiFieldPanel.
+     * @param {Object} config The config object
+     */
     constructor: function(config){
         config = config || {};
         if (!config.layout) {
