@@ -23,6 +23,7 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.ForwardAsGetFormHelper;
 import com.adobe.acs.commons.forms.helpers.impl.synthetics.SyntheticSlingHttpServletGetRequest;
+import com.adobe.acs.commons.forms.impl.FormImpl;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -65,7 +66,7 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
                 return this.getProtectedForm((Form) obj);
             } else {
                 log.info("Unable to find Form in Request attribute: [ {} => {} ]", key, obj);
-                return new Form(formName, request.getResource().getPath());
+                return new FormImpl(formName, request.getResource().getPath());
             }
         }
     }

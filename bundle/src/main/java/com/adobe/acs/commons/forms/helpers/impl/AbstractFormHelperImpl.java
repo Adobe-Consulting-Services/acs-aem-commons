@@ -22,6 +22,7 @@ package com.adobe.acs.commons.forms.helpers.impl;
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
+import com.adobe.acs.commons.forms.impl.FormImpl;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.ArrayUtils;
@@ -191,7 +192,7 @@ public abstract class AbstractFormHelperImpl {
             }
         }
 
-        return this.clean(new Form(formName, request.getResource().getPath(), map));
+        return this.clean(new FormImpl(formName, request.getResource().getPath(), map));
     }
 
     /**
@@ -221,7 +222,7 @@ public abstract class AbstractFormHelperImpl {
             }
         }
 
-        return new Form(form.getName(), form.getResourcePath(), cleanedMap, form.getErrors());
+        return new FormImpl(form.getName(), form.getResourcePath(), cleanedMap, form.getErrors());
     }
 
     /**
@@ -231,7 +232,7 @@ public abstract class AbstractFormHelperImpl {
      * @return
      */
     protected final Form getProtectedForm(final Form form) {
-        return new Form(form.getName(),
+        return new FormImpl(form.getName(),
                 form.getResourcePath(),
                 this.getProtectedData(form.getData()),
                 this.getProtectedErrors(form.getErrors()));

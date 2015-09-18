@@ -22,6 +22,7 @@ package com.adobe.acs.commons.forms.helpers.impl;
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PostRedirectGetFormHelper;
+import com.adobe.acs.commons.forms.impl.FormImpl;
 import com.adobe.acs.commons.util.TypeUtil;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
@@ -71,7 +72,7 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
         }
 
         log.debug("Creating empty form for FORM [ {} ]", formName);
-        return new Form(formName, request.getResource().getPath());
+        return new FormImpl(formName, request.getResource().getPath());
     }
 
     @Override
@@ -199,7 +200,7 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
 
 
         if (StringUtils.isBlank(requestData)) {
-            return new Form(formName, request.getResource().getPath());
+            return new FormImpl(formName, request.getResource().getPath());
         }
 
         try {
@@ -224,10 +225,10 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
             }
         } catch (JSONException e) {
             log.warn("Cannot parse query parameters for request: {}", requestData);
-            return new Form(formName, request.getResource().getPath());
+            return new FormImpl(formName, request.getResource().getPath());
         }
 
-        return new Form(formName,
+        return new FormImpl(formName,
                 request.getResource().getPath(),
                 this.getProtectedData(data),
                 this.getProtectedErrors(errors));
