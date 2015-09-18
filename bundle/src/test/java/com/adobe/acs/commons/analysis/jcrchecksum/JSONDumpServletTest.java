@@ -44,6 +44,12 @@ import com.day.cq.widget.HtmlLibraryManager;
 @RunWith(MockitoJUnitRunner.class)
 public class JSONDumpServletTest {
 
+    private static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare";
+
+    private static final String SERVLET_SELECTORS = "dump";
+
+    private static final String SERVLET_EXTENSION = "json";
+
     @Mock
     private HtmlLibraryManager manager;
 
@@ -67,7 +73,7 @@ public class JSONDumpServletTest {
     public void testWithNoPath() throws Exception {
         this.resourceResolver = mock(ResourceResolver.class);
         this.request =
-            new MockSlingHttpServletRequest("/bin/jsondump", null, "json", null,
+            new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
@@ -93,7 +99,7 @@ public class JSONDumpServletTest {
             .setProperty("jcr:title", "Foo");
 
         this.request =
-            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.dump", null, "json", null,
+            new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;

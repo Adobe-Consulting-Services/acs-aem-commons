@@ -45,7 +45,13 @@ import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorServlet;
 import com.day.cq.widget.HtmlLibraryManager;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JCRHashCalculatorServletTest {
+public class ChecksumGeneratorServletTest {
+
+    private static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare";
+    
+    private static final String SERVLET_SELECTORS = "hashes";
+    
+    private static final String SERVLET_EXTENSION = "txt";
 
     @Mock
     private HtmlLibraryManager manager;
@@ -70,7 +76,7 @@ public class JCRHashCalculatorServletTest {
     public void testWithNoPath() throws Exception {
         this.resourceResolver = mock(ResourceResolver.class);
         this.request =
-            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.hashes", null, "txt", null,
+            new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
@@ -95,7 +101,7 @@ public class JCRHashCalculatorServletTest {
             .setProperty("jcr:title", "Foo");
 
         this.request =
-            new MockSlingHttpServletRequest("/bin/acs-commons/jcr-compare.hashes.txt", null, "txt", null,
+            new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
                 null) {
                 public ResourceResolver getResourceResolver() {
                     return resourceResolver;
