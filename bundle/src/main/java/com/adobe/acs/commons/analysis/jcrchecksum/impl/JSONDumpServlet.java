@@ -23,6 +23,7 @@ package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.JSONGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -45,6 +46,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("serial")
@@ -109,7 +111,9 @@ public class JSONDumpServlet extends SlingSafeMethodsServlet {
 
         log.debug(options.toString());
 
-        if (CollectionUtils.isEmpty(options.getPaths())) {
+        List<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
+
+        if (CollectionUtils.isEmpty(paths)) {
             try {
                 response.setStatus(400);
                 response.getWriter().print(
@@ -124,7 +128,7 @@ public class JSONDumpServlet extends SlingSafeMethodsServlet {
         JSONWriter jsonWriter = new JSONWriter(response.getWriter());
 
         try {
-            JSONGenerator.generateJSON(session, options.getPaths(), options,
+            JSONGenerator.generateJSON(session, paths, options,
                 jsonWriter);
         } catch (RepositoryException e) {
             throw new ServletException("Error accessing repository", e);

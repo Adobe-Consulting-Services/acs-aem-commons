@@ -22,11 +22,8 @@ package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 
 import aQute.bnd.annotation.ProviderType;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.request.RequestParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 @ProviderType
 public class DefaultChecksumGeneratorOptions extends AbstractChecksumGeneratorOptions {
@@ -63,18 +60,8 @@ public class DefaultChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
         );
     }
 
-    public DefaultChecksumGeneratorOptions(SlingHttpServletRequest request) throws IOException {
+    public DefaultChecksumGeneratorOptions(SlingHttpServletRequest request) {
         this();
-
-        this.addPaths(request.getParameterValues(PATHS));
-        this.addPaths(this.getPathsFromQuery(request.getResourceResolver(),
-                request.getParameter(QUERY_TYPE),
-                request.getParameter(QUERY)).toArray(new String[]{}));
-
-        RequestParameter data = request.getRequestParameter(DATA);
-        if(data != null && data.getInputStream() != null) {
-            this.addPaths(this.getPathsFromInputstream(data.getInputStream()).toArray(new String[]{}));
-        }
     }
 
 }

@@ -24,18 +24,9 @@ import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.util.InfoWriter;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -104,44 +95,6 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         return this.sortedProperties;
     }
 
-    protected Set<String> getPathsFromQuery(ResourceResolver resourceResolver, String language, String query) {
-        if (StringUtils.isBlank(query)) {
-            return Collections.EMPTY_SET;
-        }
-
-        Set<String> paths = new HashSet<String>();
-        language = StringUtils.defaultIfEmpty(language, "xpath");
-        Iterator<Resource> resources = resourceResolver.findResources(query, language);
-
-        while (resources.hasNext()) {
-            paths.add(resources.next().getPath());
-        }
-
-        return paths;
-    }
-
-
-    protected Set<String> getPathsFromInputstream(InputStream is) throws IOException {
-        if (is == null) {
-            return Collections.EMPTY_SET;
-        }
-
-        Set<String> paths = new HashSet<String>();
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-
-        try {
-            String path;
-            while ((path = br.readLine()) != null) {
-                paths.add(path);
-            }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
-        }
-
-        return paths;
-    }
 
 
     public String toString() {

@@ -2,9 +2,9 @@
 <section class="coral-Form-fieldset acsCommons-Form-multifieldset">
     <h3 class="coral-Form-fieldset-legend">Paths</h3>
 
-    <div ng-repeat="item in form.checksum.paths track by $index">
+    <div ng-repeat="item in config.paths track by $index">
         <button class="coral-Button coral-Button--square coral-Button--quiet acsCommons-Form-multifieldset-remove"
-                ng-click="form.checksum.paths.splice($index, 1)">
+                ng-click="config.paths.splice($index, 1)">
             <i class="coral-Icon coral-Icon--delete"></i>
         </button>
 
@@ -15,7 +15,7 @@
     </div>
 
     <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
-        ng-click="form.checksum.paths.push({ value: '' });">Add Path</a>
+        ng-click="config.paths.push({ value: '' });">Add Path</a>
 </section>
 
 <%-- Query --%>
@@ -23,14 +23,14 @@
     <h3 class="coral-Form-fieldset-legend">Query</h3>
 
     <select ng-options="language for language in ['None', 'xpath', 'JCR-SQL', 'JCR-SQL2']"
-            ng-model="form.checksum.queryType"></select>
+            ng-model="config.queryType"></select>
 
     <p>
-                <textarea ng-hide="form.checksum.queryType === 'None'"
+                <textarea ng-hide="config.queryType === 'None'"
                           class="coral-Textfield coral-Textfield--multiline"
                           rows="4"
                           style="width: 100%"
-                          ng-model="form.checksum.query"
+                          ng-model="config.query"
                           type="text"></textarea>
     </p>
 </section>
@@ -40,9 +40,9 @@
 <section class="coral-Form-fieldset acsCommons-Form-multifieldset">
     <h3 class="coral-Form-fieldset-legend">Node types</h3>
 
-    <div ng-repeat="item in form.checksum.nodeTypes track by $index">
+    <div ng-repeat="item in config.nodeTypes track by $index">
         <button class="coral-Button coral-Button--square coral-Button--quiet acsCommons-Form-multifieldset-remove"
-                ng-click="form.checksum.nodeTypes.splice($index, 1)">
+                ng-click="config.nodeTypes.splice($index, 1)">
             <i class="coral-Icon coral-Icon--delete"></i>
         </button>
 
@@ -53,7 +53,7 @@
     </div>
 
     <a      class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
-            ng-click="form.checksum.nodeTypes.push({ value: '' });">Add Node Type</a>
+            ng-click="config.nodeTypes.push({ value: '' });">Add Node Type</a>
 </section>
 
 
@@ -61,9 +61,9 @@
 <section class="coral-Form-fieldset acsCommons-Form-multifieldset">
     <h3 class="coral-Form-fieldset-legend">Node types to exclude</h3>
 
-    <div ng-repeat="item in form.checksum.excludeNodeTypes track by $index">
+    <div ng-repeat="item in config.excludeNodeTypes track by $index">
         <button class="coral-Button coral-Button--square coral-Button--quiet acsCommons-Form-multifieldset-remove"
-                ng-click="form.checksum.excludeNodeTypes.splice($index, 1)">
+                ng-click="config.excludeNodeTypes.splice($index, 1)">
             <i class="coral-Icon coral-Icon--delete"></i>
         </button>
 
@@ -74,7 +74,7 @@
     </div>
 
     <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
-        ng-click="form.checksum.excludeNodeTypes.push({ value: '' });">Add Node Type to Exclude</a>
+        ng-click="config.excludeNodeTypes.push({ value: '' });">Add Node Type to Exclude</a>
 
 </section>
 
@@ -83,9 +83,9 @@
 <section class="coral-Form-fieldset acsCommons-Form-multifieldset">
     <h3 class="coral-Form-fieldset-legend">Properties to exclude</h3>
 
-    <div ng-repeat="item in form.checksum.excludeProperties track by $index">
+    <div ng-repeat="item in config.excludeProperties track by $index">
         <button class="coral-Button coral-Button--square coral-Button--quiet acsCommons-Form-multifieldset-remove"
-                ng-click="form.checksum.excludeProperties.splice($index, 1)">
+                ng-click="config.excludeProperties.splice($index, 1)">
             <i class="coral-Icon coral-Icon--delete"></i>
         </button>
 
@@ -97,7 +97,7 @@
     </div>
 
     <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
-        ng-click="form.checksum.excludeProperties.push({ value: '' });">Add Property to Exclude</a>
+        ng-click="config.excludeProperties.push({ value: '' });">Add Property to Exclude</a>
 </section>
 
 
@@ -105,9 +105,9 @@
 <section class="coral-Form-fieldset acsCommons-Form-multifieldset">
     <h3 class="coral-Form-fieldset-legend">Sorted multi-value properties</h3>
 
-    <div ng-repeat="item in form.checksum.sortedProperties track by $index">
+    <div ng-repeat="item in config.sortedProperties track by $index">
         <button class="coral-Button coral-Button--square coral-Button--quiet acsCommons-Form-multifieldset-remove"
-                ng-click="form.checksum.sortedProperties.splice($index, 1)">
+                ng-click="config.sortedProperties.splice($index, 1)">
             <i class="coral-Icon coral-Icon--delete"></i>
         </button>
 
@@ -119,6 +119,6 @@
     </div>
 
     <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
-        ng-click="form.checksum.sortedProperties.push({ value: '' });">Add Sorted Property</a>
+        ng-click="config.sortedProperties.push({ value: '' });">Add Sorted Property</a>
 </section>
 

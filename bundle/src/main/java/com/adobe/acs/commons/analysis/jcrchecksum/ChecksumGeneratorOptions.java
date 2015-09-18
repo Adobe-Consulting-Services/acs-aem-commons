@@ -42,7 +42,6 @@ public interface ChecksumGeneratorOptions {
 
     String SORTED_PROPERTIES = "sortedProperties";
 
-    Set<String> getPaths();
     Set<String> getIncludedNodeTypes();
     Set<String> getExcludedNodeTypes();
     Set<String> getExcludedProperties();

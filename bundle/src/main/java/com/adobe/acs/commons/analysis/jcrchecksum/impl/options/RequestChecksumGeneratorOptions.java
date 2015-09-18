@@ -21,34 +21,101 @@
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 
 import aQute.bnd.annotation.ProviderType;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 @ProviderType
 public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOptions {
     private static final Logger log = LoggerFactory.getLogger(RequestChecksumGeneratorOptions.class);
 
     public RequestChecksumGeneratorOptions(SlingHttpServletRequest request) throws IOException {
-
         this.addIncludedNodeTypes(request.getParameterValues(NODES_TYPES));
         this.addExcludedNodeTypes(request.getParameterValues(NODE_TYPE_EXCLUDES));
         this.addExcludedProperties(request.getParameterValues(PROPERTY_EXCLUDES));
         this.addSortedProperties(request.getParameterValues(SORTED_PROPERTIES));
+    }
+
+    public static List<String> getPaths(SlingHttpServletRequest request) throws IOException {
+        List<String> paths = new ArrayList<String>();
 
         // Add Paths
 
-        this.addPaths(request.getParameterValues(PATHS));
-        this.addPaths(this.getPathsFromQuery(request.getResourceResolver(),
+        if(request.getParameterValues(PATHS) != null) {
+            paths.addAll(asList(request.getParameterValues(PATHS)));
+        }
+
+        paths.addAll(getPathsFromQuery(request.getResourceResolver(),
                 request.getParameter(QUERY_TYPE),
-                request.getParameter(QUERY)).toArray(new String[]{}));
+                request.getParameter(QUERY)));
 
         RequestParameter data = request.getRequestParameter(DATA);
         if(data != null && data.getInputStream() != null) {
-            this.addPaths(this.getPathsFromInputstream(data.getInputStream()).toArray(new String[]{}));
+            paths.addAll(getPathsFromInputstream(data.getInputStream()));
+        }
+
+        return paths;
+    }
+
+    private static Set<String> getPathsFromQuery(ResourceResolver resourceResolver, String language, String query) {
+        if (StringUtils.isBlank(query)) {
+            return Collections.EMPTY_SET;
+        }
+
+        Set<String> paths = new HashSet<String>();
+        language = StringUtils.defaultIfEmpty(language, "xpath");
+        Iterator<Resource> resources = resourceResolver.findResources(query, language);
+
+        while (resources.hasNext()) {
+            paths.add(resources.next().getPath());
+        }
+
+        return paths;
+    }
+
+    private static Set<String> getPathsFromInputstream(InputStream is) throws IOException {
+        if (is == null) {
+            return Collections.EMPTY_SET;
+        }
+
+        Set<String> paths = new HashSet<String>();
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+        try {
+            String path;
+            while ((path = br.readLine()) != null) {
+                paths.add(path);
+            }
+        } finally {
+            if (br != null) {
+                br.close();
+            }
+        }
+
+        return paths;
+    }
+
+    private static List<String> asList(String[] arr) {
+        if (arr == null) {
+            return Collections.EMPTY_LIST;
+        } else {
+            return Arrays.asList(arr);
         }
     }
 }

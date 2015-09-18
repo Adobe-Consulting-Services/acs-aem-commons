@@ -20,13 +20,10 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.servlet.ServletException;
-
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -41,9 +38,12 @@ import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 @Component(
@@ -105,7 +105,10 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
 
         log.debug(options.toString());
 
-        if (CollectionUtils.isEmpty(options.getPaths())) {
+        List<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
+
+
+        if (CollectionUtils.isEmpty(paths)) {
             try {
                 response.setStatus(400);
                 response.getWriter().print("ERROR: At least one path must be specified");
@@ -116,7 +119,7 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
 
         Session session = request.getResourceResolver().adaptTo(Session.class);
 
-        for (final String path : options.getPaths()) {
+        for (final String path : paths) {
             log.debug("Generating checksum for path [ {} ]", path);
             ChecksumGenerator.generateChecksums(session, path, options, response.getWriter());
         }

@@ -31,42 +31,37 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 running: false
             };
 
-            $scope.form = {
-                checksum: {
-                    optionsName: 'REQUEST',
-                    paths: [
-                        { value: '/content/geometrixx/en/products' }
-                    ],
-                    queryType: 'None',
-                    nodeTypes: [
-                        { value: 'cq:PageContent' },
-                        { value: 'dam:AssetContent' }
-                    ],
-                    excludeNodeTypes: [
-                        { value: 'rep:ACL' }
-                    ],
-                    excludeProperties: [
-                        { value: 'jcr:created' },
-                        { value: 'jcr:createdBy'},
-                        { value: 'jcr:uuid' },
-                        { value: 'jcr:lastModified' },
-                        { value: 'jcr:lastModifiedBy' },
-                        { value: 'cq:lastModified' },
-                        { value: 'cq:lastModifiedBy' },
-                        { value: 'cq:lastReplicated' },
-                        { value: 'cq:lastReplicatedBy' },
-                        { value: 'cq:lastReplicationAction' },
-                        { value: 'jcr:versionHistory' },
-                        { value: 'jcr:predecessors' },
-                        { value: 'jcr:baseVersion' }
-                    ],
-                    sortedProperties: [
-                        { value: 'cq:tags' }
-                    ]
-                },
-                json: {
-                    path: null
-                }
+            $scope.config = {
+                optionsName: 'REQUEST',
+                paths: [
+                    { value: '/content' }
+                ],
+                queryType: 'None',
+                nodeTypes: [
+                    { value: 'cq:PageContent' },
+                    { value: 'dam:AssetContent' }
+                ],
+                excludeNodeTypes: [
+                    { value: 'rep:ACL' }
+                ],
+                excludeProperties: [
+                    { value: 'jcr:created' },
+                    { value: 'jcr:createdBy'},
+                    { value: 'jcr:uuid' },
+                    { value: 'jcr:lastModified' },
+                    { value: 'jcr:lastModifiedBy' },
+                    { value: 'cq:lastModified' },
+                    { value: 'cq:lastModifiedBy' },
+                    { value: 'cq:lastReplicated' },
+                    { value: 'cq:lastReplicatedBy' },
+                    { value: 'cq:lastReplicationAction' },
+                    { value: 'jcr:versionHistory' },
+                    { value: 'jcr:predecessors' },
+                    { value: 'jcr:baseVersion' }
+                ],
+                sortedProperties: [
+                    { value: 'cq:tags' }
+                ]
             };
 
             $scope.hosts = [{
@@ -121,7 +116,7 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 var params;
 
                 $scope.app.running = NotificationsService.running(true);
-                params  = $scope.getParams(angular.copy($scope.form.checksum));
+                params  = $scope.getParams(angular.copy($scope.config));
 
                 $http({
                     method: 'GET',
@@ -161,7 +156,7 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
 
                 $scope.app.running = NotificationsService.running(true);
 
-                params = $scope.getParams(angular.copy($scope.form.checksum));
+                params = $scope.getParams(angular.copy($scope.config));
                 params.paths = [ path ];
 
                 $http({
@@ -185,6 +180,12 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                     });
             };
 
+
+            $scope.configAsParams = function() {
+                var params = $scope.getParams(angular.copy($scope.config));
+
+                return $.param(params);
+            };
 
             $scope.init = function(hostNames) {
                 angular.forEach(hostNames, function(hostName) {
