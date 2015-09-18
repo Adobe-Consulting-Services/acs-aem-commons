@@ -6,16 +6,14 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
-import org.apache.sling.testing.resourceresolver.MockResourceResolverFactory;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
 
@@ -26,29 +24,26 @@ import static org.junit.Assert.assertThat;
 @RunWith(JUnit4.class)
 public class PostRedirectGetFormHelperImplTest {
 
+    @Rule
+    public SlingContext slingContext = new SlingContext();
     private MockSlingHttpServletRequest request;
     private MockSlingHttpServletResponse response;
     private Resource requestResource;
-
     private FormHelper formHelper;
 
     @Before
     public void setup() throws LoginException, PersistenceException {
-        final ResourceResolverFactory resourceResolverFactory = new MockResourceResolverFactory();
-        final ResourceResolver resourceResolver = resourceResolverFactory.getResourceResolver(null);
-        final Resource root = resourceResolver.getResource("/");
-
-        request = new MockSlingHttpServletRequest(resourceResolver);
-        response = new MockSlingHttpServletResponse();
-
-        formHelper = new PostRedirectGetWithCookiesFormHelperImpl();
-        requestResource = resourceResolver.create(root, "/test", Collections.<String, Object>emptyMap());
+        request = slingContext.request();
+        response = slingContext.response();
+        requestResource = slingContext.create().resource("/test", Collections.<String, Object>emptyMap());
         request.setResource(requestResource);
+        request.setMethod("POST");
+
+        formHelper = new PostRedirectGetFormHelperImpl();
     }
 
     @Test
     public void shouldMapFormName() throws Exception {
-        request.setMethod("POST");
         request.setParameterMap(ImmutableMap.<String, Object>of(":form", "demo"));
 
         final Form form = formHelper.getForm("demo", request, response);
@@ -58,8 +53,6 @@ public class PostRedirectGetFormHelperImplTest {
 
     @Test
     public void shouldMapSingleParam() throws Exception {
-        request.setMethod("POST");
-        request.setResource(requestResource);
         request.setParameterMap(ImmutableMap.<String, Object>of(":form", "x", "hello", "world"));
 
         final Form form = formHelper.getForm("x", request, response);
@@ -69,8 +62,6 @@ public class PostRedirectGetFormHelperImplTest {
 
     @Test
     public void shouldMapFirstValueOfMultiParams() throws Exception {
-        request.setMethod("POST");
-        request.setResource(requestResource);
         request.setParameterMap(ImmutableMap.<String, Object>of(":form", "x", "hello", new String[]{"world", "mundo"}));
 
         final Form form = formHelper.getForm("x", request, response);
