@@ -47,7 +47,10 @@ import java.util.Map;
                 value = ResizeImageTransformerImpl.TYPE
         )
 })
-@Service
+@Service(value = {
+        ImageTransformer.class,
+        ResizeImageTransformerImpl.class
+})
 public class ResizeImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ResizeImageTransformerImpl.class);
 
@@ -79,6 +82,10 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
         int width = properties.get(KEY_WIDTH, properties.get(KEY_WIDTH_ALIAS, 0));
         int height = properties.get(KEY_HEIGHT, properties.get(KEY_HEIGHT_ALIAS, 0));
 
+        return resize(layer, width, height);
+    }
+
+    Layer resize(Layer layer, int width, int height) {
         if (width > maxDimension) {
             width = maxDimension;
         }
