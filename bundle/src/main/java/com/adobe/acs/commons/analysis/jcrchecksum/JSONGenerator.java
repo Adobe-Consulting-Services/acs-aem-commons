@@ -127,8 +127,7 @@ public class JSONGenerator {
 
         out.key(node.getPath());
         out.object();
-        out.key("foo");
-        out.value("fi");
+        
         outputProperties(node, opts, out);
 
         outputChildNodes(node, opts, out);

@@ -42,9 +42,11 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                     { value: 'dam:AssetContent' }
                 ],
                 excludeNodeTypes: [
-                    { value: 'rep:ACL' }
+                    { value: 'rep:ACL' },
+                    { value: 'cq:meta' } //added for AEM6.1 compatibility
                 ],
                 excludeProperties: [
+                    { value: 'jcr:mixinTypes'}, //added as author instances have cq:ReplicationStatus and pubs don't
                     { value: 'jcr:created' },
                     { value: 'jcr:createdBy'},
                     { value: 'jcr:uuid' },
@@ -65,7 +67,7 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
             };
 
             $scope.hosts = [{
-                name: 'Localhost',
+                name: 'localhost',
                 uri: '',
                 data: '',
                 active: true
@@ -121,7 +123,8 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 $http({
                     method: 'GET',
                     url: encodeURI(host.uri + $scope.app.hashesURI),
-                    params: params
+                    params: params,
+                    headers: {'Authorization': ((host.user && host.user.length > 0)?"Basic " + btoa(host.user + ":" + host.password):undefined)}
                 }).
                     success(function (data, status, headers, config) {
                         host.data = data;
@@ -162,7 +165,8 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 $http({
                     method: 'GET',
                     url: encodeURI(host.uri + $scope.app.jsonURI),
-                    params: params
+                    params: params,
+                    headers: {'Authorization': ((host.user && host.user.length > 0)?"Basic " + btoa(host.user + ":" + host.password):undefined)}
                 }).
                     success(function (data, status, headers, config) {
                         if (isLeft) {

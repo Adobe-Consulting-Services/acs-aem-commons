@@ -37,10 +37,12 @@ public class DefaultChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
         );
 
         this.addExcludedNodeTypes(
-                "rep:ACL"
+                "rep:ACL",
+                "cq:meta"
         );
 
         this.addExcludedProperties(
+                "jcr:mixinTypes",
                 "jcr:created",
                 "jcr:uuid",
                 "jcr:lastModified",
@@ -50,6 +52,7 @@ public class DefaultChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
                 "cq:lastReplicated",
                 "cq:lastReplicatedBy",
                 "cq:lastReplicationAction",
+                "cq:ReplicationStatus",
                 "jcr:versionHistory",
                 "jcr:predecessors",
                 "jcr:baseVersion"
