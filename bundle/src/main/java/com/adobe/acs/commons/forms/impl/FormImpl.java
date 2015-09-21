@@ -107,7 +107,7 @@ public class FormImpl implements Form {
 
     @Override
     public boolean hasData() {
-        if (!this.data.isEmpty()) {
+        if (this.data.isEmpty()) {
             return false;
         }
 
