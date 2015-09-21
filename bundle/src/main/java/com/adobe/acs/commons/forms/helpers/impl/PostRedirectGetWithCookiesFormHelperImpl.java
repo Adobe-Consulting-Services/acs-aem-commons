@@ -22,6 +22,7 @@ package com.adobe.acs.commons.forms.helpers.impl;
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PostRedirectGetWithCookiesHelper;
+import com.adobe.acs.commons.util.CookieUtil;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -51,6 +52,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetWithCookiesFormHelperImpl.class);
 
     public static final int COOKIE_MAX_AGE = 10 * 60;
+    public static final String ROOT_COOKIE_PATH = "/";
 
     @Override
     public final void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response)
@@ -89,12 +91,13 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
     @Override
     protected String getRawFormData(final String formName, final SlingHttpServletRequest request,
             final SlingHttpServletResponse response) {
-        final Cookie cookie = findCookie(request, getGetLookupKey(formName));
-        if (response != null) {
-            cookie.setMaxAge(0);  // expire the cookie
-            response.addCookie(cookie);
+        final String cookieName = getGetLookupKey(formName);
+        final Cookie cookie = findCookie(request, cookieName);
+
+        if (response != null && cookie != null) {
+            CookieUtil.dropCookies(request, response, ROOT_COOKIE_PATH, cookieName);
         } else {
-            log.warn("SlingHttpServletResponse required for removing cookie. Please use formHelper.getForm(\"" + formName + "\", slingRequest, slingResponse);");
+            log.warn("SlingHttpServletResponse required for removing cookie. Please use formHelper.getForm({}, slingRequest, slingResponse);", formName);
         }
         // Get the QP lookup for this form
         return this.decode(cookie.getValue());
@@ -159,7 +162,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
         final String value = getQueryParameterValue(form);
         final Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge(COOKIE_MAX_AGE);
-        response.addCookie(cookie);
+        CookieUtil.addCookie(cookie, response);
     }
 
 }
