@@ -82,7 +82,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
     protected final boolean doHandleGet(final String formName, final SlingHttpServletRequest request) {
         //noinspection SimplifiableIfStatement
         if (StringUtils.equalsIgnoreCase("GET", request.getMethod())) {
-            return (findCookie(request, this.getGetLookupKey(formName)) != null);
+            return (CookieUtil.getCookie(request, this.getGetLookupKey(formName)) != null);
         } else {
             return false;
         }
@@ -92,7 +92,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
     protected String getRawFormData(final String formName, final SlingHttpServletRequest request,
             final SlingHttpServletResponse response) {
         final String cookieName = getGetLookupKey(formName);
-        final Cookie cookie = findCookie(request, cookieName);
+        final Cookie cookie = CookieUtil.getCookie(request, cookieName);
 
         if (response != null && cookie != null) {
             CookieUtil.dropCookies(request, response, ROOT_COOKIE_PATH, cookieName);
@@ -134,21 +134,6 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
     @Override
     protected final String decode(String encoded) {
         return StringUtils.isBlank(encoded) ? "" : org.apache.sling.commons.json.http.Cookie.unescape(encoded);
-    }
-
-    /**
-     * Find the cookie on the request
-     * @param request
-     * @param name
-     * @return form cookie or null
-     */
-    protected Cookie findCookie(SlingHttpServletRequest request, String name) {
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals(name)) {
-                return cookie;
-            }
-        }
-        return null;
     }
 
     /**
