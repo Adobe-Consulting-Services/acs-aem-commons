@@ -22,6 +22,6 @@ package com.adobe.acs.commons.forms.helpers;
 /**
  * Marker interface to identify the variation of the PostRedirectGetHelper that uses cookies instead of url params
  */
-public interface PostRedirectGetWithCookiesHelper extends PostRedirectGetFormHelper {
+public interface PostRedirectGetWithCookiesFormHelper extends PostRedirectGetFormHelper {
 
 }

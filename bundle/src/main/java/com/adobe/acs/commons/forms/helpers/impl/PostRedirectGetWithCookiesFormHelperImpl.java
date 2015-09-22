@@ -21,7 +21,7 @@ package com.adobe.acs.commons.forms.helpers.impl;
 
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
-import com.adobe.acs.commons.forms.helpers.PostRedirectGetWithCookiesHelper;
+import com.adobe.acs.commons.forms.helpers.PostRedirectGetWithCookiesFormHelper;
 import com.adobe.acs.commons.util.CookieUtil;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
@@ -47,8 +47,8 @@ import java.io.IOException;
 @Property(label = "Service Ranking",
         name = Constants.SERVICE_RANKING,
         intValue = FormHelper.SERVICE_RANKING_POST_REDIRECT_WITH_COOKIES_GET)
-@Service(value = { FormHelper.class, PostRedirectGetWithCookiesHelper.class })
-public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFormHelperImpl implements PostRedirectGetWithCookiesHelper {
+@Service(value = { FormHelper.class, PostRedirectGetWithCookiesFormHelper.class })
+public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFormHelperImpl implements PostRedirectGetWithCookiesFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetWithCookiesFormHelperImpl.class);
 
     public static final int COOKIE_MAX_AGE = 10 * 60;
