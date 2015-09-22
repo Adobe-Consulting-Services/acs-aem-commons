@@ -136,10 +136,11 @@ public class CookieUtil {
             return false;
         }
 
-        cookie.setMaxAge(expiry);
-        cookie.setPath(cookiePath);
+        final Cookie responseCookie = (Cookie) cookie.clone();
+        responseCookie.setMaxAge(expiry);
+        responseCookie.setPath(cookiePath);
 
-        addCookie(cookie, response);
+        addCookie(responseCookie, response);
 
         return true;
     }
@@ -232,10 +233,12 @@ public class CookieUtil {
                 continue;
             }
 
-            cookie.setMaxAge(0);
-            cookie.setPath(cookiePath);
+            final Cookie responseCookie = (Cookie) cookie.clone();
+            responseCookie.setMaxAge(0);
+            responseCookie.setPath(cookiePath);
+            responseCookie.setValue("");
 
-            addCookie(cookie, response);
+            addCookie(responseCookie, response);
             count++;
         }
 
