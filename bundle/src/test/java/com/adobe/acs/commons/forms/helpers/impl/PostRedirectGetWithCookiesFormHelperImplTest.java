@@ -107,6 +107,20 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
         assertThat(cookieCaptor.getValue().getMaxAge(), is(0));
     }
 
+    @Test
+    public void shouldRemoveCookieDataOnGetRequest() throws Exception {
+        final SlingHttpServletResponse redirectResponse = spy(slingContext.response());
+        request.setMethod("GET");
+        request.addCookie(new Cookie("f_x", encode("{\"n\":\"x\", \"f\": {\"hello\": \"world\"}}")));
+
+        formHelper.getForm("x", request, redirectResponse);
+
+        // check we a cookie was set
+        verify(redirectResponse).addCookie(cookieCaptor.capture());
+        // and that is
+        assertThat(cookieCaptor.getValue().getMaxAge(), is(0));
+    }
+
     private JSONObject toJSONObject(String form) throws JSONException {
         return new JSONObject(form);
     }
