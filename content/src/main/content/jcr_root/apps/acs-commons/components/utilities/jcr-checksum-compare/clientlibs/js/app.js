@@ -295,7 +295,7 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                                 '<i class="coral-Icon coral-Icon--sizeXS coral-Icon--close coral-MinimalButton-icon "></i>' +
                             '</button>' +
                         '</div>' +
-                        '<div class="coral-Modal-body" id="json-diff">' +
+                        '<div class="coral-Modal-body acsCommons-Modal-body" id="json-diff">' +
                             '<p id="json-diff"></p>' +
 
                         '</div>' +
