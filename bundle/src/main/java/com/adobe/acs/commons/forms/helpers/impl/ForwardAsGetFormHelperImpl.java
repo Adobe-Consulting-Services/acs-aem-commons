@@ -73,7 +73,7 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
 
     @Override
     public Form getForm(final String formName, final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
-        return getForm(formName, request, null);
+        return getForm(formName, request);
     }
 
     @Override
