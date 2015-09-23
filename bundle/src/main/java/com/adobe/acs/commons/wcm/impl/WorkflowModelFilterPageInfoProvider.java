@@ -46,9 +46,15 @@ import com.day.cq.wcm.api.PageInfoProvider;
 @Service
 public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(WorkflowModelFilterPageInfoProvider.class);
+    private static final String KEY_MODELS = "models";
+
+    private static final String KEY_MODEL_PATH = "wid";
 
     private static final String KEY_WORKFLOWS = "workflows";
+
+    private static final String PN_APPLIES_TO = "appliesTo";
+
+    private static final Logger log = LoggerFactory.getLogger(WorkflowModelFilterPageInfoProvider.class);
 
     @Override
     public void updatePageInfo(SlingHttpServletRequest request, JSONObject info, Resource resource)
@@ -68,17 +74,17 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
     }
 
     private void filter(JSONObject typeObject, String resourcePath, ResourceResolver resourceResolver) throws JSONException {
-        final JSONArray models = typeObject.getJSONArray("models");
+        final JSONArray models = typeObject.getJSONArray(KEY_MODELS);
         final JSONArray newModels = new JSONArray();
         for (int i = 0; i < models.length(); i++) {
             final JSONObject modelObject = models.getJSONObject(i);
-            final String path = modelObject.getString("wid");
+            final String path = modelObject.getString(KEY_MODEL_PATH);
             final Resource modelResource = resourceResolver.getResource(path);
             if (modelResource != null) {
                 // we're looking for the appliesTo property on the jcr:content node, the wid value
                 // is the path to the jcr:content/model node.
                 final ValueMap properties = modelResource.getParent().getValueMap();
-                final String[] appliesTo = properties.get("appliesTo", String[].class);
+                final String[] appliesTo = properties.get(PN_APPLIES_TO, String[].class);
                 if (appliesTo == null) {
                     newModels.put(modelObject);
                 } else {
@@ -92,7 +98,7 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
             }
         }
         
-        typeObject.put("models", newModels);
+        typeObject.put(KEY_MODELS, newModels);
     }
 
 }
