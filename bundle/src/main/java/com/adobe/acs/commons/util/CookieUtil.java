@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -83,7 +84,7 @@ public class CookieUtil {
     }
 
     /**
-     * Gets Cookies from the Request whose's names match the provides Regex
+     * Gets Cookies from the Request whose names match the provides Regex
      *
      * @param request Request to get the Cookie from
      * @param regex   Regex to match against Cookie names
@@ -97,7 +98,7 @@ public class CookieUtil {
 
         final Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         final Pattern p = Pattern.compile(regex);
