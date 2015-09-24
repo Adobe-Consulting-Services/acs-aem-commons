@@ -227,7 +227,6 @@ public class ChecksumGenerator {
             out.print(node.getPath());
             out.print("\t");
             out.println(DigestUtils.shaHex(checkSums.toString()));
-            out.flush();
         }
         props = null;
 
