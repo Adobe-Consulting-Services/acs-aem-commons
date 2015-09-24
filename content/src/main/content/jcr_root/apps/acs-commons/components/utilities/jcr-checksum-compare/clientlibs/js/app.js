@@ -39,7 +39,8 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 queryType: 'None',
                 nodeTypes: [
                     { value: 'cq:PageContent' },
-                    { value: 'dam:AssetContent' }
+                    { value: 'dam:AssetContent' },
+                    { value: 'cq:Tag'}
                 ],
                 excludeNodeTypes: [
                     { value: 'rep:ACL' },

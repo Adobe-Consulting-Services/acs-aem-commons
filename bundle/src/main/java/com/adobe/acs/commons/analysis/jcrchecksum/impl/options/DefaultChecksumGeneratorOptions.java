@@ -33,7 +33,8 @@ public class DefaultChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
 
         this.addIncludedNodeTypes(
                 "cq:PageContent",
-                "dam:AssetContent"
+                "dam:AssetContent",
+                "cq:Tag"
         );
 
         this.addExcludedNodeTypes(
