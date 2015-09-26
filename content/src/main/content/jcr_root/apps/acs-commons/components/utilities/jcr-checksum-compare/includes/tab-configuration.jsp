@@ -1,3 +1,33 @@
+<%-- Hosts --%>
+<section class="coral-Form-fieldset acsCommons-Form-multifieldset">
+    <h3 class="coral-Form-fieldset-legend">Hosts</h3>
+
+    <div ng-repeat="item in hosts track by $index">
+        <button class="coral-Button coral-Button--square coral-Button--quiet acsCommons-Form-multifieldset-remove"
+                ng-click="hosts.splice($index, 1)">
+            <i class="coral-Icon coral-Icon--delete"></i>
+        </button>
+
+        <input class="coral-Form-field coral-Textfield acsCommons-Form-multifieldset-input"
+               ng-model="item.name"
+               type="text"
+               ng-change="item.uri=item.name"
+               placeholder="Hostname to compare">
+        <input class="coral-Form-field coral-Textfield acsCommons-Form-multifieldset-input"
+               ng-model="item.user"
+               type="text"
+               placeholder="User">
+        <input class="coral-Form-field coral-Textfield acsCommons-Form-multifieldset-input"
+               ng-model="item.password"
+               type="password"
+               placeholder="Password">
+
+    </div>
+
+    <a  class="acsCommons-Form-multifieldset-add coral-Icon coral-Icon--add"
+        ng-click="hosts.push({ name: '' });">Add Host</a>
+</section>
+
 <%-- Paths --%>
 <section class="coral-Form-fieldset acsCommons-Form-multifieldset">
     <h3 class="coral-Form-fieldset-legend">Paths</h3>

@@ -24,6 +24,7 @@ import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.JSONGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -51,11 +53,17 @@ import java.util.Map;
 
 @SuppressWarnings("serial")
 @SlingServlet(label = "ACS AEM Commons - JCR Checksum JSON Dump Servlet",
-        paths = { "/bin/acs-commons/jcr-compare.dump.json" })
+        paths = { ChecksumGeneratorServlet.SERVLET_PATH  + "."
+                    + JSONDumpServlet.SERVLET_SELECTOR + "."
+                    + JSONDumpServlet.SERVLET_EXTENSION})
 public class JSONDumpServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory
         .getLogger(JSONDumpServlet.class);
 
+    public static final String SERVLET_SELECTOR = "dump";
+    
+    public static final String SERVLET_EXTENSION = "json";
+    
     private static final String DEFAULT_ALLOW_ORIGIN = "*";
 
     private String allowOrigin = DEFAULT_ALLOW_ORIGIN;
@@ -94,6 +102,8 @@ public class JSONDumpServlet extends SlingSafeMethodsServlet {
 
         if (StringUtils.isNotBlank(this.allowOrigin)) {
             response.setHeader("Access-Control-Allow-Origin", this.allowOrigin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST");
         }
 
         // Generate current date and time for filename

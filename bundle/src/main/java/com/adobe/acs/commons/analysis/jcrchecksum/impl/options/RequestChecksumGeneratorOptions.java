@@ -58,7 +58,12 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
         // Add Paths
 
         if(request.getParameterValues(PATHS) != null) {
-            paths.addAll(asList(request.getParameterValues(PATHS)));
+            String[] pathArr = request.getParameterValues(PATHS);
+            for(String path : pathArr) {
+                if(path.length() > 0) {
+                    paths.add(path);
+                }
+            }
         }
 
         paths.addAll(getPathsFromQuery(request.getResourceResolver(),

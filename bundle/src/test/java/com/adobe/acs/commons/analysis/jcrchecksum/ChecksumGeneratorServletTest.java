@@ -115,15 +115,7 @@ public class ChecksumGeneratorServletTest {
                     }
                 };
             };
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            final PrintWriter pw = new PrintWriter(baos);
             this.response = new MockSlingHttpServletResponse() {
-                public PrintWriter getWriter() {
-                    return pw;
-                };
-                public StringBuffer getOutput() {
-                    return new StringBuffer().append(baos.toString());
-                };
                 public void setHeader(String header, String value) {
                 //do nothing
                 return;

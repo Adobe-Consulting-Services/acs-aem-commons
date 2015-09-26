@@ -82,9 +82,11 @@ public class JSONGenerator {
                 }
                 traverseTree(node, opts, out);
             } catch (PathNotFoundException e) {
+                out.key("ERROR");
                 out.value("WARN: Path doesn't exist: " + path);
             } catch (RepositoryException e) {
-                out.value("ERROR: Unable to read path: " + e.getMessage());
+                out.key("ERROR");
+                out.value("Unable to read path: " + e.getMessage());
             } finally {
                 out.endObject();
             }
@@ -102,7 +104,7 @@ public class JSONGenerator {
                 NodeIterator nIt;
                 if (nodeTypes.contains(primaryNodeType)
                     && !nodeTypeExcludes.contains(primaryNodeType)) {
-                    generateJSON(node, opts, out);
+                    generateSubnodeJSON(node, opts, out);
                 } else {
                     nIt = node.getNodes();
                     while (nIt.hasNext()) {
@@ -124,11 +126,23 @@ public class JSONGenerator {
     private static void generateJSON(Node node,
         ChecksumGeneratorOptions opts, JSONWriter out)
         throws RepositoryException, JSONException {
-
         out.key(node.getPath());
         out.object();
-        out.key("foo");
-        out.value("fi");
+        
+        outputProperties(node, opts, out);
+
+        outputChildNodes(node, opts, out);
+
+        out.endObject();
+    }
+    
+    private static void generateSubnodeJSON(Node node,
+        ChecksumGeneratorOptions opts, JSONWriter out)
+        throws RepositoryException, JSONException {
+
+        out.key(node.getName());
+        out.object();
+        
         outputProperties(node, opts, out);
 
         outputChildNodes(node, opts, out);
@@ -251,7 +265,7 @@ public class JSONGenerator {
                     //output child node if parent is has orderable children
                     out.key(child.getName());
                     out.object();
-                    generateJSON(child, opts, out);
+                    generateSubnodeJSON(child, opts, out);
                     out.endObject();
                 } else {
                     // otherwise put the child nodes into a sorted map 
@@ -264,7 +278,7 @@ public class JSONGenerator {
         for (Node child : childSortMap.values()) {
             out.key(child.getName());
             out.object();
-            generateJSON(child, opts, out);
+            generateSubnodeJSON(child, opts, out);
             out.endObject();
         }
         childSortMap = null;
