@@ -20,12 +20,13 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.io.JSONWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.Item;
 import javax.jcr.Node;
@@ -38,40 +39,39 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
-
-import aQute.bnd.annotation.ProviderType;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal
  * and calculates an aggregate checksum on the nodes with the specified node types (via {@link ChecksumGeneratorOptions}).
- * 
  */
 @ProviderType
 public class JSONGenerator {
     private static final Logger log = LoggerFactory
-        .getLogger(ChecksumGenerator.class);
-    
+            .getLogger(ChecksumGenerator.class);
+
     public static void generateJSON(Session session, String path,
-        JSONWriter out) throws RepositoryException, JSONException {
+                                    JSONWriter out) throws RepositoryException, JSONException {
         Set<String> paths = new HashSet<String>();
         paths.add(path);
         generateJSON(session, paths, new DefaultChecksumGeneratorOptions(), out);
     }
 
-    public static void generateJSON(Session session, Iterable<String> paths,
-        ChecksumGeneratorOptions opts, JSONWriter out)
-        throws RepositoryException, JSONException {
+    public static void generateJSON(Session session, Set<String> paths,
+                                    ChecksumGeneratorOptions opts, JSONWriter out)
+            throws RepositoryException, JSONException {
         Node node = null;
 
-        for(String path :paths) {
+        if(paths.size() > 1) {
+            out.array();
+        }
+
+        for (String path : paths) {
             out.object();
             try {
                 if (session.itemExists(path)) {
@@ -91,10 +91,15 @@ public class JSONGenerator {
                 out.endObject();
             }
         }
+
+        if(paths.size() > 1) {
+            out.endArray();
+        }
+
     }
 
     private static void traverseTree(Node node, ChecksumGeneratorOptions opts,
-        JSONWriter out) throws JSONException {
+                                     JSONWriter out) throws JSONException {
         Set<String> nodeTypes = opts.getIncludedNodeTypes();
         Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
         if (node != null) {
@@ -103,7 +108,7 @@ public class JSONGenerator {
                 primaryNodeType = node.getPrimaryNodeType().getName();
                 NodeIterator nIt;
                 if (nodeTypes.contains(primaryNodeType)
-                    && !nodeTypeExcludes.contains(primaryNodeType)) {
+                        && !nodeTypeExcludes.contains(primaryNodeType)) {
                     generateSubnodeJSON(node, opts, out);
                 } else {
                     nIt = node.getNodes();
@@ -124,25 +129,25 @@ public class JSONGenerator {
     }
 
     private static void generateJSON(Node node,
-        ChecksumGeneratorOptions opts, JSONWriter out)
-        throws RepositoryException, JSONException {
+                                     ChecksumGeneratorOptions opts, JSONWriter out)
+            throws RepositoryException, JSONException {
         out.key(node.getPath());
         out.object();
-        
+
         outputProperties(node, opts, out);
 
         outputChildNodes(node, opts, out);
 
         out.endObject();
     }
-    
+
     private static void generateSubnodeJSON(Node node,
-        ChecksumGeneratorOptions opts, JSONWriter out)
-        throws RepositoryException, JSONException {
+                                            ChecksumGeneratorOptions opts, JSONWriter out)
+            throws RepositoryException, JSONException {
 
         out.key(node.getName());
         out.object();
-        
+
         outputProperties(node, opts, out);
 
         outputChildNodes(node, opts, out);
@@ -160,14 +165,14 @@ public class JSONGenerator {
      * @throws ValueFormatException
      */
     private static void outputProperties(Node node,
-        ChecksumGeneratorOptions opts, JSONWriter out)
-        throws RepositoryException, JSONException, ValueFormatException {
+                                         ChecksumGeneratorOptions opts, JSONWriter out)
+            throws RepositoryException, JSONException, ValueFormatException {
         Set<String> excludes = opts.getExcludedProperties();
         Set<String> sortValues = opts.getSortedProperties();
 
         SortedMap<String, Property> props = new TreeMap<String, Property>();
         PropertyIterator pi = node.getProperties();
-        
+
         // sort the properties by name as the JCR makes no guarantees on property order
         while (pi.hasNext()) {
             Property p = pi.nextProperty();
@@ -179,7 +184,7 @@ public class JSONGenerator {
             }
         }
         pi = null;
-        
+
         for (Property p : props.values()) {
             int type = p.getType();
 
@@ -196,13 +201,13 @@ public class JSONGenerator {
                         if (isSortedValues) {
                             try {
                                 java.io.InputStream stream =
-                                    v.getBinary().getStream();
+                                        v.getBinary().getStream();
                                 String ckSum = DigestUtils.shaHex(stream);
                                 stream.close();
                                 sortedValueMap.put(ckSum, v);
                             } catch (IOException e) {
                                 sortedValueMap.put(
-                                    "ERROR: generating hash for binary of " + p.getPath() + " : " + e.getMessage(), v);
+                                        "ERROR: generating hash for binary of " + p.getPath() + " : " + e.getMessage(), v);
                             }
                         } else {
                             outputPropertyValue(p, v, out);
@@ -228,12 +233,12 @@ public class JSONGenerator {
                 outputPropertyValue(p, p.getValue(), out);
             }
         }
-//        if (nodeTypes.contains(primaryNodeType)) {
-//            out.print(node.getPath());
-//            out.print("\t");
-//            out.println(DigestUtils.shaHex(checkSums.toString()));
-//            out.flush();
-//        }
+        //        if (nodeTypes.contains(primaryNodeType)) {
+        //            out.print(node.getPath());
+        //            out.print("\t");
+        //            out.println(DigestUtils.shaHex(checkSums.toString()));
+        //            out.flush();
+        //        }
     }
 
     /**
@@ -244,10 +249,10 @@ public class JSONGenerator {
      * @throws JSONException
      */
     private static void outputChildNodes(Node node,
-        ChecksumGeneratorOptions opts, JSONWriter out)
-        throws RepositoryException, JSONException {
+                                         ChecksumGeneratorOptions opts, JSONWriter out)
+            throws RepositoryException, JSONException {
         Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
-        
+
         NodeIterator nIt;
         nIt = node.getNodes();
 
@@ -260,7 +265,7 @@ public class JSONGenerator {
         while (nIt.hasNext()) {
             Node child = nIt.nextNode();
             if (!nodeTypeExcludes
-                .contains(child.getPrimaryNodeType().getName())) {
+                    .contains(child.getPrimaryNodeType().getName())) {
                 if (hasOrderedChildren) {
                     //output child node if parent is has orderable children
                     out.key(child.getName());
@@ -285,7 +290,7 @@ public class JSONGenerator {
     }
 
     private static void outputPropertyValue(Property p, Value v, JSONWriter out) throws ValueFormatException, RepositoryException, JSONException {
-        
+
         if (v.getType() == PropertyType.STRING) {
             out.value(v.getString());
         } else if (v.getType() == PropertyType.BINARY) {
@@ -297,11 +302,11 @@ public class JSONGenerator {
             } catch (IOException e) {
                 out.value("ERROR: calculating hash for binary of " + p.getPath() + " : " + e.getMessage());
             }
-        } else if(v.getType() == PropertyType.BOOLEAN) {
+        } else if (v.getType() == PropertyType.BOOLEAN) {
             out.value(v.getBoolean());
-        } else if(v.getType() == PropertyType.DATE) {
+        } else if (v.getType() == PropertyType.DATE) {
             Calendar cal = v.getDate();
-            if(cal != null) {
+            if (cal != null) {
                 out.object();
                 out.key("type");
                 out.value(PropertyType.nameFromValue(v.getType()));
@@ -309,11 +314,11 @@ public class JSONGenerator {
                 out.value(cal.getTime().toString());
                 out.endObject();
             }
-        } else if(v.getType() == PropertyType.LONG) {
+        } else if (v.getType() == PropertyType.LONG) {
             out.value(v.getLong());
-        } else if(v.getType() == PropertyType.DOUBLE) {
+        } else if (v.getType() == PropertyType.DOUBLE) {
             out.value(v.getDouble());
-        } else if(v.getType() == PropertyType.DECIMAL) {
+        } else if (v.getType() == PropertyType.DECIMAL) {
             out.value(v.getDecimal());
         } else {
             out.object();

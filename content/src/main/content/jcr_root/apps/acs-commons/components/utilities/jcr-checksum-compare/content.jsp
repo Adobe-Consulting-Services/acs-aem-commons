@@ -36,14 +36,14 @@
 
     <form class="coral-Form coral-Form--vertical acs-form"
             novalidate
-            ng-show="!app.running">
+            ng-hide="app.running">
 
 
-        <div class="coral-TabPanel coral-TabPanel--large" data-init="tabs">
+        <div id="tabs" class="coral-TabPanel coral-TabPanel--large" data-init="tabs">
             <nav class="coral-TabPanel-navigation">
                 <a class="coral-TabPanel-tab is-active" data-toggle="tab">Configuration</a>
-                <a class="coral-TabPanel-tab" data-toggle="tab">Content Comparison</a>
-                <a class="coral-TabPanel-tab" data-toggle="tab">Download JSON</a>
+                <a class="coral-TabPanel-tab content-comparison-tab" data-toggle="tab">Content Comparison</a>
+                <a class="coral-TabPanel-tab download-json-tab" data-toggle="tab">Download JSON</a>
             </nav>
 
             <div class="coral-TabPanel-content">
@@ -51,15 +51,19 @@
                     <cq:include script="includes/tab-configuration.jsp"/>
                 </section>
 
-                <section class="coral-TabPanel-pane">
-                    <cq:include script="includes/tab-content-comparison.jsp"/>
-                </section>
+                    <section class="coral-TabPanel-pane">
+                        <cq:include script="includes/tab-content-comparison.jsp"/>
+                    </section>
 
-                <section class="coral-TabPanel-pane">
-                    <cq:include script="includes/tab-download-json.jsp"/>
-                </section>
-            </div>
+                    <section class="coral-TabPanel-pane">
+                        <cq:include script="includes/tab-download-json.jsp"/>
+                    </section>
+                </div>
         </div>
 
     </form>
+
+    <section ng-show="app.running" class="positioned-example-section">
+        <div class="coral-Wait coral-Wait--large coral-Wait--center"></div>
+    </section>
 </div>

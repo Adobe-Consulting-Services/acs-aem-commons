@@ -24,7 +24,6 @@ import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -42,10 +41,10 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.ServletException;
-
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 @Component(
@@ -129,12 +128,11 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
 
         log.debug(options.toString());
 
-        List<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
-
+        Set<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
 
         if (CollectionUtils.isEmpty(paths)) {
             try {
-                response.setStatus(400);
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().print("ERROR: At least one path must be specified");
             } catch (IOException ioe) {
                throw ioe;

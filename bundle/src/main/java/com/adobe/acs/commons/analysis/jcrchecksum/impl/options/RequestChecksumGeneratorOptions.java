@@ -33,7 +33,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,8 +51,8 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
         this.addSortedProperties(request.getParameterValues(SORTED_PROPERTIES));
     }
 
-    public static List<String> getPaths(SlingHttpServletRequest request) throws IOException {
-        List<String> paths = new ArrayList<String>();
+    public static Set<String> getPaths(SlingHttpServletRequest request) throws IOException {
+        Set<String> paths = new HashSet<String>();
 
         // Add Paths
 

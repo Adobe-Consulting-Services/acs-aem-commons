@@ -24,7 +24,6 @@ import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.JSONGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -42,14 +41,14 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.ServletException;
-
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 @SlingServlet(label = "ACS AEM Commons - JCR Checksum JSON Dump Servlet",
@@ -121,11 +120,11 @@ public class JSONDumpServlet extends SlingSafeMethodsServlet {
 
         log.debug(options.toString());
 
-        List<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
+        Set<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
 
         if (CollectionUtils.isEmpty(paths)) {
             try {
-                response.setStatus(400);
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().print(
                     "ERROR: At least one path must be specified");
             } catch (IOException ioe) {
@@ -138,8 +137,7 @@ public class JSONDumpServlet extends SlingSafeMethodsServlet {
         JSONWriter jsonWriter = new JSONWriter(response.getWriter());
 
         try {
-            JSONGenerator.generateJSON(session, paths, options,
-                jsonWriter);
+            JSONGenerator.generateJSON(session, paths, options, jsonWriter);
         } catch (RepositoryException e) {
             throw new ServletException("Error accessing repository", e);
         } catch (JSONException e) {
