@@ -18,7 +18,7 @@
  * #L%
  */
 
-/*global angular: false, moment: false, JSON: false, difflib: false, diffview: false, console: false */
+/*global angular: false, moment: false, JSON: false, difflib: false, diffview: false */
 
 angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons.notifications'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout', '$q', 'NotificationsService',
@@ -145,7 +145,6 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                     $scope.getHashes($scope.diff.left),
                     $scope.getHashes($scope.diff.right)
                 ]).then(function(promises) {
-                    console.log(promises);
 
                     // Left
                     if(promises[0].status === 200) {

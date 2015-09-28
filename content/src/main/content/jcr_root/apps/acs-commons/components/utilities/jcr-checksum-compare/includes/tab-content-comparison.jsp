@@ -34,8 +34,6 @@
 <p></p>
 
 
-
-
 <div contentdiff
      left="diff.left"
      right="diff.right"></div>

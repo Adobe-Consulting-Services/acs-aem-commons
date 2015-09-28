@@ -1,2 +1,0 @@
-difflib.js
-diffview.js
