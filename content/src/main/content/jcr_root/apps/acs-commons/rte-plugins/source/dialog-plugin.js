@@ -78,7 +78,7 @@
         }
     });
 
-    //popover dialog thats hosts iframe
+    //popover dialog hosting iframe
     INSERT_DIALOG_CONTENT_PLUGIN_DIALOG = new Class({
         extend: CUI.rte.ui.cui.AbstractBaseDialog,
 
@@ -110,7 +110,7 @@
         }
     });
 
-    //extend the toolkit implementation for returning custom toolbar builder and dialog manager
+    //extend the toolkit implementation for custom toolbar builder and dialog manager
     ACS_TOOLKIT_IMPL = new Class({
         toString: "ACSToolkitImpl",
 
@@ -268,7 +268,13 @@
         },
 
         execute: function (execDef) {
-            execDef.editContext.doc.execCommand("insertHTML", false, execDef.value);
+            var acsPlugins = execDef.component.registeredPlugins[GROUP],
+                popoverConfig = acsPlugins.config[INSERT_DIALOG_CONTENT_FEATURE],
+                /*jshint -W061 */
+                onSubmitFn = eval("(" + popoverConfig.onsubmit + ")"),
+                html = onSubmitFn(execDef.value);
+
+            execDef.editContext.doc.execCommand("insertHTML", false, html);
         }
     });
 
