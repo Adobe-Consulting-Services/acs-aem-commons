@@ -321,13 +321,13 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                                 'ng-click="getJSON(entry)"' +
                                 'class="coral-Table-row acsCommons-Table-row-{{ entry.op }}">' +
                             '<td class="coral-Table-cell acsCommons-Table-cell-icon" ng-show="entry.op === \'equals\'">' +
-                                    '<i class="coral-Icon coral-Icon--checkCircle"></i></td>' +
+                                    '<i class="coral-Icon coral-Icon--check"></i></td>' +
                             '<td class="coral-Table-cell acsCommons-Table-cell-icon" ng-show="entry.op === \'unequals\'">' +
-                                        '<i class="coral-Icon coral-Icon--closeCircle"></i></td>' +
+                                        '<i class="coral-Icon coral-Icon--close"></i></td>' +
                             '<td class="coral-Table-cell acsCommons-Table-cell-icon" ng-show="entry.op === \'leftOnly\'">' +
-                                    '<i class="coral-Icon coral-Icon--addCircle"></i></td>' +
+                                    '<i class="coral-Icon coral-Icon--chevronLeft"></i></td>' +
                             '<td class="coral-Table-cell acsCommons-Table-cell-icon" ng-show="entry.op === \'rightOnly\'">' +
-                                    '<i class="coral-Icon coral-Icon--minusCircle"></i></td>' +
+                                    '<i class="coral-Icon coral-Icon--chevronRight"></i></td>' +
 
                             '<td class="coral-Table-cell">{{ entry.path }}</td>' +
                             '<td class="coral-Table-cell">{{ entry.hash }}</td>' +
