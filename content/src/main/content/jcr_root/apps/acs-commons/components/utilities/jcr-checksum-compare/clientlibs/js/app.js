@@ -162,6 +162,8 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                         NotificationsService.add('error', $scope.diff.right.data);
                     }
 
+                    $scope.$broadcast('hashChanged');
+
                     $scope.app.running = NotificationsService.running(false);
                 });
             };
@@ -214,6 +216,8 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                         NotificationsService.add('error',
                             'ERROR', 'Unable to collect JCR JSON diff data from ' + $scope.diff.right.name);
                     }
+
+                    $scope.$broadcast('jsonChanged');
 
                     $scope.app.running = NotificationsService.running(false);
 
@@ -278,7 +282,7 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                 return !(item.name === null || item.name.trim().length === 0);
             };
 
-    }]).directive('contentdiff', function () {
+    }]).directive('contentdiff', ['$timeout', function ($timeout) {
         return {
             restrict: 'A',
             scope: {
@@ -424,27 +428,19 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
 
 
                 var computeDiff = function() {
-                    if (scope.left && scope.left.data && scope.right && scope.right.data) {
-
-                        scope.diffData = buildDiff(buildHashes(scope.left.data),
-                            buildHashes(scope.right.data));
-                    }
+                    scope.diffData = buildDiff(buildHashes(scope.left.data),
+                        buildHashes(scope.right.data));
                 };
 
-                scope.$watch('left.data', function() {
-                    if (scope.left && scope.right && scope.left.data && scope.right.data) {
+                scope.$on('hashChanged', function() {
+                    $timeout(function() {
                         computeDiff();
-                    }
-                });
+                    }, 0);
 
-                scope.$watch('right.data', function() {
-                    if (scope.left && scope.right && scope.left.data && scope.right.data) {
-                        computeDiff();
-                    }
                 });
              }
         };
-    }).directive('jsondiff', function () {
+    }]).directive('jsondiff', ['$timeout', function ($timeout) {
         return {
             restrict: 'A',
             scope: {
@@ -471,15 +467,16 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
             replace: false,
             link: function(scope, element, attrs) {
                 var modal = new CUI.Modal({ element:'#jsonDiffModal', visible: false }),
-                    count = 1;
+                    centerModal,
+                    computeDiff;
 
-                var centerModal = function() {
+                centerModal = function() {
                     // Fix centering
                     $modal = angular.element('#jsonDiffModal');
                     $modal.css('margin-left', -1 * ($modal.outerWidth() / 2));
                 };
 
-                var computeDiff = function() {
+                computeDiff = function() {
                     var delta = jsondiffpatch.diff(scope.left, scope.right);
                     // Using angular.element since CUI moves the Modal DOM outside of the original context
                     angular.element('#json-diff').html(jsondiffpatch.formatters.html.format(delta));
@@ -488,17 +485,11 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                     centerModal();
                 };
 
-                scope.$watch('left', function() {
-                    if (scope.left && scope.right) {
+                scope.$on('jsonChanged', function() {
+                    $timeout(function() {
                         computeDiff();
-                    }
-                });
-
-                scope.$watch('right', function() {
-                    if (scope.left && scope.right) {
-                        computeDiff();
-                    }
+                    }, 0);
                 });
             }
         };
-    });
+    }]);
