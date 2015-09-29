@@ -52,7 +52,7 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
 
     private static final String KEY_WORKFLOWS = "workflows";
 
-    private static final String PN_APPLIES_TO_PATH = "appliesToPath";
+    private static final String PN_ALLOWED_PATHS = "allowedPaths";
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowModelFilterPageInfoProvider.class);
 
@@ -84,12 +84,12 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
                 // we're looking for the appliesTo property on the jcr:content node, the wid value
                 // is the path to the jcr:content/model node.
                 final ValueMap properties = modelResource.getParent().getValueMap();
-                final String[] appliesTo = properties.get(PN_APPLIES_TO_PATH, String[].class);
-                if (appliesTo == null) {
+                final String[] allowedPaths = properties.get(PN_ALLOWED_PATHS, String[].class);
+                if (allowedPaths == null) {
                     newModels.put(modelObject);
                 } else {
-                    for (final String appliesToValue : appliesTo) {
-                        if (resourcePath.matches(appliesToValue)) {
+                    for (final String allowedPath : allowedPaths) {
+                        if (resourcePath.matches(allowedPath)) {
                             newModels.put(modelObject);
                             break;
                         }
