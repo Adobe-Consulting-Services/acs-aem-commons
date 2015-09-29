@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,13 +47,18 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal
- * and calculates an aggregate checksum on the nodes with the specified node types (via {@link ChecksumGeneratorOptions}).
+ * Utility that generates checksums for JCR paths.
+ * The checksum is calculated using a depth first traversal
+ * and calculates an aggregate checksum on the nodes with the specified node types
+ * (via {@link ChecksumGeneratorOptions}).
  */
 @ProviderType
-public class JSONGenerator {
-    private static final Logger log = LoggerFactory
-            .getLogger(ChecksumGenerator.class);
+public final class JSONGenerator {
+    private static final Logger log = LoggerFactory.getLogger(ChecksumGenerator.class);
+
+    private JSONGenerator() {
+        // Private cstor for static util
+    }
 
     public static void generateJSON(Session session, String path,
                                     JSONWriter out) throws RepositoryException, JSONException {
@@ -67,7 +72,7 @@ public class JSONGenerator {
             throws RepositoryException, JSONException {
         Node node = null;
 
-        if(paths.size() > 1) {
+        if (paths.size() > 1) {
             out.array();
         }
 
@@ -92,7 +97,7 @@ public class JSONGenerator {
             }
         }
 
-        if(paths.size() > 1) {
+        if (paths.size() > 1) {
             out.endArray();
         }
 
@@ -206,8 +211,8 @@ public class JSONGenerator {
                                 stream.close();
                                 sortedValueMap.put(ckSum, v);
                             } catch (IOException e) {
-                                sortedValueMap.put(
-                                        "ERROR: generating hash for binary of " + p.getPath() + " : " + e.getMessage(), v);
+                                sortedValueMap.put("ERROR: generating hash for binary of "
+                                        + p.getPath() + " : " + e.getMessage(), v);
                             }
                         } else {
                             outputPropertyValue(p, v, out);
@@ -248,8 +253,7 @@ public class JSONGenerator {
      * @throws RepositoryException
      * @throws JSONException
      */
-    private static void outputChildNodes(Node node,
-                                         ChecksumGeneratorOptions opts, JSONWriter out)
+    private static void outputChildNodes(Node node, ChecksumGeneratorOptions opts, JSONWriter out)
             throws RepositoryException, JSONException {
         Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
 
@@ -273,7 +277,7 @@ public class JSONGenerator {
                     generateSubnodeJSON(child, opts, out);
                     out.endObject();
                 } else {
-                    // otherwise put the child nodes into a sorted map 
+                    // otherwise put the child nodes into a sorted map
                     // to output them with consistent ordering
                     childSortMap.put(child.getName(), child);
                 }
@@ -286,10 +290,10 @@ public class JSONGenerator {
             generateSubnodeJSON(child, opts, out);
             out.endObject();
         }
-        childSortMap = null;
     }
 
-    private static void outputPropertyValue(Property p, Value v, JSONWriter out) throws ValueFormatException, RepositoryException, JSONException {
+    private static void outputPropertyValue(Property p, Value v, JSONWriter out)
+            throws RepositoryException, JSONException {
 
         if (v.getType() == PropertyType.STRING) {
             out.value(v.getString());

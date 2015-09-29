@@ -25,13 +25,7 @@ import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.jackrabbit.oak.commons.PropertiesUtil;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
@@ -43,52 +37,21 @@ import javax.jcr.Session;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Component(
-        label = "ACS AEM Commons - JCR Checksum Servlet",
-        metatype = false
+@SlingServlet(
+        label = "ACS AEM Commons - JCR Checksum Hash Servlet",
+        paths = { ServletConstants.SERVLET_PATH  + "."
+                + ServletConstants.CHECKSUM_SERVLET_SELECTOR + "."
+                + ServletConstants.CHECKSUM_SERVLET_EXTENSION}
 )
-@Properties({
-        @Property(
-                name = "sling.servlet.paths",
-                value = ChecksumGeneratorServlet.SERVLET_PATH + "." 
-                        + ChecksumGeneratorServlet.SERVLET_SELECTOR + "." 
-                        + ChecksumGeneratorServlet.SERVLET_EXTENSION,
-                propertyPrivate = true)
-})
-@Service
 public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
     public static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);
 
-    public static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare";
-    
-    public static final String SERVLET_SELECTOR = "hashes";
-    
-    public static final String SERVLET_EXTENSION = "txt";
-    
-    private static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-
-    private static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
-
-    private static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
-
-    private static final String DEFAULT_ALLOW_ORIGIN = "*";
-
-    private String allowOrigin = DEFAULT_ALLOW_ORIGIN;
-
-    private static final String ORIGIN = "Origin";
-    
-    @Property(label = "Access-Control-Allow-Origin response header value",
-            description = "Set to the hostname(s) of the AEM Author environment",
-            value = DEFAULT_ALLOW_ORIGIN)
-    public static final String PROP_ALLOW_ORIGIN = "access-control-allow-origin";
-
-
     @Override
-    public void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException {
+    public final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
+            ServletException {
         try {
             this.handleRequest(request, response);
         } catch (IOException e) {
@@ -98,7 +61,8 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
         }
     }
 
-    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException {
+    public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
+            ServletException {
         try {
             this.handleRequest(request, response);
         } catch (IOException e) {
@@ -112,21 +76,12 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
                                SlingHttpServletResponse response) throws IOException, RepositoryException {
 
         response.setContentType("text/plain");
-        
-        if (StringUtils.isNotBlank(this.allowOrigin)) {
-            if(request.getHeader("Origin") != null) {
-                response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, request.getHeader("Origin"));
-            } else {
-                response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, this.allowOrigin);
-            }
-            response.setHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
-            response.setHeader(ACCESS_CONTROL_ALLOW_METHODS, "GET, POST");
-        }
-
-        String optionsName = request.getParameter("optionsName");
+        String optionsName = request.getParameter(ServletConstants.OPTIONS_NAME);
         ChecksumGeneratorOptions options = ChecksumGeneratorOptionsFactory.getOptions(request, optionsName);
 
-        log.debug(options.toString());
+        if (log.isDebugEnabled()) {
+            log.debug(options.toString());
+        }
 
         Set<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
 
@@ -139,17 +94,11 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
             }
         }
 
-        Session session = request.getResourceResolver().adaptTo(Session.class);
+        final Session session = request.getResourceResolver().adaptTo(Session.class);
 
         for (final String path : paths) {
             log.debug("Generating checksum for path [ {} ]", path);
             ChecksumGenerator.generateChecksums(session, path, options, response.getWriter());
         }
-    }
-
-    @Activate
-    protected final void activate(Map<String, Object> config) {
-        this.allowOrigin =
-                PropertiesUtil.toString(config.get(PROP_ALLOW_ORIGIN), DEFAULT_ALLOW_ORIGIN);
     }
 }

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,21 +47,22 @@ import java.util.TreeSet;
 /**
  * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal
  * and calculates an aggregate checksum on the nodes with the specified node types (via {@link ChecksumGeneratorOptions}).
- * 
  */
 @ProviderType
-public class ChecksumGenerator {
-    private static final Logger log = LoggerFactory
-        .getLogger(ChecksumGenerator.class);
+public final class ChecksumGenerator {
+    private static final Logger log = LoggerFactory.getLogger(ChecksumGenerator.class);
 
-    public static void generateChecksums(Session session, String path,
-        PrintWriter out) throws RepositoryException {
+    private ChecksumGenerator() {
+        // Private cstor for static util
+    }
+
+    public static void generateChecksums(Session session, String path, PrintWriter out) throws RepositoryException {
         generateChecksums(session, path, new DefaultChecksumGeneratorOptions(), out);
     }
 
-    public static void generateChecksums(Session session, String path,
-        ChecksumGeneratorOptions opts, PrintWriter out)
-        throws RepositoryException {
+    public static void generateChecksums(Session session, String path, ChecksumGeneratorOptions opts, PrintWriter out)
+            throws RepositoryException {
+
         Node node = null;
         try {
             if (session.itemExists(path)) {
@@ -71,6 +72,7 @@ public class ChecksumGenerator {
                 }
             }
         } catch (PathNotFoundException e) {
+            log.warn("Path not found while generating checksums", e);
             return;
         } catch (RepositoryException e) {
             throw e;
@@ -79,8 +81,8 @@ public class ChecksumGenerator {
         traverseTree(node, opts, out);
     }
 
-    private static void traverseTree(Node node, ChecksumGeneratorOptions opts,
-        PrintWriter out) {
+    private static void traverseTree(Node node, ChecksumGeneratorOptions opts, PrintWriter out) {
+
         Set<String> nodeTypes = opts.getIncludedNodeTypes();
         Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
 
@@ -89,14 +91,15 @@ public class ChecksumGenerator {
             try {
                 primaryNodeType = node.getPrimaryNodeType().getName();
                 NodeIterator nIt;
-                if (nodeTypes.contains(primaryNodeType)
-                    && !nodeTypeExcludes.contains(primaryNodeType)) {
+                if (nodeTypes.contains(primaryNodeType) && !nodeTypeExcludes.contains(primaryNodeType)) {
                     generateChecksums(node, opts, out);
                 } else {
                     nIt = node.getNodes();
+
                     while (nIt.hasNext()) {
                         primaryNodeType = node.getPrimaryNodeType().getName();
                         Node child = nIt.nextNode();
+
                         if (nodeTypes.contains(primaryNodeType)) {
                             generateChecksums(child, opts, out);
                         } else {
@@ -111,8 +114,8 @@ public class ChecksumGenerator {
     }
 
     private static String generateChecksums(Node node,
-        ChecksumGeneratorOptions opts, PrintWriter out)
-        throws RepositoryException {
+                                            ChecksumGeneratorOptions opts, PrintWriter out)
+            throws RepositoryException {
 
         Set<String> nodeTypes = opts.getIncludedNodeTypes();
         Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
@@ -128,26 +131,26 @@ public class ChecksumGenerator {
         checkSums.append(node.getName());
         SortedSet<String> childSortSet = new TreeSet<String>();
         boolean hasOrderedChildren = false;
+
         try {
             hasOrderedChildren = node.getPrimaryNodeType().hasOrderableChildNodes();
         } catch (Exception e) {
+            log.warn("Has orderable child nodes check failed", e);
         }
+
         while (nIt.hasNext()) {
             Node child = nIt.nextNode();
-            if (!nodeTypeExcludes
-                .contains(child.getPrimaryNodeType().getName())) {
+
+            if (!nodeTypeExcludes.contains(child.getPrimaryNodeType().getName())) {
                 if (hasOrderedChildren) {
                     checkSums.append(child.getName()).append("=");
                     checkSums.append(generateChecksums(child, opts, out));
-                    // out.append("child: " +
-                    // child.getName()).append("=").append(generateChecksums(child,
-                    // nodeTypes, excludes, out)).append("\n");
                 } else {
-                    childSortSet.add(child.getName() + "="
-                        + generateChecksums(child, opts, out));
+                    childSortSet.add(child.getName() + "=" + generateChecksums(child, opts, out));
                 }
             }
         }
+
         if (!hasOrderedChildren) {
             for (String childChksum : childSortSet) {
                 checkSums.append(childChksum);
@@ -156,35 +159,37 @@ public class ChecksumGenerator {
 
         SortedMap<String, String> props = new TreeMap<String, String>();
         PropertyIterator pi = node.getProperties();
+
         while (pi.hasNext()) {
             Property p = pi.nextProperty();
             int type = p.getType();
+
             if (excludes.contains(p.getName())) {
                 continue;
             } else if (p.isMultiple()) {
+
                 boolean isSortedValues = sortValues.contains(p.getName());
                 Value[] values = p.getValues();
                 StringBuffer sb = new StringBuffer();
 
                 SortedSet<String> valSet = new TreeSet<String>();
+
                 for (Value v : values) {
                     type = v.getType();
+
                     if (type == PropertyType.BINARY) {
                         try {
-                            java.io.InputStream stream =
-                                v.getBinary().getStream();
+                            java.io.InputStream stream = v.getBinary().getStream();
                             String ckSum = DigestUtils.shaHex(stream);
                             stream.close();
-                            // checkSums.append(p.getName()).append(ckSum);
+
                             if (isSortedValues) {
                                 valSet.add(ckSum);
                             } else {
                                 sb.append(ckSum);
                             }
                         } catch (IOException e) {
-                            log.error(
-                                "Error calculating hash for binary of {} : {}",
-                                p.getPath(), e.getMessage());
+                            log.error("Error calculating hash for binary of {} : {}", p.getPath(), e.getMessage());
                         }
                     } else {
                         String ckSum = DigestUtils.shaHex(v.getString());
@@ -196,12 +201,15 @@ public class ChecksumGenerator {
                         }
                     }
                 }
+
                 if (isSortedValues) {
                     for (String v : valSet) {
                         sb.append(v);
                     }
                 }
+
                 props.put(p.getName(), sb.toString());
+
             } else if (type == PropertyType.BINARY) {
                 try {
                     java.io.InputStream stream = p.getBinary().getStream();
@@ -210,25 +218,23 @@ public class ChecksumGenerator {
                     // checkSums.append(p.getName()).append("=").append(ckSum);
                     props.put(p.getName(), ckSum);
                 } catch (IOException e) {
-                    log.error("Error calculating hash for binary of {} : {}",
-                        p.getPath(), e.getMessage());
+                    log.error("Error calculating hash for binary of {} : {}", p.getPath(), e.getMessage());
                 }
             } else {
                 String ckSum = DigestUtils.shaHex(p.getString());
-                // checkSums.append(p.getName()).append("=").append(ckSum);
                 props.put(p.getName(), ckSum);
             }
         }
+
         for (String key : props.keySet()) {
             checkSums.append(key).append("=").append(props.get(key));
-            // out.append(key).append("=").append(props.get(key)).append("\n");
         }
+
         if (nodeTypes.contains(primaryNodeType)) {
             out.print(node.getPath());
             out.print("\t");
             out.println(DigestUtils.shaHex(checkSums.toString()));
         }
-        props = null;
 
         return DigestUtils.shaHex(checkSums.toString());
     }

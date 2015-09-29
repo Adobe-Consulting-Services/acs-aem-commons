@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,10 +56,10 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
 
         // Add Paths
 
-        if(request.getParameterValues(PATHS) != null) {
+        if (request.getParameterValues(PATHS) != null) {
             String[] pathArr = request.getParameterValues(PATHS);
-            for(String path : pathArr) {
-                if(path.length() > 0) {
+            for (String path : pathArr) {
+                if (path.length() > 0) {
                     paths.add(path);
                 }
             }
@@ -70,7 +70,7 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
                 request.getParameter(QUERY)));
 
         RequestParameter data = request.getRequestParameter(DATA);
-        if(data != null && data.getInputStream() != null) {
+        if (data != null && data.getInputStream() != null) {
             paths.addAll(getPathsFromInputstream(data.getInputStream()));
         }
 

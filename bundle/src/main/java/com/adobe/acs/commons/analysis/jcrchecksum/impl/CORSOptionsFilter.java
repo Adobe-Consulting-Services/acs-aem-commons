@@ -1,3 +1,23 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
 import org.apache.felix.scr.annotations.Component;
@@ -22,8 +42,8 @@ import java.io.IOException;
  */
 @Component(immediate = true)
 @Properties({
-        @Property(name = "service.description", value = "ACS AEM Commons CORS Filter"),
-        @Property(name = "pattern", value = ChecksumGeneratorServlet.SERVLET_PATH + ".*"),
+        @Property(name = "service.description", value = "ACS AEM Commons - JCR Checksum CORS Filter"),
+        @Property(name = "pattern", value = ServletConstants.SERVLET_PATH + ".*"),
         @Property(name = "service.ranking", value = "2147483647"),
 })
 @Service
@@ -40,13 +60,11 @@ public class CORSOptionsFilter implements Filter {
 
     private static final String ORIGIN = "Origin";
 
-
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public final void init(FilterConfig filterConfig) throws ServletException {
         // Nothing to do
-        log.debug("CORS Filter initialize");
     }
 
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
+    public final void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
             ServletException {
 
         if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
@@ -58,7 +76,7 @@ public class CORSOptionsFilter implements Filter {
 
             if (isOptions) {
 
-                if (httpRequest.getRequestURI().startsWith(ChecksumGeneratorServlet.SERVLET_PATH)) {
+                if (httpRequest.getRequestURI().startsWith(ServletConstants.SERVLET_PATH)) {
                     final String origin = httpRequest.getHeader(ORIGIN);
 
                     if (origin != null && origin.length() > 0) {
@@ -68,7 +86,7 @@ public class CORSOptionsFilter implements Filter {
                         httpResponse.setHeader(ACCESS_CONTROL_ALLOW_METHODS, "GET, POST");
 
                         // Options check has already occurred
-                        httpResponse.setStatus(200);
+                        httpResponse.setStatus(HttpServletResponse.SC_OK);
 
                         return;
                     }
@@ -80,7 +98,7 @@ public class CORSOptionsFilter implements Filter {
         chain.doFilter(request, response);
     }
 
-    public void destroy() {
+    public final void destroy() {
         // Nothing to do
     }
 }
