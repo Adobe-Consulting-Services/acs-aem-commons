@@ -20,12 +20,8 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import javax.jcr.Session;
-
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.JSONDumpServlet;
+import com.day.cq.widget.HtmlLibraryManager;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
@@ -38,8 +34,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.JSONDumpServlet;
-import com.day.cq.widget.HtmlLibraryManager;
+import javax.jcr.Node;
+import javax.jcr.Session;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JSONDumpServletTest {
@@ -94,10 +94,15 @@ public class JSONDumpServletTest {
 
     @Test
     public void testWithPath() throws Exception {
-        session.getRootNode().addNode("content", "nt:unstructured")
-                .addNode("my-page", "cq:Page")
+        Node contentNode = session.getRootNode().addNode("content", "nt:unstructured");
+
+        contentNode.addNode("my-page", "cq:Page")
                 .addNode("jcr:content", "cq:PageContent")
                 .setProperty("jcr:title", "My Page");
+
+        contentNode.addNode("your-page", "cq:Page")
+                .addNode("jcr:content", "cq:PageContent")
+                .setProperty("jcr:title", "Your Page");
 
         this.request =
             new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
@@ -135,7 +140,9 @@ public class JSONDumpServletTest {
         assertEquals("application/json", response.getContentType());
         assertEquals(
             "{\"/content/my-page/jcr:content\":{\"jcr:primaryType\":\"cq:PageContent\"," +
-                    "\"jcr:title\":\"Foo\"}}",
+                    "\"jcr:title\":\"My Page\"}," +
+                    "\"/content/your-page/jcr:content\":{\"jcr:primaryType\":\"cq:PageContent\"," +
+                    "\"jcr:title\":\"Your Page\"}}",
             response.getOutput().toString());
     }
 }

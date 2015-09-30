@@ -100,7 +100,6 @@ public final class JSONGenerator {
         if (paths.size() > 1) {
             out.endArray();
         }
-
     }
 
     private static void traverseTree(Node node, ChecksumGeneratorOptions opts,
@@ -114,7 +113,7 @@ public final class JSONGenerator {
                 NodeIterator nIt;
                 if (nodeTypes.contains(primaryNodeType)
                         && !nodeTypeExcludes.contains(primaryNodeType)) {
-                    generateSubnodeJSON(node, opts, out);
+                    generateJSON(node, opts, out);
                 } else {
                     nIt = node.getNodes();
                     while (nIt.hasNext()) {
