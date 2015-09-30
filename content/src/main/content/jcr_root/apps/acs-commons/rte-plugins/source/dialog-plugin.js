@@ -17,8 +17,19 @@
  * limitations under the License.
  * #L%
  *
- * A sample component dialog using the Touch UI Multi Field
- * Note the usage of empty valued acs-commons-nested property
+ * RTE Plugin to show configured Touch UI Dialogs
+ *
+ * Steps:
+ *
+ * 1) Create the Touch UI Dialog eg. /apps/test-dialogs/cq:dialog (of sling:resourceType cq/gui/components/authoring/dialog)
+ * 2) Create ACS Commons plugin nt:unstructured node "acs-commons"
+ *      eg. /apps/<project>/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons
+ * 3) Add property "features" of type String[] and single value "insertDialogContent"
+ * 4) Create nt:unstructured "insertDialogContent" under "acs-commons"
+ *      eg. /libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons/insertDialogContent
+ * 5) Set the property "dialogPath" in "insertDialogContent" to path created in step 1 eg. /apps/test-dialogs/cq:dialog
+ * 6) Set the property "onsubmit" in "insertDialogContent" with listener function (executed on dialog submit)
+ *      eg. <code>function(dialogData) { return '<h1>' + dialogData.heading + '</h1>'; }</code>
  *
  */
 (function ($, $document, Handlebars) {
@@ -31,12 +42,12 @@
         GROUP = "acs-commons",
         INSERT_DIALOG_CONTENT_FEATURE = "insertDialogContent",
         INSERT_DIALOG_CONTENT_DIALOG = "insertDialogContentDialog",
-        ACS_CUI_TOOLBAR_BUILDER,
-        INSERT_DIALOG_CONTENT_PLUGIN_DIALOG,
-        ACS_DIALOG_MANAGER,
-        ACS_TOOLKIT_IMPL,
-        INSERT_TOUCHUI_DIALOG_PLUGIN,
-        INSERT_TOUCHUI_DIALOG_CMD;
+        AcsCuiToolbarBuilder,
+        InsertDialogContentPluginDialog,
+        AcsDialogManager,
+        AcsToolkitImpl,
+        InsertTouchUIDialogPlugin,
+        InsertTouchUIDialogCmd;
 
     function getUISetting() {
         return GROUP + "#" + INSERT_DIALOG_CONTENT_FEATURE;
@@ -56,7 +67,7 @@
     }
 
     //extend the toolbar builder to register plugin icon in fullscreen mode
-    ACS_CUI_TOOLBAR_BUILDER = new Class({
+    AcsCuiToolbarBuilder = new Class({
         toString: "ACSCuiToolbarBuilder",
 
         extend: CUI.rte.ui.cui.CuiToolbarBuilder,
@@ -79,7 +90,7 @@
     });
 
     //popover dialog hosting iframe
-    INSERT_DIALOG_CONTENT_PLUGIN_DIALOG = new Class({
+    InsertDialogContentPluginDialog = new Class({
         extend: CUI.rte.ui.cui.AbstractBaseDialog,
 
         toString: "ACSPluginDialog",
@@ -90,7 +101,7 @@
     });
 
     //extend the CUI dialog manager to register popover dialog
-    ACS_DIALOG_MANAGER = new Class({
+    AcsDialogManager = new Class({
         toString: "ACSDialogManager",
 
         extend: CUI.rte.ui.cui.CuiDialogManager,
@@ -102,7 +113,7 @@
 
             var context = this.editorKernel.getEditContext(),
                 $container = CUI.rte.UIUtils.getUIContainer($(context.root)),
-                dialog = new INSERT_DIALOG_CONTENT_PLUGIN_DIALOG();
+                dialog = new InsertDialogContentPluginDialog();
 
             dialog.attach(config, $container, this.editorKernel, true);
 
@@ -111,23 +122,23 @@
     });
 
     //extend the toolkit implementation for custom toolbar builder and dialog manager
-    ACS_TOOLKIT_IMPL = new Class({
+    AcsToolkitImpl = new Class({
         toString: "ACSToolkitImpl",
 
         extend: CUI.rte.ui.cui.ToolkitImpl,
 
         createToolbarBuilder: function () {
-            return new ACS_CUI_TOOLBAR_BUILDER();
+            return new AcsCuiToolbarBuilder();
         },
 
         createDialogManager: function (editorKernel) {
-            return new ACS_DIALOG_MANAGER(editorKernel);
+            return new AcsDialogManager(editorKernel);
         }
     });
 
-    CUI.rte.ui.ToolkitRegistry.register("cui", ACS_TOOLKIT_IMPL);
+    CUI.rte.ui.ToolkitRegistry.register("cui", AcsToolkitImpl);
 
-    INSERT_TOUCHUI_DIALOG_PLUGIN = new Class({
+    InsertTouchUIDialogPlugin = new Class({
         toString: "TouchUIInsertDialogPlugin",
 
         extend: CUI.rte.plugins.Plugin,
@@ -145,8 +156,10 @@
                 return;
             }
 
+            var config = this.config[INSERT_DIALOG_CONTENT_FEATURE];
+
             this.pickerUI = tbGenerator.createElement(INSERT_DIALOG_CONTENT_FEATURE,
-                                            this, true, "Insert TouchUI Dialog");
+                                            this, true, config.tooltip || "Insert TouchUI Dialog");
 
             tbGenerator.addElement(GROUP, plg.Plugin.SORT_FORMAT, this.pickerUI, 120);
         },
@@ -251,9 +264,9 @@
         }
     });
 
-    CUI.rte.plugins.PluginRegistry.register(GROUP, INSERT_TOUCHUI_DIALOG_PLUGIN);
+    CUI.rte.plugins.PluginRegistry.register(GROUP, InsertTouchUIDialogPlugin);
 
-    INSERT_TOUCHUI_DIALOG_CMD = new Class({
+    InsertTouchUIDialogCmd = new Class({
         toString: "TouchUIInsertDialogCmd",
 
         extend: CUI.rte.commands.Command,
@@ -278,7 +291,7 @@
         }
     });
 
-    CUI.rte.commands.CommandRegistry.register(INSERT_DIALOG_CONTENT_FEATURE, INSERT_TOUCHUI_DIALOG_CMD);
+    CUI.rte.commands.CommandRegistry.register(INSERT_DIALOG_CONTENT_FEATURE, InsertTouchUIDialogCmd);
 
     //returns the picker dialog html
     //Handlebars doesn't do anything useful here, but the framework expects a template
