@@ -127,7 +127,6 @@ public class ChecksumGeneratorTest {
         session.save();
 
         ChecksumGenerator.generateChecksums(session, "/content", pw);
-        System.out.println(baos.toString());
 
         assertEquals(
             "Hash doesn't differ on cq:PageContent when node is added",

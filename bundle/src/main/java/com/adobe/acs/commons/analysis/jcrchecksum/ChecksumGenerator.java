@@ -58,6 +58,7 @@ public final class ChecksumGenerator {
 
     public static void generateChecksums(Session session, String path, PrintWriter out) throws RepositoryException {
         generateChecksums(session, path, new DefaultChecksumGeneratorOptions(), out);
+        out.flush();
     }
 
     public static void generateChecksums(Session session, String path, ChecksumGeneratorOptions opts, PrintWriter out)
@@ -79,6 +80,8 @@ public final class ChecksumGenerator {
         }
 
         traverseTree(node, opts, out);
+
+        out.flush();
     }
 
     private static void traverseTree(Node node, ChecksumGeneratorOptions opts, PrintWriter out) {
