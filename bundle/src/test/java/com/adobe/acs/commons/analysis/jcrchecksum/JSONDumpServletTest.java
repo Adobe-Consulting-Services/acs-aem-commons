@@ -94,9 +94,10 @@ public class JSONDumpServletTest {
 
     @Test
     public void testWithPath() throws Exception {
-        session.getRootNode().addNode("content").addNode("foo", "cq:Page")
-            .addNode("jcr:content", "cq:PageContent")
-            .setProperty("jcr:title", "Foo");
+        session.getRootNode().addNode("content", "nt:unstructured")
+                .addNode("my-page", "cq:Page")
+                .addNode("jcr:content", "cq:PageContent")
+                .setProperty("jcr:title", "My Page");
 
         this.request =
             new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
@@ -105,9 +106,20 @@ public class JSONDumpServletTest {
                     return resourceResolver;
                 };
 
+                public String getParameter(String name) {
+                    if("optionsName".equals(name)) {
+                        return "REQUEST";
+                    } else {
+                        return null;
+                    }
+                }
+
                 public String[] getParameterValues(String name) {
-                    if (name.equals("paths")) {
-                        return new String[] { "/content" };
+                    if ("paths".equals(name)) {
+                        return new String[]{ "/content" };
+                    } else if ("nodeTypes".equals(name)) {
+                        return new String[]{ "cq:PageContent" };
+
                     } else {
                         return null;
                     }
@@ -122,7 +134,8 @@ public class JSONDumpServletTest {
         servlet.doGet(request, response);
         assertEquals("application/json", response.getContentType());
         assertEquals(
-            "{\"/content/foo/jcr:content\":{\"foo\":\"fi\",\"jcr:primaryType\":\"cq:PageContent\",\"jcr:title\":\"Foo\"}}",
+            "{\"/content/my-page/jcr:content\":{\"jcr:primaryType\":\"cq:PageContent\"," +
+                    "\"jcr:title\":\"Foo\"}}",
             response.getOutput().toString());
     }
 }
