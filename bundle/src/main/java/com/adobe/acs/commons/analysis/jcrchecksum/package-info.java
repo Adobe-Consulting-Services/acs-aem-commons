@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Dispatcher utilities.
+ * JCR Checksum Comparison Tool
  */
-@aQute.bnd.annotation.Version("1.1.0")
-package com.adobe.acs.commons.replication;
+@aQute.bnd.annotation.Version("1.0.0")
+package com.adobe.acs.commons.analysis.jcrchecksum;

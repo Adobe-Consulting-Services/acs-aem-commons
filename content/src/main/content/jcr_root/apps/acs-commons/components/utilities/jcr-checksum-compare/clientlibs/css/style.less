@@ -1,0 +1,89 @@
+#acs-commons-jcr-checksum-compare-app {
+
+  table.diff {
+    width: 100%;
+    margin-bottom: .9375rem;
+    border-collapse: collapse;
+    border: 1px solid #cbcbcb;
+  }
+
+  table.diff thead {
+    tr th {
+      font-family: adobe-clean, Helvetica, Arial, sans-serif;
+      border-bottom: .0625rem solid #cbcbcb;
+      background: #e6e6e6;
+      font-weight: bold;
+      font-style: normal;
+      font-size: 1.125rem;
+    }
+
+    tr th.texttitle {
+      padding: .5rem .25rem;
+      font-weight: normal;
+    }
+  }
+
+  table.diff tbody {
+    tr {
+      display: table-row;
+      background: #fafafa;
+
+      th {
+        border: 1px solid #cbcbcb;
+        background: #e6e6e6;
+        padding: .5rem .75rem;
+        color: rgb(75, 75, 75);
+      }
+
+      td {
+        display: table-cell;
+        padding: 0 .625rem;
+        vertical-align: middle;
+        text-align: left;
+        padding: .5rem 1rem;
+        border-bottom: 1px solid #ddd;
+
+        &.insert {
+          cursor: pointer;
+        }
+
+        &.delete {
+          cursor: pointer;
+        }
+      }
+    }
+
+    th.author {
+      border: 1px solid #cbcbcb;
+      background: #e6e6e6;
+      color: rgb(75, 75, 75);
+    }
+
+  }
+
+  .acsCommons-Form-multifieldset {
+
+    .acsCommons-Form-multifieldset-input {
+      width: calc(~'100% - 40px');
+    }
+
+    .acsCommons-Form-multifieldset-remove {
+      line-height: 2.25rem;
+      float: right;
+    }
+
+    .acsCommons-Form-multifieldset-add {
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .acsCommons-Form-multifieldset-add::before {
+      padding-right: .5rem;
+    }
+  }
+}
+.acsCommons-Modal-body {
+  overflow: auto;
+  height: 35rem;
+  width: 45rem;
+}
