@@ -242,6 +242,12 @@
             <version>1.4</version>
             <scope>test</scope>
          </dependency>
+        <dependency>
+            <groupId>com.adobe.acs.bundles</groupId>
+            <artifactId>com.adobe.acs.bundles.retrofit</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!--  Build Dependencies -->
         <dependency>
