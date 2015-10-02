@@ -116,38 +116,37 @@ public final class ChecksumGenerator {
         }
     }
 
-    private static String generateChecksums(Node node,
-                                            ChecksumGeneratorOptions opts, PrintWriter out)
+    private static String generateChecksums(Node node, ChecksumGeneratorOptions opts, PrintWriter out)
             throws RepositoryException {
 
-        Set<String> nodeTypes = opts.getIncludedNodeTypes();
+        Set<String> nodeTypeIncludes = opts.getIncludedNodeTypes();
         Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
-        Set<String> excludes = opts.getExcludedProperties();
-        Set<String> sortValues = opts.getSortedProperties();
+        Set<String> propertyExcludes = opts.getExcludedProperties();
+        Set<String> sortedProperties = opts.getSortedProperties();
 
-        NodeIterator nIt;
-        nIt = node.getNodes();
-        StringBuilder checkSums = new StringBuilder();
-        String primaryNodeType;
-        primaryNodeType = node.getPrimaryNodeType().getName();
+        NodeIterator children = node.getNodes();
+        StringBuilder checksums = new StringBuilder();
+        String primaryNodeType = node.getPrimaryNodeType().getName();
 
-        checkSums.append(node.getName());
+        checksums.append(node.getName());
         SortedSet<String> childSortSet = new TreeSet<String>();
         boolean hasOrderedChildren = false;
 
         try {
             hasOrderedChildren = node.getPrimaryNodeType().hasOrderableChildNodes();
-        } catch (Exception e) {
-            log.warn("Has orderable child nodes check failed", e);
+        } catch (UnsupportedOperationException e) {
+            // This is an exception thrown in the test scenarios using the Mock JCR API
+            // This would not happen using the actual JCR APIs
+            // Allow other exceptions to be thrown and break processing normally
         }
 
-        while (nIt.hasNext()) {
-            Node child = nIt.nextNode();
+        while (children.hasNext()) {
+            Node child = children.nextNode();
 
             if (!nodeTypeExcludes.contains(child.getPrimaryNodeType().getName())) {
                 if (hasOrderedChildren) {
-                    checkSums.append(child.getName()).append("=");
-                    checkSums.append(generateChecksums(child, opts, out));
+                    checksums.append(child.getName()).append("=");
+                    checksums.append(generateChecksums(child, opts, out));
                 } else {
                     childSortSet.add(child.getName() + "=" + generateChecksums(child, opts, out));
                 }
@@ -155,90 +154,89 @@ public final class ChecksumGenerator {
         }
 
         if (!hasOrderedChildren) {
-            for (String childChksum : childSortSet) {
-                checkSums.append(childChksum);
+            for (String childChecksum : childSortSet) {
+                checksums.append(childChecksum);
             }
         }
 
         SortedMap<String, String> props = new TreeMap<String, String>();
-        PropertyIterator pi = node.getProperties();
+        PropertyIterator properties = node.getProperties();
 
-        while (pi.hasNext()) {
-            Property p = pi.nextProperty();
-            int type = p.getType();
+        while (properties.hasNext()) {
+            Property property = properties.nextProperty();
+            int type = property.getType();
 
-            if (excludes.contains(p.getName())) {
+            if (propertyExcludes.contains(property.getName())) {
+                log.debug("Excluding property: {}", property.getName());
                 continue;
-            } else if (p.isMultiple()) {
+            } else if (property.isMultiple()) {
 
-                boolean isSortedValues = sortValues.contains(p.getName());
-                Value[] values = p.getValues();
+                boolean isSorted = sortedProperties.contains(property.getName());
+                Value[] values = property.getValues();
                 StringBuffer sb = new StringBuffer();
 
                 SortedSet<String> valSet = new TreeSet<String>();
 
-                for (Value v : values) {
-                    type = v.getType();
+                for (Value value : values) {
+                    type = value.getType();
 
                     if (type == PropertyType.BINARY) {
                         try {
-                            java.io.InputStream stream = v.getBinary().getStream();
-                            String ckSum = DigestUtils.shaHex(stream);
+                            java.io.InputStream stream = value.getBinary().getStream();
+                            String checksumOfBinary = DigestUtils.shaHex(stream);
                             stream.close();
 
-                            if (isSortedValues) {
-                                valSet.add(ckSum);
+                            if (isSorted) {
+                                valSet.add(checksumOfBinary);
                             } else {
-                                sb.append(ckSum);
+                                sb.append(checksumOfBinary);
                             }
                         } catch (IOException e) {
-                            log.error("Error calculating hash for binary of {} : {}", p.getPath(), e.getMessage());
+                            log.error("Error calculating hash for binary of {} : {}", property.getPath(), e.getMessage());
                         }
                     } else {
-                        String ckSum = DigestUtils.shaHex(v.getString());
-                        // checkSums.append(p.getName()).append("=").append(ckSum);
-                        if (isSortedValues) {
-                            valSet.add(ckSum);
+                        String checksumOfString = DigestUtils.shaHex(value.getString());
+                        if (isSorted) {
+                            valSet.add(checksumOfString);
                         } else {
-                            sb.append(ckSum);
+                            sb.append(checksumOfString);
                         }
                     }
                 }
 
-                if (isSortedValues) {
+                if (isSorted) {
                     for (String v : valSet) {
                         sb.append(v);
                     }
                 }
 
-                props.put(p.getName(), sb.toString());
+                props.put(property.getName(), sb.toString());
 
             } else if (type == PropertyType.BINARY) {
                 try {
-                    java.io.InputStream stream = p.getBinary().getStream();
+                    java.io.InputStream stream = property.getBinary().getStream();
                     String ckSum = DigestUtils.shaHex(stream);
                     stream.close();
-                    // checkSums.append(p.getName()).append("=").append(ckSum);
-                    props.put(p.getName(), ckSum);
+                    props.put(property.getName(), ckSum);
                 } catch (IOException e) {
-                    log.error("Error calculating hash for binary of {} : {}", p.getPath(), e.getMessage());
+                    log.error("Error calculating hash for binary of {} : {}", property.getPath(), e.getMessage());
                 }
             } else {
-                String ckSum = DigestUtils.shaHex(p.getString());
-                props.put(p.getName(), ckSum);
+                String ckSum = DigestUtils.shaHex(property.getString());
+                props.put(property.getName(), ckSum);
             }
         }
 
         for (String key : props.keySet()) {
-            checkSums.append(key).append("=").append(props.get(key));
+            checksums.append(key).append("=").append(props.get(key));
         }
 
-        if (nodeTypes.contains(primaryNodeType)) {
+        if (nodeTypeIncludes.contains(primaryNodeType)) {
             out.print(node.getPath());
             out.print("\t");
-            out.println(DigestUtils.shaHex(checkSums.toString()));
+            out.println(DigestUtils.shaHex(checksums.toString()));
         }
 
-        return DigestUtils.shaHex(checkSums.toString());
+        return DigestUtils.shaHex(checksums.toString());
     }
 }

@@ -55,9 +55,9 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         return this.paths;
     }
 
-    public void addIncludedNodeTypes(String... includedNodeTypes) {
-        if (includedNodeTypes != null) {
-            this.includedNodeTypes.addAll(Arrays.asList(includedNodeTypes));
+    public void addIncludedNodeTypes(String... data) {
+        if (data != null) {
+            this.includedNodeTypes.addAll(Arrays.asList(data));
         }
     }
 
@@ -65,9 +65,9 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         return this.includedNodeTypes;
     }
 
-    public void addExcludedNodeTypes(String... excludedNodeTypes) {
-        if (excludedNodeTypes != null) {
-            this.excludedNodeTypes.addAll(Arrays.asList(excludedNodeTypes));
+    public void addExcludedNodeTypes(String... data) {
+        if (data != null) {
+            this.excludedNodeTypes.addAll(Arrays.asList(data));
         }
     }
 
@@ -75,9 +75,9 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         return this.excludedNodeTypes;
     }
 
-    public void addExcludedProperties(String... excludedProperties) {
-        if (excludedProperties != null) {
-            this.excludedProperties.addAll(Arrays.asList(excludedProperties));
+    public void addExcludedProperties(String... data) {
+        if (data != null) {
+            this.excludedProperties.addAll(Arrays.asList(data));
         }
     }
 
@@ -85,9 +85,9 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         return this.excludedProperties;
     }
 
-    public void addSortedProperties(String... sortedProperties) {
-        if (sortedProperties != null) {
-            this.sortedProperties.addAll(Arrays.asList(sortedProperties));
+    public void addSortedProperties(String... data) {
+        if (data != null) {
+            this.sortedProperties.addAll(Arrays.asList(data));
         }
     }
 

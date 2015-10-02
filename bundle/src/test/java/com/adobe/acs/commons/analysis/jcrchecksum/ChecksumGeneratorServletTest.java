@@ -96,9 +96,11 @@ public class ChecksumGeneratorServletTest {
 
     @Test
     public void testWithPath() throws Exception {
-        session.getRootNode().addNode("content").addNode("foo", "cq:Page")
-            .addNode("jcr:content", "cq:PageContent")
-            .setProperty("jcr:title", "Foo");
+        session.getRootNode()
+                .addNode("content")
+                    .addNode("foo", "cq:Page")
+                        .addNode("jcr:content", "cq:PageContent")
+                            .setProperty("jcr:title", "Foo");
 
         this.request =
             new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,

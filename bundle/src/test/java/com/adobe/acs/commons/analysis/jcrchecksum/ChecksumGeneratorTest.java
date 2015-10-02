@@ -20,6 +20,8 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.CustomChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
 import org.apache.jackrabbit.value.ValueFactoryImpl;
 import org.apache.sling.testing.mock.jcr.MockJcr;
 import org.junit.After;
@@ -37,6 +39,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 
@@ -78,22 +81,23 @@ public class ChecksumGeneratorTest {
     public Node setupAsset1() throws RepositoryException {
         // Set up page1
         Node asset1 =
-            session.getRootNode().addNode("content")
-                .addNode("dam", "sling:Folder").addNode("foo.jpg", "dam:Asset")
-                .addNode("jcr:content", "dam:AssetContent");
+            session.getRootNode()
+                    .addNode("content")
+                        .addNode("dam", "sling:Folder")
+                            .addNode("foo.jpg", "dam:Asset")
+                                .addNode("jcr:content", "dam:AssetContent");
 
-        asset1.addNode("metadata").setProperty("dc:title", "Foo");
+        asset1
+                .addNode("metadata").setProperty("dc:title", "Foo");
 
         asset1
             .addNode("renditions", "nt:folder")
-            .addNode("original", "nt:file")
-            .addNode("jcr:content", "nt:resource")
-            .setProperty(
-                "data",
-                ValueFactoryImpl.getInstance().createBinary(
-                    new ByteArrayInputStream("test binary string".getBytes())));
+                .addNode("original", "nt:file")
+                    .addNode("jcr:content", "nt:resource")
+                        .setProperty("data", ValueFactoryImpl.getInstance().createBinary(new ByteArrayInputStream("test binary string".getBytes())));
         
-        asset1.setProperty("text", "t");
+        asset1
+                .setProperty("text", "t");
 
         // Set a property
         Calendar c = Calendar.getInstance();
@@ -171,17 +175,16 @@ public class ChecksumGeneratorTest {
             page2.getPath() + "\t" + hash4 + "\n", baos.toString());
     }
 
-    /*
     @Test
     public void testDamAsset() throws IOException, RepositoryException {
         Node asset1 = setupAsset1();
 
-        // Test nodetype matching
-        HashSet<String> nodeTypes = new HashSet<String>();
-        nodeTypes.add("dam:AssetContent");
-        ChecksumGeneratorOptions opts = new ChecksumGeneratorOptions();
-        opts.setNodeTypeIncludes(nodeTypes);
-        opts.disableDefaultNodeTypeIncludes();
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "dam:AssetContent" });
+        opts.addExcludedProperties(new DefaultChecksumGeneratorOptions().getExcludedProperties());
+        opts.addExcludedNodeTypes(new DefaultChecksumGeneratorOptions().getExcludedNodeTypes());
+        opts.addSortedProperties(new DefaultChecksumGeneratorOptions().getSortedProperties());
+        
         ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
 
         assertEquals(asset1.getPath() + "\t"
@@ -197,9 +200,8 @@ public class ChecksumGeneratorTest {
         // Test nodetype matching
         HashSet<String> nodeTypes = new HashSet<String>();
         nodeTypes.add("dam:AssetContent");
-        ChecksumGeneratorOptions opts = new ChecksumGeneratorOptions();
-        opts.setNodeTypeIncludes(nodeTypes);
-        opts.disableDefaultNodeTypeIncludes();
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(nodeTypes.toArray(new String[0]));
         ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
 
         assertEquals("", baos.toString());
@@ -210,7 +212,7 @@ public class ChecksumGeneratorTest {
         Node page1 = setupPage1();
         Node asset1 = setupAsset1();
 
-        ChecksumGeneratorOptions opts = new ChecksumGeneratorOptions();
+        ChecksumGeneratorOptions opts = new DefaultChecksumGeneratorOptions();
         ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
 
         StringBuffer sb = new StringBuffer();
@@ -230,8 +232,8 @@ public class ChecksumGeneratorTest {
         // Exclude dam:AssetContent nodetype
         HashSet<String> excludedNodetypes = new HashSet<String>();
         excludedNodetypes.add("dam:AssetContent");
-        ChecksumGeneratorOptions opts = new ChecksumGeneratorOptions();
-        opts.setNodeTypeExcludes(excludedNodetypes);
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedNodeTypes(excludedNodetypes.toArray(new String[0]));
         ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
 
         assertEquals(page1.getPath()
@@ -246,9 +248,8 @@ public class ChecksumGeneratorTest {
 
         HashSet<String> nodeTypes = new HashSet<String>();
         nodeTypes.add("nt:unstructured");
-        ChecksumGeneratorOptions opts = new ChecksumGeneratorOptions();
-        opts.setNodeTypeIncludes(nodeTypes);
-        opts.disableDefaultNodeTypeIncludes();
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(nodeTypes.toArray(new String[0]));
         ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
 
         StringBuffer sb = new StringBuffer();
@@ -265,9 +266,9 @@ public class ChecksumGeneratorTest {
         Node page1 = setupPage1();
         Node asset1 = setupAsset1();
 
-        ChecksumGeneratorOptions opts = new ChecksumGeneratorOptions();
-        opts.disableDefaultPropertyExcludes();
-        opts.setPropertyExcludes(new String[] {"jcr:created"});
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedProperties(new String[]{"jcr:created"});
+        
         ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
 
         StringBuffer sb = new StringBuffer();
@@ -278,5 +279,4 @@ public class ChecksumGeneratorTest {
 
         assertEquals(sb.toString(), baos.toString());
     }
-    */
 }
