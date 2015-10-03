@@ -35,8 +35,6 @@ import java.util.Set;
 @ProviderType
 public abstract class AbstractChecksumGeneratorOptions implements ChecksumGeneratorOptions {
 
-    protected Set<String> paths = new HashSet<String>();
-
     protected Set<String> includedNodeTypes = new HashSet<String>();
 
     protected Set<String> excludedNodeTypes = new HashSet<String>();
@@ -44,16 +42,6 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
     protected Set<String> excludedProperties = new HashSet<String>();
 
     protected Set<String> sortedProperties = new HashSet<String>();
-
-    public void addPaths(String... paths) {
-        if (paths != null) {
-            this.paths.addAll(Arrays.asList(paths));
-        }
-    }
-
-    public Set<String> getPaths() {
-        return this.paths;
-    }
 
     public void addIncludedNodeTypes(String... data) {
         if (data != null) {
@@ -99,7 +87,6 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         InfoWriter iw = new InfoWriter();
 
         iw.title("Checksum Generator Options");
-        iw.message("Paths: {}", this.getPaths());
         iw.message("Node Type Includes: {}", this.getIncludedNodeTypes());
         iw.message("Node Type Excludes: {}", this.getExcludedNodeTypes());
         iw.message("Property Excludes: {}", this.getExcludedProperties());

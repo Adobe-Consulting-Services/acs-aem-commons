@@ -38,6 +38,7 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -167,7 +168,7 @@ public final class ChecksumGenerator {
             int type = property.getType();
 
             if (propertyExcludes.contains(property.getName())) {
-                log.debug("Excluding property: {}", property.getName());
+                log.debug("Excluding property: {}", node.getPath() + "/@" + property.getName());
                 continue;
             } else if (property.isMultiple()) {
 
@@ -209,15 +210,21 @@ public final class ChecksumGenerator {
                         sb.append(v);
                     }
                 }
+                
+                if (log.isDebugEnabled()) {
+                    log.debug("Multi-property: {} ~> {}", node.getPath() + "/@" + property.getName(), sb.toString());
+                }
 
                 props.put(property.getName(), sb.toString());
 
             } else if (type == PropertyType.BINARY) {
                 try {
                     java.io.InputStream stream = property.getBinary().getStream();
-                    String ckSum = DigestUtils.shaHex(stream);
+                    String checksum = DigestUtils.shaHex(stream);
                     stream.close();
-                    props.put(property.getName(), ckSum);
+                    props.put(property.getName(), checksum);
+
+                    log.debug("Binary property: {} ~> {}", node.getPath() + "/@" + property.getName(), checksum);
                 } catch (IOException e) {
                     log.error("Error calculating hash for binary of {} : {}", property.getPath(), e.getMessage());
                 }
@@ -227,16 +234,25 @@ public final class ChecksumGenerator {
             }
         }
 
+        
         for (String key : props.keySet()) {
             checksums.append(key).append("=").append(props.get(key));
         }
 
+        log.debug("Collected checksums: {} ~> {}", node.getPath(), checksums);
+
+        String sha = DigestUtils.shaHex(checksums.toString());
+        
         if (nodeTypeIncludes.contains(primaryNodeType)) {
+            log.debug("Node type of [ {} ] included as checksum-able node types {}", primaryNodeType, Arrays.asList(nodeTypeIncludes));
             out.print(node.getPath());
             out.print("\t");
-            out.println(DigestUtils.shaHex(checksums.toString()));
+            out.println(sha);
         }
 
-        return DigestUtils.shaHex(checksums.toString());
+        if (log.isDebugEnabled()) {
+            log.debug("Final checksum: {} ~> {}", node.getPath(), sha);
+        }
+        return sha;
     }
 }

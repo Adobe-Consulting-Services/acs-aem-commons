@@ -67,8 +67,10 @@ public class ChecksumGeneratorTest {
     public Node setupPage1() throws RepositoryException {
         // Set up page1
         Node page1 =
-            session.getRootNode().addNode("content").addNode("foo", "cq:Page")
-                .addNode("jcr:content", "cq:PageContent");
+            session.getRootNode()
+                    .addNode("content")
+                        .addNode("foo", "cq:Page")
+                            .addNode("jcr:content", "cq:PageContent");
 
         // Set a property
         Calendar c = Calendar.getInstance();
@@ -184,6 +186,8 @@ public class ChecksumGeneratorTest {
         opts.addExcludedProperties(new DefaultChecksumGeneratorOptions().getExcludedProperties());
         opts.addExcludedNodeTypes(new DefaultChecksumGeneratorOptions().getExcludedNodeTypes());
         opts.addSortedProperties(new DefaultChecksumGeneratorOptions().getSortedProperties());
+        
+        System.out.print(opts.toString());
         
         ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
 
