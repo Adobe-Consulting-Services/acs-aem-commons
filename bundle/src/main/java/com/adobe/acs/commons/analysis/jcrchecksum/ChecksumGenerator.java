@@ -22,14 +22,13 @@ package com.adobe.acs.commons.analysis.jcrchecksum;
 
 import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+import com.sun.deploy.util.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Item;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
-import javax.jcr.PathNotFoundException;
 import javax.jcr.Property;
 import javax.jcr.PropertyIterator;
 import javax.jcr.PropertyType;
@@ -37,13 +36,15 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal
@@ -57,80 +58,216 @@ public final class ChecksumGenerator {
         // Private cstor for static util
     }
 
-    public static void generateChecksums(Session session, String path, PrintWriter out) throws RepositoryException {
-        generateChecksums(session, path, new DefaultChecksumGeneratorOptions(), out);
-        out.flush();
+    public static Map<String, String> generateChecksum(Session session, String path) throws RepositoryException,
+            IOException {
+        return generateChecksum(session, path, new DefaultChecksumGeneratorOptions());
     }
 
-    public static void generateChecksums(Session session, String path, ChecksumGeneratorOptions opts, PrintWriter out)
-            throws RepositoryException {
+    public static Map<String, String> generateChecksum(Session session, String path, ChecksumGeneratorOptions opts)
+            throws RepositoryException, IOException {
 
-        Node node = null;
-        try {
-            if (session.itemExists(path)) {
-                Item item = session.getItem(path);
-                if (item.isNode()) {
-                    node = (Node) item;
-                }
-            }
-        } catch (PathNotFoundException e) {
-            log.warn("Path not found while generating checksums", e);
-            return;
-        } catch (RepositoryException e) {
-            throw e;
+        Node node = session.getNode(path);
+
+        if (node == null) {
+            log.warn("Path [ {} ] not found while generating checksums", path);
+            return new LinkedHashMap<String, String>();
         }
 
-        traverseTree(node, opts, out);
-
-        out.flush();
+        return traverseTree(node, opts);
     }
 
-    private static void traverseTree(Node node, ChecksumGeneratorOptions opts, PrintWriter out) {
+    /**
+     *
+     * @param node
+     * @param options
+     * @return
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    private static Map<String, String> traverseTree(Node node, ChecksumGeneratorOptions options) throws
+            RepositoryException,
+            IOException {
 
-        Set<String> nodeTypes = opts.getIncludedNodeTypes();
-        Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
+        final Map<String, String> checksums = new LinkedHashMap<String, String>();
 
-        if (node != null) {
-            String primaryNodeType;
-            try {
-                primaryNodeType = node.getPrimaryNodeType().getName();
-                NodeIterator nIt;
-                if (nodeTypes.contains(primaryNodeType) && !nodeTypeExcludes.contains(primaryNodeType)) {
-                    generateChecksums(node, opts, out);
+        if (isChecksumable(node, options)) {
+
+            // Tree-traversal has found a node to checksum (checksum will include all valid sub-tree nodes)
+
+            checksums.putAll(generatedNodeChecksum(node, options));
+
+        } else {
+
+            // Traverse the tree for checksum-able node systems
+
+            NodeIterator children = node.getNodes();
+
+            while (children.hasNext()) {
+                // Check each child with recursive logic; if child is checksum-able the call into traverseTree will
+                // handle this case
+                checksums.putAll(traverseTree(children.nextNode(), options));
+            }
+        }
+
+        return checksums;
+    }
+
+
+    /**
+     * Ensures the node's primary type is included in the Included Node Types and NOT in the Excluded Node Types.
+     *
+     * @param node    the candidate node
+     * @param options the checksum options containing the included and excluded none types
+     * @return true if the node represents a checksum-able node system
+     * @throws RepositoryException
+     */
+    private static boolean isChecksumable(Node node, ChecksumGeneratorOptions options) throws RepositoryException {
+        final Set<String> nodeTypeIncludes = options.getIncludedNodeTypes();
+        final Set<String> nodeTypeExcludes = options.getExcludedNodeTypes();
+
+        final String primaryNodeType = node.getPrimaryNodeType().getName();
+
+        return nodeTypeIncludes.contains(primaryNodeType) && !nodeTypeExcludes.contains(primaryNodeType);
+    }
+
+    /**
+     *
+     * @param node
+     * @param options
+     * @return
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    private static Map<String, String> generatedNodeChecksum(Node node, ChecksumGeneratorOptions options)
+            throws RepositoryException, IOException {
+
+        final Set<String> nodeTypeExcludes = options.getExcludedNodeTypes();
+
+        final Map<String, String> checksums = new LinkedHashMap<String, String>();
+
+        /* Create checksums for Node's properties */
+        checksums.put(node.getPath(), aggregateChecksums(generatePropertyChecksums(node, options)));
+
+        /* Then process node's children */
+
+        final Map<String, String> sortedChecksums = new TreeMap<String, String>();
+        final boolean hasOrderedChildren = hasOrderedChildren(node);
+        final NodeIterator children = node.getNodes();
+
+        while (children.hasNext()) {
+            final Node child = children.nextNode();
+
+            if (!nodeTypeExcludes.contains(child.getPrimaryNodeType().getName())) {
+                if (hasOrderedChildren) {
+                    // Use the order dictated by the JCR
+                    checksums.putAll(generatedNodeChecksum(child, options));
                 } else {
-                    nIt = node.getNodes();
-
-                    while (nIt.hasNext()) {
-                        primaryNodeType = node.getPrimaryNodeType().getName();
-                        Node child = nIt.nextNode();
-
-                        if (nodeTypes.contains(primaryNodeType)) {
-                            generateChecksums(child, opts, out);
-                        } else {
-                            traverseTree(child, opts, out);
-                        }
-                    }
+                    // If order is not dictated by JCR, collect so we can sort later
+                    sortedChecksums.putAll(generatedNodeChecksum(child, options));
                 }
-            } catch (RepositoryException e) {
-                log.error("Error while traversing tree {}", e.getMessage());
+            }
+        }
+
+        if (!hasOrderedChildren && sortedChecksums.size() > 0) {
+            // Order is not dictated by JCR, so add the lexigraphically sorted entries to the checksums string
+            checksums.putAll(sortedChecksums);
+        }
+
+        /* Compute aggregate of the node and its children's checksums */
+        log.debug(toString(checksums));
+
+        final Map<String, String> aggregateChecksum = new LinkedHashMap<String, String>();
+        aggregateChecksum.put(node.getPath(), aggregateChecksums(checksums));
+        return aggregateChecksum;
+    }
+
+    /**
+     * Returns a lexigraphically sorted map of the [PROPERTY PATH] : [CHECKSUM OF PROPERTIES].
+     *
+     * @param node    the node to collect and checksum the properties for
+     * @param options the checksum generator options
+     * @return the map of the properties and their checksums
+     * @throws RepositoryException
+     */
+    protected static SortedMap<String, String> generatePropertyChecksums(final Node node, final ChecksumGeneratorOptions options) throws RepositoryException, IOException {
+
+        SortedMap<String, String> propertyChecksums = new TreeMap<String, String>();
+        PropertyIterator properties = node.getProperties();
+
+        while (properties.hasNext()) {
+            final Property property = properties.nextProperty();
+
+            if (options.getExcludedProperties().contains(property.getName())) {
+                // Skip this property as it is excluded
+                log.debug("Excluding property: {}", node.getPath() + "/@" + property.getName());
+                continue;
+            }
+
+            /* Accept the property for checksuming */
+
+            final List<String> checksums = new ArrayList<String>();
+
+            for (final Value value : property.getValues()) {
+                if (value.getType() == PropertyType.BINARY) {
+                    checksums.add(getBinaryChecksum(value));
+                } else {
+                    checksums.add(getStringChecksum(value));
+                }
+            }
+
+            if (!options.getSortedProperties().contains(property.getName())) {
+                Collections.sort(checksums);
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Property: {} ~> {}",
+                        node.getPath() + "/@" + property.getName(),
+                        StringUtils.join(checksums, ","));
+            }
+
+            propertyChecksums.put(property.getPath(), StringUtils.join(checksums, ","));
+        }
+
+        return propertyChecksums;
+    }
+
+    /**
+     * Gets the checksum for a Binary value.
+     * @param value the Value
+     * @return the checksum
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    protected static String getBinaryChecksum(final Value value) throws RepositoryException, IOException {
+        InputStream stream = null;
+
+        try {
+            stream = value.getBinary().getStream();
+            return DigestUtils.shaHex(stream);
+        } finally {
+            if (stream != null) {
+                stream.close();
             }
         }
     }
 
-    private static String generateChecksums(Node node, ChecksumGeneratorOptions opts, PrintWriter out)
-            throws RepositoryException {
+    /**
+     * Gets the checksum for a String value.
+     * @param value the Value
+     * @return the checksum
+     * @throws RepositoryException
+     */
+    protected static String getStringChecksum(final Value value) throws RepositoryException {
+        return DigestUtils.shaHex(value.getString());
+    }
 
-        Set<String> nodeTypeIncludes = opts.getIncludedNodeTypes();
-        Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
-        Set<String> propertyExcludes = opts.getExcludedProperties();
-        Set<String> sortedProperties = opts.getSortedProperties();
-
-        NodeIterator children = node.getNodes();
-        StringBuilder checksums = new StringBuilder();
-        String primaryNodeType = node.getPrimaryNodeType().getName();
-
-        checksums.append(node.getName());
-        SortedSet<String> childSortSet = new TreeSet<String>();
+    /**
+     * Checks if node has ordered children.
+     * @param node the node
+     * @return true if the node has ordered children
+     * @throws RepositoryException
+     */
+    protected static boolean hasOrderedChildren(final Node node) throws RepositoryException {
         boolean hasOrderedChildren = false;
 
         try {
@@ -141,118 +278,37 @@ public final class ChecksumGenerator {
             // Allow other exceptions to be thrown and break processing normally
         }
 
-        while (children.hasNext()) {
-            Node child = children.nextNode();
+        return hasOrderedChildren;
+    }
 
-            if (!nodeTypeExcludes.contains(child.getPrimaryNodeType().getName())) {
-                if (hasOrderedChildren) {
-                    checksums.append(child.getName()).append("=");
-                    checksums.append(generateChecksums(child, opts, out));
-                } else {
-                    childSortSet.add(child.getName() + "=" + generateChecksums(child, opts, out));
-                }
-            }
+    /**
+     * Aggregates a set of checksum entries into a single checksum value
+     * @param checksums the checksums
+     * @return the checksum value
+     */
+    protected static String aggregateChecksums(final Map<String, String> checksums) {
+        StringBuilder checksum = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : checksums.entrySet()) {
+            checksum.append(entry.getKey() + "=" + entry.getValue());
         }
 
-        if (!hasOrderedChildren) {
-            for (String childChecksum : childSortSet) {
-                checksums.append(childChecksum);
-            }
+        return DigestUtils.shaHex(checksum.toString());
+    }
+
+    /**
+     *
+     * @param map
+     * @return
+     */
+    private static String toString(Map<String, String> map) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("\n");
+        for(Map.Entry<String, String> entry : map.entrySet()) {
+            sb.append(entry.getKey() + " = " + entry.getValue() + "\n");
         }
 
-        SortedMap<String, String> props = new TreeMap<String, String>();
-        PropertyIterator properties = node.getProperties();
-
-        while (properties.hasNext()) {
-            Property property = properties.nextProperty();
-            int type = property.getType();
-
-            if (propertyExcludes.contains(property.getName())) {
-                log.debug("Excluding property: {}", node.getPath() + "/@" + property.getName());
-                continue;
-            } else if (property.isMultiple()) {
-
-                boolean isSorted = sortedProperties.contains(property.getName());
-                Value[] values = property.getValues();
-                StringBuffer sb = new StringBuffer();
-
-                SortedSet<String> valSet = new TreeSet<String>();
-
-                for (Value value : values) {
-                    type = value.getType();
-
-                    if (type == PropertyType.BINARY) {
-                        try {
-                            java.io.InputStream stream = value.getBinary().getStream();
-                            String checksumOfBinary = DigestUtils.shaHex(stream);
-                            stream.close();
-
-                            if (isSorted) {
-                                valSet.add(checksumOfBinary);
-                            } else {
-                                sb.append(checksumOfBinary);
-                            }
-                        } catch (IOException e) {
-                            log.error("Error calculating hash for binary of {} : {}", property.getPath(), e.getMessage());
-                        }
-                    } else {
-                        String checksumOfString = DigestUtils.shaHex(value.getString());
-                        if (isSorted) {
-                            valSet.add(checksumOfString);
-                        } else {
-                            sb.append(checksumOfString);
-                        }
-                    }
-                }
-
-                if (isSorted) {
-                    for (String v : valSet) {
-                        sb.append(v);
-                    }
-                }
-                
-                if (log.isDebugEnabled()) {
-                    log.debug("Multi-property: {} ~> {}", node.getPath() + "/@" + property.getName(), sb.toString());
-                }
-
-                props.put(property.getName(), sb.toString());
-
-            } else if (type == PropertyType.BINARY) {
-                try {
-                    java.io.InputStream stream = property.getBinary().getStream();
-                    String checksum = DigestUtils.shaHex(stream);
-                    stream.close();
-                    props.put(property.getName(), checksum);
-
-                    log.debug("Binary property: {} ~> {}", node.getPath() + "/@" + property.getName(), checksum);
-                } catch (IOException e) {
-                    log.error("Error calculating hash for binary of {} : {}", property.getPath(), e.getMessage());
-                }
-            } else {
-                String ckSum = DigestUtils.shaHex(property.getString());
-                props.put(property.getName(), ckSum);
-            }
-        }
-
-        
-        for (String key : props.keySet()) {
-            checksums.append(key).append("=").append(props.get(key));
-        }
-
-        log.debug("Collected checksums: {} ~> {}", node.getPath(), checksums);
-
-        String sha = DigestUtils.shaHex(checksums.toString());
-        
-        if (nodeTypeIncludes.contains(primaryNodeType)) {
-            log.debug("Node type of [ {} ] included as checksum-able node types {}", primaryNodeType, Arrays.asList(nodeTypeIncludes));
-            out.print(node.getPath());
-            out.print("\t");
-            out.println(sha);
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Final checksum: {} ~> {}", node.getPath(), sha);
-        }
-        return sha;
+        return sb.toString();
     }
 }

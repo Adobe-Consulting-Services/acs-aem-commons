@@ -28,7 +28,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.io.JSONWriter;
 import org.slf4j.Logger;
@@ -47,12 +46,11 @@ import java.util.Set;
 
 @SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - JCR Checksum JSON Dump Servlet",
         paths = { ServletConstants.SERVLET_PATH  + "."
                     + ServletConstants.JSON_SERVLET_SELECTOR + "."
                     + ServletConstants.JSON_SERVLET_EXTENSION}
 )
-public class JSONDumpServlet extends SlingSafeMethodsServlet {
+public class JSONDumpServlet extends BaseChecksumServlet {
     private static final Logger log = LoggerFactory.getLogger(JSONDumpServlet.class);
 
     @Override

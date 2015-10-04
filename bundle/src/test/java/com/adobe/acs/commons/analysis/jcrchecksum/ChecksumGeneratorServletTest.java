@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
+import javax.jcr.Node;
 import javax.jcr.Session;
 
 import org.apache.sling.api.resource.LoginException;
@@ -96,11 +97,14 @@ public class ChecksumGeneratorServletTest {
 
     @Test
     public void testWithPath() throws Exception {
-        session.getRootNode()
-                .addNode("content")
-                    .addNode("foo", "cq:Page")
-                        .addNode("jcr:content", "cq:PageContent")
-                            .setProperty("jcr:title", "Foo");
+        Node page =
+                session.getRootNode()
+                        .addNode("content")
+                        .addNode("test-page", "cq:Page")
+                        .addNode("jcr:content", "cq:PageContent");
+
+        page.setProperty("jcr:title", "test title");
+        session.save();
 
         this.request =
             new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
@@ -126,7 +130,7 @@ public class ChecksumGeneratorServletTest {
         servlet.doGet(request, response);
         assertEquals("text/plain", response.getContentType());
         assertEquals(
-            "/content/foo/jcr:content\ta8f1f8a5182de6c3bba7ec1b85cf5e77f2cf5c87\n",
+            "/content/test-page/jcr:content\t80586766b6af5d2df74b9842ead00f9e1f9a3350",
             response.getOutput().toString());
     }
 }

@@ -28,7 +28,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,16 +36,16 @@ import javax.jcr.Session;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - JCR Checksum Hash Servlet",
         paths = { ServletConstants.SERVLET_PATH  + "."
                 + ServletConstants.CHECKSUM_SERVLET_SELECTOR + "."
                 + ServletConstants.CHECKSUM_SERVLET_EXTENSION}
 )
-public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
+public class ChecksumGeneratorServlet extends BaseChecksumServlet {
     public static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);
 
     @Override
@@ -98,7 +97,13 @@ public class ChecksumGeneratorServlet extends SlingAllMethodsServlet {
 
         for (final String path : paths) {
             log.debug("Generating checksum for path [ {} ]", path);
-            ChecksumGenerator.generateChecksums(session, path, options, response.getWriter());
+
+            Map<String, String> checksums = ChecksumGenerator.generateChecksum(session, path, options);
+
+            for(final Map.Entry<String, String> entry : checksums.entrySet()) {
+                log.trace("Checksum [ {} ~> {} ]", entry.getKey(), entry.getValue());
+                response.getWriter().write(entry.getKey() + "\t" + entry.getValue());
+            }
         }
     }
 }

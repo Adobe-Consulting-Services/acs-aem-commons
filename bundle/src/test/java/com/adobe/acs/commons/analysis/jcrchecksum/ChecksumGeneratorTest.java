@@ -22,6 +22,7 @@ package com.adobe.acs.commons.analysis.jcrchecksum;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.CustomChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.jackrabbit.value.ValueFactoryImpl;
 import org.apache.sling.testing.mock.jcr.MockJcr;
 import org.junit.After;
@@ -34,50 +35,49 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChecksumGeneratorTest {
 
-    ByteArrayOutputStream baos;
+    StringWriter sw;
     PrintWriter pw;
     Session session;
 
     @Before
     public void setUp() {
-        baos = new ByteArrayOutputStream();
-        pw = new PrintWriter(baos);
+        sw = new StringWriter();
+        pw = new PrintWriter(sw);
         session = MockJcr.newSession();
     }
 
     @After
-    public void tearDown() {
-        baos = null;
+    public void tearDown() throws IOException {
+        sw.close();
         pw.close();
         session.logout();
     }
 
     public Node setupPage1() throws RepositoryException {
         // Set up page1
-        Node page1 =
+        Node page =
             session.getRootNode()
                     .addNode("content")
-                        .addNode("foo", "cq:Page")
+                        .addNode("test-page", "cq:Page")
                             .addNode("jcr:content", "cq:PageContent");
 
-        // Set a property
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Date(1274883865399L));
+        page.setProperty("jcr:title", "test title");
 
         session.save();
-        return page1;
+        return page;
     }
 
     public Node setupAsset1() throws RepositoryException {
@@ -112,69 +112,54 @@ public class ChecksumGeneratorTest {
     }
 
     @Test
-    public void testHashForCqPageContentNode1() throws IOException,
-        RepositoryException {
-        Node page1 = setupPage1();
+    public void testHashForCqPageContentNode1() throws IOException, RepositoryException {
+        Node page = setupPage1();
 
-        String hash1 = "59280e67ad29ffeb22537f08a583585aa24af325";
+        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, "/content");
 
-        ChecksumGenerator.generateChecksums(session, "/content", pw);
-
-        assertEquals(page1.getPath() + "\t" + hash1 + "\n", baos.toString());
+        assertEquals("80586766b6af5d2df74b9842ead00f9e1f9a3350",
+                actual.get("/content/test-page/jcr:content"));
     }
 
-    public void testHashForCqPageContentNode2() throws RepositoryException {
-        String hash2 = "59280e67ad29ffeb22537f08a583585aa24af325";
-
-        Node page1 = setupPage1();
-
-        // Adding node to see that hash is different
-        page1.addNode("par", "nt:unstructured");
+    @Test
+    public void testNodeTypeExcludes() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured");
         session.save();
 
-        ChecksumGenerator.generateChecksums(session, "/content", pw);
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedNodeTypes(new String[]{ "nt:unstructured" });
 
-        assertEquals(
-            "Hash doesn't differ on cq:PageContent when node is added",
-            page1.getPath() + "\t" + hash2 + "\n", baos.toString());
+        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, "/content", opts);
 
-        tearDown();
-        setUp();
-    }
-
-    public void testHashForCqPageContentNode() throws RepositoryException {
-        Node page1 = setupPage1();
-
-        // Add property
-        page1.setProperty("jcr:title", "test");
-
-        String hash3 = "32afca96379726cf3d5f0c0a7280fd3484b4572a";
-
-        ChecksumGenerator.generateChecksums(session, "/content", pw);
-        System.out.println(baos.toString());
-
-        assertEquals("Hash doesn't differ on cq:PageContent when property set",
-            page1.getPath() + "\t" + hash3 + "\n", baos.toString());
+        assertEquals("80586766b6af5d2df74b9842ead00f9e1f9a3350",
+                actual.get("/content/test-page/jcr:content"));
     }
 
     @Test
     public void testSpecificPath() throws IOException, RepositoryException {
         setupPage1();
         setupAsset1();
-        String hash4 = "68910cd4b94e13d56c45e4500211ab59116d52e4";
 
         // Create page node
-        Node page2 =
-            session.getRootNode().addNode("content").addNode("bar", "cq:Page")
-                .addNode("jcr:content", "cq:PageContent");
-        // Set a property
-        page2.setProperty("text", "Test text");
+        Node page =
+            session.getRootNode()
+                    .addNode("content")
+                        .addNode("bar", "cq:Page")
+                            .addNode("jcr:content", "cq:PageContent");
+        page.setProperty("text", "Test text");
         session.save();
 
-        ChecksumGenerator.generateChecksums(session, page2.getPath(), pw);
+        String raw = "/content/bar/jcr:content/jcr:primaryType=" + DigestUtils.shaHex("cq:PageContent") +
+                    "/content/bar/jcr:content/text=" + DigestUtils.shaHex("Test text");
 
-        assertEquals("Specific path set",
-            page2.getPath() + "\t" + hash4 + "\n", baos.toString());
+        String propertiesChecksum = DigestUtils.shaHex(raw);
+        String expected = DigestUtils.shaHex("/content/bar/jcr:content=" + propertiesChecksum);
+
+        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, page.getPath());
+
+        assertEquals(expected, actual.get("/content/bar/jcr:content"));
     }
 
     @Test
@@ -188,99 +173,135 @@ public class ChecksumGeneratorTest {
         opts.addSortedProperties(new DefaultChecksumGeneratorOptions().getSortedProperties());
         
         System.out.print(opts.toString());
-        
-        ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
 
-        assertEquals(asset1.getPath() + "\t"
-            + "84d3abcf19e7f174992d5fa44a9030499a1b7b89" + "\n",
-            baos.toString());
-    }
+        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, "/content", opts);
 
-    @Test
-    public void testNonDefaultNodeTypesConfig() throws IOException,
-        RepositoryException {
-        setupPage1();
-
-        // Test nodetype matching
-        HashSet<String> nodeTypes = new HashSet<String>();
-        nodeTypes.add("dam:AssetContent");
-        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
-        opts.addIncludedNodeTypes(nodeTypes.toArray(new String[0]));
-        ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
-
-        assertEquals("", baos.toString());
+        assertEquals("46feca04d348cf451d672d0516f2badb27f0a18b",
+                actual.get("/content/dam/foo.jpg/jcr:content"));
     }
 
     @Test
     public void testMultiple() throws IOException, RepositoryException {
-        Node page1 = setupPage1();
-        Node asset1 = setupAsset1();
+        Node page = setupPage1();
+        Node asset = setupAsset1();
 
-        ChecksumGeneratorOptions opts = new DefaultChecksumGeneratorOptions();
-        ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
+        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, "/content");
 
-        StringBuffer sb = new StringBuffer();
-        sb.append(page1.getPath() + "\t"
-            + "59280e67ad29ffeb22537f08a583585aa24af325\n");
-        sb.append(asset1.getPath() + "\t"
-            + "84d3abcf19e7f174992d5fa44a9030499a1b7b89\n");
-
-        assertEquals(sb.toString(), baos.toString());
+        assertEquals("80586766b6af5d2df74b9842ead00f9e1f9a3350", actual.get(page.getPath()));
+        assertEquals("46feca04d348cf451d672d0516f2badb27f0a18b", actual.get(asset.getPath()));
     }
 
     @Test
-    public void testNodeTypeExclusion() throws IOException, RepositoryException {
-        Node page1 = setupPage1();
-        setupAsset1();
+    public void testGeneratedNodeChecksum() throws RepositoryException, IOException {
+        Node node = session.getRootNode().addNode("a/b");
+        node.setProperty("jcr:title", "My Title");
+        node.setProperty("jcr:description", "This is my test node");
+        node.setProperty("long", new Long(100));
+        node.setProperty("double", new Double(99.99));
+        node.setProperty("boolean", true);
+        session.save();
 
-        // Exclude dam:AssetContent nodetype
-        HashSet<String> excludedNodetypes = new HashSet<String>();
-        excludedNodetypes.add("dam:AssetContent");
+
+        String raw =
+            "/a/b/boolean=" + DigestUtils.shaHex("true") +
+            "/a/b/double=" + DigestUtils.shaHex("99.99") +
+            "/a/b/jcr:description=" + DigestUtils.shaHex("This is my test node") +
+            "/a/b/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured") +
+            "/a/b/jcr:title=" + DigestUtils.shaHex("My Title") +
+            "/a/b/long=" + DigestUtils.shaHex("100");
+
+        String propertiesChecksum = DigestUtils.shaHex(raw);
+        String expected = DigestUtils.shaHex("/a/b=" + propertiesChecksum);
+
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
-        opts.addExcludedNodeTypes(excludedNodetypes.toArray(new String[0]));
-        ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
+        opts.addSortedProperties(new String[]{ "sorted" });
+        opts.addIncludedNodeTypes(new String[]{ "nt:unstructured" });
 
-        assertEquals(page1.getPath()
-            + "\t59280e67ad29ffeb22537f08a583585aa24af325\n", baos.toString());
+        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, node.getPath(), opts);
+
+        assertEquals(expected, actual.get("/a/b"));
+    }
+
+
+    @Test
+    public void testGeneratePropertyChecksums() throws RepositoryException, IOException {
+
+        Node node = session.getRootNode().addNode("a/b");
+        node.setProperty("jcr:title", "My Title");
+        node.setProperty("jcr:description", "This is my test node");
+        node.setProperty("long", new Long(100));
+        node.setProperty("double", new Double(99.99));
+        node.setProperty("boolean", true);
+        node.setProperty("unsorted", new String[]{ "woof", "bark", "howl" });
+        node.setProperty("sorted", new String[]{ "yelp", "arf" });
+        session.save();
+
+        // Expected to be sorted alphabetically
+        Map<String, String> expected = new LinkedHashMap<String, String>();
+        expected.put("/a/b/boolean", DigestUtils.shaHex("true"));
+        expected.put("/a/b/double", DigestUtils.shaHex("99.99"));
+        expected.put("/a/b/jcr:description", DigestUtils.shaHex("This is my test node"));
+        expected.put("/a/b/jcr:primaryType", DigestUtils.shaHex(("nt:unstructured")));
+        expected.put("/a/b/jcr:title", DigestUtils.shaHex(("My Title")));
+        expected.put("/a/b/long", DigestUtils.shaHex("100"));
+        expected.put("/a/b/sorted", DigestUtils.shaHex("yelp") + "," + DigestUtils.shaHex("arf"));
+        // This order is dictated by the sorted values of the corresponding hashes
+        expected.put("/a/b/unsorted", DigestUtils.shaHex("howl") + "," + DigestUtils.shaHex("bark") + ","
+                + DigestUtils.shaHex("woof"));
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addSortedProperties(new String[]{ "sorted" });
+
+        Map<String, String> actual = ChecksumGenerator.generatePropertyChecksums(node, opts);
+
+        assertEquals(expected, actual);
+    }
+
+
+
+    @Test
+    public void testGeneratePropertyChecksums_IgnoreProperties() throws RepositoryException, IOException {
+
+        Node node = session.getRootNode().addNode("a/b");
+        node.setProperty("jcr:title", "My Title");
+        node.setProperty("jcr:description", "This is my test node");
+        node.setProperty("long", new Long(100));
+        node.setProperty("double", new Double(99.99));
+        node.setProperty("boolean", true);
+        node.setProperty("unsorted", new String[]{ "woof", "bark", "howl" });
+        node.setProperty("sorted", new String[]{ "yelp", "arf" });
+        session.save();
+
+        // Expected to be sorted alphabetically
+        Map<String, String> expected = new LinkedHashMap<String, String>();
+        expected.put("/a/b/boolean", DigestUtils.shaHex("true"));
+        expected.put("/a/b/double", DigestUtils.shaHex("99.99"));
+        expected.put("/a/b/jcr:primaryType", DigestUtils.shaHex(("nt:unstructured")));
+        expected.put("/a/b/jcr:title", DigestUtils.shaHex(("My Title")));
+        expected.put("/a/b/sorted", DigestUtils.shaHex("yelp") + "," + DigestUtils.shaHex("arf"));
+
+        // This order is dictated by the sorted values of the corresponding hashes
+        expected.put("/a/b/unsorted", DigestUtils.shaHex("howl") + "," + DigestUtils.shaHex("bark") + ","
+                + DigestUtils.shaHex("woof"));
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addSortedProperties(new String[]{ "sorted" });
+        opts.addExcludedProperties(new String[]{ "jcr:description", "long" });
+
+        Map<String, String> actual = ChecksumGenerator.generatePropertyChecksums(node, opts);
+
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void testDisableDefaultNodeTypes() throws IOException,
-        RepositoryException {
-        setupPage1();
-        Node asset1 = setupAsset1();
+    public void testAggregateChecksums() {
+        Map<String, String> checksums = new LinkedHashMap<String, String>();
+        checksums.put("/content/foo", "1234");
+        checksums.put("/content/bar", "5678,9012");
 
-        HashSet<String> nodeTypes = new HashSet<String>();
-        nodeTypes.add("nt:unstructured");
-        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
-        opts.addIncludedNodeTypes(nodeTypes.toArray(new String[0]));
-        ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
+        String expected = DigestUtils.shaHex("/content/foo=1234/content/bar=5678,9012");
+        String actual = ChecksumGenerator.aggregateChecksums(checksums);
 
-        StringBuffer sb = new StringBuffer();
-        sb.append(asset1.getPath()
-            + "/metadata\t487fc5a1f73b94a2084bf605c4da6f6d9f4490cf\n");
-        sb.append("/content\tffa80be356e7e0c796ce6018a1de3c1523fc51b7\n");
-
-        assertEquals(sb.toString(), baos.toString());
-    }
-
-    @Test
-    public void testDisableDefaultPropertyExcludes() throws IOException,
-        RepositoryException {
-        Node page1 = setupPage1();
-        Node asset1 = setupAsset1();
-
-        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
-        opts.addExcludedProperties(new String[]{"jcr:created"});
-        
-        ChecksumGenerator.generateChecksums(session, "/content", opts, pw);
-
-        StringBuffer sb = new StringBuffer();
-        sb.append(page1.getPath()
-            + "\t59280e67ad29ffeb22537f08a583585aa24af325\n");
-        sb.append(asset1.getPath()
-            + "\td358a4ff33917a06b8568462d1d192b6a6e91672\n");
-
-        assertEquals(sb.toString(), baos.toString());
+        assertEquals(expected, actual);
     }
 }
