@@ -7,11 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-<<<<<<< HEAD
     <version>2.0.9-SNAPSHOT</version>
-=======
-    <version>2.0.1-SNAPSHOT</version>
->>>>>>> parent of f4f84d5... JCR Checksum Comparison Tool
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
