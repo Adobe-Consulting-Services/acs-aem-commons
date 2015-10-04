@@ -48,7 +48,8 @@ import java.util.TreeMap;
 
 /**
  * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal
- * and calculates an aggregate checksum on the nodes with the specified node types (via {@link ChecksumGeneratorOptions}).
+ * and calculates an aggregate checksum on the nodes with the specified node types
+ * (via {@link ChecksumGeneratorOptions}).
  */
 @ProviderType
 public final class ChecksumGenerator {
@@ -58,12 +59,34 @@ public final class ChecksumGenerator {
         // Private cstor for static util
     }
 
+
+    /**
+     * Convenience method for  generateChecksum(session, path, new DefaultChecksumGeneratorOptions()).
+     *
+     * @param session the session
+     * @param path tthe root path to generate checksums for
+     * @return the map of abs path ~> checksums
+     * @throws RepositoryException
+     * @throws IOException
+     */
     public static Map<String, String> generateChecksum(Session session, String path) throws RepositoryException,
             IOException {
         return generateChecksum(session, path, new DefaultChecksumGeneratorOptions());
     }
 
-    public static Map<String, String> generateChecksum(Session session, String path, ChecksumGeneratorOptions opts)
+    /**
+     * Traverses the content tree whose root is defined by the path param, respecting the {@link
+     * ChecksumGeneratorOptions}.
+     * Generates map of checksum hashes in the format [ ABSOLUTE PATH ] : [ CHECKSUM OF NODE SYSTEM ]
+     *
+     * @param session the session
+     * @param path the root path to generate checksums for
+     * @param options the {@link ChecksumGeneratorOptions} that define the checksum generation
+     * @return the map of abs path ~> checksums
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    public static Map<String, String> generateChecksum(Session session, String path, ChecksumGeneratorOptions options)
             throws RepositoryException, IOException {
 
         Node node = session.getNode(path);
@@ -73,7 +96,7 @@ public final class ChecksumGenerator {
             return new LinkedHashMap<String, String>();
         }
 
-        return traverseTree(node, opts);
+        return traverseTree(node, options);
     }
 
     /**
@@ -131,10 +154,10 @@ public final class ChecksumGenerator {
     }
 
     /**
-     *
-     * @param node
-     * @param options
-     * @return
+     * Generates a checksum for a single node and its node sub-system, respecting the options.
+     * @param node the node whose subsystem to create a checksum for
+     * @param options the {@link ChecksumGeneratorOptions} options
+     * @return a map containing 1 entry in the form [ node.getPath() ] : [ CHECKSUM OF NODE SYSTEM ]
      * @throws RepositoryException
      * @throws IOException
      */
@@ -182,14 +205,16 @@ public final class ChecksumGenerator {
     }
 
     /**
-     * Returns a lexigraphically sorted map of the [PROPERTY PATH] : [CHECKSUM OF PROPERTIES].
-     *
-     * @param node    the node to collect and checksum the properties for
+     * Returns a lexicographically sorted map of the [PROPERTY PATH] : [CHECKSUM OF PROPERTIES].
+     * @param node  the node to collect and checksum the properties for
      * @param options the checksum generator options
      * @return the map of the properties and their checksums
      * @throws RepositoryException
      */
-    protected static SortedMap<String, String> generatePropertyChecksums(final Node node, final ChecksumGeneratorOptions options) throws RepositoryException, IOException {
+    protected static SortedMap<String, String> generatePropertyChecksums(final Node node,
+                                                                         final ChecksumGeneratorOptions options)
+
+            throws RepositoryException, IOException {
 
         SortedMap<String, String> propertyChecksums = new TreeMap<String, String>();
         PropertyIterator properties = node.getProperties();
@@ -282,7 +307,7 @@ public final class ChecksumGenerator {
     }
 
     /**
-     * Aggregates a set of checksum entries into a single checksum value
+     * Aggregates a set of checksum entries into a single checksum value.
      * @param checksums the checksums
      * @return the checksum value
      */
@@ -297,15 +322,15 @@ public final class ChecksumGenerator {
     }
 
     /**
-     *
-     * @param map
-     * @return
+     * Helper method for debugging output.
+     * @param map a map
+     * @return a String representation of the map.
      */
     private static String toString(Map<String, String> map) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("\n");
-        for(Map.Entry<String, String> entry : map.entrySet()) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
             sb.append(entry.getKey() + " = " + entry.getValue() + "\n");
         }
 

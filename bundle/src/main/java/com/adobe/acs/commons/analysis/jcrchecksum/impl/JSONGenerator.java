@@ -18,9 +18,11 @@
  * #L%
  */
 
-package com.adobe.acs.commons.analysis.jcrchecksum;
+package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
 import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.sling.commons.json.JSONException;

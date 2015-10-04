@@ -21,7 +21,6 @@
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
-import com.adobe.acs.commons.analysis.jcrchecksum.JSONGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
 import org.apache.commons.collections.CollectionUtils;

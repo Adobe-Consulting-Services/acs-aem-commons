@@ -42,8 +42,27 @@ public interface ChecksumGeneratorOptions {
 
     String SORTED_PROPERTIES = "sortedProperties";
 
+    /**
+     * For a node to be checksumable, its primaryType must exists in getIncludedNodesTypes() and not exist in
+     * getExcludedNodeTypes().
+     * @return the nodes types which are candidates for aggregation.
+     */
     Set<String> getIncludedNodeTypes();
+
+    /**
+     * @return the node types which are not candidates for aggregation and cannot be aggregated under aggregation
+     * candidates.
+     */
     Set<String> getExcludedNodeTypes();
+
+    /**
+     *
+     * @return the property names that should not be included as part of the checksum hash
+     */
     Set<String> getExcludedProperties();
+
+    /**
+     * @return the property names whose multi-value order as defined in the JCR should be respected.
+     */
     Set<String> getSortedProperties();
 }
