@@ -22,6 +22,7 @@ package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
 
+import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalForceQuitException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -54,17 +55,19 @@ import java.util.regex.Pattern;
 public class RemoveServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(RemoveServlet.class);
 
+    private static final String PARAM_BATCH_SIZE = "batchSize";
+    
     private static final String PARAM_WORKFLOW_STATUSES = "statuses";
-
+    
     private static final String PARAM_WORKFLOW_MODELS = "models";
 
     private static final String PARAM_WORKFLOW_PAYLOADS = "payloads";
 
     private static final String PARAM_OLDER_THAN = "olderThan";
 
-    private static final String PARAM_LIMIT = "limit";
-
     private static final int MS_IN_SECOND = 1000;
+
+    private static final int DEFAULT_BATCH_SIZE = 1000;
 
 
     @Reference
@@ -111,14 +114,21 @@ public class RemoveServlet extends SlingAllMethodsServlet {
                 olderThan.setTimeInMillis(ts * MS_IN_SECOND);
             }
 
-            final Long limit = params.optLong(PARAM_LIMIT, MS_IN_SECOND);
+            int batchSize = params.optInt(PARAM_BATCH_SIZE);
+            if (batchSize < 1) {
+                batchSize = DEFAULT_BATCH_SIZE;
+            }
 
             workflowInstanceRemover.removeWorkflowInstances(request.getResourceResolver(),
                     models,
                     statuses,
                     payloads,
                     olderThan,
-                    limit.intValue());
+                    batchSize);
+
+        } catch (WorkflowRemovalForceQuitException e) {
+            response.setStatus(599);
+            response.getWriter().write("Workflow removal force quit");
 
         } catch (Exception e) {
             log.error("An error occurred while attempting to remove workflow instances.", e);

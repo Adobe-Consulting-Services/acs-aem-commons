@@ -21,6 +21,8 @@
 package com.adobe.acs.commons.workflow.bulk.removal;
 
 import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalException;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalForceQuitException;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalStatus;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -30,32 +32,10 @@ import java.util.regex.Pattern;
 
 public interface WorkflowInstanceRemover {
 
-    String WORKFLOW_REMOVAL_PAGE_PATH = "/etc/acs-commons/workflow-remover";
-
-    String WORKFLOW_REMOVAL_STATUS_PATH = WORKFLOW_REMOVAL_PAGE_PATH + "/jcr:content/status";
-
     String WORKFLOW_INSTANCES_PATH = "/etc/workflow/instances";
 
-    String PN_STATUS = "status";
+    String MODEL_ID = "modelId";
 
-    String PN_MODEL_ID = "modelId";
-
-    String PN_STARTED_AT = "startedAt";
-
-    String PN_COMPLETED_AT = "completedAt";
-
-    String PN_INITIATED_BY = "initiatedBy";
-
-    String PN_CHECKED_COUNT = "checkedCount";
-
-    String PN_COUNT = "count";
-
-    enum Status {
-        RUNNING,
-        COMPLETE,
-        ERROR,
-        UNKNOWN
-    }
 
     /**
      * Removes workflow instances that match the parameter criteria.
@@ -71,7 +51,7 @@ public interface WorkflowInstanceRemover {
                                 final Collection<String> modelIds,
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
-                                final Calendar olderThan) throws PersistenceException, WorkflowRemovalException, InterruptedException;
+                                final Calendar olderThan) throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException;
 
 
     /**
@@ -90,6 +70,19 @@ public interface WorkflowInstanceRemover {
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
                                 final Calendar olderThan,
-                                final int batchSize) throws PersistenceException, WorkflowRemovalException, InterruptedException;
+                                final int batchSize) throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException;
 
+
+    /**
+     * Gets the Workflow Remover's status.
+     * *
+     * @return the workflow remover's status object 
+     */
+    WorkflowRemovalStatus getStatus();
+
+    /**
+     * Forces an interruption of the Workflow removal process.
+     * Any uncommited changes will be lost.
+     */
+    void forceQuit();
 }

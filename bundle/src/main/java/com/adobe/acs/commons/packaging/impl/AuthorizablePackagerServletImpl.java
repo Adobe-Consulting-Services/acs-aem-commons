@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import com.day.jcr.vault.fs.api.PathFilterSet;
+import com.day.jcr.vault.fs.filter.DefaultPathFilter;
 import com.day.jcr.vault.fs.io.AccessControlHandling;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageDefinition;
@@ -105,7 +107,7 @@ public class AuthorizablePackagerServletImpl extends SlingAllMethodsServlet {
         final ValueMap properties = this.getProperties(request);
 
         try {
-            final List<String> paths = this.findPaths(resourceResolver,
+            final List<PathFilterSet> paths = this.findPaths(resourceResolver,
                     properties.get("authorizableIds", new String[0]));
 
             final Map<String, String> packageDefinitionProperties = new HashMap<String, String>();
@@ -121,14 +123,14 @@ public class AuthorizablePackagerServletImpl extends SlingAllMethodsServlet {
 
             if (preview) {
                 // Handle preview mode
-                response.getWriter().print(packageHelper.getPreviewJSONForPaths(paths));
+                response.getWriter().print(packageHelper.getPathFilterSetPreviewJSON(paths));
             } else if (paths == null || paths.isEmpty()) {
                 // Do not create empty packages; This will only clutter up CRX Package Manager
                 response.getWriter().print(packageHelper.getErrorJSON("Refusing to create a package with no filter "
                         + "set rules."));
             } else {
                 // Create JCR Package; Defaults should always be passed in via Request Parameters, but just in case
-                final JcrPackage jcrPackage = packageHelper.createPackageForPaths(paths,
+                final JcrPackage jcrPackage = packageHelper.createPackageFromPathFilterSets(paths,
                         request.getResourceResolver().adaptTo(Session.class),
                         properties.get(PACKAGE_GROUP_NAME, DEFAULT_PACKAGE_GROUP_NAME),
                         properties.get(PACKAGE_NAME, DEFAULT_PACKAGE_NAME),
@@ -173,24 +175,28 @@ public class AuthorizablePackagerServletImpl extends SlingAllMethodsServlet {
         }
     }
 
-    private List<String> findPaths(final ResourceResolver resourceResolver,
+    private List<PathFilterSet> findPaths(final ResourceResolver resourceResolver,
                                          final String[] authorizableIds) throws RepositoryException {
 
         final UserManager userManager = resourceResolver.adaptTo(UserManager.class);
 
-        final List<String> paths = new ArrayList<String>();
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
         for (final String authorizableId : authorizableIds) {
             try {
                 final Authorizable authorizable = userManager.getAuthorizable(authorizableId);
                 if (authorizable != null) {
-                    paths.add(authorizable.getPath());
+                    final String path = authorizable.getPath();
+                    final PathFilterSet principal = new PathFilterSet(path);
+                    // Exclude tokens as they are not vlt installable in AEM6/Oak
+                    principal.addExclude(new DefaultPathFilter(path + "/\\.tokens"));
+                    pathFilterSets.add(principal);
                 }
             } catch (RepositoryException e) {
                 log.warn("Unable to find path for authorizable " + authorizableId, e);
             }
         }
 
-        return paths;
+        return pathFilterSets;
     }
 }

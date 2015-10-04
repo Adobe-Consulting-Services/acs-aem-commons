@@ -35,7 +35,8 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                     { pattern: '' }
                 ],
                 models: [],
-                statuses: []
+                statuses: [],
+                batchSize: 1000
             };
 
             $scope.status = {};
@@ -60,39 +61,34 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                 $scope.getStatus();
             };
 
-            $scope.getStatus = function () {
+            $scope.getStatus = function (forceRunning) {
                 $http({
                     method: 'GET',
-                    url: encodeURI($scope.app.resource + '/status.json')
+                    url: encodeURI($scope.app.resource + '.status.json')
                 }).
                     success(function (data, status, headers, config) {
-                        var startedAtMoment, completedAtMoment;
 
-                        $scope.status = data || {};
+                        $scope.status = data || { running: false };
 
-                        startedAtMoment = moment($scope.status.startedAt);
+                        if(forceRunning) {
+                            $scope.app.running = NotificationsService.running(forceRunning);
+                        } else {
+                            $scope.app.running =
+                                NotificationsService.running(($scope.status && $scope.status.running) || false);
+                        }
 
-                        $scope.status.startedAt = startedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
-
-                        if ($scope.status.status === 'complete') {
-                            $scope.app.running = NotificationsService.running(false);
-
-                            completedAtMoment = moment($scope.status.completedAt);
-
-                            $scope.status.completedAt = completedAtMoment.format('MMMM Do YYYY, h:mm:ss a');
-                            $scope.status.timeTaken = completedAtMoment.diff(startedAtMoment, 'seconds');
-
-
-                        } else if ($scope.status.status === 'running') {
-                            $scope.app.running = NotificationsService.running(true);
-
-                            $scope.status.timeTaken = moment().diff(startedAtMoment, 'seconds');
-
+                        if ($scope.app.running) {
                             $scope.app.refresh = $timeout(function () {
                                 $scope.getStatus();
-                            }, 3000);
+                            }, 2000);
+                            
+                        } else if ($scope.status.erredAt) {
+
+                            NotificationsService.add('error',
+                                'ERROR', 'Workflow removal resulted in an error. Please check the AEM logs.');
+                            
                         }
-                    }).
+                     }).
                     error(function (data, status, headers, config) {
                         NotificationsService.add('error',
                             'ERROR', 'Unable to retrieve status');
@@ -102,7 +98,13 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
             };
 
             $scope.remove = function () {
-                var payload = angular.copy($scope.form);
+                var payload;
+
+                if ($scope.app.running) {
+                    return;
+                }
+
+                payload = angular.copy($scope.form);
                 $scope.app.running = NotificationsService.running(true);
 
                 if (payload.olderThan) {
@@ -119,16 +121,44 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                         $scope.getStatus();
                         $scope.app.running = NotificationsService.running(false);
                         NotificationsService.add('info',
-                            'INFO', 'Workflow removal completed');                        
+                            'INFO', 'Workflow removal complete');
                     }).
                     error(function (data, status, headers, config) {
-                        $scope.app.running = NotificationsService.running(false);
-                        NotificationsService.add('error',
-                            'ERROR', 'Workflow removal failed due to: ' + data);
+                        if (status === 599) {
+                            $scope.app.running = NotificationsService.running(false);
+                        } else {
+                            $scope.getStatus();
+                            $scope.app.running = NotificationsService.running(false);
+                            NotificationsService.add('error',
+                                'ERROR', 'Workflow removal failed due to: ' + data);
+                        }
                     });
 
-                $scope.getStatus();
+                $scope.getStatus(true);
             };
+
+
+            $scope.forceQuit = function () {
+                $http({
+                    method: 'POST',
+                    url: encodeURI($scope.app.resource + '.force-quit.json'),
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).
+                    success(function (data, status, headers, config) {
+                        $scope.app.running = NotificationsService.running(false);
+
+                        $scope.status = data || { running: false };
+
+                        NotificationsService.add('info',
+                            'INFO', 'Workflow removal has been force quit');
+                    }).
+                    error(function (data, status, headers, config) {
+                        $scope.getStatus();
+                        NotificationsService.add('error',
+                            'ERROR', 'Workflow removal failed to force quit: ' + data);
+                    });
+            };
+
 
             /* Form Methods */
             $scope.toggleStatusSelection = function (status) {
