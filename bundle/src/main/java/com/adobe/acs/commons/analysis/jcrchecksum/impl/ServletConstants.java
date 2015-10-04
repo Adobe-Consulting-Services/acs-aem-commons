@@ -2,14 +2,14 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,8 +17,24 @@
  * limitations under the License.
  * #L%
  */
-/**
- * Dispatcher utilities.
- */
-@aQute.bnd.annotation.Version("1.1.0")
-package com.adobe.acs.commons.replication;
+
+package com.adobe.acs.commons.analysis.jcrchecksum.impl;
+
+public final class ServletConstants {
+
+    private ServletConstants() {
+        // Private cstor
+    }
+
+    public static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare";
+
+    public static final String CHECKSUM_SERVLET_SELECTOR = "hashes";
+
+    public static final String CHECKSUM_SERVLET_EXTENSION = "txt";
+
+    public static final String JSON_SERVLET_SELECTOR = "dump";
+
+    public static final String JSON_SERVLET_EXTENSION = "json";
+
+    public static final String OPTIONS_NAME = "optionsName";
+}
