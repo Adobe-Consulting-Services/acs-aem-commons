@@ -3,6 +3,7 @@ package com.adobe.acs.commons.resources.solr;
 
 import retrofit.http.GET;
 import retrofit.http.Query;
+import retrofit.http.RestMethod;
 
 import java.util.Map;
 
