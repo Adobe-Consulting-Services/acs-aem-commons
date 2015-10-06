@@ -22,6 +22,7 @@ package com.adobe.acs.commons.analysis.jcrchecksum;
 
 import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+import com.day.jcr.vault.util.Text;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -59,7 +60,6 @@ public final class ChecksumGenerator {
     private ChecksumGenerator() {
         // Private cstor for static util
     }
-
 
     /**
      * Convenience method for  generateChecksum(session, path, new DefaultChecksumGeneratorOptions()).
@@ -101,10 +101,10 @@ public final class ChecksumGenerator {
     }
 
     /**
-     *
-     * @param node
-     * @param options
-     * @return
+     * Traverse the tree for candidate aggregate nodes.
+     * @param node the current node being traversed
+     * @param options the checksum generator options
+     * @return a map of paths and checksums
      * @throws RepositoryException
      * @throws IOException
      */
@@ -115,15 +115,12 @@ public final class ChecksumGenerator {
         final Map<String, String> checksums = new LinkedHashMap<String, String>();
 
         if (isChecksumable(node, options)) {
-
             // Tree-traversal has found a node to checksum (checksum will include all valid sub-tree nodes)
-
-            checksums.putAll(generatedNodeChecksum(node, options));
-
+            final Map<String, String> tmp = generatedNodeChecksum(node.getPath(), node, options);
+            log.debug(toString(tmp));
+            checksums.put(node.getPath(), aggregateChecksums(tmp));
         } else {
-
             // Traverse the tree for checksum-able node systems
-
             NodeIterator children = node.getNodes();
 
             while (children.hasNext()) {
@@ -156,13 +153,16 @@ public final class ChecksumGenerator {
 
     /**
      * Generates a checksum for a single node and its node sub-system, respecting the options.
+     * @param aggregateNodePath the absolute path of the node being aggregated into a checksum
      * @param node the node whose subsystem to create a checksum for
      * @param options the {@link ChecksumGeneratorOptions} options
      * @return a map containing 1 entry in the form [ node.getPath() ] : [ CHECKSUM OF NODE SYSTEM ]
      * @throws RepositoryException
      * @throws IOException
      */
-    private static Map<String, String> generatedNodeChecksum(Node node, ChecksumGeneratorOptions options)
+    private static Map<String, String> generatedNodeChecksum(final String aggregateNodePath,
+                                                             final Node node,
+                                                             final ChecksumGeneratorOptions options)
             throws RepositoryException, IOException {
 
         final Set<String> nodeTypeExcludes = options.getExcludedNodeTypes();
@@ -170,7 +170,8 @@ public final class ChecksumGenerator {
         final Map<String, String> checksums = new LinkedHashMap<String, String>();
 
         /* Create checksums for Node's properties */
-        checksums.put(node.getPath(), aggregateChecksums(generatePropertyChecksums(node, options)));
+        checksums.put(getChecksumKey(aggregateNodePath, node.getPath()),
+                aggregateChecksums(generatePropertyChecksums(aggregateNodePath, node, options)));
 
         /* Then process node's children */
 
@@ -184,35 +185,32 @@ public final class ChecksumGenerator {
             if (!nodeTypeExcludes.contains(child.getPrimaryNodeType().getName())) {
                 if (hasOrderedChildren) {
                     // Use the order dictated by the JCR
-                    checksums.putAll(generatedNodeChecksum(child, options));
+                    checksums.putAll(generatedNodeChecksum(aggregateNodePath, child, options));
                 } else {
                     // If order is not dictated by JCR, collect so we can sort later
-                    sortedChecksums.putAll(generatedNodeChecksum(child, options));
+                    sortedChecksums.putAll(generatedNodeChecksum(aggregateNodePath, child, options));
                 }
             }
         }
 
         if (!hasOrderedChildren && sortedChecksums.size() > 0) {
-            // Order is not dictated by JCR, so add the lexigraphically sorted entries to the checksums string
+            // Order is not dictated by JCR, so add the lexicographically sorted entries to the checksums string
             checksums.putAll(sortedChecksums);
         }
 
-        /* Compute aggregate of the node and its children's checksums */
-        log.debug(toString(checksums));
-
-        final Map<String, String> aggregateChecksum = new LinkedHashMap<String, String>();
-        aggregateChecksum.put(node.getPath(), aggregateChecksums(checksums));
-        return aggregateChecksum;
+        return checksums;
     }
 
     /**
      * Returns a lexicographically sorted map of the [PROPERTY PATH] : [CHECKSUM OF PROPERTIES].
+     * @param aggregateNodePath the absolute path of the node being aggregated into a checksum
      * @param node  the node to collect and checksum the properties for
      * @param options the checksum generator options
      * @return the map of the properties and their checksums
      * @throws RepositoryException
      */
-    protected static SortedMap<String, String> generatePropertyChecksums(final Node node,
+    protected static SortedMap<String, String> generatePropertyChecksums(final String aggregateNodePath,
+                                                                         final Node node,
                                                                          final ChecksumGeneratorOptions options)
 
             throws RepositoryException, IOException {
@@ -253,10 +251,31 @@ public final class ChecksumGenerator {
                         StringUtils.join(checksums, ","));
             }
 
-            propertyChecksums.put(property.getPath(), StringUtils.join(checksums, ","));
+            propertyChecksums.put(getChecksumKey(aggregateNodePath, property.getPath()),
+                    StringUtils.join(checksums, ","));
         }
 
         return propertyChecksums;
+    }
+
+
+    /**
+     * Generates the relative key used for tracking nodes and properties.
+     * @param aggregatePath the absolute path of the node being aggregated.
+     * @param path the path of the item being checksumed
+     * @return the key
+     */
+    protected static String getChecksumKey(String aggregatePath, String path) {
+        if ("/".equals(aggregatePath) && "/".equals(path)) {
+            return "/";
+        } else if ("/".equals(aggregatePath)) {
+            return path;
+        }
+
+        String baseNodeName = Text.getName(aggregatePath);
+        String relPath = StringUtils.removeStart(path, aggregatePath);
+
+        return baseNodeName + relPath;
     }
 
     /**
