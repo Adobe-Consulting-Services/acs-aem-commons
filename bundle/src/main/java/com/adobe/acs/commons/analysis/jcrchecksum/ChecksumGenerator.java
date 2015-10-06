@@ -116,9 +116,12 @@ public final class ChecksumGenerator {
 
         if (isChecksumable(node, options)) {
             // Tree-traversal has found a node to checksum (checksum will include all valid sub-tree nodes)
-            final Map<String, String> tmp = generatedNodeChecksum(node.getPath(), node, options);
-            log.debug(toString(tmp));
-            checksums.put(node.getPath(), aggregateChecksums(tmp));
+            checksums.put(node.getPath(),
+                    generatedNodeChecksum(node.getPath(), node, options));
+
+            log.debug("Top Level Node: {} ~> {}",
+                    node.getPath(),
+                    checksums.get(node.getPath()));
         } else {
             // Traverse the tree for checksum-able node systems
             NodeIterator children = node.getNodes();
@@ -160,7 +163,7 @@ public final class ChecksumGenerator {
      * @throws RepositoryException
      * @throws IOException
      */
-    private static Map<String, String> generatedNodeChecksum(final String aggregateNodePath,
+    protected static String generatedNodeChecksum(final String aggregateNodePath,
                                                              final Node node,
                                                              final ChecksumGeneratorOptions options)
             throws RepositoryException, IOException {
@@ -171,11 +174,11 @@ public final class ChecksumGenerator {
 
         /* Create checksums for Node's properties */
         checksums.put(getChecksumKey(aggregateNodePath, node.getPath()),
-                aggregateChecksums(generatePropertyChecksums(aggregateNodePath, node, options)));
+                generatePropertyChecksums(aggregateNodePath, node, options));
 
         /* Then process node's children */
 
-        final Map<String, String> sortedChecksums = new TreeMap<String, String>();
+        final Map<String, String> lexicographicallySortedChecksums = new TreeMap<String, String>();
         final boolean hasOrderedChildren = hasOrderedChildren(node);
         final NodeIterator children = node.getNodes();
 
@@ -185,20 +188,33 @@ public final class ChecksumGenerator {
             if (!nodeTypeExcludes.contains(child.getPrimaryNodeType().getName())) {
                 if (hasOrderedChildren) {
                     // Use the order dictated by the JCR
-                    checksums.putAll(generatedNodeChecksum(aggregateNodePath, child, options));
+                    checksums.put(
+                            getChecksumKey(aggregateNodePath, child.getPath()),
+                            generatedNodeChecksum(aggregateNodePath, child, options));
+
+                    log.debug("Aggregated Ordered Node: {} ~> {}",
+                            getChecksumKey(aggregateNodePath, child.getPath()),
+                            checksums.get(getChecksumKey(aggregateNodePath, child.getPath())));
                 } else {
                     // If order is not dictated by JCR, collect so we can sort later
-                    sortedChecksums.putAll(generatedNodeChecksum(aggregateNodePath, child, options));
+                    lexicographicallySortedChecksums.put(
+                            getChecksumKey(aggregateNodePath, child.getPath()),
+                            generatedNodeChecksum(aggregateNodePath, child, options));
+
+                    log.debug("Aggregated Unordered Node: {} ~> {}",
+                            getChecksumKey(aggregateNodePath, child.getPath()),
+                            lexicographicallySortedChecksums.get(getChecksumKey(aggregateNodePath, child.getPath())));
+
                 }
             }
         }
 
-        if (!hasOrderedChildren && sortedChecksums.size() > 0) {
+        if (!hasOrderedChildren && lexicographicallySortedChecksums.size() > 0) {
             // Order is not dictated by JCR, so add the lexicographically sorted entries to the checksums string
-            checksums.putAll(sortedChecksums);
+            checksums.putAll(lexicographicallySortedChecksums);
         }
 
-        return checksums;
+        return aggregateChecksums(checksums);
     }
 
     /**
@@ -209,10 +225,9 @@ public final class ChecksumGenerator {
      * @return the map of the properties and their checksums
      * @throws RepositoryException
      */
-    protected static SortedMap<String, String> generatePropertyChecksums(final String aggregateNodePath,
-                                                                         final Node node,
-                                                                         final ChecksumGeneratorOptions options)
-
+    protected static String generatePropertyChecksums(final String aggregateNodePath,
+                                                      final Node node,
+                                                      final ChecksumGeneratorOptions options)
             throws RepositoryException, IOException {
 
         SortedMap<String, String> propertyChecksums = new TreeMap<String, String>();
@@ -247,7 +262,7 @@ public final class ChecksumGenerator {
 
             if (log.isDebugEnabled()) {
                 log.debug("Property: {} ~> {}",
-                        node.getPath() + "/@" + property.getName(),
+                        getChecksumKey(aggregateNodePath, property.getPath()),
                         StringUtils.join(checksums, ","));
             }
 
@@ -255,7 +270,7 @@ public final class ChecksumGenerator {
                     StringUtils.join(checksums, ","));
         }
 
-        return propertyChecksums;
+        return aggregateChecksums(propertyChecksums);
     }
 
 
@@ -352,13 +367,15 @@ public final class ChecksumGenerator {
      * @return the checksum value
      */
     protected static String aggregateChecksums(final Map<String, String> checksums) {
-        StringBuilder checksum = new StringBuilder();
+        StringBuilder data = new StringBuilder();
 
         for (Map.Entry<String, String> entry : checksums.entrySet()) {
-            checksum.append(entry.getKey() + "=" + entry.getValue());
+            data.append(entry.getKey() + "=" + entry.getValue());
         }
 
-        return DigestUtils.shaHex(checksum.toString());
+        log.debug("Creating aggregate checksum for: {}", data);
+
+        return DigestUtils.shaHex(data.toString());
     }
 
     /**
