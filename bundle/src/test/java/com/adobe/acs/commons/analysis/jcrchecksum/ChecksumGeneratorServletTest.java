@@ -130,7 +130,7 @@ public class ChecksumGeneratorServletTest {
         servlet.doGet(request, response);
         assertEquals("text/plain", response.getContentType());
         assertEquals(
-            "/content/test-page/jcr:content\t80586766b6af5d2df74b9842ead00f9e1f9a3350\n",
+            "/content/test-page/jcr:content\t0362210a336ba79c6cab30bf09deaf2f1a749e6f\n",
             response.getOutput().toString());
     }
 }

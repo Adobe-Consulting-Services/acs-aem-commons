@@ -214,7 +214,12 @@ public final class ChecksumGenerator {
             checksums.putAll(lexicographicallySortedChecksums);
         }
 
-        return aggregateChecksums(checksums);
+        final String nodeChecksum = aggregateChecksums(checksums);
+        log.debug("Node [ {} ] has a aggregated checksum of [ {} ]",
+                getChecksumKey(aggregateNodePath, node.getPath()),
+                nodeChecksum);
+
+        return nodeChecksum;
     }
 
     /**
@@ -372,8 +377,6 @@ public final class ChecksumGenerator {
         for (Map.Entry<String, String> entry : checksums.entrySet()) {
             data.append(entry.getKey() + "=" + entry.getValue());
         }
-
-        log.debug("Creating aggregate checksum for: {}", data);
 
         return DigestUtils.shaHex(data.toString());
     }
