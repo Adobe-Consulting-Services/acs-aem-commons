@@ -19,10 +19,10 @@
   ~ #L%
   -->
 
-<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:description="Compare JCR Content Trees"
-    jcr:primaryType="nt:unstructured"
-    jcr:title="JCR Checksum Compare"
-    href="/etc/acs-commons/jcr-checksum-compare.html"
-    id="acs-commons-jcr-checksum-compare"
-    target="_blank"/>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="cq:PageContent"
+        jcr:title="JCR Compare"
+        sling:resourceType="acs-commons/components/utilities/jcr-compare"/>
+</jcr:root>

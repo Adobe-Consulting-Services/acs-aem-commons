@@ -20,7 +20,7 @@
 
 /*global angular: false, moment: false, JSON: false, difflib: false, diffview: false */
 
-angular.module('acs-commons-jcr-checksum-compare-app', ['pasvaz.bindonce', 'acsCoral', 'ACS.Commons.notifications'])
+angular.module('acs-commons-jcr-compare-app', ['pasvaz.bindonce', 'acsCoral', 'ACS.Commons.notifications'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout', '$q', 'NotificationsService',
         function ($scope, $http, $timeout, $q, NotificationsService) {
 
