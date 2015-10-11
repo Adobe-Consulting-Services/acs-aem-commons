@@ -242,6 +242,12 @@
             <version>1.4</version>
             <scope>test</scope>
          </dependency>
+         <dependency>
+             <groupId>org.apache.sling</groupId>
+             <artifactId>org.apache.sling.testing.jcr-mock</artifactId>
+             <version>1.1.8</version>
+             <scope>test</scope>
+         </dependency>
 
         <!--  Build Dependencies -->
         <dependency>
