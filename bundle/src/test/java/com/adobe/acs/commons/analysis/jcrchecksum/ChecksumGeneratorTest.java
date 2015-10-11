@@ -190,8 +190,8 @@ public class ChecksumGeneratorTest {
                 "jcr:content/renditions/original/jcr:primaryType=" + DigestUtils.shaHex("nt:file");
         aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
         nodeChecksum =  DigestUtils.shaHex("jcr:content/renditions/original="
-                + aggregatedPopertiesChecksum
-                + "jcr:content/renditions/original/jcr:content=" +  originalJcrContentChecksum
+                        + aggregatedPopertiesChecksum
+                        + "jcr:content/renditions/original/jcr:content=" +  originalJcrContentChecksum
         );
 
         final String originalChecksum = nodeChecksum;

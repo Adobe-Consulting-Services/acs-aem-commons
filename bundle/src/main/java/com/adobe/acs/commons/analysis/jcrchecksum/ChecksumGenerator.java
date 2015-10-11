@@ -164,8 +164,8 @@ public final class ChecksumGenerator {
      * @throws IOException
      */
     protected static String generatedNodeChecksum(final String aggregateNodePath,
-                                                             final Node node,
-                                                             final ChecksumGeneratorOptions options)
+                                                  final Node node,
+                                                  final ChecksumGeneratorOptions options)
             throws RepositoryException, IOException {
 
         final Set<String> nodeTypeExcludes = options.getExcludedNodeTypes();
