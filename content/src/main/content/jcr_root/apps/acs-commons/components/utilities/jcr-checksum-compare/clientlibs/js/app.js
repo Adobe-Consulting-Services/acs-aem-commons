@@ -20,7 +20,7 @@
 
 /*global angular: false, moment: false, JSON: false, difflib: false, diffview: false */
 
-angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons.notifications'])
+angular.module('acs-commons-jcr-checksum-compare-app', ['pasvaz.bindonce', 'acsCoral', 'ACS.Commons.notifications'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout', '$q', 'NotificationsService',
         function ($scope, $http, $timeout, $q, NotificationsService) {
 
@@ -317,24 +317,27 @@ angular.module('acs-commons-jcr-checksum-compare-app', ['acsCoral', 'ACS.Commons
                         '<tr class="coral-Table-row">' +
                             '<th class="coral-Table-headerCell"></th>' +
                             '<th class="coral-Table-headerCell">Path</th>' +
-                            '<th class="coral-Table-headerCell">Content Hash</th>' +
                         '</tr>' +
                     '</thead>' +
                     '<tbody>' +
-                        '<tr    ng-repeat="entry in diffData track by $index" ' +
-                                'ng-click="getJSON(entry)"' +
-                                'class="coral-Table-row acsCommons-Table-row-{{ entry.op }}">' +
-                            '<td class="coral-Table-cell acsCommons-Table-cell-icon" ng-show="entry.op === \'equals\'">' +
-                                    '<i class="coral-Icon coral-Icon--check"></i></td>' +
-                            '<td class="coral-Table-cell acsCommons-Table-cell-icon" ng-show="entry.op === \'unequals\'">' +
+                        '<tr    bindonce ' +
+                                'ng-repeat="entry in diffData track by $index" ' +
+                                'ng-click="getJSON(entry)" ' +
+                                'bo-class="\'coral-Table-row acsCommons-Table-row-\' + entry.op">' +
+                            '<td class="coral-Table-cell acsCommons-Table-cell-icon" ' +
+                                        'bo-show="entry.op === \'equals\'">' +
+                                        '<i class="coral-Icon coral-Icon--check"></i></td>' +
+                            '<td class="coral-Table-cell acsCommons-Table-cell-icon" ' +
+                                        'bo-show="entry.op === \'unequals\'">' +
                                         '<i class="coral-Icon coral-Icon--close"></i></td>' +
-                            '<td class="coral-Table-cell acsCommons-Table-cell-icon" ng-show="entry.op === \'leftOnly\'">' +
+                            '<td class="coral-Table-cell acsCommons-Table-cell-icon" ' +
+                                        'bo-show="entry.op === \'leftOnly\'">' +
                                     '<i class="coral-Icon coral-Icon--chevronLeft"></i></td>' +
-                            '<td class="coral-Table-cell acsCommons-Table-cell-icon" ng-show="entry.op === \'rightOnly\'">' +
+                            '<td class="coral-Table-cell acsCommons-Table-cell-icon" ' +
+                                        'bo-show="entry.op === \'rightOnly\'">' +
                                     '<i class="coral-Icon coral-Icon--chevronRight"></i></td>' +
 
-                            '<td class="coral-Table-cell">{{ entry.path }}</td>' +
-                            '<td class="coral-Table-cell">{{ entry.hash }}</td>' +
+                            '<td class="coral-Table-cell" bo-text="entry.path"></td>' +
                         '</tr>' +
                     '</tbody>' +
                 '<table>' +
