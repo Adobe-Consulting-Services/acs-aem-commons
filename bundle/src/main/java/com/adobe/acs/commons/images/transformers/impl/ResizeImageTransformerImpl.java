@@ -53,12 +53,11 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
     static final String TYPE = "resize";
 
-    private static final String KEY_WIDTH = "width";
-    private static final String KEY_WIDTH_ALIAS = "w";
+    static final String KEY_WIDTH = "width";
+    static final String KEY_WIDTH_ALIAS = "w";
 
-    private static final String KEY_HEIGHT = "height";
-    private static final String KEY_HEIGHT_ALIAS = "h";
-
+    static final String KEY_HEIGHT = "height";
+    static final String KEY_HEIGHT_ALIAS = "h";
 
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
