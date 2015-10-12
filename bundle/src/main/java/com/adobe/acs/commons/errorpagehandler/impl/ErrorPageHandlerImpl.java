@@ -335,7 +335,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             log.debug("Using resolved error page: {}", errorPagePath);
             return errorPagePath;
         } else {
-            log.warn("ACS AEM Commons Error Page Handler is enabled but mis-configured. A valid error image"
+            log.debug("ACS AEM Commons Error Page Handler is enabled but mis-configured. A valid error image"
                     + " handler nor a valid error page could be found.");
         }
         return null;

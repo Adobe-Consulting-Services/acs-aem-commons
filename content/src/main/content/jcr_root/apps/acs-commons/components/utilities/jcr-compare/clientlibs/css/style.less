@@ -1,0 +1,110 @@
+@green: lighten(#B6E440, 10%);
+@red: lighten(#ED4E58, 25%);;
+@blue: lighten(#61B3E4, 25%);
+@orange: lighten(#F49D31, 25%);
+
+#acs-commons-jcr-compare-app {
+
+  .acsCommons-Cursor--hand {
+    cursor: pointer;
+  }
+
+  .acsCommons-Table-row-equals {
+    background-color: @green;
+  }
+
+  .acsCommons-Table-row-unequals {
+    background-color: @red;
+    .acsCommons-Cursor--hand;
+  }
+
+  .acsCommons-Table-row-leftOnly {
+    background-color: @blue;
+    .acsCommons-Cursor--hand;
+  }
+
+  .acsCommons-Table-row-rightOnly {
+    background-color: @orange;
+    .acsCommons-Cursor--hand;
+  }
+
+  .acsCommons-Table-cell-icon {
+    text-align: center;
+  }
+
+  .acsCommons-Panel {
+    width:30%;
+    float:left;
+    border: solid 1px #ccc;
+    margin-bottom: 1rem;
+    margin-right: 3%;
+
+    .acsCommons-Panel-wrapper {
+      padding: 1rem;
+
+      .acsCommons-Form-multifieldset-input {
+        width: 100%;
+      }
+    }
+  }
+
+  .acsCommons-List--legend {
+
+    li {
+      margin-bottom: .5rem;
+    }
+
+    .legend-box {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      margin-right: .5rem;
+      vertical-align: middle;
+    }
+
+    .legend-box.equals {
+      background-color: @green;
+    }
+
+    .legend-box.unequals {
+      background-color: @red;
+    }
+
+    .legend-box.leftOnly {
+      background-color: @blue;
+    }
+
+    .legend-box.rightOnly {
+      background-color: @orange;
+    }
+  }
+
+  .acsCommons-Form-multifieldset {
+
+    .acsCommons-Form-multifieldset-input {
+      width: calc(~'100% - 40px');
+    }
+
+    .acsCommons-Form-multifieldset-remove {
+      line-height: 2.25rem;
+      float: right;
+    }
+
+    .acsCommons-Form-multifieldset-add {
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .acsCommons-Form-multifieldset-add::before {
+      padding-right: .5rem;
+    }
+  }
+
+  .clear {
+    clear: both;
+  }
+}
+.acsCommons-Modal-body {
+  overflow: auto;
+  height: 35rem;
+}

@@ -25,6 +25,7 @@
         <include pattern="/etc/acs-commons/oak-index-manager(.*)?" />
         <include pattern="/etc/acs-commons/bulk-workflow-manager" />
         <include pattern="/etc/acs-commons/bulk-workflow-manager/jcr:content" />
+        <include pattern="/etc/acs-commons/jcr-compare(.*)?" />
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?" />
         <include pattern="/etc/acs-commons/version-replicator(.*)?" />
         <include pattern="/etc/acs-commons/version-compare(.*)?" />

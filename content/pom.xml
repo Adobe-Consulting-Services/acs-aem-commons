@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>2.0.7-SNAPSHOT</version>
+        <version>2.0.9-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -86,49 +86,7 @@
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/extensions/contentfinder/audio.js</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/jquery.fonticonpicker/jquery.fonticonpicker.js</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-animate.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-animate.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-cookies.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-cookies.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-loader.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-loader.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-mocks.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-resource.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-resource.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-route.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-route.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-sanitize.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-sanitize.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-scenario.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-touch.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular-touch.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.2/angular.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-animate.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-animate.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-aria.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-aria.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-cookies.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-cookies.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-loader.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-loader.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-messages.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-messages.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-mocks.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-resource.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-resource.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-route.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-route.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-sanitize.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-sanitize.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-scenario.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-touch.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular-touch.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/angular.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/angularjs/v1.3/modules/ng-storage/ngStorage.min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/json/json2.js</exclude>
-                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor/lodash/lodash-v2.4.1.js</exclude>
+                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor</exclude>
                     </excludes>
                 </configuration>
             </plugin>
