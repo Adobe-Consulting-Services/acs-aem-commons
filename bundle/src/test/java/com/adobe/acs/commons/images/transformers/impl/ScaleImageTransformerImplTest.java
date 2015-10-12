@@ -76,8 +76,8 @@ public class ScaleImageTransformerImplTest {
     }
 
     @Test
-    public void testTransform_withMalformedPercent() throws Exception {
-        properties.put("scale", "abc%");
+    public void testTransform_withMalformedScale() throws Exception {
+        properties.put("scale", "50%");
 
         transformer.transform(layer, properties);
 
@@ -85,8 +85,8 @@ public class ScaleImageTransformerImplTest {
     }
 
     @Test
-    public void testTransform_withPercent() throws Exception {
-        properties.put("scale", "50%");
+    public void testTransform_scaleAsDouble() throws Exception {
+        properties.put("scale", ".50");
 
         transformer.transform(layer, properties);
 
@@ -94,13 +94,14 @@ public class ScaleImageTransformerImplTest {
     }
 
     @Test
-    public void testTransform_withoutPercent() throws Exception {
-        properties.put("scale", ".50");
+    public void testTransform_scaleAsDouble2() throws Exception {
+        properties.put("scale", "1.50");
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).resize(800, 450);
+        verify(layer, times(1)).resize(2400, 1350);
     }
+
 
     @Test
     public void testTransform_roundDefault() throws Exception {

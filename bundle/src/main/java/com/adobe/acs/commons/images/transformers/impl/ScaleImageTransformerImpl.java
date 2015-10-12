@@ -75,23 +75,16 @@ public class ScaleImageTransformerImpl implements ImageTransformer {
 
         log.debug("Transforming with [ {} ]", TYPE);
 
-        String scaleString = StringUtils.trim(properties.get(KEY_SCALE, "1"));
+        Double scale = properties.get(KEY_SCALE, 1D);
         String round = StringUtils.trim(properties.get(KEY_ROUND, String.class));
 
-        double scale = 1;
-        try {
-            if (scaleString.endsWith("%")) {
-                double percentage = Double.parseDouble(StringUtils.substringBefore(scaleString, "%"));
-                scale = percentage / 100D;
-            } else {
-                scale = Double.parseDouble(scaleString);
-            }
-        } catch (NumberFormatException e) {
-            log.warn("Could not part a valid scale value from [ {} ], defaulting to 1", scaleString);
-            scale = 1;
+        if (scale == null) {
+            log.warn("Could not derive a Double value for key [ {} ] from value [ {} ]",
+                    KEY_SCALE, properties.get(KEY_SCALE, String.class));
+            scale = 1D;
         }
 
-        if (scale != 1) {
+        if (scale != 1D) {
 
             int currentWidth = layer.getWidth();
             int currentHeight = layer.getHeight();
