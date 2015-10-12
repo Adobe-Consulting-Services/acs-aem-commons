@@ -23,20 +23,25 @@ package com.adobe.acs.commons.images.transformers.impl;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 /**
  * ACS AEM Commons - Image Transformer - Scale
  * ImageTransformer that scales the layer. Accepts two params: scale, round. Scale is a double value (e.g. "0.5") or a
  * percentage (e.g. "50%").
- * Rounding is one of "round" (using Math.round), "up" (using Math.ceil) or "down" (using Math.floor) with "round"
- * being the default
+ * Rounding is one of "round" (using Math.round), "up" (using Math.ceil), or "down" (using Math.floor)
+ * "round" being the default
+ *
  */
 @Component
 @Properties({
@@ -54,11 +59,11 @@ public class ScaleImageTransformerImpl implements ImageTransformer {
     private static final String KEY_SCALE = "scale";
     private static final String KEY_ROUND = "round";
 
-    private Map<String, ImageTransformer> imageTransformers = new ConcurrentHashMap<String, ImageTransformer>();
+    private static final String ROUND_UP = "up";
+    private static final String ROUND_DOWN = "down";
 
-
-    @Reference
-    ResizeImageTransformerImpl resizeImageTransformer;
+    @Reference(target = "(" + ImageTransformer.PROP_TYPE + "=" + ResizeImageTransformerImpl.TYPE  +")")
+    ImageTransformer resizeImageTransformer;
 
     @Override
     public final Layer transform(Layer layer, final ValueMap properties) {
@@ -70,20 +75,19 @@ public class ScaleImageTransformerImpl implements ImageTransformer {
 
         log.debug("Transforming with [ {} ]", TYPE);
 
-        String scaleString = properties.get(KEY_SCALE, "1");
-        String round = properties.get(KEY_ROUND, "round");
+        String scaleString = StringUtils.trim(properties.get(KEY_SCALE, "1"));
+        String round = StringUtils.trim(properties.get(KEY_ROUND, String.class));
 
         double scale = 1;
         try {
             if (scaleString.endsWith("%")) {
-                double percentage = Double.parseDouble(StringUtils.substringBeforeLast(scaleString, "%"));
-                scale = percentage / 100;
-            }
-            else {
+                double percentage = Double.parseDouble(StringUtils.substringBefore(scaleString, "%"));
+                scale = percentage / 100D;
+            } else {
                 scale = Double.parseDouble(scaleString);
             }
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
+            log.warn("Could not part a valid scale value from [ {} ], defaulting to 1", scaleString);
             scale = 1;
         }
 
@@ -95,20 +99,26 @@ public class ScaleImageTransformerImpl implements ImageTransformer {
             double newWidth = scale * currentWidth;
             double newHeight = scale * currentHeight;
 
-            if ("up".equals(round)) {
-                newWidth = Math.ceil(newWidth);
-                newHeight = Math.ceil(newHeight);
-            }
-            else if ("down".equals(round)) {
+            if (StringUtils.equals(ROUND_UP, round)) {
+                newWidth = (int) Math.ceil(newWidth);
+                newHeight = (int) Math.ceil(newHeight);
+            } else if (StringUtils.equals(ROUND_DOWN, round)) {
                 newWidth = (int) Math.floor(newWidth);
                 newHeight = (int) Math.floor(newHeight);
-            }
-            else { // "round"
+            } else {
+                // "round"
                 newWidth = (int) Math.round(newWidth);
                 newHeight = (int) Math.round(newHeight);
             }
 
-            layer = resizeImageTransformer.resize(layer, (int)newWidth, (int)newHeight);
+
+            // Invoke the ResizeImageTransformer with the new values
+
+            final ValueMap params = new ValueMapDecorator(new HashMap<String, Object>());
+            params.put(ResizeImageTransformerImpl.KEY_WIDTH, (int)newWidth);
+            params.put(ResizeImageTransformerImpl.KEY_HEIGHT, (int)newHeight);
+
+            layer = resizeImageTransformer.transform(layer, params);
         }
 
         return layer;

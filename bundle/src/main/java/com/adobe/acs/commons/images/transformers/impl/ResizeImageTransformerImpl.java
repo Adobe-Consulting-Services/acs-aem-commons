@@ -47,23 +47,20 @@ import java.util.Map;
                 value = ResizeImageTransformerImpl.TYPE
         )
 })
-@Service(value = {
-        ImageTransformer.class,
-        ResizeImageTransformerImpl.class
-})
+@Service
 public class ResizeImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ResizeImageTransformerImpl.class);
 
     static final String TYPE = "resize";
 
-    private static final String KEY_WIDTH = "width";
-    private static final String KEY_WIDTH_ALIAS = "w";
+    static final String KEY_WIDTH = "width";
+    static final String KEY_WIDTH_ALIAS = "w";
 
-    private static final String KEY_HEIGHT = "height";
-    private static final String KEY_HEIGHT_ALIAS = "h";
+    static final String KEY_HEIGHT = "height";
+    static final String KEY_HEIGHT_ALIAS = "h";
 
 
-    private static final int DEFAULT_MAX_DIMENSION = 50000;
+    public static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
     @Property(label = "Max dimension in px",
             description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
@@ -82,10 +79,6 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
         int width = properties.get(KEY_WIDTH, properties.get(KEY_WIDTH_ALIAS, 0));
         int height = properties.get(KEY_HEIGHT, properties.get(KEY_HEIGHT_ALIAS, 0));
 
-        return resize(layer, width, height);
-    }
-
-    Layer resize(Layer layer, int width, int height) {
         if (width > maxDimension) {
             width = maxDimension;
         }
