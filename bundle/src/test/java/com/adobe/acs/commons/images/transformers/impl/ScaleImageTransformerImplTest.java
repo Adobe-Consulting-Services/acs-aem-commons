@@ -141,6 +141,7 @@ public class ScaleImageTransformerImplTest {
 
     @Test
     public void testTransform_nullParams() throws Exception {
+        transformer.transform(layer, null);
 
         verifyZeroInteractions(layer);
     }

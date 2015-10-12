@@ -59,8 +59,7 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
     static final String KEY_HEIGHT = "height";
     static final String KEY_HEIGHT_ALIAS = "h";
 
-
-    public static final int DEFAULT_MAX_DIMENSION = 50000;
+    private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
     @Property(label = "Max dimension in px",
             description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
