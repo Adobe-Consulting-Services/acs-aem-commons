@@ -138,7 +138,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
     }
 
     @Test
-    public void test_with_prefix_and_multiple_hosts() throws Exception {
+    public void test_with_prefix_and_multiple_numbered_hosts() throws Exception {
         MockBundle bundle = new MockBundle(-1);
         MockComponentContext ctx = new MockComponentContext(bundle);
         ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
@@ -159,6 +159,30 @@ public class StaticReferenceRewriteTransformerFactoryTest {
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("//static2.host.com/etc/clientlib/testA.css", out.getValue(0));
+    }
+
+    @Test
+    public void test_with_prefix_and_multiple_named_hosts() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", new String[] { "staticA.host.com", "staticB.host.com" });
+        ctx.setProperty("host.count", 2);
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/testA.css");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("//staticB.host.com/etc/clientlib/testA.css", out.getValue(0));
     }
 
     @Test

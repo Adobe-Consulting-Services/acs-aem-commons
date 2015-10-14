@@ -79,7 +79,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     private static final String PROP_HOST_COUNT = "host.count";
 
     @Property(label = "Static Host Pattern", description = "Pattern for generating static host domain names. "
-            + "'{}' will be replaced with the host number.")
+            + "'{}' will be replaced with the host number. If more than one is provided, the host count is ignored.", unbounded = PropertyUnbounded.ARRAY)
     private static final String PROP_HOST_NAME_PATTERN = "host.pattern";
 
     @Property(unbounded = PropertyUnbounded.ARRAY, label = "Path Prefixes",
@@ -92,38 +92,43 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
     private int staticHostCount;
 
-    private String staticHostPattern;
+    private String[] staticHostPattern;
 
     public Transformer createTransformer() {
         return new StaticReferenceRewriteTransformer();
     }
 
-    private String getStaticHostNum(final String filePath) {
-        String hostNumberString = "1";
-        if (staticHostCount > 1) {
-            final int fileHash = ((filePath.hashCode() & Integer.MAX_VALUE) % staticHostCount) + 1;
-            hostNumberString = Integer.toString(fileHash);
+    private static String getShardValue(final String filePath, final int shardCount, final ShardNameProvider sharder) {
+        int result = 1;
+        if (shardCount > 1) {
+            final int fileHash = ((filePath.hashCode() & Integer.MAX_VALUE) % shardCount) + 1;
+            String hostNumberString = Integer.toString(fileHash);
             if (hostNumberString.length() >= 2) {
                 // get the 2nd digit as the 1st digit will not contain "0"
                 Character c = hostNumberString.charAt(1);
                 hostNumberString = c.toString();
                 // If there are more than 10 hosts, convert it back to base10
                 // so we do not have alpha
-                hostNumberString = Integer.toString(Integer.parseInt(hostNumberString, staticHostCount));
+                hostNumberString = Integer.toString(Integer.parseInt(hostNumberString, shardCount));
 
-                int hostNumberInt = Integer.parseInt(hostNumberString) + 1;
-                hostNumberString = Integer.toString(hostNumberInt);
+                result = Integer.parseInt(hostNumberString) + 1;
+            } else {
+                result = fileHash;
             }
         }
 
-        return hostNumberString;
+        return sharder.lookup(result);
     }
 
     private String prependHostName(String value) {
-        if (staticHostPattern != null) {
-            final String hostNum = this.getStaticHostNum(value);
-            final String host = staticHostPattern.replace("{}", hostNum);
-
+        if (staticHostPattern != null && staticHostPattern.length > 0) {
+            final String host;
+            if (staticHostPattern.length == 1) {
+                final String hostNum = getShardValue(value, staticHostCount, toStringShardNameProvider);
+                host = staticHostPattern[0].replace("{}", hostNum);
+            } else {
+                host = getShardValue(value, staticHostPattern.length, lookupShardNameProvider);
+            }
             return String.format("//%s%s", host, value);
         } else {
             return value;
@@ -178,8 +183,27 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         this.attributes = ParameterUtil.toMap(attrProp, ":", ",");
 
         this.prefixes = PropertiesUtil.toStringArray(properties.get(PROP_PREFIXES), new String[0]);
-        this.staticHostPattern = PropertiesUtil.toString(properties.get(PROP_HOST_NAME_PATTERN), null);
+        this.staticHostPattern = PropertiesUtil.toStringArray(properties.get(PROP_HOST_NAME_PATTERN), null);
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
-
     }
+
+    private static interface ShardNameProvider {
+        String lookup(int idx);
+    }
+
+    private static final ShardNameProvider toStringShardNameProvider = new ShardNameProvider() {
+
+        @Override
+        public String lookup(int idx) {
+            return Integer.toString(idx);
+        }
+    };
+
+    private ShardNameProvider lookupShardNameProvider = new ShardNameProvider() {
+
+        @Override
+        public String lookup(int idx) {
+            return staticHostPattern[idx - 1];
+        }
+    };
 }
