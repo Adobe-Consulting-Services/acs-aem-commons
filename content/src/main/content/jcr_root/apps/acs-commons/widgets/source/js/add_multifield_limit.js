@@ -44,6 +44,12 @@
                     return false;
                 }
             }
+            if (this.maxItems) {
+                if (this.getActualItemCount() > this.maxItems) {
+                    this.markInvalid(CQ.I18n.get('You are only allowed to add {0} items to this field', [this.maxItems]));
+                    return false;
+                }
+            }
             
             return originalValidateFunction.apply(this);
         },
