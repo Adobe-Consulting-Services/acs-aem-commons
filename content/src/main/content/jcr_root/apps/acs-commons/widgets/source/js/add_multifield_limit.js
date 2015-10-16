@@ -26,7 +26,7 @@
             return this.items.getCount() - 1;
         },
         addItem: function(value) {
-            if (this.maxItems && (this.maxItems == this.getActualItemCount())) {
+            if (this.maxItems && (parseInt(this.maxItems) === this.getActualItemCount())) {
                 CQ.Ext.Msg.show({
                     title: 'Maximum Items reached',
                     msg: 'You are only allowed to add ' + this.maxItems + ' items to this field',
