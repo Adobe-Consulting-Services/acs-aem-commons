@@ -32,9 +32,8 @@ import java.io.IOException;
 /**
  * Provides CORS functionality required by the server-to-server XHR communication
  */
+@SuppressWarnings("serial")
 public class BaseChecksumServlet extends SlingAllMethodsServlet {
-    private final Logger log = LoggerFactory.getLogger(BaseChecksumServlet.class);
-
     private static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 
     private static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";

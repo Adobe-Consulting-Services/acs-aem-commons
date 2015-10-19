@@ -117,8 +117,8 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         return true;
     }
 
-    private class NamePropertyUpdater extends AbstractJSONObjectVisitor {
-        private final Logger log = LoggerFactory.getLogger(NamePropertyUpdater.class);
+    private static class NamePropertyUpdater extends AbstractJSONObjectVisitor {
+        private static final Logger log = LoggerFactory.getLogger(NamePropertyUpdater.class);
 
         private static final String PN_NAME = "name";
         private static final String NT_CQ_WIDGET = "cq:Widget";

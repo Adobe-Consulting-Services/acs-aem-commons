@@ -207,7 +207,7 @@ public class EnsureOakIndex {
                     // DELETE
                     if (oakIndex != null) {
                         this.delete(oakIndex);
-                    } else {
+                    } else if (log.isInfoEnabled()) {
                         // Oak index does not exist
                         log.info("Requesting deletion of a non-existent Oak Index at [ {} ]\n."
                                 + "Consider removing the Ensure Definition at [ {} ] if it is no longer needed.",
@@ -417,7 +417,9 @@ public class EnsureOakIndex {
 
             final long start = System.currentTimeMillis();
             oakIndex.getResourceResolver().commit();
-            log.info("Deleted Oak Index at [ {} ] in {} ms", path, System.currentTimeMillis() - start);
+            if (log.isInfoEnabled()) {
+                log.info("Deleted Oak Index at [ {} ] in {} ms", path, System.currentTimeMillis() - start);
+            }
         } else {
             log.warn("Oak Index at [ {} ] could not be adapted to a Node for removal.", oakIndex.getPath());
         }

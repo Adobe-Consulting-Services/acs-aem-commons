@@ -136,7 +136,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             final List<Resource> containerFolders = this.getWorkflowInstanceFolders(resourceResolver);
 
             for (Resource containerFolder : containerFolders) {
-                log.debug("Checking [ {} ] for workflow instances to remove", containerFolder.getPath());
+                if (log.isDebugEnabled()) {
+                    log.debug("Checking [ {} ] for workflow instances to remove", containerFolder.getPath());
+                }
                 final Collection<Resource> sortedFolders = this.getSortedAndFilteredFolders(containerFolder);
 
                 for (final Resource folder : sortedFolders) {
@@ -245,8 +247,10 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                 // Save final batch if needed, and update tracking nodes
                 this.complete(resourceResolver, checkedCount, workflowRemovedCount);
             }
-            log.info("Removed a total of [ {} ] workflow instances in [ {} ] ms", count,
-                    System.currentTimeMillis() - start);
+            if (log.isInfoEnabled()) {
+                log.info("Removed a total of [ {} ] workflow instances in [ {} ] ms", count,
+                        System.currentTimeMillis() - start);
+            }
 
             return count;
 
