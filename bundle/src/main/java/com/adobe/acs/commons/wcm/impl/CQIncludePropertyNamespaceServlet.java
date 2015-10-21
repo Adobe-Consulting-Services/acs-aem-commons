@@ -22,9 +22,12 @@ package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.json.AbstractJSONObjectVisitor;
 import com.adobe.acs.commons.util.BufferingResponse;
+import com.adobe.acs.commons.util.InfoWriter;
 import com.adobe.acs.commons.util.PathInfoUtil;
 import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -33,15 +36,23 @@ import org.apache.sling.api.request.RequestUtil;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * ACS AEM Commons - CQInclude Property Namespace
+ * ACS AEM Commons - CQInclude Property Namespace.
  */
 @SuppressWarnings("serial")
 @SlingServlet(
@@ -56,6 +67,51 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
     private static final String AEM_CQ_INCLUDE_SELECTORS = "overlay.infinity";
 
     private static final int NAME_PROPERTY_SELECTOR_INDEX = 3;
+
+    private static final String PN_NAME = "name";
+
+    private static final String NT_CQ_WIDGET = "cq:Widget";
+
+    private static final String[] DEFAULT_NAMESPACEABLE_PROPERTY_NAMES = new String[]{
+            PN_NAME,
+            "cropParameter",
+            "fileNameParameter",
+            "fileReferenceParameter",
+            "mapParameter",
+            "rotateParameter",
+            "widthParameter",
+            "heightParameter"
+    };
+
+    private String[] namespaceablePropertyNames = null;
+
+    @Property(label = "Property Names",
+            description = "Namespace properties defined in this list. Leave empty for on 'name'. "
+                    + " Defaults to [ name, cropParameter, fileNameParameter, fileReferenceParameter, "
+                    + "mapParameter, rotateParameter, widthParameter, heightParameter] ",
+            value = {
+                    PN_NAME,
+                    "cropParameter",
+                    "fileNameParameter",
+                    "fileReferenceParameter",
+                    "mapParameter",
+                    "rotateParameter",
+                    "widthParameter",
+                    "heightParameter"
+            }
+    )
+    public static final String PROP_NAMESPACEABLE_PROPERTY_NAMES = "namespace.property-names";
+
+    private static final String[] DEFAULT_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = new String[]{ "^\\./.*" };
+
+    private List<Pattern> namespaceablePropertyValuePatterns = new ArrayList<Pattern>();
+
+    @Property(label = "Property Value Patterns",
+            description = "Namespace properties whose values match a regex in this list. "
+                    + "Defaults to [ \"^\\\\./.*\" ]",
+            value = { "^\\./.*" })
+    public static final String PROP_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = "namespace.property-value-patterns";
+
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -72,7 +128,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         /* Servlet accepts this request */
         RequestUtil.setRequestAttribute(request, REQ_ATTR, true);
 
-        final String prefix =
+        final String namespace =
                 URLDecoder.decode(PathInfoUtil.getSelector(request, NAME_PROPERTY_SELECTOR_INDEX), "UTF-8");
 
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
@@ -84,9 +140,9 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
 
         try {
             final JSONObject json = new JSONObject(bufferingResponse.getContents());
-            final NamePropertyUpdater namePropertyUpdater = new NamePropertyUpdater(prefix);
+            final PropertyNamespaceUpdater propertyNamespaceUpdater = new PropertyNamespaceUpdater(namespace);
 
-            namePropertyUpdater.accept(json);
+            propertyNamespaceUpdater.accept(json);
             response.getWriter().write(json.toString());
 
         } catch (JSONException e) {
@@ -98,7 +154,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         }
     }
 
-    private boolean accepts(SlingHttpServletRequest request) {
+    protected boolean accepts(SlingHttpServletRequest request) {
         if (request.getAttribute(REQ_ATTR) != null) {
             // Cyclic loop
             log.warn("Identified a cyclic loop in the ACS Commons CQ Include Namespace prefix Servlet for [ {} ]",
@@ -117,31 +173,95 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         return true;
     }
 
-    private class NamePropertyUpdater extends AbstractJSONObjectVisitor {
-        private final Logger log = LoggerFactory.getLogger(NamePropertyUpdater.class);
+    @Activate
+    protected void activate(final Map<String, Object> config) {
+        // Property Names
+        namespaceablePropertyNames = PropertiesUtil.toStringArray(config.get(PROP_NAMESPACEABLE_PROPERTY_NAMES),
+                DEFAULT_NAMESPACEABLE_PROPERTY_NAMES);
 
-        private static final String PN_NAME = "name";
-        private static final String NT_CQ_WIDGET = "cq:Widget";
+        // Property Value Patterns
+        namespaceablePropertyValuePatterns = new ArrayList<Pattern>();
+        String[] regexes = PropertiesUtil.toStringArray(config.get(PROP_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS),
+                DEFAULT_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS);
+
+        for (final String regex : regexes) {
+            namespaceablePropertyValuePatterns.add(Pattern.compile(regex));
+        }
+
+        final InfoWriter iw = new InfoWriter();
+        iw.title("ACS AEM Commons - CQInclude Property Namespace Servlet");
+        iw.message("Namespace-able Property Names: {}", Arrays.asList(namespaceablePropertyNames));
+        iw.message("Namespace-able Property Value Patterns: {}", namespaceablePropertyValuePatterns);
+        iw.end();
+        log.info(iw.toString());
+    }
+
+    public final class PropertyNamespaceUpdater extends AbstractJSONObjectVisitor {
+        private final Logger log = LoggerFactory.getLogger(PropertyNamespaceUpdater.class);
 
         private final String namespace;
 
-        public NamePropertyUpdater(final String namespace) {
+        private static final String DOT_SLASH = "./";
+
+        public PropertyNamespaceUpdater(final String namespace) {
             this.namespace = namespace;
         }
+
+        private boolean accept(String propertyName, String propertyValue) {
+            // Check if the property name denotes namespaceability
+            if (namespaceablePropertyNames != null) {
+                for (final String name : namespaceablePropertyNames) {
+                    if (StringUtils.equals(name, propertyName)) {
+                        return true;
+                    }
+                }
+            }
+
+            // Check if the property value denotes namespaceability
+            if (namespaceablePropertyValuePatterns != null) {
+                for (final Pattern pattern : namespaceablePropertyValuePatterns) {
+                    final Matcher matcher = pattern.matcher(propertyValue);
+                    if (matcher.matches()) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
 
         @Override
         protected void visit(JSONObject jsonObject) {
 
             if (StringUtils.equals(jsonObject.optString(JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)) {
-                String nameValue = jsonObject.optString(PN_NAME);
+                final Iterator<String> keys = jsonObject.keys();
 
-                nameValue = StringUtils.removeStart(nameValue, "./");
+                while (keys.hasNext()) {
+                    final String propertyName = keys.next();
 
-                if (StringUtils.isNotBlank(nameValue)) {
-                    try {
-                        jsonObject.put(PN_NAME, "./" + namespace + "/" + nameValue);
-                    } catch (final JSONException e) {
-                        log.error("Error updating the Name property of the JSON object", e);
+                    if (!this.accept(propertyName, jsonObject.optString(propertyName))) {
+                        log.debug("Property [ {} ~> {} ] is not a namespaceable property name/value", propertyName,
+                                jsonObject.optString(propertyName));
+                        continue;
+                    }
+
+                    String value = jsonObject.optString(propertyName);
+
+                    if (value != null) {
+                        String prefix = "";
+                        if (StringUtils.startsWith(value, DOT_SLASH)) {
+                            value = StringUtils.removeStart(value, DOT_SLASH);
+                            prefix = DOT_SLASH;
+                        }
+
+                        if (StringUtils.isNotBlank(value)) {
+                            try {
+                                jsonObject.put(propertyName, prefix + namespace + "/" + value);
+                            } catch (final JSONException e) {
+                                log.error("Error updating the Name property of the JSON object", e);
+                            }
+                        }
                     }
                 }
             }
