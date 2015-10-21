@@ -199,7 +199,7 @@ Select
     attrs.addOther("collision", "none");
 
     attrs.add("data-init", "graphiciconselect");
-    
+
     attrs.addOthers(cfg.getProperties(), "id", "class", "rel", "title", "name", "multiple", "disabled", "required", "renderReadOnly", "fieldLabel", "fieldDescription", "emptyText", "ignoreData", "translateOptions", "ordered");
 
 

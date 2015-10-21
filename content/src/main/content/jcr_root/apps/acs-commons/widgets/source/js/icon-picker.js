@@ -159,6 +159,13 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
     hiddenField: null,
 
     /**
+     * @cfg {String} iconFontPrefix
+     * The CSS class name which will be prepended to the actual
+     * value from the options
+     */
+    iconFontPrefix: null,
+
+    /**
      * Returns the normalized data value. "undefined" or the combo box'
      * {@link CQ.Ext.form.ComboBox#emptyText emptyText} return an empty
      * string (""). Type "checkbox" return always an array even if there is
@@ -395,10 +402,20 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
 
         var defaults = {
             height: "auto",
-            hideMode: "display"
+            hideMode: "display",
+            iconFontPrefix: 'fa'
         };
 
         CQ.Util.applyDefaults(config, defaults);
+
+        if (config.iconFontPrefix === '-') {
+            config.iconFontPrefix = '';
+        } else {
+            if (config.iconFontPrefix.charAt(config.iconFontPrefix.length - 1) !== ' ') {
+                config.iconFontPrefix = config.iconFontPrefix + ' ';
+            }
+        }
+
         CQ.form.CompositeField.superclass.constructor.call(this, config);
 
         this.hiddenField = new CQ.Ext.form.Hidden({ name: this.name });
@@ -440,16 +457,16 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
         ACS.CQ.GraphicIconSelection.superclass.onRender.call(this, ct, pos);
         var t = this.tpl || new CQ.Ext.XTemplate(
             '<div class="graphic-selection-list clearfix image-staging">' +
-                '<tpl for=".">' +
+                '<tpl for="options">' +
                     '<a href="#" class="graphic-selection-item" data-value="{value}" title="{text}">' +
                         '<div class="graphic-selection-image">' +
-                            '<i class="fa {value}"></i>' +
+                            '<i class="{parent.prefix}{value}"></i>' +
                         '</div>' +
                     '</a>' +
                 '</tpl>' +
             '</div>'
         );
-        t.append(this.el, this.options);
+        t.append(this.el, {'options': this.options, 'prefix': this.iconFontPrefix});
 
         var extThis = this,
             jqThis = jQuery(this.getEl().dom),
