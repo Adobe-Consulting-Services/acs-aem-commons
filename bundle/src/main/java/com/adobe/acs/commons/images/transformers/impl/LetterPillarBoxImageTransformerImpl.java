@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
 
 /**
- * ACS AEM Commons - Image Transformer - Letter/Piller Box ImageTransformer that
+ * ACS AEM Commons - Image Transformer - Letter/Pillar Box ImageTransformer that
  * resizes the layer. Accepts two Integer params: height and width. If either is
  * left blank the missing dimension will be computed based on the original
  * layer's aspect ratio. If the newly resized image does not fit into the
@@ -102,7 +102,7 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
     }
 
     /*
-     * Creates the actual piller/letter boxing.
+     * Creates the actual pillar/letter boxing.
      */
     private Layer build(Dimension size, Layer img, Color color) {
 
