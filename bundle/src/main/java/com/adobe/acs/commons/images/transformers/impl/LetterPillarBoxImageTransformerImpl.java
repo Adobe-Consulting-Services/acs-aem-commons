@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,7 +57,7 @@ import com.day.image.Layer;
 public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(LetterPillarBoxImageTransformerImpl.class);
 
-    static final String TYPE = "letter-piller-box";
+    static final String TYPE = "letter-pillar-box";
 
     private static final String KEY_WIDTH = "width";
     private static final String KEY_WIDTH_ALIAS = "w";
@@ -72,6 +72,8 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
     private static final String KEY_COLOR_ALIAS = "c";
 
     private static final Color TRANSPARENT = new Color(255, 255, 255, 0);
+
+    private static final int MAX_ALPHA = 255;
 
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
@@ -108,15 +110,17 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
 
         int startXpos = 0;
         int startYpos = 0;
-        if (img.getHeight() == size.height) {
+        int imgHeight = img.getHeight();
+        int imgWidth = img.getWidth();
+        if (imgHeight == size.height) {
             // Pillar
-            startXpos = calculateStartPosition(size.width, img.getWidth());
-        } else if (img.getWidth() == size.width) {
+            startXpos = calculateStartPosition(size.width, imgWidth);
+        } else if (imgWidth == size.width) {
             // Letter
-            startYpos = calculateStartPosition(size.height, img.getHeight());
+            startYpos = calculateStartPosition(size.height, imgHeight);
         }
 
-        merged.blit(img, startXpos, startYpos, img.getWidth(), img.getHeight(), 0, 0);
+        merged.blit(img, startXpos, startYpos, imgWidth, imgHeight, 0, 0);
         return merged;
     }
 
@@ -128,20 +132,20 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
 
         final Dimension origDimensions = new Dimension(original.getWidth(), original.getHeight());
         final int fixedDimension = getFixedDimension(origDimensions, newDimensions);
-        int newWidth = newDimensions.width;
-        int newHeight = newDimensions.height;
+        float newWidth = newDimensions.width;
+        float newHeight = newDimensions.height;
 
         if (fixedDimension < 0) {
 
             // Height is "fixed", calculate width
-            newWidth = (origDimensions.width * newDimensions.height) / origDimensions.height;
+            newWidth = (origDimensions.width * newDimensions.height) / (float) origDimensions.height;
         } else if (fixedDimension > 0) {
 
             // Width is "fixed", calculate height
-            newHeight = (newDimensions.width * origDimensions.height) / origDimensions.width;
+            newHeight = (newDimensions.width * origDimensions.height) / (float) origDimensions.width;
         }
 
-        original.resize(newWidth, newHeight);
+        original.resize(Math.round(newWidth), Math.round(newHeight));
         return original;
     }
 
@@ -167,35 +171,38 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
 
     private Dimension getResizeDimensions(final ValueMap properties, final Layer layer) {
 
-        int width = properties.get(KEY_WIDTH, properties.get(KEY_WIDTH_ALIAS, 0));
-        int height = properties.get(KEY_HEIGHT, properties.get(KEY_HEIGHT_ALIAS, 0));
+        int targetWidth = properties.get(KEY_WIDTH, properties.get(KEY_WIDTH_ALIAS, 0));
+        int targetHeight = properties.get(KEY_HEIGHT, properties.get(KEY_HEIGHT_ALIAS, 0));
 
-        if (width > maxDimension) {
-            width = maxDimension;
+        int startWidth = layer.getWidth();
+        int startHeight = layer.getHeight();
+
+        if (targetWidth > maxDimension) {
+            targetWidth = maxDimension;
         }
 
-        if (height > maxDimension) {
-            height = maxDimension;
+        if (targetHeight > maxDimension) {
+            targetHeight = maxDimension;
         }
 
-        if ((width < 1) && (height < 1)) {
-            width = layer.getWidth();
-            height = layer.getHeight();
-        } else if (width < 1) {
-            final float aspect = (float) height / layer.getHeight();
-            width = Math.round(layer.getWidth() * aspect);
-        } else if (height < 1) {
-            final float aspect = (float) width / layer.getWidth();
-            height = Math.round(layer.getHeight() * aspect);
+        if ((targetWidth < 1) && (targetHeight < 1)) {
+            targetWidth = startWidth;
+            targetHeight = startHeight;
+        } else if (targetWidth < 1) {
+            final float aspect = (float) targetHeight / startHeight;
+            targetWidth = Math.round(startWidth * aspect);
+        } else if (targetHeight < 1) {
+            final float aspect = (float) targetWidth / startWidth;
+            targetHeight = Math.round(startHeight * aspect);
         }
-        return new Dimension(width, height);
+        return new Dimension(targetWidth, targetHeight);
     }
 
     private Color getColor(final ValueMap properties) {
         String hexcolor = properties.get(KEY_COLOR, properties.get(KEY_COLOR_ALIAS, String.class));
-        float alpha = normalizeAlpha(properties.get(KEY_ALPHA, properties.get(KEY_ALPHA_ALIAS, 0.0)).floatValue());
+        int alpha = normalizeAlpha(properties.get(KEY_ALPHA, properties.get(KEY_ALPHA_ALIAS, 0.0)).floatValue());
 
-        Color color = null;
+        Color color = TRANSPARENT;
         if (hexcolor != null) {
             try {
                 Color parsed = Color.decode("0x" + hexcolor);
@@ -208,14 +215,14 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
         return color;
     }
 
-    private float normalizeAlpha(float alpha) {
+    private int normalizeAlpha(float alpha) {
         if (alpha > 1) {
             alpha = 1f;
         } else if (alpha < 0) {
             alpha = 0f;
         }
 
-        return alpha;
+        return Math.round(alpha * MAX_ALPHA);
     }
 
     private int calculateStartPosition(int originalSize, int newSize) {
