@@ -41,7 +41,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Property(label = "Cache store",
               description = "Cache store which shall be used for caching the response for this request URI. Example -" +
                       " MEM",
-              value = DEFAULT_CACHE_STORE)
+              value = HttpCacheConfigImpl.DEFAULT_CACHE_STORE)
     private static final String PROP_CACHE_STORE = "httpcache.config.cachestore";
     private static final String DEFAULT_CACHE_STORE = "MEM"; // Defaults to memory cache store
     private String cacheStore;
