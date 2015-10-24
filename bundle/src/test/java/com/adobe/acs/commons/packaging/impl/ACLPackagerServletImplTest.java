@@ -214,7 +214,6 @@ public class ACLPackagerServletImplTest {
 
         aclPackagerServlet.doPost(request, response);
         String tmp = response.getOutput().toString();
-        System.out.println(tmp);
         final JSONObject actual = new JSONObject(tmp);
 
         assertEquals("preview", actual.optString("status", "error"));

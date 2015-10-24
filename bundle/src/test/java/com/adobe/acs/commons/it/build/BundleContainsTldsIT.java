@@ -19,12 +19,13 @@
  */
 package com.adobe.acs.commons.it.build;
 
+import org.junit.Test;
+
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class BundleContainsTldsIT {
 
@@ -34,8 +35,7 @@ public class BundleContainsTldsIT {
     public void test() throws Exception {
         String artifactPath = System.getProperty("artifactPath");
         if (artifactPath == null) {
-            System.err
-                    .println("Artifact Path not set, presumably because this test is run from an IDE. Not checking JAR contents.");
+            System.err.println("Artifact Path not set, presumably because this test is run from an IDE. Not checking JAR contents.");//NOPMD
             return;
         }
 

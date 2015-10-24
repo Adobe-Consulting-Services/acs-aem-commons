@@ -182,7 +182,7 @@ public class CMYKJPEGImageReader extends ImageReader {
                 }
             } else if (seg.marker == 0xffee) {
                 // APP14: Application-specific marker segment
-                if (seg.length == 12) {
+                if (seg.length == 12) {//NOPMD
                     DataInputStream dis = new DataInputStream(fifi);
                     // Check for 6-bytes containing the null-terminated string: "Adobe".
                     if (dis.readInt() == 0x41646f62L && dis.readUnsignedShort() == 0x6500) {
@@ -211,7 +211,7 @@ public class CMYKJPEGImageReader extends ImageReader {
                     profile = ICC_Profile.getInstance(new ByteArrayInputStream(app2ICCProfile.toByteArray()));
                 } catch (Throwable ex) {
                     // icc profile is corrupt
-                    ex.printStackTrace();
+                    ex.printStackTrace();//NOPMD
                 }
             }
 

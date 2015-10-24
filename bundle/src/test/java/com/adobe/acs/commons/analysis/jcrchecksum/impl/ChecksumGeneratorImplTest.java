@@ -316,26 +316,25 @@ public class ChecksumGeneratorImplTest {
                 + DigestUtils.shaHex("nt:unstructured"));
         bChecksum = DigestUtils.shaHex("jcr:content/a/b=" + bChecksum);
 
-        System.out.println("jcr:content/a/b Checksum: " + bChecksum);
+        //System.out.println("jcr:content/a/b Checksum: " + bChecksum);
 
         String cChecksum = DigestUtils.shaHex("jcr:content/a/c/jcr:primaryType="
                 + DigestUtils.shaHex("nt:unstructured"));
         cChecksum = DigestUtils.shaHex("jcr:content/a/c=" + cChecksum);
 
-        System.out.println("jcr:content/a/c Checksum: " + cChecksum);
+        //System.out.println("jcr:content/a/c Checksum: " + cChecksum);
 
         String aChecksum = DigestUtils.shaHex("jcr:content/a/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured"))
                 + "jcr:content/a/b=" + bChecksum
                 + "jcr:content/a/c=" + cChecksum;
         aChecksum = DigestUtils.shaHex("jcr:content/a=" + aChecksum);
 
-        System.out.println("jcr:content/a Checksum: " + DigestUtils.shaHex("jcr:content/=" + aChecksum));
-
+        //System.out.println("jcr:content/a Checksum: " + DigestUtils.shaHex("jcr:content/=" + aChecksum));
 
         String jcrContentChecksum = DigestUtils.shaHex("jcr:content/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured"))
                 + "jcr:content/a=" + aChecksum;
 
-        System.out.println("jcrContentChecksum: " + jcrContentChecksum);
+        //System.out.println("jcrContentChecksum: " + jcrContentChecksum);
 
         jcrContentChecksum = DigestUtils.shaHex("jcr:content=" + jcrContentChecksum);
         String expected = jcrContentChecksum;
