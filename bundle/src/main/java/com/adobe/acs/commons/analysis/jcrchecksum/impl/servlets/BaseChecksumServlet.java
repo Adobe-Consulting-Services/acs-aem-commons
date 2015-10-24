@@ -18,13 +18,11 @@
  * #L%
  */
 
-package com.adobe.acs.commons.analysis.jcrchecksum.impl;
+package com.adobe.acs.commons.analysis.jcrchecksum.impl.servlets;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import java.io.IOException;

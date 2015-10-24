@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.analysis.jcrchecksum.impl;
+package com.adobe.acs.commons.analysis.jcrchecksum.impl.servlets;
 
 public final class ServletConstants {
 

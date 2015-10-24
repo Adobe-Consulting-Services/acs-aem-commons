@@ -18,8 +18,9 @@
  * #L%
  */
 
-package com.adobe.acs.commons.analysis.jcrchecksum;
+package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.CustomChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -46,7 +47,9 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ChecksumGeneratorTest {
+public class ChecksumGeneratorImplTest {
+
+    ChecksumGeneratorImpl checksumGenerator = new ChecksumGeneratorImpl();
 
     StringWriter sw;
 
@@ -117,23 +120,23 @@ public class ChecksumGeneratorTest {
     @Test
     public void testGetChecksumKey() {
         String expected = "jcr:content";
-        String actual = ChecksumGenerator.getChecksumKey("/content/page/jcr:content", "/content/page/jcr:content");
+        String actual = checksumGenerator.getChecksumKey("/content/page/jcr:content", "/content/page/jcr:content");
         assertEquals(expected, actual);
 
         expected = "jcr:content/foo";
-        actual = ChecksumGenerator.getChecksumKey("/content/page/jcr:content", "/content/page/jcr:content/foo");
+        actual = checksumGenerator.getChecksumKey("/content/page/jcr:content", "/content/page/jcr:content/foo");
         assertEquals(expected, actual);
 
         expected = "jcr:content/foo/bar";
-        actual = ChecksumGenerator.getChecksumKey("/content/page/jcr:content", "/content/page/jcr:content/foo/bar");
+        actual = checksumGenerator.getChecksumKey("/content/page/jcr:content", "/content/page/jcr:content/foo/bar");
         assertEquals(expected, actual);
 
         expected = "/";
-        actual = ChecksumGenerator.getChecksumKey("/", "/");
+        actual = checksumGenerator.getChecksumKey("/", "/");
         assertEquals(expected, actual);
 
         expected = "/etc/workflow";
-        actual = ChecksumGenerator.getChecksumKey("/", "/etc/workflow");
+        actual = checksumGenerator.getChecksumKey("/", "/etc/workflow");
         assertEquals(expected, actual);
     }
 
@@ -141,7 +144,7 @@ public class ChecksumGeneratorTest {
     public void testHashForCqPageContentNode1() throws IOException, RepositoryException {
         Node page = setupPage1();
 
-        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, "/content");
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content");
 
         assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
                 actual.get("/content/test-page/jcr:content"));
@@ -157,7 +160,7 @@ public class ChecksumGeneratorTest {
         opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
         opts.addExcludedNodeTypes(new String[]{ "nt:unstructured" });
 
-        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, "/content", opts);
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
 
         assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
                 actual.get("/content/test-page/jcr:content"));
@@ -182,7 +185,7 @@ public class ChecksumGeneratorTest {
 
         final String originalJcrContentChecksum = nodeChecksum;
 
-        assertEquals(originalJcrContentChecksum, ChecksumGenerator.generatedNodeChecksum(asset.getPath(), asset.getNode
+        assertEquals(originalJcrContentChecksum, checksumGenerator.generatedNodeChecksum(asset.getPath(), asset.getNode
                 ("renditions/original/jcr:content"), opts));
 
         // jcr:content/renditions/original
@@ -196,7 +199,7 @@ public class ChecksumGeneratorTest {
 
         final String originalChecksum = nodeChecksum;
 
-        assertEquals(originalChecksum, ChecksumGenerator.generatedNodeChecksum(asset.getPath(),
+        assertEquals(originalChecksum, checksumGenerator.generatedNodeChecksum(asset.getPath(),
                 asset.getNode("renditions/original"), opts));
 
 
@@ -208,7 +211,7 @@ public class ChecksumGeneratorTest {
 
         final String renditionsChecksum = nodeChecksum;
 
-        assertEquals(renditionsChecksum, ChecksumGenerator.generatedNodeChecksum(asset.getPath(),
+        assertEquals(renditionsChecksum, checksumGenerator.generatedNodeChecksum(asset.getPath(),
                 asset.getNode("renditions"), opts));
 
         // jcr:content/metadata
@@ -219,7 +222,7 @@ public class ChecksumGeneratorTest {
 
         final String metadataChecksum = nodeChecksum;
 
-        assertEquals(metadataChecksum, ChecksumGenerator.generatedNodeChecksum(asset.getPath(),
+        assertEquals(metadataChecksum, checksumGenerator.generatedNodeChecksum(asset.getPath(),
                 asset.getNode("metadata"), opts));
 
 
@@ -233,11 +236,11 @@ public class ChecksumGeneratorTest {
 
         String jcrContentChecksum = nodeChecksum;
 
-        assertEquals(jcrContentChecksum, ChecksumGenerator.generatedNodeChecksum(asset.getPath(),
+        assertEquals(jcrContentChecksum, checksumGenerator.generatedNodeChecksum(asset.getPath(),
                 asset, opts));
 
 
-        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, "/content", opts);
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
 
         // df5fa249ada79b02d435fe75d28afb6811d54edb
         assertEquals(jcrContentChecksum, actual.get("/content/dam/foo.jpg/jcr:content"));
@@ -260,7 +263,7 @@ public class ChecksumGeneratorTest {
 
         options.addSortedProperties(defaultOptions.getSortedProperties());
 
-        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, "/content", options);
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", options);
 
         // Checksums proven by above tests
         assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f", actual.get(page.getPath()));
@@ -292,7 +295,7 @@ public class ChecksumGeneratorTest {
         opts.addSortedProperties(new String[]{ "sorted" });
         opts.addIncludedNodeTypes(new String[]{ "nt:unstructured" });
 
-        Map<String, String> actual = ChecksumGenerator.generateChecksum(session, node.getPath(), opts);
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, node.getPath(), opts);
 
         assertEquals(expected, actual.get("/page/jcr:content"));
     }
@@ -341,11 +344,11 @@ public class ChecksumGeneratorTest {
         opts.addIncludedNodeTypes(new String[]{ "nt:unstructured" });
 
         // A checksum
-        assertEquals(bChecksum, ChecksumGenerator.generatedNodeChecksum(node.getPath(), a.getNode("b"), opts));
-        assertEquals(cChecksum, ChecksumGenerator.generatedNodeChecksum(node.getPath(), a.getNode("c"), opts));
-        assertEquals(aChecksum, ChecksumGenerator.generatedNodeChecksum(node.getPath(), a, opts));
+        assertEquals(bChecksum, checksumGenerator.generatedNodeChecksum(node.getPath(), a.getNode("b"), opts));
+        assertEquals(cChecksum, checksumGenerator.generatedNodeChecksum(node.getPath(), a.getNode("c"), opts));
+        assertEquals(aChecksum, checksumGenerator.generatedNodeChecksum(node.getPath(), a, opts));
 
-        Map<String, String> actual = ChecksumGenerator.generateChecksum(node.getSession(), node.getPath(), opts);
+        Map<String, String> actual = checksumGenerator.generateChecksums(node.getSession(), node.getPath(), opts);
         assertEquals(expected, actual.get(node.getPath()));
     }
 
@@ -381,7 +384,7 @@ public class ChecksumGeneratorTest {
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
         opts.addSortedProperties(new String[]{ "sorted" });
 
-        String actual = ChecksumGenerator.generatePropertyChecksums(node.getPath(), node, opts);
+        String actual = checksumGenerator.generatePropertyChecksums(node.getPath(), node, opts);
 
         assertEquals(expected, actual);
     }
@@ -417,7 +420,7 @@ public class ChecksumGeneratorTest {
         opts.addSortedProperties(new String[]{ "sorted" });
         opts.addExcludedProperties(new String[]{ "jcr:description", "long" });
 
-        String actual = ChecksumGenerator.generatePropertyChecksums(node.getPath(), node, opts);
+        String actual = checksumGenerator.generatePropertyChecksums(node.getPath(), node, opts);
 
         assertEquals(expected, actual);
     }
@@ -429,7 +432,7 @@ public class ChecksumGeneratorTest {
         checksums.put("jcr:content/bar", "5678,9012");
 
         String expected = DigestUtils.shaHex("jcr:content/foo=1234jcr:content/bar=5678,9012");
-        String actual = ChecksumGenerator.aggregateChecksums(checksums);
+        String actual = checksumGenerator.aggregateChecksums(checksums);
 
         assertEquals(expected, actual);
     }
