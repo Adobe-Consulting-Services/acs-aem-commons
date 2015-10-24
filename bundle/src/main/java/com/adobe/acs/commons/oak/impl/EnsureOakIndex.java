@@ -94,6 +94,9 @@ public class EnsureOakIndex {
     private AemCapabilityHelper capabilityHelper;
 
     @Reference
+    private ChecksumGenerator checksumGenerator;
+
+    @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
     private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
@@ -382,7 +385,7 @@ public class EnsureOakIndex {
         ensureDefinitionOptions.addExcludedProperties(IGNORE_PROPERTIES);
 
         final Map<String, String> srcChecksum =
-                ChecksumGenerator.generateChecksum(session, ensureDefinition.getPath(), ensureDefinitionOptions);
+                checksumGenerator.generateChecksums(session, ensureDefinition.getPath(), ensureDefinitionOptions);
 
         // Compile checksum for the oakIndex node system
         final CustomChecksumGeneratorOptions oakIndexOptions = new CustomChecksumGeneratorOptions();
@@ -390,7 +393,7 @@ public class EnsureOakIndex {
         oakIndexOptions.addExcludedProperties(IGNORE_PROPERTIES);
 
         final Map<String, String> destChecksum =
-                ChecksumGenerator.generateChecksum(session, oakIndex.getPath(), oakIndexOptions);
+                checksumGenerator.generateChecksums(session, oakIndex.getPath(), oakIndexOptions);
 
         // Compare checksums
         return !StringUtils.equals(srcChecksum.get(ensureDefinition.getPath()), destChecksum.get(oakIndex.getPath()));
