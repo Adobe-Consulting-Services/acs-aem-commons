@@ -6,6 +6,8 @@ import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import org.apache.felix.scr.annotations.*;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +133,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      * @param config
      */
     protected void bindCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule,
-                                  final Map<String, Object> config) {
+                                         final Map<String, Object> config) {
         cacheHandlingRules.add(cacheHandlingRule);
         log.debug("Cache handling rule implementation {} has been added", cacheHandlingRule.getClass().getName());
         log.debug("Total number of cache handling rule available after addition - {}", cacheHandlingRules.size());
@@ -144,14 +146,13 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      * @param config
      */
     protected void unbindCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule,
-                                    final Map<String, Object> config) {
+                                           final Map<String, Object> config) {
         if (cacheHandlingRules.contains(cacheHandlingRule)) {
             cacheHandlingRules.remove(cacheHandlingRule);
         }
         log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
         log.debug("Total number of cache handling rules available after removal - {}", cacheHandlingRules.size());
     }
-
     @Activate
     protected void activate(Map<String, Object> configs) {
         log.info("HttpCacheEngineImpl activated.");
@@ -160,5 +161,46 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     @Deactivate
     protected void deactivate(Map<String, Object> configs) {
         log.info("HttpCacheEngineImpl deactivated.");
+    }
+
+    //-----------------------<Interface specific implementation>--------//
+    @Override
+    public boolean isRequestCacheable(SlingHttpServletRequest request) {
+        return false;
+    }
+
+    @Override
+    public boolean isCacheHit(SlingHttpServletRequest request) {
+        return false;
+    }
+
+    @Override
+    public void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+
+    }
+
+    @Override
+    public void markResponseCacheable(SlingHttpServletResponse response) {
+
+    }
+
+    @Override
+    public boolean validateCacheableResponse(SlingHttpServletResponse response) {
+        return false;
+    }
+
+    @Override
+    public boolean cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        return false;
+    }
+
+    @Override
+    public boolean isPathPotentialToInvalidate(String path) {
+        return false;
+    }
+
+    @Override
+    public boolean invalidateCache(String path) {
+        return false;
     }
 }

@@ -43,7 +43,7 @@ public class HttpCacheFilter implements Filter {
             ServletException {
         final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
         final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
-
+        log.trace("In HttpCache filter.");
         dealWithRequest(slingRequest, response);
         chain.doFilter(request, response);
         dealwithResponse(request, slingResponse);
