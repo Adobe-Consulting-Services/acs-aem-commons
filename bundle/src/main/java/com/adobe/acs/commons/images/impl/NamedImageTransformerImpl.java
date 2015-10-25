@@ -20,15 +20,15 @@
 
 package com.adobe.acs.commons.images.impl;
 
-import com.adobe.acs.commons.images.ImageTransformer;
-import com.adobe.acs.commons.images.NamedImageTransformer;
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.adobe.acs.commons.util.TypeUtil;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.day.image.Layer;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -39,11 +39,14 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.adobe.acs.commons.images.ImageTransformer;
+import com.adobe.acs.commons.images.NamedImageTransformer;
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.adobe.acs.commons.util.TypeUtil;
+import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.day.image.Layer;
 
+//@formatter:off
 @Component(
         label = "ACS AEM Commons - Named Image Transformer Factory",
         description = "Instances of this factory define registered Named Image transformers which are comprised of "
@@ -58,6 +61,12 @@ import java.util.Map;
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
 )
 @Service
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Transformer Name: {name}")
+})
+//@formatter:on
 public class NamedImageTransformerImpl implements NamedImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(NamedImageTransformerImpl.class);
 
@@ -69,9 +78,7 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
     /* Transformer Configuration Name */
     private static final String DEFAULT_TRANSFORM_NAME = "";
 
-    @Property(label = "Transform Name",
-            description = "Name of Transform.",
-            value = "")
+    @Property(label = "Transform Name", description = "Name of Transform.", value = "")
     private static final String PROP_NAME = "name";
 
     private String transformName = DEFAULT_TRANSFORM_NAME;
@@ -80,20 +87,19 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
     @Property(label = "Image Transformers",
             description = "Transform in the format [ image-transformer-type:key1=val1&key2=val2 ]"
                     + " Order of transform rules dictates order of application.",
-            cardinality = Integer.MAX_VALUE,
-            value = { })
+            cardinality = Integer.MAX_VALUE, value = {})
     private static final String PROP_TRANSFORMS = "transforms";
 
-    private Map<String, ValueMap> transforms =
-            Collections.synchronizedMap(new LinkedHashMap<String, ValueMap>());
+    private Map<String, ValueMap> transforms = Collections.synchronizedMap(new LinkedHashMap<String, ValueMap>());
 
     /**
      * @inheritDoc
      */
+    @Override
     public final Layer transform(Layer layer) {
 
-        for (final Map.Entry<String, ValueMap> entry : this.transforms.entrySet()) {
-            final ImageTransformer imageTransformer = this.imageTransformers.get(entry.getKey());
+        for (final Map.Entry<String, ValueMap> entry : transforms.entrySet()) {
+            final ImageTransformer imageTransformer = imageTransformers.get(entry.getKey());
             if (imageTransformer == null) {
                 log.warn("Skipping transform. Missing ImageTransformer for type: {}");
                 continue;
@@ -111,22 +117,22 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
      */
     @Override
     public String getTransformName() {
-        return this.transformName;
+        return transformName;
     }
 
+    @Override
     public final Map<String, ValueMap> getImageTransforms() {
-        return this.transforms;
+        return transforms;
     }
 
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
-        this.transformName = PropertiesUtil.toString(properties.get(PROP_NAME), DEFAULT_TRANSFORM_NAME);
+        transformName = PropertiesUtil.toString(properties.get(PROP_NAME), DEFAULT_TRANSFORM_NAME);
 
-        log.info("Registering Named Image Transformer: {}", this.transformName);
+        log.info("Registering Named Image Transformer: {}", transformName);
 
-        final Map<String, String> map = ParameterUtil.toMap(PropertiesUtil.toStringArray(
-                properties.get(PROP_TRANSFORMS), new String[]{}), ":", true, null);
-
+        final Map<String, String> map = ParameterUtil
+                .toMap(PropertiesUtil.toStringArray(properties.get(PROP_TRANSFORMS), new String[] {}), ":", true, null);
 
         for (final Map.Entry<String, String> entry : map.entrySet()) {
             final String[] params = StringUtils.split(entry.getValue(), "&");
@@ -135,11 +141,11 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
             log.debug("ImageTransform params for [ {} ] ~> {}", entry.getKey(), values);
 
             // Order matters so use a LinkedHashMap
-            this.transforms.put(entry.getKey(), TypeUtil.toValueMap(values));
+            transforms.put(entry.getKey(), TypeUtil.toValueMap(values));
         }
 
-        log.info("Named Images Transforms: {}", this.transforms.size());
-        for (final Map.Entry<String, ValueMap> entry : this.transforms.entrySet()) {
+        log.info("Named Images Transforms: {}", transforms.size());
+        for (final Map.Entry<String, ValueMap> entry : transforms.entrySet()) {
             log.info("{} ~> {}", entry.getKey(), entry.getValue());
         }
     }
