@@ -46,7 +46,6 @@ import com.adobe.acs.commons.util.TypeUtil;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.image.Layer;
 
-//@formatter:off
 @Component(
         label = "ACS AEM Commons - Named Image Transformer Factory",
         description = "Instances of this factory define registered Named Image transformers which are comprised of "
@@ -64,9 +63,8 @@ import com.day.image.Layer;
 @Properties({
     @Property(
             name = "webconsole.configurationFactory.nameHint",
-            value = "Transformer Name: {name}")
+            value = "Transformer: {name}")
 })
-//@formatter:on
 public class NamedImageTransformerImpl implements NamedImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(NamedImageTransformerImpl.class);
 
