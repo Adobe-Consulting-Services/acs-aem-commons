@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.logging.impl;
 
 import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.jackrabbit.util.ISO8601;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
