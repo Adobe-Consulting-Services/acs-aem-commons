@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.images.transformers.impl;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
