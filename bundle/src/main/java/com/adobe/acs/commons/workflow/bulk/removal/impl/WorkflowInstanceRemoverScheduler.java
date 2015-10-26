@@ -138,7 +138,9 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
                     olderThan, 
                     batchSize);
 
-            log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);
+            if (log.isInfoEnabled()) {
+                log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);
+            }
 
         } catch (LoginException e) {
             log.error("Login Exception when getting admin resource resolver", e);
