@@ -44,7 +44,7 @@ import ch.qos.logback.core.Appender;
 @Properties({
     @Property(
             name = "webconsole.configurationFactory.nameHint",
-            value = "Host: {host}, for loggers {{loggers}]")
+            value = "Host: {host}, for loggers [{loggers}]")
 })
 public final class SyslogAppender {
 
