@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -50,13 +51,17 @@ import java.util.Map;
         metatype = true,
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
-
-@Property(
-        label = "Rewriter Pipeline Type",
-        description = "Type identifier to be referenced in rewriter pipeline configuration.",
-        name = "pipeline.type",
-        value = "resourceresolver-map",
-        propertyPrivate = true)
+@Properties({ 
+    @Property(
+            label = "Rewriter Pipeline Type",
+            description = "Type identifier to be referenced in rewriter pipeline configuration.",
+            name = "pipeline.type",
+            value = "resourceresolver-map",
+            propertyPrivate = true),
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Pipeline Type: {pipeline.type}, for element:attributes [{attributes}]")
+})
 @Service
 public final class ResourceResolverMapTransformerFactory implements TransformerFactory {
 
