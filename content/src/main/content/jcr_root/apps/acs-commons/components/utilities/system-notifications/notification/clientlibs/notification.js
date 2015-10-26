@@ -71,6 +71,4 @@ $(function() {
         
         return null;
     } 
-    
-    
 });

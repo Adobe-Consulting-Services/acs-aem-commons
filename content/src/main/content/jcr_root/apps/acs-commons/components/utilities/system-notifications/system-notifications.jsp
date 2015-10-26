@@ -1,16 +1,11 @@
 <%@ page session="false" contentType="text/html" pageEncoding="utf-8"
-         import="com.day.cq.i18n.I18n,
-                 org.apache.sling.api.resource.Resource,
-                 org.apache.sling.api.resource.ResourceUtil,
-                 org.apache.sling.api.resource.ValueMap, java.text.SimpleDateFormat, java.util.Date" %>
-<%
-%>
-<%@include file="/libs/foundation/global.jsp" %>
-<%
-%>
-<%@taglib prefix="ui" uri="http://www.adobe.com/taglibs/granite/ui/1.0" %>
-<%
-
+         import="com.day.cq.i18n.I18n, 
+         java.text.SimpleDateFormat,
+         java.util.Date" %><%
+%><%@include file="/libs/foundation/global.jsp" %><%
+%><%@taglib prefix="ui" uri="http://www.adobe.com/taglibs/granite/ui/1.0" %><%
+%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
+    
     // 2015-10-22 03:03
     final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
     SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
@@ -28,9 +23,8 @@
         pageContext.setAttribute("offTime", sdf.format(offTime));
     }
     
-    pageContext.setAttribute("color", properties.get("color", "yellow"));
+    pageContext.setAttribute("style", properties.get("style", "yellow"));
     pageContext.setAttribute("dismissible", properties.get("dismissible", "true"));
-
 
 %><!DOCTYPE html>
 <html class="coral-App">
@@ -93,13 +87,13 @@
             </div>
 
             <div class="acsCommons-System-Notifications-Form-row">
-                <label class="coral-Form-fieldlabel">Color</label>
+                <label class="coral-Form-fieldlabel">Style</label>
                 <div>
                     <span class="coral-Select" data-init="select">
                       <button type="button" class="coral-Select-button coral-MinimalButton">
                           <span class="coral-Select-button-text">Select a color</span>
                       </button>
-                      <select class="coral-Select-select" name="./color">
+                      <select class="coral-Select-select" name="./style">
                           <option value="green" ${color eq "green" ? "selected" : ""}>Green</option>
                           <option value="blue" ${color eq "blue" ? "selected" : ""}>Blue</option>
                           <option value="yellow" ${color eq "yellow" ? "selected" : ""}>Yellow</option>
@@ -114,7 +108,7 @@
                 <input type="text"
                        class="coral-Textfield acsCommons-System-Notifications-Page-input--text"
                        name="./jcr:title"
-                       value="${properties["jcr:title"]}"/>
+                       value="${xss:encodeForHTML(xssAPI, properties["jcr:title"])}"/>
             </div>
 
             <div class="acsCommons-System-Notifications-Form-row">
@@ -122,7 +116,7 @@
                 <textarea
                         class="coral-Textfield coral-Textfield--multiline acsCommons-System-Notifications-Page-input--textarea"
                         rows="6"
-                        name="./jcr:description">${properties["jcr:description"]}</textarea>
+                        name="./jcr:description">${xss:encodeForHTML(xssAPI, properties["jcr:description"])}</textarea>
             </div>
 
 
@@ -145,7 +139,7 @@
                              data-displayed-format="llll"
                              data-stored-format="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
                              data-init="datepicker">
-                            <input class="coral-InputGroup-input coral-Textfield" value="${onTime}" type="datetime"
+                            <input class="coral-InputGroup-input coral-Textfield" value="${xss:encodeForHTMLAttr(xssAPI, onTime)}" type="datetime"
                                    name="./onTime"/>
                             <span class="coral-InputGroup-button">
                                 <button class="coral-Button coral-Button--secondary coral-Button--square" type="button"
@@ -157,7 +151,6 @@
                     </div>
                 </div>
 
-
                 <div style="width:50%; float: left;">
                     <label class="coral-Form-fieldlabel">Off Time</label>
 
@@ -166,7 +159,7 @@
                              data-displayed-format="llll"
                              data-stored-format="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
                              data-init="datepicker">
-                            <input class="coral-InputGroup-input coral-Textfield" value="${offTime}" type="datetime"
+                            <input class="coral-InputGroup-input coral-Textfield" value="${xss:encodeForHTMLAttr(xssAPI, offTime)}" type="datetime"
                                    name="./offTime"/>
                             <span class="coral-InputGroup-button">
                                 <button class="coral-Button coral-Button--secondary coral-Button--square" type="button"

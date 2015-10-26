@@ -23,7 +23,6 @@ package com.adobe.acs.commons.wcm.notifications.impl;
 import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
 import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
 import com.adobe.acs.commons.util.CookieUtil;
-import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -132,6 +131,14 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             return message;
         }
         
+        message = StringUtils.trimToEmpty(message);
+
+        boolean allowHTML = false;
+        if (StringUtils.startsWith(message, "html:")) {
+            allowHTML = true;
+            message = StringUtils.removeStart(message, "html:");
+        }
+        
         if (onTime != null) {
             message = StringUtils.replace(message, "{{ onTime }}", onTime);
         }
@@ -140,7 +147,9 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             message = StringUtils.replace(message, "{{ offTime }}", offTime);
         }
         
-        message = message.replaceAll("(\r\n|\n)", "<br />");
+        if (!allowHTML) {
+            message = message.replaceAll("(\r\n|\n)", "<br />");
+        }
 
         return message;
     }

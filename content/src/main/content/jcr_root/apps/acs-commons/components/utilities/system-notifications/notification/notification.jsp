@@ -17,8 +17,7 @@
   ~ limitations under the License.
   ~ #L%
   --%><%
-%><%@ page import="java.util.Calendar, 
-        com.adobe.acs.commons.wcm.notifications.SystemNotifications, 
+%><%@ page import="com.adobe.acs.commons.wcm.notifications.SystemNotifications,
         java.text.SimpleDateFormat, 
         java.util.Date" %><%
 %><%@include file="/libs/foundation/global.jsp"%><%
@@ -32,7 +31,7 @@
     String notificationId = systemNotifications.getNotificationId(pageManager.getContainingPage(resource));
     
     pageContext.setAttribute("title", xssAPI.encodeForHTML(properties.get("jcr:title", String.class)));
-    pageContext.setAttribute("color", xssAPI.encodeForHTMLAttr(properties.get("color", "yellow")));
+    pageContext.setAttribute("style", xssAPI.encodeForHTMLAttr(properties.get("style", "yellow")));
     pageContext.setAttribute("uid", xssAPI.encodeForHTMLAttr(notificationId));
 
     Date onTime = properties.get("onTime", Date.class);
@@ -54,7 +53,7 @@
     
     pageContext.setAttribute("dismissible", properties.get("dismissible", true));
 
-%><div class="acsCommons-System-Notification acsCommons-System-Notification--${color}"
+%><div class="acsCommons-System-Notification acsCommons-System-Notification--${style}"
        data-dismissible="${dismissible}"
        data-uid="${uid}">
     <a href="#" class="acsCommons-System-Notification-dismiss">Dismiss</a>
