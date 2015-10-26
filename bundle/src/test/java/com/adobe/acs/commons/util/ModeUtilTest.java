@@ -117,6 +117,24 @@ public class ModeUtilTest {
     }
 
     @Test
+    public void testIsAnalytics() throws Exception {
+        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.ANALYTICS);
+        assertTrue(ModeUtil.isAnalytics(request));
+        PowerMockito.verifyStatic();
+        WCMMode.fromRequest(request);
+        verifyNoMoreInteractions(request);
+    }
+
+    @Test
+    public void testIsNotAnalytics() throws Exception {
+        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.EDIT);
+        assertFalse(ModeUtil.isAnalytics(request));
+        PowerMockito.verifyStatic();
+        WCMMode.fromRequest(request);
+        verifyNoMoreInteractions(request);
+    }
+
+    @Test
     public void testIsDesign() throws Exception {
         when(WCMMode.fromRequest(request)).thenReturn(WCMMode.DESIGN);
         assertTrue(ModeUtil.isDesign(request));

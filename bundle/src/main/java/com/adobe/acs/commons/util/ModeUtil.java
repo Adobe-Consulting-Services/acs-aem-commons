@@ -85,6 +85,17 @@ public final class ModeUtil {
     }
 
     /**
+     * Checks if the request is in mode {@link WCMMode#ANALYTICS}
+     * 
+     * @param request
+     *            request to check
+     * @return true if the request is in analytics mode
+     */
+    public static boolean isAnalytics(SlingHttpServletRequest request) {
+        return WCMMode.ANALYTICS == WCMMode.fromRequest(request);
+    }
+
+    /**
      * Checks if the request is in mode {@link WCMMode#DESIGN}
      * 
      * @param request
