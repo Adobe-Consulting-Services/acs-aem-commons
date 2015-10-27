@@ -36,14 +36,8 @@ import com.day.cq.wcm.api.WCMMode;
 
 import aQute.bnd.annotation.ProviderType;
 
-//@formatter:off
 @ProviderType
-@Component(
-        immediate = true, 
-        enabled = true, 
-        label = "ACS AEM Commons - Mode Utilities", 
-        description = "Helper methods for determining system modes.")
-//@formatter:on
+@Component(immediate = true)
 public final class ModeUtil {
 
     private static boolean isAuthor = false;
