@@ -197,8 +197,6 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
     }
 
     public final class PropertyNamespaceUpdater extends AbstractJSONObjectVisitor {
-        private final Logger log = LoggerFactory.getLogger(PropertyNamespaceUpdater.class);
-
         private final String namespace;
 
         private static final String DOT_SLASH = "./";

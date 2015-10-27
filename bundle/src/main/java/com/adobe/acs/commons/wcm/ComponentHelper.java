@@ -51,7 +51,7 @@ public interface ComponentHelper {
     /**
      * Checks if Page equals in WCM Mode EDIT.
      *
-     * @deprecated use {@link ModeUtil#isEdit(SlingHttpServletRequest)
+     * @deprecated use {@link ModeUtil#isEdit(SlingHttpServletRequest)}
      * @return true if current request equals in EDIT mode.
      */
     @Deprecated
