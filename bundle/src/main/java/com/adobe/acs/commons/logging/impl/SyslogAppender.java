@@ -26,6 +26,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
 import ch.qos.logback.core.net.SyslogAppenderBase;
@@ -40,6 +41,11 @@ import ch.qos.logback.core.Appender;
 @Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
         label = "ACS AEM Commons - Syslog Appender",
         description = "Logback appender to send messages using Syslog")
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Host: {host}, for loggers [{loggers}]")
+})
 public final class SyslogAppender {
 
     private static final String ROOT = "ROOT";

@@ -62,6 +62,9 @@ import java.util.regex.Pattern;
                 boolValue = false,
                 propertyPrivate = true
         ),
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]")
 })
 @Service
 public class WorkflowInstanceRemoverScheduler implements Runnable {

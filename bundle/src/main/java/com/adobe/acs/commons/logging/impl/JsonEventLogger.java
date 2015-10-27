@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.logging.impl;
 
 import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.jackrabbit.util.ISO8601;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
@@ -42,6 +43,11 @@ import java.util.*;
 @Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
     label = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
 @SuppressWarnings("PMD.MoreThanOneLogger")
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Logger: {event.logger.category} for events matching '{event.filter}'")
+})
 public class JsonEventLogger implements EventHandler {
 
     /**

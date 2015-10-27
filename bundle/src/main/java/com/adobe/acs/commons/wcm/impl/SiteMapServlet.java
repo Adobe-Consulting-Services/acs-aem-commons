@@ -54,7 +54,11 @@ import com.day.cq.wcm.api.PageManager;
         label = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components."),
         @Property(name = "sling.servlet.selectors", value = "sitemap", propertyPrivate = true),
         @Property(name = "sling.servlet.extensions", value = "xml", propertyPrivate = true),
-        @Property(name = "sling.servlet.methods", value = "GET", propertyPrivate = true) })
+        @Property(name = "sling.servlet.methods", value = "GET", propertyPrivate = true),
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Site Map for: {externalizer.domain}, on resource types: [{sling.servlet.resourceTypes}]")
+})
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final String DEFAULT_EXTERNALIZER_DOMAIN = "publish";
