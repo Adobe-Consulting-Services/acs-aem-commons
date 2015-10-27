@@ -31,7 +31,7 @@
     String notificationId = systemNotifications.getNotificationId(pageManager.getContainingPage(resource));
     
     pageContext.setAttribute("title", xssAPI.encodeForHTML(properties.get("jcr:title", String.class)));
-    pageContext.setAttribute("style", xssAPI.encodeForHTMLAttr(properties.get("style", "yellow")));
+    pageContext.setAttribute("style", xssAPI.encodeForHTMLAttr(properties.get("style", "green")));
     pageContext.setAttribute("uid", xssAPI.encodeForHTMLAttr(notificationId));
 
     Date onTime = properties.get("onTime", Date.class);

@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
 
 public abstract class AbstractHtmlRequestInjector implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AbstractHtmlRequestInjector.class);
@@ -155,7 +154,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
 
         filterProps.put("service.ranking", String.valueOf(ranking));
         filterProps.put("sling.filter.scope", "REQUEST");
-        //filterProps.put("sling.filter.pattern", StringUtils.defaultIfEmpty(pattern, ".*"));
+        filterProps.put("sling.filter.pattern", StringUtils.defaultIfEmpty(pattern, ".*"));
         filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
     }
 
