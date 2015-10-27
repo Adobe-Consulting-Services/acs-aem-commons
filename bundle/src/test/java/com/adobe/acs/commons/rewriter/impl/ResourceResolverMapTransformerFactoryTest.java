@@ -43,6 +43,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -96,5 +97,31 @@ public class ResourceResolverMapTransformerFactoryTest extends TestCase {
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("/en/jcr:content/img.png", out.getValue(0));
+    }
+
+    @Test
+    public void testRebuildAttributes_NegativeScenario() throws Exception {
+        final Map<String, Object> config = new HashMap<String, Object>();
+        config.put("attributes", new String[]{"img:src"});
+
+        ResourceResolverMapTransformerFactory factory = new ResourceResolverMapTransformerFactory();
+
+        factory.activate(config);
+        Transformer transformer = factory.createTransformer();
+        transformer.init(processingContext, null);
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "data-uri", null, "CDATA", "/img.png");
+
+        /* Execute */
+
+        transformer.startElement(null, "img", null, in);
+        
+        /* Verify */
+
+        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+                attributesCaptor.capture());
+        verifyZeroInteractions(resourceResolver);
     }
 }
