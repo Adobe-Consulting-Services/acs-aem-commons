@@ -18,8 +18,19 @@
  * #L%
  */
 $(document).on('cui-contentloaded.data-api', function (e) {
-    $('[data-init~=graphiciconselect] > select').fontIconPicker({
-        'theme' : 'fip-coral',
-        'classValuePrefix' : 'fa '
+    $('[data-init~=graphiciconselect] > select').each(function(idx, el) {
+        var $el = $(el),
+            prefix = $el.parent().data("icon-font-prefix") || 'fa ';
+        if (prefix === '-') {
+            prefix = '';
+        } else {
+            if (prefix.charAt(prefix.length - 1) !== ' ') {
+                prefix = prefix + ' ';
+            }
+        }
+        $el.fontIconPicker({
+            'theme' : 'fip-coral',
+            'classValuePrefix' : prefix
+        });
     });
 });
