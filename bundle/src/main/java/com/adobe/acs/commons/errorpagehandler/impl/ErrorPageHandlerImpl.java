@@ -514,18 +514,16 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         }
 
         // If the resource exists, then use it!
-        if (resource != null && !ResourceUtil.isNonExistingResource(resource)) {
+        if (!ResourceUtil.isNonExistingResource(resource)) {
             log.debug("Found real aggregate resource at [ {} }", resource.getPath());
             return resource;
         }
 
         // Quick check for the Parent; Handles common case of deactivated pages
-        if (resource != null) {
-            final Resource parent = resource.getParent();
-            if (parent != null) {
-                log.debug("Found real aggregate resource via getParent() at [ {} ]", parent.getPath());
-                return parent;
-            }
+        final Resource parent = resource.getParent();
+        if (parent != null) {
+            log.debug("Found real aggregate resource via getParent() at [ {} ]", parent.getPath());
+            return parent;
         }
 
         // Start checking the path until the first real ancestor is found

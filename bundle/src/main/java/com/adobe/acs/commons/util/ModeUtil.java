@@ -35,9 +35,11 @@ import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.WCMMode;
 
 import aQute.bnd.annotation.ProviderType;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @ProviderType
 @Component(immediate = true)
+@SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
 public final class ModeUtil {
 
     private static boolean isAuthor = false;

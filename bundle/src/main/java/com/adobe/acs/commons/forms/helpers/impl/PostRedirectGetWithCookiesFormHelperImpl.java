@@ -94,13 +94,15 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
         final String cookieName = getGetLookupKey(formName);
         final Cookie cookie = CookieUtil.getCookie(request, cookieName);
 
+        String data = "";
         if (response != null && cookie != null) {
             CookieUtil.dropCookies(request, response, ROOT_COOKIE_PATH, cookieName);
+            // Get the QP lookup for this form
+            data = this.decode(cookie.getValue());
         } else {
             log.warn("SlingHttpServletResponse required for removing cookie. Please use formHelper.getForm({}, slingRequest, slingResponse);", formName);
         }
-        // Get the QP lookup for this form
-        return this.decode(cookie.getValue());
+        return data;
     }
 
     @Override

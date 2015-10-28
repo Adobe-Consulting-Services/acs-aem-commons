@@ -116,7 +116,6 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         }
 
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
-        final HttpServletResponse response = (HttpServletResponse) servletResponse;
         
         if (!StringUtils.equalsIgnoreCase("get", request.getMethod())) {
             // Only inject on GET requests
