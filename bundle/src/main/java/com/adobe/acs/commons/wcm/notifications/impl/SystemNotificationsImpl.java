@@ -66,14 +66,19 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     private static final String INJECT_TEXT =
             "<script>"
                     + "if(window === top) {"
-                    + "   window.jQuery || document.write('<script src=\"/etc/clientlibs/granite/jquery.js\"><\\/script>');"
-                    + "   document.write('<script src=\"/apps/acs-commons/components/utilities/system-notifications/notification/clientlibs.js\"><\\/script>');"
+                    + "   window.jQuery || document.write('<script src=\"%s\"><\\/script>');"
+                    + "   document.write('<script src=\"%s\"><\\/script>');"
                     + "}"
                     + "</script>";
 
     @Override
     protected void inject(HttpServletRequest servletRequest, HttpServletResponse servletResponse, PrintWriter printWriter) {
-        printWriter.println(INJECT_TEXT);
+        final String jquerySrc = servletRequest.getContextPath()
+                + "/etc/clientlibs/granite/jquery.js";
+        final String notificationsSrc = servletRequest.getContextPath()
+                + "/apps/acs-commons/components/utilities/system-notifications/notification/clientlibs.js";
+
+        printWriter.println(String.format(INJECT_TEXT, jquerySrc, notificationsSrc));
     }
 
     @Override
