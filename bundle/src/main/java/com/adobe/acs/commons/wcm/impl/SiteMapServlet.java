@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -38,6 +40,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
@@ -60,12 +63,28 @@ import com.day.cq.wcm.api.PageManager;
                 value = "Site Map for: {externalizer.domain}, on resource types: [{sling.servlet.resourceTypes}]")
 })
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
+    
+    private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd");
+
+    private static final boolean DEFAULT_INCLUDE_LAST_MODIFIED = false;
 
     private static final String DEFAULT_EXTERNALIZER_DOMAIN = "publish";
 
     @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain",
             description = "Must correspond to a configuration of the Externalizer component.")
     private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
+
+    @Property(boolValue = DEFAULT_INCLUDE_LAST_MODIFIED, label = "Include Last Modified",
+            description = "If true, the last modified value will be included in the sitemap.")
+    private static final String PROP_INCLUDE_LAST_MODIFIED = "include.lastmod";
+
+    @Property(label = "Change Frequency Properties",
+            description = "The set of JCR property names which will contain the change frequency value.")
+    private static final String PROP_CHANGE_FREQUENCY_PROPERTIES = "changefreq.properties";
+
+    @Property(label = "Priority Properties",
+            description = "The set of JCR property names which will contain the priority value.")
+    private static final String PROP_PRIORITY_PROPERTIES = "priority.properties";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
@@ -74,10 +93,19 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private String externalizerDomain;
 
+    private boolean includeLastModified;
+
+    private String[] changefreqProperties;
+
+    private String[] priorityProperties;
+
     @Activate
     protected void activate(Map<String, Object> properties) {
         this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
                 DEFAULT_EXTERNALIZER_DOMAIN);
+        this.includeLastModified = PropertiesUtil.toBoolean(properties.get(PROP_INCLUDE_LAST_MODIFIED), DEFAULT_INCLUDE_LAST_MODIFIED);
+        this.changefreqProperties = PropertiesUtil.toStringArray(properties.get(PROP_CHANGE_FREQUENCY_PROPERTIES), new String[0]);
+        this.priorityProperties = PropertiesUtil.toStringArray(properties.get(PROP_PRIORITY_PROPERTIES), new String[0]);
     }
 
     @Override
@@ -114,14 +142,39 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
         stream.writeStartElement(NS, "url");
 
-        stream.writeStartElement(NS, "loc");
 
         String loc = externalizer.externalLink(resolver, externalizerDomain,
                 String.format("%s.html", page.getPath()));
-        stream.writeCharacters(loc);
+        writeElement(stream, "loc", loc);
+
+        if (includeLastModified) {
+            Calendar cal = page.getLastModified();
+            if (cal != null) {
+                writeElement(stream, "lastmod", DATE_FORMAT.format(cal));
+            }
+        }
+
+        final ValueMap properties = page.getProperties();
+        writeFirstPropertyValue(stream, "changefreq", changefreqProperties, properties);
+        writeFirstPropertyValue(stream, "priority", priorityProperties, properties);
 
         stream.writeEndElement();
+    }
 
+    private void writeFirstPropertyValue(final XMLStreamWriter stream, final String elementName, final String[] propertyNames,
+            final ValueMap properties) throws XMLStreamException {
+        for (String prop : propertyNames) {
+            String value = properties.get(prop, String.class);
+            if (value != null) {
+                writeElement(stream, elementName, value);
+                break;
+            }
+        }
+    }
+
+    private void writeElement(final XMLStreamWriter stream, final String elementName, final String text) throws XMLStreamException {
+        stream.writeStartElement(NS, elementName);
+        stream.writeCharacters(text);
         stream.writeEndElement();
     }
 
