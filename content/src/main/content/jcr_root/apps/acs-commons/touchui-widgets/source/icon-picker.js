@@ -19,7 +19,6 @@
  */
 $(document).on('cui-contentloaded.data-api', function (e) {
     $('[data-init~=graphiciconselect] > select').fontIconPicker({
-        'theme' : 'fip-coral',
-        'classValuePrefix' : 'fa '
+        'theme' : 'fip-coral'
     });
 });
