@@ -91,13 +91,13 @@
                 <div>
                     <span class="coral-Select" data-init="select">
                       <button type="button" class="coral-Select-button coral-MinimalButton">
-                          <span class="coral-Select-button-text">Select a color</span>
+                          <span class="coral-Select-button-text">Select a style</span>
                       </button>
                       <select class="coral-Select-select" name="./style">
-                          <option value="green" ${color eq "green" ? "selected" : ""}>Green</option>
-                          <option value="blue" ${color eq "blue" ? "selected" : ""}>Blue</option>
-                          <option value="yellow" ${color eq "yellow" ? "selected" : ""}>Yellow</option>
-                          <option value="red" ${color eq "red" ? "selected" : ""}>Red</option>
+                          <option value="green" ${style eq "green" ? "selected" : ""}>Green</option>
+                          <option value="blue" ${style eq "blue" ? "selected" : ""}>Blue</option>
+                          <option value="yellow" ${style eq "yellow" ? "selected" : ""}>Yellow</option>
+                          <option value="red" ${style eq "red" ? "selected" : ""}>Red</option>
                       </select>
                     </span>
                 </div>
@@ -170,11 +170,13 @@
                         </div>
                     </div>    
                 </div>
+                
+                <div style="clear:both;"></div>
             </div>
+
         </section>
     </div>
     </div>
 </form>
-
 </body>
 </html>
