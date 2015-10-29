@@ -465,7 +465,7 @@ public class EnsureOakIndex {
         }
     }
 
-    private class OakIndexDefinitionException extends Exception {
+    private static class OakIndexDefinitionException extends Exception {
         public OakIndexDefinitionException(String message) {
             super(message);
         }

@@ -58,7 +58,7 @@ import java.util.regex.Pattern;
 public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemover {
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceRemoverImpl.class);
 
-    private static final SimpleDateFormat WORKFLOW_FOLDER_FORMAT = new SimpleDateFormat("YYYY-MM-dd");
+    private static final String WORKFLOW_FOLDER_FORMAT = "YYYY-MM-dd";
 
     private static final String PN_MODEL_ID = "modelId";
 
@@ -230,7 +230,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                     if (remaining == 0
                             && NN_DATE_FOLDER_PATTERN.matcher(folder.getName()).matches()
-                            && !StringUtils.startsWith(folder.getName(), WORKFLOW_FOLDER_FORMAT.format(new Date()))) {
+                            && !StringUtils.startsWith(folder.getName(), new SimpleDateFormat(WORKFLOW_FOLDER_FORMAT).format(new Date()))) {
                         // Dont remove folders w items and dont remove any of "today's" folders
                         // MUST match the YYYY-MM-DD(.*) pattern; do not try to remove root folders
                         try {
