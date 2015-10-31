@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Sling job consumer consuming the job created for invalidating cache. For creating an invalidation job for this
- * consumer, make use of the constants defined at {@link CacheInvalidationJobConstants}
+ * consumer, make use of the topic and associated constants defined at {@link CacheInvalidationJobConstants}
  */
 @Component(label = "ACS AEM Commons - HTTP Cache - Cache invalidation job consumer",
            description = "Consumes job for invalidating the http cache.",

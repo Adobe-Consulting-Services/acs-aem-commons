@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.httpcache.engine;
 
+import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
@@ -18,7 +19,7 @@ public interface HttpCacheEngine {
      * @param request
      * @return True if the request is cacheable
      */
-    boolean isRequestCacheable(SlingHttpServletRequest request);
+    boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheException;
 
     /**
      * Check if the given request can be served from available cache.
@@ -26,7 +27,7 @@ public interface HttpCacheEngine {
      * @param request
      * @return True if the given request can be served from cache.
      */
-    boolean isCacheHit(SlingHttpServletRequest request);
+    boolean isCacheHit(SlingHttpServletRequest request) throws HttpCacheException;
 
     /**
      * Deliver the response from the cache. Custom cache handling rule hook {@link
@@ -36,7 +37,7 @@ public interface HttpCacheEngine {
      * @param request
      * @param response
      */
-    void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response);
+    void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response) throws HttpCacheException;
 
     /**
      * Mark the response with an attribute that makes the response identifiable as the one that can be cached when the
@@ -44,7 +45,7 @@ public interface HttpCacheEngine {
      *
      * @param response
      */
-    void markResponseCacheable(SlingHttpServletResponse response);
+    void markResponseCacheable(SlingHttpServletResponse response) throws HttpCacheException;
 
     /**
      * Check if the given response has the attribute set by {@link #markResponseCacheable(SlingHttpServletResponse)} to
@@ -53,7 +54,7 @@ public interface HttpCacheEngine {
      * @param response
      * @return True if the response has the attribute which marks the response as cacheable.
      */
-    boolean validateCacheableResponse(SlingHttpServletResponse response);
+    boolean validateCacheableResponse(SlingHttpServletResponse response) throws HttpCacheException;
 
     /**
      * Cache the given response. Custom cache handling rule hook {@link com.adobe.acs.commons.httpcache.rule
@@ -64,7 +65,7 @@ public interface HttpCacheEngine {
      * @param response
      * @return True is caching is successful.
      */
-    boolean cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response);
+    boolean cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response) throws HttpCacheException;
 
     /**
      * Check if the supplied JCR repository path has the potential to invalidate cache. This can be identified based on

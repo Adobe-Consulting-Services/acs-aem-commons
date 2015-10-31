@@ -75,6 +75,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         cacheConfigs.add(cacheConfig);
         log.debug("Cache config for request URI {} added.", cacheConfig.getRequestUri());
         log.debug("Total number of cache configs addition - {}", cacheConfigs.size());
+        // TODO - Bind only when mandatory configs are present. Otherwise ignore.
     }
 
     /**

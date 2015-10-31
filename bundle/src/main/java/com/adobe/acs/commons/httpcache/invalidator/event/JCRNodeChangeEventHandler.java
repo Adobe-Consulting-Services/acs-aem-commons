@@ -16,9 +16,11 @@ import java.util.Map;
 /**
  * Sample http cache invalidation job creator. Creates invalidation job when there is a change in JCR repository. Cache
  * invalidation events could be sling event handlers, sling filter to trap replication events, workflow steps, etc.
- * Invalidation event creates and starts Invalidation jobs. <p> This is modelled as a sling event handler which listens
+ * Invalidation event creates and starts Invalidation jobs.
+ *
+ * <p> This is modelled as a sling event handler which listens
  * to any change in paths -- /content, /etc and creates an invalidation job. The intention of this invalidation job is
- * that whenever there is any change in the above said paths the configured cache needs to be invalidated. </p>
+ * that whenever there is any change in the above said paths, the configured cache needs to be invalidated. </p>
  */
 @Component(label = "ACS AEM Commons - HTTP Cache - Invalidation job creator on JCR node change",
            description = "Creates http cache invalidation job on JCR node / property change.",
