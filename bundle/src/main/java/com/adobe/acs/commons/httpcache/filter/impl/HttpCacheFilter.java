@@ -79,7 +79,7 @@ public class HttpCacheFilter implements Filter {
         try {
             // If the request has the attribute marked, cache the response.
             if (cacheEngine.isResponseCacheable(slingRequest)) {
-                cacheEngine.cacheResponse(slingRequest, slingResponse);
+                cacheEngine.cacheResponse(slingRequest, slingResponse, cacheConfig);
                 log.debug("Response for the URI cached - {}", slingRequest.getRequestURI());
             }
         } catch (HttpCacheException e) {

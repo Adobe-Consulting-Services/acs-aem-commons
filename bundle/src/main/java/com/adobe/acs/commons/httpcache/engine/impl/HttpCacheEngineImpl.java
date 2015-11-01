@@ -216,7 +216,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
             responseWrapper = (HttpCacheServletResponseWrapper)response;
         }
         // TODO - Find out the when the stream gets closed as it's tied to servlet response stream closure.
-        responseWrapper.getFile();
+        responseWrapper.getTempCacheFile();
         return false;
     }
 
