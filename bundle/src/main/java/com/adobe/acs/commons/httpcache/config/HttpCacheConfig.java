@@ -21,6 +21,9 @@ public interface HttpCacheConfig {
      */
     String getResponseMimeType();
 
+    // TODO - Mandatory and optional list of user groups may not be required. Cached item shall be a combination of
+    // request uri and the set of configured groups.
+
     /**
      * Get the list of configured AEM user groups which must be present in the request user's group list.
      *

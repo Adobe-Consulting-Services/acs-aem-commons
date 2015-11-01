@@ -11,4 +11,6 @@ public interface HttpCacheStore {
     String VALUE_MEM_CACHE_STORE_TYPE = "MEM";
     /** Value representing disk type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
     String VALUE_DISK_CACHE_STORE_TYPE = "DISK";
+    /** Value representing JCR type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
+    String VALUE_JCR_CACHE_STORE_TYPE = "JCR";
 }

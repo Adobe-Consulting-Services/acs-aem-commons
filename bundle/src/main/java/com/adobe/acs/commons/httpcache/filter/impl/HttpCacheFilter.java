@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.httpcache.filter.impl;
 
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import org.apache.felix.scr.annotations.Reference;
@@ -44,19 +45,28 @@ public class HttpCacheFilter implements Filter {
         final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
 
 
+        HttpCacheConfig cacheConfig = null;
+
         try {
             // Check if the url is cacheable as per configs and rules.
             if (cacheEngine.isRequestCacheable(slingRequest)) {
+                // Get the applicable cache config.
+                cacheConfig = cacheEngine.getCacheConfig(slingRequest);
                 // Check if cached response available for this request.
-                if (cacheEngine.isCacheHit(slingRequest)) {
+                if (cacheEngine.isCacheHit(slingRequest, cacheConfig)) {
                     // Deliver the response from cache.
                     cacheEngine.deliverCacheContent(slingRequest, slingResponse);
                     log.debug("Response delivered from cache for the url - {}", slingRequest.getRequestURI());
                     return;
                 } else {
-                    // Mark the response as cacheable once processed.
-                    cacheEngine.markResponseCacheable(slingResponse);
+                    // Mark the request as cacheable once processed.
+                    cacheEngine.markRequestCacheable(slingRequest);
+                    // Wrap the response
+                    response = cacheEngine.wrapResponse(slingRequest, slingResponse, cacheConfig);
                 }
+            }else{
+                // Mark the request that it's response won't be cached.
+                cacheEngine.markRequestNotCacheable(slingRequest);
             }
         } catch (HttpCacheException e) {
             log.error("HttpCache exception while dealing with request. Did nothing. Passed on the control to filter "
@@ -67,8 +77,8 @@ public class HttpCacheFilter implements Filter {
         chain.doFilter(request, response);
 
         try {
-            // If the response has the attribute marked, cache the response.
-            if (cacheEngine.validateCacheableResponse(slingResponse)) {
+            // If the request has the attribute marked, cache the response.
+            if (cacheEngine.isResponseCacheable(slingRequest)) {
                 cacheEngine.cacheResponse(slingRequest, slingResponse);
                 log.debug("Response for the URI cached - {}", slingRequest.getRequestURI());
             }
