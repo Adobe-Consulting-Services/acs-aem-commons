@@ -4,6 +4,7 @@ import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import org.apache.felix.scr.annotations.*;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,21 @@ import java.util.Map;
           propertyPrivate = true)
 public class MemHttpCacheStoreImpl implements HttpCacheStore {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
+
+    @Property(label = "TTL",
+              description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
+              longValue = MemHttpCacheStoreImpl.DEFAULT_TTL)
+    private static final String PROP_TTL = "httpcache.cachestore.memcache.ttl";
+    private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
+    private long ttl;
+
+    @Property(label = "Maximum size of this store in MB",
+              description = "Default to 100MB. If cache size goes beyond this size, least used entry will be evicted " +
+                      "" + "from the cache",
+              longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
+    private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.memcache.maxsize";
+    private static final long DEFAULT_MAX_SIZE_IN_MB = 100L; // Defaults to 100MB.
+    private long maxSizeInMb;
 
     @Override
     public void put(CacheKey key, CacheContent content) {
@@ -49,6 +65,9 @@ public class MemHttpCacheStoreImpl implements HttpCacheStore {
 
     @Activate
     protected void activate(Map<String, Object> configs) {
+        // Read config and populate values.
+        ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
+        maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
         log.info("MemHttpCacheStoreImpl activated / modified.");
     }
 

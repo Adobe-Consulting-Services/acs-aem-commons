@@ -31,16 +31,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @References({@Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
                         referenceInterface = HttpCacheConfig.class,
                         policy = ReferencePolicy.DYNAMIC,
-                        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE), @Reference(name = HttpCacheEngineImpl
-        .METHOD_NAME_TO_BIND_CACHE_STORE,
-                                                                                          referenceInterface =
-                                                                                                  HttpCacheStore.class,
-                                                                                          policy = ReferencePolicy
-                                                                                                  .DYNAMIC,
-                                                                                          cardinality = ReferenceCardinality.MANDATORY_MULTIPLE), @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
-                                                                                                                                                             referenceInterface = HttpCacheHandlingRule.class,
-                                                                                                                                                             policy = ReferencePolicy.DYNAMIC,
-                                                                                                                                                             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)})
+                        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+
+                    @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
+                               referenceInterface = HttpCacheStore.class,
+                               policy = ReferencePolicy.DYNAMIC,
+                               cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
+
+                    @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
+                               referenceInterface = HttpCacheHandlingRule.class,
+                               policy = ReferencePolicy.DYNAMIC,
+                               cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)})
 public class HttpCacheEngineImpl implements HttpCacheEngine {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
 
@@ -204,16 +205,18 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     }
 
     @Override
-    public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig httpCacheConfig) {
+    public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse
+            response, HttpCacheConfig httpCacheConfig) {
         return null;
     }
 
     @Override
-    public boolean cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig cacheConfig) {
+    public boolean cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
+            cacheConfig) {
         HttpCacheServletResponseWrapper responseWrapper = null;
 
-        if (response instanceof HttpCacheServletResponseWrapper){
-            responseWrapper = (HttpCacheServletResponseWrapper)response;
+        if (response instanceof HttpCacheServletResponseWrapper) {
+            responseWrapper = (HttpCacheServletResponseWrapper) response;
         }
         // TODO - Find out the when the stream gets closed as it's tied to servlet response stream closure.
         responseWrapper.getTempCacheFile();
