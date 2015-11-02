@@ -25,7 +25,24 @@ public class CacheContent {
     private InputStream dataInputStream;
 
     /**
-     * Making constructor private forcing instances to be made through <code>build</code> method.
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * method.
+     *
+     * @param charEncoding
+     * @param contentType
+     * @param headers
+     * @param dataInputStream
+     */
+    public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
+            dataInputStream) {
+        this.charEncoding = charEncoding;
+        this.contentType = contentType;
+        this.headers = headers;
+        this.dataInputStream = dataInputStream;
+    }
+
+    /**
+     * No argument constructor for the build method.
      */
     private CacheContent() {
     }
@@ -92,7 +109,7 @@ public class CacheContent {
      *
      * @return
      */
-    public InputStream getDataStream() {
+    public InputStream getInputDataStream() {
         return dataInputStream;
     }
 }

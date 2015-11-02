@@ -2,6 +2,7 @@ package com.adobe.acs.commons.httpcache.store;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.CacheKey;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 
 /**
  * Data store for persisting cache items. Data store implementation could be in-memory, disk or even JCR repository.
@@ -19,13 +20,16 @@ public interface HttpCacheStore {
 
     /**
      * Put an item into the cache.
-     * @param key Object holding the key attributes.
+     *
+     * @param key     Object holding the key attributes.
      * @param content Object holding the content which needs to be cached.
+     * @throws HttpCacheDataStreamException Failure when reading the input stream.
      */
-    void put(CacheKey key, CacheContent content);
+    void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException;
 
     /**
      * Get the Cache item given a key.
+     *
      * @param key bject holding the key attributes.
      * @return Object holding the content which needs to be cached. Null if key not present.
      */
@@ -33,12 +37,14 @@ public interface HttpCacheStore {
 
     /**
      * Get the number of entries in the cache.
+     *
      * @return
      */
-    int size();
+    long size();
 
     /**
      * Invalidate the given cache key.
+     *
      * @param key
      */
     void invalidate(CacheKey key);
