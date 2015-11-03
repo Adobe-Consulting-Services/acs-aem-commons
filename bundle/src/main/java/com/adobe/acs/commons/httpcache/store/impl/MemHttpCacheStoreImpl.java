@@ -4,12 +4,16 @@ import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.CacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.google.common.cache.*;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.TabularData;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Map;
@@ -25,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
           value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
           propertyPrivate = true)
-public class MemHttpCacheStoreImpl implements HttpCacheStore {
+public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
     /** Megabyte to byte */
@@ -135,6 +139,45 @@ public class MemHttpCacheStoreImpl implements HttpCacheStore {
     @Override
     public void invalidateAll() {
         cache.invalidateAll();
+    }
+
+    //-------------------------<Mbean specific implementation>
+    // TODO -- How do we deal with the mandate of having a constructor in OSGi service.
+    public MemHttpCacheStoreImpl() throws NotCompliantMBeanException{
+        super(MemCacheMBean.class);
+    }
+
+    @Override
+    public void clearCache() {
+        cache.invalidateAll();
+    }
+
+    @Override
+    public long getCacheEntriesCount() {
+        return this.size();
+    }
+
+    @Override
+    public int getCacheSizeInKB() {
+        // TODO - Query from Guava cache??
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public long getTtl() {
+        return this.ttl;
+    }
+
+    @Override
+    public TabularData getCacheStats() {
+        // TODO - Use Guava getStats and form jmx tabular structure.
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public TabularData getCacheKeys() {
+        // TODO - Query from Guava cache.
+        throw new NotImplementedException();
     }
 
 }
