@@ -506,6 +506,7 @@
     <modules>
         <module>bundle</module>
         <module>bundle-twitter</module>
+        <module>bundle-httpcache</module>
         <module>content</module>
     </modules>
 </project>

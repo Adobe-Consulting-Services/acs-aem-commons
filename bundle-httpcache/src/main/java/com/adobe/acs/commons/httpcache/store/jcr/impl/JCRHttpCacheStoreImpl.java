@@ -6,7 +6,7 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 
 /**
- *
+ *  JCR cache store implementation.
  */
 // TODO - Take the cache root path from config.
 public class JCRHttpCacheStoreImpl implements HttpCacheStore{
