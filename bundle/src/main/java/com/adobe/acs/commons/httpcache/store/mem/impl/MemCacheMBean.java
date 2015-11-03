@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.httpcache.store.impl;
+package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.granite.jmx.annotation.Description;
 

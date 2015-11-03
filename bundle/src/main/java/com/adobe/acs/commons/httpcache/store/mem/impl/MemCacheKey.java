@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.httpcache.store.impl;
+package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;

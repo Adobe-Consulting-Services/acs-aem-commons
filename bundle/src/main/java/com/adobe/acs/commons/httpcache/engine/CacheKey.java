@@ -8,6 +8,8 @@ import org.apache.sling.api.SlingHttpServletRequest;
 /**
  * Represents the cache key used in cache stores. Modeled as value object.
  */
+
+// TODO - Make userGroup optional so that it works for anonymous as well.
 public class CacheKey {
     /** Request uri in http context */
     private String uri;
@@ -71,4 +73,5 @@ public class CacheKey {
     public int hashCode() {
         return new HashCodeBuilder(17, 37).append(uri).append(userGroups).toHashCode();
     }
+
 }
