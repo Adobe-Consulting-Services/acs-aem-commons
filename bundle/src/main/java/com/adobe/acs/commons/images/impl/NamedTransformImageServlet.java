@@ -87,11 +87,11 @@ import java.util.regex.Pattern;
                 propertyPrivate = false
         ),
         @Property(
-		label = "File Name Pattern",
-		description = "RegEx Pattern to filter allowed filenames",
-		name = NamedTransformImageServlet.NAMED_IMAGE_FILENAME_PATTERN,
-		value = NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN,
-		propertyPrivate = false
+            label = "Allows Suffix Patterns",
+            description = "Regex pattern to filter allowed file names. Defaults to [ "
+                    + NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN + " ]",
+            name = NamedTransformImageServlet.NAMED_IMAGE_FILENAME_PATTERN,
+            value = NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN
 		),
         @Property(
                 label = "Extension",
@@ -125,6 +125,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 	private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
 	public static final String NAMED_IMAGE_FILENAME_PATTERN = "acs.commons.namedimage.filename.pattern";
+
 	public static final String DEFAULT_FILENAME_PATTERN = "(image|img)\\.(.+)";
 
 	@Reference
@@ -136,7 +137,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final String TYPE_QUALITY = "quality";
 
-    private static Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
+    private Pattern lastSuffixPattern = Pattern.compile(DEFAULT_FILENAME_PATTERN);
 
     private Map<String, NamedImageTransformer> namedImageTransformers =
             new ConcurrentHashMap<String, NamedImageTransformer>();
@@ -183,7 +184,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
 
         final String lastSuffix = PathInfoUtil.getLastSuffixSegment(request);
-        final Matcher matcher = LAST_SUFFIX_PATTERN.matcher(lastSuffix);
+        final Matcher matcher = lastSuffixPattern.matcher(lastSuffix);
         if (!matcher.matches()) {
             return false;
         }
@@ -455,7 +456,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 	    final String fileNameRegex = PropertiesUtil.toString(properties.get(NAMED_IMAGE_FILENAME_PATTERN),
 			    DEFAULT_FILENAME_PATTERN);
 	    if(StringUtils.isNotEmpty(fileNameRegex)) {
-		    LAST_SUFFIX_PATTERN = Pattern.compile(fileNameRegex);
+		    lastSuffixPattern = Pattern.compile(fileNameRegex);
 	    }
         try {
             renditionPatternPicker = new RenditionPatternPicker(regex);
