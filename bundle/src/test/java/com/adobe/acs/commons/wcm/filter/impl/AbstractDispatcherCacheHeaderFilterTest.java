@@ -52,13 +52,22 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AbstractCacheControlHeaderFilterTest {
+public class AbstractDispatcherCacheHeaderFilterTest {
 
-    AbstractCacheControlHeaderFilter filter;
+    AbstractDispatcherCacheHeaderFilter filter;
 
     Dictionary<String, Object> properties = null;
 
+    @SuppressWarnings("rawtypes")
+    Map params = null;
+
+    Set<String> agents = null;
+
+    Set<String> cachecontrol = null;
+
     String pattern = "/content/.*";
+
+    private String headerName = "Header Name";
 
     private String headerValue = "Header Value";
 
@@ -73,7 +82,7 @@ public class AbstractCacheControlHeaderFilterTest {
 
     @Mock
     HttpServletRequest request;
-    
+
     @Mock
     HttpServletResponse response;
 
@@ -81,43 +90,59 @@ public class AbstractCacheControlHeaderFilterTest {
     FilterChain chain;
 
     @Before
+    @SuppressWarnings("rawtypes")
     public void setup() throws Exception {
         properties = new Hashtable<String, Object>();
         String[] patterns = new String[] { pattern };
-        properties.put(AbstractCacheControlHeaderFilter.PROP_FILTER_PATTERN, patterns);
+        properties.put(AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN, patterns);
 
-        filter = new AbstractCacheControlHeaderFilter() {
-            
+        params = new HashMap();
+        agents = new HashSet<String>();
+        cachecontrol = new HashSet<String>();
+
+        filter = new AbstractDispatcherCacheHeaderFilter() {
+
+            @Override
+            protected String getHeaderName() {
+                return headerName;
+            }
+
             @Override
             protected String getHeaderValue() {
                 return headerValue;
             }
-            
+
             @Override
             protected void doActivate(ComponentContext context) throws Exception {
             }
         };
+        when(componentContext.getProperties()).thenReturn(properties);
+        when(componentContext.getBundleContext()).thenReturn(bundleContext);
+        when(bundleContext.registerService(anyString(), any(), (Dictionary) any())).thenReturn(serviceRegistration);
+
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getParameterMap()).thenReturn(params);
     }
 
     @After
     public void tearDown() throws Exception {
         properties = null;
+        params = null;
+        agents = null;
+        cachecontrol = null;
+
         reset(componentContext, bundleContext, serviceRegistration, request, response, chain);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     public void testActivateSuccess() throws Exception {
-
-        when(componentContext.getProperties()).thenReturn(properties);
-        when(componentContext.getBundleContext()).thenReturn(bundleContext);
-        when(bundleContext.registerService(anyString(), any(), (Dictionary) any())).thenReturn(serviceRegistration);
 
         BaseMatcher<Dictionary<String, Object>> filterPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
             @Override
             public void describeTo(Description description) {
-                //do nothing
+                // do nothing
             }
+
             @Override
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
@@ -135,24 +160,20 @@ public class AbstractCacheControlHeaderFilterTest {
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     public void testActivateMultipleFilters() throws Exception {
 
         ServiceRegistration secondRegistration = mock(ServiceRegistration.class);
 
         final String secondPattern = "/content/dam/.*";
-        properties.put(AbstractCacheControlHeaderFilter.PROP_FILTER_PATTERN, new String[] { pattern, secondPattern });
-
-
-        when(componentContext.getProperties()).thenReturn(properties);
-        when(componentContext.getBundleContext()).thenReturn(bundleContext);
-        when(bundleContext.registerService(anyString(), any(), (Dictionary) any())).thenReturn(serviceRegistration, secondRegistration);
+        properties.put(AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
+                new String[] { pattern, secondPattern });
 
         BaseMatcher<Dictionary<String, Object>> firstPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
             @Override
             public void describeTo(Description description) {
-                //do nothing
+                // do nothing
             }
+
             @Override
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
@@ -163,8 +184,9 @@ public class AbstractCacheControlHeaderFilterTest {
         BaseMatcher<Dictionary<String, Object>> secondPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
             @Override
             public void describeTo(Description description) {
-                //do nothing
+                // do nothing
             }
+
             @Override
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
@@ -182,28 +204,24 @@ public class AbstractCacheControlHeaderFilterTest {
 
     }
 
-    @Test(expected=ConfigurationException.class)
+    @Test(expected = ConfigurationException.class)
     public void testActivateNoFilters() throws Exception {
-        properties.remove(AbstractCacheControlHeaderFilter.PROP_FILTER_PATTERN);
+        properties.remove(AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN);
         when(componentContext.getProperties()).thenReturn(properties);
         filter.activate(componentContext);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     public void testDeactivate() throws Exception {
-        when(componentContext.getProperties()).thenReturn(properties);
-        when(componentContext.getBundleContext()).thenReturn(bundleContext);
-        when(bundleContext.registerService(anyString(), any(), (Dictionary) any())).thenReturn(serviceRegistration);
-        
+
         filter.activate(componentContext);
         filter.deactivate(componentContext);
-        
+
         filter.deactivate(componentContext);
-        
+
         verify(serviceRegistration).unregister();
         verifyNoMoreInteractions(serviceRegistration);
-        
+
     }
 
     @Test
@@ -213,12 +231,11 @@ public class AbstractCacheControlHeaderFilterTest {
         ServiceRegistration secondRegistration = mock(ServiceRegistration.class);
 
         final String secondPattern = "/content/dam/.*";
-        properties.put(AbstractCacheControlHeaderFilter.PROP_FILTER_PATTERN, new String[] { pattern, secondPattern });
+        properties.put(AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
+                new String[] { pattern, secondPattern });
 
-
-        when(componentContext.getProperties()).thenReturn(properties);
-        when(componentContext.getBundleContext()).thenReturn(bundleContext);
-        when(bundleContext.registerService(anyString(), any(), (Dictionary) any())).thenReturn(serviceRegistration, secondRegistration);
+        when(bundleContext.registerService(anyString(), any(), (Dictionary) any())).thenReturn(serviceRegistration,
+                secondRegistration);
 
         filter.activate(componentContext);
         filter.deactivate(componentContext);
@@ -252,8 +269,8 @@ public class AbstractCacheControlHeaderFilterTest {
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.CACHE_CONTROL_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verifyNoMoreInteractions(request, this.request, response, chain);
     }
@@ -262,17 +279,12 @@ public class AbstractCacheControlHeaderFilterTest {
     @SuppressWarnings("unchecked")
     public void testDoFilterHashParams() throws Exception {
 
-        @SuppressWarnings("rawtypes")
-        Map params = new HashMap();
         params.put("parameter", "value");
-
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getParameterMap()).thenReturn(params);
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.CACHE_CONTROL_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
         verifyNoMoreInteractions(request, this.request, response, chain);
@@ -281,16 +293,16 @@ public class AbstractCacheControlHeaderFilterTest {
     @Test
     public void testDoFilterNoServerAgent() throws Exception {
 
-        @SuppressWarnings("rawtypes")
-        Map params = new HashMap();
-        
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getParameterMap()).thenReturn(params);
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
+            .thenReturn(Collections.enumeration(agents));
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME))
+            .thenReturn(Collections.enumeration(cachecontrol));
+
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.CACHE_CONTROL_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
         verifyNoMoreInteractions(request, this.request, response, chain);
@@ -299,20 +311,19 @@ public class AbstractCacheControlHeaderFilterTest {
     @Test
     public void testDoFilterInvalidServerAgent() throws Exception {
 
-        @SuppressWarnings("rawtypes")
-        Map params = new HashMap();
 
-        Set<String> agents = new HashSet<String>();
         agents.add("Not-Day-Communique-Dispatcher");
 
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getParameterMap()).thenReturn(params);
-        when(request.getHeaders(AbstractCacheControlHeaderFilter.SERVER_AGENT_NAME)).thenReturn(Collections.enumeration(agents));
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
+            .thenReturn(Collections.enumeration(agents));
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME))
+            .thenReturn(Collections.enumeration(cachecontrol));
+
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.CACHE_CONTROL_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
         verifyNoMoreInteractions(request, this.request, response, chain);
@@ -321,24 +332,20 @@ public class AbstractCacheControlHeaderFilterTest {
     @Test
     public void testDoFilterHasCacheControlHeader() throws Exception {
 
-        @SuppressWarnings("rawtypes")
-        Map params = new HashMap();
+        agents.add(AbstractDispatcherCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
 
-        Set<String> agents = new HashSet<String>();
-        agents.add(AbstractCacheControlHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
-
-        Set<String> cachecontrol = new HashSet<String>();
         cachecontrol.add("Some Cache Control Header");
 
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getParameterMap()).thenReturn(params);
-        when(request.getHeaders(AbstractCacheControlHeaderFilter.SERVER_AGENT_NAME)).thenReturn(Collections.enumeration(agents));
-        when(request.getHeaders(AbstractCacheControlHeaderFilter.CACHE_CONTROL_NAME)).thenReturn(Collections.enumeration(cachecontrol));
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
+            .thenReturn(Collections.enumeration(agents));
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME))
+            .thenReturn(Collections.enumeration(cachecontrol));
+
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.CACHE_CONTROL_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
         verifyNoMoreInteractions(request, this.request, response, chain);
@@ -347,25 +354,22 @@ public class AbstractCacheControlHeaderFilterTest {
     @Test
     public void testDoFilterSuccess() throws Exception {
 
-        @SuppressWarnings("rawtypes")
-        Map params = new HashMap();
 
-        Set<String> agents = new HashSet<String>();
-        agents.add(AbstractCacheControlHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
+        agents.add(AbstractDispatcherCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
+            .thenReturn(Collections.enumeration(agents));
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME))
+            .thenReturn(Collections.enumeration(cachecontrol));
 
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getParameterMap()).thenReturn(params);
-        when(request.getHeaders(AbstractCacheControlHeaderFilter.SERVER_AGENT_NAME)).thenReturn(Collections.enumeration(agents));
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractCacheControlHeaderFilter.CACHE_CONTROL_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
+        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
-        verify(response).addHeader(AbstractCacheControlHeaderFilter.CACHE_CONTROL_NAME, headerValue);
+        verify(response).addHeader(headerName, headerValue);
         verifyNoMoreInteractions(request, this.request, response, chain);
     }
-
 
 }

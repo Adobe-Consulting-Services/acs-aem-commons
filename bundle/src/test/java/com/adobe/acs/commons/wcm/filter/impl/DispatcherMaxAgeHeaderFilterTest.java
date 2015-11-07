@@ -35,9 +35,9 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MaxAgeCacheControlHeaderFilterTest {
+public class DispatcherMaxAgeHeaderFilterTest {
 
-    MaxAgeCacheControlHeaderFilter filter;
+    DispatcherMaxAgeHeaderFilter filter;
 
     Dictionary<String, Object> properties = null;
 
@@ -49,15 +49,20 @@ public class MaxAgeCacheControlHeaderFilterTest {
     @Before
     public void setup() throws Exception {
         properties = new Hashtable<String, Object>();
-        properties.put(MaxAgeCacheControlHeaderFilter.PROP_MAX_AGE, maxage);
+        properties.put(DispatcherMaxAgeHeaderFilter.PROP_MAX_AGE, maxage);
 
-        filter = new MaxAgeCacheControlHeaderFilter();
+        filter = new DispatcherMaxAgeHeaderFilter();
     }
 
     @After
     public void tearDown() throws Exception {
         properties = null;
         reset(componentContext);
+    }
+
+    @Test
+    public void testGetHeaderName() {
+        assertEquals(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME, filter.getHeaderName());
     }
 
     @Test
@@ -71,7 +76,7 @@ public class MaxAgeCacheControlHeaderFilterTest {
 
     @Test(expected=ConfigurationException.class)
     public void testActivateNoMaxAge() throws Exception {
-        properties.remove(MaxAgeCacheControlHeaderFilter.PROP_MAX_AGE);
+        properties.remove(DispatcherMaxAgeHeaderFilter.PROP_MAX_AGE);
         when(componentContext.getProperties()).thenReturn(properties);
         filter.activate(componentContext);
     }

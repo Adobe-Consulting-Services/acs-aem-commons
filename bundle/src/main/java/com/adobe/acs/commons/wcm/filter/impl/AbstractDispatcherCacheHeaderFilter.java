@@ -48,14 +48,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract class to handle standard logic to registering the Cache-Control header filter.
+ * Abstract class to handle standard logic for registering a Dispatcher TTL header filter.
  * 
  * @author Bryan Stopp (bstopp)
  * @since 2.1.0
  */
-public abstract class AbstractCacheControlHeaderFilter implements Filter {
+public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractCacheControlHeaderFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractDispatcherCacheHeaderFilter.class);
 
     public static final String PROP_FILTER_PATTERN = "filter.pattern";
 
@@ -65,7 +65,18 @@ public abstract class AbstractCacheControlHeaderFilter implements Filter {
 
     protected static final String CACHE_CONTROL_NAME = "Cache-Control";
 
+    protected static final String EXPIRES_NAME = "Expires";
+
+    protected static final String EXPIRES_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
+
     private List<ServiceRegistration> filterRegistrations = new ArrayList<ServiceRegistration>();
+
+    /**
+     * Get the value to place in the Cache-Control header.
+     * 
+     * @return the value of the Cache-Control header
+     */
+    protected abstract String getHeaderName();
 
     /**
      * Get the value to place in the Cache-Control header.
@@ -97,9 +108,10 @@ public abstract class AbstractCacheControlHeaderFilter implements Filter {
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         if (this.accepts(request)) {
+            String header = getHeaderName();
             String val = getHeaderValue();
-            log.debug("Adding header {}: {}", CACHE_CONTROL_NAME, val);
-            response.addHeader(CACHE_CONTROL_NAME, val);
+            log.debug("Adding header {}: {}", header, val);
+            response.addHeader(header, val);
         }
         filterChain.doFilter(request, response);
     }

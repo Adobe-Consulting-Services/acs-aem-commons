@@ -32,7 +32,7 @@ import org.osgi.service.component.ComponentContext;
 
 //@formatter:off
 @Component(
-      label = "ACS AEM Commons - Cache Control Header - Max Age",
+      label = "ACS AEM Commons - Dispacher Cache Control Header - Max Age",
       description = "Adds a Cache-Control max-age header to content to enable Dispatcher TTL support.",
       immediate = false,
       metatype = true,
@@ -43,7 +43,7 @@ import org.osgi.service.component.ComponentContext;
     @Property(label = "Filter Patterns",
         description = "Patterns on which to apply this Max Age cache-control rule.",
         cardinality = Integer.MAX_VALUE,
-        name = AbstractCacheControlHeaderFilter.PROP_FILTER_PATTERN,
+        name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
         propertyPrivate = false,
         value = { }),
     @Property(
@@ -51,7 +51,7 @@ import org.osgi.service.component.ComponentContext;
           value = "Max Age: {max.age} for Patterns: [{filter.pattern}]")
 })
 //@formatter:on
-public class MaxAgeCacheControlHeaderFilter extends AbstractCacheControlHeaderFilter {
+public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
 
     @Property(label = "Cache-Control Max Age",
             description = "Max age value (in seconds) to put in Cache Control header.")
@@ -60,6 +60,11 @@ public class MaxAgeCacheControlHeaderFilter extends AbstractCacheControlHeaderFi
     private static final String HEADER_PREFIX = "max-age=";
 
     private long maxage;
+
+    @Override
+    protected String getHeaderName() {
+        return CACHE_CONTROL_NAME;
+    }
 
     @Override
     protected String getHeaderValue() {
