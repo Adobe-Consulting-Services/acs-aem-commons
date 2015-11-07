@@ -120,6 +120,11 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     }
 
     @Override
+    public boolean contains(CacheKey key) {
+        return false;
+    }
+
+    @Override
     public CacheContent getIfPresent(CacheKey key) {
         MemCacheValue value = cache.getIfPresent(new MemCacheKey().buildForLookups(key.getUri(), key.getUserGroups()));
         return new CacheContent(value.getCharEncoding(), value.getContentType(), value.getHeaders(), new

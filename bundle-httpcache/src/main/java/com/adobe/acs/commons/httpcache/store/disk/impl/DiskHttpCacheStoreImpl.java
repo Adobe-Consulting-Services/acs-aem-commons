@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.httpcache.store.jcr.impl;
+package com.adobe.acs.commons.httpcache.store.disk.impl;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.CacheKey;
@@ -10,18 +10,18 @@ import org.apache.felix.scr.annotations.Service;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
- * JCR cache store implementation.
+ * Disk cache store implementation.
  */
 // TODO - Take the cache root path from config.
 // TODO - Make this policy = ConfigurationPolicy.REQUIRE
-@Component(label = "ACS AEM Commons - HTTP Cache - JCR based cache store.",
-           description = "Cache data store implementation for JCR storage.",
+@Component(label = "ACS AEM Commons - HTTP Cache - Disk based cache store.",
+           description = "Cache data store implementation for Disk storage.",
            metatype = true)
 @Service
 @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-          value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
+          value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
           propertyPrivate = true)
-public class JCRHttpCacheStoreImpl implements HttpCacheStore {
+public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
         throw new NotImplementedException();

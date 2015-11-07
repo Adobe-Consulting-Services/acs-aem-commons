@@ -55,7 +55,7 @@ public class HttpCacheFilter implements Filter {
                 // Check if cached response available for this request.
                 if (cacheEngine.isCacheHit(slingRequest, cacheConfig)) {
                     // Deliver the response from cache.
-                    cacheEngine.deliverCacheContent(slingRequest, slingResponse);
+                    cacheEngine.deliverCacheContent(slingRequest, slingResponse, cacheConfig);
                     log.debug("Response delivered from cache for the url - {}", slingRequest.getRequestURI());
                     return;
                 } else {

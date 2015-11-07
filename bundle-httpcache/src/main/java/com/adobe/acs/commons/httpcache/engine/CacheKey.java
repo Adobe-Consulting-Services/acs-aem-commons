@@ -19,7 +19,7 @@ public class CacheKey {
     /**
      * Making constructor private forcing instances to be made through <code>build</code> method.
      */
-    private CacheKey() {
+    public CacheKey() {
     }
 
     /**
@@ -51,7 +51,7 @@ public class CacheKey {
     public CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
         CacheKey key = new CacheKey();
         key.uri = request.getRequestURI();
-        key.userGroups = (String[]) cacheConfig.geUserGroupNames().toArray();
+        key.userGroups = (String[]) cacheConfig.getUserGroupNames().toArray();
         return this;
     }
 

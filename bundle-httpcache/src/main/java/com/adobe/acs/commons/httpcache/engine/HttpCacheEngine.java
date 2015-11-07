@@ -44,9 +44,10 @@ public interface HttpCacheEngine {
      *
      * @param request
      * @param response
+     * @param cacheConfig
      */
-    void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
-            HttpCacheException;
+    void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
+            cacheConfig) throws HttpCacheException;
 
     /**
      * Mark the request with an attribute that makes its response identifiable as the one that can be cached when the
@@ -75,7 +76,7 @@ public interface HttpCacheEngine {
     boolean isResponseCacheable(SlingHttpServletRequest request);
 
     HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse response,
-                                                 HttpCacheConfig httpCacheConfig);
+                                                 HttpCacheConfig httpCacheConfig) throws HttpCacheException;
 
     /**
      * Cache the given response. Custom cache handling rule hook {@link com.adobe.acs.commons.httpcache.rule
@@ -84,9 +85,9 @@ public interface HttpCacheEngine {
      * @param request
      * @param response
      * @param cacheConfig
-     * @return True is caching is successful.
      */
-    boolean cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig cacheConfig) throws HttpCacheException;
+    void cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
+            cacheConfig) throws HttpCacheException;
 
     /**
      * Check if the supplied JCR repository path has the potential to invalidate cache. This can be identified based on
@@ -103,9 +104,8 @@ public interface HttpCacheEngine {
      * .HttpCacheHandlingRule#onCacheInvalidate(String)} exposed.
      *
      * @param path JCR repository path.
-     * @return
      */
-    boolean invalidateCache(String path);
+    void invalidateCache(String path) throws HttpCacheException;
 
     /**
      * Attribute key set on <code>SlingHttpServletRequest</code> to identify if its response is cacheable.

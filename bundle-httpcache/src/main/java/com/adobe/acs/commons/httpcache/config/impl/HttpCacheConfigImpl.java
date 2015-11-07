@@ -1,6 +1,7 @@
 package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 @Component(label = "ACS AEM Commons - HTTP Cache - Cache config",
            description = "Config for request URI pattern that has to be cached. Each config is tied to a single " +
-                   "request URI pattern. Allows multiple configurations.",
+                   "request URI pattern.",
            configurationFactory = true,
            metatype = true)
 @Service
@@ -26,40 +27,50 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
 
     @Property(label = "Request URI pattern",
-              description = "Request URI pattern (REGEX) to be cached. Example - /content/mysite(.*).product-data.json. Mandatory parameter.")
+              description = "Request URI pattern (REGEX) to be cached. Example - /content/mysite(.*).product-data" +
+                      ".json. Mandatory parameter.")
     private static final String PROP_REQUEST_URI_PATTERN = "httpcache.config.requesturi.pattern";
     private String requestUriPattern;
 
-    @Property(label = "Response MIME type",
-              description = "Example - application/json. Mandatory parameter.")
-    private static final String PROP_RESPONSE_MIME_TYPE = "httpcache.config.response.mime";
-    private String responseMimeType;
+    @Property(label = "Is request authenticated",
+              description = "Select if the request is authenticated. If not selected, this cache will be applicable "
+                      + "only for anonymous (public user) requests.",
+              boolValue = HttpCacheConfigImpl.DEFAULT_IS_REQUEST_AUTHENTICATION_REQUIRED)
+    private static final String PROP_IS_REQUEST_AUTHENTICATION_REQUIRED = "httpcache.config.request.authentication" +
+            ".isrequired";
+    private static final boolean DEFAULT_IS_REQUEST_AUTHENTICATION_REQUIRED = false;
+    private boolean isRequestAuthenticationRequired;
 
-    @Property(label = "AEM user groups - Mandatory",
-              description = "Mandatory set of AEM user groups for which this config is applicable. User of the " +
-                      "request has to have all these groups for the request to be cache. Represents AND condition.",
+    @Property(label = "AEM user groups",
+              description = "Set of AEM user groups for which this config is applicable. User of the " +
+                      "request has to have at least one of these groups to be present to have this config applicable." +
+                      " This parameter is effective only when the above " +
+                      "'httpcache.config.request.authentication.isrequired' is true. This parameter is optional.",
               cardinality = Integer.MAX_VALUE)
-    private static final String PROP_USER_GROUPS_MANDATORY = "httpcache.config.users.group.mandatory";
-    private String[] userGroupsMandatory;
+    private static final String PROP_USER_GROUPS = "httpcache.config.users.group.mandatory";
+    private String[] userGroups;
 
-    @Property(label = "AEM user groups - Optional",
-              description = "Optional set of AEM user groups for which this config is applicable. Represents OR " +
-                      "condition.",
-              cardinality = Integer.MAX_VALUE)
-    private static final String PROP_USER_GROUPS_OPTIONAL = "httpcache.config.users.group.optional";
-    private String[] userGroupsOptional;
 
+    // @formatter:off
     @Property(label = "Cache store",
-              description = "Cache store for caching the response for this request URI. Example - MEM. This should " +
-                      "be" + " one of the cache stores active in this installation. Mandatory parameter.",
-              value = HttpCacheConfigImpl.DEFAULT_CACHE_STORE)
+              description = "Cache store for caching the response for this request URI. Example - MEM. This should "
+                      + "be one of the cache stores active in this installation. Mandatory parameter.",
+              options = {
+                      @PropertyOption(name = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
+                                         value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE),
+                      @PropertyOption(name = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
+                                      value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE),
+                      @PropertyOption(name = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
+                                      value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE)},
+              value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE)
+    // @formatter:on
     private static final String PROP_CACHE_STORE = "httpcache.config.cachestore";
     private static final String DEFAULT_CACHE_STORE = "MEM"; // Defaults to memory cache store
     private String cacheStore;
 
     @Property(label = "JCR path pattern (REGEX) for cache invalidation ",
-              description = "Optional set of paths in JCR (Oak) repository for which this cache has to be invalidated. This accepts "
-                      + "REGEX. Example - /etc/my-products(.*)",
+              description = "Optional set of paths in JCR (Oak) repository for which this cache has to be invalidated" +
+                      ". This accepts " + "REGEX. Example - /etc/my-products(.*)",
               cardinality = Integer.MAX_VALUE)
     private static final String PROP_CACHE_INVALIDATION_PATH_PATTERN = "httpcache.config.invalidation.oakpath";
     private String[] cacheInvalidationPathPattern;
@@ -70,18 +81,13 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     }
 
     @Override
-    public String getResponseMimeType() {
-        return responseMimeType;
+    public boolean isRequestAuthenticationRequired() {
+        return isRequestAuthenticationRequired;
     }
 
     @Override
-    public List<String> getMandatoryUserGroupNames() {
-        return Arrays.asList(userGroupsMandatory);
-    }
-
-    @Override
-    public List<String> getOptionalUserGroupNames() {
-        return Arrays.asList(userGroupsOptional);
+    public List<String> getUserGroupNames() {
+        return Arrays.asList(userGroups);
     }
 
     @Override
@@ -99,20 +105,21 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     protected void activate(Map<String, Object> configs) {
         //Read configs and populate variables after trimming whitespaces.
         requestUriPattern = PropertiesUtil.toString(configs.get(PROP_REQUEST_URI_PATTERN), StringUtils.EMPTY).trim();
-        responseMimeType = PropertiesUtil.toString(configs.get(PROP_RESPONSE_MIME_TYPE), StringUtils.EMPTY).trim();
-        userGroupsMandatory = PropertiesUtil.toStringArray(PROP_USER_GROUPS_MANDATORY, ArrayUtils.EMPTY_STRING_ARRAY);
-        for (int i = 0; i < userGroupsMandatory.length; i++) {
-            userGroupsMandatory[i] = userGroupsMandatory[i].trim();
+
+        isRequestAuthenticationRequired = PropertiesUtil.toBoolean(configs.get
+                (PROP_IS_REQUEST_AUTHENTICATION_REQUIRED), DEFAULT_IS_REQUEST_AUTHENTICATION_REQUIRED);
+
+        userGroups = PropertiesUtil.toStringArray(PROP_USER_GROUPS, ArrayUtils.EMPTY_STRING_ARRAY);
+        for (int i = 0; i < userGroups.length; i++) {
+            userGroups[i] = userGroups[i].trim();
         }
-        userGroupsOptional = PropertiesUtil.toStringArray(PROP_USER_GROUPS_OPTIONAL, ArrayUtils.EMPTY_STRING_ARRAY);
-        for (int i = 0; i < userGroupsOptional.length; i++) {
-            userGroupsOptional[i] = userGroupsOptional[i].trim();
-        }
+
         cacheStore = PropertiesUtil.toString(configs.get(PROP_CACHE_STORE), StringUtils.EMPTY).trim();
+
         cacheInvalidationPathPattern = PropertiesUtil.toStringArray(PROP_CACHE_INVALIDATION_PATH_PATTERN, ArrayUtils
                 .EMPTY_STRING_ARRAY);
         for (int i = 0; i < cacheInvalidationPathPattern.length; i++) {
-            userGroupsOptional[i] = cacheInvalidationPathPattern[i].trim();
+            cacheInvalidationPathPattern[i] = cacheInvalidationPathPattern[i].trim();
         }
         log.info("HttpCacheConfigImpl activated /modified.");
     }

@@ -44,7 +44,7 @@ public class CacheContent {
     /**
      * No argument constructor for the build method.
      */
-    private CacheContent() {
+    public CacheContent() {
     }
 
     /**

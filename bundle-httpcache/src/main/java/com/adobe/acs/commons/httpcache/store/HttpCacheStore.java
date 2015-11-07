@@ -28,6 +28,13 @@ public interface HttpCacheStore {
     void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException;
 
     /**
+     * Check if there is an entry in cache for the given key.
+     * @param key
+     * @return
+     */
+    boolean contains(CacheKey key);
+
+    /**
      * Get the Cache item given a key.
      *
      * @param key bject holding the key attributes.

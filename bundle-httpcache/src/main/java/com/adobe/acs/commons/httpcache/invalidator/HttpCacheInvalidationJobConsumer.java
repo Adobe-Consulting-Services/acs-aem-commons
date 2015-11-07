@@ -1,6 +1,7 @@
 package com.adobe.acs.commons.httpcache.invalidator;
 
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import com.adobe.acs.commons.httpcache.invalidator.CacheInvalidationJobConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
@@ -37,7 +38,9 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
         // Check if the path in the job is applicable for the set cache configs.
         if (httpCacheEngine.isPathPotentialToInvalidate(path)) {
             // Invalidate the cache.
-            if (httpCacheEngine.invalidateCache(path)) {
+            try{
+                httpCacheEngine.invalidateCache(path);
+            } catch (HttpCacheException e){
                 log.debug("Job with the payload path - {} has invalidated the cache", path);
             }
         }

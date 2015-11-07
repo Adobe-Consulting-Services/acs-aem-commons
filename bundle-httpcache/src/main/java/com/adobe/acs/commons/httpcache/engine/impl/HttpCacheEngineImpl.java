@@ -2,16 +2,23 @@ package com.adobe.acs.commons.httpcache.engine.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
+import com.adobe.acs.commons.httpcache.engine.CacheContent;
+import com.adobe.acs.commons.httpcache.engine.CacheKey;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import com.adobe.acs.commons.httpcache.util.CacheUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,6 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Default implementation for {@link HttpCacheEngine}. Binds multiple {@link HttpCacheConfig}. Multiple {@link
  * HttpCacheStore} also get bound to this.
  */
+// @formatter:off
 @Component(label = "ACS AEM Commons - HTTP Cache - Cache engine",
            description = "Controlling service for http cache implementation.",
            metatype = true,
@@ -42,28 +50,29 @@ import java.util.concurrent.CopyOnWriteArrayList;
                                referenceInterface = HttpCacheHandlingRule.class,
                                policy = ReferencePolicy.DYNAMIC,
                                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)})
+// @formatter:on
 public class HttpCacheEngineImpl implements HttpCacheEngine {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
 
     /** Method name that binds cache configs */
-    static final String METHOD_NAME_TO_BIND_CONFIG = "cacheConfig";
+    static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
 
     /** Thread safe list to contain the registered HttpCacheConfig references. */
     private static CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<>();
 
     /** Method name that binds cache store */
-    static final String METHOD_NAME_TO_BIND_CACHE_STORE = "cacheStore";
+    static final String METHOD_NAME_TO_BIND_CACHE_STORE = "httpCacheStore";
 
     /** Thread safe hash map to contain the registered cache store references. */
     private static ConcurrentHashMap<String, HttpCacheStore> cacheStoresMap = new ConcurrentHashMap<>();
 
     /** Method name that binds cache handling rules */
-    static final String METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES = "cacheHandlingRule";
+    static final String METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES = "httpCacheHandlingRule";
 
     /** Thread safe list to contain the registered HttpCacheHandlingRule references. */
     private static CopyOnWriteArrayList<HttpCacheHandlingRule> cacheHandlingRules = new CopyOnWriteArrayList<>();
 
-    //-------------------<OSGi specific>---------------//
+    //-------------------<OSGi specific methods>---------------//
 
     /**
      * Binds cache config. Cache config could come and go at run time.
@@ -71,11 +80,28 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      * @param cacheConfig
      * @param config
      */
-    protected void bindCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
+    protected void bindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
+        // Validate cache config object
+        // Check if the request uri is present.
+        if (StringUtils.isEmpty(cacheConfig.getRequestUri())) {
+            log.info("Http cache config rejected at the request uri is absent.");
+            return;
+        }
+        // Remove the user groups array if the config is not tied to authentication.
+        if (!cacheConfig.isRequestAuthenticationRequired() && cacheConfig.getUserGroupNames().size() > 0) {
+            cacheConfig.getUserGroupNames().clear();
+            log.debug("Config is for unauthenticated requests and hence list of groups configured are rejected.");
+        }
+
+        // Check if the same object is already there in the map.
+        if (cacheConfigs.contains(cacheConfig)) {
+            log.trace("Http cache config object already exists in the cacheConfigs map and hence ignored.");
+        }
+
+        // Add it to the map.
         cacheConfigs.add(cacheConfig);
-        log.debug("Cache config for request URI {} added.", cacheConfig.getRequestUri());
+        log.info("Cache config for request URI {} added.", cacheConfig.getRequestUri());
         log.debug("Total number of cache configs addition - {}", cacheConfigs.size());
-        // TODO - Bind only when mandatory configs are present. Otherwise ignore.
     }
 
     /**
@@ -84,14 +110,13 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      * @param cacheConfig
      * @param config
      */
-    protected void unbindCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
+    protected void unbindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
         if (cacheConfigs.contains(cacheConfig)) {
             cacheConfigs.remove(cacheConfig);
+            // TODO - When a cache config is unbound, associated cached items should be removed from cache store.
         }
-        log.debug("Cache config for request URI {} removed.", cacheConfig.getRequestUri());
+        log.info("Cache config for request URI {} removed.", cacheConfig.getRequestUri());
         log.debug("Total number of cache configs after removal - {}", cacheConfigs.size());
-        // TODO - When a cache config is unbound, associated cached items should be removed from cache store.
-        // TODO - Do not accept duplicates.
     }
 
     /**
@@ -100,11 +125,11 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      * @param cacheStore
      * @param config
      */
-    protected void bindCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> config) {
+    protected void bindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> config) {
         if (config.containsKey(HttpCacheStore.KEY_CACHE_STORE_TYPE) && !cacheStoresMap.containsKey((String) config
                 .get(HttpCacheStore.KEY_CACHE_STORE_TYPE))) {
             cacheStoresMap.put((String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), cacheStore);
-            log.debug("Cache store implementation {} has been added", (String) config.get(HttpCacheStore
+            log.info("Cache store implementation {} has been added", (String) config.get(HttpCacheStore
                     .KEY_CACHE_STORE_TYPE));
             log.debug("Total number of cache stores in the map - {}", cacheStoresMap.size());
         }
@@ -116,11 +141,11 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      * @param cacheStore
      * @param config
      */
-    protected void unbindCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> config) {
+    protected void unbindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> config) {
         if (config.containsKey(HttpCacheStore.KEY_CACHE_STORE_TYPE) && cacheStoresMap.containsKey((String) config.get
                 (HttpCacheStore.KEY_CACHE_STORE_TYPE))) {
             cacheStoresMap.remove((String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
-            log.debug("Cache store removed - {}.", (String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
+            log.info("Cache store removed - {}.", (String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
             log.debug("Total number of cache stores after removal - {}", cacheStoresMap.size());
         }
     }
@@ -131,11 +156,13 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      * @param cacheHandlingRule
      * @param config
      */
-    protected void bindCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String, Object>
+    protected void bindHttpCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String, Object>
             config) {
-        cacheHandlingRules.add(cacheHandlingRule);
-        log.debug("Cache handling rule implementation {} has been added", cacheHandlingRule.getClass().getName());
-        log.debug("Total number of cache handling rule available after addition - {}", cacheHandlingRules.size());
+        if (!cacheHandlingRules.contains(cacheHandlingRule)) {
+            cacheHandlingRules.add(cacheHandlingRule);
+            log.debug("Cache handling rule implementation {} has been added", cacheHandlingRule.getClass().getName());
+            log.debug("Total number of cache handling rule available after addition - {}", cacheHandlingRules.size());
+        }
 
     }
 
@@ -145,13 +172,13 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      * @param cacheHandlingRule
      * @param config
      */
-    protected void unbindCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String, Object>
-            config) {
+    protected void unbindHttpCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String,
+            Object> config) {
         if (cacheHandlingRules.contains(cacheHandlingRule)) {
             cacheHandlingRules.remove(cacheHandlingRule);
+            log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
+            log.debug("Total number of cache handling rules available after removal - {}", cacheHandlingRules.size());
         }
-        log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
-        log.debug("Total number of cache handling rules available after removal - {}", cacheHandlingRules.size());
     }
 
     @Activate
@@ -167,7 +194,17 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     //-----------------------<Interface specific implementation>--------//
     @Override
     public boolean isRequestCacheable(SlingHttpServletRequest request) {
-        return false;
+
+        // TODO - Check if request is cacheable as per any cache config.
+
+        // Execute custom rules.
+        for (HttpCacheHandlingRule rule : cacheHandlingRules) {
+            if (!rule.onRequestReceive(request)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -178,12 +215,32 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
     @Override
     public boolean isCacheHit(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
+        // Check if the cache set in the config contains the key.
+        if (cacheStoresMap.contains(cacheConfig.getCacheStoreName())) {
+            return cacheStoresMap.get(cacheConfig.getCacheStoreName()).contains(new CacheKey().build(request,
+                    cacheConfig));
+        } else {
+            log.debug("Cache store set in the config is not available.");
+        }
         return false;
     }
 
     @Override
-    public void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+    public void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response,
+                                    HttpCacheConfig cacheConfig) {
+        // Get the cached content from cache
+        CacheContent cacheContent = cacheStoresMap.get(cacheConfig.getCacheStoreName()).getIfPresent(new CacheKey()
+                .build(request, cacheConfig));
 
+         // Execute custom rules.
+        for (HttpCacheHandlingRule rule : cacheHandlingRules) {
+            if (!rule.onCacheDeliver(request, response)) {
+                // TODO log details
+                return;
+            }
+        }
+
+        // TODO - Populate the response
     }
 
     @Override
@@ -206,30 +263,67 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
     @Override
     public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse
-            response, HttpCacheConfig httpCacheConfig) {
-        return null;
+            response, HttpCacheConfig cacheConfig) throws HttpCacheException {
+        CacheKey cacheKey = new CacheKey().build(request, cacheConfig);
+
+        try {
+            return new HttpCacheServletResponseWrapper(response, CacheUtils.createTemporaryCacheFile(cacheKey));
+        } catch (FileNotFoundException e) {
+            // TODO - Handle and rethrow.
+            throw new HttpCacheException(e);
+        }
     }
 
     @Override
-    public boolean cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
+    public void cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
             cacheConfig) {
         HttpCacheServletResponseWrapper responseWrapper = null;
 
         if (response instanceof HttpCacheServletResponseWrapper) {
             responseWrapper = (HttpCacheServletResponseWrapper) response;
+        } else {
+            // Assert error.
         }
+
+        // Execute custom rules.
+        for (HttpCacheHandlingRule rule : cacheHandlingRules) {
+            if (!rule.onResponseCache(request, response)) {
+                log.debug("Per custom rule {} caching for this request {} has been cancelled.", rule.getClass()
+                        .getName(), request.getRequestURI());
+                return;
+            }
+        }
+
         // TODO - Find out the when the stream gets closed as it's tied to servlet response stream closure.
-        responseWrapper.getTempCacheFile();
-        return false;
+        CacheKey cacheKey = new CacheKey().build(request, cacheConfig);
+        CacheContent cacheContent = null;
+        try {
+            cacheContent = new CacheContent().build(responseWrapper);
+            cacheStoresMap.get(cacheConfig.getCacheStoreName()).put(cacheKey, cacheContent);
+        } catch (HttpCacheDataStreamException e) {
+            // TODO - Revamp exception handling strategy.
+        }
     }
 
     @Override
     public boolean isPathPotentialToInvalidate(String path) {
+        // TODO - Find out all the cache config which has this path applicable for invalidation. If one of them is
+        // found, return false;
         return false;
     }
 
     @Override
-    public boolean invalidateCache(String path) {
-        return false;
+    public void invalidateCache(String path) {
+        // Execute custom rules.
+        for (HttpCacheHandlingRule rule : cacheHandlingRules) {
+            if (!rule.onCacheInvalidate(path)) {
+                log.debug("Per custom rule {} this invalidation has been cancelled.", rule.getClass().getName());
+                return;
+            }
+        }
+
+        // TODO - Find out all the cache config which has this path applicable for invalidation.
+        // TODO - Hit the corresponding store and check if corresponding key is present.
+        // TODO - If present, invalidate the cache.
     }
 }

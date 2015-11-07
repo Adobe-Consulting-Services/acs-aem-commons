@@ -32,7 +32,7 @@ public interface HttpCacheConfig {
      *
      * @return
      */
-    List<String> geUserGroupNames();
+    List<String> getUserGroupNames();
 
     /**
      * Name of the configured cache store.
