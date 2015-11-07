@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.httpcache.exception;
 
 /**
- *
+ * Custom exception representing failure condition in cache engine.
  */
 public class HttpCacheEngineException extends HttpCacheException {
     public HttpCacheEngineException() {

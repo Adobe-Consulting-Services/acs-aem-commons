@@ -232,7 +232,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         CacheContent cacheContent = cacheStoresMap.get(cacheConfig.getCacheStoreName()).getIfPresent(new CacheKey()
                 .build(request, cacheConfig));
 
-         // Execute custom rules.
+        // Execute custom rules.
         for (HttpCacheHandlingRule rule : cacheHandlingRules) {
             if (!rule.onCacheDeliver(request, response)) {
                 // TODO log details
