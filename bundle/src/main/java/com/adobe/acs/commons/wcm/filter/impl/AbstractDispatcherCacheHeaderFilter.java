@@ -63,12 +63,6 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
 
     protected static final String DISPATCHER_AGENT_HEADER_VALUE = "Communique-Dispatcher";
 
-    protected static final String CACHE_CONTROL_NAME = "Cache-Control";
-
-    protected static final String EXPIRES_NAME = "Expires";
-
-    protected static final String EXPIRES_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
-
     private List<ServiceRegistration> filterRegistrations = new ArrayList<ServiceRegistration>();
 
     /**
@@ -123,23 +117,18 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean accepts(final HttpServletRequest request) {
+    protected boolean accepts(final HttpServletRequest request) {
 
         Enumeration<String> agentsEnum = request.getHeaders(SERVER_AGENT_NAME);
-        Enumeration<String> ccEnum = request.getHeaders(CACHE_CONTROL_NAME);
-
         List<String> serverAgents = agentsEnum != null ? Collections.list(agentsEnum) : Collections.<String>emptyList();
-        List<String> cacheControl = ccEnum != null ? Collections.list(ccEnum) : Collections.<String>emptyList();
 
         // Only inject when:
         // - GET request
         // - No Params
         // - From Dispatcher
-        // - Header doesn't already exist
         if (StringUtils.equalsIgnoreCase("get", request.getMethod()) && 
             request.getParameterMap().isEmpty() && 
-            serverAgents.contains(DISPATCHER_AGENT_HEADER_VALUE) && 
-            cacheControl.isEmpty()) {
+            serverAgents.contains(DISPATCHER_AGENT_HEADER_VALUE)) {
 
             return true;
         }

@@ -22,8 +22,15 @@ package com.adobe.acs.commons.wcm.filter.impl;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,22 +49,45 @@ public class DispatcherMaxAgeHeaderFilterTest {
     Dictionary<String, Object> properties = null;
 
     private long maxage = 2000;
-    
+
+    Set<String> agents = null;
+    Set<String> cachecontrol = null;
+
+    @SuppressWarnings("rawtypes")
+    Map params = null;
+
     @Mock
     ComponentContext componentContext;
+
+    @Mock
+    HttpServletRequest request;
 
     @Before
     public void setup() throws Exception {
         properties = new Hashtable<String, Object>();
         properties.put(DispatcherMaxAgeHeaderFilter.PROP_MAX_AGE, maxage);
 
+        agents = new HashSet<String>();
+        cachecontrol = new HashSet<String>();
+        params = new HashMap();
+
         filter = new DispatcherMaxAgeHeaderFilter();
+
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getParameterMap()).thenReturn(params);
+        agents.add(AbstractDispatcherCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
+                .thenReturn(Collections.enumeration(agents));
+
     }
 
     @After
     public void tearDown() throws Exception {
         properties = null;
-        reset(componentContext);
+        agents = null;
+        cachecontrol = null;
+        params = null;
+        reset(componentContext, request);
     }
 
     @Test
@@ -74,7 +104,45 @@ public class DispatcherMaxAgeHeaderFilterTest {
         assertEquals("max-age=" + maxage, filter.getHeaderValue());
     }
 
-    @Test(expected=ConfigurationException.class)
+    @Test
+    public void testAcceptsHasCacheControlHeader() throws Exception {
+
+        cachecontrol.add("Some Cache Control Header");
+
+        when(request.getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME))
+                .thenReturn(Collections.enumeration(cachecontrol));
+
+        boolean result = filter.accepts(request);
+        assertFalse(result);
+
+        verify(request).getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME);
+    }
+
+    @Test
+    public void testAcceptsNoCacheControlHeader() throws Exception {
+
+        when(request.getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME))
+                .thenReturn(Collections.enumeration(cachecontrol));
+
+        boolean result = filter.accepts(request);
+        assertTrue(result);
+
+        verify(request).getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testAcceptsCalledParent() throws Exception {
+
+        params.put("key", "value");
+
+        boolean result = filter.accepts(request);
+        assertFalse(result);
+
+        verify(request, times(0)).getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME);
+    }
+
+    @Test(expected = ConfigurationException.class)
     public void testActivateNoMaxAge() throws Exception {
         properties.remove(DispatcherMaxAgeHeaderFilter.PROP_MAX_AGE);
         when(componentContext.getProperties()).thenReturn(properties);

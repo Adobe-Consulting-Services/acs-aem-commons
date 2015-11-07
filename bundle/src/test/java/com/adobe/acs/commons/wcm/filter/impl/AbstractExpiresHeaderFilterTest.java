@@ -24,9 +24,16 @@ import static org.mockito.Mockito.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.After;
@@ -47,13 +54,26 @@ public class AbstractExpiresHeaderFilterTest {
 
     private String exipres = "02:30";
     
+    Set<String> agents = null;
+    Set<String> expires = null;
+
+    @SuppressWarnings("rawtypes")
+    Map params = null;
+
     @Mock
     ComponentContext componentContext;
+
+    @Mock
+    HttpServletRequest request;
 
     @Before
     public void setup() throws Exception {
         properties = new Hashtable<String, Object>();
         properties.put(AbstractExpiresHeaderFilter.PROP_EXPIRES_TIME, exipres);
+
+        agents = new HashSet<String>();
+        expires = new HashSet<String>();
+        params = new HashMap();
 
         filter = new AbstractExpiresHeaderFilter() {
             @Override
@@ -61,12 +81,23 @@ public class AbstractExpiresHeaderFilterTest {
                 // Do nothing.
             }
         };
+
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getParameterMap()).thenReturn(params);
+        agents.add(AbstractDispatcherCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
+                .thenReturn(Collections.enumeration(agents));
+
     }
 
     @After
     public void tearDown() throws Exception {
         properties = null;
-        reset(componentContext);
+        agents = null;
+        expires = null;
+        params = null;
+
+        reset(componentContext, request);
     }
 
     @Test
@@ -96,14 +127,52 @@ public class AbstractExpiresHeaderFilterTest {
         assertTrue(DateUtils.isSameInstant(expected, actual));
     }
 
-    @Test(expected=ConfigurationException.class)
+    @Test
+    public void testAcceptsHasExpiresHeader() throws Exception {
+
+        expires.add("Some Expires Header");
+
+        when(request.getHeaders(AbstractExpiresHeaderFilter.EXPIRES_NAME))
+                .thenReturn(Collections.enumeration(expires));
+
+        boolean result = filter.accepts(request);
+        assertFalse(result);
+
+        verify(request).getHeaders(AbstractExpiresHeaderFilter.EXPIRES_NAME);
+    }
+
+    @Test
+    public void testAcceptsNoExpiresHeader() throws Exception {
+
+        when(request.getHeaders(AbstractExpiresHeaderFilter.EXPIRES_NAME))
+                .thenReturn(Collections.enumeration(expires));
+
+        boolean result = filter.accepts(request);
+        assertTrue(result);
+
+        verify(request).getHeaders(AbstractExpiresHeaderFilter.EXPIRES_NAME);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testAcceptsCalledParent() throws Exception {
+
+        params.put("key", "value");
+
+        boolean result = filter.accepts(request);
+        assertFalse(result);
+
+        verify(request, times(0)).getHeaders(AbstractExpiresHeaderFilter.EXPIRES_NAME);
+    }
+
+    @Test(expected = ConfigurationException.class)
     public void testActivateNoExpiresTime() throws Exception {
         properties.remove(AbstractExpiresHeaderFilter.PROP_EXPIRES_TIME);
         when(componentContext.getProperties()).thenReturn(properties);
         filter.activate(componentContext);
     }
 
-    @Test(expected=ConfigurationException.class)
+    @Test(expected = ConfigurationException.class)
     public void testActivateInvalidExpiresTime() throws Exception {
         properties.put(AbstractExpiresHeaderFilter.PROP_EXPIRES_TIME, "9999");
         when(componentContext.getProperties()).thenReturn(properties);

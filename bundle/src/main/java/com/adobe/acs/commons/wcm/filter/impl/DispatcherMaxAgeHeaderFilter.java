@@ -20,6 +20,9 @@
 package com.adobe.acs.commons.wcm.filter.impl;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -53,6 +56,8 @@ import org.osgi.service.component.ComponentContext;
 //@formatter:on
 public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
 
+    protected static final String CACHE_CONTROL_NAME = "Cache-Control";
+
     @Property(label = "Cache-Control Max Age",
             description = "Max age value (in seconds) to put in Cache Control header.")
     public static final String PROP_MAX_AGE = "max.age";
@@ -69,6 +74,17 @@ public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderF
     @Override
     protected String getHeaderValue() {
         return HEADER_PREFIX + maxage;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected boolean accepts(HttpServletRequest request) {
+        
+        if (super.accepts(request)) {
+            Enumeration<String> cacheHeader = request.getHeaders(CACHE_CONTROL_NAME);
+            return cacheHeader == null || !cacheHeader.hasMoreElements();
+        }
+        return false;
     }
 
     @Override

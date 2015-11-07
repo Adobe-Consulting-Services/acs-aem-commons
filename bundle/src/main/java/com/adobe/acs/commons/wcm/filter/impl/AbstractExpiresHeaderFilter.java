@@ -24,7 +24,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.TimeZone;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -39,6 +42,10 @@ import org.osgi.service.component.ComponentContext;
  *
  */
 public abstract class AbstractExpiresHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
+
+    protected static final String EXPIRES_NAME = "Expires";
+
+    protected static final String EXPIRES_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
 
     public static final String PROP_EXPIRES_TIME = "expires.time";
 
@@ -73,6 +80,17 @@ public abstract class AbstractExpiresHeaderFilter extends AbstractDispatcherCach
         SimpleDateFormat dateFormat = new SimpleDateFormat(EXPIRES_FORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         return dateFormat.format(next.getTime());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected boolean accepts(HttpServletRequest request) {
+        
+        if (super.accepts(request)) {
+            Enumeration<String> expiresheaders = request.getHeaders(EXPIRES_NAME);
+            return expiresheaders == null || !expiresheaders.hasMoreElements();
+        }
+        return false;
     }
 
     @Override

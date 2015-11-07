@@ -63,8 +63,6 @@ public class AbstractDispatcherCacheHeaderFilterTest {
 
     Set<String> agents = null;
 
-    Set<String> cachecontrol = null;
-
     String pattern = "/content/.*";
 
     private String headerName = "Header Name";
@@ -98,7 +96,6 @@ public class AbstractDispatcherCacheHeaderFilterTest {
 
         params = new HashMap();
         agents = new HashSet<String>();
-        cachecontrol = new HashSet<String>();
 
         filter = new AbstractDispatcherCacheHeaderFilter() {
 
@@ -129,7 +126,6 @@ public class AbstractDispatcherCacheHeaderFilterTest {
         properties = null;
         params = null;
         agents = null;
-        cachecontrol = null;
 
         reset(componentContext, bundleContext, serviceRegistration, request, response, chain);
     }
@@ -270,7 +266,6 @@ public class AbstractDispatcherCacheHeaderFilterTest {
         verify(chain).doFilter(request, response);
 
         verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verifyNoMoreInteractions(request, this.request, response, chain);
     }
@@ -284,7 +279,6 @@ public class AbstractDispatcherCacheHeaderFilterTest {
         verify(chain).doFilter(request, response);
 
         verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
         verifyNoMoreInteractions(request, this.request, response, chain);
@@ -295,14 +289,11 @@ public class AbstractDispatcherCacheHeaderFilterTest {
 
         when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
             .thenReturn(Collections.enumeration(agents));
-        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME))
-            .thenReturn(Collections.enumeration(cachecontrol));
 
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
         verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
         verifyNoMoreInteractions(request, this.request, response, chain);
@@ -316,40 +307,17 @@ public class AbstractDispatcherCacheHeaderFilterTest {
 
         when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
             .thenReturn(Collections.enumeration(agents));
-        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME))
-            .thenReturn(Collections.enumeration(cachecontrol));
 
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
         verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
         verifyNoMoreInteractions(request, this.request, response, chain);
     }
 
-    @Test
-    public void testDoFilterHasCacheControlHeader() throws Exception {
-
-        agents.add(AbstractDispatcherCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
-
-        cachecontrol.add("Some Cache Control Header");
-
-        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
-            .thenReturn(Collections.enumeration(agents));
-        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME))
-            .thenReturn(Collections.enumeration(cachecontrol));
-
-        filter.doFilter(request, response, chain);
-        verify(chain).doFilter(request, response);
-
-        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
-        verify(request).getMethod();
-        verify(request).getParameterMap();
-        verifyNoMoreInteractions(request, this.request, response, chain);
-    }
+    
 
     @Test
     public void testDoFilterSuccess() throws Exception {
@@ -358,14 +326,11 @@ public class AbstractDispatcherCacheHeaderFilterTest {
         agents.add(AbstractDispatcherCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
         when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
             .thenReturn(Collections.enumeration(agents));
-        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME))
-            .thenReturn(Collections.enumeration(cachecontrol));
 
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
         verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
-        verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.CACHE_CONTROL_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
         verify(response).addHeader(headerName, headerValue);
