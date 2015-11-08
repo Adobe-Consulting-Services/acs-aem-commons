@@ -28,16 +28,14 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 
 import com.adobe.acs.commons.genericlists.GenericList;
 import com.day.cq.wcm.api.NameConstants;
-import com.day.cq.wcm.commons.WCMUtils;
 
 public final class GenericListImpl implements GenericList {
 
-    static final String TMPL_GENERIC_LIST = "/apps/acs-commons/templates/utilities/genericlist";
+    static final String RT_GENERIC_LIST = "acs-commons/components/utilities/genericlist";
     static final String PN_VALUE = "value";
     static final String TITLE_PREFIX = NameConstants.PN_TITLE + ".";
 
@@ -107,7 +105,7 @@ public final class GenericListImpl implements GenericList {
         Iterator<Resource> children = listParsys.listChildren();
         while (children.hasNext()) {
             Resource res = children.next();
-            ValueMap map = ResourceUtil.getValueMap(res);
+            ValueMap map = res.getValueMap();
             String title = map.get(NameConstants.PN_TITLE, String.class);
             String value = map.get(PN_VALUE, String.class);
             if (title != null && value != null) {

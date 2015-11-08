@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    activeTab="{Long}0"
+    xtype="tabpanel">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <image
+            jcr:primaryType="cq:Widget"
+            path="/libs/wcm/foundation/components/image/dialog/items/image.infinity.json"
+            xtype="cqinclude"/>
+        <advanced jcr:primaryType="cq:Widget" title="Advanced" xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <alt jcr:primaryType="cq:Widget"
+                     fieldLabel="Alt Text"
+                     name="./alt"
+                     xtype="textfield"/>
+                <link-url jcr:primaryType="cq:Widget"
+                         fieldDescription="Drop files or pages from the Content Finder"
+                         fieldLabel="Link to"
+                         name="./linkURL"
+                         xtype="pathfield"/>
+            </items>
+        </advanced>
+        <transform
+            jcr:primaryType="cq:Widget"
+            title="Image Transform"
+            xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <transform
+                    jcr:primaryType="cq:Widget"
+                    fieldLabel="Transformation Name"
+                    name="./transform"
+                    options="$PATH.options.json"
+                    type="select"
+                    xtype="selection"/>
+            </items>
+        </transform>
+    </items>
+</jcr:root>

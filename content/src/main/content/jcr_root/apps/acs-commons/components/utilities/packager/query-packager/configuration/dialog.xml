@@ -124,6 +124,10 @@
                                 jcr:primaryType="nt:unstructured"
                                 text="JCR-SQL2"
                                 value="JCR-SQL2"/>
+                        <query-builder
+                                jcr:primaryType="nt:unstructured"
+                                text="QueryBuilder"
+                                value="queryBuilder"/>
                     </options>
                 </query-language>
                 <query

@@ -20,9 +20,9 @@
 
 /*global JSON: false, angular: false */
 
-angular.module('bulkWorkflowManagerApp',[])
-    .controller('MainCtrl', ['$scope', '$http', '$timeout',
-    function($scope, $http, $timeout) {
+angular.module('acs-commons-bulk-workflow-manager-app',['acsCoral', 'ACS.Commons.notifications'])
+    .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
+    function($scope, $http, $timeout, NotificationsService) {
 
     $scope.dfault = {
         pollingInterval: 5
@@ -34,8 +34,6 @@ angular.module('bulkWorkflowManagerApp',[])
         polling: false
     };
 
-    $scope.notifications = [];
-
     $scope.formOptions = {};
 
     $scope.form = {};
@@ -44,14 +42,14 @@ angular.module('bulkWorkflowManagerApp',[])
 
     $scope.start = function(isValid) {
         if(!isValid) {
-            $scope.addNotification('error',
+            NotificationsService.add('error',
                 "Invalid form parameters",
                 "Form is incomplete or contains invalid parameters.");
 
             return;
         }
 
-        $scope.results = {};
+        $scope.items = {};
 
         $http({
             method: 'POST',
@@ -67,14 +65,14 @@ angular.module('bulkWorkflowManagerApp',[])
             $scope.notifications.shift();
         }).
         error(function(data, status, headers, config) {
-            $scope.addNotification('error',
-                data.title || "Error starting Bulk Workflow",
-                data.message);
+                NotificationsService.add('error',
+                    data.title || "Error starting Bulk Workflow",
+                    data.message);
 
             $scope.notifications.shift();
         });
 
-        $scope.addNotification('notice',
+        NotificationsService.add('notice',
             "Starting...",
             "Collecting payloads for processing. Depending on the query and number of payload items this may take some time. Please be patient.");
     };
@@ -91,7 +89,7 @@ angular.module('bulkWorkflowManagerApp',[])
                 $timeout.cancel($scope.app.pollingPromise);
             }).
             error(function(data, status, headers, config) {
-                $scope.addNotification('error',
+                NotificationsService.add('error',
                     data.title || 'Error stopping the bulk workflow process.',
                     data.message);
             });
@@ -110,7 +108,7 @@ angular.module('bulkWorkflowManagerApp',[])
                 $scope.status();
             }).
             error(function(data, status, headers, config) {
-                $scope.addNotification('error',
+                NotificationsService.add('error',
                     data.title || 'Error resuming bulk workflow process.',
                     data.message);
             });
@@ -142,7 +140,7 @@ angular.module('bulkWorkflowManagerApp',[])
             }).
             error(function(data, status, headers, config) {
                 $scope.app.polling = false;
-                $scope.addNotification('error',
+                NotificationsService.add('error',
                     'Could not retrieve bulk workflow status.', data.message);
             });
     };
@@ -158,7 +156,7 @@ angular.module('bulkWorkflowManagerApp',[])
                 $scope.formOptions = data || {};
             }).
             error(function(data, status, headers, config) {
-                $scope.addNotification('error',
+                NotificationsService.add('error',
                     data.title || 'Error retrieving form values from the server.',
                     data.message);
             });
@@ -181,23 +179,5 @@ angular.module('bulkWorkflowManagerApp',[])
             $timeout.cancel($scope.app.pollingPromise);
             $scope.status();
         }
-    };
-
-    $scope.addNotification = function (type, title, message) {
-        var timeout = 30000;
-
-        if(type === 'success')  {
-            timeout = timeout / 2;
-        }
-
-        $scope.notifications.push({
-            type: type,
-            title: title,
-            message: message
-        });
-
-        $timeout(function() {
-            $scope.notifications.shift();
-        }, timeout);
     };
 }]);

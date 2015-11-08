@@ -41,26 +41,23 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 
-@Component(
-        label = "ACS AEM Commons - Forms - Forms POST-Handler Filter",
-        description = "Request Filter that handles some internal routing of ACS-AEM-Commons Form POST requests "
-                + "to Page URIs.",
-        metatype = false
-)
+/**
+ * ACS AEM Commons - Forms - Forms POST-Handler Filter
+ * Request Filter that handles some internal routing of ACS-AEM-Commons Form POST requests
+ *  to Page URIs.
+ */
+@Component
 @Properties({
         @Property(
                 name = "sling.filter.scope",
-                value = "request",
-                propertyPrivate = true
+                value = "request"
         ),
         @Property(
                 name = "filter.order",
-                intValue = 0,
-                propertyPrivate = true
+                intValue = 0
         )
 })
 @Service
-
 public class FormsPostFilterImpl implements javax.servlet.Filter {
     private static final Logger log = LoggerFactory.getLogger(FormsPostFilterImpl.class);
 

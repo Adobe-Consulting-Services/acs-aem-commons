@@ -23,7 +23,7 @@ package com.adobe.acs.commons.replication.dispatcher.impl;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter.FlushType;
-import com.adobe.acs.commons.util.OsgiPropertyUtil;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.Preprocessor;
 import com.day.cq.replication.ReplicationAction;
@@ -36,6 +36,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
@@ -66,6 +67,11 @@ import java.util.regex.Pattern;
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
 @Service
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Rule: {prop.replication-action-type}, for Hirearchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
+})
 public class DispatcherFlushRulesImpl implements Preprocessor {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
 
@@ -124,8 +130,8 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
-    private Map<Pattern, String> hierarchicalFlushRules = new LinkedHashMap<Pattern, String>();
-    private Map<Pattern, String> resourceOnlyFlushRules = new LinkedHashMap<Pattern, String>();
+    private Map<Pattern, String[]> hierarchicalFlushRules = new LinkedHashMap<Pattern, String[]>();
+    private Map<Pattern, String[]> resourceOnlyFlushRules = new LinkedHashMap<Pattern, String[]>();
     private ReplicationActionType replicationActionType = null;
 
     /**
@@ -151,33 +157,37 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
             resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
             // Flush full content hierarchies
-            for (final Map.Entry<Pattern, String> entry : this.hierarchicalFlushRules.entrySet()) {
+            for (final Map.Entry<Pattern, String[]> entry : this.hierarchicalFlushRules.entrySet()) {
                 final Pattern pattern = entry.getKey();
                 final Matcher m = pattern.matcher(path);
 
                 if (m.matches()) {
-                    final String flushPath = m.replaceAll(entry.getValue());
-
-                    log.debug("Requesting hierarchical flush of associated path: {} ~> {}", path,
-                    		flushPath);
-                    dispatcherFlusher.flush(resourceResolver, flushActionType, false,
-                            HIERARCHICAL_FILTER,
-                            flushPath);
+                    for (final String value : entry.getValue()) {
+                        final String flushPath = m.replaceAll(value);
+    
+                        log.debug("Requesting hierarchical flush of associated path: {} ~> {}", path,
+                                flushPath);
+                        dispatcherFlusher.flush(resourceResolver, flushActionType, false,
+                                HIERARCHICAL_FILTER,
+                                flushPath);
+                    }
                 }
             }
 
             // Flush explicit resources using the CQ-Action-Scope ResourceOnly header
-            for (final Map.Entry<Pattern, String> entry : this.resourceOnlyFlushRules.entrySet()) {
+            for (final Map.Entry<Pattern, String[]> entry : this.resourceOnlyFlushRules.entrySet()) {
                 final Pattern pattern = entry.getKey();
                 final Matcher m = pattern.matcher(path);
 
                 if (m.matches()) {
-                    final String flushPath = m.replaceAll(entry.getValue());
-
-                    log.debug("Requesting ResourceOnly flush of associated path: {} ~> {}", path, entry.getValue());
-                    dispatcherFlusher.flush(resourceResolver, flushActionType, false,
-                            RESOURCE_ONLY_FILTER,
-                            flushPath);
+                    for (final String value : entry.getValue()) {
+                        final String flushPath = m.replaceAll(value);
+    
+                        log.debug("Requesting ResourceOnly flush of associated path: {} ~> {}", path, entry.getValue());
+                        dispatcherFlusher.flush(resourceResolver, flushActionType, false,
+                                RESOURCE_ONLY_FILTER,
+                                flushPath);
+                    }
                 }
             }
 
@@ -235,14 +245,14 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                         DEFAULT_REPLICATION_ACTION_TYPE_NAME));
 
         /* Flush Rules */
-        this.hierarchicalFlushRules = this.configureFlushRules(OsgiPropertyUtil.toMap(
+        this.hierarchicalFlushRules = this.configureFlushRules(ParameterUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES),
                         DEFAULT_HIERARCHICAL_FLUSH_RULES), "="));
 
         log.debug("Hierarchical flush rules: " + this.hierarchicalFlushRules);
 
         /* ResourceOnly Flush Rules */
-        this.resourceOnlyFlushRules = this.configureFlushRules(OsgiPropertyUtil.toMap(
+        this.resourceOnlyFlushRules = this.configureFlushRules(ParameterUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_ONLY_FLUSH_RULES),
                         DEFAULT_RESOURCE_ONLY_FLUSH_RULES), "="));
 
@@ -255,13 +265,13 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
      * @param configuredRules String based flush rules from OSGi configuration
      * @return returns the configures flush rules
      */
-     protected final Map<Pattern, String> configureFlushRules(final Map<String, String> configuredRules)
+     protected final Map<Pattern, String[]> configureFlushRules(final Map<String, String> configuredRules)
              throws Exception {
-        final Map<Pattern, String> rules = new LinkedHashMap<Pattern, String>();
+        final Map<Pattern, String[]> rules = new LinkedHashMap<Pattern, String[]>();
 
         for (final Map.Entry<String, String> entry : configuredRules.entrySet()) {
             final Pattern pattern = Pattern.compile(entry.getKey());
-            rules.put(pattern, entry.getValue());
+            rules.put(pattern, entry.getValue().split("&"));
         }
 
         return rules;
@@ -288,8 +298,8 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
     @Deactivate
     protected final void deactivate(final Map<String, String> properties) {
-        this.hierarchicalFlushRules = new HashMap<Pattern, String>();
-        this.resourceOnlyFlushRules = new HashMap<Pattern, String>();
+        this.hierarchicalFlushRules = new HashMap<Pattern, String[]>();
+        this.resourceOnlyFlushRules = new HashMap<Pattern, String[]>();
         this.replicationActionType = null;
     }
 

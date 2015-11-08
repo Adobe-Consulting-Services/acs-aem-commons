@@ -41,10 +41,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * ACS AEM Commons - Replicate Version Servlet
+ * Servlet end-point used to initiate replication of resource versions.
+ */
 @SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Replicate Version Servlet",
-        description = "Servlet end-point used to initiate replication of resource versions.",
         resourceTypes = "acs-commons/components/utilities/version-replicator",
         selectors = "replicateversion",
         extensions = "json",

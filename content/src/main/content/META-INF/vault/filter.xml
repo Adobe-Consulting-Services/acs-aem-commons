@@ -25,8 +25,10 @@
         <include pattern="/etc/acs-commons/oak-index-manager(.*)?" />
         <include pattern="/etc/acs-commons/bulk-workflow-manager" />
         <include pattern="/etc/acs-commons/bulk-workflow-manager/jcr:content" />
+        <include pattern="/etc/acs-commons/jcr-compare(.*)?" />
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?" />
         <include pattern="/etc/acs-commons/version-replicator(.*)?" />
+        <include pattern="/etc/acs-commons/version-compare(.*)?" />
         <include pattern="/etc/acs-commons/dispatcher-flush"/>
         <include pattern="/etc/acs-commons/dispatcher-flush/jcr:content"/>
         <include pattern="/etc/acs-commons/lists"/>
@@ -35,8 +37,15 @@
         <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content"/>
         <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content/list"/>
         <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content/list/default_\d+"/>
+        <include pattern="/etc/acs-commons/lists/font-awesome-icons"/>
+        <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content"/>
+        <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list"/>
+        <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list/item_\d+"/>
+        <include pattern="/etc/acs-commons/notifications"/>
+        <include pattern="/etc/acs-commons/notifications/jcr:content"/>
         <include pattern="/etc/acs-commons/packagers"/>
         <include pattern="/etc/acs-commons/packagers/jcr:content"/>
+        <include pattern="/etc/acs-commons/workflow-remover(.*)"/>
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
 </workspaceFilter>

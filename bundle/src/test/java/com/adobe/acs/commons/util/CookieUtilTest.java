@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.util;
 
 import org.junit.*;
+import org.mockito.ArgumentCaptor;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -29,8 +30,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class CookieUtilTest {
 
@@ -146,6 +146,15 @@ public class CookieUtilTest {
         String[] cookieNames = {"dog-mammal", "cat-mammal"};
         CookieUtil.dropCookies(request, response, "/", cookieNames);
         assertTrue(true);
+
+        ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
+
+        verify(response, times(2)).addCookie(cookieCaptor.capture());
+
+        for (Cookie cookie : cookieCaptor.getAllValues()) {
+            assertEquals(0, cookie.getMaxAge());
+            assertEquals("", cookie.getValue());
+        }
     }
 
     /**

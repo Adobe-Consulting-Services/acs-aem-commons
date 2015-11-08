@@ -20,12 +20,9 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -37,13 +34,9 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.commons.json.jcr.JsonItemWriter;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import com.adobe.acs.commons.util.PathInfoUtil;
@@ -67,7 +60,7 @@ import com.adobe.granite.xss.XSSAPI;
  */
 @SuppressWarnings("serial")
 @SlingServlet(extensions = "json", selectors = "rte", resourceTypes = "sling/servlet/default")
-public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
+public final class RTEConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
     private static final int RTE_HEIGHT = 200;
 
@@ -90,7 +83,8 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
 
     private String rootPath;
 
-    private JSONObject createEmptyRTE(String rteName) throws JSONException {
+    @Override
+    protected JSONObject createEmptyWidget(String rteName) throws JSONException {
         JSONObject object = new JSONObject();
         object.put("xtype", "richtext");
         object.put("name", "./" + xssApi.encodeForJSString(rteName));
@@ -99,25 +93,13 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
         return object;
     }
 
-    private boolean matches(String componentPath, Resource resource) {
-        ValueMap map = resource.adaptTo(ValueMap.class);
-        if (map == null) {
-            return false;
-        }
-        String pattern = map.get("pattern", String.class);
-        if (pattern == null) {
-            return false;
-        }
-        return componentPath.matches(pattern);
-    }
-
     private void returnDefault(String rteName, SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException, ServletException {
         response.setContentType("application/json");
         try {
             Resource root = request.getResourceResolver().getResource(DEFAULT_CONFIG);
             if (root == null) {
-                writeEmptyRTE(rteName, response);
+                writeEmptyWidget(rteName, response);
                 return;
             }
 
@@ -127,54 +109,10 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
         }
     }
 
-    private JSONObject toJSONObject(Resource resource) throws JSONException, ServletException {
-        JSONObject config = null;
-        Node node = resource.adaptTo(Node.class);
-        if (node != null) {
-
-            JsonItemWriter writer = new JsonItemWriter(null);
-            StringWriter string = new StringWriter();
-            try {
-                writer.dump(node, string, -1);
-            } catch (RepositoryException e) {
-                throw new ServletException(e);
-            }
-            config = new JSONObject(string.toString());
-
-        }
-        return config;
-    }
-
-    /**
-     * Load the default configuration and "underlay" it under the provided
-     * configuration so that the provided configuration overwrites the default
-     * configuration.
-     * 
-     * @param resolver the resource resolver
-     * @param config the configuration to underlay
-     * @return the underlayed configuration
-     * @throws JSONException
-     * @throws ServletException
-     */
-    private JSONObject underlayDefault(ResourceResolver resolver, JSONObject config) throws JSONException,
-            ServletException {
-        JSONObject defaultStructure = toJSONObject(resolver.getResource(DEFAULT_CONFIG));
-        if (defaultStructure != null) {
-            Iterator<String> keys = config.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                defaultStructure.put(key, config.get(key));
-            }
-            return defaultStructure;
-        } else {
-            return config;
-        }
-    }
-
     private void writeConfigResource(Resource resource, String rteName, boolean isDefault,
             SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException, JSONException, ServletException {
-        JSONObject widget = createEmptyRTE(rteName);
+        JSONObject widget = createEmptyWidget(rteName);
 
         // these two size properties seem to be necessary to get the size correct
         // in a component dialog
@@ -209,7 +147,7 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
         }
 
         if (config.optBoolean("includeDefault")) {
-            config = underlayDefault(resource.getResourceResolver(), config);
+            config = underlay(config, resource.getResourceResolver().getResource(DEFAULT_CONFIG));
         }
 
         widget.put("rtePlugins", config);
@@ -220,12 +158,6 @@ public final class RTEConfigurationServlet extends SlingSafeMethodsServlet {
         parent.put("padding", 0);
         parent.accumulate("items", widget);
         parent.write(response.getWriter());
-    }
-
-    private void writeEmptyRTE(String rteName, SlingHttpServletResponse response) throws IOException,
-            JSONException {
-        JSONObject rte = createEmptyRTE(rteName);
-        rte.write(response.getWriter());
     }
 
     @Activate

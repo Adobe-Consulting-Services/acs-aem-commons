@@ -75,7 +75,10 @@ import java.util.Set;
                 name = "sling.servlet.methods",
                 cardinality = Integer.MAX_VALUE,
                 value = {"GET"}
-        )
+        ),
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Target type: {prop.target-resource-type}")
 })
 @Service(Servlet.class)
 public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {

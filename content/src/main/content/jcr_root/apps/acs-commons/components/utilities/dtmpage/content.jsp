@@ -22,7 +22,8 @@
 %><%@include file="/libs/foundation/global.jsp"%><div>
 
 <div>
-    <h3>Dynamic Tag Management</h3>   
+    <h3>Dynamic Tag Management</h3>
+    <h4>Note - this integration is deprecated. Please use the standard integration instead.</h4>
     <ul>
         <li><div class="li-bullet"><strong>Header Script URL: </strong><br><%= xssAPI.encodeForHTML(properties.get("headerUrl", "")).replaceAll("\\&\\#xa;","<br>") %></div></li>
         <li><div class="li-bullet"><strong>JavaScript Footer Snippet: </strong><br><%= xssAPI.encodeForHTML(properties.get("footerCode", "")).replaceAll("\\&\\#xa;","<br>") %></div></li>

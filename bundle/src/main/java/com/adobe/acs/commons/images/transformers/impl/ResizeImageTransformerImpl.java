@@ -34,16 +34,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Image Transformer - Resize",
-        description = "ImageTransformer that resizes the layer. Accepts two Integer params: height and width."
-                + "If either is left blank the missing dimension will be computed based on the original layer's "
-                + "aspect ratio")
+/**
+ * ACS AEM Commons - Image Transformer - Resize
+ * ImageTransformer that resizes the layer. Accepts two Integer params: height and width.
+ * If either is left blank the missing dimension will be computed based on the original layer's
+ * aspect ratio
+ */
+@Component
 @Properties({
         @Property(
                 name = ImageTransformer.PROP_TYPE,
-                value = ResizeImageTransformerImpl.TYPE,
-                propertyPrivate = true
+                value = ResizeImageTransformerImpl.TYPE
         )
 })
 @Service
@@ -52,12 +53,11 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
     static final String TYPE = "resize";
 
-    private static final String KEY_WIDTH = "width";
-    private static final String KEY_WIDTH_ALIAS = "w";
+    static final String KEY_WIDTH = "width";
+    static final String KEY_WIDTH_ALIAS = "w";
 
-    private static final String KEY_HEIGHT = "height";
-    private static final String KEY_HEIGHT_ALIAS = "h";
-
+    static final String KEY_HEIGHT = "height";
+    static final String KEY_HEIGHT_ALIAS = "h";
 
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;

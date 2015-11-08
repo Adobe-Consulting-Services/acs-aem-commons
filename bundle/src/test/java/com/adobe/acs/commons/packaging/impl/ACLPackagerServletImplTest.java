@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.util.AemCapabilityHelper;
 import com.day.jcr.vault.packaging.JcrPackage;
 import com.day.jcr.vault.packaging.JcrPackageManager;
 import com.day.jcr.vault.packaging.Version;
@@ -63,22 +64,39 @@ public class ACLPackagerServletImplTest {
     static final String CONTENT_RESOURCE_PATH = "/etc/acs-commons/packages/acl-packager-test/jcr:content";
     static final String CONTENT_RESOURCE_TYPE = "acs-commons/components/utilities/packager/acl-packager";
 
-    SuccessMockResourceResolver resourceResolver = new SuccessMockResourceResolver();
+    Crx2SuccessMockResourceResolver crx2ResourceResolver = new Crx2SuccessMockResourceResolver();
+    OakSuccessMockResourceResolver oakResourceResolver = new OakSuccessMockResourceResolver();
+
     ErrorMockResourceResolver errorResourceResolver = new ErrorMockResourceResolver();
 
     @Spy
-    MockResource contentResource = new MockResource(resourceResolver, CONTENT_RESOURCE_PATH, CONTENT_RESOURCE_TYPE);
+    MockResource crx2ContentResource = new MockResource(crx2ResourceResolver, CONTENT_RESOURCE_PATH, CONTENT_RESOURCE_TYPE);
 
     @Spy
-    MockResource configurationResource = new MockResource(resourceResolver,
+    MockResource crx2ConfigurationResource = new MockResource(crx2ResourceResolver,
             CONTENT_RESOURCE_PATH + "/configuration", "");
+
+
+    @Spy
+    MockResource oakContentResource = new MockResource(oakResourceResolver, CONTENT_RESOURCE_PATH,
+            CONTENT_RESOURCE_TYPE);
+
+    @Spy
+    MockResource oakConfigurationResource = new MockResource(oakResourceResolver,
+            CONTENT_RESOURCE_PATH + "/configuration", "");
+
 
     @Mock
     PackageHelper packageHelper;
 
-    @Mock JcrPackage jcrPackage;
+    @Mock
+    JcrPackage jcrPackage;
 
-    @Mock Session session;
+    @Mock
+    AemCapabilityHelper aemCapabilityHelper;
+
+    @Mock
+    Session session;
 
     @InjectMocks
     ACLPackagerServletImpl aclPackagerServlet;
@@ -95,10 +113,14 @@ public class ACLPackagerServletImplTest {
 
         ValueMap properties = new ValueMapDecorator(map);
 
-        doReturn(properties).when(configurationResource).adaptTo(ValueMap.class);
+        doReturn(properties).when(crx2ConfigurationResource).adaptTo(ValueMap.class);
+        doReturn(properties).when(oakConfigurationResource).adaptTo(ValueMap.class);
 
-        resourceResolver.addResource(contentResource);
-        resourceResolver.addResource(configurationResource);
+        crx2ResourceResolver.addResource(crx2ContentResource);
+        crx2ResourceResolver.addResource(crx2ConfigurationResource);
+
+        oakResourceResolver.addResource(oakContentResource);
+        oakResourceResolver.addResource(oakConfigurationResource);
 
         /* PackageHelper Mocks */
         when(packageHelper.getNextVersion(any(JcrPackageManager.class), any(String.class), any(String.class),
@@ -111,6 +133,7 @@ public class ACLPackagerServletImplTest {
         when(packageHelper.getSuccessJSON(any(JcrPackage.class))).thenReturn("{\"status\": \"success\"}");
         when(packageHelper.getErrorJSON(any(String.class))).thenReturn("{\"status\": \"error\"}");
         when(packageHelper.getPathFilterSetPreviewJSON(any(Collection.class))).thenReturn("{\"status\": \"preview\"}");
+
     }
 
     @After
@@ -119,7 +142,9 @@ public class ACLPackagerServletImplTest {
     }
 
     @Test
-    public void testDoPost_success() throws Exception {
+    public void testDoPost_crx2_success() throws Exception {
+        when(aemCapabilityHelper.isOak()).thenReturn(false);
+
         final String resourcePath = "/etc/acs-commons/packages/acl-packager-test/jcr:content";
         final String selectors = "package";
         final String extension = "json";
@@ -128,13 +153,40 @@ public class ACLPackagerServletImplTest {
 
         MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourcePath, selectors,
                 extension, suffix, queryString);
-        request.setResourceResolver(resourceResolver);
+        request.setResourceResolver(crx2ResourceResolver);
         request.setMethod("POST");
 
         MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
-        request.setResourceResolver(resourceResolver);
-        request.setResource(contentResource);
+        request.setResourceResolver(crx2ResourceResolver);
+        request.setResource(crx2ContentResource);
+
+        aclPackagerServlet.doPost(request, response);
+
+        final JSONObject actual = new JSONObject(response.getOutput().toString());
+        assertEquals("success", actual.optString("status", "error"));
+    }
+
+
+    @Test
+    public void testDoPost_oak_success() throws Exception {
+        when(aemCapabilityHelper.isOak()).thenReturn(true);
+
+        final String resourcePath = "/etc/acs-commons/packages/acl-packager-test/jcr:content";
+        final String selectors = "package";
+        final String extension = "json";
+        final String suffix = "";
+        final String queryString = "";
+
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourcePath, selectors,
+                extension, suffix, queryString);
+        request.setResourceResolver(oakResourceResolver);
+        request.setMethod("POST");
+
+        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
+        request.setResourceResolver(oakResourceResolver);
+        request.setResource(oakContentResource);
 
         aclPackagerServlet.doPost(request, response);
 
@@ -157,12 +209,11 @@ public class ACLPackagerServletImplTest {
 
         MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
-        request.setResourceResolver(resourceResolver);
-        request.setResource(contentResource);
+        request.setResourceResolver(crx2ResourceResolver);
+        request.setResource(crx2ContentResource);
 
         aclPackagerServlet.doPost(request, response);
         String tmp = response.getOutput().toString();
-        System.out.println(tmp);
         final JSONObject actual = new JSONObject(tmp);
 
         assertEquals("preview", actual.optString("status", "error"));
@@ -184,7 +235,7 @@ public class ACLPackagerServletImplTest {
         MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
         request.setResourceResolver(errorResourceResolver);
-        request.setResource(contentResource);
+        request.setResource(crx2ContentResource);
 
         aclPackagerServlet.doPost(request, response);
 
@@ -193,18 +244,18 @@ public class ACLPackagerServletImplTest {
     }
 
 
-    private class SuccessMockResourceResolver extends MockResourceResolver {
+    private class Crx2SuccessMockResourceResolver extends MockResourceResolver {
         final List<Resource> results;
 
-        public SuccessMockResourceResolver() {
+        public Crx2SuccessMockResourceResolver() {
             super();
 
             results = new LinkedList<Resource>();
-            results.add(new MockResource(this, "/content/dam/rep:policy", ""));
-            results.add(new MockResource(this, "/content/acs-commons/rep:policy", ""));
-            results.add(new MockResource(this, "/etc/workflow/packages/rep:policy", ""));
-            results.add(new MockResource(this, "/var/audit/1/2/3/rep:policy", ""));
-            results.add(new MockResource(this, "/home/groups/authors/rep:policy", ""));
+            results.add(new MockResource(this, "/content/dam/rep:policy", "rep:ACL"));
+            results.add(new MockResource(this, "/content/acs-commons/rep:policy", "rep:ACL"));
+            results.add(new MockResource(this, "/etc/workflow/packages/rep:policy", "rep:ACL"));
+            results.add(new MockResource(this, "/var/audit/1/2/3/rep:policy", "rep:ACL"));
+            results.add(new MockResource(this, "/home/groups/authors/rep:policy", "rep:ACL"));
 
             for(Resource resource : results) {
                 this.addResource(resource);
@@ -252,6 +303,81 @@ public class ACLPackagerServletImplTest {
             return false;
         }
 
+        @Override
+        public boolean isResourceType(Resource resource, String resourceType) {
+            return resource.getResourceType().equals(resourceType);
+        }
+
+        @SuppressWarnings("unchecked")
+        public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+            return (AdapterType) session;
+        }
+    }
+
+    private class OakSuccessMockResourceResolver extends MockResourceResolver {
+        final List<Resource> results;
+
+        public OakSuccessMockResourceResolver() {
+            super();
+
+            results = new LinkedList<Resource>();
+            results.add(new MockResource(this, "/content/dam/rep:policy/allow0", ""));
+            results.add(new MockResource(this, "/content/dam/rep:policy/allow1", ""));
+            results.add(new MockResource(this, "/content/acs-commons/rep:policy/deny", ""));
+            results.add(new MockResource(this, "/etc/workflow/packages/rep:policy/allow", ""));
+            results.add(new MockResource(this, "/var/audit/1/2/3/rep:policy/deny", ""));
+            results.add(new MockResource(this, "/home/groups/authors/rep:policy/allow", ""));
+
+            for(Resource resource : results) {
+                this.addResource(resource);
+            }
+
+            this.addResource(new MockResource(this, "/content/dam/rep:policy", "rep:ACL"));
+            this.addResource(new MockResource(this, "/content/acs-commons/rep:policy", "rep:ACL"));
+            this.addResource(new MockResource(this, "/etc/workflow/packages/rep:policy", "rep:ACL"));
+            this.addResource(new MockResource(this, "/var/audit/1/2/3/rep:policy", "rep:ACL"));
+            this.addResource(new MockResource(this, "/home/groups/authors/rep:policy", "rep:ACL"));
+        }
+
+        @Override
+        public Iterable<Resource> getChildren(final Resource resource) {
+            return null;
+        }
+
+        public Iterator<Resource> findResources(String query, String language) {
+            return this.results.iterator();
+        }
+
+        @Override
+        public void delete(final Resource resource) throws PersistenceException {
+
+        }
+
+        @Override
+        public Resource create(final Resource resource, final String s, final Map<String, Object> stringObjectMap) throws PersistenceException {
+            return null;
+        }
+
+        @Override
+        public void revert() {
+
+        }
+
+        @Override
+        public void commit() throws PersistenceException {
+
+        }
+
+        @Override
+        public boolean hasChanges() {
+            return false;
+        }
+
+        @Override
+        public boolean isResourceType(Resource resource, String resourceType) {
+            return resource.getResourceType().equals(resourceType);
+        }
+
         @SuppressWarnings("unchecked")
         public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
             return (AdapterType) session;
@@ -265,11 +391,11 @@ public class ACLPackagerServletImplTest {
             super();
 
             results = new LinkedList<Resource>();
-            results.add(new MockResource(this, "/content/dam/rep:policy", ""));
-            results.add(new MockResource(this, "/content/acs-commons/rep:policy", ""));
-            results.add(new MockResource(this, "/etc/workflow/packages/rep:policy", ""));
-            results.add(new MockResource(this, "/var/audit/1/2/3/rep:policy", ""));
-            results.add(new MockResource(this, "/home/groups/authors/rep:policy", ""));
+            results.add(new MockResource(this, "/content/dam/rep:policy", "rep:ACL"));
+            results.add(new MockResource(this, "/content/acs-commons/rep:policy", "rep:ACL"));
+            results.add(new MockResource(this, "/etc/workflow/packages/rep:policy", "rep:ACL"));
+            results.add(new MockResource(this, "/var/audit/1/2/3/rep:policy", "rep:ACL"));
+            results.add(new MockResource(this, "/home/groups/authors/rep:policy", "rep:ACL"));
 
             for(Resource resource : results) {
                 this.addResource(resource);

@@ -3,28 +3,23 @@ package com.adobe.acs.commons.images.transformers.impl;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(
-        label = "ACS AEM Commons - Image Transformer - Bounded Resize",
-        description =
-                "ImageTransformer that resizes the layer but will not resize past maximum dimension constraints. "
-                        + "Accepts two Integer params: height and width. "
-                        + "Either width or height will scale to the parameterized limit. "
-                        + "The other dimension scale automatically to maintain the original aspect ratio"
-                        + "If the original image is smaller than the configured dimensions the image won't be resized")
-@Properties({
-        @Property(
-                name = ImageTransformer.PROP_TYPE,
-                value = BoundedResizeTransformerImpl.TYPE,
-                propertyPrivate = true
-        )
-})
+/**
+ * ACS AEM Commons - Image Transformer - Bounded Resize
+ * ImageTransformer that resizes the layer but will not resize past maximum dimension constraints.
+ * Accepts two Integer params: height and width.
+ * Either width or height will scale to the parameterized limit.
+ * The other dimension scale automatically to maintain the original aspect ratio
+ * If the original image is smaller than the configured dimensions the image won't be resized
+ */
+@Component
+@Property(name = ImageTransformer.PROP_TYPE,
+          value = BoundedResizeTransformerImpl.TYPE)
 @Service(value = ImageTransformer.class)
 public class BoundedResizeTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(BoundedResizeTransformerImpl.class);

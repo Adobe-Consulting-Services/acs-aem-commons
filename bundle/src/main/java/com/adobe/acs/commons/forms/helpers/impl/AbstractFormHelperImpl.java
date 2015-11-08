@@ -22,6 +22,7 @@ package com.adobe.acs.commons.forms.helpers.impl;
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
+import com.adobe.acs.commons.forms.impl.FormImpl;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.ArrayUtils;
@@ -44,14 +45,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component(label = "ACS AEM Commons - Forms - Abstract Form Helper",
-        description = "Abstract Form Helper. This provides common behaviors for handling POST-behaviors of the "
-        + "ACS AEM Commons Forms implementation.",
-        metatype = false,
-        componentAbstract = true)
-@Property(name = Constants.SERVICE_RANKING,
-        intValue = FormHelper.SERVICE_RANKING_BASE,
-        propertyPrivate = true)
+/**
+ * ACS AEM Commons - Forms - Abstract Form Helper
+ * Abstract Form Helper. This provides common behaviors for handling POST-behaviors of the
+ *  ACS AEM Commons Forms implementation.
+ */
+@Component(componentAbstract = true)
+@Property(name = Constants.SERVICE_RANKING, intValue = FormHelper.SERVICE_RANKING_BASE)
 public abstract class AbstractFormHelperImpl {
     private static final Logger log = LoggerFactory.getLogger(AbstractFormHelperImpl.class);
 
@@ -192,7 +192,7 @@ public abstract class AbstractFormHelperImpl {
             }
         }
 
-        return this.clean(new Form(formName, request.getResource().getPath(), map));
+        return this.clean(new FormImpl(formName, request.getResource().getPath(), map));
     }
 
     /**
@@ -222,7 +222,7 @@ public abstract class AbstractFormHelperImpl {
             }
         }
 
-        return new Form(form.getName(), form.getResourcePath(), cleanedMap, form.getErrors());
+        return new FormImpl(form.getName(), form.getResourcePath(), cleanedMap, form.getErrors());
     }
 
     /**
@@ -232,7 +232,7 @@ public abstract class AbstractFormHelperImpl {
      * @return
      */
     protected final Form getProtectedForm(final Form form) {
-        return new Form(form.getName(),
+        return new FormImpl(form.getName(),
                 form.getResourcePath(),
                 this.getProtectedData(form.getData()),
                 this.getProtectedErrors(form.getErrors()));
@@ -293,7 +293,7 @@ public abstract class AbstractFormHelperImpl {
      * @param unencoded
      * @return
      */
-    protected final String encode(String unencoded) {
+    protected String encode(String unencoded) {
         if (StringUtils.isBlank(unencoded)) {
             return "";
         }
@@ -311,7 +311,7 @@ public abstract class AbstractFormHelperImpl {
      * @param encoded
      * @return
      */
-    protected final String decode(String encoded) {
+    protected String decode(String encoded) {
         if (StringUtils.isBlank(encoded)) {
             return "";
         }

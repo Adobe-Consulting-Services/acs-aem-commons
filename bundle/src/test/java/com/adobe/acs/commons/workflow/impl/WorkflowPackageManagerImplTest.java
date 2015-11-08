@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -54,6 +55,7 @@ import static org.mockito.Mockito.when;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ResourceCollectionUtil.class, JcrUtil.class})
 public class WorkflowPackageManagerImplTest {
+    private final String NORMAL_PAGE_PATH = "/content/test";
     private final String WORKFLOW_PACKAGE_PATH = "/etc/packages/test";
     private final String[] PAYLOAD_PATHS = {"/content/one", "/content/two"};
 
@@ -81,6 +83,12 @@ public class WorkflowPackageManagerImplTest {
     @Mock
     Resource contentResource;
 
+    @Mock
+    Page normalPage;
+
+    @Mock
+    Resource normalPageContentResource;
+
     @InjectMocks
     WorkflowPackageManager wpm = new WorkflowPackageManagerImpl();
 
@@ -92,9 +100,20 @@ public class WorkflowPackageManagerImplTest {
         when(workflowPackageResource.adaptTo(Node.class)).thenReturn(workflowPackageNode);
         when(workflowPackageNode.getSession()).thenReturn(session);
         when(pageManager.getPage(WORKFLOW_PACKAGE_PATH)).thenReturn(workflowPackagePage);
+        when(pageManager.getContainingPage(WORKFLOW_PACKAGE_PATH)).thenReturn(workflowPackagePage);
         when(workflowPackagePage.getContentResource()).thenReturn(contentResource);
         when(contentResource.isResourceType("cq/workflow/components/collection/page")).thenReturn(true);
+        when(contentResource.getChild("vlt:definition")).thenReturn(mock(Resource.class));
+        when(contentResource.adaptTo(Node.class)).thenReturn(workflowPackageNode);
+
+        // Normal Page Path
+
+        when(pageManager.getPage(NORMAL_PAGE_PATH)).thenReturn(normalPage);
+        when(pageManager.getContainingPage(NORMAL_PAGE_PATH)).thenReturn(normalPage);
+        when(normalPage.getContentResource()).thenReturn(normalPageContentResource);
+        when(normalPageContentResource.isResourceType("cq/workflow/components/collection/page")).thenReturn(false);
     }
+
 
     @Test
     public void testCreate() throws Exception {
@@ -116,6 +135,17 @@ public class WorkflowPackageManagerImplTest {
     }
 
     @Test
+    public void testGetPaths_NormalPage() throws Exception {
+
+        final String[] expected = new String[]{};
+
+        List<String> paths = wpm.getPaths(resourceResolver, NORMAL_PAGE_PATH);
+        final String[] actual = paths.toArray(new String[0]);
+
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test
     public void testDelete() throws Exception {
         wpm.delete(resourceResolver, WORKFLOW_PACKAGE_PATH);
 
@@ -128,6 +158,10 @@ public class WorkflowPackageManagerImplTest {
         assertTrue(wpm.isWorkflowPackage(resourceResolver, WORKFLOW_PACKAGE_PATH));
     }
 
+    @Test
+    public void testIsWorkflowPackage_NormalPage() throws Exception {
+        assertFalse(wpm.isWorkflowPackage(resourceResolver, NORMAL_PAGE_PATH));
+    }
 
     ResourceCollection testResourceCollection = new ResourceCollection() {
         private String[] paths = PAYLOAD_PATHS;

@@ -47,8 +47,6 @@ import com.day.cq.wcm.api.NameConstants;
 
 @SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Unique Vanity Path Checker",
-        description = "Checks if the entered vanity path is already in use",
         metatype = false,
         paths = { "/bin/wcm/duplicateVanityCheck" },
         methods = { "GET" }

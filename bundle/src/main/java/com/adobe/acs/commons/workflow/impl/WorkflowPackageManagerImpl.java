@@ -47,13 +47,17 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Workflow Package Manager",
-        description = "Manager for creating and working with Workflow Packages"
-)
+/**
+ * ACS AEM Commons - Workflow Package Manager.
+ * Manager for creating and working with Workflow Packages.
+ *
+ */
+@Component
 @Service
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);
@@ -61,6 +65,8 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final String WORKFLOW_PACKAGE_TEMPLATE = "/libs/cq/workflow/templates/collectionpage";
 
     private static final String NT_VLT_DEFINITION = "vlt:PackageDefinition";
+
+    private static final String NN_VLT_DEFINITION = "vlt:definition";
 
     private static final String FILTER_RESOURCE_TYPE = "cq/workflow/components/collection/definition/resourcelist";
 
@@ -115,7 +121,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
                 WORKFLOW_PACKAGE_TEMPLATE, name, false);
         final Resource contentResource = page.getContentResource();
 
-        Node node = JcrUtil.createPath(contentResource.getPath() + "/vlt:definition", NT_VLT_DEFINITION, session);
+        Node node = JcrUtil.createPath(contentResource.getPath() + "/" + NN_VLT_DEFINITION, NT_VLT_DEFINITION, session);
         node = JcrUtil.createPath(node.getPath() + "/filter", JcrConstants.NT_UNSTRUCTURED, session);
         JcrUtil.setProperty(node, SLING_RESOURCE_TYPE, FILTER_RESOURCE_TYPE);
 
@@ -141,28 +147,40 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      */
     public final List<String> getPaths(final ResourceResolver resourceResolver,
                                        final String path) throws RepositoryException {
-        final List<String> paths = new ArrayList<String>();
+
+        final List<String> collectionPaths = new ArrayList<String>();
+
         final Resource resource = resourceResolver.getResource(path);
 
         if (resource == null) {
             log.warn("Requesting paths for a non-existent Resource [ {} ]; returning empty results.", path);
-            return paths;
-        }
+            return Collections.EMPTY_LIST;
 
-        final Node node = resource.adaptTo(Node.class);
-        final ResourceCollection resourceCollection =
-                ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
+        } else if (!isWorkflowPackage(resourceResolver, path)) {
+            log.debug("Requesting paths for a non-Resource Collection  [ {} ]; returning provided path.", path);
+            return Arrays.asList(new String[]{ path });
 
-        if (resourceCollection != null) {
-            final List<Node> members = resourceCollection.list(workflowPackageTypes);
-            for (final Node member : members) {
-                paths.add(member.getPath());
-            }
         } else {
-            // Is not a workflow package; return a List of the provided payload path
-            paths.add(path);
+            final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+            final Page page = pageManager.getContainingPage(path);
+
+            if (page != null && page.getContentResource() != null) {
+                final Node node = page.getContentResource().adaptTo(Node.class);
+
+                final ResourceCollection resourceCollection =
+                        ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
+
+                if (resourceCollection != null) {
+                    final List<Node> members = resourceCollection.list(workflowPackageTypes);
+                    for (final Node member : members) {
+                        collectionPaths.add(member.getPath());
+                    }
+                    return collectionPaths;
+                }
+            }
+
+            return Arrays.asList(new String[]{ path });
         }
-        return paths;
     }
 
     /**
@@ -201,7 +219,15 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
             return false;
         }
 
-        return contentResource.isResourceType(WORKFLOW_PAGE_RESOURCE_TYPE);
+        if (!contentResource.isResourceType(WORKFLOW_PAGE_RESOURCE_TYPE)) {
+            return false;
+        }
+
+        if (contentResource.getChild(NN_VLT_DEFINITION) == null) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -223,6 +249,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     @Activate
     protected final void activate(final Map<String, String> config) {
-        workflowPackageTypes = PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
+        workflowPackageTypes =
+                PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
     }
 }

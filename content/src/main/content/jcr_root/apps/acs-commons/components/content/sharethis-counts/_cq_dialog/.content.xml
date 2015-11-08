@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="ShareThis Counts"
+    sling:resourceType="cq/gui/components/authoring/dialog">
+    <content
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="granite/ui/components/foundation/container">
+        <layout
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
+        <items jcr:primaryType="nt:unstructured">
+            <columns
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <style jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/foundation/form/radiogroup"
+                    text="Style">
+                        <items jcr:primaryType="nt:unstructured">
+                                <horizontal
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/foundation/form/radio"
+                                name="./style"
+                                text="Horizontal"
+                                value="horizontal"/>
+                            <vertical
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/foundation/form/radio"
+                                name="./style"
+                                text="Vertical"
+                                value="vertical"/>
+                        </items>
+                    </style>
+                    <services
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/form/select"
+                        multiple="{Boolean}true"
+                        fieldLabel="Services"
+                        emptyText="Select services"
+                        name="./services">
+                        <datasource
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="acs-commons/components/utilities/genericlist/datasource"
+                            path="/etc/acs-commons/lists/sharethis-services" />
+                    </services>
+                </items>
+            </columns>
+        </items>
+    </content>
+</jcr:root>

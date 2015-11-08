@@ -38,7 +38,6 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
@@ -95,7 +94,7 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
                 Twitter client = page.adaptTo(Twitter.class);
                 if (client != null) {
                     try {
-                        ValueMap properties = ResourceUtil.getValueMap(twitterResource);
+                        ValueMap properties = twitterResource.getValueMap();
                         String username = properties.get("username", String.class);
 
                         if (!StringUtils.isEmpty(username)) {
@@ -186,7 +185,7 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
     }
 
     private boolean isReplicationEnabled(Resource twitterResource) {
-        ValueMap properties = ResourceUtil.getValueMap(twitterResource);
+        ValueMap properties = twitterResource.getValueMap();
         return properties.get("replicate", false);
     }
 

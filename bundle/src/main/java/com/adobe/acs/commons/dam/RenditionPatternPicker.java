@@ -64,9 +64,9 @@ public class RenditionPatternPicker implements RenditionPicker {
 
     /**
      * Gets the rendition which matches against the constructor's Regex pattern.
-     * <p/>
+     * <p>
      * If no matches are made and an Original exists, returns the Original.
-     * <p/>
+     * <p>
      * If no matches are made and an Original doesn't exist, return the first Rendition.
      *
      * @param asset Asset whose Renditions will be selected.

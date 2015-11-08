@@ -41,10 +41,7 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
  * ACS AEM commons Design Reference Provider.
  * Reference provider that searches for design pages for any given page resource.
  */
-@Component(
-        label = "ACS AEM Commons - Design Reference Provider",
-        description = "Reference provider that searches for design pages for any given page resource",
-        policy = ConfigurationPolicy.REQUIRE)
+@Component(policy = ConfigurationPolicy.REQUIRE)
 @Service
 public final class DesignReferenceProvider implements ReferenceProvider {
 

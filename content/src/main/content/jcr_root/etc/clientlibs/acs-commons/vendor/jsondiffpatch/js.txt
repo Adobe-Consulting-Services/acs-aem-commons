@@ -1,0 +1,5 @@
+#base=js
+
+jsondiffpatch.js
+jsondiffpatch-formatters.js
+diff_match_patch_uncompressed.js

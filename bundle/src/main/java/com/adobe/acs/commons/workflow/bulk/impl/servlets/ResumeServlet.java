@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.workflow.bulk.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.BulkWorkflowEngine;
+
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -32,10 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 
+/**
+ * ACS AEM Commons - Bulk Workflow Manager - Resume Servlet
+ */
+@SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Bulk Workflow Manager - Resume Servlet",
         methods = { "POST" },
         resourceTypes = { BulkWorkflowEngine.SLING_RESOURCE_TYPE },
         selectors = { "resume" },
@@ -66,9 +71,9 @@ public class ResumeServlet extends SlingAllMethodsServlet {
                 bulkWorkflowEngine.resume(request.getResource(), interval);
             }
 
-            response.sendRedirect(request.getResourceResolver().map(request.getResource().getPath()) + ".status.json");
+            response.sendRedirect(request.getResourceResolver().map(request, request.getResource().getPath()) + ".status.json");
         } catch (JSONException e) {
-            log.error("Could not resume Bulk Workflow due to: {}", e.getMessage());
+            log.error("Could not resume Bulk Workflow due to: {}", e);
 
             HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not resume Bulk Workflow.",

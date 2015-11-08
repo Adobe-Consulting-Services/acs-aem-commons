@@ -19,36 +19,40 @@
 */
 package com.adobe.acs.commons.email.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.jcr.Session;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.text.StrLookup;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.HtmlEmail;
-import org.apache.commons.mail.SimpleEmail;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.acs.commons.email.EmailServiceConstants;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
+import org.apache.commons.lang.text.StrLookup;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.mail.SimpleEmail;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Component(label = "ACS AEM Commons - E-mail Service",
-    description = "A Generic Email service that sends an email to a given list of recipients.")
+import javax.jcr.Session;
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ACS AEM Commons - E-mail Service
+ * A Generic Email service that sends an email to a given list of recipients.
+ */
+@Component
 @Service
 public final class EmailServiceImpl implements EmailService {
 
@@ -61,9 +65,12 @@ public final class EmailServiceImpl implements EmailService {
     private ResourceResolverFactory resourceResolverFactory;
 
     @Override
-    public List<String> sendEmail(final String templatePath, final Map<String, String> emailParams,
-        final String... recipients) {
+    public List<String> sendEmail(final String templatePath,
+                                  final Map<String, String> emailParams,
+                                  final String... recipients) {
+
         List<String> failureList = new ArrayList<String>();
+
         if (recipients == null || recipients.length <= 0) {
             throw new IllegalArgumentException("Invalid Recipients");
         }
@@ -77,7 +84,7 @@ public final class EmailServiceImpl implements EmailService {
             }
         }
         InternetAddress[] iAddressRecipients = addresses.toArray(new InternetAddress[addresses.size()]);
-        List<InternetAddress> failureInternetAddresses =  sendEmail(templatePath, emailParams, iAddressRecipients);
+        List<InternetAddress> failureInternetAddresses = sendEmail(templatePath, emailParams, iAddressRecipients);
 
         for (InternetAddress address : failureInternetAddresses) {
             failureList.add(address.toString());
@@ -89,7 +96,7 @@ public final class EmailServiceImpl implements EmailService {
 
     @Override
     public List<InternetAddress> sendEmail(final String templatePath, final Map<String, String> emailParams,
-            final InternetAddress... recipients) {
+                                           final InternetAddress... recipients) {
 
         List<InternetAddress> failureList = new ArrayList<InternetAddress>();
 
@@ -97,66 +104,69 @@ public final class EmailServiceImpl implements EmailService {
             throw new IllegalArgumentException("Invalid Recipients");
         }
 
-        if (StringUtils.isBlank(templatePath)) {
-            throw new IllegalArgumentException("Template path is null or empty");
-        }
-        Email email = getEmail(templatePath, emailParams);
+        final MailTemplate mailTemplate = this.getMailTemplate(templatePath);
+        final Class<? extends Email> mailType = this.getMailType(templatePath);
+        final MessageGateway<Email> messageGateway = messageGatewayService.getGateway(mailType);
 
-        if (email == null) {
-            throw new IllegalArgumentException("Error while creating template");
-        }
-
-        MessageGateway<Email> messageGateway = messageGatewayService.getGateway(email.getClass());
-
-        for (InternetAddress address : recipients) {
+        for (final InternetAddress address : recipients) {
             try {
+                // Get a new email per recipient to avoid duplicate attachments
+                final Email email = getEmail(mailTemplate, mailType, emailParams);
                 email.setTo(Collections.singleton(address));
                 messageGateway.send(email);
             } catch (Exception e) {
                 failureList.add(address);
-                log.error("Exception sending email to " + address, e);
+                log.error("Error sending email to [ " + address + " ]", e);
             }
-         }
+        }
 
         return failureList;
     }
 
+    private Email getEmail(final MailTemplate mailTemplate,
+                           final Class<? extends Email> mailType,
+                           final Map<String, String> params) throws EmailException, MessagingException, IOException {
 
-    private Email getEmail(String templatePath, Map<String, String> emailParams) {
+        final Email email = mailTemplate.getEmail(StrLookup.mapLookup(params), mailType);
+
+        if (params.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)
+                && params.containsKey(EmailServiceConstants.SENDER_NAME)) {
+
+            email.setFrom(
+                    params.get(EmailServiceConstants.SENDER_EMAIL_ADDRESS),
+                    params.get(EmailServiceConstants.SENDER_NAME));
+
+        } else if (params.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)) {
+            email.setFrom(params.get(EmailServiceConstants.SENDER_EMAIL_ADDRESS));
+        }
+
+        return email;
+    }
+
+    private Class<? extends Email> getMailType(String templatePath) {
+        return templatePath.endsWith(".html") ? HtmlEmail.class : SimpleEmail.class;
+    }
+
+    private MailTemplate getMailTemplate(String templatePath) throws IllegalArgumentException {
+        MailTemplate mailTemplate = null;
         ResourceResolver resourceResolver = null;
         try {
             resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            mailTemplate = MailTemplate.create(templatePath, resourceResolver.adaptTo(Session.class));
 
-           final MailTemplate mailTemplate = MailTemplate.create(templatePath, resourceResolver.adaptTo(Session.class));
-
-           if (mailTemplate == null) {
-               log.warn("Email template at {} could not be created.", templatePath);
-               return null;
-           }
-
-           Class<? extends Email> emailClass = templatePath.endsWith(".html") ? HtmlEmail.class : SimpleEmail.class;
-
-           final Email email = mailTemplate.getEmail(StrLookup.mapLookup(emailParams), emailClass);
-
-           if (emailParams.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)
-                    && emailParams.containsKey(EmailServiceConstants.SENDER_NAME)) {
-                email.setFrom(emailParams.get(EmailServiceConstants.SENDER_EMAIL_ADDRESS),
-                        emailParams.get(EmailServiceConstants.SENDER_NAME));
-           } else if (emailParams.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)) {
-                email.setFrom(emailParams.get(EmailServiceConstants.SENDER_EMAIL_ADDRESS));
-           }
-
-           return email;
-
-        } catch (Exception e) {
-            log.error("Unable to construct email from template " + templatePath, e);
+            if (mailTemplate == null) {
+                throw new IllegalArgumentException("Mail template path [ "
+                        + templatePath + " ] could not resolve to a valid template");
+            }
+        } catch (LoginException e) {
+            log.error("Unable to obtain an administrative resource resolver to get the Mail Template at [ "
+                            + templatePath + " ]", e);
         } finally {
             if (resourceResolver != null) {
                 resourceResolver.close();
             }
         }
 
-        return null;
+        return mailTemplate;
     }
-
 }

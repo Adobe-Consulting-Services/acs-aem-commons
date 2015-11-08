@@ -42,12 +42,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Dispatcher Flusher",
-        description = "Service used to issue flush requests to enabled Dispatcher Flush Agents.",
-        immediate = false,
-        metatype = false
-)
+/**
+ * ACS AEM Commons - Dispatcher Flusher
+ * Service used to issue flush requests to enabled Dispatcher Flush Agents.
+ */
+@Component
 @Service
 public class DispatcherFlusherImpl implements DispatcherFlusher {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherImpl.class);

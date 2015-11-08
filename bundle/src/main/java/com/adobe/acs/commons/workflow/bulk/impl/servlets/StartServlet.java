@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.workflow.bulk.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.BulkWorkflowEngine;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -36,11 +37,15 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.HashMap;
 
+/**
+ * ACS AEM Commons - Bulk Workflow Manager - Start Servlet
+ */
+@SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Bulk Workflow Manager - Start Servlet",
         methods = { "POST" },
         resourceTypes = { BulkWorkflowEngine.SLING_RESOURCE_TYPE },
         selectors = { "start" },
@@ -91,31 +96,31 @@ public class StartServlet extends SlingAllMethodsServlet {
             bulkWorkflowEngine.initialize(request.getResource(), map);
             bulkWorkflowEngine.start(request.getResource());
 
-            response.sendRedirect(request.getResourceResolver().map(request.getResource().getPath()) + ".status.json");
+            response.sendRedirect(request.getResourceResolver().map(request, request.getResource().getPath()) + ".status.json");
 
         } catch (JSONException e) {
-            log.error("Could not parse HTTP Request params: {}", e.getMessage());
+            log.error("Could not parse HTTP Request params: {}", e);
 
             HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not initialize Bulk Workflow due to invalid parameters."
                             + " Please review the form and try again.",
                     e.getMessage());
         } catch (RepositoryException e) {
-            log.error("Could not initialize Bulk Workflow: {}", e.getMessage());
+            log.error("Could not initialize Bulk Workflow: {}", e);
 
             HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not initialize Bulk Workflow.",
                     e.getMessage());
 
         } catch (IllegalArgumentException e) {
-            log.warn("Could not initialize Bulk Workflow due to invalid arguments: {}", e.getMessage());
+            log.warn("Could not initialize Bulk Workflow due to invalid arguments: {}", e);
 
             HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not initialize Bulk Workflow due to invalid arguments.",
                     e.getMessage());
 
         } catch (Exception e) {
-            log.error("Could not initialize Bulk Workflow due to unexpected error: {}", e.getMessage());
+            log.error("Could not initialize Bulk Workflow due to unexpected error: {}", e);
 
             HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not start Bulk Workflow.",

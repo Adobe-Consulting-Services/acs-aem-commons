@@ -29,10 +29,11 @@ import org.apache.sling.jcr.api.SlingRepository;
 
 import com.adobe.acs.commons.util.AemCapabilityHelper;
 
-@Component(
-        label = "ACS AEM Commons - AEM Capability Helper",
-        description = "Provides information about the current AEM installation and what it can and can't do."
-)
+/**
+ * ACS AEM Commons - AEM Capability Helper
+ * Provides information about the current AEM installation and what it can and can't do.
+ */
+@Component
 @Service
 public class AemCapabilityHelperImpl implements AemCapabilityHelper {
 

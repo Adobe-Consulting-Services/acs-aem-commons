@@ -42,6 +42,10 @@ The best pull request are small and focused. Don't try to change the world in on
   * OSGi Services automatically registered as part of the stack should be annotated w `policy = ConfigurationPolicy.REQUIRE`. *Common candidates include (but not limited to): Filters, Scheduled Services, Event Listeners and Authentication handlers.*
   * Ex. Until a OSGi Configuration is added for the feature "Component Error Handler", this Sling Filter will remain inactive making it impossible to effect Request processing.
 
+## Version Compatibility
+
+ACS AEM Commons is expected to be installable on AEM 6.0 and AEM 6.1. This means that all *required* OSGi dependencies must be available on 6.0. It is acceptable for some features to require AEM 6.1, but contributors are strongly encouraged to be thoughtful about requiring 6.1.
+
 ## Participating in Code Reviews
 
 Even if you don't have time to contribute code, reviewing code contributed by other people is an option. To do this, go to [https://github.com/Adobe-Consulting-Services/acs-aem-commons/pulls](https://github.com/Adobe-Consulting-Services/acs-aem-commons/pulls) to see the open pull requests.

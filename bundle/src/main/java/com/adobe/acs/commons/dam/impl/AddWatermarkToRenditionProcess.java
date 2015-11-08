@@ -45,7 +45,7 @@ import com.day.image.Layer;
  * <li>watermark - The repository path of the watermark.</li>
  * </ul>
  */
-@Component(metatype = false)
+@Component
 @Service
 @Property(name = "process.label", value = "Add Watermark to Rendition")
 public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess {

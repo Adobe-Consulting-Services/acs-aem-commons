@@ -49,9 +49,7 @@ import javax.servlet.ServletRequest;
  */
 @Component(label = "ACS AEM Commons - Component Helper",
         description = "Component Helper is a service used in the context of CQ Components for "
-                + "encapsulating common tasks and performing common checks.",
-        immediate = false,
-        metatype = true)
+                + "encapsulating common tasks and performing common checks.")
 @Service
 public final class ComponentHelperImpl implements ComponentHelper {
     private static final String CSS_EDIT_MODE = "wcm-helper-edit-mode";
@@ -288,9 +286,9 @@ public final class ComponentHelperImpl implements ComponentHelper {
     /**
      * "Intelligently" determines the WCMEditType to use based on the
      * DropTarget.
-     * <p/>
+     * <p>
      * Inspects the DropTarget's Groups and Accepts to make this determination.
-     * <p/>
+     * <p>
      * If no match can be found, defaults to TEXT
      *
      * @param dropTarget the drop target

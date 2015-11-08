@@ -23,6 +23,9 @@ package com.adobe.acs.commons.images;
 import aQute.bnd.annotation.ProviderType;
 
 import com.day.image.Layer;
+import org.apache.sling.api.resource.ValueMap;
+
+import java.util.Map;
 
 @ProviderType
 public interface NamedImageTransformer {
@@ -40,4 +43,17 @@ public interface NamedImageTransformer {
      * transform parameters) the layer unmodified
      */
     Layer transform(Layer layer);
+
+    /**
+     * Returns the name of this transform as defined in this instance's OSGi configuration. The transform name is also
+     * used to construct URLs for the <code>NamedTransformImageServlet</code>
+     *
+     * @return the transform name
+     */
+    String getTransformName();
+
+    /**
+     * @return the ImageTransforms types and their params for this Named Image Transform
+     */
+    Map<String, ValueMap> getImageTransforms();
 }

@@ -36,6 +36,8 @@
     final String CN_AJAX_SELECTOR = "ajaxSelectors";
     final String CN_AJAX_EXTENSION = "ajaxExtension";
     final String CN_AJAX_LOADING_INDICATOR = "ajaxLoadingIndicator";
+    final String CN_AJAX_PASS_QUERY_PARAMS = "ajaxPassQueryParameters";
+
 
     final WCMMode mode = WCMMode.fromRequest(slingRequest);
     final ValueMap componentProperties = component.getProperties();
@@ -44,15 +46,21 @@
             xssAPI.encodeForHTMLAttr(StringUtils.stripToEmpty(componentProperties.get(CN_AJAX_LOADING_INDICATOR, "")));
     boolean ajaxLoadingIndicatorEnabled = StringUtils.isNotBlank(ajaxLoadingIndicator);
 
+    String queryParams = StringUtils.stripToNull(slingRequest.getQueryString());
+    boolean passQueryParams = componentProperties.get(CN_AJAX_PASS_QUERY_PARAMS, false)
+            &&  StringUtils.isNotBlank(queryParams);
+
     String ajaxSelectors = StringUtils.stripToEmpty(componentProperties.get(CN_AJAX_SELECTOR, DEFAULT_SELECTOR));
     String ajaxExtension = StringUtils.stripToEmpty(componentProperties.get(CN_AJAX_EXTENSION, DEFAULT_EXTENSION));
     if(StringUtils.isBlank(ajaxSelectors)) { ajaxSelectors = DEFAULT_SELECTOR; }
     if(StringUtils.isBlank(ajaxExtension)) { ajaxExtension = DEFAULT_EXTENSION; }
 
-    final String url = resourceResolver.map(resource.getPath()) + "." + ajaxSelectors + "." + ajaxExtension;
+    final String url = resourceResolver.map(slingRequest, resource.getPath()) + "." + ajaxSelectors + "." + ajaxExtension;
 
 %><% if(WCMMode.PREVIEW.equals(mode) || WCMMode.DISABLED.equals(mode)) { %>
-    <div data-ajax-component data-url="<%= url %>" class="acs-ajax-component">
+    <div data-ajax-component data-url="<%= url %>"
+         <%= passQueryParams ? "data-ajax-query-parameters=\"" + xssAPI.encodeForHTMLAttr(queryParams) + "\"" : "" %>
+         class="acs-ajax-component">
     	<% if (ajaxLoadingIndicatorEnabled) { %>
     		<div class="<%= ajaxLoadingIndicator %>"></div>
     	<% } %>

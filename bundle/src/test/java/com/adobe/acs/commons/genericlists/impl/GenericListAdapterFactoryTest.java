@@ -65,22 +65,12 @@ public class GenericListAdapterFactoryTest {
 
     @Before
     public void setup() {
-        when(listPage.getProperties()).thenAnswer(new Answer<ValueMap>() {
-            @SuppressWarnings("serial")
-            public ValueMap answer(InvocationOnMock invocation) throws Throwable {
-                return new ValueMapDecorator(new HashMap<String, Object>() {
-                    {
-                        put(NameConstants.NN_TEMPLATE, GenericListImpl.TMPL_GENERIC_LIST);
-
-                    }
-                });
-            }
-        });
         when(listPage.getContentResource()).thenReturn(contentResource);
+        when(contentResource.isResourceType(GenericListImpl.RT_GENERIC_LIST)).thenReturn(true);
         when(contentResource.getChild("list")).thenReturn(listResource);
         when(listResource.listChildren()).thenReturn(Arrays.asList(resourceOne, resourceTwo).iterator());
 
-        when(resourceOne.adaptTo(ValueMap.class)).thenAnswer(new Answer<ValueMap>() {
+        when(resourceOne.getValueMap()).thenAnswer(new Answer<ValueMap>() {
             @SuppressWarnings("serial")
             public ValueMap answer(InvocationOnMock invocation) throws Throwable {
                 return new ValueMapDecorator(new HashMap<String, Object>() {
@@ -92,7 +82,7 @@ public class GenericListAdapterFactoryTest {
                 });
             }
         });
-        when(resourceTwo.adaptTo(ValueMap.class)).thenAnswer(new Answer<ValueMap>() {
+        when(resourceTwo.getValueMap()).thenAnswer(new Answer<ValueMap>() {
             @SuppressWarnings("serial")
             public ValueMap answer(InvocationOnMock invocation) throws Throwable {
                 return new ValueMapDecorator(new HashMap<String, Object>() {
@@ -111,7 +101,7 @@ public class GenericListAdapterFactoryTest {
     }
 
     @Test
-    public void test_that_adapting_page_with_correct_template_returns_directly() {
+    public void test_that_adapting_page_with_correct_resourceType_returns_directly() {
         GenericList list = adapterFactory.getAdapter(listPage, GenericList.class);
         assertNotNull(list);
         List<Item> items = list.getItems();
@@ -122,20 +112,12 @@ public class GenericListAdapterFactoryTest {
     }
 
     @Test
-    public void test_that_adapting_page_with_wrong_template_returns_null() {
+    public void test_that_adapting_page_with_wrong_resourceType_returns_null() {
         Page wrongPage = mock(Page.class);
+        Resource wrongContentResource = mock(Resource.class);
 
-        when(wrongPage.getProperties()).thenAnswer(new Answer<ValueMap>() {
-            @SuppressWarnings("serial")
-            public ValueMap answer(InvocationOnMock invocation) throws Throwable {
-                return new ValueMapDecorator(new HashMap<String, Object>() {
-                    {
-                        put(NameConstants.NN_TEMPLATE, "/wrong");
-
-                    }
-                });
-            }
-        });
+        when(wrongPage.getContentResource()).thenReturn(wrongContentResource);
+        when(wrongContentResource.isResourceType(GenericListImpl.RT_GENERIC_LIST)).thenReturn(false);
 
         GenericList section = adaptToGenericList(wrongPage);
         assertNull(section);
@@ -163,7 +145,7 @@ public class GenericListAdapterFactoryTest {
         Locale french = new Locale("fr");
         Locale swissFrench = new Locale("fr", "ch");
         Locale franceFrench = new Locale("fr", "fr");
-        
+
         GenericList list = adapterFactory.getAdapter(listPage, GenericList.class);
         assertNotNull(list);
         List<Item> items = list.getItems();

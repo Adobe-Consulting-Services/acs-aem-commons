@@ -41,7 +41,7 @@
 %>
 
 <% if(hasActionType && hasPaths && hasAgents) { %>
-<form action="<%= resource.getPath() %>.flush.html" method="post">
+<form action="<%= slingRequest.getContextPath() %><%= resource.getPath() %>.flush.html" method="post">
     <input class="button" type="submit" value="Flush Paths on Dispatchers"/>
 </form>
 <% } %>
@@ -67,7 +67,7 @@
 
 <h3>Active Dispatcher Flush Agents (excludes Resource Only agents)</h3>
 <ul>
-    <% if(!hasAgents) { %><li class="not-set"><a href="/miscadmin#/etc/replication/agents.author" target="_blank">No active
+    <% if(!hasAgents) { %><li class="not-set"><a href="<%= slingRequest.getContextPath() %>/miscadmin#/etc/replication/agents.author" target="_blank">No active
     Dispatcher Flush replication agents</a></li><% } %>
     <% for(final Agent agent : flushAgents) { %>
     <li><a href="<%= resourceResolver.map(agent.getConfiguration().getConfigPath()) %>.log.html" target="_target"><%= agent.getConfiguration().getName() %></a></li>

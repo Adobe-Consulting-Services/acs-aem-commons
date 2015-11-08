@@ -57,13 +57,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Package Helper",
-        description = "Helper utility for creating CRX Packages and using the ACS AEM Commons packager. "
-)
+/**
+ * ACS AEM Commons - Package Helper
+ * Helper utility for creating CRX Packages and using the ACS AEM Commons packager.
+ */
+@Component
 @Service
 public final class PackageHelperImpl implements PackageHelper {
-    private static final Logger log = LoggerFactory.getLogger(ACLPackagerServletImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PackageHelperImpl.class);
 
     private static final String NN_THUMBNAIL = "thumbnail.png";
 
@@ -251,6 +252,25 @@ public final class PackageHelperImpl implements PackageHelper {
                 conflictResolution, packageDefinitionProperties);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JcrPackage createPackageForPaths(final Collection<String> paths, final Session session,
+                                            final String groupName, String name, final String version,
+                                            final ConflictResolution conflictResolution,
+                                            Map<String, String> packageDefinitionProperties)
+                    throws IOException, RepositoryException {
+
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
+
+        for (final String path : paths) {
+            pathFilterSets.add(new PathFilterSet(path));
+        }
+
+        return this.createPackageFromPathFilterSets(pathFilterSets, session, groupName, name, version,
+                conflictResolution, packageDefinitionProperties);
+    }
 
     /**
      * {@inheritDoc}
@@ -335,13 +355,25 @@ public final class PackageHelperImpl implements PackageHelper {
     public String getPreviewJSON(final Collection<Resource> resources) throws JSONException {
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
-        for (Resource resource : resources) {
+        for (final Resource resource : resources) {
             pathFilterSets.add(new PathFilterSet(resource.getPath()));
         }
 
         return this.getPathFilterSetPreviewJSON(pathFilterSets);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public String getPreviewJSONForPaths(Collection<String> paths) throws JSONException {
+        final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
+
+        for (final String path : paths) {
+            pathFilterSets.add(new PathFilterSet(path));
+        }
+
+        return this.getPathFilterSetPreviewJSON(pathFilterSets);
+    }
 
     /**
      * {@inheritDoc}
@@ -379,4 +411,5 @@ public final class PackageHelperImpl implements PackageHelper {
             return JSON_EXCEPTION_MSG;
         }
     }
+
 }

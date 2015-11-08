@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>2.1.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -66,22 +66,27 @@
             </plugin>
             
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jslint-maven-plugin</artifactId>
+                <groupId>com.cj.jshintmojo</groupId>
+                <artifactId>jshint-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>jslint</goal>
+                            <goal>lint</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <sourceJsFolder>src/main/content/jcr_root</sourceJsFolder>
-                    <failOnIssues>true</failOnIssues>
-                    <predefinedVars>jQuery,window,$</predefinedVars>
+                    <directories>
+                        <directory>src/main/content/jcr_root</directory>
+                    </directories>
+                    <failOnError>true</failOnError>
+                    <globals>jQuery,window,$</globals>
                     <excludes>
-                        <exclude>**/extensions/**/*.js</exclude>
-                        <exclude>**/vendor/**/*.js</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/components/content/base/ajax/loading-indicator-clientlibs/js/vendor/spin.min.js</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/extensions/contentfinder/audio.js</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/jquery.fonticonpicker/jquery.fonticonpicker.js</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js</exclude>
+                        <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -159,18 +164,6 @@
             <artifactId>servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.day.cq.wcm</groupId>
-            <artifactId>cq-wcm-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.day.cq</groupId>
-            <artifactId>cq-commons</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.day.cq.wcm</groupId>
             <artifactId>cq-wcm-taglib</artifactId>
             <version>5.6.4</version>
@@ -183,22 +176,22 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.day.cq.wcm</groupId>
-            <artifactId>cq-wcm-commons</artifactId>
-            <version>5.6.4</version>
+            <groupId>com.day.commons</groupId>
+            <artifactId>day-commons-jstl</artifactId>
+            <version>1.1.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.adobe.granite</groupId>
-            <artifactId>com.adobe.granite.xssprotection</artifactId>
-            <version>5.5.24</version>
-            <scope>provided</scope>
+            <groupId>com.adobe.aem</groupId>
+            <artifactId>aem-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.day.cq.wcm</groupId>
-            <artifactId>cq-wcm-core</artifactId>
-            <version>5.6.14</version>
-            <scope>provided</scope>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.twitter4j</groupId>
+            <artifactId>twitter4j-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -207,27 +200,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.day.commons</groupId>
-            <artifactId>day-commons-jstl</artifactId>
-            <version>1.1.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.day.cq.dam</groupId>
-            <artifactId>cq-dam-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.day.cq.dam</groupId>
-            <artifactId>cq-dam-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.day.cq.dam</groupId>
-            <artifactId>cq-dam-video</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
+
     </dependencies>
     <profiles>
         <profile>

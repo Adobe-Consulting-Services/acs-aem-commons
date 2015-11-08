@@ -53,11 +53,12 @@ import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.NameConstants;
 
-@Component(
-        label = "ACS AEM Commons - replicate specific version of a resource tree",
-        description = "Service used to replicate specific version of a resource tree through a "
-                + "specific replication agent", immediate = false,
-        metatype = false)
+/**
+ * ACS AEM Commons - replicate specific version of a resource tree
+ * Service used to replicate specific version of a resource tree through a
+ * specific replication agent
+ */
+@Component
 @Service
 public class ReplicateVersionImpl implements
         ReplicateVersion {

@@ -62,7 +62,7 @@
     };
 
     self.setSearchPath = function (spath) {
-        searchPath = spath;
+        searchPath = spath || self.searchRoot;
     };
 
     self.setItemResourceType = function (rt) {

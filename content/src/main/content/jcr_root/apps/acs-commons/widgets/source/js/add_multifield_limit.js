@@ -26,10 +26,10 @@
             return this.items.getCount() - 1;
         },
         addItem: function(value) {
-            if (this.maxItems && (this.maxItems === this.getActualItemCount())) {
+            if (this.maxItems && (parseInt(this.maxItems) === this.getActualItemCount())) {
                 CQ.Ext.Msg.show({
-                    title: 'Maximum Items reached',
-                    msg: 'You are only allowed to add ' + this.maxItems + ' items to this field',
+                    title: CQ.I18n.get('Maximum Items reached'),
+                    msg: CQ.I18n.get('You are only allowed to add {0} items to this field', [this.maxItems]),
                     icon: CQ.Ext.MessageBox.WARNING,
                     buttons: CQ.Ext.Msg.OK
                 });
@@ -40,7 +40,13 @@
         validate: function() {
             if (this.minItems) {
                 if (this.getActualItemCount() < this.minItems) {
-                    this.markInvalid("You must add at least " + this.minItems + " items to this field");
+                    this.markInvalid(CQ.I18n.get("You must add at least {0} items to this field", [ this.minItems ]));
+                    return false;
+                }
+            }
+            if (this.maxItems) {
+                if (this.getActualItemCount() > this.maxItems) {
+                    this.markInvalid(CQ.I18n.get('You are only allowed to add {0} items to this field', [this.maxItems]));
                     return false;
                 }
             }

@@ -40,21 +40,20 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 
-@Component(
-        label = "ACS AEM Commons - Forms - POST-Redirect-GET Filter",
-        description = "Include Filter that handles internal routing of multi-step POST-Redirect-GET Form submissions.",
-        metatype = false
-)
+/**
+ * ACS AEM Commons - Forms - POST-Redirect-GET Filter
+ * Include Filter that handles internal routing of multi-step POST-Redirect-GET Form submissions.
+ *
+ */
+@Component
 @Properties({
         @Property(
                 name = "sling.filter.scope",
-                value = "include",
-                propertyPrivate = true
+                value = "include"
         ),
         @Property(
                 name = "filter.order",
-                intValue = 0,
-                propertyPrivate = true
+                intValue = 0
         )
 })
 @Service

@@ -1,0 +1,4 @@
+#base=source
+
+touchui-composite-multifield.js
+icon-picker.js

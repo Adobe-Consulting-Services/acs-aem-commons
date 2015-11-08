@@ -23,6 +23,7 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.ForwardAsGetFormHelper;
 import com.adobe.acs.commons.forms.helpers.impl.synthetics.SyntheticSlingHttpServletGetRequest;
+import com.adobe.acs.commons.forms.impl.FormImpl;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -40,10 +41,10 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
-@Component(label = "ACS AEM Commons - Forms - Forward-as-GET Form Helper",
-        description = "Forward-as-GET Form Helper",
-        metatype = false,
-        inherit = true)
+/**
+ * ACS AEM Commons - Forms - Forward-as-GET Form Helper
+ */
+@Component(inherit = true)
 @Property(label = "Service Ranking",
         name = Constants.SERVICE_RANKING,
         intValue = FormHelper.SERVICE_RANKING_FORWARD_AS_GET)
@@ -65,9 +66,14 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
                 return this.getProtectedForm((Form) obj);
             } else {
                 log.info("Unable to find Form in Request attribute: [ {} => {} ]", key, obj);
-                return new Form(formName, request.getResource().getPath());
+                return new FormImpl(formName, request.getResource().getPath());
             }
         }
+    }
+
+    @Override
+    public Form getForm(final String formName, final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+        return getForm(formName, request);
     }
 
     @Override

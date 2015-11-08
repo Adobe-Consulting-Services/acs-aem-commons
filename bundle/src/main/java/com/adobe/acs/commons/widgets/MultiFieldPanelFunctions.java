@@ -57,7 +57,7 @@ public final class MultiFieldPanelFunctions {
     public static List<Map<String, String>> getMultiFieldPanelValues(Resource resource, String name) {
         ValueMap map = resource.adaptTo(ValueMap.class);
         List<Map<String, String>> results = new ArrayList<Map<String, String>>();
-        if (map.containsKey(name)) {
+        if (map != null && map.containsKey(name)) {
             String[] values = map.get(name, new String[0]);
             for (String value : values) {
 

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.dam.RenditionPatternPicker;
+import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.PathInfoUtil;
 import com.day.cq.commons.jcr.JcrConstants;
@@ -32,6 +33,7 @@ import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.foundation.Image;
 import com.day.image.Layer;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -40,13 +42,16 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.OptingServlet;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
@@ -58,8 +63,11 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,6 +87,13 @@ import java.util.regex.Pattern;
                 propertyPrivate = false
         ),
         @Property(
+            label = "Allows Suffix Patterns",
+            description = "Regex pattern to filter allowed file names. Defaults to [ "
+                    + NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN + " ]",
+            name = NamedTransformImageServlet.NAMED_IMAGE_FILENAME_PATTERN,
+            value = NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN
+		),
+        @Property(
                 label = "Extension",
                 description = "",
                 name = "sling.servlet.extensions",
@@ -91,30 +106,43 @@ import java.util.regex.Pattern;
                 propertyPrivate = true
         )
 })
-@Reference(
-        name = "namedImageTransformers",
-        referenceInterface = NamedImageTransformer.class,
-        policy = ReferencePolicy.DYNAMIC,
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
-)
+@References({
+        @Reference(
+                name = "namedImageTransformers",
+                referenceInterface = NamedImageTransformer.class,
+                policy = ReferencePolicy.DYNAMIC,
+                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
+        ),
+        @Reference(
+                name = "imageTransformers",
+                referenceInterface = ImageTransformer.class,
+                policy = ReferencePolicy.DYNAMIC,
+                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
+        )
+})
 @Service(Servlet.class)
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
-    private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
+	private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
-    @Reference
+	public static final String NAMED_IMAGE_FILENAME_PATTERN = "acs.commons.namedimage.filename.pattern";
+
+	public static final String DEFAULT_FILENAME_PATTERN = "(image|img)\\.(.+)";
+
+	@Reference
     private MimeTypeService mimeTypeService;
 
-    private static final Pattern LAST_SUFFIX_PATTERN = Pattern.compile("(image|img)\\.(.+)");
-
-    private static final double IMAGE_GIF_MAX_QUALITY = 255;
-
-    private static final double IMAGE_MAX_QUALITY = 1.0;
-
-    private static final String MIME_TYPE_GIF = "image/gif";
+    private static final ValueMap EMPTY_PARAMS = new ValueMapDecorator(new LinkedHashMap<String, Object>());
 
     private static final String MIME_TYPE_PNG = "image/png";
 
-    private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();
+    private static final String TYPE_QUALITY = "quality";
+
+    private Pattern lastSuffixPattern = Pattern.compile(DEFAULT_FILENAME_PATTERN);
+
+    private Map<String, NamedImageTransformer> namedImageTransformers =
+            new ConcurrentHashMap<String, NamedImageTransformer>();
+
+    private Map<String, ImageTransformer> imageTransformers = new ConcurrentHashMap<String, ImageTransformer>();
 
     /* Asset Rendition Pattern Picker */
 
@@ -134,6 +162,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * - Are not null
      * - Have a suffix
      * - Whose first suffix segment is a registered transform name
+     * - Whose last suffix matches the image file name pattern
      *
      * @param request SlingRequest object
      * @return true if the Servlet should handle the request
@@ -155,7 +184,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
 
         final String lastSuffix = PathInfoUtil.getLastSuffixSegment(request);
-        final Matcher matcher = LAST_SUFFIX_PATTERN.matcher(lastSuffix);
+        final Matcher matcher = lastSuffixPattern.matcher(lastSuffix);
         if (!matcher.matches()) {
             return false;
         }
@@ -167,22 +196,112 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
             ServletException, IOException {
 
-        final String transformName = PathInfoUtil.getSuffixSegment(request, 0);
-        final NamedImageTransformer namedImageTransformer = this.namedImageTransformers.get(transformName);
+        // Get the transform names from the suffix
+        final List<NamedImageTransformer> selectedNamedImageTransformers = getNamedImageTransformers(request);
+
+        // Collect and combine the image transformers and their params
+        final ValueMap imageTransformersWithParams = getImageTransformersWithParams(selectedNamedImageTransformers);
 
         final Image image = this.resolveImage(request);
         final String mimeType = this.getMimeType(request, image);
         Layer layer = this.getLayer(image);
         
+        if (layer == null) {
+            response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        
         // Transform the image
-        layer = namedImageTransformer.transform(layer);
+        layer = this.transform(layer, imageTransformersWithParams);
 
-        final double quality = (mimeType.equals(MIME_TYPE_GIF) ? IMAGE_GIF_MAX_QUALITY : IMAGE_MAX_QUALITY);
+        // Get the quality
+        final double quality = this.getQuality(mimeType,
+                imageTransformersWithParams.get(TYPE_QUALITY, EMPTY_PARAMS));
+
         response.setContentType(mimeType);
-
         layer.write(mimeType, quality, response.getOutputStream());
-
         response.flushBuffer();
+    }
+
+    /**
+     * Execute the ImageTransformers as specified by the Request's suffix segments against the Image layer.
+     *
+     * @param layer the Image layer
+     * @param imageTransformersWithParams the transforms and their params
+     * @return the transformed Image layer
+     */
+    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams) {
+
+        for (final String type : imageTransformersWithParams.keySet()) {
+            if (StringUtils.equals(TYPE_QUALITY, type)) {
+                // Do not process the "quality" transform in the usual manner
+                continue;
+            }
+
+            final ImageTransformer imageTransformer = this.imageTransformers.get(type);
+            if (imageTransformer == null) {
+                log.warn("Skipping transform. Missing ImageTransformer for type: {}");
+                continue;
+            }
+
+            final ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
+
+            if (transformParams != null) {
+                layer = imageTransformer.transform(layer, transformParams);
+            }
+        }
+
+        return layer;
+    }
+
+    /**
+     * Gets the NamedImageTransformers based on the Suffix segments in order.
+     *
+     * @param request the SlingHttpServletRequest object
+     * @return a list of the NamedImageTransformers specified by the HTTP Request suffix segments
+     */
+    protected final List<NamedImageTransformer> getNamedImageTransformers(final SlingHttpServletRequest request) {
+        final List<NamedImageTransformer> transformers = new ArrayList<NamedImageTransformer>();
+
+        String[] suffixes = PathInfoUtil.getSuffixSegments(request);
+        if (suffixes.length < 2) {
+            log.warn("Named Transform Image Servlet requires at least one named transform");
+            return transformers;
+        }
+
+        int endIndex = suffixes.length - 1;
+        // Its OK to check; the above check ensures there are 2+ segments
+        if (StringUtils.isNumeric(PathInfoUtil.getSuffixSegment(request, suffixes.length - 2))) {
+            endIndex--;
+        }
+
+        suffixes = (String[]) ArrayUtils.subarray(suffixes, 0, endIndex);
+
+        for (final String transformerName : suffixes) {
+            final NamedImageTransformer transformer = this.namedImageTransformers.get(transformerName);
+            if (transformer != null) {
+                transformers.add(transformer);
+            }
+        }
+
+        return transformers;
+    }
+
+    /**
+     * Collect and combine the image transformers and their params.
+     *
+     * @param selectedNamedImageTransformers the named transformers and their params
+     * @return the combined named image transformers and their params
+     */
+    protected final ValueMap getImageTransformersWithParams(
+            final List<NamedImageTransformer> selectedNamedImageTransformers) {
+        final ValueMap params = new ValueMapDecorator(new LinkedHashMap<String, Object>());
+
+        for (final NamedImageTransformer namedImageTransformer : selectedNamedImageTransformers) {
+            params.putAll(namedImageTransformer.getImageTransforms());
+        }
+
+        return params;
     }
 
     /**
@@ -193,8 +312,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      */
     protected final Image resolveImage(final SlingHttpServletRequest request) {
         final Resource resource = request.getResource();
+        final ResourceResolver resourceResolver = request.getResourceResolver();
 
-        final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+        final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         final Page page = pageManager.getContainingPage(resource);
 
         if (DamUtil.isAsset(resource)) {
@@ -217,15 +337,15 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             return image;
 
         } else if (DamUtil.isRendition(resource)
-                || ResourceUtil.isA(resource, JcrConstants.NT_FILE)
-                || ResourceUtil.isA(resource, JcrConstants.NT_RESOURCE)) {
+                || resourceResolver.isResourceType(resource, JcrConstants.NT_FILE)
+                || resourceResolver.isResourceType(resource, JcrConstants.NT_RESOURCE)) {
             // For renditions; use the requested rendition
             final Image image = new Image(resource);
             image.set(Image.PN_REFERENCE, resource.getPath());
             return image;
 
         } else if (page != null) {
-            if (ResourceUtil.isA(resource, NameConstants.NT_PAGE)
+            if (resourceResolver.isResourceType(resource, NameConstants.NT_PAGE)
                     || StringUtils.equals(resource.getPath(), page.getContentResource().getPath())) {
                 // Is a Page or Page's Content Resource; use the Page's image resource
                 return new Image(page.getContentResource(), "image");
@@ -241,8 +361,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * Gets the mimeType of the image.
      * - The last segments suffix is looked at first and used
      * - if the last suffix segment's "extension" is .orig or .original then use the underlying resources mimeType
-     * - else look up the mimetype to use based on this "extension"
-     * - default to the resource's mimetype if the requested mimetype by extension is not supported.
+     * - else look up the mimeType to use based on this "extension"
+     * - default to the resource's mimeType if the requested mimeType by extension is not supported.
      *
      * @param image the image to get the mimeType for
      * @return the string representation of the image's mimeType
@@ -291,10 +411,53 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return layer;
     }
 
+
+    /**
+     * Computes the quality based on the "synthetic" Image Quality transform params
+     *
+     * Image Quality does not "transform" in the usual manner (it is not a simple layer manipulation)
+     * thus this ad-hoc method is required to handle quality manipulation transformations.
+     *
+     * If "quality" key is no available in "transforms" the default of 82 is used (magic AEM Product quality setting)
+     *
+     * @param mimeType the desired image mimeType
+     * @param transforms the map of image transform params
+     * @return
+     */
+    protected final double getQuality(final String mimeType, final ValueMap transforms) {
+        final String key = "quality";
+        final int defaultQuality = 82;
+        final int maxQuality = 100;
+        final int minQuality = 0;
+        final int maxQualityGIF = 255;
+        final double oneHundred = 100D;
+
+        log.debug("Transforming with [ quality ]");
+
+        double quality = transforms.get(key, defaultQuality);
+
+        if (quality > maxQuality || quality < minQuality) {
+            quality = defaultQuality;
+        }
+
+        quality = quality / oneHundred;
+
+        if (StringUtils.equals("image/gif", mimeType)) {
+            quality = quality * maxQualityGIF;
+        }
+
+        return quality;
+    }
+
     @Activate
     protected final void activate(final Map<String, String> properties) throws Exception {
         final String regex = PropertiesUtil.toString(properties.get(PROP_ASSET_RENDITION_PICKER_REGEX),
                 DEFAULT_ASSET_RENDITION_PICKER_REGEX);
+	    final String fileNameRegex = PropertiesUtil.toString(properties.get(NAMED_IMAGE_FILENAME_PATTERN),
+			    DEFAULT_FILENAME_PATTERN);
+	    if(StringUtils.isNotEmpty(fileNameRegex)) {
+		    lastSuffixPattern = Pattern.compile(fileNameRegex);
+	    }
         try {
             renditionPatternPicker = new RenditionPatternPicker(regex);
             log.info("Asset Rendition Pattern Picker: {}", regex);
@@ -318,6 +481,20 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final String type = PropertiesUtil.toString(props.get(NamedImageTransformer.PROP_NAME), null);
         if (type != null) {
             this.namedImageTransformers.remove(type);
+        }
+    }
+
+    protected final void bindImageTransformers(final ImageTransformer service, final Map<Object, Object> props) {
+        final String type = PropertiesUtil.toString(props.get(ImageTransformer.PROP_TYPE), null);
+        if (type != null) {
+            imageTransformers.put(type, service);
+        }
+    }
+
+    protected final void unbindImageTransformers(final ImageTransformer service, final Map<Object, Object> props) {
+        final String type = PropertiesUtil.toString(props.get(ImageTransformer.PROP_TYPE), null);
+        if (type != null) {
+            imageTransformers.remove(type);
         }
     }
 }

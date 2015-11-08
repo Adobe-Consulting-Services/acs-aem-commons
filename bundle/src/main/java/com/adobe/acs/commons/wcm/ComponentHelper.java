@@ -24,43 +24,55 @@ import javax.servlet.ServletRequest;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
+import com.adobe.acs.commons.util.ModeUtil;
+
 import aQute.bnd.annotation.ProviderType;
 
 @ProviderType
 public interface ComponentHelper {
     /**
      * Checks if Page equals in WCM Mode DESIGN.
-     *
+     * 
+     * @deprecated use {@link ModeUtil#isDesign(SlingHttpServletRequest)} 
      * @return true if current request equals in Edit mode.
      */
+    @Deprecated
     boolean isDesignMode(SlingHttpServletRequest request);
 
     /**
      * Checks if Page equals in WCM Mode DISABLED.
      *
+     * @deprecated use {@link ModeUtil#isDisabled(SlingHttpServletRequest)} 
      * @return true if current request equals in DISABLED mode.
      */
+    @Deprecated
     boolean isDisabledMode(SlingHttpServletRequest request);
 
     /**
      * Checks if Page equals in WCM Mode EDIT.
      *
+     * @deprecated use {@link ModeUtil#isEdit(SlingHttpServletRequest)}
      * @return true if current request equals in EDIT mode.
      */
+    @Deprecated
     boolean isEditMode(SlingHttpServletRequest request);
 
     /**
      * Checks if Page equals in WCM Mode PREVIEW.
      *
+     * @deprecated use {@link ModeUtil#isPreview(SlingHttpServletRequest)}
      * @return true if current request equals in PREVIEW mode.
      */
+    @Deprecated
     boolean isPreviewMode(SlingHttpServletRequest request);
 
     /**
      * Checks if Page equals in WCM Mode READ_ONLY.
-     *
+     * 
+     * @deprecated use {@link ModeUtil#isReadOnly}
      * @return true if current request equals in READ_ONLY mode.
      */
+    @Deprecated
     boolean isReadOnlyMode(SlingHttpServletRequest request);
 
     /**
@@ -74,9 +86,11 @@ public interface ComponentHelper {
     /**
      * Checks if touch authoring mode has been selected.
      * 
+     * @deprecated {@link ModeUtil#isTouch(SlingHttpServletRequest)}
      * @param request the current request
      * @return true if touch authoring mode is active
      */
+    @Deprecated
     boolean isTouchAuthoringMode(ServletRequest request);
 
     /**
@@ -97,9 +111,9 @@ public interface ComponentHelper {
 
     /**
      * Wrapper for printEditBlock(...) with special handling for non-Authoring modes.
-     * <p/>
+     * <p>
      * Normal use: inclusion at top of component JSP before any markup is output:
-     * <p/>
+     * <p>
      * <% if(WCMHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.NONE,
      * StringUtils.isNotBlank(properties.get("foo", ""))) {
      * return; // Stops execution of the JSP; leaving only the Edit Block rendered in Authoring Mode or nothing in non-Authoring Modes
@@ -119,10 +133,10 @@ public interface ComponentHelper {
 
     /**
      * Print the DropTarget Edit Icon to the response.
-     * <p/>
+     * <p>
      * Allow the WCMHelper to automatically derive the placeholder icon based on
      * the DropTarget's Groups and Accepts properties.
-     * <p/>
+     * <p>
      * Only displays if an 'AND' of all 'visible' parameters evaluates to true.
      *
      * @param request
@@ -137,9 +151,9 @@ public interface ComponentHelper {
 
     /**
      * Print the DropTarget Edit Icon to the response.
-     * <p/>
+     * <p>
      * Specify the DropTarget Icon to display.
-     * <p/>
+     * <p>
      * Only displays if an 'AND' of all 'visible' parameters evaluates to true.
      *
      * @param request
@@ -183,7 +197,7 @@ public interface ComponentHelper {
     /**
      * Returns the HTML for creating DropTarget Edit Icon(s) for a specific
      * (named) DropTargets defined by a Component.
-     * <p/>
+     * <p>
      * Allows the developer to specific the EditType Icon to be used for the
      * Drop Target via editType parameter. If editType equals left null, the edit
      * type will be derived based on the DropTarget's Groups and Accepts

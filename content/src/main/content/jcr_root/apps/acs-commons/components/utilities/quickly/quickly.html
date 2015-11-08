@@ -1,0 +1,54 @@
+<link rel="stylesheet" href="/apps/acs-commons/components/utilities/quickly/clientlibs.css"/>
+
+<div id="acs-commons-quickly-app">
+    <div id="acs-commons-quickly-ctrl" ng-controller="QuicklyCtrl">
+        <div id="acs-commons-quickly"
+             init
+             ng-show="app.visible"
+             ng-enter="app.select()"
+             ng-up="app.up()"
+             ng-down="app.down()"
+             ng-right="app.right()">
+
+            <div class="quickly-cmd-wrapper">
+                <input command-input
+                       id="acs-commons-quickly-cmd"
+                       ng-model="cmd"
+                       ng-model-options="{ debounce: {'default': 250, 'blur': 0} }"
+                       class="quickly-cmd"
+                       type="text"/>
+            </div>
+
+            <ul class="quickly-results"
+                    results
+                    ng-show="results && results.length > 0">
+                <li ng-repeat="result in results"
+                     ng-click="app.select(result)"
+                     ng-class="{ selected: result.selected,
+                                    noop: result.action.method === 'noop' || !result.action.method,
+                                    actionable: result.action.method !== 'noop' }"
+                     ng-over="app.over(result)"
+                     class="quickly-result">
+
+                    <div class="quickly-result-icon {{result.type}}"></div>
+
+                    <div class="quickly-result-text-block">
+                        <h1 class="quickly-result-title">{{result.title}}</h1>
+                        <p class="quickly-result-description">{{result.description}}</p>
+                    </div>
+
+                    <div class="clear"></div>
+                </li>
+            </ul>
+
+            <action-form
+                    data="action"
+                    complete="app.complete()"></action-form>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    angular.bootstrap(document.getElementById('acs-commons-quickly-app'), ['quickly']);
+</script>

@@ -39,9 +39,11 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
 
+/**
+ * ACS AEM Commons - Bulk Workflow Manager - Status Servlet
+ */
 @SuppressWarnings("serial")
 @SlingServlet(
-        label = "ACS AEM Commons - Bulk Workflow Manager - Status Servlet",
         methods = { "GET" },
         resourceTypes = { BulkWorkflowEngine.SLING_RESOURCE_TYPE },
         selectors = { "status" },
@@ -133,7 +135,7 @@ public class StatusServlet extends SlingAllMethodsServlet {
             response.getWriter().write(json.toString());
 
         } catch (JSONException e) {
-            log.error("Could not collect Bulk Workflow status due to: {}", e.getMessage());
+            log.error("Could not collect Bulk Workflow status due to: {}", e);
 
             HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not collect Bulk Workflow status.",

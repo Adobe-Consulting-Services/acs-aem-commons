@@ -1,6 +1,6 @@
 /*
  * #%L
- * ACS AEM Tools Bundle
+ * ACS AEM Commons Bundle
  * %%
  * Copyright (C) 2014 Adobe
  * %%
@@ -138,4 +138,10 @@ public final class FileImporter implements Importer {
             log.warn("Unrecognized scheme '{}' passed to importData()", schemeValue);
         }
     }
+
+    @Override
+    public void importData(String schemeValue, String dataSource, Resource target, String login, String password) throws ImportException {
+        importData(schemeValue, dataSource, target);
+    }
+
 }
