@@ -204,7 +204,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
             }
         }
 
-        return true;
+        return false;
     }
 
     @Override

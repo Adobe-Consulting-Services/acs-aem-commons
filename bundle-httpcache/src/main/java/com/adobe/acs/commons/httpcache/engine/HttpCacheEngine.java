@@ -36,6 +36,7 @@ public interface HttpCacheEngine {
      * @param request
      * @param cacheConfig
      * @return True if the given request can be served from cache.
+     * @throws HttpCachePersistenceException
      */
     boolean isCacheHit(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
             HttpCachePersistenceException;
@@ -47,6 +48,7 @@ public interface HttpCacheEngine {
      * @param request
      * @param response
      * @param cacheConfig
+     * @throws HttpCachePersistenceException
      */
     void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
             cacheConfig) throws HttpCachePersistenceException;
