@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.wcm.notifications.impl;
 
 import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
+import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
 import com.adobe.acs.commons.util.CookieUtil;
 import com.day.cq.wcm.api.Page;
@@ -94,6 +95,12 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
         if (StringUtils.startsWith(slingRequest.getResource().getPath(), PATH_NOTIFICATIONS)) {
             // Do NOT inject on the notifications Authoring pages
+            return false;
+        }
+
+        final Resource notificationsFolder = slingRequest.getResourceResolver().getResource(PATH_NOTIFICATIONS);
+        if (notificationsFolder == null || this.getNotifications(slingRequest, notificationsFolder).size() < 1) {
+            // If no notifications folder or no active notifications; do not inject JS
             return false;
         }
 
@@ -219,7 +226,10 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     @Activate
     protected void activate(ComponentContext ctx) {
-        super.registerAsSlingFilter(ctx, -10000, ".*");
+        if (ModeUtil.isAuthor()) {
+            // Only register filter on AEM Author
+            super.registerAsSlingFilter(ctx, -10000, ".*");
+        }
     }
 
     @Deactivate
