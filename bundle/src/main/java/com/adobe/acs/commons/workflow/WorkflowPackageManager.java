@@ -82,6 +82,23 @@ public interface WorkflowPackageManager {
     List<String> getPaths(ResourceResolver resourceResolver, String workflowPackagePath) throws RepositoryException;
 
     /**
+     * Gets the payload paths in the Workflow Package.
+     *
+     * This method will always return a List.
+     * - If the path does not resolve to a resource > an empty list
+     * - If the path does not resolve to a Workflow Package > a List of one item; the param path
+     * - If the path does resolve to a Workflow Package > a List of all resources in the Workflow Package but not the
+     * WF Package itself.
+     *
+     * @param resourceResolver The resource resolver to access the Workflow Package
+     * @param workflowPackagePath the absolute path to the Workflow Package
+     * @param nodeTypes the allowed node types to include in the Workflow Package
+     * @return a list of paths contained in the Workflow Package
+     * @throws RepositoryException
+     */
+    List<String> getPaths(ResourceResolver resourceResolver, String workflowPackagePath, String[] nodeTypes) throws RepositoryException;
+
+    /**
      * Deletes the specified Workflow Package.
      *
      * @param resourceResolver The resource resolver to access the Workflow Package
