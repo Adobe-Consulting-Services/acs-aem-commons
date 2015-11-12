@@ -24,13 +24,24 @@ import java.util.Map;
            metatype = true)
 @Service
 public class HttpCacheConfigImpl implements HttpCacheConfig {
-    private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class).
 
     @Property(label = "Request URI pattern",
               description = "Request URI pattern (REGEX) to be cached. Example - /content/mysite(.*).product-data" +
                       ".json. Mandatory parameter.")
     private static final String PROP_REQUEST_URI_PATTERN = "httpcache.config.requesturi.pattern";
     private String requestUriPattern;
+    // TODO - Pre-compile the patterns.
+    /**
+     * TODO: 3 options related to authentication.
+
+     WDYT about having this be 3 options:
+
+     1) Only anonymous requests
+     2) Only authenticated requests
+     3) All requests
+
+     */
 
     @Property(label = "Is request authenticated",
               description = "Select if the request is authenticated. If not selected, this cache will be applicable "

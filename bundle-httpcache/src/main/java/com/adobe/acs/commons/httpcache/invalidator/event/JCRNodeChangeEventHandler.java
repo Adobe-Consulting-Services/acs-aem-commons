@@ -34,6 +34,7 @@ import java.util.Map;
                        name = EventConstants.EVENT_TOPIC,
                        propertyPrivate = true),
 
+        // TODO - Correct the inappropriate description below.
                     @Property(label = "Event Filters",
                               value = "(|(" + SlingConstants.PROPERTY_PATH + "=" +
                                       "/content*)(" + SlingConstants.PROPERTY_PATH + "=" + "/etc*))",
