@@ -21,9 +21,9 @@
 package com.adobe.acs.commons.wcm.notifications.impl;
 
 import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
+import com.adobe.acs.commons.util.CookieUtil;
 import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
-import com.adobe.acs.commons.util.CookieUtil;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -31,13 +31,22 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,19 +58,24 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component(immediate = true)
 @Service(value = SystemNotifications.class)
-public class SystemNotificationsImpl extends AbstractHtmlRequestInjector implements SystemNotifications {
+public class SystemNotificationsImpl extends AbstractHtmlRequestInjector implements SystemNotifications, EventHandler {
     private static final Logger log = LoggerFactory.getLogger(SystemNotificationsImpl.class);
 
     public static final String COOKIE_NAME = "acs-commons-system-notifications";
+
     private static final String PATH_NOTIFICATIONS = "/etc/acs-commons/notifications";
 
     private static final String PN_ON_TIME = "onTime";
+
     private static final String PN_OFF_TIME = "offTime";
+
     private static final String PN_ENABLED = "enabled";
 
     private static final String INJECT_TEXT =
@@ -71,6 +85,16 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
                     + "   document.write('<script src=\"%s\"><\\/script>');"
                     + "}"
                     + "</script>";
+
+    private AtomicBoolean isFilter = new AtomicBoolean(false);
+
+    private ComponentContext osgiComponentContext;
+
+    private ServiceRegistration eventHandlerRegistration;
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
 
     @Override
     protected void inject(HttpServletRequest servletRequest, HttpServletResponse servletResponse, PrintWriter printWriter) {
@@ -139,10 +163,10 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     @Override
     public String getMessage(String message, String onTime, String offTime) {
-        if(StringUtils.isBlank(message)) {
+        if (StringUtils.isBlank(message)) {
             return message;
         }
-        
+
         message = StringUtils.trimToEmpty(message);
 
         boolean allowHTML = false;
@@ -150,7 +174,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             allowHTML = true;
             message = StringUtils.removeStart(message, "html:");
         }
-        
+
         if (onTime != null) {
             message = StringUtils.replace(message, "{{ onTime }}", onTime);
         }
@@ -158,7 +182,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
         if (offTime != null) {
             message = StringUtils.replace(message, "{{ offTime }}", offTime);
         }
-        
+
         if (!allowHTML) {
             message = message.replaceAll("(\r\n|\n)", "<br />");
         }
@@ -168,10 +192,10 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private boolean isActiveNotification(final SlingHttpServletRequest request,
                                          final Resource resource) {
-        if(JcrConstants.JCR_CONTENT.equals(resource.getName())) {
+        if (JcrConstants.JCR_CONTENT.equals(resource.getName())) {
             return false;
         }
-        
+
         final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
         final Page notificationPage = pageManager.getContainingPage(resource);
 
@@ -224,16 +248,127 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
         }
     }
 
+    private boolean hasNotifications() {
+
+        ResourceResolver resourceResolver = null;
+
+        try {
+            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+
+            final Resource notificationsFolder = resourceResolver.getResource(PATH_NOTIFICATIONS);
+            final Iterator<Resource> resources = notificationsFolder.listChildren();
+
+            while (resources.hasNext()) {
+                final Resource resource = resources.next();
+                if (!JcrConstants.JCR_CONTENT.equals(resource.getName())) {
+                    return true;
+                }
+            }
+        } catch (LoginException e) {
+            log.error("Could not get an admin ResourceResolver", e);
+        } finally {
+            if (resourceResolver != null) {
+                resourceResolver.close();
+            }
+        }
+
+        return false;
+    }
+
+    private void registerAsFilter() {
+            super.registerAsSlingFilter(this.osgiComponentContext, 0, ".*");
+            log.debug("Registered System Notifications as Sling Filter");
+    }
+
+    private void registerAsEventHandler() {
+            final Hashtable filterProps = new Hashtable<String, String>();
+
+            // Listen on Add and Remove under /etc/acs-commons/notifications
+
+            filterProps.put(EventConstants.EVENT_TOPIC,
+                    new String[]{
+                            SlingConstants.TOPIC_RESOURCE_ADDED,
+                            SlingConstants.TOPIC_RESOURCE_REMOVED });
+
+            filterProps.put(EventConstants.EVENT_FILTER, "(&"
+                    + "(" + SlingConstants.PROPERTY_PATH + "=" + SystemNotificationsImpl.PATH_NOTIFICATIONS + "/*)"
+                    + ")");
+
+            this.eventHandlerRegistration =
+                    this.osgiComponentContext.getBundleContext().registerService(EventHandler.class.getName(), this,
+                            filterProps);
+
+            log.debug("Registered System Notifications as Event Handler");
+    }
+
+    @Override
+    public void handleEvent(final Event event) {
+        long start = System.currentTimeMillis();
+
+        if (!ModeUtil.isAuthor()) {
+            log.warn("This event handler should ONLY run on AEM Author.");
+            return;
+        }
+
+        /** The following code will ONLY execute on AEM Author **/
+
+        final String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
+        if (StringUtils.endsWith(path, JcrConstants.JCR_CONTENT)) {
+            // Ignore jcr:content nodes; Only handle events for cq:Page
+            return;
+        }
+
+        ResourceResolver resourceResolver = null;
+        try {
+            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+
+            if (this.hasNotifications()) {
+                if (!this.isFilter.getAndSet(true)) {
+                    this.registerAsFilter();
+                }
+            } else {
+                if (this.isFilter.getAndSet(false)) {
+                    this.unregisterFilter();
+                    log.debug("Unregistered System Notifications Sling Filter");
+                }
+            }
+        } catch (LoginException e) {
+            log.error("Could not get an admin ResourceResolver", e);
+        } finally {
+            if (resourceResolver != null) {
+                resourceResolver.close();
+            }
+        }
+
+        if (System.currentTimeMillis() - start > 2500) {
+            log.warn("Event handling for System notifications took [ {} ] ms. Event blacklisting occurs after 5000 ms.",
+                    System.currentTimeMillis() - start);
+        }
+    }
+
     @Activate
     protected void activate(ComponentContext ctx) {
+        this.osgiComponentContext = ctx;
+
         if (ModeUtil.isAuthor()) {
-            // Only register filter on AEM Author
-            super.registerAsSlingFilter(ctx, -10000, ".*");
+            this.registerAsEventHandler();
+
+            if (this.hasNotifications()) {
+                this.registerAsFilter();
+            }
         }
     }
 
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
         super.deactivate(ctx);
+
+        // Unregister the event handler is was registered
+        if (eventHandlerRegistration != null) {
+            eventHandlerRegistration.unregister();
+            eventHandlerRegistration = null;
+        }
+
+        this.osgiComponentContext = null;
     }
 }
