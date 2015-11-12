@@ -147,7 +147,14 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      */
     public final List<String> getPaths(final ResourceResolver resourceResolver,
                                        final String path) throws RepositoryException {
+        return getPaths(resourceResolver,path, workflowPackageTypes);
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    public final List<String> getPaths(final ResourceResolver resourceResolver,
+            final String path, final String[] nodeTypes) throws RepositoryException {
         final List<String> collectionPaths = new ArrayList<String>();
 
         final Resource resource = resourceResolver.getResource(path);
@@ -171,7 +178,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
                         ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
 
                 if (resourceCollection != null) {
-                    final List<Node> members = resourceCollection.list(workflowPackageTypes);
+                    final List<Node> members = resourceCollection.list(nodeTypes);
                     for (final Node member : members) {
                         collectionPaths.add(member.getPath());
                     }
