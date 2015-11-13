@@ -4,7 +4,7 @@ package com.adobe.acs.commons.httpcache.invalidator;
  * Constants for creating http cache invalidation jobs. Custom invalidation events could leverage these constants while
  * creating and starting an invalidation job.
  */
-public class CacheInvalidationJobConstants {
+public final class CacheInvalidationJobConstants {
 
     /** Topic for the http cache invalidation job */
     public static final String TOPIC_HTTP_CACHE_INVALIDATION_JOB = "com/adobe/acs/commons/httpcache/invalidator/job";

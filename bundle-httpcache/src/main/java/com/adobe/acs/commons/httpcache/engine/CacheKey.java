@@ -51,7 +51,7 @@ public class CacheKey {
     public CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
         CacheKey key = new CacheKey();
         key.uri = request.getRequestURI();
-        key.userGroups = (String[]) cacheConfig.getUserGroupNames().toArray();
+        //key.userGroups = (String[]) cacheConfig.getUserGroupNames().toArray();
         return this;
     }
 

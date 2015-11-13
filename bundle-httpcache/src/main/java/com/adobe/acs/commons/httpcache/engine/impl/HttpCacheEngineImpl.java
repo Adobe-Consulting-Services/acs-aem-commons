@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.httpcache.engine.impl;
 
+import com.adobe.acs.commons.httpcache.config.AuthenticationStatusConfigConstants;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
@@ -11,7 +12,6 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.CacheUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -41,7 +41,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
                         policy = ReferencePolicy.DYNAMIC,
                         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
 
-                    @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
+                   /* @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
                                referenceInterface = HttpCacheStore.class,
                                policy = ReferencePolicy.DYNAMIC,
                                cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
@@ -49,7 +49,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
                     @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
                                referenceInterface = HttpCacheHandlingRule.class,
                                policy = ReferencePolicy.DYNAMIC,
-                               cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)})
+                               cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)*/})
 // @formatter:on
 public class HttpCacheEngineImpl implements HttpCacheEngine {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
@@ -83,12 +83,13 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     protected void bindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
         // Validate cache config object
         // Check if the request uri is present.
-        if (StringUtils.isEmpty(cacheConfig.getRequestUri())) {
+        if (cacheConfig.getRequestURIs().isEmpty()) {
             log.info("Http cache config rejected at the request uri is absent.");
             return;
         }
-        // Remove the user groups array if the config is not tied to authentication.
-        if (!cacheConfig.isRequestAuthenticationRequired() && cacheConfig.getUserGroupNames().size() > 0) {
+        // Remove the user groups array if the config is tied to anonymous requests.
+        if (!AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST.equals(cacheConfig.getAuthenticationRequirement())
+                && !cacheConfig.getUserGroupNames().isEmpty()) {
             cacheConfig.getUserGroupNames().clear();
             log.debug("Config is for unauthenticated requests and hence list of groups configured are rejected.");
         }
@@ -96,12 +97,13 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         // Check if the same object is already there in the map.
         if (cacheConfigs.contains(cacheConfig)) {
             log.trace("Http cache config object already exists in the cacheConfigs map and hence ignored.");
+            return;
         }
 
         // Add it to the map.
         cacheConfigs.add(cacheConfig);
-        log.info("Cache config for request URI {} added.", cacheConfig.getRequestUri());
-        log.debug("Total number of cache configs addition - {}", cacheConfigs.size());
+        log.info("Cache config for request URIs {} added.", cacheConfig.getRequestURIs().toString());
+        log.debug("Total number of cache configs added - {}", cacheConfigs.size());
     }
 
     /**
@@ -113,10 +115,12 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     protected void unbindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
         if (cacheConfigs.contains(cacheConfig)) {
             cacheConfigs.remove(cacheConfig);
-            // TODO - When a cache config is unbound, associated cached items should be removed from cache store.
+            // TODO - When a cache config is unbound, associated cached items should be removed from the cache store.
+            log.info("Cache config for request URI {} removed.", cacheConfig.getRequestURIs().toString());
+            log.debug("Total number of cache configs after removal - {}", cacheConfigs.size());
+            return;
         }
-        log.info("Cache config for request URI {} removed.", cacheConfig.getRequestUri());
-        log.debug("Total number of cache configs after removal - {}", cacheConfigs.size());
+        log.debug("This cache config entry was not bound and hence nothing to unbind.");
     }
 
     /**

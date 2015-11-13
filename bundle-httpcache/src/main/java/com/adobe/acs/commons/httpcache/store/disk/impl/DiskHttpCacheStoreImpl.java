@@ -4,10 +4,10 @@ import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.CacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Disk cache store implementation.
