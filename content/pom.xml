@@ -60,6 +60,11 @@
                             <artifactId>acs-aem-commons-bundle-twitter</artifactId>
                             <target>/apps/acs-commons/install</target>
                         </embedded>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>acs-aem-commons-bundle-httpcache</artifactId>
+                            <target>/apps/acs-commons/install</target>
+                        </embedded>
                     </embeddeds>
                     <targetURL>http://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
@@ -156,12 +161,17 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-bundle-httpcache</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.jcr</groupId>
             <artifactId>jcr</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.day.cq.wcm</groupId>
