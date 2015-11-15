@@ -1,6 +1,6 @@
 package com.adobe.acs.commons.httpcache.util;
 
-import com.adobe.acs.commons.httpcache.engine.CacheKey;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.commons.lang.NotImplementedException;
 
 import java.io.File;

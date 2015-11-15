@@ -2,14 +2,30 @@ package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.AuthenticationStatusConfigConstants;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -46,13 +62,15 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     // @formatter:off
     @Property(label = "Authentication",
               description = "Authentication requirement.",
-              options = {@PropertyOption(name = AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST,
+              options = {
+                      @PropertyOption(name = AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST,
                                          value = AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST),
                       @PropertyOption(name = AuthenticationStatusConfigConstants.AUTHENTICATED_REQUEST,
                                       value = AuthenticationStatusConfigConstants.AUTHENTICATED_REQUEST),
                       @PropertyOption(name = AuthenticationStatusConfigConstants.BOTH_ANONYMOUS_AUTHENTICATED_REQUESTS,
                                       value = AuthenticationStatusConfigConstants
-                                              .BOTH_ANONYMOUS_AUTHENTICATED_REQUESTS)},
+                                              .BOTH_ANONYMOUS_AUTHENTICATED_REQUESTS)
+              },
               value = AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST)
     // @formatter:on
     private static final String PROP_AUTHENTICATION_REQUIREMENT = "httpcache.config.request.authentication";
@@ -98,6 +116,9 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private List<String> cacheInvalidationPathPatterns;
     private List<Pattern> cacheInvalidationPathPatternsAsRegEx;
 
+    // TODO make this target configurable via OSGi so other can specific custom Key factories
+    @Reference(target = "(component.pid=com.adobe.acs.commons.httpcache.keys.impl.GroupCacheKeyFactory)")
+    private CacheKeyFactory cacheKeyFactory;
 
     @Activate
     @Modified
@@ -105,65 +126,46 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         //Read configs and populate variables after trimming whitespaces.
 
         // Request URIs - Whitelisted.
-        requestUriPatterns = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get
-                (PROP_REQUEST_URI_PATTERNS))));
-        requestUriPatternsAsRegEx = new ArrayList<>();
-        Iterator<String> listIterator = requestUriPatterns.listIterator();
-        while (listIterator.hasNext()) {
-            String value = listIterator.next();
-            if (StringUtils.isNotBlank(value)) {
-                requestUriPatternsAsRegEx.add(Pattern.compile(value));
-            } else {
-                listIterator.remove();
-            }
-        }
+        requestUriPatterns = Arrays.asList(
+                PropertiesUtil.toStringArray(configs.get(PROP_REQUEST_URI_PATTERNS), new String[]{}));
+        requestUriPatternsAsRegEx = compileToPatterns(requestUriPatterns);
 
         // Request URIs - Blacklisted.
-        blacklistedRequestUriPatterns = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get
-                (PROP_BLACKLISTED_REQUEST_URI_PATTERNS))));
-        blacklistedRequestUriPatternsAsRegEx = new ArrayList<>();
-        listIterator = blacklistedRequestUriPatterns.listIterator();
-        while (listIterator.hasNext()) {
-            String value = listIterator.next();
-            if (StringUtils.isNotBlank(value)) {
-                blacklistedRequestUriPatternsAsRegEx.add(Pattern.compile(value));
-            } else {
-                listIterator.remove();
-            }
-        }
+        blacklistedRequestUriPatterns = Arrays.asList(
+                PropertiesUtil.toStringArray(configs.get(PROP_BLACKLISTED_REQUEST_URI_PATTERNS), new String[]{}));
+        blacklistedRequestUriPatternsAsRegEx = compileToPatterns(blacklistedRequestUriPatterns);
 
         // Authentication requirement.
         authenticationRequirement = PropertiesUtil.toString(configs.get(PROP_AUTHENTICATION_REQUIREMENT),
                 DEFAULT_AUTHENTICATION_REQUIREMENT);
 
-        // User groups.
-        userGroups = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_USER_GROUPS))));
-        listIterator = userGroups.listIterator();
-        while (listIterator.hasNext()) {
-            String value = listIterator.next();
-            if (StringUtils.isBlank(value)) {
-                listIterator.remove();
-            }
-        }
-
         // Cache store
         cacheStore = PropertiesUtil.toString(configs.get(PROP_CACHE_STORE), DEFAULT_CACHE_STORE);
 
         // Cache invalidation paths.
-        cacheInvalidationPathPatterns = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get
-                (PROP_CACHE_INVALIDATION_PATH_PATTERNS))));
-        cacheInvalidationPathPatternsAsRegEx = new ArrayList<>();
-        listIterator = cacheInvalidationPathPatterns.listIterator();
-        while (listIterator.hasNext()) {
-            String value = listIterator.next();
-            if (StringUtils.isNotBlank(value)) {
-                cacheInvalidationPathPatternsAsRegEx.add(Pattern.compile(value));
-            } else {
-                listIterator.remove();
+        cacheInvalidationPathPatterns = Arrays.asList(
+                PropertiesUtil.toStringArray(configs.get(PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
+        cacheInvalidationPathPatternsAsRegEx = compileToPatterns(cacheInvalidationPathPatterns);
+
+        log.info("HttpCacheConfigImpl activated /modified.");
+    }
+
+    /**
+     * Converts an array of Regex strings into compiled Patterns.
+     *
+     * @param regexes the regex strings to compile into Patterns
+     * @return the list of compiled Patterns
+     */
+    private List<Pattern> compileToPatterns(final List<String> regexes) {
+        final List<Pattern> patterns = new ArrayList<>();
+
+        for (String regex : regexes) {
+            if (StringUtils.isNotBlank(regex)) {
+                patterns.add(Pattern.compile(regex));
             }
         }
 
-        log.info("HttpCacheConfigImpl activated /modified.");
+        return patterns;
     }
 
     @Deactivate
@@ -171,49 +173,69 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         log.info("HttpCacheConfigImpl deactivated.");
     }
 
+    private boolean matches(List<Pattern> patterns, String data) {
+        for (Pattern pattern : patterns) {
+            final Matcher matcher = pattern.matcher(data);
+            if (matcher.matches()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     //------------------------< Interface specific methods >
     @Override
-    public List<String> getRequestURIs() {
-        return requestUriPatterns;
+    public boolean accepts(SlingHttpServletRequest request) {
+        if ("anonymous".equals(request.getResourceResolver().getUserID())
+                && AuthenticationStatusConfigConstants.AUTHENTICATED_REQUEST.equals(this.authenticationRequirement)) {
+            // Only supports authenticated requests, but request is anonymous so reject
+            return false;
+        }
+
+        final String uri = request.getRequestURI();
+
+        if (!this.matches(this.requestUriPatternsAsRegEx, uri)) {
+            // Does not match URI Whitelist
+            return false;
+        }
+
+        if (this.matches(this.blacklistedRequestUriPatternsAsRegEx, uri)) {
+            // Matches URI Blacklist; reject
+            return false;
+        }
+
+        return true;
     }
 
     @Override
-    public List<Pattern> getRequestURIsAsRegEx() {
-        return requestUriPatternsAsRegEx;
+    public CacheKey buildCacheKey(SlingHttpServletRequest request) {
+        try {
+            return this.cacheKeyFactory.build(request);
+        } catch (HttpCacheKeyCreationException e) {
+            // TODO handle error
+            return null;
+        }
     }
 
     @Override
-    public List<String> getBlacklistedURIs() {
-        return blacklistedRequestUriPatterns;
+    public boolean isValid() {
+        return CollectionUtils.isNotEmpty(this.requestUriPatterns);
     }
 
     @Override
-    public List<Pattern> getBlacklistedURIsAsRegEx() {
-        return blacklistedRequestUriPatternsAsRegEx;
+    public boolean isInvalidateAll() {
+        // TODO get this from OSGi Config
+        return false;
     }
 
     @Override
-    public String getAuthenticationRequirement() {
-        return authenticationRequirement;
-    }
-
-    @Override
-    public List<String> getUserGroupNames() {
-        return userGroups;
+    public boolean canInvalidate(final String path) {
+        return matches(cacheInvalidationPathPatternsAsRegEx, path);
     }
 
     @Override
     public String getCacheStoreName() {
         return cacheStore;
-    }
-
-    @Override
-    public List<String> getCacheInvalidationPaths() {
-        return cacheInvalidationPathPatterns;
-    }
-
-    @Override
-    public List<Pattern> getCacheInvalidationPathsAsRegEx() {
-        return cacheInvalidationPathPatternsAsRegEx;
     }
 }

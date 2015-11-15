@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.httpcache.config;
 
-import java.util.List;
-import java.util.regex.Pattern;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
  * Configuration for Http cache. Multiple configs can be supplied. Request uri, authentication details, aem user group
@@ -15,50 +15,6 @@ import java.util.regex.Pattern;
  */
 public interface HttpCacheConfig {
     /**
-     * Get the request URIs set for this config.
-     *
-     * @return List of URIs expressed in REGEX.
-     */
-    List<String> getRequestURIs();
-
-    /**
-     * Get the request URIs set for this config in the form of regular expression patterns.
-     *
-     * @return
-     */
-    List<Pattern> getRequestURIsAsRegEx();
-
-    /**
-     * Get the blacklisted URIs.
-     *
-     * @return List of URIs expressed in REGEX.
-     */
-    List<String> getBlacklistedURIs();
-
-    /**
-     * Get the blacklisted request URIs set for this config in the form of regular expression patterns.
-     *
-     * @return
-     */
-    List<Pattern> getBlacklistedURIsAsRegEx();
-
-    /**
-     * Get the authentication requirement set for this config.
-     *
-     * @return One of the constants defined in {@link AuthenticationStatusConfigConstants}
-     */
-    String getAuthenticationRequirement();
-
-
-    /**
-     * Get the configured AEM user groups in which at least one of them must be present in the request user's group
-     * list.
-     *
-     * @return
-     */
-    List<String> getUserGroupNames();
-
-    /**
      * Name of the configured cache store.
      *
      * @return
@@ -66,18 +22,36 @@ public interface HttpCacheConfig {
     String getCacheStoreName();
 
     /**
-     * Get the configured JCR path patterns (REGEX) for which this cache will be invalidated.
+     * Determins if this Http Cache Config should try to create a cache entry for the http request's response.
      *
-     * @return
+     * @param request the request
+     * @return true if the response should be cached, false if it should not be cached.
      */
-    List<String> getCacheInvalidationPaths();
+    boolean accepts(SlingHttpServletRequest request);
 
     /**
-     * Get the configured JCR path patterns (REGEX) for which this cache will be invalidated as regular expression
-     * pattern.
-     *
-     * @return
+     * @return true if this config is considered valid and processable by the HttpCacheEngine
      */
-    List<Pattern> getCacheInvalidationPathsAsRegEx();
+    boolean isValid();
+
+    /**
+     * Creates the CacheKey object using the CacheKeyFactory associated with this HttpCacheConfig factory instance.
+     * @param request the request to create the CacheKey for
+     * @return the CacheKey
+     */
+    CacheKey buildCacheKey(SlingHttpServletRequest request);
+
+    /**
+     * @return true if this has been configured to invalidate the cache entirely for any invalidation. false if each
+     * CacheKey should be checked for invalidation.
+     */
+    boolean isInvalidateAll();
+
+    /**
+     * Determines if a JCR path is a candidate for invalidating this cache.
+     * @param path the jcr path
+     * @return true if this config can be invalidated by a change to this path
+     */
+    boolean canInvalidate(String path);
 }
 

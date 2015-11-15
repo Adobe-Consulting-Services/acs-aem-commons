@@ -1,13 +1,22 @@
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
-import com.adobe.acs.commons.httpcache.engine.CacheKey;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import com.adobe.acs.commons.httpcache.store.mem.MemCacheKey;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import com.google.common.cache.*;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.TabularData;
 import java.io.ByteArrayInputStream;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -51,7 +59,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     private long maxSizeInMb;
 
     /** Cache - Uses Google Guava's cache */
-    private Cache<MemCacheKey, MemCacheValue> cache;
+    private Cache<CacheKey, MemCacheValue> cache;
 
     @Activate
     protected void activate(Map<String, Object> configs) {
@@ -64,16 +72,23 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         // Recording cache usage stats enabled.
         if (null != cache) {
             cache.invalidateAll();
-            log.info("Mem cache already present. Inavlidating the cache and re-initizling it.");
+            log.info("Mem cache already present. Invalidating the cache and re-initializing it.");
         }
         if (ttl != DEFAULT_TTL) {
             // If ttl is present, attach it to cache config.
-            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).expireAfterWrite(ttl, TimeUnit
-                    .SECONDS).removalListener(new MemCacheEntryRemovalListener()).recordStats().build();
+            cache = CacheBuilder.newBuilder()
+                    .maximumWeight(maxSizeInMb * MEGABYTE)
+                    .expireAfterWrite(ttl, TimeUnit.SECONDS)
+                    .removalListener(new MemCacheEntryRemovalListener())
+                    .recordStats()
+                    .build();
         } else {
             // If ttl is absent, go only with the maximum weight condition.
-            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).
-                    removalListener(new MemCacheEntryRemovalListener()).recordStats().build();
+            cache = CacheBuilder.newBuilder()
+                    .maximumWeight(maxSizeInMb * MEGABYTE)
+                    .removalListener(new MemCacheEntryRemovalListener())
+                    .recordStats()
+                    .build();
         }
 
         log.info("MemHttpCacheStoreImpl activated / modified.");
@@ -88,13 +103,17 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     /**
      * Removal listener for cache entry items.
      */
-    private static class MemCacheEntryRemovalListener implements RemovalListener<MemCacheKey, MemCacheValue> {
+    private static class MemCacheEntryRemovalListener implements RemovalListener<CacheKey, MemCacheValue> {
         private static final Logger log = LoggerFactory.getLogger(MemCacheEntryRemovalListener.class);
 
         @Override
-        public void onRemoval(RemovalNotification<MemCacheKey, MemCacheValue> removalNotification) {
-            log.debug("Mem cache entry removed due to {} - Uri of key: {}, Groups of key: {}", removalNotification
-                    .getKey().getUri(), Arrays.toString(removalNotification.getKey().getUserGroups()));
+        public void onRemoval(RemovalNotification<CacheKey, MemCacheValue> removalNotification) {
+            // TODO Remove or adjust how this debug is logged; shouldnt expose CacheKey impl details directly
+            /*
+                log.debug("Mem cache entry removed due to {} - Uri of key: {}, Groups of key: {}",
+                     removalNotification.getKey().getUri(),
+                     Arrays.toString(removalNotification.getKey().getUserGroups()));
+             */
             log.debug("Mem cache entry removed due to {} ", removalNotification.getCause().name());
         }
     }
@@ -113,7 +132,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
-        cache.put(new MemCacheKey().buildForCaching(key.getUri(), key.getUserGroups()), new MemCacheValue()
+        cache.put(key, new MemCacheValue()
                 .buildForCaching(content.getCharEncoding(), content.getContentType(), content.getHeaders(), content
                         .getInputDataStream()));
 
@@ -126,7 +145,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
     @Override
     public CacheContent getIfPresent(CacheKey key) {
-        MemCacheValue value = cache.getIfPresent(new MemCacheKey().buildForLookups(key.getUri(), key.getUserGroups()));
+        MemCacheValue value = cache.getIfPresent(key);
         return new CacheContent(value.getCharEncoding(), value.getContentType(), value.getHeaders(), new
                 ByteArrayInputStream(value.getBytes()));
     }
@@ -137,8 +156,25 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     }
 
     @Override
+    public void invalidate(String path) {
+        // TODO review this for efficiency
+        long start = System.currentTimeMillis();
+
+        for (CacheKey key : cache.asMap().keySet()) {
+            // key.isInvalidatedBy should be fast, but this is ultimately bounded by # of keys
+            if (key.isInvalidatedBy(path)) {
+                invalidate(key);
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Selective cache invalidation took {}ms", System.currentTimeMillis() - start);
+        }
+    }
+
+    @Override
     public void invalidate(CacheKey key) {
-        cache.invalidate(new MemCacheKey().buildForLookups(key.getUri(), key.getUserGroups()));
+        cache.invalidate(key);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.httpcache.store;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
-import com.adobe.acs.commons.httpcache.engine.CacheKey;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 
 /**
@@ -50,6 +50,13 @@ public interface HttpCacheStore {
     long size();
 
     /**
+     * Invalidate by jcr path.
+     *
+     * @param path
+     */
+    void invalidate(String path);
+
+    /**
      * Invalidate the given cache key.
      *
      * @param key
@@ -60,4 +67,6 @@ public interface HttpCacheStore {
      * Invalidate all entries in the cache.
      */
     void invalidateAll();
+
+
 }
