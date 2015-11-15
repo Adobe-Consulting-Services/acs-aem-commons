@@ -157,11 +157,15 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
     }
 
-    @Deactivate
-    protected void deactivate(ComponentContext ctx) {
+    protected final void unregisterFilter() {
         if (filterRegistration != null) {
             filterRegistration.unregister();
             filterRegistration = null;
         }
+    }
+
+    @Deactivate
+    protected void deactivate(ComponentContext ctx) {
+        this.unregisterFilter();
     }
 }
