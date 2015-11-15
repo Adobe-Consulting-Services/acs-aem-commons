@@ -1,8 +1,10 @@
 package com.adobe.acs.commons.httpcache.engine;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
@@ -19,16 +21,19 @@ public interface HttpCacheEngine {
      *
      * @param request
      * @return True if the request is cacheable
+     * @throws HttpCacheReposityAccessException
      */
-    boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheException;
+    boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheReposityAccessException;
 
     /**
      * Get the cache config applicable for the given request.
      *
      * @param request
      * @return Applicable CacheConfig
+     * @throws HttpCacheConfigConflictException
+     * @throws HttpCacheReposityAccessException
      */
-    HttpCacheConfig getCacheConfig(SlingHttpServletRequest request);
+    HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheConfigConflictException, HttpCacheReposityAccessException;
 
     /**
      * Check if the given request can be served from available cache.

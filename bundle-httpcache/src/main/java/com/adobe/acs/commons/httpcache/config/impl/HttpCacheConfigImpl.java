@@ -18,7 +18,8 @@ import java.util.regex.Pattern;
 @Component(label = "ACS AEM Commons - HTTP Cache - Cache config",
            description = "Config for request URI patterns that have to be cached.",
            configurationFactory = true,
-           metatype = true)
+           metatype = true,
+           immediate = true)
 @Service
 public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
