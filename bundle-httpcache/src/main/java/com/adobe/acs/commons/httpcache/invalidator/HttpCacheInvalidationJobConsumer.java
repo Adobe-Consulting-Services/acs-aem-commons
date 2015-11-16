@@ -2,21 +2,26 @@ package com.adobe.acs.commons.httpcache.invalidator;
 
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
-import com.adobe.acs.commons.httpcache.invalidator.CacheInvalidationJobConstants;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * ACS AEM Commons - HTTP Cache - Cache invalidation job consumer
+ * Consumes job for invalidating the http cache.
+ *
  * Sling job consumer consuming the job created for invalidating cache. For creating an invalidation job for this
  * consumer, make use of the topic and associated constants defined at {@link CacheInvalidationJobConstants}
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Cache invalidation job consumer",
-           description = "Consumes job for invalidating the http cache.",
-           immediate = true)
+@Component(immediate = true)
 @Service
 @Property(name = JobConsumer.PROPERTY_TOPICS,
           value = CacheInvalidationJobConstants.TOPIC_HTTP_CACHE_INVALIDATION_JOB)

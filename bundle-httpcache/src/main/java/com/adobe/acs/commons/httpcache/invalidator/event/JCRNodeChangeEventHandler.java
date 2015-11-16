@@ -22,10 +22,12 @@ import java.util.Map;
  * to any change in paths -- /content, /etc and creates an invalidation job. The intention of this invalidation job is
  * that whenever there is any change in the above said paths, the configured cache needs to be invalidated. </p>
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Invalidation job creator on JCR node change",
-           description = "Creates http cache invalidation job on JCR node / property change.",
-           metatype = true,
-           immediate = true,
+
+/**
+ * ACS AEM Commons - HTTP Cache - Invalidation job creator on JCR node change
+ * Creates http cache invalidation job on JCR node / property change.
+ */
+@Component(immediate = true,
            policy = ConfigurationPolicy.REQUIRE)
 @Properties({@Property(label = "Event Topics",
                        value = {SlingConstants.TOPIC_RESOURCE_CHANGED, SlingConstants.TOPIC_RESOURCE_ADDED,

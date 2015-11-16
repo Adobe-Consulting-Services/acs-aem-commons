@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.disk.impl;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
-import com.adobe.acs.commons.httpcache.engine.CacheKey;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import org.apache.commons.lang.NotImplementedException;
@@ -10,13 +10,14 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 
 /**
- * Disk cache store implementation.
+ *  ACS AEM Commons - HTTP Cache - Disk based cache store
+ *  Cache data store implementation for Disk storage.
  */
+
 // TODO - Take the cache root path from config.
 // TODO - Make this policy = ConfigurationPolicy.REQUIRE
-@Component(label = "ACS AEM Commons - HTTP Cache - Disk based cache store.",
-           description = "Cache data store implementation for Disk storage.",
-           metatype = true)
+
+@Component
 @Service
 @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
           value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
@@ -39,6 +40,11 @@ public class DiskHttpCacheStoreImpl implements HttpCacheStore {
 
     @Override
     public long size() {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void invalidate(final String path) {
         throw new NotImplementedException();
     }
 
