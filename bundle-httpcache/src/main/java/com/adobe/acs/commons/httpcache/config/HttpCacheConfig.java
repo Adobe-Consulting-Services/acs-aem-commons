@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.httpcache.config;
 
+import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.sling.api.SlingHttpServletRequest;
 
@@ -22,33 +23,29 @@ public interface HttpCacheConfig {
     String getCacheStoreName();
 
     /**
-     * Determins if this Http Cache Config should try to create a cache entry for the http request's response.
+     * Determine if this cache config is applicable for the given request.
      *
      * @param request the request
      * @return true if the response should be cached, false if it should not be cached.
      */
-    boolean accepts(SlingHttpServletRequest request);
+    boolean accepts(SlingHttpServletRequest request) throws HttpCacheReposityAccessException;
 
     /**
-     * @return true if this config is considered valid and processable by the HttpCacheEngine
+     * @return true if this config is considered valid and processable by the HttpCacheEngine.
      */
     boolean isValid();
 
     /**
      * Creates the CacheKey object using the CacheKeyFactory associated with this HttpCacheConfig factory instance.
+     *
      * @param request the request to create the CacheKey for
      * @return the CacheKey
      */
     CacheKey buildCacheKey(SlingHttpServletRequest request);
 
     /**
-     * @return true if this has been configured to invalidate the cache entirely for any invalidation. false if each
-     * CacheKey should be checked for invalidation.
-     */
-    boolean isInvalidateAll();
-
-    /**
      * Determines if a JCR path is a candidate for invalidating this cache.
+     *
      * @param path the jcr path
      * @return true if this config can be invalidated by a change to this path
      */

@@ -3,11 +3,13 @@ package com.adobe.acs.commons.httpcache.engine.impl;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
-import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.CacheUtils;
@@ -18,16 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * ACS AEM Commons - HTTP Cache - Cache engine
- * Controlling service for http cache implementation.
- *
- * Default implementation for {@link HttpCacheEngine}. Binds multiple {@link HttpCacheConfig}. Multiple {@link
- * HttpCacheStore} also get bound to this.
+ * ACS AEM Commons - HTTP Cache - Cache engine Controlling service for http cache implementation. Default implementation
+ * for {@link HttpCacheEngine}. Binds multiple {@link HttpCacheConfig}. Multiple {@link HttpCacheStore} also get bound
+ * to this.
  */
 
 // TODO - Make this service tied to osgi config nodes
@@ -201,33 +203,54 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
     //-----------------------<Interface specific implementation>--------//
     @Override
-    public boolean isRequestCacheable(SlingHttpServletRequest request) {
+    public boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheReposityAccessException {
 
-        // TODO - Check if request is cacheable as per any cache config.
+        boolean isRequestCacheable = false;
+
+        // Check if any of the cache config accepts this request.
+        for (HttpCacheConfig cacheConfig : cacheConfigs) {
+            if (cacheConfig.accepts(request)) {
+                isRequestCacheable = true;
+            }
+        }
 
         // Execute custom rules.
         for (HttpCacheHandlingRule rule : cacheHandlingRules) {
             if (!rule.onRequestReceive(request)) {
-                return false;
+                log.debug("Request cannot be cached for the uri {} honoring the rule {}", request.getRequestURI(),
+                        rule.getClass().getName());
+                isRequestCacheable = false;
             }
         }
 
-        return false;
+        return isRequestCacheable;
     }
 
     @Override
-    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) {
-        // TODO - Loop through the available cache config and return the one applicable for this request.
+    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheReposityAccessException,
+            HttpCacheConfigConflictException {
 
-        for (HttpCacheConfig config : cacheConfigs) {
-            if(config.accepts(request)) {
-                // Return the first acceptable HttpCacheConfig
-                return config;
+        List<HttpCacheConfig> matchingConfigs = new ArrayList<>();
+
+        // Collect all the matching cache configs.
+        for (HttpCacheConfig cacheConfig : cacheConfigs) {
+            if (cacheConfig.accepts(request)) {
+                matchingConfigs.add(cacheConfig);
             }
         }
 
-        log.debug("Could not find an acceptable HttpCacheConfig");
-        return null;
+        // If there is more than one matching cache config, throw Cache Conflict exception.
+        // Ideally, when there are multiple configs matching, the one with closest match has to be chosen based on
+        // certain ranking mechanism. For the sake of simplicity, it' been reserved for future implementation.
+        if (matchingConfigs.size() == 1) {
+            return matchingConfigs.get(0);
+        } else if (matchingConfigs.size() > 1) {
+            throw new HttpCacheConfigConflictException("Multiple matching cache configs found and unable to " +
+                    "determine the closest match");
+        } else {
+            log.debug("Could not find an acceptable HttpCacheConfig");
+            return null;
+        }
     }
 
     @Override
@@ -245,8 +268,8 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     public void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                     HttpCacheConfig cacheConfig) {
         // Get the cached content from cache
-        CacheContent cacheContent = cacheStoresMap.get(
-                cacheConfig.getCacheStoreName()).getIfPresent(cacheConfig.buildCacheKey(request));
+        CacheContent cacheContent = cacheStoresMap.get(cacheConfig.getCacheStoreName()).getIfPresent(cacheConfig
+                .buildCacheKey(request));
 
         // Execute custom rules.
         for (HttpCacheHandlingRule rule : cacheHandlingRules) {
@@ -346,10 +369,11 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         }
 
         for (HttpCacheConfig config : cacheConfigs) {
-            if(config.canInvalidate(path)) {
+            if (config.canInvalidate(path)) {
                 HttpCacheStore cacheStore = cacheStoresMap.get(config.getCacheStoreName());
                 if (cacheStore != null) {
-                    if (config.isInvalidateAll()) {
+                    // FIXME - This is against the multiple cache config concept.
+                    /*if (config.isInvalidateAll()) {
                         // Config is marked to always invalidate all entries for each invalidation event
                         cacheStore.invalidateAll();
                         ;
@@ -357,7 +381,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
                         // Config is marked to check each entry for selective invalidation
                         // TODO this is O(N) where N is # of entries in cache
                         cacheStore.invalidate(path);
-                    }
+                    }*/
                 }
             }
         }

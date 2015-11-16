@@ -3,28 +3,22 @@ package com.adobe.acs.commons.httpcache.config.impl;
 import com.adobe.acs.commons.httpcache.config.AuthenticationStatusConfigConstants;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import com.adobe.acs.commons.httpcache.util.UserUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
+import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import javax.jcr.RepositoryException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,8 +111,18 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private List<String> cacheInvalidationPathPatterns;
     private List<Pattern> cacheInvalidationPathPatternsAsRegEx;
 
-    // TODO make this target configurable via OSGi so other can specific custom Key factories
-    @Reference(target = "(component.pid=com.adobe.acs.commons.httpcache.keys.impl.GroupCacheKeyFactory)")
+    // Target implementation for Cache Key Factory.
+    @Property(label = "CacheKeyFactory service pid",
+              description = "Service pid of target implementation of CacheKeyFactory to be used. Example - " +
+                      "(service.pid=com.adobe.acs.commons.httpcache.keys.impl.GroupCacheKeyFactory)." +
+                      "Mandatory parameter.",
+              value = "(service.pid=com.adobe.acs.commons.httpcache.keys.impl.GroupCacheKeyFactory)")
+    private static final String PROP_CACHEKEYFACTORY_TARGET_PID = "cacheKeyFactory.target";
+
+    //@Reference(target = "(component.pid=com.adobe.acs.commons.httpcache.keys.impl.GroupCacheKeyFactory)")
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
+               policy = ReferencePolicy.DYNAMIC,
+               name = "cacheKeyFactory")
     private CacheKeyFactory cacheKeyFactory;
 
     @Activate
@@ -127,13 +131,13 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         //Read configs and populate variables after trimming whitespaces.
 
         // Request URIs - Whitelisted.
-        requestUriPatterns = Arrays.asList(
-                PropertiesUtil.toStringArray(configs.get(PROP_REQUEST_URI_PATTERNS), new String[]{}));
+        requestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_REQUEST_URI_PATTERNS), new
+                String[]{}));
         requestUriPatternsAsRegEx = compileToPatterns(requestUriPatterns);
 
         // Request URIs - Blacklisted.
-        blacklistedRequestUriPatterns = Arrays.asList(
-                PropertiesUtil.toStringArray(configs.get(PROP_BLACKLISTED_REQUEST_URI_PATTERNS), new String[]{}));
+        blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get
+                (PROP_BLACKLISTED_REQUEST_URI_PATTERNS), new String[]{}));
         blacklistedRequestUriPatternsAsRegEx = compileToPatterns(blacklistedRequestUriPatterns);
 
         // Authentication requirement.
@@ -143,9 +147,19 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         // Cache store
         cacheStore = PropertiesUtil.toString(configs.get(PROP_CACHE_STORE), DEFAULT_CACHE_STORE);
 
+        // User groups after removing empty strings.
+        userGroups = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_USER_GROUPS))));
+        ListIterator<String> listIterator = userGroups.listIterator();
+        while (listIterator.hasNext()) {
+            String value = listIterator.next();
+            if (StringUtils.isBlank(value)) {
+                listIterator.remove();
+            }
+        }
+
         // Cache invalidation paths.
-        cacheInvalidationPathPatterns = Arrays.asList(
-                PropertiesUtil.toStringArray(configs.get(PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
+        cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get
+                (PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
         cacheInvalidationPathPatternsAsRegEx = compileToPatterns(cacheInvalidationPathPatterns);
 
         log.info("HttpCacheConfigImpl activated /modified.");
@@ -174,6 +188,76 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         log.info("HttpCacheConfigImpl deactivated.");
     }
 
+    //------------------------< Interface specific implementation >
+
+    @Override
+    public String getCacheStoreName() {
+        return cacheStore;
+    }
+
+    @Override
+    public boolean accepts(SlingHttpServletRequest request) throws HttpCacheReposityAccessException {
+
+        // Match authentication requirement.
+        if (UserUtils.isAnonymous(request.getResourceResolver().getUserID())) {
+            if (AuthenticationStatusConfigConstants.AUTHENTICATED_REQUEST.equals(this.authenticationRequirement)) {
+                // Request is anonymous but the config accepts only authenticated request and hence reject.
+                return false;
+            }
+        } else {
+            if (AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST.equals(this.authenticationRequirement)) {
+                // Request is authenticated but config is for anonymous and hence reject.
+                return false;
+            }
+        }
+
+
+        // Match request URI.
+        final String uri = request.getRequestURI();
+        if (!this.matches(this.requestUriPatternsAsRegEx, uri)) {
+            // Does not match URI Whitelist
+            return false;
+        }
+
+        // Match blacklisted URI.
+        if (this.matches(this.blacklistedRequestUriPatternsAsRegEx, uri)) {
+            // Matches URI Blacklist; reject
+            return false;
+        }
+
+        // Match groups.
+        if (UserUtils.isAnonymous(request.getResourceResolver().getUserID())) {
+            // If the user is anonymous, no matching with groups required.
+            return true;
+        } else {
+            // Case of authenticated requests.
+            if (this.userGroups.size() > 0) {
+                try {
+                    List<String> requestUserGroupNames = UserUtils.getUserGroupMembershipNames(request
+                            .getResourceResolver().adaptTo(User.class));
+
+                    // At least one of the group in config should match.
+                    boolean isGroupMatchFound = CollectionUtils.containsAny(this.userGroups, requestUserGroupNames);
+                    if (!isGroupMatchFound) {
+                        log.debug("Group didn't match and hence rejecting the cache config.");
+                    }
+                    return isGroupMatchFound;
+                } catch (RepositoryException e) {
+                    throw new HttpCacheReposityAccessException("Unable to access group information of request user.",
+                            e);
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Matching the given data with the set of compiled patterns.
+     *
+     * @param patterns
+     * @param data
+     * @return
+     */
     private boolean matches(List<Pattern> patterns, String data) {
         for (Pattern pattern : patterns) {
             final Matcher matcher = pattern.matcher(data);
@@ -183,30 +267,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         }
 
         return false;
-    }
-
-    //------------------------< Interface specific methods >
-    @Override
-    public boolean accepts(SlingHttpServletRequest request) {
-        if ("anonymous".equals(request.getResourceResolver().getUserID())
-                && AuthenticationStatusConfigConstants.AUTHENTICATED_REQUEST.equals(this.authenticationRequirement)) {
-            // Only supports authenticated requests, but request is anonymous so reject
-            return false;
-        }
-
-        final String uri = request.getRequestURI();
-
-        if (!this.matches(this.requestUriPatternsAsRegEx, uri)) {
-            // Does not match URI Whitelist
-            return false;
-        }
-
-        if (this.matches(this.blacklistedRequestUriPatternsAsRegEx, uri)) {
-            // Matches URI Blacklist; reject
-            return false;
-        }
-
-        return true;
     }
 
     @Override
@@ -225,18 +285,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     }
 
     @Override
-    public boolean isInvalidateAll() {
-        // TODO get this from OSGi Config
-        return false;
-    }
-
-    @Override
     public boolean canInvalidate(final String path) {
         return matches(cacheInvalidationPathPatternsAsRegEx, path);
-    }
-
-    @Override
-    public String getCacheStoreName() {
-        return cacheStore;
     }
 }
