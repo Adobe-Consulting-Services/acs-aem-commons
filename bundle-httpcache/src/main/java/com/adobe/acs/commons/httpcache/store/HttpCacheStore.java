@@ -1,8 +1,8 @@
 package com.adobe.acs.commons.httpcache.store;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
-import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
 
 /**
  * Data store for persisting cache items. Data store implementation could be in-memory, disk or even JCR repository.
@@ -29,6 +29,7 @@ public interface HttpCacheStore {
 
     /**
      * Check if there is an entry in cache for the given key.
+     *
      * @param key
      * @return
      */
@@ -49,12 +50,6 @@ public interface HttpCacheStore {
      */
     long size();
 
-    /**
-     * Invalidate by jcr path.
-     *
-     * @param path
-     */
-    void invalidate(String path);
 
     /**
      * Invalidate the given cache key.
@@ -67,6 +62,4 @@ public interface HttpCacheStore {
      * Invalidate all entries in the cache.
      */
     void invalidateAll();
-
-
 }

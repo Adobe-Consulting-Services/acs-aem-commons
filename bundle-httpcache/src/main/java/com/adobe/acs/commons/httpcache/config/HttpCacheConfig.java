@@ -1,8 +1,11 @@
 package com.adobe.acs.commons.httpcache.config;
 
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.sling.api.SlingHttpServletRequest;
+
+import java.util.List;
 
 /**
  * Configuration for Http cache. Multiple configs can be supplied. Request uri, authentication details, aem user group
@@ -41,7 +44,7 @@ public interface HttpCacheConfig {
      * @param request the request to create the CacheKey for
      * @return the CacheKey
      */
-    CacheKey buildCacheKey(SlingHttpServletRequest request);
+    CacheKey buildCacheKey(SlingHttpServletRequest request) throws HttpCacheKeyCreationException;
 
     /**
      * Determines if a JCR path is a candidate for invalidating this cache.
@@ -50,5 +53,9 @@ public interface HttpCacheConfig {
      * @return true if this config can be invalidated by a change to this path
      */
     boolean canInvalidate(String path);
+
+    public String getAuthenticationRequirement();
+
+    public List<String> getUserGroups();
 }
 

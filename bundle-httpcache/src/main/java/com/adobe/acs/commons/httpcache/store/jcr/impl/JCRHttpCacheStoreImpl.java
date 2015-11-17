@@ -45,11 +45,6 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore {
     }
 
     @Override
-    public void invalidate(final String path) {
-        throw new NotImplementedException();
-    }
-
-    @Override
     public void invalidate(CacheKey key) {
         throw new NotImplementedException();
     }

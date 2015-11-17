@@ -1,10 +1,7 @@
 package com.adobe.acs.commons.httpcache.engine;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
-import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
+import com.adobe.acs.commons.httpcache.exception.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
@@ -43,8 +40,7 @@ public interface HttpCacheEngine {
      * @return True if the given request can be served from cache.
      * @throws HttpCachePersistenceException
      */
-    boolean isCacheHit(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
-            HttpCachePersistenceException;
+    boolean isCacheHit(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCachePersistenceException, HttpCacheKeyCreationException;
 
     /**
      * Deliver the response from the cache. Custom cache handling rule hook {@link com.adobe.acs.commons.httpcache
@@ -56,7 +52,7 @@ public interface HttpCacheEngine {
      * @throws HttpCachePersistenceException
      */
     void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
-            cacheConfig) throws HttpCachePersistenceException;
+            cacheConfig) throws HttpCachePersistenceException, HttpCacheKeyCreationException;
 
     /**
      * Mark the request with an attribute that makes its response identifiable as the one that can be cached when the

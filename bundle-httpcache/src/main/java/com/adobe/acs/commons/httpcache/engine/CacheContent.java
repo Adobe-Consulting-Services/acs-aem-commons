@@ -13,7 +13,6 @@ import java.util.*;
  * Represents response content to be cached.
  */
 public class CacheContent {
-    // TODO - Capture the size the response content as well.
     private static final Logger log = LoggerFactory.getLogger(CacheContent.class);
 
     /** Response character encoding */

@@ -1,22 +1,14 @@
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
-import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.mem.MemCacheKey;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
-import com.google.common.cache.Weigher;
+import com.google.common.cache.*;
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +24,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Component(label = "ACS AEM Commons - HTTP Cache - In-Memory cache store.",
            description = "Cache data store implementation for in-memory storage.",
-           metatype = true)
+           metatype = true,
+           immediate = true)
 @Service
 @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
           value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
@@ -76,19 +69,12 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         }
         if (ttl != DEFAULT_TTL) {
             // If ttl is present, attach it to cache config.
-            cache = CacheBuilder.newBuilder()
-                    .maximumWeight(maxSizeInMb * MEGABYTE)
-                    .expireAfterWrite(ttl, TimeUnit.SECONDS)
-                    .removalListener(new MemCacheEntryRemovalListener())
-                    .recordStats()
-                    .build();
+            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).expireAfterWrite(ttl, TimeUnit
+                    .SECONDS).removalListener(new MemCacheEntryRemovalListener()).recordStats().build();
         } else {
             // If ttl is absent, go only with the maximum weight condition.
-            cache = CacheBuilder.newBuilder()
-                    .maximumWeight(maxSizeInMb * MEGABYTE)
-                    .removalListener(new MemCacheEntryRemovalListener())
-                    .recordStats()
-                    .build();
+            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).weigher(new MemCacheEntryWeigher()).removalListener(new
+                    MemCacheEntryRemovalListener()).recordStats().build();
         }
 
         log.info("MemHttpCacheStoreImpl activated / modified.");
@@ -108,23 +94,18 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
         @Override
         public void onRemoval(RemovalNotification<CacheKey, MemCacheValue> removalNotification) {
-            // TODO Remove or adjust how this debug is logged; shouldnt expose CacheKey impl details directly
-            /*
-                log.debug("Mem cache entry removed due to {} - Uri of key: {}, Groups of key: {}",
-                     removalNotification.getKey().getUri(),
-                     Arrays.toString(removalNotification.getKey().getUserGroups()));
-             */
-            log.debug("Mem cache entry removed due to {} ", removalNotification.getCause().name());
+            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey(),
+                    removalNotification.getCause().name());
         }
     }
 
     /**
      * Weigher for the cache entry.
      */
-    private static class MemCacheEntryWeigher implements Weigher<MemCacheKey, MemCacheValue> {
+    private static class MemCacheEntryWeigher implements Weigher<CacheKey, MemCacheValue> {
 
         @Override
-        public int weigh(MemCacheKey memCacheKey, MemCacheValue memCacheValue) {
+        public int weigh(CacheKey memCacheKey, MemCacheValue memCacheValue) {
             // Size of the byte array.
             return memCacheValue.getBytes().length;
         }
@@ -132,9 +113,8 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
-        cache.put(key, new MemCacheValue()
-                .buildForCaching(content.getCharEncoding(), content.getContentType(), content.getHeaders(), content
-                        .getInputDataStream()));
+        cache.put(key, new MemCacheValue().buildForCaching(content.getCharEncoding(), content.getContentType(),
+                content.getHeaders(), content.getInputDataStream()));
 
     }
 
@@ -156,23 +136,6 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     }
 
     @Override
-    public void invalidate(String path) {
-        // TODO review this for efficiency
-        long start = System.currentTimeMillis();
-
-        for (CacheKey key : cache.asMap().keySet()) {
-            // key.isInvalidatedBy should be fast, but this is ultimately bounded by # of keys
-            if (key.isInvalidatedBy(path)) {
-                invalidate(key);
-            }
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Selective cache invalidation took {}ms", System.currentTimeMillis() - start);
-        }
-    }
-
-    @Override
     public void invalidate(CacheKey key) {
         cache.invalidate(key);
     }
@@ -184,7 +147,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
     //-------------------------<Mbean specific implementation>
     // TODO -- How do we deal with the mandate of having a constructor in OSGi service.
-    public MemHttpCacheStoreImpl() throws NotCompliantMBeanException{
+    public MemHttpCacheStoreImpl() throws NotCompliantMBeanException {
         super(MemCacheMBean.class);
     }
 

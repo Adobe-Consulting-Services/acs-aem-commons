@@ -5,10 +5,7 @@ import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
+import com.adobe.acs.commons.httpcache.exception.*;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
@@ -16,11 +13,13 @@ import com.adobe.acs.commons.httpcache.util.CacheUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,15 +43,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
                         policy = ReferencePolicy.DYNAMIC,
                         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
 
-                   /* @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
-                               referenceInterface = HttpCacheStore.class,
-                               policy = ReferencePolicy.DYNAMIC,
-                               cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
-
-                    @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
+                        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
                                referenceInterface = HttpCacheHandlingRule.class,
                                policy = ReferencePolicy.DYNAMIC,
-                               cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)*/})
+                               cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+
+                        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
+                               referenceInterface = HttpCacheStore.class,
+                               policy = ReferencePolicy.DYNAMIC,
+                               cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)})
+
 // @formatter:on
 public class HttpCacheEngineImpl implements HttpCacheEngine {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
@@ -85,20 +85,10 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      */
     protected void bindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
         // Validate cache config object
-        // Check if the request uri is present.
-        if (cacheConfig.isValid()) {
+        if (!cacheConfig.isValid()) {
             log.info("Http cache config rejected at the request uri is absent.");
             return;
         }
-
-        /*
-        // Remove the user groups array if the config is tied to anonymous requests.
-        if (!AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST.equals(cacheConfig.getAuthenticationRequirement())
-                && !cacheConfig.getUserGroupNames().isEmpty()) {
-            cacheConfig.getUserGroupNames().clear();
-            log.debug("Config is for unauthenticated requests and hence list of groups configured are rejected.");
-        }
-        */
 
         // Check if the same object is already there in the map.
         if (cacheConfigs.contains(cacheConfig)) {
@@ -108,7 +98,6 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
         // Add it to the map.
         cacheConfigs.add(cacheConfig);
-        //log.info("Cache config for request URIs {} added.", cacheConfig.getRequestURIs().toString());
         log.debug("Total number of cache configs added - {}", cacheConfigs.size());
     }
 
@@ -122,7 +111,6 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         if (cacheConfigs.contains(cacheConfig)) {
             cacheConfigs.remove(cacheConfig);
             // TODO - When a cache config is unbound, associated cached items should be removed from the cache store.
-            //log.info("Cache config for request URI {} removed.", cacheConfig.getRequestURIs().toString());
             log.debug("Total number of cache configs after removal - {}", cacheConfigs.size());
             return;
         }
@@ -133,13 +121,13 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
      * Binds cache store implementation
      *
      * @param cacheStore
-     * @param config
+     * @param configs
      */
-    protected void bindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> config) {
-        if (config.containsKey(HttpCacheStore.KEY_CACHE_STORE_TYPE) && !cacheStoresMap.containsKey((String) config
+    protected void bindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> configs) {
+        if (configs.containsKey(HttpCacheStore.KEY_CACHE_STORE_TYPE) && !cacheStoresMap.containsKey((String) configs
                 .get(HttpCacheStore.KEY_CACHE_STORE_TYPE))) {
-            cacheStoresMap.put((String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), cacheStore);
-            log.info("Cache store implementation {} has been added", (String) config.get(HttpCacheStore
+            cacheStoresMap.put(PropertiesUtil.toString(configs.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null), cacheStore);
+            log.info("Cache store implementation {} has been added", (String) configs.get(HttpCacheStore
                     .KEY_CACHE_STORE_TYPE));
             log.debug("Total number of cache stores in the map - {}", cacheStoresMap.size());
         }
@@ -254,9 +242,10 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     }
 
     @Override
-    public boolean isCacheHit(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
+    public boolean isCacheHit(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
+            HttpCacheKeyCreationException {
         // Check if the cache set in the config contains the key.
-        if (cacheStoresMap.contains(cacheConfig.getCacheStoreName())) {
+        if (cacheStoresMap.containsKey(cacheConfig.getCacheStoreName())) {
             return cacheStoresMap.get(cacheConfig.getCacheStoreName()).contains(cacheConfig.buildCacheKey(request));
         } else {
             log.debug("Cache store set in the config is not available.");
@@ -266,7 +255,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
     @Override
     public void deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response,
-                                    HttpCacheConfig cacheConfig) {
+                                    HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
         // Get the cached content from cache
         CacheContent cacheContent = cacheStoresMap.get(cacheConfig.getCacheStoreName()).getIfPresent(cacheConfig
                 .buildCacheKey(request));
@@ -315,7 +304,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
     @Override
     public void cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
-            cacheConfig) {
+            cacheConfig) throws HttpCacheKeyCreationException {
         HttpCacheServletResponseWrapper responseWrapper = null;
 
         if (response instanceof HttpCacheServletResponseWrapper) {

@@ -270,13 +270,8 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     }
 
     @Override
-    public CacheKey buildCacheKey(SlingHttpServletRequest request) {
-        try {
-            return this.cacheKeyFactory.build(request);
-        } catch (HttpCacheKeyCreationException e) {
-            // TODO handle error
-            return null;
-        }
+    public CacheKey buildCacheKey(SlingHttpServletRequest request) throws HttpCacheKeyCreationException {
+            return this.cacheKeyFactory.build(request, this);
     }
 
     @Override
@@ -287,5 +282,15 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public boolean canInvalidate(final String path) {
         return matches(cacheInvalidationPathPatternsAsRegEx, path);
+    }
+
+    @Override
+    public String getAuthenticationRequirement() {
+        return authenticationRequirement;
+    }
+
+    @Override
+    public List<String> getUserGroups() {
+        return userGroups;
     }
 }
