@@ -4,7 +4,6 @@ import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
-import com.adobe.acs.commons.httpcache.store.mem.MemCacheKey;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.google.common.cache.*;
 import org.apache.commons.lang.NotImplementedException;
@@ -68,13 +67,13 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
             log.info("Mem cache already present. Invalidating the cache and re-initializing it.");
         }
         if (ttl != DEFAULT_TTL) {
-            // If ttl is present, attach it to cache config.
+            // If ttl is present, attach it to guava cache configuration.
             cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).expireAfterWrite(ttl, TimeUnit
                     .SECONDS).removalListener(new MemCacheEntryRemovalListener()).recordStats().build();
         } else {
             // If ttl is absent, go only with the maximum weight condition.
-            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).weigher(new MemCacheEntryWeigher()).removalListener(new
-                    MemCacheEntryRemovalListener()).recordStats().build();
+            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).weigher(new MemCacheEntryWeigher
+                    ()).removalListener(new MemCacheEntryRemovalListener()).recordStats().build();
         }
 
         log.info("MemHttpCacheStoreImpl activated / modified.");
@@ -111,6 +110,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         }
     }
 
+    //-------------------------<CacheStore interface specific implementation>
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
         cache.put(key, new MemCacheValue().buildForCaching(content.getCharEncoding(), content.getContentType(),
@@ -120,12 +120,18 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
     @Override
     public boolean contains(CacheKey key) {
-        return false;
+        if (null == this.getIfPresent(key)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public CacheContent getIfPresent(CacheKey key) {
         MemCacheValue value = cache.getIfPresent(key);
+        if (null == value) {
+            return null;
+        }
         return new CacheContent(value.getCharEncoding(), value.getContentType(), value.getHeaders(), new
                 ByteArrayInputStream(value.getBytes()));
     }

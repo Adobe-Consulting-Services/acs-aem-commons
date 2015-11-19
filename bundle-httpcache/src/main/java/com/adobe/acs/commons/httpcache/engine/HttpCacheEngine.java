@@ -63,15 +63,6 @@ public interface HttpCacheEngine {
     void markRequestCacheable(SlingHttpServletRequest request);
 
     /**
-     * Mark the request with an attribute that makes its response identifiable as the one that CANNOT be cached when the
-     * request is processed and its response created.
-     *
-     * @param request
-     */
-    void markRequestNotCacheable(SlingHttpServletRequest request);
-
-
-    /**
      * Check if the given response has the attribute set by {@link #markRequestCacheable(SlingHttpServletResponse)} to
      * find out if the response has to be cached.
      *

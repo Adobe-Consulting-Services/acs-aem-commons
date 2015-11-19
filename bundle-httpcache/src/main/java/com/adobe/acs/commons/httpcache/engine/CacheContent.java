@@ -62,9 +62,12 @@ public class CacheContent {
 
         // Extracting header K,V.
         responseWrapper.getHeaderNames();
-        List<String> headerNames = Collections.list((Enumeration<String>) responseWrapper.getHeaderNames());
+        List<String> headerNames = new ArrayList<>();
+        headerNames.addAll(responseWrapper.getHeaderNames());
         for (String headerName : headerNames) {
-            headers.put(headerName, Collections.list((Enumeration<String>) responseWrapper.getHeaders(headerName)));
+            List<String> test = new ArrayList<String>();
+            test.addAll(responseWrapper.getHeaders(headerName));
+            headers.put(headerName, test);
         }
 
         // Get hold of the response content available in a temporary file.

@@ -10,6 +10,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.CacheUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -17,9 +18,8 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -126,7 +126,8 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     protected void bindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> configs) {
         if (configs.containsKey(HttpCacheStore.KEY_CACHE_STORE_TYPE) && !cacheStoresMap.containsKey((String) configs
                 .get(HttpCacheStore.KEY_CACHE_STORE_TYPE))) {
-            cacheStoresMap.put(PropertiesUtil.toString(configs.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null), cacheStore);
+            cacheStoresMap.put(PropertiesUtil.toString(configs.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null),
+                    cacheStore);
             log.info("Cache store implementation {} has been added", (String) configs.get(HttpCacheStore
                     .KEY_CACHE_STORE_TYPE));
             log.debug("Total number of cache stores in the map - {}", cacheStoresMap.size());
@@ -243,14 +244,14 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
     @Override
     public boolean isCacheHit(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
-            HttpCacheKeyCreationException {
+            HttpCacheKeyCreationException, HttpCachePersistenceException {
         // Check if the cache set in the config contains the key.
         if (cacheStoresMap.containsKey(cacheConfig.getCacheStoreName())) {
             return cacheStoresMap.get(cacheConfig.getCacheStoreName()).contains(cacheConfig.buildCacheKey(request));
         } else {
-            log.debug("Cache store set in the config is not available.");
+            throw new HttpCachePersistenceException("Configured cache store unavailable " + cacheConfig
+                    .getCacheStoreName());
         }
-        return false;
     }
 
     @Override
@@ -269,6 +270,12 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         }
 
         // TODO - Populate the response
+        try {
+IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+        log.debug("Delivered from cache.");
+        } catch (IOException e) {
+    e.printStackTrace();
+}
     }
 
     @Override
@@ -278,27 +285,24 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     }
 
     @Override
-    public void markRequestNotCacheable(SlingHttpServletRequest request) {
-        request.setAttribute(HttpCacheEngine.FLAG_IS_REQUEST_CACHEABLE_KEY, HttpCacheEngine
-                .FLAG_IS_REQUEST_CACHEABLE_VALUE_NO);
-    }
-
-    @Override
     public boolean isResponseCacheable(SlingHttpServletRequest request) {
-        // TODO - Verify if the given request has the flag set by #markRequestCacheable
+        if (HttpCacheEngine.FLAG_IS_REQUEST_CACHEABLE_VALUE_YES.equals((String) request.getAttribute(HttpCacheEngine
+                .FLAG_IS_REQUEST_CACHEABLE_KEY))) {
+
+            return true;
+        }
         return false;
     }
 
     @Override
     public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse
-            response, HttpCacheConfig cacheConfig) throws HttpCacheException {
+            response, HttpCacheConfig cacheConfig) throws HttpCacheDataStreamException, HttpCacheKeyCreationException {
         CacheKey cacheKey = cacheConfig.buildCacheKey(request);
 
         try {
             return new HttpCacheServletResponseWrapper(response, CacheUtils.createTemporaryCacheFile(cacheKey));
-        } catch (FileNotFoundException e) {
-            // TODO - Handle and rethrow.
-            throw new HttpCacheException(e);
+        } catch (java.io.IOException e) {
+            throw new HttpCacheDataStreamException(e);
         }
     }
 
