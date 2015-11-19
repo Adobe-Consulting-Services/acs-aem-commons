@@ -23,7 +23,7 @@
         pageContext.setAttribute("offTime", sdf.format(offTime));
     }
     
-    pageContext.setAttribute("style", properties.get("style", "yellow"));
+    pageContext.setAttribute("style", properties.get("style", "green"));
     pageContext.setAttribute("dismissible", properties.get("dismissible", "true"));
 
 %><!DOCTYPE html>
