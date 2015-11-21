@@ -93,6 +93,8 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
 
     private static final String QUERY_BUILDER = "queryBuilder";
 
+    private static final String LIST = "list";
+
     @Reference
     private Packaging packaging;
 
@@ -213,26 +215,56 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
             for (final Hit hit : hits) {
                 resources.add(hit.getResource());
             }
+        } else if (language.equals(LIST)) {
+            if (StringUtils.isNotBlank(statement)) {
+                final String[] lines = statement.split("[,;\\s\\n\\t]+");
+
+                for (String line : lines) {
+                    if (StringUtils.isNotBlank(line)) {
+                        final Resource resource = resourceResolver.getResource(line);
+                        final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+                        if (relativeAwareResource != null) {
+                            resources.add(relativeAwareResource);
+                        }
+                    }
+                }
+            }
         } else {
             Iterator<Resource> resourceIterator = resourceResolver.findResources(statement, language);
-    
+
             while (resourceIterator.hasNext()) {
                 final Resource resource = resourceIterator.next();
-    
-                if (resource != null) {
-                    if (StringUtils.isNotBlank(relPath)) {
-                        final Resource relResource = resource.getChild(relPath);
-    
-                        if (relResource != null) {
-                            resources.add(relResource);
-                        }
-                    } else {
-                        resources.add(resource);
-                    }
+                final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+                if (relativeAwareResource != null) {
+                    resources.add(relativeAwareResource);
                 }
             }
         }
 
         return resources;
+    }
+
+    /**
+     * Get the relative resource of the given resource if it resolves otherwise
+     * the provided resource.
+     *
+     * @param resource         the resource
+     * @param relPath          the relative path to resolve against the resource
+     * @return the relative resource if it resolves otherwise the resource
+     */
+    private Resource getRelativeAwareResource(final Resource resource, final String relPath) {
+        if (resource != null) {
+            if (StringUtils.isNotBlank(relPath)) {
+                final Resource relResource = resource.getChild(relPath);
+
+                if (relResource != null) {
+                    return relResource;
+                }
+            }
+        }
+
+        return resource;
     }
 }
