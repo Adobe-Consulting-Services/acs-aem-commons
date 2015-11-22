@@ -123,13 +123,35 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                        final Calendar olderThan,
                                        final int batchSize)
             throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
+        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, batchSize, -1);
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    public int removeWorkflowInstances(final ResourceResolver resourceResolver,
+                                       final Collection<String> modelIds,
+                                       final Collection<String> statuses,
+                                       final Collection<Pattern> payloads,
+                                       final Calendar olderThan,
+                                       final int batchSize,
+                                       final int maxDurationInMins)
+            throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
+
+        final long start = System.currentTimeMillis();
+        long end = -1;
+        
         int count = 0;
         int checkedCount = 0;
         int workflowRemovedCount = 0;
-
-        final long start = System.currentTimeMillis();
-
+        long maxDurationInMs = -1;
+        
+        
+        if (maxDurationInMs > 0) {
+            maxDurationInMs = maxDurationInMins * 60 * 1000;
+            end = start + maxDurationInMs;
+        }
+        
         try {
             this.start(resourceResolver);
 
@@ -149,6 +171,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                         if (this.forceQuit.get()) {
                             throw new WorkflowRemovalForceQuitException();
+                        }  else if (end > 0 && System.currentTimeMillis() >= end) {
+                            throw new WorkflowRemovalMaxDurationExceededException();
                         }
 
                         final ValueMap properties = instance.getValueMap();
@@ -272,11 +296,15 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         }  catch (WorkflowRemovalForceQuitException e) {
             this.forceQuit.set(false);
             // Uncommon instance of using Exception to control flow; Force quitting is an extreme condition.
-            log.info("Workflow removal was force quit. The removal state is unknown.");
+            log.warn("Workflow removal was force quit. The removal state is unknown.");
             this.forceQuit(resourceResolver);
             throw e;
+        }  catch (WorkflowRemovalMaxDurationExceededException e) {
+            // Uncommon instance of using Exception to control flow; Exceeding max duration extreme condition.
+            log.warn("Workflow removal exceeded max duration of [ {} ] minutes. Final removal commit initiating...");
+            this.complete(resourceResolver, checkedCount, count);
+            return count;
         }
-
     }
 
     private Collection<Resource> getSortedAndFilteredFolders(Resource folderResource) {
