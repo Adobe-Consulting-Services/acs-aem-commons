@@ -21,6 +21,9 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalForceQuitException;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalMaxDurationExceededException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -144,11 +147,14 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         int count = 0;
         int checkedCount = 0;
         int workflowRemovedCount = 0;
-        long maxDurationInMs = -1;
-        
-        
-        if (maxDurationInMs > 0) {
-            maxDurationInMs = maxDurationInMins * 60 * 1000;
+
+        if (maxDurationInMins > 0) {
+            // Max duration has been requested (greater than 0)
+
+            // Convert minutes to milliseconds
+            long maxDurationInMs = maxDurationInMins * 60 * 1000;
+
+            // Compute the end time
             end = start + maxDurationInMs;
         }
         
@@ -158,9 +164,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             final List<Resource> containerFolders = this.getWorkflowInstanceFolders(resourceResolver);
 
             for (Resource containerFolder : containerFolders) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Checking [ {} ] for workflow instances to remove", containerFolder.getPath());
-                }
+                log.debug("Checking [ {} ] for workflow instances to remove", containerFolder.getPath());
+
                 final Collection<Resource> sortedFolders = this.getSortedAndFilteredFolders(containerFolder);
 
                 for (final Resource folder : sortedFolders) {
@@ -271,12 +276,6 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                 // Save final batch if needed, and update tracking nodes
                 this.complete(resourceResolver, checkedCount, workflowRemovedCount);
             }
-            if (log.isInfoEnabled()) {
-                log.info("Removed a total of [ {} ] workflow instances in [ {} ] ms", count,
-                        System.currentTimeMillis() - start);
-            }
-
-            return count;
 
         } catch (PersistenceException e) {
             this.forceQuit.set(false);
@@ -301,10 +300,18 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             throw e;
         }  catch (WorkflowRemovalMaxDurationExceededException e) {
             // Uncommon instance of using Exception to control flow; Exceeding max duration extreme condition.
-            log.warn("Workflow removal exceeded max duration of [ {} ] minutes. Final removal commit initiating...");
+            log.warn("Workflow removal exceeded max duration of [ {} ] minutes. Final removal commit initiating...", maxDurationInMins);
             this.complete(resourceResolver, checkedCount, count);
-            return count;
         }
+
+        if (log.isInfoEnabled()) {
+            log.info("Workflow Removal Process Finished! "
+                    + "Removed a total of [ {} ] workflow instances in [ {} ] ms",
+                    count,
+                    System.currentTimeMillis() - start);
+        }
+
+        return count;
     }
 
     private Collection<Resource> getSortedAndFilteredFolders(Resource folderResource) {

@@ -20,7 +20,11 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
+import com.adobe.acs.commons.util.InfoWriter;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalForceQuitException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -64,7 +68,9 @@ import java.util.regex.Pattern;
         ),
         @Property(
                 name = "webconsole.configurationFactory.nameHint",
-                value = "Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]")
+                propertyPrivate = true,
+                value = "Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]"
+        )
 })
 @Service
 public class WorkflowInstanceRemoverScheduler implements Runnable {
@@ -77,13 +83,13 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     private WorkflowInstanceRemover workflowInstanceRemover;
 
 
-    private static final String[] DEFAULT_WORKFLOW_STATUSES = {"COMPLETE", "ABORTED"};
+    private static final String[] DEFAULT_WORKFLOW_STATUSES = {"COMPLETED", "ABORTED"};
 
     private List<String> statuses = new ArrayList<String>();
 
     @Property(label = "Workflow Status",
             description = "Only remove Workflow Instances that have one of these statuses.",
-            value = { "COMPLETE", "ABORTED" })
+            value = { "COMPLETED", "ABORTED" })
     public static final String PROP_WORKFLOW_STATUSES = "workflow.statuses";
 
 
@@ -123,7 +129,16 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             description = "Save removals to JCR in batches of this defined size.",
             intValue = DEFAULT_BATCH_SIZE)
     public static final String PROP_BATCH_SIZE = "batch-size";
-    
+
+
+    private static final int DEFAULT_MAX_DURATION = 0;
+    private int maxDuration = DEFAULT_MAX_DURATION;
+    @Property(label = "Max duration (in minutes)",
+            description = "Max number of minutes this workflow removal process can execute. 0 for no limit. "
+                    + "[ Default: 0 ]",
+            intValue = DEFAULT_MAX_DURATION)
+    public static final String PROP_MAX_DURATION = "max-duration";
+
     @Override
     public final void run() {
 
@@ -139,7 +154,8 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
                     statuses,
                     payloads,
                     olderThan, 
-                    batchSize);
+                    batchSize,
+                    maxDuration);
 
             if (log.isInfoEnabled()) {
                 log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);
@@ -162,21 +178,34 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         }
     }
 
+    private List<String> arrayToList(String[] array) {
+        List<String> list = new ArrayList<String>();
+
+        for (String element : array) {
+            if (StringUtils.isNotBlank(element)) {
+                list.add(element);
+            }
+        }
+
+        return list;
+    }
+
     @Activate
     protected final void activate(final Map<String, String> config) {
-        statuses = Arrays.asList(PropertiesUtil.toStringArray(
-                config.get(PROP_WORKFLOW_STATUSES), DEFAULT_WORKFLOW_STATUSES));
 
-        models = Arrays.asList(PropertiesUtil.toStringArray(
-                config.get(PROP_WORKFLOW_MODELS), DEFAULT_WORKFLOW_MODELS));
+        statuses = arrayToList(PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_STATUSES), DEFAULT_WORKFLOW_STATUSES));
+
+        models = arrayToList(PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_MODELS), DEFAULT_WORKFLOW_MODELS));
 
         final String[] payloadsArray =
                 PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_PAYLOADS), DEFAULT_WORKFLOW_PAYLOADS);
 
-        for (String payload : payloadsArray) {
-            Pattern p = Pattern.compile(payload);
-            if (p != null) {
-                payloads.add(p);
+        for (final String payload : payloadsArray) {
+            if (StringUtils.isNotBlank(payload)) {
+                final Pattern p = Pattern.compile(payload);
+                if (p != null) {
+                    payloads.add(p);
+                }
             }
         }
 
@@ -191,6 +220,20 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         if (batchSize < 1) {
             batchSize = DEFAULT_BATCH_SIZE;
         }
+
+        maxDuration = PropertiesUtil.toInteger(config.get(PROP_MAX_DURATION), DEFAULT_MAX_DURATION);
+
+        final InfoWriter iw = new InfoWriter();
+        iw.title("Workflow Instance Removal Configuration");
+        iw.message("Workflow status: {}", statuses);
+        iw.message("Workflow models: {}", models);
+        iw.message("Payloads: {}", Arrays.asList(payloadsArray));
+        iw.message("Older than: {}", olderThan);
+        iw.message("Batch size: {}", batchSize);
+        iw.message("Max Duration (minutes): {}", maxDuration);
+        iw.end();
+
+        log.info(iw.toString());
     }
 
     @Deactivate
@@ -200,5 +243,6 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         models = new ArrayList<String>();
         payloads = new ArrayList<Pattern>();
         batchSize = DEFAULT_BATCH_SIZE;
+        maxDuration = DEFAULT_MAX_DURATION;
     }
 }

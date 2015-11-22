@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk.removal.impl;
+package com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions;
 
 @SuppressWarnings("serial")
 public class WorkflowRemovalException extends Exception {
