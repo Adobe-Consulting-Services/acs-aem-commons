@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.httpcache.rule.impl;
 
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -15,7 +17,8 @@ public class CacheOnlyResponse200 extends AbstractHttpCacheHandlingRule {
     private static final int HTTP_SUCCESS_RESPONSE_STATUS = 200;
 
     @Override
-    public boolean onResponseCache(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+    public boolean onResponseCache(SlingHttpServletRequest request, SlingHttpServletResponse response,
+                                   HttpCacheConfig cacheConfig, CacheContent cacheContent) {
         // Continue only if the response status is 200.
         if (HTTP_SUCCESS_RESPONSE_STATUS != response.getStatus())
             return false;

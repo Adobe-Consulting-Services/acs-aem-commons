@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.httpcache.engine;
 
+import com.adobe.acs.commons.httpcache.engine.impl.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class CacheContent {
     private String contentType;
     /** Response headers */
     private Map<String, List<String>> headers = new HashMap<>();
-    /** Response content in file */
+    /** Response content as input stream */
     private InputStream dataInputStream;
 
     /**
@@ -35,6 +36,7 @@ public class CacheContent {
      */
     public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
             dataInputStream) {
+
         this.charEncoding = charEncoding;
         this.contentType = contentType;
         this.headers = headers;
@@ -61,13 +63,12 @@ public class CacheContent {
         this.contentType = responseWrapper.getContentType();
 
         // Extracting header K,V.
-        responseWrapper.getHeaderNames();
         List<String> headerNames = new ArrayList<>();
         headerNames.addAll(responseWrapper.getHeaderNames());
         for (String headerName : headerNames) {
-            List<String> test = new ArrayList<String>();
-            test.addAll(responseWrapper.getHeaders(headerName));
-            headers.put(headerName, test);
+            List<String> values = new ArrayList<String>();
+            values.addAll(responseWrapper.getHeaders(headerName));
+            headers.put(headerName, values);
         }
 
         // Get hold of the response content available in a temporary file.

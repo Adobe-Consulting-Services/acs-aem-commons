@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.httpcache.exception;
 
 /**
- * Custom exception representing failure condition in accessing repository.
+ * Custom exception representing failure condition in accessing JCR repository.
  */
 public class HttpCacheReposityAccessException extends HttpCacheException {
     public HttpCacheReposityAccessException() {

@@ -3,8 +3,6 @@ package com.adobe.acs.commons.httpcache.config;
 /**
  * Constants used to represent authentication status in {@link HttpCacheConfig}.
  */
-// TODO - Can this be converted into enum? OSGi annotations may not allow enums. Do check.
-// TODO - Can constants be centeralized? Do check.
 public final class AuthenticationStatusConfigConstants {
     private AuthenticationStatusConfigConstants() {
         throw new Error(AuthenticationStatusConfigConstants.class.getName() + " is not meant to be instantiated.");

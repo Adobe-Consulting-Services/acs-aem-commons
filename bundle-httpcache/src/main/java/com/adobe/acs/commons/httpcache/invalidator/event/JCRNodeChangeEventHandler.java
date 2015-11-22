@@ -16,18 +16,15 @@ import java.util.Map;
 /**
  * Sample http cache invalidation job creator. Creates invalidation job when there is a change in JCR repository. Cache
  * invalidation events could be sling event handlers, sling filter to trap replication events, workflow steps, etc.
- * Invalidation event creates and starts Invalidation jobs.
- *
- * <p> This is modelled as a sling event handler which listens
- * to any change in paths -- /content, /etc and creates an invalidation job. The intention of this invalidation job is
- * that whenever there is any change in the above said paths, the configured cache needs to be invalidated. </p>
+ * Invalidation event creates and starts Invalidation jobs. <p> This is modelled as a sling event handler which listens
+ * to any change in paths (by default) -- /content, /etc and creates an invalidation job. The intention of this
+ * invalidation job is that whenever there is any change in the above said paths, the configured cache needs to be
+ * invalidated. </p>
  */
-
-/**
- * ACS AEM Commons - HTTP Cache - Invalidation job creator on JCR node change
- * Creates http cache invalidation job on JCR node / property change.
- */
-@Component(immediate = true,
+@Component(label = "ACS AEM Commons - HTTP Cache - JCR node change invalidator.",
+           description = "Watches for the configured JCR paths and triggers cache invalidation job.",
+           metatype = true,
+           immediate = true,
            policy = ConfigurationPolicy.REQUIRE)
 @Properties({@Property(label = "Event Topics",
                        value = {SlingConstants.TOPIC_RESOURCE_CHANGED, SlingConstants.TOPIC_RESOURCE_ADDED,
@@ -36,15 +33,12 @@ import java.util.Map;
                        name = EventConstants.EVENT_TOPIC,
                        propertyPrivate = true),
 
-        // TODO - Correct the inappropriate description below.
-                    @Property(label = "Event Filters",
+                    @Property(label = "JCR paths to watch for changes.",
                               value = "(|(" + SlingConstants.PROPERTY_PATH + "=" +
                                       "/content*)(" + SlingConstants.PROPERTY_PATH + "=" + "/etc*))",
-                              description = "Event filter announcing that this is " +
-                                      "interested only for the MPAS " + "products parent " +
-                                      "node.",
-                              name = EventConstants.EVENT_FILTER,
-                              propertyPrivate = true)})
+                              description = "Paths expressed in LDAP syntax. Example: (|(path=/content*)(path=/etc*))" +
+                                      " - Watches for changes under /content or /etc. ",
+                              name = EventConstants.EVENT_FILTER)})
 @Service
 public class JCRNodeChangeEventHandler implements EventHandler {
     private static final Logger log = LoggerFactory.getLogger(JCRNodeChangeEventHandler.class);
@@ -54,6 +48,7 @@ public class JCRNodeChangeEventHandler implements EventHandler {
 
     @Override
     public void handleEvent(final Event event) {
+
         // Get the required information from the event.
         final String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
         // Create the required payload.
@@ -61,6 +56,7 @@ public class JCRNodeChangeEventHandler implements EventHandler {
         payload.put(CacheInvalidationJobConstants.PAYLOAD_KEY_DATA_CHANGE_PATH, path);
         // Start a job.
         jobManager.addJob(CacheInvalidationJobConstants.TOPIC_HTTP_CACHE_INVALIDATION_JOB, payload);
+
         log.debug("New invalidation job created with the payload path. - {}", path);
     }
 }

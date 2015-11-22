@@ -24,12 +24,11 @@ public class CacheUtils {
      * @return
      */
     public static File createTemporaryCacheFile(CacheKey cacheKey) throws IOException {
-        // Create a file in Java temp directory with cacheKey.hashCode() as file name.
-        String name = cacheKey.getUri().replace("/", "_");
+        // Create a file in Java temp directory with cacheKey.toSting() as file name.
 
-        File file = File.createTempFile(name, "");
+        File file = File.createTempFile(cacheKey.toString(), ".tmp");
         if (null != file) {
-            log.debug("Temp file created with the name - {}", name);
+            log.debug("Temp file created with the name - {}", cacheKey.toString());
         }
         return file;
     }

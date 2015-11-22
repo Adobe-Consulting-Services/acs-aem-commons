@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.httpcache.engine;
+package com.adobe.acs.commons.httpcache.engine.impl;
 
 import org.apache.commons.io.output.TeeOutputStream;
 
@@ -7,13 +7,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- *
+ * Writes to 2 outputstream. Required to take copy of the servlet response.
  */
 public class TeeServletOutputStream extends ServletOutputStream {
     private final TeeOutputStream teeOutputStream;
 
-    public TeeServletOutputStream( OutputStream one, OutputStream two ) {
-        teeOutputStream = new TeeOutputStream( one, two);
+    public TeeServletOutputStream(OutputStream one, OutputStream two) {
+        // Uses Apache IO TeeOutputStream
+        teeOutputStream = new TeeOutputStream(one, two);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
@@ -16,6 +17,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.TabularData;
 import java.io.ByteArrayInputStream;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -149,6 +151,19 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     @Override
     public void invalidateAll() {
         cache.invalidateAll();
+    }
+
+    @Override
+    public void invalidate(HttpCacheConfig cacheConfig) {
+        ConcurrentMap<CacheKey, MemCacheValue> cacheAsMap = cache.asMap();
+        for(CacheKey key : cacheAsMap.keySet()){
+            // Match the cache key with cache config.
+            // If matches, invalidate that particular key.
+        }
+    }
+
+    public void invalidate(String path) {
+
     }
 
     //-------------------------<Mbean specific implementation>

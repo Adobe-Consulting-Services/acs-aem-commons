@@ -19,4 +19,12 @@ public interface CacheKeyFactory {
      * @throws HttpCacheKeyCreationException
      */
     CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException;
+
+    /**
+     * Does the Cache Key matches the Htt[ Cache Config.
+     * @param key
+     * @param cacheConfig
+     * @return True if key and config match.
+     */
+    boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig);
 }

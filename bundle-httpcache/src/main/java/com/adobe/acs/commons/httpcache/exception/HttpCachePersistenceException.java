@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.httpcache.exception;
 
 /**
- * Custom exception representing failure conditions in persisting cached items.
+ * Custom exception representing failure conditions in persistence of cached items.
  */
 public class HttpCachePersistenceException extends HttpCacheException {
     public HttpCachePersistenceException() {

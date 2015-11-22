@@ -14,7 +14,7 @@ import java.util.List;
  * for configs that need authenticated requests. </li><li>User group list represents logical OR condition and at least
  * one of the groups should be present in the request.</li><li>If 2 cache configs with the same url pattern and
  * different list of groups present, one with high match score of groups with request would be considered. In case of
- * levelled score, cache will be rejected.</li><li>Cache invalidation path is the JCR path expressed in REGEX
+ * levelled score, cache will be rejected.</li><li>Cache invalidation path is the JCR path expressed in REGEX.
  * pattern.</li></ul>
  */
 public interface HttpCacheConfig {
@@ -54,8 +54,25 @@ public interface HttpCacheConfig {
      */
     boolean canInvalidate(String path);
 
+    /**
+     * Get the authentication requirement for request set for this config.
+     *
+     * @return Uses the constants defined in {@link AuthenticationStatusConfigConstants}
+     */
     public String getAuthenticationRequirement();
 
+    /**
+     * Get the list of user groups for request set for this config.
+     *
+     * @return
+     */
     public List<String> getUserGroups();
+
+    /**
+     * Returns true if the key is generated using this cache config.
+     * @param key
+     * @return
+     */
+    boolean knows(CacheKey key);
 }
 

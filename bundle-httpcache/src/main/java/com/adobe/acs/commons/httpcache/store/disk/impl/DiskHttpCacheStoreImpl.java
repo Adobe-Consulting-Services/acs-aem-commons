@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.httpcache.store.disk.impl;
 
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
@@ -51,5 +52,15 @@ public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     @Override
     public void invalidateAll() {
         throw new NotImplementedException();
+    }
+
+    @Override
+    public void invalidate(HttpCacheConfig cacheConfig) {
+        
+    }
+
+    @Override
+    public void invalidate(String path) {
+
     }
 }

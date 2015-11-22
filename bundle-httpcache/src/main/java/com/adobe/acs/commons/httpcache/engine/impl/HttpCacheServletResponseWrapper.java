@@ -1,6 +1,5 @@
-package com.adobe.acs.commons.httpcache.engine;
+package com.adobe.acs.commons.httpcache.engine.impl;
 
-import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.wrappers.SlingHttpServletResponseWrapper;
 
@@ -23,6 +22,7 @@ public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWra
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
+        // Takes copy of the stream.
         return new TeeServletOutputStream(super.getOutputStream(), printStream);
     }
 

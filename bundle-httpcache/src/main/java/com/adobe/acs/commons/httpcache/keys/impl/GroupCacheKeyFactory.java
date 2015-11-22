@@ -22,20 +22,32 @@ public class GroupCacheKeyFactory implements CacheKeyFactory {
     @Override
     public CacheKey build(final SlingHttpServletRequest slingHttpServletRequest, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
+
         return new GroupCacheKey(slingHttpServletRequest, cacheConfig);
+    }
+
+    @Override
+    public boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig) {
+        // TODO Provide implementation.
+        // Check if key is instance of GroupCacheKey.
+        // Validate if key request uri can be constructed out of uri patterns in cache config.
+        // Validate the authentication requirements
+        // Validate the groups.
+        return false;
     }
 
     /**
      * The GroupCacheKey is a custom CacheKey bound to this particular factory.
      */
     public class GroupCacheKey implements CacheKey {
-        /* This key is composed of uri, list of user groups and authenticatin details */
+        /* This key is composed of uri, list of user groups and authentication requirement details */
         private String uri;
         private List<String> userGroups;
         private String authenticationRequirement;
 
         public GroupCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
                 HttpCacheKeyCreationException {
+
             this.uri = request.getRequestURI();
             this.userGroups = cacheConfig.getUserGroups();
             this.authenticationRequirement = cacheConfig.getAuthenticationRequirement();
@@ -48,6 +60,7 @@ public class GroupCacheKeyFactory implements CacheKeyFactory {
 
         @Override
         public boolean equals(Object o) {
+
             if (this == o)
                 return true;
 
@@ -62,8 +75,20 @@ public class GroupCacheKeyFactory implements CacheKeyFactory {
 
         @Override
         public int hashCode() {
+
             return new HashCodeBuilder(17, 37).append(uri).append(userGroups).append(authenticationRequirement)
                     .toHashCode();
+        }
+
+        @Override
+        public String toString() {
+
+            StringBuilder formattedString = new StringBuilder(this.uri.replace('/', '_')).append("_");
+            for (String userGroup : userGroups) {
+                formattedString.append(userGroup).append("_");
+            }
+            formattedString.append(authenticationRequirement);
+            return formattedString.toString();
         }
     }
 }

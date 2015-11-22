@@ -111,6 +111,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private List<String> cacheInvalidationPathPatterns;
     private List<Pattern> cacheInvalidationPathPatternsAsRegEx;
 
+    // TODO - Move this to class level.
     // Target implementation for Cache Key Factory.
     @Property(label = "CacheKeyFactory service pid",
               description = "Service pid of target implementation of CacheKeyFactory to be used. Example - " +
@@ -119,7 +120,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               value = "(service.pid=com.adobe.acs.commons.httpcache.keys.impl.GroupCacheKeyFactory)")
     private static final String PROP_CACHEKEYFACTORY_TARGET_PID = "cacheKeyFactory.target";
 
-    //@Reference(target = "(component.pid=com.adobe.acs.commons.httpcache.keys.impl.GroupCacheKeyFactory)")
+    // Making the cache key factory configurable.
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
                policy = ReferencePolicy.DYNAMIC,
                name = "cacheKeyFactory")
@@ -292,5 +293,10 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public List<String> getUserGroups() {
         return userGroups;
+    }
+
+    @Override
+    public boolean knows(CacheKey key) {
+        return this.cacheKeyFactory.doesKeyMatchConfig(key, this);
     }
 }

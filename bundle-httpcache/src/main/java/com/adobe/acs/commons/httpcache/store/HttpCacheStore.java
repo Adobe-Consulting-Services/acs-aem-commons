@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.httpcache.store;
 
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
@@ -62,4 +63,11 @@ public interface HttpCacheStore {
      * Invalidate all entries in the cache.
      */
     void invalidateAll();
+
+    /**
+     * Invalidate all the cached items applicable for the given cache config.
+     *
+     * @param cacheConfig
+     */
+    void invalidate(HttpCacheConfig cacheConfig);
 }
