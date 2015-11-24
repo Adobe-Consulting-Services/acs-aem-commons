@@ -46,6 +46,14 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
         ACS.CQ.MultiFieldPanel.superclass.constructor.call(this, config);
     },
 
+    setValuesAsJson: function(){
+        var value = this.getValue();
+
+        if (value){
+            this.panelValue.setValue(value);
+        }
+    },
+
     initComponent: function() {
         ACS.CQ.MultiFieldPanel.superclass.initComponent.call(this);
 
@@ -58,13 +66,7 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
         var multifield = this.findParentByType('multifield'),
             dialog = this.findParentByType('dialog');
 
-        dialog.on('beforesubmit', function(){
-            var value = this.getValue();
-
-            if (value){
-                this.panelValue.setValue(value);
-            }
-        },this);
+        dialog.on('beforesubmit', this.setValuesAsJson, this);
 
         dialog.on('loadcontent', function(){
             if(_.isEmpty(multifield.dropTargets)){
