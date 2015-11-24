@@ -27,19 +27,21 @@ public class GroupCacheKeyFactory implements CacheKeyFactory {
     }
 
     @Override
-    public boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig) {
-        // TODO Provide implementation.
+    public boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
+
         // Check if key is instance of GroupCacheKey.
+        if (!(key instanceof GroupCacheKey)) {
+            return false;
+        }
         // Validate if key request uri can be constructed out of uri patterns in cache config.
-        // Validate the authentication requirements
-        // Validate the groups.
-        return false;
+        return new GroupCacheKey(key.getUri(), cacheConfig).equals(key);
     }
 
     /**
      * The GroupCacheKey is a custom CacheKey bound to this particular factory.
      */
     public class GroupCacheKey implements CacheKey {
+        
         /* This key is composed of uri, list of user groups and authentication requirement details */
         private String uri;
         private List<String> userGroups;
@@ -49,13 +51,17 @@ public class GroupCacheKeyFactory implements CacheKeyFactory {
                 HttpCacheKeyCreationException {
 
             this.uri = request.getRequestURI();
-            this.userGroups = cacheConfig.getUserGroups();
+            // Note - Custom attribute in this case is user group names.
+            this.userGroups = cacheConfig.getCustomConfigAttributes();
             this.authenticationRequirement = cacheConfig.getAuthenticationRequirement();
         }
 
-        @Override
-        public String getUri() {
-            return uri;
+        public GroupCacheKey(String uri, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
+
+            this.uri = uri;
+            // Note - Custom attribute in this case is user group names.
+            this.userGroups = cacheConfig.getCustomConfigAttributes();
+            this.authenticationRequirement = cacheConfig.getAuthenticationRequirement();
         }
 
         @Override
@@ -89,6 +95,11 @@ public class GroupCacheKeyFactory implements CacheKeyFactory {
             }
             formattedString.append(authenticationRequirement);
             return formattedString.toString();
+        }
+
+        @Override
+        public String getUri() {
+            return this.uri;
         }
     }
 }

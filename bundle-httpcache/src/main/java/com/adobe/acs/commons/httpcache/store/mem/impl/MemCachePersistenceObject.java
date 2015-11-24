@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Value for cache item in mem store.
  */
-class MemCacheValue {
+class MemCachePersistenceObject {
     /** Response character encoding */
     private String charEncoding;
     /** Response content type */
@@ -24,8 +24,9 @@ class MemCacheValue {
     /** Byte array to hold the data from the stream */
     private byte[] bytes;
 
-    /** Create <code>MemCacheValue</code>. Use <code>buildForCaching</code> method to initialize parameters. */
-    MemCacheValue() {
+    /** Create <code>MemCachePersistenceObject</code>. Use <code>buildForCaching</code> method to initialize
+     * parameters. */
+    MemCachePersistenceObject() {
     }
 
     /**
@@ -38,8 +39,8 @@ class MemCacheValue {
      * @param dataInputStream
      * @throws HttpCacheDataStreamException
      */
-    public MemCacheValue buildForCaching(String charEncoding, String contentType, Map<String, List<String>> headers,
-                                         InputStream dataInputStream) throws HttpCacheDataStreamException {
+    public MemCachePersistenceObject buildForCaching(String charEncoding, String contentType, Map<String,
+            List<String>> headers, InputStream dataInputStream) throws HttpCacheDataStreamException {
         // Taken copy of arguments before caching them to avoid chances of memory leak.
         // Take copy of originals
         this.charEncoding = new String(charEncoding);

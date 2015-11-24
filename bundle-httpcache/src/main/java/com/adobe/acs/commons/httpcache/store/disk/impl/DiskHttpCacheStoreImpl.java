@@ -58,9 +58,4 @@ public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     public void invalidate(HttpCacheConfig cacheConfig) {
         
     }
-
-    @Override
-    public void invalidate(String path) {
-
-    }
 }

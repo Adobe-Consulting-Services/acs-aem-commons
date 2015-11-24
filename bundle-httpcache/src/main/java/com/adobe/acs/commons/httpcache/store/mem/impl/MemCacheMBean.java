@@ -18,16 +18,16 @@ public interface MemCacheMBean {
     long getCacheEntriesCount();
 
     @Description("Size of cache in KB")
-    int getCacheSizeInKB();
+    long getCacheSizeInBytes();
 
     @Description("Cache TTL in Seconds. -1 value represent no TTL.")
     long getTtl();
 
     @Description("Available cache stats.")
-    TabularData getCacheStats();
+    TabularData getCacheStats() throws OpenDataException;
 
 
     @Description("Keys in cache")
-    TabularData getCacheKeys();
+    TabularData getCacheKeys() throws OpenDataException;
 
 }

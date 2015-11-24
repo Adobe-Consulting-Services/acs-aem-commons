@@ -7,15 +7,16 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.google.common.cache.*;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.TabularData;
+import javax.management.openmbean.*;
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -27,10 +28,11 @@ import java.util.concurrent.TimeUnit;
            description = "Cache data store implementation for in-memory storage.",
            metatype = true,
            immediate = true)
-@Service
-@Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-          value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
-          propertyPrivate = true)
+@Properties({@Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
+                       value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
+                       propertyPrivate = true), @Property(name = "jmx.objectname",
+                                                          value = "com.adobe.acs.httpcache:type=CRX")})
+@Service(value = {DynamicMBean.class, HttpCacheStore.class})
 public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
@@ -53,7 +55,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     private long maxSizeInMb;
 
     /** Cache - Uses Google Guava's cache */
-    private Cache<CacheKey, MemCacheValue> cache;
+    private Cache<CacheKey, MemCachePersistenceObject> cache;
 
     @Activate
     protected void activate(Map<String, Object> configs) {
@@ -90,12 +92,12 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     /**
      * Removal listener for cache entry items.
      */
-    private static class MemCacheEntryRemovalListener implements RemovalListener<CacheKey, MemCacheValue> {
+    private static class MemCacheEntryRemovalListener implements RemovalListener<CacheKey, MemCachePersistenceObject> {
         private static final Logger log = LoggerFactory.getLogger(MemCacheEntryRemovalListener.class);
 
         @Override
-        public void onRemoval(RemovalNotification<CacheKey, MemCacheValue> removalNotification) {
-            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey(),
+        public void onRemoval(RemovalNotification<CacheKey, MemCachePersistenceObject> removalNotification) {
+            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey().toString(),
                     removalNotification.getCause().name());
         }
     }
@@ -103,20 +105,20 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     /**
      * Weigher for the cache entry.
      */
-    private static class MemCacheEntryWeigher implements Weigher<CacheKey, MemCacheValue> {
+    private static class MemCacheEntryWeigher implements Weigher<CacheKey, MemCachePersistenceObject> {
 
         @Override
-        public int weigh(CacheKey memCacheKey, MemCacheValue memCacheValue) {
+        public int weigh(CacheKey memCacheKey, MemCachePersistenceObject memCachePersistenceObject) {
             // Size of the byte array.
-            return memCacheValue.getBytes().length;
+            return memCachePersistenceObject.getBytes().length;
         }
     }
 
     //-------------------------<CacheStore interface specific implementation>
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
-        cache.put(key, new MemCacheValue().buildForCaching(content.getCharEncoding(), content.getContentType(),
-                content.getHeaders(), content.getInputDataStream()));
+        cache.put(key, new MemCachePersistenceObject().buildForCaching(content.getCharEncoding(), content
+                .getContentType(), content.getHeaders(), content.getInputDataStream()));
 
     }
 
@@ -130,7 +132,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
     @Override
     public CacheContent getIfPresent(CacheKey key) {
-        MemCacheValue value = cache.getIfPresent(key);
+        MemCachePersistenceObject value = cache.getIfPresent(key);
         if (null == value) {
             return null;
         }
@@ -155,19 +157,17 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
     @Override
     public void invalidate(HttpCacheConfig cacheConfig) {
-        ConcurrentMap<CacheKey, MemCacheValue> cacheAsMap = cache.asMap();
-        for(CacheKey key : cacheAsMap.keySet()){
+        ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
+        for (CacheKey key : cacheAsMap.keySet()) {
             // Match the cache key with cache config.
-            // If matches, invalidate that particular key.
+            if (cacheConfig.knows(key)) {
+                // If matches, invalidate that particular key.
+                cache.invalidate(key);
+            }
         }
     }
 
-    public void invalidate(String path) {
-
-    }
-
     //-------------------------<Mbean specific implementation>
-    // TODO -- How do we deal with the mandate of having a constructor in OSGi service.
     public MemHttpCacheStoreImpl() throws NotCompliantMBeanException {
         super(MemCacheMBean.class);
     }
@@ -183,9 +183,16 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     }
 
     @Override
-    public int getCacheSizeInKB() {
-        // TODO - Query from Guava cache??
-        throw new NotImplementedException();
+    public long getCacheSizeInBytes() {
+
+        // Iterate through the cache entries and compute the total size of byte array.
+        long size = 0L;
+        ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
+        for (final CacheKey key : cacheAsMap.keySet()) {
+            size += cacheAsMap.get(key).getBytes().length;
+        }
+
+        return size;
     }
 
     @Override
@@ -194,15 +201,59 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     }
 
     @Override
-    public TabularData getCacheStats() {
-        // TODO - Use Guava getStats and form jmx tabular structure.
-        throw new NotImplementedException();
+    public TabularData getCacheStats() throws OpenDataException {
+        // Exposing all google guava stats.
+        final CompositeType cacheEntryType = new CompositeType("cacheStat", "Cache Stats", new
+                String[]{"averageLoadPenalty", "evictionCount", "hitCount", "hitRate", "loadCount",
+                "loadExceptionCount", "loadExceptionRate", "loadSuccessCount", "missCount", "missRate", " " +
+                "requestCount", "totalLoadTime"}, new String[]{"Average load penality", "Eviction Count", "Hit " +
+                "Count", "Hit Rate", "Load Count", "Load Exception Count", "Load Exception Rate", "Load Success " +
+                "Count", "Miss Count", "Miss Rate", "Request Count", " Total Load Time"}, new OpenType[]{SimpleType
+                .DOUBLE, SimpleType.LONG, SimpleType.LONG, SimpleType.DOUBLE, SimpleType.LONG, SimpleType.LONG,
+                SimpleType.DOUBLE, SimpleType.LONG, SimpleType.LONG, SimpleType.DOUBLE, SimpleType.LONG, SimpleType
+                .LONG});
+
+        final TabularDataSupport tabularData = new TabularDataSupport(new TabularType("cacheEntries", "Cache " +
+                "Entries", cacheEntryType, new String[]{}));
+
+        CacheStats cacheStats = this.cache.stats();
+
+        final Map<String, Object> data = new HashMap<>();
+        data.put("averageLoadPenalty", cacheStats.averageLoadPenalty());
+        data.put("evictionCount", cacheStats.evictionCount());
+        data.put("hitCount", cacheStats.hitCount());
+        data.put("hitRate", cacheStats.hitRate());
+        data.put("loadCount", cacheStats.loadCount());
+        data.put("loadExceptionCount", cacheStats.loadExceptionCount());
+        data.put("loadExceptionRate", cacheStats.loadExceptionRate());
+        data.put("loadSuccessCount", cacheStats.loadSuccessCount());
+        data.put("missCount", cacheStats.missCount());
+        data.put("missRate", cacheStats.missRate());
+        data.put("requestCount", cacheStats.requestCount());
+        data.put("requestCount", cacheStats.requestCount());
+        data.put("requestCount", cacheStats.totalLoadTime());
+        tabularData.put(new CompositeDataSupport(cacheEntryType, data));
+
+        return tabularData;
     }
 
     @Override
-    public TabularData getCacheKeys() {
-        // TODO - Query from Guava cache.
-        throw new NotImplementedException();
+    public TabularData getCacheKeys() throws OpenDataException {
+
+        final CompositeType cacheEntryType = new CompositeType("cacheEntry", "Cache Entry", new String[]{"cacheKey"},
+                new String[]{"Cache Key - String representation"}, new OpenType[]{SimpleType.STRING});
+
+        final TabularDataSupport tabularData = new TabularDataSupport(new TabularType("cacheEntries", "Cache " +
+                "Entries", cacheEntryType, new String[]{"cacheKey"}));
+
+        ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
+        for (final CacheKey key : cacheAsMap.keySet()) {
+            final Map<String, String> data = new HashMap<>();
+            data.put("cacheKey", key.toString());
+            tabularData.put(new CompositeDataSupport(cacheEntryType, data));
+        }
+
+        return tabularData;
     }
 
 }

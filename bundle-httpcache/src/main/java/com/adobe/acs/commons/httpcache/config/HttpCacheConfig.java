@@ -6,6 +6,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Configuration for Http cache. Multiple configs can be supplied. Request uri, authentication details, aem user group
@@ -26,7 +27,44 @@ public interface HttpCacheConfig {
     String getCacheStoreName();
 
     /**
-     * Determine if this cache config is applicable for the given request.
+     * Get the authentication requirement for request set for this config.
+     *
+     * @return Uses the constants defined in {@link AuthenticationStatusConfigConstants}
+     */
+    String getAuthenticationRequirement();
+
+    /**
+     * Get the configured list of whitelisted request URIs.
+     *
+     * @return
+     */
+    List<Pattern> getRequestUriPatterns();
+
+    /**
+     * Get the configured list of blacklisted request URIs.
+     *
+     * @return
+     */
+    List<Pattern> getBlacklistedRequestUriPatterns();
+
+    /**
+     * Get the configured list of JCR paths that could unvalidate this config.
+     *
+     * @return
+     */
+    List<Pattern> getJCRInvalidationPaths();
+
+    /**
+     * Get the list of custom attributes captured through configuration which is supposed to be supplied to the
+     * extensions.
+     *
+     * @return
+     */
+    List<String> getCustomConfigAttributes();
+
+    /**
+     * Determine if this cache config is applicable for the given request. Calls <code>HttpCacheConfigExtension
+     * .accept()</code> for providing share of control to the custom code.
      *
      * @param request the request
      * @return true if the response should be cached, false if it should not be cached.
@@ -55,24 +93,10 @@ public interface HttpCacheConfig {
     boolean canInvalidate(String path);
 
     /**
-     * Get the authentication requirement for request set for this config.
-     *
-     * @return Uses the constants defined in {@link AuthenticationStatusConfigConstants}
-     */
-    public String getAuthenticationRequirement();
-
-    /**
-     * Get the list of user groups for request set for this config.
-     *
-     * @return
-     */
-    public List<String> getUserGroups();
-
-    /**
      * Returns true if the key is generated using this cache config.
+     *
      * @param key
      * @return
      */
-    boolean knows(CacheKey key);
+    boolean knows(CacheKey key) throws HttpCacheKeyCreationException;
 }
-

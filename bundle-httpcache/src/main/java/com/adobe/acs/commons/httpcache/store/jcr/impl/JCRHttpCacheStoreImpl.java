@@ -60,8 +60,4 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore {
 
     }
 
-    @Override
-    public void invalidate(String path) {
-
-    }
 }

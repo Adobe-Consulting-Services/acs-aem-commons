@@ -25,6 +25,7 @@ public interface CacheKeyFactory {
      * @param key
      * @param cacheConfig
      * @return True if key and config match.
+     * @throws HttpCacheKeyCreationException
      */
-    boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig);
+    boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException;
 }
