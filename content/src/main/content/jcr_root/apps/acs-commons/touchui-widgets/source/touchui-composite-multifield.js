@@ -115,40 +115,7 @@
 
     ACS.TouchUI.CompositeMultiField = new Class({
         toString: 'ACS TouchUI Composite Multifield',
-
-        isSelectOne: function ($field) {
-            return !_.isEmpty($field) && ($field.prop("type") === "select-one");
-        },
-
-        setSelectOne: function ($field, value) {
-            var select = $field.closest(".coral-Select").data("select");
-
-            if (select) {
-                select.setValue(value);
-            }
-        },
-
-        isCheckbox: function ($field) {
-            return !_.isEmpty($field) && ($field.prop("type") === "checkbox");
-        },
-
-        setCheckBox: function ($field, value) {
-            $field.prop("checked", $field.attr("value") === value);
-        },
-
-        setWidgetValue: function ($field, value) {
-            if (_.isEmpty($field)) {
-                return;
-            }
-
-            if (this.isSelectOne($field)) {
-                this.setSelectOne($field, value);
-            } else if (this.isCheckbox($field)) {
-                this.setCheckBox($field, value);
-            } else {
-                $field.val(value);
-            }
-        },
+        extend: ACS.TouchUI.Widget,
 
         //reads multifield data from server, creates the nested composite multifields and fills them
         addDataInFields: function () {
