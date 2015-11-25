@@ -1,4 +1,5 @@
 #base=source
 
+touchui-widgets-init.js
 touchui-composite-multifield.js
 icon-picker.js
