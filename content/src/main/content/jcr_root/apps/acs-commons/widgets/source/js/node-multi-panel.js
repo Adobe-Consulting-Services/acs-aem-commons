@@ -28,7 +28,7 @@ CQ.Ext.ns("ACS.CQ");
  */
 
 ACS.CQ.NodeMultiFieldPanel = CQ.Ext.extend(ACS.CQ.MultiFieldPanel, {
-    addStorePath: function (items, prefix, counter){
+    setValuesInChildNode: function (items, prefix, counter){
         items.each(function(i){
             if(!i.hasOwnProperty("key")){
                 return;
@@ -51,19 +51,15 @@ ACS.CQ.NodeMultiFieldPanel = CQ.Ext.extend(ACS.CQ.MultiFieldPanel, {
 
         dialog.removeListener("beforesubmit", this.setValuesAsJson, dialog);
 
-        this.addStorePath(this.items, this.name, multiPanels.length + 1);
-
-        if(dialog.acsInit){
-            return;
-        }
+        this.setValuesInChildNode(this.items, this.name, multiPanels.length + 1);
 
         multi.on("removeditem", function(){
             multiPanels = multi.findByType("nodemultifieldpanel");
 
             for(var x = 1; x <= multiPanels.length; x++){
-                addStorePath(multiPanels[x-1].items, multiPanels[x-1].name, x);
+                this.setValuesInChildNode(multiPanels[x-1].items, multiPanels[x-1].name, x);
             }
-        });
+        }, this);
     },
 
     getValue: function () {
