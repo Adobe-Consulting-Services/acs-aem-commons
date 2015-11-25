@@ -4,7 +4,7 @@ import com.adobe.acs.commons.httpcache.config.AuthenticationStatusConfigConstant
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
@@ -103,21 +103,13 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Property(name = "cacheConfigExtension.target",
               label = "HttpCacheConfigExtension service pid",
               description = "Service pid of target implementation of HttpCacheConfigExtension to be used. Example - " +
-                      "(service.pid=ccom.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)." +
+                      "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)." +
                       " Optional parameter.",
               value = "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)")
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
                policy = ReferencePolicy.DYNAMIC,
                name = "cacheConfigExtension")
     private HttpCacheConfigExtension cacheConfigExtension;
-
-    // Custom cache config attributes
-    @Property(label = "Custom config attributes",
-              description = "Custom cache config attributes to be supplied to the configured extension. Optional " +
-                      "parameter.",
-              cardinality = Integer.MAX_VALUE)
-    private static final String PROP_USER_GROUPS = "httpcache.config.extension.customattributes";
-    private List<String> customAttributes;
 
     // Making the cache key factory configurable.
     @Property(name = "cacheKeyFactory.target",
@@ -159,16 +151,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
                 (PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
         cacheInvalidationPathPatternsAsRegEx = compileToPatterns(cacheInvalidationPathPatterns);
 
-        // User groups after removing empty strings.
-        customAttributes = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_USER_GROUPS))));
-        ListIterator<String> listIterator = customAttributes.listIterator();
-        while (listIterator.hasNext()) {
-            String value = listIterator.next();
-            if (StringUtils.isBlank(value)) {
-                listIterator.remove();
-            }
-        }
-
         log.info("HttpCacheConfigImpl activated /modified.");
     }
 
@@ -203,17 +185,17 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     }
 
     @Override
-    public boolean accepts(SlingHttpServletRequest request) throws HttpCacheReposityAccessException {
+    public boolean accepts(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException {
 
         // Match authentication requirement.
         if (UserUtils.isAnonymous(request.getResourceResolver().getUserID())) {
             if (AuthenticationStatusConfigConstants.AUTHENTICATED_REQUEST.equals(this.authenticationRequirement)) {
-                // Request is anonymous but the config accepts only authenticated request and hence reject.
+                log.trace("Rejected: Request is anonymous but the config accepts only authenticated request and hence reject");
                 return false;
             }
         } else {
             if (AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST.equals(this.authenticationRequirement)) {
-                // Request is authenticated but config is for anonymous and hence reject.
+                log.trace("Rejected: Request is authenticated but config is for anonymous and hence reject.");
                 return false;
             }
         }
@@ -222,18 +204,20 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         final String uri = request.getRequestURI();
         if (!this.matches(this.requestUriPatternsAsRegEx, uri)) {
             // Does not match URI Whitelist
+            log.trace("Rejected: Request URI does not match the white-listed URI patterns");
             return false;
         }
 
         // Match blacklisted URI.
         if (this.matches(this.blacklistedRequestUriPatternsAsRegEx, uri)) {
             // Matches URI Blacklist; reject
+            log.trace("Rejected: Request URI does match a black-listed URI pattern");
             return false;
         }
 
         // Passing on the control to the extension point.
         if (null != cacheConfigExtension) {
-            return cacheConfigExtension.accepts(request, this, customAttributes);
+            cacheConfigExtension.accepts(request, this);
         }
 
         return true;
@@ -290,11 +274,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public List<Pattern> getJCRInvalidationPaths() {
         return this.cacheInvalidationPathPatternsAsRegEx;
-    }
-
-    @Override
-    public List<String> getCustomConfigAttributes() {
-        return this.customAttributes;
     }
 
     @Override
