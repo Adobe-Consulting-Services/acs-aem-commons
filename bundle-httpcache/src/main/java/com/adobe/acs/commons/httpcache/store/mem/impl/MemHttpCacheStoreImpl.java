@@ -257,38 +257,70 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     @Override
     public TabularData getCacheStats() throws OpenDataException {
         // Exposing all google guava stats.
-        final CompositeType cacheEntryType = new CompositeType("cacheStat", "Cache Stats", new
-                String[]{"averageLoadPenalty", "evictionCount", "hitCount", "hitRate", "loadCount",
-                "loadExceptionCount", "loadExceptionRate", "loadSuccessCount", "missCount", "missRate", " " +
-                "requestCount", "totalLoadTime"}, new String[]{"Average load penalty", "Eviction Count", "Hit " +
-                "Count", "Hit Rate", "Load Count", "Load Exception Count", "Load Exception Rate", "Load Success " +
-                "Count", "Miss Count", "Miss Rate", "Request Count", " Total Load Time"}, new OpenType[]{SimpleType
-                .DOUBLE, SimpleType.LONG, SimpleType.LONG, SimpleType.DOUBLE, SimpleType.LONG, SimpleType.LONG,
-                SimpleType.DOUBLE, SimpleType.LONG, SimpleType.LONG, SimpleType.DOUBLE, SimpleType.LONG, SimpleType
-                .LONG});
+        final CompositeType cacheEntryType = new CompositeType("cacheStat",
+                "Cache Stats",
+                new String[]{"key", "value"},
+                new String[]{"Data Point", "Value"},
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING});
 
-        final TabularDataSupport tabularData = new TabularDataSupport(new TabularType("cacheEntries", "Cache " +
-                "Entries", cacheEntryType, new String[]{"averageLoadPenalty"}));
+        final TabularDataSupport tabularData = new TabularDataSupport(
+                new TabularType("cacheEntries", "Cache Entries", cacheEntryType, new String[]{"key"}));
 
         CacheStats cacheStats = this.cache.stats();
 
-        final Map<String, Object> data = new HashMap<>();
-        data.put("averageLoadPenalty", cacheStats.averageLoadPenalty());
-        data.put("evictionCount", cacheStats.evictionCount());
-        data.put("hitCount", cacheStats.hitCount());
-        data.put("hitRate", cacheStats.hitRate());
-        data.put("loadCount", cacheStats.loadCount());
-        data.put("loadExceptionCount", cacheStats.loadExceptionCount());
-        data.put("loadExceptionRate", cacheStats.loadExceptionRate());
-        data.put("loadSuccessCount", cacheStats.loadSuccessCount());
-        data.put("missCount", cacheStats.missCount());
-        data.put("missRate", cacheStats.missRate());
-        data.put("requestCount", cacheStats.requestCount());
-        data.put("totalLoadTime", cacheStats.totalLoadTime());
-        tabularData.put(new CompositeDataSupport(cacheEntryType, data));
+        final Map<String, Object> row = new HashMap<>();
+
+        row.put("key", "Request Count");
+        row.put("value", String.valueOf(cacheStats.requestCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Total Load Time");
+        row.put("value", String.valueOf(cacheStats.totalLoadTime()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Average Load Penalty");
+        row.put("value", String.valueOf(cacheStats.averageLoadPenalty()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Hit Count");
+        row.put("value", String.valueOf(cacheStats.hitCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Hit Rate");
+        row.put("value", String.format("%.0f%%", cacheStats.hitRate() * 100));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Miss Count");
+        row.put("value", String.valueOf(cacheStats.missCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Miss Rate");
+        row.put("value", String.format("%.0f%%", cacheStats.missRate() * 100));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Eviction Count");
+        row.put("value", String.valueOf(cacheStats.evictionCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Load Count");
+        row.put("value", String.valueOf(cacheStats.loadCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Load Exception Count");
+        row.put("value", String.valueOf(cacheStats.loadExceptionCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Load Exception Rate");
+        row.put("value", String.valueOf(cacheStats.loadExceptionRate()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Load Success Count");
+        row.put("value", String.valueOf(cacheStats.loadSuccessCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         return tabularData;
     }
+
 
     @Override
     public TabularData getCacheKeys() throws OpenDataException {

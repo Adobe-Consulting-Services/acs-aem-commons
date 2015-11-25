@@ -1,6 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.granite.jmx.annotation.Description;
+import com.adobe.granite.jmx.annotation.Name;
 
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
@@ -25,7 +26,7 @@ public interface MemCacheMBean {
     long getTtl();
 
     @Description("Cache entry contents by key.")
-    String getCacheEntry(String cacheKeyStr) throws IOException;
+    String getCacheEntry(@Name(value="Cache Key") String cacheKeyStr) throws IOException;
 
     @Description("Available cache stats.")
     TabularData getCacheStats() throws OpenDataException;
