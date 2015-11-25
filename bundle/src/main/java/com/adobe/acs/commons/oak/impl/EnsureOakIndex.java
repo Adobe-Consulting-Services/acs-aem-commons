@@ -291,7 +291,7 @@ public class EnsureOakIndex {
 	                }
 
 	            } catch (OakIndexDefinitionException e) {
-	                log.error("Skipping... " + e.getMessage());
+	                log.error("Skipping " + ensureDefinitions.getPath() + ": " + e.getMessage());
 	            }
 	        }
 	    }
