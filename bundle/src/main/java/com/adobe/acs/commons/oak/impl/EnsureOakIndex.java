@@ -77,6 +77,8 @@ public class EnsureOakIndex {
     private static final String PN_DELETE = "delete";
 
     private static final String PN_IGNORE = "ignore";
+    
+    private static final String PN_DISABLE = "disable";
 
     private static final String NT_OAK_QUERY_INDEX_DEFINITION = "oak:QueryIndexDefinition";
 
@@ -95,10 +97,15 @@ public class EnsureOakIndex {
             PN_FORCE_REINDEX,
             PN_DELETE,
             PN_IGNORE,
+            PN_DISABLE,
             // Oak properties
             PN_REINDEX,
             PN_REINDEX_COUNT
     };
+    
+    private static final String PN_TYPE = "type";
+    private static final String DISABLED = "disabled";
+    
 
     @Reference
     private AemCapabilityHelper capabilityHelper;
@@ -262,6 +269,10 @@ public class EnsureOakIndex {
 	                                oakIndexesPath + "/" + ensureDefinition.getName(),
 	                                ensureDefinition.getPath());
 	                    }
+	                } else if (ensureDefinitionProperties.get(PN_DISABLE,false)) {
+	                	// DISABLE index
+	                	this.disableIndex (oakIndex);
+	                	
 	                } else if (oakIndex == null) {
 	                    // CREATE
 	                    validateEnsureDefinition(ensureDefinition);
@@ -411,6 +422,20 @@ public class EnsureOakIndex {
 
 	        return oakIndex;
 	    }
+	    
+	    /**
+	     * Disables an index, so it's no longer updated by Oak
+	     * @param oakIndex the index
+	     * @throws PersistenceException 
+	     */
+	    private void disableIndex (Resource oakIndex) throws PersistenceException {
+	    	final ModifiableValueMap oakIndexProperties = oakIndex.adaptTo(ModifiableValueMap.class);
+	    	oakIndexProperties.put(PN_TYPE, DISABLED);
+	    	oakIndex.getResourceResolver().commit();
+	    	
+	    	log.info ("Disabled index at {}", oakIndex.getPath());
+	    }
+	    
 
 	    /**
 	     * Determines if the ensure definition is the same as the the same-named oak:index definition.
