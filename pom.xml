@@ -77,8 +77,8 @@
                     <!-- use version 2.3.2 to have java 1.5 as the default -->
                     <version>2.3.2</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.7</source>
+                        <target>1.7</target>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -244,8 +244,8 @@
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>2.5</version>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>3.0.1</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -292,6 +292,12 @@
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>2.5</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>15.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -500,6 +506,7 @@
     <modules>
         <module>bundle</module>
         <module>bundle-twitter</module>
+        <module>bundle-httpcache</module>
         <module>content</module>
     </modules>
 </project>
