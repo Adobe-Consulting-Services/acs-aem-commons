@@ -30,23 +30,24 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * to this.
  */
 // @formatter:off
-@Component(policy = ConfigurationPolicy.REQUIRE)
+@Component
 @Service
-@References({@Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
-                        referenceInterface = HttpCacheConfig.class,
-                        policy = ReferencePolicy.DYNAMIC,
-                        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+@References({
+        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
+                referenceInterface = HttpCacheConfig.class,
+                policy = ReferencePolicy.DYNAMIC,
+                cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
 
-                        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
-                               referenceInterface = HttpCacheHandlingRule.class,
-                               policy = ReferencePolicy.DYNAMIC,
-                               cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
+               referenceInterface = HttpCacheHandlingRule.class,
+               policy = ReferencePolicy.DYNAMIC,
+               cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
 
-                        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
-                               referenceInterface = HttpCacheStore.class,
-                               policy = ReferencePolicy.DYNAMIC,
-                               cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)})
-
+        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
+               referenceInterface = HttpCacheStore.class,
+               policy = ReferencePolicy.DYNAMIC,
+               cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
+})
 // @formatter:on
 public class HttpCacheEngineImpl implements HttpCacheEngine {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
@@ -200,7 +201,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
     //-----------------------<Interface specific implementation>--------//
     @Override
-    public boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheReposityAccessException {
+    public boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException {
 
         boolean isRequestCacheable = false;
 
@@ -208,23 +209,28 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         for (HttpCacheConfig cacheConfig : cacheConfigs) {
             if (cacheConfig.accepts(request)) {
                 isRequestCacheable = true;
+                break;
             }
         }
 
-        // Execute custom rules.
-        for (HttpCacheHandlingRule rule : cacheHandlingRules) {
-            if (!rule.onRequestReceive(request)) {
-                log.debug("Request cannot be cached for the uri {} honoring the rule {}", request.getRequestURI(),
-                        rule.getClass().getName());
-                isRequestCacheable = false;
+        // Execute custom rules as long as one cache config accepts the request
+        if (isRequestCacheable) {
+            for (HttpCacheHandlingRule rule : cacheHandlingRules) {
+                if (!rule.onRequestReceive(request)) {
+                    log.debug("Request cannot be cached for the uri {} honoring the rule {}", request.getRequestURI(),
+                            rule.getClass().getName());
+                    isRequestCacheable = false;
+                }
             }
+        } else {
+            log.trace("No HttpCacheConfigs could be found that accept this request.");
         }
 
         return isRequestCacheable;
     }
 
     @Override
-    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheReposityAccessException,
+    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException,
             HttpCacheConfigConflictException {
 
         List<HttpCacheConfig> matchingConfigs = new ArrayList<>();
