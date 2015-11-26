@@ -52,7 +52,7 @@ public interface HttpCacheConfig {
      *
      * @return
      */
-    List<Pattern> getJCRInvalidationPaths();
+    List<Pattern> getJCRInvalidationPathPatterns();
 
     /**
      * Determine if this cache config is applicable for the given request. Calls <code>HttpCacheConfigExtension

@@ -272,7 +272,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     }
 
     @Override
-    public List<Pattern> getJCRInvalidationPaths() {
+    public List<Pattern> getJCRInvalidationPathPatterns() {
         return this.cacheInvalidationPathPatternsAsRegEx;
     }
 
