@@ -11,12 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -24,32 +19,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 
 /**
- * This cache config extension assumes that custom attributes are aem group names. It accepts the http request only if
- * at least one of the configured groups is present in the request user's group membership list.
+ * Implementation for custom cache config extension and associated cache key creation based on aem groups. This cache
+ * config extension accepts the http request only if at least one of the configured groups is present in the request
+ * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
  */
-@Component(immediate = true, metatype = true, configurationFactory = true)
+@Component(label = "ACS AEM Commons - HTTP Cache - Group based extension for HttpCacheConfig and CacheKeyFactory.",
+           description = "HttpCacheConfig custom extension for group based configuration and associated cache key " +
+                   "creation.",
+           immediate = true,
+           metatype = true,
+           configurationFactory = true)
 @Service
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(GroupHttpCacheConfigExtension.class);
 
     // Custom cache config attributes
     @Property(label = "Allowed user groups",
-            description = "Users groups that are used to accept and create cache keys.",
-            unbounded = PropertyUnbounded.ARRAY)
+              description = "Users groups that are used to accept and create cache keys.",
+              unbounded = PropertyUnbounded.ARRAY)
     private static final String PROP_USER_GROUPS = "httpcache.config.extension.user-groups";
     private List<String> userGroups;
 
     //-------------------------<HttpCacheConfigExtension methods>
 
     @Override
-    public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCacheRepositoryAccessException {
+    public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
+            HttpCacheRepositoryAccessException {
 
         // Match groups.
         if (UserUtils.isAnonymous(request.getResourceResolver().getUserID())) {
@@ -119,7 +117,6 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
                 HttpCacheKeyCreationException {
 
             this.uri = request.getRequestURI();
-            // Note - Custom attribute in this case is user group names.
             this.cacheKeyUserGroups = userGroups;
             this.authenticationRequirement = cacheConfig.getAuthenticationRequirement();
         }
@@ -145,15 +142,15 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
 
             GroupCacheKey that = (GroupCacheKey) o;
 
-            return new EqualsBuilder().append(uri, that.uri).append(cacheKeyUserGroups, that.cacheKeyUserGroups).append
-                    (authenticationRequirement, that.authenticationRequirement).isEquals();
+            return new EqualsBuilder().append(uri, that.uri).append(cacheKeyUserGroups, that.cacheKeyUserGroups)
+                    .append(authenticationRequirement, that.authenticationRequirement).isEquals();
         }
 
         @Override
         public int hashCode() {
 
-            return new HashCodeBuilder(17, 37).append(uri).append(cacheKeyUserGroups).append(authenticationRequirement)
-                    .toHashCode();
+            return new HashCodeBuilder(17, 37).append(uri).append(cacheKeyUserGroups).append
+                    (authenticationRequirement).toHashCode();
         }
 
         @Override
@@ -180,7 +177,8 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     protected void activate(Map<String, Object> configs) {
 
         // User groups after removing empty strings.
-        userGroups = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_USER_GROUPS), new String[]{})));
+        userGroups = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_USER_GROUPS), new
+                String[]{})));
         ListIterator<String> listIterator = userGroups.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();
