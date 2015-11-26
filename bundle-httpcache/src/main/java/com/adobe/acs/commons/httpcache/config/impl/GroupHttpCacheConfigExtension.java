@@ -34,7 +34,7 @@ import java.util.Map;
  * This cache config extension assumes that custom attributes are aem group names. It accepts the http request only if
  * at least one of the configured groups is present in the request user's group membership list.
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = true, configurationFactory = true)
 @Service
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(GroupHttpCacheConfigExtension.class);
@@ -180,7 +180,7 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     protected void activate(Map<String, Object> configs) {
 
         // User groups after removing empty strings.
-        userGroups = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_USER_GROUPS))));
+        userGroups = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_USER_GROUPS), new String[]{})));
         ListIterator<String> listIterator = userGroups.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();

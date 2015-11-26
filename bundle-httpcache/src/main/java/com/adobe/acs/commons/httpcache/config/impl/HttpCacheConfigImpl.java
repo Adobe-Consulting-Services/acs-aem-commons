@@ -115,9 +115,9 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Property(name = "cacheKeyFactory.target",
               label = "CacheKeyFactory service pid",
               description = "Service pid of target implementation of CacheKeyFactory to be used. Example - " +
-                      "(service.pid=com.adobe.acs.commons.httpcache.keys.impl.GroupCacheKeyFactory)." +
+                      "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)." +
                       "Mandatory parameter.",
-              value = "(service.pid=com.adobe.acs.commons.httpcache.keys.impl.GroupCacheKeyFactory)")
+              value = "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)")
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
                policy = ReferencePolicy.DYNAMIC,
@@ -217,7 +217,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
         // Passing on the control to the extension point.
         if (null != cacheConfigExtension) {
-            cacheConfigExtension.accepts(request, this);
+           return cacheConfigExtension.accepts(request, this);
         }
 
         return true;
