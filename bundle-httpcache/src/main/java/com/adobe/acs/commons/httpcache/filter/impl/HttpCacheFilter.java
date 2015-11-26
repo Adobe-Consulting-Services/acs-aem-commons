@@ -26,7 +26,7 @@ import java.io.IOException;
         description = "Intercepts http requests to deal with caching.",
         generateComponent = true,
         generateService = true,
-        order = 0,
+        order = 4999, // Magic number places it immediately after the Granite inner cache
         scope = SlingFilterScope.REQUEST)
 public class HttpCacheFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheFilter.class);
@@ -38,6 +38,8 @@ public class HttpCacheFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
             ServletException {
         log.trace("In HttpCache filter.");
+
+        final long start = System.currentTimeMillis();
 
         final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
         SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
@@ -54,6 +56,10 @@ public class HttpCacheFilter implements Filter {
                 if (cacheEngine.isCacheHit(slingRequest, cacheConfig)) {
                     // Deliver the response from cache.
                     if (cacheEngine.deliverCacheContent(slingRequest, slingResponse, cacheConfig)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Delivered cached request [ {} ] in {} ms", slingRequest.getRequestURI(),
+                                    System.currentTimeMillis() - start);
+                        }
                         return;
                     }
                 } else {
@@ -74,6 +80,11 @@ public class HttpCacheFilter implements Filter {
             // If the request has the attribute marked, cache the response.
             if (isResponseCacheable) {
                 cacheEngine.cacheResponse(slingRequest, slingResponse, cacheConfig);
+            }
+
+            if (log.isTraceEnabled()) {
+                log.trace("Delivered un-cached request [ {} ] in {} ms", slingRequest.getRequestURI(),
+                        System.currentTimeMillis() - start);
             }
         } catch (HttpCacheException e) {
             log.error("HttpCache exception while dealing with response. Returned the filter chain response", e);

@@ -3,19 +3,40 @@ package com.adobe.acs.commons.httpcache.store.mem.impl;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import com.google.common.cache.*;
-import org.apache.felix.scr.annotations.*;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheStats;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.*;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -28,10 +49,14 @@ import java.util.concurrent.TimeUnit;
            description = "Cache data store implementation for in-memory storage.",
            metatype = true,
            immediate = true)
-@Properties({@Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-                       value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
-                       propertyPrivate = true), @Property(name = "jmx.objectname",
-                                                          value = "com.adobe.acs.httpcache:type=CRX")})
+@Properties({
+        @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
+                    value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
+                    propertyPrivate = true),
+        @Property(name = "jmx.objectname",
+                    value = "com.adobe.acs.httpcache:type=In Memory",
+                    propertyPrivate = true)
+})
 @Service(value = {DynamicMBean.class, HttpCacheStore.class})
 public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
@@ -160,9 +185,15 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
         for (CacheKey key : cacheAsMap.keySet()) {
             // Match the cache key with cache config.
-            if (cacheConfig.knows(key)) {
-                // If matches, invalidate that particular key.
-                cache.invalidate(key);
+            try {
+                if (cacheConfig.knows(key)) {
+                    // If matches, invalidate that particular key.
+                    cache.invalidate(key);
+                }
+            } catch (HttpCacheKeyCreationException e) {
+                // TODO Verify full invalidation is the best approach in the event of a failure
+                log.error("Could not invalidate cache. Falling back to full cache invalidation.", e);
+                this.invalidateAll();
             }
         }
     }
@@ -201,41 +232,95 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     }
 
     @Override
+    public String getCacheEntry(String cacheKeyStr) throws IOException {
+        CacheKey cacheKey = null;
+
+        for (CacheKey cacheKeyTmp : cache.asMap().keySet()) {
+            if (StringUtils.equals(cacheKeyStr, cacheKeyTmp.toString())) {
+                cacheKey = cacheKeyTmp;
+                break;
+            }
+        }
+
+        if (cacheKey != null) {
+            MemCachePersistenceObject persistenceObject = cache.getIfPresent(cacheKey);
+            if(persistenceObject != null) {
+                return IOUtils.toString(
+                        new ByteArrayInputStream(persistenceObject.getBytes()),
+                        persistenceObject.getCharEncoding());
+            }
+        }
+
+        return "Invalid cache key parameter.";
+    }
+
+    @Override
     public TabularData getCacheStats() throws OpenDataException {
         // Exposing all google guava stats.
-        final CompositeType cacheEntryType = new CompositeType("cacheStat", "Cache Stats", new
-                String[]{"averageLoadPenalty", "evictionCount", "hitCount", "hitRate", "loadCount",
-                "loadExceptionCount", "loadExceptionRate", "loadSuccessCount", "missCount", "missRate", " " +
-                "requestCount", "totalLoadTime"}, new String[]{"Average load penality", "Eviction Count", "Hit " +
-                "Count", "Hit Rate", "Load Count", "Load Exception Count", "Load Exception Rate", "Load Success " +
-                "Count", "Miss Count", "Miss Rate", "Request Count", " Total Load Time"}, new OpenType[]{SimpleType
-                .DOUBLE, SimpleType.LONG, SimpleType.LONG, SimpleType.DOUBLE, SimpleType.LONG, SimpleType.LONG,
-                SimpleType.DOUBLE, SimpleType.LONG, SimpleType.LONG, SimpleType.DOUBLE, SimpleType.LONG, SimpleType
-                .LONG});
+        final CompositeType cacheEntryType = new CompositeType("cacheStat",
+                "Cache Stats",
+                new String[]{"key", "value"},
+                new String[]{"Data Point", "Value"},
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING});
 
-        final TabularDataSupport tabularData = new TabularDataSupport(new TabularType("cacheEntries", "Cache " +
-                "Entries", cacheEntryType, new String[]{}));
+        final TabularDataSupport tabularData = new TabularDataSupport(
+                new TabularType("cacheEntries", "Cache Entries", cacheEntryType, new String[]{"key"}));
 
         CacheStats cacheStats = this.cache.stats();
 
-        final Map<String, Object> data = new HashMap<>();
-        data.put("averageLoadPenalty", cacheStats.averageLoadPenalty());
-        data.put("evictionCount", cacheStats.evictionCount());
-        data.put("hitCount", cacheStats.hitCount());
-        data.put("hitRate", cacheStats.hitRate());
-        data.put("loadCount", cacheStats.loadCount());
-        data.put("loadExceptionCount", cacheStats.loadExceptionCount());
-        data.put("loadExceptionRate", cacheStats.loadExceptionRate());
-        data.put("loadSuccessCount", cacheStats.loadSuccessCount());
-        data.put("missCount", cacheStats.missCount());
-        data.put("missRate", cacheStats.missRate());
-        data.put("requestCount", cacheStats.requestCount());
-        data.put("requestCount", cacheStats.requestCount());
-        data.put("requestCount", cacheStats.totalLoadTime());
-        tabularData.put(new CompositeDataSupport(cacheEntryType, data));
+        final Map<String, Object> row = new HashMap<>();
+
+        row.put("key", "Request Count");
+        row.put("value", String.valueOf(cacheStats.requestCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Total Load Time");
+        row.put("value", String.valueOf(cacheStats.totalLoadTime()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Average Load Penalty");
+        row.put("value", String.valueOf(cacheStats.averageLoadPenalty()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Hit Count");
+        row.put("value", String.valueOf(cacheStats.hitCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Hit Rate");
+        row.put("value", String.format("%.0f%%", cacheStats.hitRate() * 100));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Miss Count");
+        row.put("value", String.valueOf(cacheStats.missCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Miss Rate");
+        row.put("value", String.format("%.0f%%", cacheStats.missRate() * 100));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Eviction Count");
+        row.put("value", String.valueOf(cacheStats.evictionCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Load Count");
+        row.put("value", String.valueOf(cacheStats.loadCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Load Exception Count");
+        row.put("value", String.valueOf(cacheStats.loadExceptionCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Load Exception Rate");
+        row.put("value", String.valueOf(cacheStats.loadExceptionRate()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Load Success Count");
+        row.put("value", String.valueOf(cacheStats.loadSuccessCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         return tabularData;
     }
+
 
     @Override
     public TabularData getCacheKeys() throws OpenDataException {

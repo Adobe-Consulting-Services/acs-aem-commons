@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.httpcache.config;
 
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.sling.api.SlingHttpServletRequest;
 
@@ -55,21 +55,13 @@ public interface HttpCacheConfig {
     List<Pattern> getJCRInvalidationPaths();
 
     /**
-     * Get the list of custom attributes captured through configuration which is supposed to be supplied to the
-     * extensions.
-     *
-     * @return
-     */
-    List<String> getCustomConfigAttributes();
-
-    /**
      * Determine if this cache config is applicable for the given request. Calls <code>HttpCacheConfigExtension
      * .accept()</code> for providing share of control to the custom code.
      *
      * @param request the request
      * @return true if the response should be cached, false if it should not be cached.
      */
-    boolean accepts(SlingHttpServletRequest request) throws HttpCacheReposityAccessException;
+    boolean accepts(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException;
 
     /**
      * @return true if this config is considered valid and processable by the HttpCacheEngine.

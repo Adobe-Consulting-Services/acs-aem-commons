@@ -8,6 +8,9 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,7 +91,15 @@ class MemCachePersistenceObject {
      * @return Returned in <code>Map<String, List<String>></code> format.
      */
     public Map<String, List<String>> getHeaders() {
-        return (Map<String, List<String>>) (Map<?, ?>) Multimaps.asMap(headers);
+        Map<String, List<String>> map = new HashMap<>();
+
+        // Convert com.google.common.collect.AbstractMapBasedMultimap$WrappedSet to List<String> value to avoid cast
+        // exception
+        for (Map.Entry<String, Collection<String>> entry : Multimaps.asMap(headers).entrySet()) {
+            map.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+        }
+
+        return map;
     }
 
     /**

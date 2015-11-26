@@ -1,9 +1,7 @@
 package com.adobe.acs.commons.httpcache.config;
 
-import com.adobe.acs.commons.httpcache.exception.HttpCacheReposityAccessException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import org.apache.sling.api.SlingHttpServletRequest;
-
-import java.util.List;
 
 /**
  * Hook to supply custom extension to the {@link HttpCacheConfig}.
@@ -16,10 +14,8 @@ public interface HttpCacheConfigExtension {
      *
      * @param request
      * @param cacheConfig
-     * @param customConfigAttributes Custom cache config attributes.
      * @return True if this cache config extension accepts the cache config custom attributes.
-     * @throws HttpCacheReposityAccessException
+     * @throws HttpCacheRepositoryAccessException
      */
-    boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, List<String>
-            customConfigAttributes) throws HttpCacheReposityAccessException;
+    boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCacheRepositoryAccessException;
 }

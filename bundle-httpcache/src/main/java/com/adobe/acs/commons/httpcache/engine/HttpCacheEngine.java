@@ -19,9 +19,9 @@ public interface HttpCacheEngine {
      *
      * @param request
      * @return True if the request is cacheable
-     * @throws HttpCacheReposityAccessException
+     * @throws HttpCacheRepositoryAccessException
      */
-    boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheReposityAccessException;
+    boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException;
 
     /**
      * Get the cache config applicable for the given request.
@@ -29,10 +29,10 @@ public interface HttpCacheEngine {
      * @param request
      * @return Applicable CacheConfig
      * @throws HttpCacheConfigConflictException
-     * @throws HttpCacheReposityAccessException
+     * @throws HttpCacheRepositoryAccessException
      */
     HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheConfigConflictException,
-            HttpCacheReposityAccessException;
+            HttpCacheRepositoryAccessException;
 
     /**
      * Check if the given request can be served from available cache.
