@@ -20,8 +20,10 @@ public class CacheOnlyResponse200 extends AbstractHttpCacheHandlingRule {
     public boolean onResponseCache(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                    HttpCacheConfig cacheConfig, CacheContent cacheContent) {
         // Continue only if the response status is 200.
-        if (HTTP_SUCCESS_RESPONSE_STATUS != response.getStatus())
+        if (HTTP_SUCCESS_RESPONSE_STATUS != response.getStatus()) {
             return false;
+        }
+
         return true;
     }
 }
