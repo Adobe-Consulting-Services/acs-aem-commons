@@ -19,8 +19,8 @@ public interface MemCacheMBean {
     @Description("Number of entries in the cache")
     long getCacheEntriesCount();
 
-    @Description("Size of cache in KB")
-    long getCacheSizeInBytes();
+    @Description("Size of cache")
+    String getCacheSize();
 
     @Description("Cache TTL in Seconds. -1 value represent no TTL.")
     long getTtl();

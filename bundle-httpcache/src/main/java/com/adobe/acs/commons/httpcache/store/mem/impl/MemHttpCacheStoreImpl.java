@@ -13,6 +13,7 @@ import com.google.common.cache.CacheStats;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -191,7 +192,6 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
                     cache.invalidate(key);
                 }
             } catch (HttpCacheKeyCreationException e) {
-                // TODO Verify full invalidation is the best approach in the event of a failure
                 log.error("Could not invalidate cache. Falling back to full cache invalidation.", e);
                 this.invalidateAll();
             }
@@ -214,8 +214,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     }
 
     @Override
-    public long getCacheSizeInBytes() {
-
+    public String getCacheSize() {
         // Iterate through the cache entries and compute the total size of byte array.
         long size = 0L;
         ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
@@ -223,7 +222,8 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
             size += cacheAsMap.get(key).getBytes().length;
         }
 
-        return size;
+        // Convert bytes to human-friendly format
+        return FileUtils.byteCountToDisplaySize(size);
     }
 
     @Override
@@ -274,14 +274,6 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         row.put("value", String.valueOf(cacheStats.requestCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Total Load Time");
-        row.put("value", String.valueOf(cacheStats.totalLoadTime()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("key", "Average Load Penalty");
-        row.put("value", String.valueOf(cacheStats.averageLoadPenalty()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
         row.put("key", "Hit Count");
         row.put("value", String.valueOf(cacheStats.hitCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
@@ -316,6 +308,14 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
         row.put("key", "Load Success Count");
         row.put("value", String.valueOf(cacheStats.loadSuccessCount()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Average Load Penalty");
+        row.put("value", String.valueOf(cacheStats.averageLoadPenalty()));
+        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+
+        row.put("key", "Total Load Time");
+        row.put("value", String.valueOf(cacheStats.totalLoadTime()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         return tabularData;
