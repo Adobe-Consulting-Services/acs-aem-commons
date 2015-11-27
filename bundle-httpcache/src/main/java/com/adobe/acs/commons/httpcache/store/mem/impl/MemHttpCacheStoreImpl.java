@@ -311,7 +311,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         row.put("key", "Load Exception Rate");
-        row.put("value", String.valueOf(cacheStats.loadExceptionRate()));
+        row.put("value", String.format("%.0f%%", cacheStats.loadExceptionRate() * 100));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         row.put("key", "Load Success Count");
