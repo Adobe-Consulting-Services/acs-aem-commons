@@ -18,6 +18,6 @@ public class CacheOnlyGetRequest extends AbstractHttpCacheHandlingRule {
     @Override
     public boolean onRequestReceive(SlingHttpServletRequest request) {
         // Return true only if Http method is GET.
-        return request.getMethod().equals(HTTP_GET_METHOD);
+        return HTTP_GET_METHOD.equals(request.getMethod());
     }
 }
