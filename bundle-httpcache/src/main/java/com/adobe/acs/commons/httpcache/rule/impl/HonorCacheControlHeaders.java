@@ -5,6 +5,7 @@ import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
@@ -18,6 +19,7 @@ import java.util.List;
            description = "Do not cache the response when it's set with cache control headers marking it as not " +
                    "cacheable.",
            immediate = true)
+@Service
 public class HonorCacheControlHeaders extends AbstractHttpCacheHandlingRule {
     private static final String KEY_CACHE_CONTROL_HEADER = "Cache-Control"; // HTTP 1.1
     private static final String[] VALUES_CACHE_CONTROL = {"no-cache, no-store, must-revalidate"};

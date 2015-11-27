@@ -4,6 +4,7 @@ import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -14,7 +15,9 @@ import org.apache.sling.api.SlingHttpServletResponse;
 @Component(label = "ACS AEM Commons - HTTP Cache - Rule: Mark response as cache delivered.",
            description = "Attach k,v to response header marking it as delivered from cache.",
            immediate = true,
+           metatype = true,
            policy = ConfigurationPolicy.REQUIRE)
+@Service
 public class MarkResponseAsCacheDelivered extends AbstractHttpCacheHandlingRule {
     private static final String KEY_HTTPCACHE_MARK = "acs-commons-httpcache";
     private static final String VALUE_HTTPCACHE_MARK = "cache-delivered";

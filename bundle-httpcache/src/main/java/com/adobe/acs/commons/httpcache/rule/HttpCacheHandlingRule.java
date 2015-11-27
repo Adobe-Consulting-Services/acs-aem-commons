@@ -30,7 +30,7 @@ public interface HttpCacheHandlingRule {
      * @param request
      * @param response
      * @param cacheConfig
-     * @param cacheContent Object carring data to be cached.
+     * @param cacheContent Object carrying data to be cached.
      * @return True represents success and cache handling rules will be continued. False represents failure with cache
      * handling rules being stopped and fallback action will be taken.
      */

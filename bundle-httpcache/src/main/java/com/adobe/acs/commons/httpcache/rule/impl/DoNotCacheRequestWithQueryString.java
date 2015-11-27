@@ -13,6 +13,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 @Component(label = "ACS AEM Commons - HTTP Cache - Rule: Do not cache query string requests.",
            description = "Do not cache requests which has got query strings.",
            immediate = true,
+           metatype = true,
            policy = ConfigurationPolicy.REQUIRE)
 @Service
 public class DoNotCacheRequestWithQueryString extends AbstractHttpCacheHandlingRule {
