@@ -5,6 +5,7 @@ import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigComparator;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
@@ -267,16 +268,26 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException {
+    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException, HttpCacheConfigConflictException {
         // Get the first accepting cache config based on the cache config order.
+        HttpCacheConfig bestCacheConfig = null;
+
         for (HttpCacheConfig cacheConfig : cacheConfigs) {
-            if (cacheConfig.accepts(request)) {
-                return cacheConfig;
+            if (bestCacheConfig != null) {
+                // A matching HttpCacheConfig has been found, so check for order + acceptance conflicts
+                if (bestCacheConfig.getOrder() == cacheConfig.getOrder()) {
+                    if (cacheConfig.accepts(request)) {
+                        // Throw an exception if two HttpCacheConfigs w the same order accept the same request
+                        throw new HttpCacheConfigConflictException();
+                    }
+                }
+            } else if (cacheConfig.accepts(request)) {
+                bestCacheConfig = cacheConfig;
             }
         }
 
         log.debug("Could not find an acceptable HttpCacheConfig");
-        return null;
+        return bestCacheConfig;
     }
 
     @Override
