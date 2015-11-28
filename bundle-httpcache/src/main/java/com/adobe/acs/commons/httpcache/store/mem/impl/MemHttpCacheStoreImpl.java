@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
                     value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
                     propertyPrivate = true),
         @Property(name = "jmx.objectname",
-                    value = "com.adobe.acs.httpcache:type=In Memory",
+                    value = "com.adobe.acs.httpcache:type=In Memory HTTP Cache Store",
                     propertyPrivate = true)
 })
 @Service(value = {DynamicMBean.class, HttpCacheStore.class})
@@ -192,7 +192,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
                     cache.invalidate(key);
                 }
             } catch (HttpCacheKeyCreationException e) {
-                log.error("Could not invalidate cache. Falling back to full cache invalidation.", e);
+                log.error("Could not invalidate HTTP cache. Falling back to full cache invalidation.", e);
                 this.invalidateAll();
             }
         }
@@ -257,65 +257,66 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     @Override
     public TabularData getCacheStats() throws OpenDataException {
         // Exposing all google guava stats.
-        final CompositeType cacheEntryType = new CompositeType("cacheStat",
+        final CompositeType cacheEntryType = new CompositeType(
                 "Cache Stats",
-                new String[]{"key", "value"},
-                new String[]{"Data Point", "Value"},
+                "Cache Stats",
+                new String[]{"Stat", "Value"},
+                new String[]{"Stat", "Value"},
                 new OpenType[]{SimpleType.STRING, SimpleType.STRING});
 
         final TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType("cacheEntries", "Cache Entries", cacheEntryType, new String[]{"key"}));
+                new TabularType("Cache Stats", "Cache Stats", cacheEntryType, new String[]{"Stat"}));
 
         CacheStats cacheStats = this.cache.stats();
 
         final Map<String, Object> row = new HashMap<>();
 
-        row.put("key", "Request Count");
-        row.put("value", String.valueOf(cacheStats.requestCount()));
+        row.put("Stat", "Request Count");
+        row.put("Value", String.valueOf(cacheStats.requestCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Hit Count");
-        row.put("value", String.valueOf(cacheStats.hitCount()));
+        row.put("Stat", "Hit Count");
+        row.put("Value", String.valueOf(cacheStats.hitCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Hit Rate");
-        row.put("value", String.format("%.0f%%", cacheStats.hitRate() * 100));
+        row.put("Stat", "Hit Rate");
+        row.put("Value", String.format("%.0f%%", cacheStats.hitRate() * 100));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Miss Count");
-        row.put("value", String.valueOf(cacheStats.missCount()));
+        row.put("Stat", "Miss Count");
+        row.put("Value", String.valueOf(cacheStats.missCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Miss Rate");
-        row.put("value", String.format("%.0f%%", cacheStats.missRate() * 100));
+        row.put("Stat", "Miss Rate");
+        row.put("Value", String.format("%.0f%%", cacheStats.missRate() * 100));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Eviction Count");
-        row.put("value", String.valueOf(cacheStats.evictionCount()));
+        row.put("Stat", "Eviction Count");
+        row.put("Value", String.valueOf(cacheStats.evictionCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Load Count");
-        row.put("value", String.valueOf(cacheStats.loadCount()));
+        row.put("Stat", "Load Count");
+        row.put("Value", String.valueOf(cacheStats.loadCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Load Exception Count");
-        row.put("value", String.valueOf(cacheStats.loadExceptionCount()));
+        row.put("Stat", "Load Exception Count");
+        row.put("Value", String.valueOf(cacheStats.loadExceptionCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Load Exception Rate");
-        row.put("value", String.format("%.0f%%", cacheStats.loadExceptionRate() * 100));
+        row.put("Stat", "Load Exception Rate");
+        row.put("Value", String.format("%.0f%%", cacheStats.loadExceptionRate() * 100));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Load Success Count");
-        row.put("value", String.valueOf(cacheStats.loadSuccessCount()));
+        row.put("Stat", "Load Success Count");
+        row.put("Value", String.valueOf(cacheStats.loadSuccessCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Average Load Penalty");
-        row.put("value", String.valueOf(cacheStats.averageLoadPenalty()));
+        row.put("Stat", "Average Load Penalty");
+        row.put("Value", String.valueOf(cacheStats.averageLoadPenalty()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("key", "Total Load Time");
-        row.put("value", String.valueOf(cacheStats.totalLoadTime()));
+        row.put("Stat", "Total Load Time");
+        row.put("Value", String.valueOf(cacheStats.totalLoadTime()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         return tabularData;
@@ -325,20 +326,34 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     @Override
     public TabularData getCacheKeys() throws OpenDataException {
 
-        final CompositeType cacheEntryType = new CompositeType("cacheEntry", "Cache Entry", new String[]{"cacheKey"},
-                new String[]{"Cache Key - String representation"}, new OpenType[]{SimpleType.STRING});
+        final CompositeType cacheEntryType = new CompositeType(
+                "Cache Entry",
+                "Cache Entry",
+                new String[]{ "Cache Key", "Size", "Content Type", "Character Encoding" },
+                new String[]{ "Cache Key", "Size", "Content Type", "Character Encoding" },
+                new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
 
-        final TabularDataSupport tabularData = new TabularDataSupport(new TabularType("cacheEntries", "Cache " +
-                "Entries", cacheEntryType, new String[]{"cacheKey"}));
+        final TabularDataSupport tabularData = new TabularDataSupport(new TabularType(
+                "Cache Entries",
+                "Cache Entries",
+                cacheEntryType,
+                new String[]{ "Cache Key" }));
 
         ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
         for (final CacheKey key : cacheAsMap.keySet()) {
-            final Map<String, String> data = new HashMap<>();
-            data.put("cacheKey", key.toString());
+            final Map<String, Object> data = new HashMap<>();
+            data.put("Cache Key", key.toString());
+
+            MemCachePersistenceObject cacheObj = cache.getIfPresent(key);
+            if (cacheObj != null) {
+                data.put("Size", FileUtils.byteCountToDisplaySize(cacheObj.getBytes().length));
+                data.put("Content Type", cacheObj.getContentType());
+                data.put("Character Encoding", cacheObj.getCharEncoding());
+            }
+
             tabularData.put(new CompositeDataSupport(cacheEntryType, data));
         }
 
         return tabularData;
     }
-
 }
