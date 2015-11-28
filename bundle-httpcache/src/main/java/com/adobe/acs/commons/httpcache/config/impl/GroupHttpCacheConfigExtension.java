@@ -40,7 +40,7 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     @Property(label = "Allowed user groups",
               description = "Users groups that are used to accept and create cache keys.",
               unbounded = PropertyUnbounded.ARRAY)
-    private static final String PROP_USER_GROUPS = "httpcache.config.extension.user-groups";
+    private static final String PROP_USER_GROUPS = "httpcache.config.extension.user-groups.allowed";
     private List<String> userGroups;
 
     //-------------------------<HttpCacheConfigExtension methods>
