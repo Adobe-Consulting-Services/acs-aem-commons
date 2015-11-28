@@ -6,11 +6,11 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
+ * ACS AEM Commons - HTTP Cache - Rule: Cache only request http method is GET.
+ *
  * Process only Http GET requests.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Rule: Cache only request http method is GET.",
-           description = "Process only Http GET requests.",
-           immediate = true)
+@Component
 @Service
 public class CacheOnlyGetRequest extends AbstractHttpCacheHandlingRule {
     private static final String HTTP_GET_METHOD = "GET";

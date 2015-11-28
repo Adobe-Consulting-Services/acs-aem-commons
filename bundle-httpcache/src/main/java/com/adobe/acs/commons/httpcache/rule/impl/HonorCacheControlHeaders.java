@@ -13,12 +13,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * ACS AEM Commons - HTTP Cache - Rule: Honor cache control headers
+ *
  * Cache only Http response status for the request is 200.
+ * Do not cache the response when it's set with cache control headers marking it as not cacheable.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Rule: Honor cache control headers",
-           description = "Do not cache the response when it's set with cache control headers marking it as not " +
-                   "cacheable.",
-           immediate = true)
+@Component
 @Service
 public class HonorCacheControlHeaders extends AbstractHttpCacheHandlingRule {
     private static final String KEY_CACHE_CONTROL_HEADER = "Cache-Control"; // HTTP 1.1

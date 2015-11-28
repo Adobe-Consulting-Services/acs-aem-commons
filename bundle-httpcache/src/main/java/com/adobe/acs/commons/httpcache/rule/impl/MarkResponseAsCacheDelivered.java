@@ -10,13 +10,11 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
 /**
+ * ACS AEM Commons - HTTP Cache - Rule: Mark response as cache delivered.
+ *
  * Attach k,v to response header marking it as delivered from cache. Useful while developing.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Rule: Mark response as cache delivered.",
-           description = "Attach k,v to response header marking it as delivered from cache.",
-           immediate = true,
-           metatype = true,
-           policy = ConfigurationPolicy.REQUIRE)
+@Component(policy = ConfigurationPolicy.REQUIRE)
 @Service
 public class MarkResponseAsCacheDelivered extends AbstractHttpCacheHandlingRule {
     private static final String KEY_HTTPCACHE_MARK = "acs-commons-httpcache";

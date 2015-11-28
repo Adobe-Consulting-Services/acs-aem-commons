@@ -9,11 +9,11 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
 /**
+ * ACS AEM Commons - HTTP Cache - Rule: Cache only response status 200.
+ *
  * Cache only Http response status for the request is 200.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Rule: Cache only response status 200.",
-           description = "Cache only Http response status for the request is 200.",
-           immediate = true)
+@Component
 @Service
 public class CacheOnlyResponse200 extends AbstractHttpCacheHandlingRule {
     private static final int HTTP_SUCCESS_RESPONSE_STATUS = 200;
