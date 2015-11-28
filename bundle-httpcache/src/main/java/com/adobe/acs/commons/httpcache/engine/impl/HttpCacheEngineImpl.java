@@ -1,27 +1,52 @@
 package com.adobe.acs.commons.httpcache.engine.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigComparator;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
-import com.adobe.acs.commons.httpcache.exception.*;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
+import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.CacheUtils;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -31,7 +56,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 // @formatter:off
 @Component
-@Service
+@Properties({
+        @Property(name = "jmx.objectname",
+                value = "com.adobe.acs.httpcache:type=HTTP Cache Engine",
+                propertyPrivate = true)
+})
 @References({
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
                 referenceInterface = HttpCacheConfig.class,
@@ -48,15 +77,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
                policy = ReferencePolicy.DYNAMIC,
                cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
 })
+@Service(value = {DynamicMBean.class, HttpCacheEngine.class})
 // @formatter:on
-public class HttpCacheEngineImpl implements HttpCacheEngine {
+public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpCacheEngine, HttpCacheEngineMBean {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
 
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
 
     /** Thread safe list to contain the registered HttpCacheConfig references. */
-    private static final CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<>();
+    private static final ConcurrentSkipListSet<HttpCacheConfig> cacheConfigs = new ConcurrentSkipListSet<>(new HttpCacheConfigComparator());
 
     /** Method name that binds cache store */
     static final String METHOD_NAME_TO_BIND_CACHE_STORE = "httpCacheStore";
@@ -69,6 +99,10 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
     /** Thread safe list to contain the registered HttpCacheHandlingRule references. */
     private static final CopyOnWriteArrayList<HttpCacheHandlingRule> cacheHandlingRules = new CopyOnWriteArrayList<>();
+
+    /** Thread safe list that contains the OSGi configurations for the registered httpCacheConfigs **/
+    private static final ConcurrentHashMap<HttpCacheConfig, Map<String, Object>> cacheConfigConfigs = new
+            ConcurrentHashMap<>();
 
     //-------------------<OSGi specific methods>---------------//
 
@@ -92,9 +126,10 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
             return;
         }
 
-        // Add it to the map.
         cacheConfigs.add(cacheConfig);
-        log.debug("Total number of cache configs added - {}", cacheConfigs.size());
+        cacheConfigConfigs.put(cacheConfig, configs);
+
+        log.debug("Total number of cache configs added: {}", cacheConfigs.size());
     }
 
     /**
@@ -115,8 +150,9 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
 
             // Remove the entry from the map.
             cacheConfigs.remove(cacheConfig);
+            cacheConfigConfigs.remove(cacheConfig);
 
-            log.debug("Total number of cache configs after removal - {}", cacheConfigs.size());
+            log.debug("Total number of cache configs after removal: {}", cacheConfigs.size());
             return;
         }
         log.debug("This cache config entry was not bound and hence nothing to unbind.");
@@ -136,7 +172,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
                     cacheStore);
             log.debug("Cache store implementation {} has been added", (String) configs.get(HttpCacheStore
                     .KEY_CACHE_STORE_TYPE));
-            log.debug("Total number of cache stores in the map - {}", cacheStoresMap.size());
+            log.debug("Total number of cache stores in the map: {}", cacheStoresMap.size());
         }
     }
 
@@ -152,7 +188,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
                 (HttpCacheStore.KEY_CACHE_STORE_TYPE))) {
             cacheStoresMap.remove((String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
             log.debug("Cache store removed - {}.", (String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
-            log.debug("Total number of cache stores after removal - {}", cacheStoresMap.size());
+            log.debug("Total number of cache stores after removal: {}", cacheStoresMap.size());
         }
     }
 
@@ -168,7 +204,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         if (!cacheHandlingRules.contains(cacheHandlingRule)) {
             cacheHandlingRules.add(cacheHandlingRule);
             log.debug("Cache handling rule implementation {} has been added", cacheHandlingRule.getClass().getName());
-            log.debug("Total number of cache handling rule available after addition - {}", cacheHandlingRules.size());
+            log.debug("Total number of cache handling rule available after addition: {}", cacheHandlingRules.size());
         }
 
     }
@@ -185,7 +221,7 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         if (cacheHandlingRules.contains(cacheHandlingRule)) {
             cacheHandlingRules.remove(cacheHandlingRule);
             log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
-            log.debug("Total number of cache handling rules available after removal - {}", cacheHandlingRules.size());
+            log.debug("Total number of cache handling rules available after removal: {}", cacheHandlingRules.size());
         }
     }
 
@@ -202,55 +238,34 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
     //-----------------------<Interface specific implementation>--------//
     @Override
     public boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException {
-
-        boolean isRequestCacheable = false;
-
-        // Check if any of the cache config accepts this request.
-        for (HttpCacheConfig cacheConfig : cacheConfigs) {
-            if (cacheConfig.accepts(request)) {
-                isRequestCacheable = true;
-                break;
-            }
-        }
-
         // Execute custom rules as long as one cache config accepts the request
-        if (isRequestCacheable) {
-            for (HttpCacheHandlingRule rule : cacheHandlingRules) {
-                if (!rule.onRequestReceive(request)) {
-                    log.debug("Request cannot be cached for the uri {} honoring the rule {}", request.getRequestURI(),
+        for (HttpCacheHandlingRule rule : cacheHandlingRules) {
+            if (!rule.onRequestReceive(request)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Request cannot be cached for the url {} honoring the rule {}", request.getRequestURL(),
                             rule.getClass().getName());
-                    isRequestCacheable = false;
                 }
+                // Only a single rule need to fail to cause the caching mechanism to be by-passed
+                return false;
             }
-        } else {
-            log.trace("No HttpCacheConfigs could be found that accept this request.");
         }
 
-        return isRequestCacheable;
+        log.debug("All rules allow caching");
+        // All rules have accepted this request, so request is cache-able.
+        return true;
     }
 
     @Override
-    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException,
-            HttpCacheConfigConflictException {
-
-        List<HttpCacheConfig> matchingConfigs = new ArrayList<>();
-
-        // Collect all the matching cache configs.
+    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException {
+        // Get the first accepting cache config based on the cache config order.
         for (HttpCacheConfig cacheConfig : cacheConfigs) {
             if (cacheConfig.accepts(request)) {
-                matchingConfigs.add(cacheConfig);
+                return cacheConfig;
             }
         }
 
-        // If there is more than one matching cache config, throw Cache Conflict exception.
-        if (matchingConfigs.size() == 1) {
-            return matchingConfigs.get(0);
-        } else if (matchingConfigs.size() > 1) {
-            throw new HttpCacheConfigConflictException("Multiple conflicting cache configs found");
-        } else {
-            log.debug("Could not find an acceptable HttpCacheConfig");
-            return null;
-        }
+        log.debug("Could not find an acceptable HttpCacheConfig");
+        return null;
     }
 
     @Override
@@ -272,8 +287,10 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         // Execute custom rules.
         for (HttpCacheHandlingRule rule : cacheHandlingRules) {
             if (!rule.onCacheDeliver(request, response, cacheConfig, cacheContent)) {
-                log.debug("Request cannot be cached for the uri {} honoring the rule {}", request.getRequestURI(),
-                        rule.getClass().getName());
+                if (log.isDebugEnabled()) {
+                    log.debug("Request cannot be cached for the uri {} honoring the rule {}", request.getRequestURI(),
+                            rule.getClass().getName());
+                }
                 return false;
             }
         }
@@ -292,7 +309,9 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
         // Copy the cached data into the servlet output stream.
         try {
             IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
-            log.debug("Response delivered from cache for the url - {}", request.getRequestURI());
+            if (log.isDebugEnabled()) {
+                log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
+            }
 
             return true;
         } catch (IOException e) {
@@ -397,5 +416,95 @@ public class HttpCacheEngineImpl implements HttpCacheEngine {
                     .getCacheStoreName());
         }
 
+    }
+
+    //-------------------------<Mbean specific implementation>
+
+    public HttpCacheEngineImpl() throws NotCompliantMBeanException {
+        super(HttpCacheEngineMBean.class);
+    }
+
+    @Override
+    public TabularData getRegisteredHttpCacheRules() throws OpenDataException {
+        final CompositeType cacheEntryType = new CompositeType(
+                "HTTP Cache Handling Rule",
+                "HTTP Cache Handling Rule",
+                new String[]{ "HTTP Cache Handling Rule" },
+                new String[]{ "HTTP Cache Handling Rule" },
+                new OpenType[]{ SimpleType.STRING});
+
+        final TabularDataSupport tabularData = new TabularDataSupport(
+                new TabularType(
+                        "HTTP Cache Handling Rules",
+                        "HTTP Cache Handling Rules",
+                        cacheEntryType,
+                        new String[]{ "HTTP Cache Handling Rule" }));
+
+        for (HttpCacheHandlingRule rule : this.cacheHandlingRules) {
+            final Map<String, Object> row = new HashMap<>();
+
+            row.put("HTTP Cache Handling Rule", rule.getClass().getName());
+            tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+        }
+
+        return tabularData;
+    }
+
+    @Override
+    public TabularData getRegisteredHttpCacheConfigs() throws OpenDataException {
+        // Exposing all google guava stats.
+        final CompositeType cacheEntryType = new CompositeType(
+                "HTTP Cache Config",
+                "HTTP Cache Config",
+                new String[]{ "Order", "OSGi Component" },
+                new String[]{ "Order", "OSGi Component" },
+                new OpenType[]{ SimpleType.INTEGER, SimpleType.STRING });
+
+        final TabularDataSupport tabularData = new TabularDataSupport(
+                new TabularType(
+                        "HTTP Cache Configs",
+                        "HTTP Cache Configs",
+                        cacheEntryType,
+                        new String[]{ "OSGi Component" }));
+
+        for (HttpCacheConfig cacheConfig : this.cacheConfigs) {
+            final Map<String, Object> row = new HashMap<>();
+
+            Map<String, Object> osgiConfig = cacheConfigConfigs.get(cacheConfig);
+
+            row.put("Order", PropertiesUtil.toInteger(osgiConfig.get(HttpCacheConfigImpl.PROP_ORDER),
+                    HttpCacheConfigImpl.DEFAULT_ORDER));
+            row.put("OSGi Component", (String) osgiConfig.get(Constants.SERVICE_PID));
+
+            tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+        }
+
+        return tabularData;
+    }
+
+    @Override
+    public TabularData getRegisteredPersistenceStores() throws OpenDataException {
+        final CompositeType cacheEntryType = new CompositeType(
+                "HTTP Cache Store",
+                "HTTP Cache Store",
+                new String[]{ "HTTP Cache Store" },
+                new String[]{ "HTTP Cache Store" },
+                new OpenType[]{ SimpleType.STRING});
+
+        final TabularDataSupport tabularData = new TabularDataSupport(
+                new TabularType(
+                        "HTTP Cache Stores",
+                        "HTTP Cache Stores",
+                        cacheEntryType,
+                        new String[]{ "HTTP Cache Store" }));
+
+        for (String storeName : this.cacheStoresMap.keySet()) {
+            final Map<String, Object> row = new HashMap<>();
+
+            row.put("HTTP Cache Store", storeName);
+            tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+        }
+
+        return tabularData;
     }
 }

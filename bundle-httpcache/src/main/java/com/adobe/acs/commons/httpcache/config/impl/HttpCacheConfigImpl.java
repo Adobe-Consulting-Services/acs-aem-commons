@@ -11,13 +11,24 @@ import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.UserUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +43,16 @@ import java.util.regex.Pattern;
 @Service
 public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
+
+    // Order
+    public static final int DEFAULT_ORDER = 1000;
+    private int order = DEFAULT_ORDER;
+    @Property(label = "Priority order",
+            description = "Order in which the HttpCacheEngine should evaluate the HttpCacheConfigs against the " +
+                    "request. Evaluates smallest to largest (Integer.MIN_VALUE -> Integer.MAX_VALUE). Defaults to " +
+                    "1000 ",
+            intValue = DEFAULT_ORDER)
+    public static final String PROP_ORDER = "httpcache.config.order";
 
     // Request URIs - Whitelisted.
     @Property(label = "Request URI patterns",
@@ -125,9 +146,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private CacheKeyFactory cacheKeyFactory;
 
     @Activate
-    @Modified
     protected void activate(Map<String, Object> configs) {
-        //Read configs and populate variables after trimming whitespaces.
 
         // Request URIs - Whitelisted.
         requestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_REQUEST_URI_PATTERNS), new
@@ -150,6 +169,8 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get
                 (PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
         cacheInvalidationPathPatternsAsRegEx = compileToPatterns(cacheInvalidationPathPatterns);
+
+        order = PropertiesUtil.toInteger(configs.get(PROP_ORDER), DEFAULT_ORDER);
 
         log.info("HttpCacheConfigImpl activated /modified.");
     }
@@ -279,5 +300,10 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public boolean knows(CacheKey key) throws HttpCacheKeyCreationException {
         return this.cacheKeyFactory.doesKeyMatchConfig(key, this);
+    }
+
+    @Override
+    public int getOrder() {
+        return this.order;
     }
 }

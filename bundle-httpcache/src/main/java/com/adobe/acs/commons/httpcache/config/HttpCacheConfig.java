@@ -91,4 +91,10 @@ public interface HttpCacheConfig {
      * @return
      */
     boolean knows(CacheKey key) throws HttpCacheKeyCreationException;
+
+    /**
+     * Gets the order the HttpCacheConfig should be executed in.
+     * @return
+     */
+    int getOrder();
 }

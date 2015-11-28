@@ -12,7 +12,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
  */
 public interface HttpCacheEngine {
     /**
-     * Check if the given request is cacheable. Custom cache handling rule hook {@link
+     * Check if the given request is cache-able. Custom cache handling rule hook {@link
      * com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule#onRequestReceive(SlingHttpServletRequest)} exposed.
      * Cacheability can be defined if the URI of the given request qualifies to be cached per any of the supplied {@link
      * com.adobe.acs.commons.httpcache.config.HttpCacheConfig}.
@@ -24,11 +24,10 @@ public interface HttpCacheEngine {
     boolean isRequestCacheable(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException;
 
     /**
-     * Get the cache config applicable for the given request.
+     * Get the first, based on cache config order, cache config applicable for the given request.
      *
      * @param request
      * @return Applicable CacheConfig
-     * @throws HttpCacheConfigConflictException
      * @throws HttpCacheRepositoryAccessException
      */
     HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheConfigConflictException,

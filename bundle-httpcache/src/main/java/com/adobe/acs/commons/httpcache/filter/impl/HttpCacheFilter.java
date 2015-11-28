@@ -48,10 +48,12 @@ public class HttpCacheFilter implements Filter {
         boolean isResponseCacheable = false;
 
         try {
-            // Check if the url is cacheable as per configs and rules.
-            if (cacheEngine.isRequestCacheable(slingRequest)) {
-                // Get the applicable cache config.
-                cacheConfig = cacheEngine.getCacheConfig(slingRequest);
+            // Get the first accepting cache config, or null if no accepting cacheConfigs can be found.
+            cacheConfig = cacheEngine.getCacheConfig(slingRequest);
+
+            // Check if the url is cache-able as per configs and rules.
+            // An accepting cacheConfig must exist and all cache rules must be met.
+            if (cacheConfig != null && cacheEngine.isRequestCacheable(slingRequest)) {
                 // Check if cached response available for this request.
                 if (cacheEngine.isCacheHit(slingRequest, cacheConfig)) {
                     // Deliver the response from cache.
