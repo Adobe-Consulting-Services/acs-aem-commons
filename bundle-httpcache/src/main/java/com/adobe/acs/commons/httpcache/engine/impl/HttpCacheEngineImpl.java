@@ -472,8 +472,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
             Map<String, Object> osgiConfig = cacheConfigConfigs.get(cacheConfig);
 
-            row.put("Order", PropertiesUtil.toInteger(osgiConfig.get(HttpCacheConfigImpl.PROP_ORDER),
-                    HttpCacheConfigImpl.DEFAULT_ORDER));
+            row.put("Order", cacheConfig.getOrder());
             row.put("OSGi Component", (String) osgiConfig.get(Constants.SERVICE_PID));
 
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
