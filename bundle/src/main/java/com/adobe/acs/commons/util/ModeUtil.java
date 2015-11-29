@@ -29,6 +29,8 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.day.cq.commons.Externalizer;
 import com.day.cq.wcm.api.AuthoringUIMode;
@@ -42,14 +44,32 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
 public final class ModeUtil {
 
+    private static Logger LOG = LoggerFactory.getLogger(ModeUtil.class);
+
+    private static Boolean activated = false;
+
     private static boolean isAuthor = false;
 
     private static boolean isPublish = false;
+
+    private static Object lock = new Object();
 
     private static Set<String> runmodes = new HashSet<String>();
 
     @Reference
     private SlingSettingsService slingSettings;
+
+    private static void waitForActivation() {
+        synchronized (lock) {
+            while (!activated) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException ex) {
+                    LOG.error("Interuppted while waiting for lock.", ex);
+                }
+            }
+        }
+    }
 
     /**
      * Is AEM runmode author.
@@ -57,6 +77,7 @@ public final class ModeUtil {
      * @return true if runmode author is present
      */
     public static boolean isAuthor() {
+        waitForActivation();
         return isAuthor;
     }
 
@@ -66,6 +87,7 @@ public final class ModeUtil {
      * @return true if runmode publish is present
      */
     public static boolean isPublish() {
+        waitForActivation();
         return isPublish;
     }
 
@@ -77,6 +99,7 @@ public final class ModeUtil {
      * @return true if the specified mode is present
      */
     public static boolean isRunmode(String mode) {
+        waitForActivation();
         return runmodes.contains(mode);
     }
 
@@ -171,12 +194,16 @@ public final class ModeUtil {
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
 
-        runmodes = slingSettings.getRunModes();
-        isAuthor = runmodes.contains(Externalizer.AUTHOR);
-        isPublish = runmodes.contains(Externalizer.PUBLISH);
-        if (isAuthor && isPublish) {
-            throw new ConfigurationException(null,
-                    "Either 'author' or 'publish' run modes may be specified, not both.");
+        synchronized (lock) {
+            runmodes = slingSettings.getRunModes();
+            isAuthor = runmodes.contains(Externalizer.AUTHOR);
+            isPublish = runmodes.contains(Externalizer.PUBLISH);
+            if (isAuthor && isPublish) {
+                throw new ConfigurationException(null,
+                        "Either 'author' or 'publish' run modes may be specified, not both.");
+            }
+            activated = true;
+            lock.notify();
         }
     }
 
