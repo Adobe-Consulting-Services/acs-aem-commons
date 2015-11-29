@@ -46,6 +46,8 @@ import com.day.cq.wcm.api.WCMMode;
 @PrepareForTest({WCMMode.class, AuthoringUIMode.class})
 public class ModeUtilTest {
 
+    boolean syncTestIsAuthor = false;
+
     @Mock
     SlingHttpServletRequest request;
 
@@ -71,6 +73,28 @@ public class ModeUtilTest {
     public void tearDown() throws Exception {
         modes = null;
         reset(slingSettings, context);
+    }
+
+    @Test
+    public void testSynchronization() throws Exception {
+        modes.add("author");
+
+        Runnable runner = new Runnable() {
+            
+            @Override
+            public void run() {
+                syncTestIsAuthor = ModeUtil.isAuthor();
+            }
+        };
+        
+        Thread thread = new Thread(runner);
+        thread.start();
+
+        assertEquals(Thread.State.WAITING, thread.getState());
+        assertFalse(syncTestIsAuthor);
+        util.activate(context);
+        assertTrue(syncTestIsAuthor);
+        assertEquals(Thread.State.TERMINATED, thread.getState());
     }
 
     @Test
