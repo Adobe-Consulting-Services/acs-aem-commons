@@ -280,6 +280,9 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                         // Throw an exception if two HttpCacheConfigs w the same order accept the same request
                         throw new HttpCacheConfigConflictException();
                     }
+                } else if (bestCacheConfig.getOrder() < cacheConfig.getOrder()) {
+                    // Since cacheConfigs is sorted by order, this means all other orders will not match
+                    break;
                 }
             } else if (cacheConfig.accepts(request)) {
                 bestCacheConfig = cacheConfig;
