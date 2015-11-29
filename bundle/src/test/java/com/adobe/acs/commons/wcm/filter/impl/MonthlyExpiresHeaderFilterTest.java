@@ -241,7 +241,7 @@ public class MonthlyExpiresHeaderFilterTest {
     @Test(expected = ConfigurationException.class)
     public void testDoActivateInvalidHighDayOfMonth() throws Exception {
         Calendar test = Calendar.getInstance();
-        int val = test.getLeastMaximum(Calendar.DAY_OF_MONTH) + 1;
+        int val = test.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, val);
         filter.doActivate(componentContext);
     }

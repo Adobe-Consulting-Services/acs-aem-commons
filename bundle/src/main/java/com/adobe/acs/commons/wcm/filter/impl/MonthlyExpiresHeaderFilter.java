@@ -101,7 +101,7 @@ public class MonthlyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
                     throw new ConfigurationException(PROP_EXPIRES_DAY_OF_MONTH,
                             "Day of month is smaller than minimum allowed value.");
                 }
-                if (intDay > test.getLeastMaximum(Calendar.DAY_OF_MONTH)) {
+                if (intDay > test.getActualMaximum(Calendar.DAY_OF_MONTH)) {
                     throw new ConfigurationException(PROP_EXPIRES_DAY_OF_MONTH,
                             "Day of month is larger than least maximum allowed value.");
                 }
