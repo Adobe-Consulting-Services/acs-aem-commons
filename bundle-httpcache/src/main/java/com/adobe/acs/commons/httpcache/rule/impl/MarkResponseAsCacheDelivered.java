@@ -12,7 +12,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 /**
  * ACS AEM Commons - HTTP Cache - Rule: Mark response as cache delivered.
  *
- * Attach k,v to response header marking it as delivered from cache. Useful while developing.
+ * Attach k,v to response header marking it as delivered from cache. Useful while debugging / troubleshooting.
  */
 @Component(policy = ConfigurationPolicy.REQUIRE)
 @Service

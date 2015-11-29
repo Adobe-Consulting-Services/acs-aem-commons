@@ -22,7 +22,7 @@ import java.util.List;
 @Service
 public class HonorCacheControlHeaders extends AbstractHttpCacheHandlingRule {
     private static final String KEY_CACHE_CONTROL_HEADER = "Cache-Control"; // HTTP 1.1
-    private static final String[] VALUES_CACHE_CONTROL = {"no-cache, no-store, must-revalidate"};
+    private static final String[] VALUES_CACHE_CONTROL = {"no-cache", "no-store", "must-revalidate"};
     private static final String KEY_PRAGMA = "Pragma"; // HTTP 1.0
     private static final String[] VALUES_PRAGMA = {"no-cache"};
 
