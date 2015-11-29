@@ -43,10 +43,12 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -86,7 +88,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
 
     /** Thread safe list to contain the registered HttpCacheConfig references. */
-    private static final ConcurrentSkipListSet<HttpCacheConfig> cacheConfigs = new ConcurrentSkipListSet<>(new HttpCacheConfigComparator());
+    private static final CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<>();
 
     /** Method name that binds cache store */
     static final String METHOD_NAME_TO_BIND_CACHE_STORE = "httpCacheStore";
@@ -126,8 +128,17 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             return;
         }
 
-        cacheConfigs.add(cacheConfig);
-        cacheConfigConfigs.put(cacheConfig, configs);
+        // Sort cacheConfigs by order; Synchronized since this bind/un-bind is a rare/limited event
+        synchronized (this.cacheConfigs) {
+            final List<HttpCacheConfig> tmp = new ArrayList<>(this.cacheConfigs);
+            tmp.add(cacheConfig);
+
+            Collections.sort(tmp, new HttpCacheConfigComparator());
+            this.cacheConfigs.clear();
+            this.cacheConfigs.addAll(tmp);
+        }
+
+        this.cacheConfigConfigs.put(cacheConfig, configs);
 
         log.debug("Total number of cache configs added: {}", cacheConfigs.size());
     }
