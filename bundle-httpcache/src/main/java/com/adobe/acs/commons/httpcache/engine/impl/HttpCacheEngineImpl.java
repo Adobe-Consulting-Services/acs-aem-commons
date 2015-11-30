@@ -5,6 +5,7 @@ import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigComparator;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
@@ -43,10 +44,12 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -86,7 +89,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
 
     /** Thread safe list to contain the registered HttpCacheConfig references. */
-    private static final ConcurrentSkipListSet<HttpCacheConfig> cacheConfigs = new ConcurrentSkipListSet<>(new HttpCacheConfigComparator());
+    private static final CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<>();
 
     /** Method name that binds cache store */
     static final String METHOD_NAME_TO_BIND_CACHE_STORE = "httpCacheStore";
@@ -126,8 +129,17 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             return;
         }
 
-        cacheConfigs.add(cacheConfig);
-        cacheConfigConfigs.put(cacheConfig, configs);
+        // Sort cacheConfigs by order; Synchronized since this bind/un-bind is a rare/limited event
+        synchronized (this.cacheConfigs) {
+            final List<HttpCacheConfig> tmp = new ArrayList<>(this.cacheConfigs);
+            tmp.add(cacheConfig);
+
+            Collections.sort(tmp, new HttpCacheConfigComparator());
+            this.cacheConfigs.clear();
+            this.cacheConfigs.addAll(tmp);
+        }
+
+        this.cacheConfigConfigs.put(cacheConfig, configs);
 
         log.debug("Total number of cache configs added: {}", cacheConfigs.size());
     }
@@ -256,16 +268,29 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException {
+    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException, HttpCacheConfigConflictException {
         // Get the first accepting cache config based on the cache config order.
+        HttpCacheConfig bestCacheConfig = null;
+
         for (HttpCacheConfig cacheConfig : cacheConfigs) {
-            if (cacheConfig.accepts(request)) {
-                return cacheConfig;
+            if (bestCacheConfig != null) {
+                // A matching HttpCacheConfig has been found, so check for order + acceptance conflicts
+                if (bestCacheConfig.getOrder() == cacheConfig.getOrder()) {
+                    if (cacheConfig.accepts(request)) {
+                        // Throw an exception if two HttpCacheConfigs w the same order accept the same request
+                        throw new HttpCacheConfigConflictException();
+                    }
+                } else if (bestCacheConfig.getOrder() < cacheConfig.getOrder()) {
+                    // Since cacheConfigs is sorted by order, this means all other orders will not match
+                    break;
+                }
+            } else if (cacheConfig.accepts(request)) {
+                bestCacheConfig = cacheConfig;
             }
         }
 
         log.debug("Could not find an acceptable HttpCacheConfig");
-        return null;
+        return bestCacheConfig;
     }
 
     @Override
