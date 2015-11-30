@@ -33,6 +33,11 @@
 
     ACS.TouchUI.Widget = new Class({
         toString: 'ACS TouchUI Widget Base Class',
+        ACS_COMMONS_NESTED:  "acs-commons-nested",
+        DATA_ACS_COMMONS_NESTED:  "data-acs-commons-nested",
+        CFFW:  ".coral-Form-fieldwrapper",
+        JSON_STORE: "JSON_STORE",
+        NODE_STORE: "NODE_STORE",
 
         isSelectOne: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "select-one");
@@ -66,6 +71,14 @@
             } else {
                 $field.val(value);
             }
+        },
+
+        isJsonStore: function(name){
+            return (_.isEmpty(name) || name === this.JSON_STORE);
+        },
+
+        isNodeStore: function(name){
+            return (name === this.NODE_STORE);
         }
     });
 }());

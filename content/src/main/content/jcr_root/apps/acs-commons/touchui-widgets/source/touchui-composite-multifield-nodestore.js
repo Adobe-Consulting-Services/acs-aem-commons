@@ -18,17 +18,226 @@
  * #L%
  *
  * A sample component dialog using the Touch UI Multi Field
- * Note the usage of empty valued acs-commons-nested property
- */
-
+ * Note the usage of acs-commons-nested property, value set to NODE_STORE
+ *
+ * <code>
+ <?xml version="1.0" encoding="UTF-8"?>
+    <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="ACS AEM Commions Multifield TouchUI Component"
+    sling:resourceType="cq/gui/components/authoring/dialog"
+    helpPath="en/cq/current/wcm/default_components.html#Text">
+        <content
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="granite/ui/components/foundation/container">
+            <layout
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
+            <items jcr:primaryType="nt:unstructured">
+                <column
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/foundation/container">
+                    <items jcr:primaryType="nt:unstructured">
+                        <fieldset
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Sample Dashboard"
+                        sling:resourceType="granite/ui/components/foundation/form/fieldset">
+                            <layout
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
+                            <items jcr:primaryType="nt:unstructured">
+                                <column
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/foundation/container">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <dashboard
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/foundation/form/textfield"
+                                        fieldDescription="Enter Dashboard name"
+                                        fieldLabel="Dashboard name"
+                                        name="./dashboard"/>
+                                        <pages
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/foundation/form/multifield"
+                                        class="full-width"
+                                        fieldDescription="Click '+' to add a new page"
+                                        fieldLabel="Pages">
+                                            <field
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/foundation/form/fieldset"
+                                            acs-commons-nested="NODE_STORE"
+                                            name="./pages">
+                                                <layout
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
+                                                method="absolute"/>
+                                                <items jcr:primaryType="nt:unstructured">
+                                                    <column
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/foundation/container">
+                                                        <items jcr:primaryType="nt:unstructured">
+                                                            <page
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/foundation/form/textfield"
+                                                            fieldDescription="Name of Page"
+                                                            fieldLabel="Page Name"
+                                                            name="./page"/>
+                                                            <path
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/foundation/form/pathbrowser"
+                                                            fieldDescription="Select Path"
+                                                            fieldLabel="Path"
+                                                            name="./path"
+                                                            rootPath="/content"/>
+                                                        </items>
+                                                    </column>
+                                                </items>
+                                            </field>
+                                        </pages>
+                                    </items>
+                                </column>
+                            </items>
+                        </fieldset>
+                    </items>
+                </column>
+            </items>
+        </content>
+    </jcr:root>
+</code>
+*/
 (function ($, $document) {
     "use strict";
 
+    var _ = window._, Class = window.Class;
+
     ACS.TouchUI.NodeCompositeMultiField = new Class({
         toString: 'ACS TouchUI Composite Multifield Store as Nodes',
-        extend: ACS.TouchUI.CompositeMultiField,
+        extend: ACS.TouchUI.Widget,
+
+        getMultiFieldNames: function(){
+            var cmf = this, mNames = {}, mName, $multifield, $template,
+                $multiTemplates = $(".js-coral-Multifield-input-template");
+
+            $multiTemplates.each(function (i, template) {
+                $template = $(template);
+                $multifield = $($template.html());
+
+                if(!cmf.isNodeStore($multifield.data(cmf.ACS_COMMONS_NESTED))){
+                    return;
+                }
+
+                mName = $multifield.data("name").substring(2);
+
+                mNames[mName] = $template.closest(".coral-Multifield");
+            });
+
+            return mNames;
+        },
+
+        buildMultiField: function(data, $multifield, mName){
+            var cmf = this;
+
+            if(_.isEmpty(mName) || _.isEmpty(data)){
+                return;
+            }
+
+            _.each(data, function(value, key){
+                if(key === "jcr:primaryType"){
+                    return;
+                }
+
+                $multifield.find(".js-coral-Multifield-add").click();
+
+                _.each(value, function(fValue, fKey){
+                    if(fKey === "jcr:primaryType"){
+                        return;
+                    }
+
+                    var $field = $multifield.find("[name='./" + fKey + "']").last();
+
+                    if(_.isEmpty($field)){
+                        return;
+                    }
+
+                    cmf.setWidgetValue($field, fValue);
+                });
+            });
+        },
 
         addDataInFields: function () {
+            var cmf = this, mNames = cmf.getMultiFieldNames(),
+                $form = $("form.cq-dialog"),
+                actionUrl = $form.attr("action") + ".infinity.json";
+
+            $.ajax(actionUrl).done(postProcess);
+
+            function postProcess(data){
+                _.each(mNames, function($multifield, mName){
+                    cmf.buildMultiField(data[mName], $multifield, mName);
+                });
+            }
+        },
+
+        getNodeStoreMultifields: function(){
+            return $("[" + this.DATA_ACS_COMMONS_NESTED + "='" + this.NODE_STORE + "']");
+        },
+
+        collectDataFromFields: function(){
+            var $multifields = this.getNodeStoreMultifields();
+
+            if(_.isEmpty($multifields)){
+                return;
+            }
+
+            var $form = $("form.cq-dialog"), $fields,
+                cmf = this;
+
+            $multifields.each(function(counter, multifield){
+                $fields = $(multifield).children().children(cmf.CFFW);
+
+                $fields.each(function (j, field) {
+                    fillValue($form, $(multifield).data("name"), $(field).find("[name]"), (counter + 1));
+                });
+            });
+
+            function fillValue($form, fieldSetName, $field, counter){
+                var name = $field.attr("name"), value;
+
+                if (!name) {
+                    return;
+                }
+
+                //strip ./
+                if (name.indexOf("./") === 0) {
+                    name = name.substring(2);
+                }
+
+                value = $field.val();
+
+                if (cmf.isCheckbox($field)) {
+                    value = $field.prop("checked") ? $field.val() : "";
+                }
+
+                //remove the field, so that individual values are not POSTed
+                $field.remove();
+
+                $('<input />').attr('type', 'hidden')
+                    .attr('name', fieldSetName + "/" + counter + "/" + name)
+                    .attr('value', value)
+                    .appendTo($form);
+            }
         }
+    });
+
+    $document.ready(function () {
+        var compositeMultiField = new ACS.TouchUI.NodeCompositeMultiField();
+
+        $document.on("dialog-ready", function(){
+            compositeMultiField.addDataInFields();
+        });
+
+        $document.on("click", ".cq-dialog-submit", function(){
+            compositeMultiField.collectDataFromFields();
+        });
     });
 }(jQuery, jQuery(document)));

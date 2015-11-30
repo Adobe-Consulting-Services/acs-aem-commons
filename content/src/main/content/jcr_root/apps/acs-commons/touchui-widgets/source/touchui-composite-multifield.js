@@ -18,7 +18,7 @@
  * #L%
  *
  * A sample component dialog using the Touch UI Multi Field
- * Note the usage of empty valued acs-commons-nested property
+ * Note the usage of acs-commons-nested property, value set to JSON_STORE
  *
  * <code>
  <?xml version="1.0" encoding="UTF-8"?>
@@ -65,7 +65,7 @@
                                             <field
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/foundation/form/fieldset"
-                                            acs-commons-nested=""
+                                            acs-commons-nested="JSON_STORE"
                                             name="./pages">
                                                 <layout
                                                 jcr:primaryType="nt:unstructured"
@@ -108,9 +108,7 @@
 (function ($, $document) {
     "use strict";
 
-    var DATA_ACS_COMMONS_NESTED = "data-acs-commons-nested",
-        CFFW = ".coral-Form-fieldwrapper",
-        _ = window._, CUI = window.CUI,
+    var _ = window._, CUI = window.CUI,
         Class = window.Class;
 
     ACS.TouchUI.CompositeMultiField = new Class({
@@ -119,80 +117,78 @@
 
         //reads multifield data from server, creates the nested composite multifields and fills them
         addDataInFields: function () {
-            var cmf = this;
+            var cmf = this, mNames = [],
+                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
+                $form = $fieldSets.closest("form.foundation-form"),
+                actionUrl = $form.attr("action") + ".json",
+                mValues, $field, name;
 
-            $document.on("dialog-ready", dlgReadyHandler);
+            if (_.isEmpty($fieldSets)) {
+                return;
+            }
 
-            function dlgReadyHandler() {
-                var mNames = [],
-                    $fieldSets = $("[" + DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
-                    $form = $fieldSets.closest("form.foundation-form"),
-                    actionUrl = $form.attr("action") + ".json",
-                    mValues, $field, name;
-
-                if (_.isEmpty($fieldSets)) {
+            $fieldSets.each(function (i, fieldSet) {
+                if(!cmf.isJsonStore($(fieldSet).data(cmf.ACS_COMMONS_NESTED))){
                     return;
                 }
 
-                $fieldSets.each(function (i, fieldSet) {
-                    mNames.push($(fieldSet).data("name"));
-                });
+                mNames.push($(fieldSet).data("name"));
+            });
 
-                mNames = _.uniq(mNames);
+            mNames = _.uniq(mNames);
 
-                //creates & fills the nested multifield with data
-                function fillNestedFields($multifield, valueArr) {
-                    _.each(valueArr, function (record, index) {
-                        $multifield.find(".js-coral-Multifield-add").click();
+            //creates & fills the nested multifield with data
+            function fillNestedFields($multifield, valueArr) {
+                _.each(valueArr, function (record, index) {
+                    $multifield.find(".js-coral-Multifield-add").click();
 
-                        //a setTimeout may be needed
-                        _.each(record, function (value, key) {
-                            cmf.setWidgetValue($($multifield.find("[name='./" + key + "']")[index]), value);
-                        });
+                    //a setTimeout may be needed
+                    _.each(record, function (value, key) {
+                        cmf.setWidgetValue($($multifield.find("[name='./" + key + "']")[index]), value);
                     });
-                }
+                });
+            }
 
-                function postProcess(data) {
-                   _.each(mNames, function (mName) {
-                        if (_.isEmpty(mName)) {
+            function postProcess(data) {
+               _.each(mNames, function (mName) {
+                    if (_.isEmpty(mName)) {
+                        return;
+                    }
+
+                    $fieldSets = $("[data-name='" + mName + "']");
+
+                    //strip ./
+                    mName = mName.substring(2);
+
+                    mValues = data[mName];
+
+                    if (_.isString(mValues)) {
+                        mValues = [JSON.parse(mValues)];
+                    }
+
+                    _.each(mValues, function (record, i) {
+                        if (!record) {
                             return;
                         }
 
-                        $fieldSets = $("[data-name='" + mName + "']");
-
-                        //strip ./
-                        mName = mName.substring(2);
-
-                        mValues = data[mName];
-
-                        if (_.isString(mValues)) {
-                            mValues = [JSON.parse(mValues)];
+                        if (_.isString(record)) {
+                            record = JSON.parse(record);
                         }
 
-                        _.each(mValues, function (record, i) {
-                            if (!record) {
-                                return;
+                        _.each(record, function (rValue, rKey) {
+                            $field = $($fieldSets[i]).find("[name='./" + rKey + "']");
+
+                            if (_.isArray(rValue) && !_.isEmpty(rValue)) {
+                                fillNestedFields($($fieldSets[i]).find("[data-init='multifield']"), rValue);
+                            } else {
+                                cmf.setWidgetValue($field, rValue);
                             }
-
-                            if (_.isString(record)) {
-                                record = JSON.parse(record);
-                            }
-
-                            _.each(record, function (rValue, rKey) {
-                                $field = $($fieldSets[i]).find("[name='./" + rKey + "']");
-
-                                if (_.isArray(rValue) && !_.isEmpty(rValue)) {
-                                    fillNestedFields($($fieldSets[i]).find("[data-init='multifield']"), rValue);
-                                } else {
-                                    cmf.setWidgetValue($field, rValue);
-                                }
-                            });
                         });
                     });
-                }
-
-                $.ajax(actionUrl).done(postProcess);
+                });
             }
+
+            $.ajax(actionUrl).done(postProcess);
         },
 
         fillValue: function ($field, record) {
@@ -243,12 +239,18 @@
 
         //collect data from widgets in multifield and POST them to CRX as JSON
         collectDataFromFields: function () {
-            var $form = $(document.querySelector('form.cq-dialog')).closest("form.foundation-form"),
-                $fieldSets = $("[" + DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
-                record, $fields, $field, name, $nestedMultiField, cmf = this;
+            var cmf = this, $form = $("form.cq-dialog"),
+                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
+                record, $fields, $field, $fieldSet, name, $nestedMultiField;
 
             $fieldSets.each(function (i, fieldSet) {
-                $fields = $(fieldSet).children().children(CFFW);
+                $fieldSet = $(fieldSet);
+
+                if(!cmf.isJsonStore($(fieldSet).data(cmf.ACS_COMMONS_NESTED))){
+                    return;
+                }
+
+                $fields = $fieldSet.children().children(cmf.CFFW);
 
                 record = {};
 
@@ -290,18 +292,12 @@
     $document.ready(function () {
         var compositeMultiField = new ACS.TouchUI.CompositeMultiField();
 
-        compositeMultiField.addDataInFields();
+        $document.on("dialog-ready", function(){
+            compositeMultiField.addDataInFields();
+        });
 
-        $document.on("dialog-ready", function () {
-            var dialog = document.querySelector('form.cq-dialog');
-
-            if (!dialog) {
-                return;
-            }
-
-            dialog.addEventListener('submit', function(){
-                compositeMultiField.collectDataFromFields();
-            }, true);
+        $document.on("click", ".cq-dialog-submit", function(){
+            compositeMultiField.collectDataFromFields();
         });
     });
 
