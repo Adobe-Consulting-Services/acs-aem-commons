@@ -69,7 +69,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
             cardinality = Integer.MAX_VALUE,
             value = {})
     public static final String PROP_DEFAULT_VIEWS = "wcm-views";
-    
+
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
             ServletException, IOException {
@@ -124,7 +124,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
         response.getWriter().write(jsonArray.toString());
     }
 
-    private class WCMViewsResourceVisitor extends AbstractResourceVisitor {
+    private static class WCMViewsResourceVisitor extends AbstractResourceVisitor {
         final Set<String> views = new TreeSet<String>();
 
         public final List<String> getWCMViews() {

@@ -18,10 +18,10 @@
  * #L%
  */
 
-package com.adobe.acs.commons.analysis.jcrchecksum.impl;
+package com.adobe.acs.commons.analysis.jcrchecksum.impl.servlets;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.JSONGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
 import org.apache.commons.collections.CollectionUtils;
@@ -31,6 +31,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.io.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,62 +41,71 @@ import javax.jcr.Session;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Set;
 
 @SuppressWarnings("serial")
 @Component
 @Properties({
-        @Property(
-                name="sling.servlet.paths",
-                value= ChecksumGeneratorServlet.SERVLET_PATH
-        ),
-        @Property(
-                name="sling.auth.requirements",
-                value= "-" + ChecksumGeneratorServlet.SERVLET_PATH
-        )
+    @Property(
+            name="sling.servlet.paths",
+            value= JSONDumpServlet.SERVLET_PATH
+    ),
+    @Property(
+        name="sling.auth.requirements",
+        value= "-" + JSONDumpServlet.SERVLET_PATH
+    )
 })
 @Service
-public class ChecksumGeneratorServlet extends BaseChecksumServlet {
-    public static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);
+public class JSONDumpServlet extends BaseChecksumServlet {
+    private static final Logger log = LoggerFactory.getLogger(JSONDumpServlet.class);
 
     public static final String SERVLET_PATH =  ServletConstants.SERVLET_PATH  + "."
-            + ServletConstants.CHECKSUM_SERVLET_SELECTOR + "."
-            + ServletConstants.CHECKSUM_SERVLET_EXTENSION;
+            + ServletConstants.JSON_SERVLET_SELECTOR + "."
+            + ServletConstants.JSON_SERVLET_EXTENSION;
 
     @Override
     public final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
-            ServletException {
+            ServletException, IOException {
         try {
             this.handleCORS(request, response);
             this.handleRequest(request, response);
-        } catch (IOException e) {
-            throw new ServletException(e);
         } catch (RepositoryException e) {
             throw new ServletException(e);
         }
     }
 
     public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
-            ServletException {
+            ServletException, IOException {
         try {
             this.handleCORS(request, response);
             this.handleRequest(request, response);
-        } catch (IOException e) {
-            throw new ServletException(e);
         } catch (RepositoryException e) {
             throw new ServletException(e);
         }
     }
 
-    private void handleRequest(SlingHttpServletRequest request,
-                               SlingHttpServletResponse response) throws IOException, RepositoryException {
+    private void handleRequest(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws IOException,
+        RepositoryException, ServletException {
 
-        response.setContentType("text/plain");
+        response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
+        // Generate current date and time for filename
+        DateFormat df = new SimpleDateFormat("yyyyddMM_HHmmss");
+        Date today = Calendar.getInstance().getTime();
+        String filename = df.format(today);
+
+        response.setHeader("Content-Disposition", "filename=jcr-checksum-"
+            + filename + ".json");
+
         String optionsName = request.getParameter(ServletConstants.OPTIONS_NAME);
-        ChecksumGeneratorOptions options = ChecksumGeneratorOptionsFactory.getOptions(request, optionsName);
+        ChecksumGeneratorOptions options =
+            ChecksumGeneratorOptionsFactory.getOptions(request, optionsName);
 
         if (log.isDebugEnabled()) {
             log.debug(options.toString());
@@ -103,23 +114,25 @@ public class ChecksumGeneratorServlet extends BaseChecksumServlet {
         Set<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
 
         if (CollectionUtils.isEmpty(paths)) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().print("ERROR: At least one path must be specified");
+            try {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().print(
+                    "ERROR: At least one path must be specified");
+            } catch (IOException ioe) {
+                throw ioe;
+            }
         }
 
-        final Session session = request.getResourceResolver().adaptTo(Session.class);
+        Session session = request.getResourceResolver().adaptTo(Session.class);
 
-        for (final String path : paths) {
-            log.debug("Generating checksum for path [ {} ]", path);
+        JSONWriter jsonWriter = new JSONWriter(response.getWriter());
 
-            Map<String, String> checksums = ChecksumGenerator.generateChecksum(session, path, options);
-
-            log.debug("Collected [ {} ] checksum entries under [ {} ]", checksums.size(), path);
-
-            for(final Map.Entry<String, String> entry : checksums.entrySet()) {
-                log.trace("Checksum [ {} ~> {} ]", entry.getKey(), entry.getValue());
-                response.getWriter().println(entry.getKey() + "\t" + entry.getValue());
-            }
+        try {
+            JSONGenerator.generateJSON(session, paths, options, jsonWriter);
+        } catch (RepositoryException e) {
+            throw new ServletException("Error accessing repository", e);
+        } catch (JSONException e) {
+            throw new ServletException("Unable to generate json", e);
         }
     }
 }

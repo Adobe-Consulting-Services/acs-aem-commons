@@ -105,16 +105,51 @@
     </jcr:root>
 </code>
 */
-
-(function () {
+(function ($, $document) {
     var DATA_ACS_COMMONS_NESTED = "data-acs-commons-nested",
         CFFW = ".coral-Form-fieldwrapper",
         _ = window._, CUI = window.CUI,
         Class = window.Class;
 
+    function isSelectOne($field){
+        return !_.isEmpty($field) && ($field.prop("type") === "select-one");
+    }
+
+    function setSelectOne($field, value){
+        var select = $field.closest(".coral-Select").data("select");
+
+        if(select){
+            select.setValue(value);
+        }
+    }
+
+    function isCheckbox($field){
+        return !_.isEmpty($field) && ($field.prop("type") === "checkbox");
+    }
+
+    function setCheckBox($field, value){
+        $field.prop( "checked", $field.attr("value") == value);
+    }
+
+    function setWidgetValue($field, value){
+        if(_.isEmpty($field)){
+            return;
+        }
+
+        if(isSelectOne($field)){
+            setSelectOne($field, value);
+        }else if(isCheckbox($field)){
+            setCheckBox($field, value);
+        }else{
+            $field.val(value);
+        }
+    }
+
     //reads multifield data from server, creates the nested composite multifields and fills them
     function addDataInFields() {
-        $(document).on("dialog-ready", function() {
+        $document.on("dialog-ready", dlgReadyHandler);
+
+        function dlgReadyHandler() {
             var mNames = [],
                 $fieldSets = $("[" + DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
                 $form = $fieldSets.closest("form.foundation-form"),
@@ -138,8 +173,7 @@
 
                     //a setTimeout may be needed
                     _.each(record, function(value, key){
-                        var $field = $($multifield.find("[name='./" + key + "']")[index]);
-                        $field.val(value);
+                        setWidgetValue($($multifield.find("[name='./" + key + "']")[index]), value);
                     });
                 });
             }
@@ -176,7 +210,7 @@
                             if(_.isArray(rValue) && !_.isEmpty(rValue)){
                                 fillNestedFields( $($fieldSets[i]).find("[data-init='multifield']"), rValue);
                             }else{
-                                $field.val(rValue);
+                                setWidgetValue($field, rValue);
                             }
                         });
                     });
@@ -184,11 +218,11 @@
             }
 
             $.ajax(actionUrl).done(postProcess);
-        });
+        }
     }
 
     function fillValue($field, record){
-        var name = $field.attr("name");
+        var name = $field.attr("name"), value;
 
         if (!name) {
             return;
@@ -199,7 +233,13 @@
             name = name.substring(2);
         }
 
-        record[name] = $field.val();
+        value = $field.val();
+
+        if( isCheckbox($field) ){
+            value = $field.prop("checked") ? $field.val() : "";
+        }
+
+        record[name] = value;
 
         //remove the field, so that individual values are not POSTed
         $field.remove();
@@ -272,10 +312,10 @@
         });
     }
 
-    $(document).ready(function () {
+    $document.ready(function () {
         addDataInFields();
 
-        $(document).on("dialog-ready", function() {
+        $document.on("dialog-ready", function() {
             //$(document).on("click", ".cq-dialog-submit", submitAction);
             var dialog = document.querySelector('form.cq-dialog');
 
@@ -313,4 +353,4 @@
     });
 
     CUI.Widget.registry.register("multifield", CUI.Multifield);
-}());
+}(jQuery, jQuery(document)));

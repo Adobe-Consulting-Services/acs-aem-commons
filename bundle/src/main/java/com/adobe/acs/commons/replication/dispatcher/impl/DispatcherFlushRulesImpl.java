@@ -36,6 +36,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
@@ -66,6 +67,11 @@ import java.util.regex.Pattern;
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
 @Service
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Rule: {prop.replication-action-type}, for Hirearchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
+})
 public class DispatcherFlushRulesImpl implements Preprocessor {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
 

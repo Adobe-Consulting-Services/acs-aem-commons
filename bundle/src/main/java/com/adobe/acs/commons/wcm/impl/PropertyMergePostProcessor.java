@@ -182,7 +182,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     /**
      * Encapsulates a PropertyMerge configuration by Destination.
      */
-    private class PropertyMerge {
+    private static class PropertyMerge {
         private boolean allowDuplicates;
         private Class<?> typeHint;
         private String destination;

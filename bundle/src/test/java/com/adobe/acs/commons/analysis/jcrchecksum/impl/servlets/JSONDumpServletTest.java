@@ -18,18 +18,10 @@
  * #L%
  */
 
-package com.adobe.acs.commons.analysis.jcrchecksum;
+package com.adobe.acs.commons.analysis.jcrchecksum.impl.servlets;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-
-import javax.jcr.Node;
-import javax.jcr.Session;
-
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.servlets.JSONDumpServlet;
+import com.day.cq.widget.HtmlLibraryManager;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
@@ -42,23 +34,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorServlet;
-import com.day.cq.widget.HtmlLibraryManager;
+import javax.jcr.Node;
+import javax.jcr.Session;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ChecksumGeneratorServletTest {
+public class JSONDumpServletTest {
 
     private static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare";
-    
-    private static final String SERVLET_SELECTORS = "hashes";
-    
-    private static final String SERVLET_EXTENSION = "txt";
+
+    private static final String SERVLET_SELECTORS = "dump";
+
+    private static final String SERVLET_EXTENSION = "json";
 
     @Mock
     private HtmlLibraryManager manager;
 
     @InjectMocks
-    public ChecksumGeneratorServlet servlet = new ChecksumGeneratorServlet();
+    public JSONDumpServlet servlet = new JSONDumpServlet();
 
     MockSlingHttpServletRequest request;
     ResourceResolver resourceResolver;
@@ -83,28 +79,30 @@ public class ChecksumGeneratorServletTest {
                     return resourceResolver;
                 };
             };
-            this.response = new MockSlingHttpServletResponse() {
+        this.response = new MockSlingHttpServletResponse() {
                 public void setHeader(String header, String value) {
-                //do nothing
-                return;
+                    //do nothing
+                    return;
+                };
             };
-        };
         servlet.doGet(request, response);
 
-        assertEquals("text/plain", response.getContentType());
-        assertEquals("ERROR: At least one path must be specified", response.getOutput().toString());
+        assertEquals("application/json", response.getContentType());
+        assertEquals("ERROR: At least one path must be specified", response
+            .getOutput().toString());
     }
 
     @Test
     public void testWithPath() throws Exception {
-        Node page =
-                session.getRootNode()
-                        .addNode("content")
-                        .addNode("test-page", "cq:Page")
-                        .addNode("jcr:content", "cq:PageContent");
+        Node contentNode = session.getRootNode().addNode("content", "nt:unstructured");
 
-        page.setProperty("jcr:title", "test title");
-        session.save();
+        contentNode.addNode("my-page", "cq:Page")
+                .addNode("jcr:content", "cq:PageContent")
+                .setProperty("jcr:title", "My Page");
+
+        contentNode.addNode("your-page", "cq:Page")
+                .addNode("jcr:content", "cq:PageContent")
+                .setProperty("jcr:title", "Your Page");
 
         this.request =
             new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
@@ -113,24 +111,39 @@ public class ChecksumGeneratorServletTest {
                     return resourceResolver;
                 };
 
+                public String getParameter(String name) {
+                    if("optionsName".equals(name)) {
+                        return "REQUEST";
+                    } else {
+                        return null;
+                    }
+                }
+
                 public String[] getParameterValues(String name) {
-                    if (name.equals("paths")) {
-                        return new String[] { "/content" };
+                    if ("paths".equals(name)) {
+                        return new String[]{ "/content" };
+                    } else if ("nodeTypes".equals(name)) {
+                        return new String[]{ "cq:PageContent" };
+
                     } else {
                         return null;
                     }
                 };
             };
-            this.response = new MockSlingHttpServletResponse() {
+        this.response = new MockSlingHttpServletResponse() {
                 public void setHeader(String header, String value) {
-                //do nothing
-                return;
+                    //do nothing
+                    return;
+                };
             };
-        };
         servlet.doGet(request, response);
-        assertEquals("text/plain", response.getContentType());
+        assertEquals("application/json", response.getContentType());
         assertEquals(
-            "/content/test-page/jcr:content\t0362210a336ba79c6cab30bf09deaf2f1a749e6f\n",
+            "{\"/content/my-page/jcr:content\":{\"jcr:primaryType\":\"cq:PageContent\"," +
+                    "\"jcr:title\":\"My Page\"}," +
+                    "\"/content/your-page/jcr:content\":{\"jcr:primaryType\":\"cq:PageContent\"," +
+                    "\"jcr:title\":\"Your Page\"}}",
             response.getOutput().toString());
     }
 }
+

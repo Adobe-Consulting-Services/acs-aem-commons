@@ -184,7 +184,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
             String oldValue = config.printProperty(property);
             return !currentValue.equals(oldValue);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Unable to check changed status", e);
         }
         return false;
     }

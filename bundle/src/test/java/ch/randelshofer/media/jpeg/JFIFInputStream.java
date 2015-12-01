@@ -331,7 +331,7 @@ public class JFIFInputStream extends FilterInputStream {
         }
 
         if (segment.isEntropyCoded()) {
-            if (b == 0xff) {
+            if (b == 0xff) {//NOPMD
                 b = read0();
                 if (b == 0x00) {
                     // found a stuffed 0xff byte

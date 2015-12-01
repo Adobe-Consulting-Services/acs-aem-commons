@@ -72,8 +72,8 @@ public class WorkflowInstanceFolderComparator implements Comparator<Resource> {
     }
 
     private int compare(final String intString1, final String intString2) {
-        Integer integer1 = new Integer(intString1);
-        Integer integer2 = new Integer(intString2);
+        Integer integer1 = Integer.valueOf(intString1);
+        Integer integer2 = Integer.valueOf(intString2);
 
         return integer1.compareTo(integer2);
     }

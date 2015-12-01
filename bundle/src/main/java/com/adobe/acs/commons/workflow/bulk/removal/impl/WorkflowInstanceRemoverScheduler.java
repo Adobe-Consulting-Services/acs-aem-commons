@@ -62,6 +62,9 @@ import java.util.regex.Pattern;
                 boolValue = false,
                 propertyPrivate = true
         ),
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]")
 })
 @Service
 public class WorkflowInstanceRemoverScheduler implements Runnable {
@@ -138,7 +141,9 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
                     olderThan, 
                     batchSize);
 
-            log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);
+            if (log.isInfoEnabled()) {
+                log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);
+            }
 
         } catch (LoginException e) {
             log.error("Login Exception when getting admin resource resolver", e);
