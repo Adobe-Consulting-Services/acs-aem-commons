@@ -443,7 +443,7 @@ ACS.CQ.GraphicIconSelection = CQ.Ext.extend(CQ.form.CompositeField, {
                 '<tpl for=".">' +
                     '<a href="#" class="graphic-selection-item" data-value="{value}" title="{text}">' +
                         '<div class="graphic-selection-image">' +
-                            '<i class="fa {value}"></i>' +
+                            '<i class="{value}"></i>' +
                         '</div>' +
                     '</a>' +
                 '</tpl>' +

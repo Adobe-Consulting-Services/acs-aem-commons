@@ -1,0 +1,91 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+@red: #FC776A;
+@green: #A4CE6E;
+@blue: #7BAEE8;
+@yellow: #FBD360;
+@dark-grey: #323232;
+@width: 60%;
+
+#acsCommons-System-Notifications {
+  position: fixed;
+  top: 55px;
+  left: 50%;
+  margin-left: calc(-1 * (@width / 2));
+  width: @width;
+  max-width: 1000px;
+  font-family: adobe-clean, Helvetica, Arial, sans-serif;
+  z-index: 1000000;
+  font-size: 14px;
+  line-height: 1.25rem;
+
+  .acsCommons-System-Notification {
+    border: solid 5px;
+    color: @dark-grey;
+    margin: 0 auto 1rem auto;
+    padding: 1rem 2rem;
+    min-width: 300px;
+
+    .acsCommons-System-Notification-dismiss {
+      float: right;
+      color: @dark-grey;
+      font-size: .75rem;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    
+    .acsCommons-System-Notification-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    a {
+      color: @dark-grey;
+    }
+  }
+  
+  .acsCommons-System-Notification--yellow {
+    background-color: @yellow;
+    border-color: darken(@yellow, 25%);
+    color: black;
+  }
+  
+  .acsCommons-System-Notification--green {
+    background-color: @green;
+    border-color: darken(@green, 25%);
+  }
+  
+  .acsCommons-System-Notification--blue {
+    background-color: @blue;
+    border-color: darken(@blue, 25%);
+  }
+
+  .acsCommons-System-Notification--red {
+    background-color: @red;
+    border-color: darken(@red, 25%);
+  }
+}
+
+

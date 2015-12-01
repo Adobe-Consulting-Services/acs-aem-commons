@@ -30,6 +30,7 @@ import javax.jcr.ValueFactory;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.felix.scr.annotations.Reference;
@@ -42,6 +43,11 @@ import com.adobe.acs.commons.util.AemCapabilityHelper;
 
 @Component(configurationFactory = true, metatype = true, label = "ACS AEM Commons - Ensure Oak Property Index",
         description = "Component Factory to create Oak property indexes.")
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Index: {index.name}, Property: {property.name}, on nodes [{node.types}]")
+})
 public class EnsurePropertyIndex {
 
     private static class IndexDefinition {

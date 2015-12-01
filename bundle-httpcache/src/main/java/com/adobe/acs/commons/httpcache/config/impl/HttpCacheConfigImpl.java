@@ -7,6 +7,7 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
+import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.UserUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,8 +40,7 @@ import java.util.regex.Pattern;
 @Component(label = "ACS AEM Commons - HTTP Cache - Cache config",
            description = "Config for request URI patterns that have to be cached.",
            configurationFactory = true,
-           metatype = true,
-           immediate = true)
+           metatype = true)
 @Service
 public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
@@ -107,14 +108,16 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Property(label = "Cache store",
               description = "Cache store for caching the response for this request URI. Example - MEM. This should "
                       + "be one of the cache stores active in this installation. Mandatory parameter.",
+              propertyPrivate = true,
               options = {
                       @PropertyOption(name = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
                                          value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE),
                       @PropertyOption(name = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
                                       value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE),
                       @PropertyOption(name = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
-                                      value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE)},
-              value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE)
+                                      value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE)
+              },
+            value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE)
     // @formatter:on
     private static final String PROP_CACHE_STORE = "httpcache.config.cachestore";
     private static final String DEFAULT_CACHE_STORE = "MEM"; // Defaults to memory cache store
@@ -145,6 +148,21 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
                name = "cacheKeyFactory")
     private CacheKeyFactory cacheKeyFactory;
 
+    // Http Cache Config specific rules
+    @Property(name = "httpCacheHandlingRules.target",
+            label = "Config-specific HttpCacheHandlingRules",
+            description = "LDAP filter to select the HTTP Cache Config specific HttpCacheHandlingRules." +
+                    "Optional parameter.",
+            value = "(|" +
+                    "(service.pid=com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheRequestWithQueryString)" +
+                    ")")
+
+    @Reference(name = "httpCacheHandlingRules",
+            referenceInterface = HttpCacheHandlingRule.class,
+            policy = ReferencePolicy.DYNAMIC,
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+    private CopyOnWriteArrayList<HttpCacheHandlingRule> cacheHandlingRules = new CopyOnWriteArrayList<>();
+
     @Activate
     protected void activate(Map<String, Object> configs) {
 
@@ -173,6 +191,38 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         order = PropertiesUtil.toInteger(configs.get(PROP_ORDER), DEFAULT_ORDER);
 
         log.info("HttpCacheConfigImpl activated /modified.");
+    }
+
+    /**
+     * Binds cache handling rule
+     *
+     * @param cacheHandlingRule
+     * @param config
+     */
+    protected void bindHttpCacheHandlingRules(final HttpCacheHandlingRule cacheHandlingRule, final Map<String, Object>
+            config) {
+
+        if (!cacheHandlingRules.contains(cacheHandlingRule)) {
+            cacheHandlingRules.add(cacheHandlingRule);
+            log.debug("Cache handling rule implementation {} has been added", cacheHandlingRule.getClass().getName());
+            log.debug("Total number of cache handling rule available after addition: {}", cacheHandlingRules.size());
+        }
+    }
+
+    /**
+     * Unbinds handling rule.
+     *
+     * @param cacheHandlingRule
+     * @param config
+     */
+    protected void unbindHttpCacheHandlingRules(final HttpCacheHandlingRule cacheHandlingRule, final Map<String,
+            Object> config) {
+
+        if (cacheHandlingRules.contains(cacheHandlingRule)) {
+            cacheHandlingRules.remove(cacheHandlingRule);
+            log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
+            log.debug("Total number of cache handling rules available after removal: {}", cacheHandlingRules.size());
+        }
     }
 
     /**
@@ -207,6 +257,15 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
     @Override
     public boolean accepts(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException {
+
+        for (HttpCacheHandlingRule rule : cacheHandlingRules) {
+            if (!rule.onRequestReceive(request)) {
+                if (log.isTraceEnabled()) {
+                    log.trace("Rejected: At HttpCacheConfig via rule [ {} ]", rule.getClass().getName());
+                }
+                return false;
+            }
+        }
 
         // Match authentication requirement.
         if (UserUtils.isAnonymous(request.getResourceResolver().getUserID())) {

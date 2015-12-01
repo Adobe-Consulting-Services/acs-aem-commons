@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.jcr.resource.JcrResourceUtil;
 
 public final class EvolutionConfig {
@@ -35,8 +36,8 @@ public final class EvolutionConfig {
     private String[] ignoreResources;
 
     public EvolutionConfig(String[] ignoreProperties, String[] ignoreResources) {
-        this.ignoreProperties = ignoreProperties;
-        this.ignoreResources = ignoreResources;
+        this.ignoreProperties = ArrayUtils.clone(ignoreProperties);
+        this.ignoreResources = ArrayUtils.clone(ignoreResources);
     }
 
     public int getDepthForPath(String path) {
@@ -85,15 +86,16 @@ public final class EvolutionConfig {
             return (String) obj;
         } else if (obj instanceof String[]) {
             String[] values = (String[]) obj;
-            String result = "[";
+            StringBuilder result = new StringBuilder();
+            result.append("[");
             for (int i = 0; i < values.length; i++) {
-                result += values[i];
+                result.append(values[i]);
                 if (i != (values.length - 1)) {
-                    result += ", ";
+                    result.append(", ");
                 }
             }
-            result += "]";
-            return result;
+            result.append("]");
+            return result.toString();
         } else if (obj instanceof Calendar) {
             Calendar value = (Calendar) obj;
             DateFormat dateFormat = DateFormat.getDateTimeInstance();

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,47 +19,13 @@
  */
 package com.adobe.acs.commons.forms;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import aQute.bnd.annotation.ProviderType;
+import org.apache.sling.api.resource.ValueMap;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @ProviderType
-public class Form {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(Form.class);
-    private final Map<String, String> data;
-    private final Map<String, String> errors;
-    private String name;
-    private String resourcePath;
-
-    public Form(final String name, final String resourcePath) {
-        this.name = name;
-        this.resourcePath = resourcePath;
-        this.data = new HashMap<String, String>();
-        this.errors = new HashMap<String, String>();
-    }
-
-    public Form(final String name, final String resourcePath, final Map<String, String> data) {
-        this.name = name;
-        this.resourcePath = resourcePath;
-        this.data = data;
-        this.errors = new HashMap<String, String>();
-    }
-
-    public Form(final String name, final String resourcePath, final Map<String, String> data, final Map<String, String> errors) {
-        this.name = name;
-        this.resourcePath = resourcePath;
-        this.data = data;
-        this.errors = errors;
-    }
-
+public interface Form {
     /**
      * Get the Form's name
      * <p>
@@ -67,9 +33,7 @@ public class Form {
      *
      * @return
      */
-    public String getName() {
-        return this.name;
-    }
+    String getName();
 
     /**
      * Sets the Form name
@@ -80,45 +44,35 @@ public class Form {
      *
      * @param name
      */
-    public void setName(final String name) {
-        this.name = name;
-    }
+    void setName(String name);
 
     /**
      * Get the Form's resource path
      *
      * @return
      */
-    public String getResourcePath() {
-        return this.resourcePath;
-    }
+    String getResourcePath();
 
     /**
      * Sets the Form's resource path
      *
      * @param resourcePath
      */
-    public void setResourcePath(final String resourcePath) {
-        this.resourcePath = resourcePath;
-    }
+    void setResourcePath(String resourcePath);
 
     /**
      * Gets a Map of the Form data
      *
      * @return
      */
-    public Map<String, String> getData() {
-        return this.data;
-    }
+    Map<String, String> getData();
 
     /**
      * Gets a Map of the error data
      *
      * @return
      */
-    public Map<String, String> getErrors() {
-        return this.errors;
-    }
+    Map<String, String> getErrors();
 
     /**
      * Determines if a Form data key exists and has non-blank data
@@ -126,10 +80,7 @@ public class Form {
      * @param key
      * @return
      */
-    public boolean has(final String key) {
-        final String val = this.get(key);
-        return (StringUtils.isNotBlank(val));
-    }
+    boolean has(String key);
 
     /**
      * Gets the data associated with a Form data key
@@ -137,10 +88,7 @@ public class Form {
      * @param key
      * @return
      */
-    public String get(final String key) {
-        final String val = this.data.get(key);
-        return StringUtils.stripToEmpty(val);
-    }
+    String get(String key);
 
     /**
      * Sets Form data
@@ -148,28 +96,14 @@ public class Form {
      * @param key
      * @param value
      */
-    public void set(final String key, final String value) {
-        this.data.put(key, value);
-    }
+    void set(String key, String value);
 
     /**
      * Determines if any Form Data exists; atleast 1 key w non-blank data must exist in the data map.
      *
      * @return
      */
-    public boolean hasData() {
-        if (!this.data.isEmpty()) {
-            return false;
-        }
-
-        for (String key : this.data.keySet()) {
-            if (this.has(key)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    boolean hasData();
 
     /**
      * Determines if an error exists
@@ -177,9 +111,7 @@ public class Form {
      * @param key
      * @return
      */
-    public boolean hasError(final String key) {
-        return this.errors.containsKey(key);
-    }
+    boolean hasError(String key);
 
     /**
      * Gets the error message
@@ -187,10 +119,7 @@ public class Form {
      * @param key
      * @return
      */
-    public String getError(final String key) {
-        final String val = this.errors.get(key);
-        return StringUtils.stripToEmpty(val);
-    }
+    String getError(String key);
 
     /**
      * Sets an error
@@ -199,9 +128,7 @@ public class Form {
      *
      * @param key
      */
-    public void setError(final String key) {
-        this.errors.put(key, null);
-    }
+    void setError(String key);
 
     /**
      * Sets an error for key with corresponding error message/data
@@ -209,38 +136,26 @@ public class Form {
      * @param key
      * @param value
      */
-    public void setError(final String key, final String value) {
-        this.errors.put(key, value);
-    }
+    void setError(String key, String value);
 
     /**
      * Checks if has data
      *
      * @return
      */
-    public boolean hasErrors() {
-        return !this.errors.isEmpty();
-    }
+    boolean hasErrors();
 
     /**
      * Get data as ValueMap
      *
      * @return
      */
-    public ValueMap getValueMap() {
-        final Map<String, Object> map = new HashMap<String, Object>();
-        map.putAll(this.data);
-        return new ValueMapDecorator(map);
-    }
+    ValueMap getValueMap();
 
     /**
      * Get Errors as ValueMap
      *
      * @return
      */
-    public ValueMap getErrorsValueMap() {
-        final Map<String, Object> map = new HashMap<String, Object>();
-        map.putAll(this.errors);
-        return new ValueMapDecorator(map);
-    }
+    ValueMap getErrorsValueMap();
 }

@@ -10,11 +10,6 @@
  *
  * {@link https://github.com/micc83/fontIconPicker}
  */
-
-/**
- * Modified for ACS AEM Commons to add support for Font Awesome
- */
-
 ;(function ($) {
 
         'use strict';
@@ -33,7 +28,6 @@
                         convertToHex      : true,                    // Whether or not to convert to hexadecimal for attribute value. If true then please pass decimal integer value to the source (or as value="" attribute of the select field)
                         allCategoryText   : 'From all categories',   // The text for the select all category option
                         unCategorizedText : 'Uncategorized',         // The text for the select uncategorized option
-                        classValuePrefix  : ''                       // Value which will be prepended to class attributes (ex: 'fa' for Font Awesome')
                 };
 
         // The actual plugin constructor
@@ -643,7 +637,7 @@
                                 // Set the icon box
                                 // Added classValuePrefix support
                                 $('<span/>', {
-                                        html:      '<i data-fip-value="' + item + '" ' + (this.settings.useAttribute ? (this.settings.attributeName + '="' + ( this.settings.convertToHex ? '&#x' + parseInt(item, 10).toString(16) + ';' : item ) + '"') : 'class="' + this.settings.classValuePrefix + item + '"') + '></i>',
+                                        html:      '<i data-fip-value="' + item + '" ' + (this.settings.useAttribute ? (this.settings.attributeName + '="' + ( this.settings.convertToHex ? '&#x' + parseInt(item, 10).toString(16) + ';' : item ) + '"') : 'class="' + item + '"') + '></i>',
                                         'class':   'fip-box',
                                         title: flipBoxTitle
                                 }).appendTo(this.iconContainer);

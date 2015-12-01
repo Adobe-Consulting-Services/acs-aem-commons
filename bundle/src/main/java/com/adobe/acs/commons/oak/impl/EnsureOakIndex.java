@@ -27,6 +27,7 @@ import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.api.resource.LoginException;
@@ -53,6 +54,11 @@ import java.util.Set;
         description = "Component Factory to manage Oak indexes.",
         configurationFactory = true,
         metatype = true)
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Definitions: {ensure-definitions.path}, Indexes: {oak-indexes.path}")
+})
 public class EnsureOakIndex {
     private static final Logger log = LoggerFactory.getLogger(EnsureOakIndex.class);
 
@@ -92,6 +98,9 @@ public class EnsureOakIndex {
 
     @Reference
     private AemCapabilityHelper capabilityHelper;
+
+    @Reference
+    private ChecksumGenerator checksumGenerator;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -207,7 +216,7 @@ public class EnsureOakIndex {
                     // DELETE
                     if (oakIndex != null) {
                         this.delete(oakIndex);
-                    } else {
+                    } else if (log.isInfoEnabled()) {
                         // Oak index does not exist
                         log.info("Requesting deletion of a non-existent Oak Index at [ {} ]\n."
                                 + "Consider removing the Ensure Definition at [ {} ] if it is no longer needed.",
@@ -382,7 +391,7 @@ public class EnsureOakIndex {
         ensureDefinitionOptions.addExcludedProperties(IGNORE_PROPERTIES);
 
         final Map<String, String> srcChecksum =
-                ChecksumGenerator.generateChecksum(session, ensureDefinition.getPath(), ensureDefinitionOptions);
+                checksumGenerator.generateChecksums(session, ensureDefinition.getPath(), ensureDefinitionOptions);
 
         // Compile checksum for the oakIndex node system
         final CustomChecksumGeneratorOptions oakIndexOptions = new CustomChecksumGeneratorOptions();
@@ -390,7 +399,7 @@ public class EnsureOakIndex {
         oakIndexOptions.addExcludedProperties(IGNORE_PROPERTIES);
 
         final Map<String, String> destChecksum =
-                ChecksumGenerator.generateChecksum(session, oakIndex.getPath(), oakIndexOptions);
+                checksumGenerator.generateChecksums(session, oakIndex.getPath(), oakIndexOptions);
 
         // Compare checksums
         return !StringUtils.equals(srcChecksum.get(ensureDefinition.getPath()), destChecksum.get(oakIndex.getPath()));
@@ -417,7 +426,9 @@ public class EnsureOakIndex {
 
             final long start = System.currentTimeMillis();
             oakIndex.getResourceResolver().commit();
-            log.info("Deleted Oak Index at [ {} ] in {} ms", path, System.currentTimeMillis() - start);
+            if (log.isInfoEnabled()) {
+                log.info("Deleted Oak Index at [ {} ] in {} ms", path, System.currentTimeMillis() - start);
+            }
         } else {
             log.warn("Oak Index at [ {} ] could not be adapted to a Node for removal.", oakIndex.getPath());
         }
@@ -454,7 +465,7 @@ public class EnsureOakIndex {
         }
     }
 
-    private class OakIndexDefinitionException extends Exception {
+    private static class OakIndexDefinitionException extends Exception {
         public OakIndexDefinitionException(String message) {
             super(message);
         }

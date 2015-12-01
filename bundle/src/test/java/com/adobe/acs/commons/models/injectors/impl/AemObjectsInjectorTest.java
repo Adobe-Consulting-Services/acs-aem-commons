@@ -44,6 +44,7 @@ import org.osgi.framework.Constants;
 import javax.inject.Inject;
 import javax.jcr.Session;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Map;
 
 import static junit.framework.Assert.assertNotNull;
@@ -203,6 +204,7 @@ public class AemObjectsInjectorTest {
             org.osgi.service.component.ComponentContext componentCtx = mock(org.osgi.service.component.ComponentContext.class);
             BundleContext bundleContext = mock(BundleContext.class);
             when(componentCtx.getBundleContext()).thenReturn(bundleContext);
+            when(componentCtx.getProperties()).thenReturn(new Hashtable());
 
             activate(componentCtx);
         }

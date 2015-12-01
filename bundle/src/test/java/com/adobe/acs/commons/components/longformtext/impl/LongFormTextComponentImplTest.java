@@ -35,7 +35,6 @@ public class LongFormTextComponentImplTest {
         final String[] expected = new String[] {"<p>ira is a dog</p>", "<p> she barks a lot</p>"};
         final String[] result = longFormTextComponent.getTextParagraphs(input);
 
-        System.out.println(Arrays.toString(result));
         Assert.assertArrayEquals(expected, result);
     }
 

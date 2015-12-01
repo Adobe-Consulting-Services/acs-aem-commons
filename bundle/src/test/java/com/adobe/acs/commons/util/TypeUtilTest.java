@@ -231,7 +231,7 @@ public class TypeUtilTest {
         } catch (IllegalAccessException e) {
             assertTrue(false);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            assertTrue(false);
         }
     }
 

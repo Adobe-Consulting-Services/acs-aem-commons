@@ -30,6 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -58,6 +59,11 @@ import java.util.Map;
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
 )
 @Service
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Transformer: {name}")
+})
 public class NamedImageTransformerImpl implements NamedImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(NamedImageTransformerImpl.class);
 

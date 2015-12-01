@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -71,7 +72,7 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
 
         RequestParameter data = request.getRequestParameter(DATA);
         if (data != null && data.getInputStream() != null) {
-            paths.addAll(getPathsFromInputstream(data.getInputStream()));
+            paths.addAll(getPathsFromInputstream(data.getInputStream(), request.getCharacterEncoding()));
         }
 
         return paths;
@@ -93,13 +94,14 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
         return paths;
     }
 
-    private static Set<String> getPathsFromInputstream(InputStream is) throws IOException {
+    private static Set<String> getPathsFromInputstream(InputStream is, String encoding) throws IOException {
         if (is == null) {
             return Collections.EMPTY_SET;
         }
 
         Set<String> paths = new HashSet<String>();
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        encoding = (encoding != null) ?  encoding : Charset.defaultCharset().name();
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
 
         try {
             String path;
