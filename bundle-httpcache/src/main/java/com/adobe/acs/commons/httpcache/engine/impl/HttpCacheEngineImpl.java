@@ -58,11 +58,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * to this.
  */
 // @formatter:off
-@Component
+@Component(
+        label = "ACS AEM Commons - HTTP Cache - Engine",
+        metatype = true
+)
 @Properties({
         @Property(name = "jmx.objectname",
                 value = "com.adobe.acs.httpcache:type=HTTP Cache Engine",
-                propertyPrivate = true)
+                propertyPrivate = true),
+
+        @Property(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES + ".target",
+                label = "Global HttpCacheHandlingRules",
+                description = "LDAP filter to select the global HttpCacheHandlingRules." +
+                        "Optional parameter.",
+                value = "(|" +
+                            "(service.pid=com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest)" +
+                            "(service.pid=com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200)" +
+                        ")")
 })
 @References({
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
@@ -73,7 +85,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
                referenceInterface = HttpCacheHandlingRule.class,
                policy = ReferencePolicy.DYNAMIC,
-               cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
+               cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
 
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
                referenceInterface = HttpCacheStore.class,

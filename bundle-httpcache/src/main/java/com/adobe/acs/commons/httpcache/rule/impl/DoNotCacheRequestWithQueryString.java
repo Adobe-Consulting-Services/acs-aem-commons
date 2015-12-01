@@ -3,16 +3,15 @@ package com.adobe.acs.commons.httpcache.rule.impl;
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
  * ACS AEM Commons - HTTP Cache - Rule: Do not cache query string requests.
  *
- * Do not cache requests which has got query strings. <p>Need to supply sling:OSGiConfig node to get this active.</p>
+ * Do not cache requests which has got query strings.
  */
-@Component(policy = ConfigurationPolicy.REQUIRE)
+@Component
 @Service
 public class DoNotCacheRequestWithQueryString extends AbstractHttpCacheHandlingRule {
 
