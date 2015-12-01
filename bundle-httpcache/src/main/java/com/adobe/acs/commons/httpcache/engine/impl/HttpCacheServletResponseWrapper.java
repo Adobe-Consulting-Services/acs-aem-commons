@@ -11,27 +11,43 @@ import java.io.*;
  */
 public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWrapper {
     private final File tempCacheFile;
-    private final PrintStream printStream;
+    private final FileOutputStream fileOutputStream;
+
+    private PrintWriter printWriter = null;
+    private ServletOutputStream servletOutputStream = null;
 
     public HttpCacheServletResponseWrapper(SlingHttpServletResponse wrappedResponse, File file) throws
-            FileNotFoundException {
+            IOException {
         super(wrappedResponse);
         this.tempCacheFile = file;
-        this.printStream = new PrintStream(file);
+        this.fileOutputStream = new FileOutputStream(file);
+
     }
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        // Takes copy of the stream.
-        return new TeeServletOutputStream(super.getOutputStream(), printStream);
+        if (this.printWriter != null) {
+            throw new IllegalStateException("Cannot invoke getOutputStream() once getWriter() has been called.");
+        } else if (this.servletOutputStream == null) {
+            this.servletOutputStream = new TeeServletOutputStream(super.getOutputStream(), fileOutputStream);
+        }
+
+        return this.servletOutputStream;
+
     }
 
     @Override
     public PrintWriter getWriter() throws IOException {
-        return new PrintWriter(new TeeServletOutputStream(super.getOutputStream(), printStream));
+        if (this.servletOutputStream != null) {
+            throw new IllegalStateException("Cannot invoke getWriter() once getOutputStream() has been called.");
+        } else if (this.printWriter == null) {
+            this.printWriter = new TeePrintWriter(super.getWriter(), new PrintWriter(fileOutputStream));
+        }
+
+        return this.printWriter;
     }
 
-    public File getTempCacheFile(){
+    public File getTempCacheFile() {
         return this.tempCacheFile;
     }
 }
