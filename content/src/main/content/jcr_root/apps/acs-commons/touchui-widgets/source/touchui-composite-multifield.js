@@ -186,6 +186,8 @@
                         });
                     });
                 });
+
+                $document.trigger('touchui-composite-multifield-ready');
             }
 
             $.ajax(actionUrl).done(postProcess);
