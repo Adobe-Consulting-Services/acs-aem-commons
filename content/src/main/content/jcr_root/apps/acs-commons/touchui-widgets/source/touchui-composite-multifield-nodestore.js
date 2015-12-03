@@ -176,7 +176,7 @@
                     cmf.buildMultiField(data[mName], $multifield, mName);
                 });
 
-                $document.trigger('touchui-composite-multifield-nodestore-ready', $multifield);
+                $document.trigger("touchui-composite-multifield-nodestore-ready", $multifield);
             }
         },
 
