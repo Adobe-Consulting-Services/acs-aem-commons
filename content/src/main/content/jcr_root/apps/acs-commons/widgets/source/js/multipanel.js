@@ -49,22 +49,24 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
     initComponent: function() {
         ACS.CQ.MultiFieldPanel.superclass.initComponent.call(this);
 
-        this.panelValue = new CQ.Ext.form.Hidden({
-            name: this.name
-        });
-
-        this.add(this.panelValue);
-
         var multifield = this.findParentByType('multifield'),
             dialog = this.findParentByType('dialog');
 
-        dialog.on('beforesubmit', function(){
-            var value = this.getValue();
+        if(ACS.CQ.MultiFieldPanel.xtype == this.xtype){
+            this.panelValue = new CQ.Ext.form.Hidden({
+                name: this.name
+            });
 
-            if (value){
-                this.panelValue.setValue(value);
-            }
-        },this);
+            this.add(this.panelValue);
+
+            dialog.on('beforesubmit', function(){
+                var value = this.getValue();
+
+                if (value){
+                    this.panelValue.setValue(value);
+                }
+            }, this);
+        }
 
         dialog.on('loadcontent', function(){
             if(_.isEmpty(multifield.dropTargets)){
