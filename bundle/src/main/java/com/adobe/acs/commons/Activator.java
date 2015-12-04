@@ -23,8 +23,6 @@ package com.adobe.acs.commons;
 import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
