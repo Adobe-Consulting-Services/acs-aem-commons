@@ -218,20 +218,17 @@ class EnsureOakIndexJobHandler implements Runnable {
                 } else {
                     // UPDATE
                     validateEnsureDefinition(ensureDefinition);
+                    boolean forceReindex = ensureDefinitionProperties.get(PN_FORCE_REINDEX, false);
 
                     if (ensureDefinitionProperties.get(PN_RECREATE_ON_UPDATE, false)) {
-                        // Recreate on Update
+                        // Recreate on Update, refresh not reuqired (is implicit)
                         this.delete(oakIndex);
                         ensuredOakIndex = this.create(ensureDefinition, oakIndexes);
                     } else {
                         // Normal Update
-                        ensuredOakIndex = this.update(ensureDefinition, oakIndexes);
+                        ensuredOakIndex = this.update(ensureDefinition, oakIndexes,forceReindex);
                     }
 
-                    // Force re-index
-                    if (ensureDefinitionProperties.get(PN_FORCE_REINDEX, false)) {
-                        this.forceRefresh(ensuredOakIndex);
-                    }
                 }
                 
                 
@@ -298,11 +295,12 @@ class EnsureOakIndexJobHandler implements Runnable {
      *
      * @param ensureDefinition the ensure definition
      * @param oakIndexes       the parent oak index folder
+     * @param forceRecreate    indicates if a recreate of the index is requested
      * @return the updated oak index resource
      * @throws RepositoryException
      * @throws IOException
      */
-    private Resource update(final Resource ensureDefinition, final Resource oakIndexes)
+    private Resource update(final Resource ensureDefinition, final Resource oakIndexes, boolean forceReindex)
             throws RepositoryException, IOException {
 
         final ValueMap ensureDefinitionProperties = ensureDefinition.getValueMap();
@@ -310,8 +308,12 @@ class EnsureOakIndexJobHandler implements Runnable {
         final ModifiableValueMap oakIndexProperties = oakIndex.adaptTo(ModifiableValueMap.class);
 
         if (!needsUpdate(ensureDefinition, oakIndex)) {
-            log.info("Skipping update... Oak Index at [ {} ] is the same as [ {} ]",
-                    oakIndex.getPath(), ensureDefinition.getPath());
+        	String skipForceIndexMessage = "";
+        	if (ensureDefinitionProperties.get(PN_FORCE_REINDEX,false)) {
+        		skipForceIndexMessage = "(forceIndex statement is ignored)";
+        	}
+            log.info("Skipping update... Oak Index at [ {} ] is the same as [ {} ] {}",
+                    new Object[]{oakIndex.getPath(), ensureDefinition.getPath(),skipForceIndexMessage});
             return null;
         }
 
@@ -356,10 +358,17 @@ class EnsureOakIndexJobHandler implements Runnable {
         }
 
         doSave = true;
+        
+        if (forceReindex) {
+        	log.info("Updated Oak Index at [ {} ] with configuration [ {} ], triggering reindex", oakIndex.getPath(),
+        			ensureDefinition.getPath());
+        	forceRefresh (oakIndex);
+        } else {
+        	// A reindexing should be required to make this change effective, so WARN if not present
+        	log.warn("Updated Oak Index at [ {} ] with configuration [ {} ], but no reindex requested!", oakIndex.getPath(),
+        			ensureDefinition.getPath());
 
-        log.info("Updated Oak Index at [ {} ] with configuration [ {} ]", oakIndex.getPath(),
-                ensureDefinition.getPath());
-
+        }
         return oakIndex;
     }
     
