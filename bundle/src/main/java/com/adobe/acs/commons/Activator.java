@@ -25,13 +25,14 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.util.ModeUtil;
 
-public class Activator implements BundleActivator, ServiceListener {
+public class Activator implements BundleActivator {
 
     BundleContext context;
 
@@ -47,7 +48,14 @@ public class Activator implements BundleActivator, ServiceListener {
     @Override
     public void start(BundleContext context) throws Exception {
         LOG.info(context.getBundle().getSymbolicName() + " started");
-        context.addServiceListener(this, "(&(objectClass=" + SlingSettingsService.class.getName() + ")");
+        ServiceReference ref  = context.getServiceReference(SlingSettingsService.class.getName());
+        SlingSettingsService service = (SlingSettingsService) context.getService(ref);
+        try {
+            ModeUtil.configure(service);
+        } catch (ConfigurationException ex) {
+            LOG.error("Unable to configure ModeUtil with Sling Settings.", ex);
+        }
+        context.ungetService(ref);
     }
 
     /*
@@ -59,17 +67,4 @@ public class Activator implements BundleActivator, ServiceListener {
         LOG.info(context.getBundle().getSymbolicName() + " stopped");
     }
 
-    @Override
-    public void serviceChanged(ServiceEvent event) {
-        if (event.getType() == ServiceEvent.REGISTERED) {
-            // Get the service object.
-            SlingSettingsService service = (SlingSettingsService) context.getService(event.getServiceReference());
-            try {
-                ModeUtil.configure(service);
-            } catch (ConfigurationException ex) {
-                LOG.error("Unable to configure ModeUtil with Sling Settings.", ex);
-            }
-            context.ungetService(event.getServiceReference());
-        }
-    }
 }
