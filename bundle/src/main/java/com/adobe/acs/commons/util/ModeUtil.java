@@ -19,9 +19,10 @@
  */
 package com.adobe.acs.commons.util;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import aQute.bnd.annotation.ProviderType;
+import com.day.cq.commons.Externalizer;
+import com.day.cq.wcm.api.AuthoringUIMode;
+import com.day.cq.wcm.api.WCMMode;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -30,16 +31,11 @@ import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
-import com.day.cq.commons.Externalizer;
-import com.day.cq.wcm.api.AuthoringUIMode;
-import com.day.cq.wcm.api.WCMMode;
-
-import aQute.bnd.annotation.ProviderType;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.HashSet;
+import java.util.Set;
 
 @ProviderType
 @Component(immediate = true)
-@SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
 public final class ModeUtil {
 
     private static boolean isAuthor = false;
