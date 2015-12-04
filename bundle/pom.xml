@@ -199,6 +199,12 @@
             <version>1</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -259,7 +265,6 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.sling-mock</artifactId>
-            <version>1.5.0</version>
         </dependency>
 
         <!--  Build Dependencies -->
