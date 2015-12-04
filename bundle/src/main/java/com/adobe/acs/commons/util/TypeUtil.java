@@ -245,6 +245,10 @@ public final class TypeUtil {
     public static String toString(final Object obj)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
 
+        if (obj == null) {
+            return "null";
+        }
+
         boolean isPrimitiveOrWrapped =
                 obj.getClass().isPrimitive() || ClassUtils.wrapperToPrimitive(obj.getClass()) != null;
 
