@@ -19,20 +19,20 @@
  */
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ProviderType;
-import com.day.cq.commons.Externalizer;
-import com.day.cq.wcm.api.AuthoringUIMode;
-import com.day.cq.wcm.api.WCMMode;
-import org.apache.felix.scr.annotations.Activate;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.day.cq.commons.Externalizer;
+import com.day.cq.wcm.api.AuthoringUIMode;
+import com.day.cq.wcm.api.WCMMode;
+
+import aQute.bnd.annotation.ProviderType;
+
 
 @ProviderType
 @Component(immediate = true)
@@ -43,9 +43,6 @@ public final class ModeUtil {
     private static boolean isPublish = false;
 
     private static Set<String> runmodes = new HashSet<String>();
-
-    @Reference
-    private SlingSettingsService slingSettings;
 
     /**
      * Is AEM runmode author.
@@ -164,8 +161,7 @@ public final class ModeUtil {
         return AuthoringUIMode.TOUCH == AuthoringUIMode.fromRequest(request);
     }
 
-    @Activate
-    protected void activate(ComponentContext componentContext) throws Exception {
+    public static synchronized void configure(SlingSettingsService slingSettings) throws ConfigurationException {
 
         runmodes = slingSettings.getRunModes();
         isAuthor = runmodes.contains(Externalizer.AUTHOR);
