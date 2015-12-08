@@ -150,7 +150,7 @@
             }
 
             function postProcess(data) {
-               _.each(mNames, function (mName) {
+                _.each(mNames, function (mName) {
                     if (_.isEmpty(mName)) {
                         return;
                     }
@@ -186,6 +186,8 @@
                         });
                     });
                 });
+
+                $document.trigger("touchui-composite-multifield-ready", $multifield);
             }
 
             $.ajax(actionUrl).done(postProcess);
