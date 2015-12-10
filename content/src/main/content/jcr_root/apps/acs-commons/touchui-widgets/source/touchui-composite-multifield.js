@@ -18,7 +18,7 @@
  * #L%
  *
  * A sample component dialog using the Touch UI Multi Field
- * Note the usage of empty valued acs-commons-nested property
+ * Note the usage of acs-commons-nested property, value set to JSON_STORE
  *
  * <code>
  <?xml version="1.0" encoding="UTF-8"?>
@@ -65,7 +65,7 @@
                                             <field
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/foundation/form/fieldset"
-                                            acs-commons-nested=""
+                                            acs-commons-nested="JSON_STORE"
                                             name="./pages">
                                                 <layout
                                                 jcr:primaryType="nt:unstructured"
@@ -105,48 +105,53 @@
     </jcr:root>
 </code>
 */
+(function ($, $document) {
+    "use strict";
 
-(function () {
-    var DATA_ACS_COMMONS_NESTED = "data-acs-commons-nested",
-        CFFW = ".coral-Form-fieldwrapper",
-        _ = window._, CUI = window.CUI,
+    var _ = window._, CUI = window.CUI,
         Class = window.Class;
 
-    //reads multifield data from server, creates the nested composite multifields and fills them
-    function addDataInFields() {
-        $(document).on("dialog-ready", function() {
-            var mNames = [],
-                $fieldSets = $("[" + DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
+    ACS.TouchUI.CompositeMultiField = new Class({
+        toString: 'ACS TouchUI Composite Multifield',
+        extend: ACS.TouchUI.Widget,
+
+        //reads multifield data from server, creates the nested composite multifields and fills them
+        addDataInFields: function () {
+            var cmf = this, mNames = [],
+                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
                 $form = $fieldSets.closest("form.foundation-form"),
                 actionUrl = $form.attr("action") + ".json",
                 mValues, $field, name;
 
-            if(_.isEmpty($fieldSets)){
+            if (_.isEmpty($fieldSets)) {
                 return;
             }
 
             $fieldSets.each(function (i, fieldSet) {
+                if(!cmf.isJsonStore($(fieldSet).data(cmf.ACS_COMMONS_NESTED))){
+                    return;
+                }
+
                 mNames.push($(fieldSet).data("name"));
             });
 
             mNames = _.uniq(mNames);
 
             //creates & fills the nested multifield with data
-            function fillNestedFields($multifield, valueArr){
-                _.each(valueArr, function(record, index){
+            function fillNestedFields($multifield, valueArr) {
+                _.each(valueArr, function (record, index) {
                     $multifield.find(".js-coral-Multifield-add").click();
 
                     //a setTimeout may be needed
-                    _.each(record, function(value, key){
-                        var $field = $($multifield.find("[name='./" + key + "']")[index]);
-                        $field.val(value);
+                    _.each(record, function (value, key) {
+                        cmf.setWidgetValue($($multifield.find("[name='./" + key + "']")[index]), value);
                     });
                 });
             }
 
-            function postProcess(data){
-                _.each(mNames, function(mName){
-                    if(_.isEmpty(mName)){
+            function postProcess(data) {
+                _.each(mNames, function (mName) {
+                    if (_.isEmpty(mName)) {
                         return;
                     }
 
@@ -157,8 +162,8 @@
 
                     mValues = data[mName];
 
-                    if(_.isString(mValues)){
-                        mValues = [ JSON.parse(mValues) ];
+                    if (_.isString(mValues)) {
+                        mValues = [JSON.parse(mValues)];
                     }
 
                     _.each(mValues, function (record, i) {
@@ -166,122 +171,135 @@
                             return;
                         }
 
-                        if(_.isString(record)){
+                        if (_.isString(record)) {
                             record = JSON.parse(record);
                         }
 
-                        _.each(record, function(rValue, rKey){
+                        _.each(record, function (rValue, rKey) {
                             $field = $($fieldSets[i]).find("[name='./" + rKey + "']");
 
-                            if(_.isArray(rValue) && !_.isEmpty(rValue)){
-                                fillNestedFields( $($fieldSets[i]).find("[data-init='multifield']"), rValue);
-                            }else{
-                                $field.val(rValue);
+                            if (_.isArray(rValue) && !_.isEmpty(rValue)) {
+                                fillNestedFields($($fieldSets[i]).find("[data-init='multifield']"), rValue);
+                            } else {
+                                cmf.setWidgetValue($field, rValue);
                             }
                         });
                     });
                 });
+
+                $document.trigger("touchui-composite-multifield-ready", $multifield);
             }
 
             $.ajax(actionUrl).done(postProcess);
-        });
-    }
+        },
 
-    function fillValue($field, record){
-        var name = $field.attr("name");
+        fillValue: function ($field, record) {
+            var name = $field.attr("name"), value;
 
-        if (!name) {
-            return;
-        }
-
-        //strip ./
-        if (name.indexOf("./") === 0) {
-            name = name.substring(2);
-        }
-
-        record[name] = $field.val();
-
-        //remove the field, so that individual values are not POSTed
-        $field.remove();
-    }
-
-    //for getting the nested multifield data as js objects
-    function getRecordFromMultiField($multifield){
-        var $fieldSets = $multifield.find("[class='coral-Form-fieldset']"),
-            records = [], record, $fields, name;
-
-        $fieldSets.each(function (i, fieldSet) {
-            $fields = $(fieldSet).find("[name]");
-
-            record = {};
-
-            $fields.each(function (j, field) {
-                fillValue($(field), record);
-            });
-
-            if(!$.isEmptyObject(record)){
-                records.push(record);
-            }
-        });
-
-        return records;
-    }
-
-    //collect data from widgets in multifield and POST them to CRX as JSON
-    function collectDataFromFields() {
-        var $form = $(this).closest("form.foundation-form"),
-            $fieldSets = $("[" + DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
-            record, $fields, $field, name, $nestedMultiField;
-
-        $fieldSets.each(function (i, fieldSet) {
-            $fields = $(fieldSet).children().children(CFFW);
-
-            record = {};
-
-            $fields.each(function (j, field) {
-                $field = $(field);
-
-                //may be a nested multifield
-                $nestedMultiField = $field.find("[data-init='multifield']");
-
-                if($nestedMultiField.length === 0){
-                    fillValue($field.find("[name]"), record);
-                }else{
-                    name = $nestedMultiField.find("[class='coral-Form-fieldset']").data("name");
-
-                    if(!name){
-                        return;
-                    }
-
-                    //strip ./
-                    name = name.substring(2);
-
-                    record[name] = getRecordFromMultiField($nestedMultiField);
-                }
-            });
-
-            if ($.isEmptyObject(record)) {
+            if (!name) {
                 return;
             }
 
-            //add the record JSON in a hidden field as string
-            $('<input />').attr('type', 'hidden')
-                .attr('name',  $(fieldSet).data("name"))
-                .attr('value', JSON.stringify(record))
-                .appendTo($form);
-        });
-    }
-
-    $(document).ready(function () {
-        addDataInFields();
-
-        $(document).on("dialog-ready", function() {
-            //$(document).on("click", ".cq-dialog-submit", submitAction);
-            var dialog = document.querySelector('form.cq-dialog');
-
-            if(dialog){
-                dialog.addEventListener('submit', collectDataFromFields, true);
+            //strip ./
+            if (name.indexOf("./") === 0) {
+                name = name.substring(2);
             }
+
+            value = $field.val();
+
+            if (this.isCheckbox($field)) {
+                value = $field.prop("checked") ? $field.val() : "";
+            }
+
+            record[name] = value;
+
+            //remove the field, so that individual values are not POSTed
+            $field.remove();
+        },
+
+        //for getting the nested multifield data as js objects
+        getRecordFromMultiField: function ($multifield) {
+            var cmf = this, $fieldSets = $multifield.find("[class='coral-Form-fieldset']"),
+                records = [], record, $fields, name;
+
+            $fieldSets.each(function (i, fieldSet) {
+                $fields = $(fieldSet).find("[name]");
+
+                record = {};
+
+                $fields.each(function (j, field) {
+                    cmf.fillValue($(field), record);
+                });
+
+                if (!$.isEmptyObject(record)) {
+                    records.push(record);
+                }
+            });
+
+            return records;
+        },
+
+        //collect data from widgets in multifield and POST them to CRX as JSON
+        collectDataFromFields: function () {
+            var cmf = this, $form = $("form.cq-dialog"),
+                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
+                record, $fields, $field, $fieldSet, name, $nestedMultiField;
+
+            $fieldSets.each(function (i, fieldSet) {
+                $fieldSet = $(fieldSet);
+
+                if(!cmf.isJsonStore($(fieldSet).data(cmf.ACS_COMMONS_NESTED))){
+                    return;
+                }
+
+                $fields = $fieldSet.children().children(cmf.CFFW);
+
+                record = {};
+
+                $fields.each(function (j, field) {
+                    $field = $(field);
+
+                    //may be a nested multifield
+                    $nestedMultiField = $field.find("[data-init='multifield']");
+
+                    if ($nestedMultiField.length === 0) {
+                        cmf.fillValue($field.find("[name]"), record);
+                    } else {
+                        name = $nestedMultiField.find("[class='coral-Form-fieldset']").data("name");
+
+                        if (!name) {
+                            return;
+                        }
+
+                        //strip ./
+                        name = name.substring(2);
+
+                        record[name] = cmf.getRecordFromMultiField($nestedMultiField);
+                    }
+                });
+
+                if ($.isEmptyObject(record)) {
+                    return;
+                }
+
+                //add the record JSON in a hidden field as string
+                $('<input />').attr('type', 'hidden')
+                    .attr('name', $(fieldSet).data("name"))
+                    .attr('value', JSON.stringify(record))
+                    .appendTo($form);
+            });
+        }
+    });
+
+    $document.ready(function () {
+        var compositeMultiField = new ACS.TouchUI.CompositeMultiField();
+
+        $document.on("dialog-ready", function(){
+            compositeMultiField.addDataInFields();
+        });
+
+        $document.on("click", ".cq-dialog-submit", function(){
+            compositeMultiField.collectDataFromFields();
         });
     });
 
@@ -313,4 +331,4 @@
     });
 
     CUI.Widget.registry.register("multifield", CUI.Multifield);
-}());
+}(jQuery, jQuery(document)));

@@ -2,7 +2,7 @@
   ~ #%L
   ~ ACS AEM Commons Bundle
   ~ %%
-  ~ Copyright (C) 2013 Adobe
+  ~ Copyright (C) 2015 Adobe
   ~ %%
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -80,6 +80,10 @@
     <section class="coral-Form-fieldset">
         <h3 class="coral-Form-fieldset-legend">Batch size</h3>
 
+        <p class="instructions">
+            Persist removals to the JCR batches of this size. Defaults to 1000.
+        </p>
+
         <div class="coral-InputGroup" data-init="numberinput" data-min="1">
           <span class="coral-InputGroup-button">
             <button type="button" class="js-coral-NumberInput-decrementButton coral-Button coral-Button--secondary coral-Button--square" title="Decrement">
@@ -87,7 +91,7 @@
             </button>
           </span>
           <input ng-model="form.batchSize"
-                  type="text" 
+                  type="text"
                   class="js-coral-NumberInput-input coral-InputGroup-input coral-Textfield">
           <span class="coral-InputGroup-button">
             <button type="button" class="js-coral-NumberInput-incrementButton coral-Button coral-Button--secondary coral-Button--square" title="Increment">
@@ -96,6 +100,31 @@
           </span>
         </div>
     </section>
+
+    <section class="coral-Form-fieldset">
+        <h3 class="coral-Form-fieldset-legend">Max duration</h3>
+
+        <p class="instructions">
+            In minutes. Force terminate this workflow process after the specified duration. Set to 0 to disable.
+        </p>
+
+        <div class="coral-InputGroup" data-init="numberinput" data-min="0">
+          <span class="coral-InputGroup-button">
+            <button type="button" class="js-coral-NumberInput-decrementButton coral-Button coral-Button--secondary coral-Button--square" title="Decrement">
+                <i class="coral-Icon coral-Icon--sizeS coral-Icon--minus"></i>
+            </button>
+          </span>
+            <input ng-model="form.maxDuration"
+                   type="text"
+                   class="js-coral-NumberInput-input coral-InputGroup-input coral-Textfield">
+          <span class="coral-InputGroup-button">
+            <button type="button" class="js-coral-NumberInput-incrementButton coral-Button coral-Button--secondary coral-Button--square" title="Increment">
+                <i class="coral-Icon coral-Icon--sizeS coral-Icon--add"></i>
+            </button>
+          </span>
+        </div>
+    </section>
+
 
     <section class="coral-Form-fieldset">
         <h3 class="coral-Form-fieldset-legend">Workflows older than</h3>

@@ -22,7 +22,6 @@ package com.adobe.acs.commons.wcm.notifications.impl;
 
 import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
 import com.adobe.acs.commons.util.CookieUtil;
-import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -42,6 +41,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -95,6 +95,8 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
+    @Reference
+    private SlingSettingsService slingSettings;
 
     @Override
     protected void inject(HttpServletRequest servletRequest, HttpServletResponse servletResponse, PrintWriter printWriter) {
@@ -305,7 +307,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     public void handleEvent(final Event event) {
         long start = System.currentTimeMillis();
 
-        if (!ModeUtil.isAuthor()) {
+        if (!this.isAuthor()) {
             log.warn("This event handler should ONLY run on AEM Author.");
             return;
         }
@@ -350,7 +352,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     protected void activate(ComponentContext ctx) {
         this.osgiComponentContext = ctx;
 
-        if (ModeUtil.isAuthor()) {
+        if (this.isAuthor()) {
             this.registerAsEventHandler();
 
             if (this.hasNotifications()) {
@@ -370,5 +372,9 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
         }
 
         this.osgiComponentContext = null;
+    }
+
+    private boolean isAuthor() {
+        return slingSettings.getRunModes().contains("author");
     }
 }

@@ -136,7 +136,9 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         }
         
         // Add HTML check
-        log.info("Injecting HTML via AbstractHTMLRequestInjector");
+        if (log.isTraceEnabled()) {
+            log.trace("Injecting HTML via AbstractHTMLRequestInjector");
+        }
         return true;
     }
 
