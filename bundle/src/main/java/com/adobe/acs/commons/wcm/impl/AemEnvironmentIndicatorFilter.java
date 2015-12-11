@@ -4,6 +4,8 @@ import com.adobe.acs.commons.util.BufferingResponse;
 import com.adobe.granite.xss.XSSAPI;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.text.StrLookup;
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -212,6 +214,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         color = PropertiesUtil.toString(config.get(PROP_COLOR), "");
         cssOverride = PropertiesUtil.toString(config.get(PROP_CSS_OVERRIDE), "");
         innerHTML = PropertiesUtil.toString(config.get(PROP_INNER_HTML), "");
+        innerHTML = new StrSubstitutor(StrLookup.systemPropertiesLookup()).replace(innerHTML);
 
         // Only write CSS variable if cssOverride or color is provided
         if (StringUtils.isNotBlank(cssOverride)) {
