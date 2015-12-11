@@ -187,7 +187,7 @@
                     });
                 });
 
-                $document.trigger("touchui-composite-multifield-ready", $multifield);
+                $document.trigger("touchui-composite-multifield-ready", mNames);
             }
 
             $.ajax(actionUrl).done(postProcess);
