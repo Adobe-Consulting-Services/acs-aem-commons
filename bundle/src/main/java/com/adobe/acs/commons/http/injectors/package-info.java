@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
  * limitations under the License.
  * #L%
  */
-
-@Version("2.1.2")
-package com.adobe.acs.commons.synth;
-
-import aQute.bnd.annotation.Version;
+/**
+ * Http Injectors.
+ */
+@aQute.bnd.annotation.Version("2.1.2")
+package com.adobe.acs.commons.http.injectors;

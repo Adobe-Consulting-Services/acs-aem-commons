@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,6 @@
  */
 
 @Version("2.1.2")
-package com.adobe.acs.commons.synth;
+package com.adobe.acs.commons.analysis.jcrchecksum;
 
 import aQute.bnd.annotation.Version;
