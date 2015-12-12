@@ -22,7 +22,7 @@ package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
 
-import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalForceQuitException;
+import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalForceQuitException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -65,10 +65,13 @@ public class RemoveServlet extends SlingAllMethodsServlet {
 
     private static final String PARAM_OLDER_THAN = "olderThan";
 
+    private static final String PARAM_MAX_DURATION = "maxDuration";
+
     private static final int MS_IN_SECOND = 1000;
 
     private static final int DEFAULT_BATCH_SIZE = 1000;
 
+    private static final int DEFAULT_MAX_DURATION = 0;
 
     @Reference
     private WorkflowInstanceRemover workflowInstanceRemover;
@@ -119,12 +122,18 @@ public class RemoveServlet extends SlingAllMethodsServlet {
                 batchSize = DEFAULT_BATCH_SIZE;
             }
 
+            int maxDuration = params.optInt(PARAM_MAX_DURATION);
+            if (maxDuration < 1) {
+                maxDuration = DEFAULT_MAX_DURATION;
+            }
+
             workflowInstanceRemover.removeWorkflowInstances(request.getResourceResolver(),
                     models,
                     statuses,
                     payloads,
                     olderThan,
-                    batchSize);
+                    batchSize,
+                    maxDuration);
 
         } catch (WorkflowRemovalForceQuitException e) {
             response.setStatus(599);

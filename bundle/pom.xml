@@ -48,6 +48,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <Bundle-Activator>com.adobe.acs.commons.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
                         <Import-Package>
                             com.adobe.cq.dialogconversion;resolution:=optional,
@@ -201,6 +202,12 @@
             <version>1</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Http Cache Dependencies -->
         <dependency>
@@ -267,7 +274,6 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.sling-mock</artifactId>
-            <version>1.5.0</version>
         </dependency>
 
         <!--  Build Dependencies -->

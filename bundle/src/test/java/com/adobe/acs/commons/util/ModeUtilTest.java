@@ -77,7 +77,7 @@ public class ModeUtilTest {
     public void testIsAuthor() throws Exception {
         modes.add("author");
 
-        util.activate(context);
+        ModeUtil.configure(slingSettings);
         assertTrue(ModeUtil.isAuthor());
         verify(slingSettings).getRunModes();
         verifyNoMoreInteractions(slingSettings, context);
@@ -87,7 +87,7 @@ public class ModeUtilTest {
     public void testIsNotAuthor() throws Exception {
         modes.add("publish");
 
-        util.activate(context);
+        ModeUtil.configure(slingSettings);
         assertFalse(ModeUtil.isAuthor());
         verify(slingSettings).getRunModes();
         verifyNoMoreInteractions(slingSettings, context);
@@ -97,7 +97,7 @@ public class ModeUtilTest {
     public void testIsPublish() throws Exception {
         modes.add("publish");
 
-        util.activate(context);
+        ModeUtil.configure(slingSettings);
         assertTrue(ModeUtil.isPublish());
         verify(slingSettings).getRunModes();
         verifyNoMoreInteractions(slingSettings, context);
@@ -107,7 +107,7 @@ public class ModeUtilTest {
     public void testIsNotPublish() throws Exception {
         modes.add("author");
 
-        util.activate(context);
+        ModeUtil.configure(slingSettings);
         assertFalse(ModeUtil.isPublish());
         verify(slingSettings).getRunModes();
         verifyNoMoreInteractions(slingSettings, context);
@@ -117,7 +117,7 @@ public class ModeUtilTest {
     public void testIsRunmode() throws Exception {
         modes.add("publish");
 
-        util.activate(context);
+        ModeUtil.configure(slingSettings);
         assertTrue(ModeUtil.isRunmode("publish"));
         verify(slingSettings).getRunModes();
         verifyNoMoreInteractions(slingSettings, context);
@@ -128,7 +128,7 @@ public class ModeUtilTest {
     public void testIsNotRunmode() throws Exception {
         modes.add("publish");
 
-        util.activate(context);
+        ModeUtil.configure(slingSettings);
         assertFalse(ModeUtil.isRunmode("author"));
         verify(slingSettings).getRunModes();
         verifyNoMoreInteractions(slingSettings, context);
@@ -283,7 +283,7 @@ public class ModeUtilTest {
     public void testActivateBothModes() throws Exception {
         modes.add("author");
         modes.add("publish");
-        util.activate(context);
+        ModeUtil.configure(slingSettings);
         verifyNoMoreInteractions(slingSettings, context);
 
     }

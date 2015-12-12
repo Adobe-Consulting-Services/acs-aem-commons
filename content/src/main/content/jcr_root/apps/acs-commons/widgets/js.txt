@@ -8,6 +8,7 @@ predicates/SelectionPredicate.js
 DDPathField.js
 polyfill_composite_field_processParentRecord.js
 multipanel.js
+node-multi-panel.js
 check_vanity_path.js
 validate_responsive_column_control_dialog.js
 add_dynamic_options_to_feed_importer.js
