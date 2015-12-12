@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,40 +22,38 @@ package com.adobe.acs.commons.analysis.jcrchecksum.impl.servlets;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
-import com.day.cq.widget.HtmlLibraryManager;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
-import org.apache.sling.commons.testing.sling.MockSlingHttpServletResponse;
-import org.apache.sling.testing.mock.jcr.MockJcr;
+import org.apache.sling.testing.mock.sling.MockSling;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.apache.sling.testing.mock.sling.servlet.MockRequestPathInfo;
+import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
+import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.internal.configuration.MockAnnotationProcessor;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.jcr.Node;
 import javax.jcr.Session;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChecksumGeneratorServletTest {
 
     private static final String SERVLET_PATH = "/bin/acs-commons/jcr-compare";
-    
+
     private static final String SERVLET_SELECTORS = "hashes";
-    
+
     private static final String SERVLET_EXTENSION = "txt";
 
-    @Mock
-    private HtmlLibraryManager manager;
+    @Rule
+    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_JACKRABBIT);
 
     @Spy
     private ChecksumGenerator checksumGenerator = new ChecksumGeneratorImpl();
@@ -63,79 +61,29 @@ public class ChecksumGeneratorServletTest {
     @InjectMocks
     public ChecksumGeneratorServlet servlet = new ChecksumGeneratorServlet();
 
-    MockSlingHttpServletRequest request;
     ResourceResolver resourceResolver;
-    MockSlingHttpServletResponse response;
     Session session;
 
     @Before
     public void setUp() throws LoginException {
-        response = new MockSlingHttpServletResponse();
-        session = MockJcr.newSession();
-        this.resourceResolver = mock(ResourceResolver.class);
-        when(this.resourceResolver.adaptTo(Session.class)).thenReturn(session);
-
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void testWithNoPath() throws Exception {
-        this.resourceResolver = mock(ResourceResolver.class);
-        this.request =
-            new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
-                null) {
-                public ResourceResolver getResourceResolver() {
-                    return resourceResolver;
-                };
-            };
-            this.response = new MockSlingHttpServletResponse() {
-                public void setHeader(String header, String value) {
-                //do nothing
-                return;
-            };
-        };
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource(SERVLET_PATH));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString(SERVLET_SELECTORS);
+        requestPathInfo.setExtension(SERVLET_EXTENSION);
+        request.setMethod("GET");
+
+        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
         servlet.doGet(request, response);
 
-        assertEquals("text/plain", response.getContentType());
-        assertEquals("ERROR: At least one path must be specified", response.getOutput().toString());
-    }
-
-    @Test
-    public void testWithPath() throws Exception {
-        Node page =
-                session.getRootNode()
-                        .addNode("content")
-                        .addNode("test-page", "cq:Page")
-                        .addNode("jcr:content", "cq:PageContent");
-
-        page.setProperty("jcr:title", "test title");
-        session.save();
-
-        this.request =
-            new MockSlingHttpServletRequest(SERVLET_PATH, SERVLET_SELECTORS, SERVLET_EXTENSION, null,
-                null) {
-                public ResourceResolver getResourceResolver() {
-                    return resourceResolver;
-                };
-
-                public String[] getParameterValues(String name) {
-                    if (name.equals("paths")) {
-                        return new String[] { "/content" };
-                    } else {
-                        return null;
-                    }
-                };
-            };
-            this.response = new MockSlingHttpServletResponse() {
-                public void setHeader(String header, String value) {
-                //do nothing
-                return;
-            };
-        };
-        servlet.doGet(request, response);
-        assertEquals("text/plain", response.getContentType());
-        assertEquals(
-            "/content/test-page/jcr:content\t0362210a336ba79c6cab30bf09deaf2f1a749e6f\n",
-            response.getOutput().toString());
+        assertEquals("text/plain;charset=UTF-8", response.getContentType());
+        assertEquals("ERROR: At least one path must be specified", response.getOutputAsString());
     }
 }
