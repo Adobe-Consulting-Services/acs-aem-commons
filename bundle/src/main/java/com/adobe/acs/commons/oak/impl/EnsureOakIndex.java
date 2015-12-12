@@ -21,7 +21,6 @@ package com.adobe.acs.commons.oak.impl;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.util.AemCapabilityHelper;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -36,28 +35,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-
 import java.util.Map;
 
+//@formatter:off
 @Component(label = "ACS AEM Commons - Ensure Oak Index",
         description = "Component Factory to manage Oak indexes.",
         configurationFactory = true,
         metatype = true)
 @Properties({
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Definitions: {ensure-definitions.path}, Indexes: {oak-indexes.path}")
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Definitions: {ensure-definitions.path}, Indexes: {oak-indexes.path}",
+                propertyPrivate = true
+        )
 })
+//@formatter:on
 public class EnsureOakIndex {
+
     static final Logger log = LoggerFactory.getLogger(EnsureOakIndex.class);
 
     @Reference
     private AemCapabilityHelper capabilityHelper;
 
-    @Reference ChecksumGenerator checksumGenerator;
+    @Reference
+    private ChecksumGenerator checksumGenerator;
 
-    @Reference ResourceResolverFactory resourceResolverFactory;
-    
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
     @Reference
     private Scheduler scheduler;
 
@@ -78,52 +83,52 @@ public class EnsureOakIndex {
 
     @Activate
     protected final void activate(Map<String, Object> config) throws RepositoryException {
-    	if (!capabilityHelper.isOak()) {
-    		log.info("Cowardly refusing to create indexes on non-Oak instance.");
-    		return;
-    	}
+        if (!capabilityHelper.isOak()) {
+            log.info("Cowardly refusing to create indexes on non-Oak instance.");
+            return;
+        }
 
-    	final String ensureDefinitionsPath = PropertiesUtil.toString(config.get(PROP_ENSURE_DEFINITIONS_PATH),
-    			DEFAULT_ENSURE_DEFINITIONS_PATH);
+        final String ensureDefinitionsPath = PropertiesUtil.toString(config.get(PROP_ENSURE_DEFINITIONS_PATH),
+                DEFAULT_ENSURE_DEFINITIONS_PATH);
 
-    	final String oakIndexesPath = PropertiesUtil.toString(config.get(PROP_OAK_INDEXES_PATH),
-    			DEFAULT_OAK_INDEXES_PATH);
+        final String oakIndexesPath = PropertiesUtil.toString(config.get(PROP_OAK_INDEXES_PATH),
+                DEFAULT_OAK_INDEXES_PATH);
 
-    	log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
+        log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
 
-    	if (StringUtils.isBlank(ensureDefinitionsPath)) {
-    		throw new IllegalArgumentException("OSGi Configuration Property `"
-    				+ PROP_ENSURE_DEFINITIONS_PATH + "` " + "cannot be blank.");
-    	} else if (StringUtils.isBlank(oakIndexesPath)) {
-    		throw new IllegalArgumentException("OSGi Configuration Property `"
-    				+ PROP_OAK_INDEXES_PATH + "` " + "cannot be blank.");
-    	}
-    	
-    	// Start the indexing process asynchronously, so the activate won't get blocked
-    	// by rebuilding a synchronous index
-    	
-    	EnsureOakIndexJobHandler sih = new EnsureOakIndexJobHandler (this, oakIndexesPath, ensureDefinitionsPath);
-    	ScheduleOptions options = scheduler.NOW();
-    	String name = String.format("Ensure index %s => %s", new Object[]{oakIndexesPath,ensureDefinitionsPath});
-    	options.name (name);
-    	options.canRunConcurrently(false);
-    	scheduler.schedule (sih,options);
-    	log.info("Job scheduled to update the index");
+        if (StringUtils.isBlank(ensureDefinitionsPath)) {
+            throw new IllegalArgumentException("OSGi Configuration Property `"
+                    + PROP_ENSURE_DEFINITIONS_PATH + "` " + "cannot be blank.");
+        } else if (StringUtils.isBlank(oakIndexesPath)) {
+            throw new IllegalArgumentException("OSGi Configuration Property `"
+                    + PROP_OAK_INDEXES_PATH + "` " + "cannot be blank.");
+        }
 
-    	
+        // Start the indexing process asynchronously, so the activate won't get blocked
+        // by rebuilding a synchronous index
+
+        EnsureOakIndexJobHandler jobHandler =
+                new EnsureOakIndexJobHandler(this, oakIndexesPath, ensureDefinitionsPath);
+        ScheduleOptions options = scheduler.NOW();
+        String name = String.format("Ensure index %s => %s", new Object[]{ oakIndexesPath, ensureDefinitionsPath });
+        options.name(name);
+        options.canRunConcurrently(false);
+        scheduler.schedule(jobHandler, options);
+
+        log.info("Job scheduled for ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
     }
 
-
-    protected ResourceResolverFactory getResourceResolverFactory () {
-    	return resourceResolverFactory;
+    final ChecksumGenerator getChecksumGenerator() {
+        return checksumGenerator;
     }
-    
-    
+
+    final ResourceResolverFactory getResourceResolverFactory() {
+        return resourceResolverFactory;
+    }
+
     static class OakIndexDefinitionException extends Exception {
-        public OakIndexDefinitionException(String message) {
+        OakIndexDefinitionException(String message) {
             super(message);
         }
     }
-    
-    
 }
