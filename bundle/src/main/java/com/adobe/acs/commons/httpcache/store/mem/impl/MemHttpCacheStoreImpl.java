@@ -39,6 +39,10 @@ import java.util.concurrent.TimeUnit;
                     propertyPrivate = true),
         @Property(name = "jmx.objectname",
                     value = "com.adobe.acs.httpcache:type=In Memory HTTP Cache Store",
+                    propertyPrivate = true),
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                    value = "TTL: {httpcache.cachestore.memcache.ttl}, " +
+                            "Max size in MB: {httpcache.cachestore.memcache.maxsize}",
                     propertyPrivate = true)
 })
 @Service(value = {DynamicMBean.class, HttpCacheStore.class})
@@ -258,7 +262,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
         CacheStats cacheStats = this.cache.stats();
 
-        final Map<String, Object> row = new HashMap<>();
+        final Map<String, Object> row = new HashMap<String, Object>();
 
         row.put("Stat", "Request Count");
         row.put("Value", String.valueOf(cacheStats.requestCount()));
@@ -330,7 +334,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
         ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
         for (final CacheKey key : cacheAsMap.keySet()) {
-            final Map<String, Object> data = new HashMap<>();
+            final Map<String, Object> data = new HashMap<String, Object>();
             data.put("Cache Key", key.toString());
 
             MemCachePersistenceObject cacheObj = cache.getIfPresent(key);

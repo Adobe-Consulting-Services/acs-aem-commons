@@ -23,7 +23,7 @@ public class CacheContent {
     /** Response content type */
     private String contentType;
     /** Response headers */
-    private Map<String, List<String>> headers = new HashMap<>();
+    private Map<String, List<String>> headers = new HashMap<String, List<String>>();
     /** Response content as input stream */
     private InputStream dataInputStream;
     /** Temp sink attached to this cache content */
@@ -67,7 +67,7 @@ public class CacheContent {
         this.contentType = responseWrapper.getContentType();
 
         // Extracting header K,V.
-        List<String> headerNames = new ArrayList<>();
+        List<String> headerNames = new ArrayList<String>();
         headerNames.addAll(responseWrapper.getHeaderNames());
         for (String headerName : headerNames) {
             List<String> values = new ArrayList<String>();

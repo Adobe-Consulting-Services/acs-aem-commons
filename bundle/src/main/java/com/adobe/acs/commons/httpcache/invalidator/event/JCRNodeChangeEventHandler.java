@@ -27,19 +27,23 @@ import java.util.Map;
            metatype = true,
            immediate = true,
            policy = ConfigurationPolicy.REQUIRE)
-@Properties({@Property(label = "Event Topics",
-                       value = {SlingConstants.TOPIC_RESOURCE_CHANGED, SlingConstants.TOPIC_RESOURCE_ADDED,
-                               SlingConstants.TOPIC_RESOURCE_REMOVED},
-                       description = "This handler responds to resource modification event.",
-                       name = EventConstants.EVENT_TOPIC,
-                       propertyPrivate = true),
-
-                    @Property(label = "JCR paths to watch for changes.",
-                              value = "(|(" + SlingConstants.PROPERTY_PATH + "=" +
-                                      "/content*)(" + SlingConstants.PROPERTY_PATH + "=" + "/etc*))",
-                              description = "Paths expressed in LDAP syntax. Example: (|(path=/content*)(path=/etc*))" +
-                                      " - Watches for changes under /content or /etc. ",
-                              name = EventConstants.EVENT_FILTER)})
+@Properties({
+        @Property(label = "Event Topics",
+                   value = {SlingConstants.TOPIC_RESOURCE_CHANGED, SlingConstants.TOPIC_RESOURCE_ADDED,
+                           SlingConstants.TOPIC_RESOURCE_REMOVED},
+                   description = "This handler responds to resource modification event.",
+                   name = EventConstants.EVENT_TOPIC,
+                   propertyPrivate = true),
+        @Property(label = "JCR paths to watch for changes.",
+                  value = "(|(" + SlingConstants.PROPERTY_PATH + "=" +
+                          "/content*)(" + SlingConstants.PROPERTY_PATH + "=" + "/etc*))",
+                  description = "Paths expressed in LDAP syntax. Example: (|(path=/content*)(path=/etc*))" +
+                          " - Watches for changes under /content or /etc. ",
+                  name = EventConstants.EVENT_FILTER),
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                    value = "JCR paths to watch for changes: {" + EventConstants.EVENT_FILTER + "}",
+                    propertyPrivate = true)
+})
 @Service
 // @formatter:on
 public class JCRNodeChangeEventHandler implements EventHandler {
@@ -54,7 +58,7 @@ public class JCRNodeChangeEventHandler implements EventHandler {
         // Get the required information from the event.
         final String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
         // Create the required payload.
-        final Map<String, Object> payload = new HashMap<>();
+        final Map<String, Object> payload = new HashMap<String, Object>();
         payload.put(CacheInvalidationJobConstants.PAYLOAD_KEY_DATA_CHANGE_PATH, path);
         // Start a job.
         jobManager.addJob(CacheInvalidationJobConstants.TOPIC_HTTP_CACHE_INVALIDATION_JOB, payload);

@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -33,6 +34,11 @@ import java.util.*;
            configurationFactory = true,
            policy = ConfigurationPolicy.REQUIRE
 )
+@Properties({
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                value = "Allowed user groups: {httpcache.config.extension.user-groups.allowed}",
+                propertyPrivate = true)
+})
 @Service
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(GroupHttpCacheConfigExtension.class);
@@ -188,6 +194,6 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
             }
         }
 
-        log.info("GroupHttpCacheConfigExtension activated /modified.");
+        log.info("GroupHttpCacheConfigExtension activated/modified.");
     }
 }

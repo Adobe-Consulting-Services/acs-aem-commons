@@ -12,6 +12,7 @@ import com.adobe.acs.commons.httpcache.util.UserUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
@@ -30,6 +31,16 @@ import java.util.regex.Pattern;
            metatype = true,
            policy = ConfigurationPolicy.REQUIRE
 )
+@Properties({
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                value = "Order: {httpcache.config.order}, " +
+                        "Request URIs: {httpcache.config.requesturi.patterns}, " +
+                        "Request URIs blacklist: {httpcache.config.requesturi.patterns.blacklisted}, " +
+                        "Authentication: {httpcache.config.request.authentication}, " +
+                        "Invalidation paths: {httpcache.config.invalidation.oak.paths}, " +
+                        "Cache type: {httpcache.config.cachestore}",
+                propertyPrivate = true)
+})
 @Service
 public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
@@ -58,8 +69,8 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               description = "Blacklisted request URI patterns (REGEX). Evaluated post applying the above request uri " +
                       "" + "patterns (httpcache.config.requesturi.patterns). Optional parameter.",
               cardinality = Integer.MAX_VALUE)
-    private static final String PROP_BLACKLISTED_REQUEST_URI_PATTERNS = "httpcache.config.requesturi.patterns" + "" +
-            ".blacklisted";
+    private static final String PROP_BLACKLISTED_REQUEST_URI_PATTERNS =
+            "httpcache.config.requesturi.patterns.blacklisted";
     private List<String> blacklistedRequestUriPatterns;
     private List<Pattern> blacklistedRequestUriPatternsAsRegEx;
 
@@ -193,7 +204,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
      * @return the list of compiled Patterns
      */
     private List<Pattern> compileToPatterns(final List<String> regexes) {
-        final List<Pattern> patterns = new ArrayList<>();
+        final List<Pattern> patterns = new ArrayList<Pattern>();
 
         for (String regex : regexes) {
             if (StringUtils.isNotBlank(regex)) {

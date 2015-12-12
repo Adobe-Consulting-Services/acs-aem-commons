@@ -42,6 +42,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Properties({
         @Property(name = "jmx.objectname",
                 value = "com.adobe.acs.httpcache:type=HTTP Cache Engine",
+                propertyPrivate = true),
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                value = "Global handling rules: {httpcache.engine.cache-handling-rules.global}",
                 propertyPrivate = true)
 })
 @References({
@@ -68,18 +71,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
     /** Thread safe list to contain the registered HttpCacheConfig references. */
-    private static final CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<HttpCacheConfig>();
 
     /** Method name that binds cache store */
     static final String METHOD_NAME_TO_BIND_CACHE_STORE = "httpCacheStore";
     /** Thread safe hash map to contain the registered cache store references. */
-    private static final ConcurrentHashMap<String, HttpCacheStore> cacheStoresMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, HttpCacheStore> cacheStoresMap = new ConcurrentHashMap<String, HttpCacheStore>();
 
     /** Method name that binds cache handling rules */
     static final String METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES = "httpCacheHandlingRule";
     /** Thread safe map to contain the registered HttpCacheHandlingRule references. */
     private static final ConcurrentHashMap<String, HttpCacheHandlingRule> cacheHandlingRules = new
-            ConcurrentHashMap<>();
+            ConcurrentHashMap<String, HttpCacheHandlingRule>();
 
     // formatter:off
     @Property(label = "Global HttpCacheHandlingRules",
@@ -96,7 +99,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     /** Thread safe list containing the OSGi configurations for the registered httpCacheConfigs. Used only for mbean.*/
     private static final ConcurrentHashMap<HttpCacheConfig, Map<String, Object>> cacheConfigConfigs = new
-            ConcurrentHashMap<>();
+            ConcurrentHashMap<HttpCacheConfig, Map<String, Object>>();
 
     //-------------------<OSGi specific methods>---------------//
 
@@ -122,7 +125,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Sort cacheConfigs by order; Synchronized since this bind/un-bind is a rare/limited event
         synchronized (this.cacheConfigs) {
-            final List<HttpCacheConfig> tmp = new ArrayList<>(this.cacheConfigs);
+            final List<HttpCacheConfig> tmp = new ArrayList<HttpCacheConfig>(this.cacheConfigs);
             tmp.add(cacheConfig);
 
             Collections.sort(tmp, new HttpCacheConfigComparator());
@@ -511,7 +514,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         // @formatter:on
 
         for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
-            final Map<String, Object> row = new HashMap<>();
+            final Map<String, Object> row = new HashMap<String, Object>();
 
             row.put("HTTP Cache Handling Rule", entry.getValue().getClass().getName());
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
@@ -541,7 +544,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         // @formatter:on
 
         for (HttpCacheConfig cacheConfig : this.cacheConfigs) {
-            final Map<String, Object> row = new HashMap<>();
+            final Map<String, Object> row = new HashMap<String, Object>();
 
             Map<String, Object> osgiConfig = cacheConfigConfigs.get(cacheConfig);
 
@@ -573,7 +576,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         // @formatter:on
 
         for (String storeName : this.cacheStoresMap.keySet()) {
-            final Map<String, Object> row = new HashMap<>();
+            final Map<String, Object> row = new HashMap<String, Object>();
 
             row.put("HTTP Cache Store", storeName);
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));

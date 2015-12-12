@@ -39,7 +39,7 @@ public class UserUtils {
      * @return
      */
     public static List<String> getUserGroupMembershipNames(User user) throws RepositoryException {
-        List<String> groupNames = new ArrayList<>();
+        List<String> groupNames = new ArrayList<String>();
 
         Iterator<Group> groupIterator = user.memberOf();
         while (groupIterator.hasNext()) {

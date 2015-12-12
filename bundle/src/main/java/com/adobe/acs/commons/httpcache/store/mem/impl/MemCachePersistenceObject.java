@@ -89,12 +89,12 @@ class MemCachePersistenceObject {
      * @return Returned in <code>Map<String, List<String>></code> format.
      */
     public Map<String, List<String>> getHeaders() {
-        Map<String, List<String>> map = new HashMap<>();
+        Map<String, List<String>> map = new HashMap<String, List<String>>();
 
         // Convert com.google.common.collect.AbstractMapBasedMultimap$WrappedSet to List<String> value to avoid cast
         // exception
         for (Map.Entry<String, Collection<String>> entry : Multimaps.asMap(headers).entrySet()) {
-            map.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+            map.put(entry.getKey(), new ArrayList<String>(entry.getValue()));
         }
 
         return map;
