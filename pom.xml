@@ -324,6 +324,14 @@
                 <version>1.6.2</version>
                 <scope>test</scope>
             </dependency>
+
+            <!-- Http Cache Dependency -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>15.0</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock</artifactId>

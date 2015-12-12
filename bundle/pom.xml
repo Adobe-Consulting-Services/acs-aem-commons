@@ -52,8 +52,10 @@
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
                         <Import-Package>
                             com.adobe.cq.dialogconversion;resolution:=optional,
+                            sun.misc.*;resolution:=optional,
                             *
                         </Import-Package>
+                        <Embed-Dependency>guava</Embed-Dependency>
                         <Sling-Model-Packages>com.adobe.acs.commons.version.model</Sling-Model-Packages>
                     </instructions>
                 </configuration>
@@ -205,6 +207,12 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.0.1</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Http Cache Dependencies -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->
