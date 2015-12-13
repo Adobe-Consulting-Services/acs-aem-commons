@@ -17,12 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm.filter.impl;
-
-import java.util.Dictionary;
-import java.util.Enumeration;
-
-import javax.servlet.http.HttpServletRequest;
+package com.adobe.acs.commons.dispatcher.ttl.impl;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -33,11 +28,14 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Dictionary;
+import java.util.Enumeration;
+
 //@formatter:off
 @Component(
       label = "ACS AEM Commons - Dispacher Cache Control Header - Max Age",
       description = "Adds a Cache-Control max-age header to content to enable Dispatcher TTL support.",
-      immediate = false,
       metatype = true,
       configurationFactory = true,
       policy = ConfigurationPolicy.REQUIRE)
@@ -50,8 +48,9 @@ import org.osgi.service.component.ComponentContext;
         propertyPrivate = false,
         value = { }),
     @Property(
-          name = "webconsole.configurationFactory.nameHint",
-          value = "Max Age: {max.age} for Patterns: [{filter.pattern}]")
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Max Age: {max.age} for Patterns: [{filter.pattern}]",
+            propertyPrivate = true)
 })
 //@formatter:on
 public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderFilter {

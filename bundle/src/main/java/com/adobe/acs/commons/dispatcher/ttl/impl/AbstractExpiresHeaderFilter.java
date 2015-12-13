@@ -17,8 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm.filter.impl;
+package com.adobe.acs.commons.dispatcher.ttl.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.component.ComponentContext;
+
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -27,19 +33,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.TimeZone;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
-
 /**
  * Provides standard functionality to specify an Expires header for Dispatcher Cache rules. 
- * 
- * @author Bryan Stopp (bstopp)
- * @since 2.1.0
- *
  */
 public abstract class AbstractExpiresHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
 
@@ -53,7 +48,7 @@ public abstract class AbstractExpiresHeaderFilter extends AbstractDispatcherCach
     private Calendar expiresTime = Calendar.getInstance();
 
     /**
-     * Sublcass implementations will adjust the date of the specified calendar to the 
+     * Subclass implementations will adjust the date of the specified calendar to the
      * next point at which content should expire.
      * 
      * The calendar passed will be the set to the correct time the current day.

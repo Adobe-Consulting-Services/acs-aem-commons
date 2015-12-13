@@ -17,9 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm.filter.impl;
-
-import java.util.Calendar;
+package com.adobe.acs.commons.dispatcher.ttl.impl;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -27,12 +25,12 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 
+import java.util.Calendar;
 
 //@formatter:off
 @Component(
     label = "ACS AEM Commons - Dispatcher Expires Header - Daily",
     description = "Adds an Expires header to content to enable Dispatcher TTL support.",
-    immediate = false,
     metatype = true,
     configurationFactory = true,
     policy = ConfigurationPolicy.REQUIRE)
@@ -50,7 +48,8 @@ import org.apache.felix.scr.annotations.Service;
       propertyPrivate = false),
   @Property(
         name = "webconsole.configurationFactory.nameHint",
-        value = "Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]")
+        value = "Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]",
+        propertyPrivate = true)
 })
 //@formatter:on
 public class DailyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
