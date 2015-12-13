@@ -19,6 +19,12 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.component.ComponentContext;
+
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -27,19 +33,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.TimeZone;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
-
 /**
  * Provides standard functionality to specify an Expires header for Dispatcher Cache rules. 
- * 
- * @author Bryan Stopp (bstopp)
- * @since 2.1.0
- *
  */
 public abstract class AbstractExpiresHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
 
