@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm.filter.impl;
+package com.adobe.acs.commons.http.headers.impl;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -36,6 +36,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+
+import com.adobe.acs.commons.http.headers.impl.MonthlyExpiresHeaderFilter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MonthlyExpiresHeaderFilterTest {
