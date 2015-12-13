@@ -19,9 +19,6 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import java.util.Calendar;
-import java.util.Dictionary;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -31,6 +28,9 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+
+import java.util.Calendar;
+import java.util.Dictionary;
 
 //@formatter:off
 @Component(
@@ -54,7 +54,8 @@ import org.osgi.service.component.ComponentContext;
       propertyPrivate = false),
   @Property(
         name = "webconsole.configurationFactory.nameHint",
-        value = "Expires each month on the {expires.day-of-month} day at {expires.time} for Patterns: [{filter.pattern}]")
+        value = "Expires each month on the {expires.day-of-month} day at {expires.time} for Patterns: [{filter.pattern}]",
+        propertyPrivate = true)
 })
 //@formatter:on
 public class MonthlyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {

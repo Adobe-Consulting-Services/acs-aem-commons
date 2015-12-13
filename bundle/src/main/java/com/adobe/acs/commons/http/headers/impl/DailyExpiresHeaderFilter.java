@@ -19,13 +19,13 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import java.util.Calendar;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+
+import java.util.Calendar;
 
 
 //@formatter:off
@@ -50,7 +50,8 @@ import org.apache.felix.scr.annotations.Service;
       propertyPrivate = false),
   @Property(
         name = "webconsole.configurationFactory.nameHint",
-        value = "Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]")
+        value = "Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]",
+        propertyPrivate = true)
 })
 //@formatter:on
 public class DailyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
