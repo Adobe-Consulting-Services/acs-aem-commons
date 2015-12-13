@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm.filter.impl;
+package com.adobe.acs.commons.http.headers;
 
 import static org.junit.Assert.*;
 
@@ -27,6 +27,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.adobe.acs.commons.http.headers.DailyExpiresHeaderFilter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DailyExpiresHeaderFilterTest {

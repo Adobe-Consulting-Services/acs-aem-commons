@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm.filter.impl;
+package com.adobe.acs.commons.http.headers;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
