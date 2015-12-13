@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.http.headers;
+package com.adobe.acs.commons.http.headers.impl;
 
 import java.util.Dictionary;
 import java.util.Enumeration;

@@ -17,25 +17,24 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.http.headers;
+package com.adobe.acs.commons.http.headers.impl;
 
 import java.util.Calendar;
 import java.util.Dictionary;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
-
 //@formatter:off
 @Component(
-    label = "ACS AEM Commons - Dispatcher Expires Header - Weekly",
+    label = "ACS AEM Commons - Dispatcher Expires Header - Monthly",
     description = "Adds an Expires header to content to enable Dispatcher TTL support.",
     immediate = false,
     metatype = true,
@@ -55,33 +54,29 @@ import org.osgi.service.component.ComponentContext;
       propertyPrivate = false),
   @Property(
         name = "webconsole.configurationFactory.nameHint",
-        value = "Expires Each week on day {expires.day-of-week} at {expires.time} for Patterns: [{filter.pattern}]")
+        value = "Expires each month on the {expires.day-of-month} day at {expires.time} for Patterns: [{filter.pattern}]")
 })
 //@formatter:on
-public class WeeklyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
+public class MonthlyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 
-    
-    @Property(
-            label = "Expires Day",
-            description = "Day of week on which content expires.",
-            options = {
-                    @PropertyOption(name = "" + Calendar.SUNDAY, value = "Sunday"),
-                    @PropertyOption(name = "" + Calendar.MONDAY, value = "Monday"),
-                    @PropertyOption(name = "" + Calendar.TUESDAY, value = "Tuesday"),
-                    @PropertyOption(name = "" + Calendar.WEDNESDAY, value = "Wednesday"),
-                    @PropertyOption(name = "" + Calendar.THURSDAY, value = "Thursday"),
-                    @PropertyOption(name = "" + Calendar.FRIDAY, value = "Friday"),
-                    @PropertyOption(name = "" + Calendar.SATURDAY, value = "Saturday"),
-            })
-    static final String PROP_EXPIRES_DAY_OF_WEEK = "expires.day-of-week";
+    private static final String LAST = "LAST";
 
-    private int dayOfWeek;
+    @Property(label = "Expires Day", description = "Day of month on which content expires. "
+            + "Use keyword 'LAST' to enable last day of month, as setting to 31 will generate errors in February.")
+    static final String PROP_EXPIRES_DAY_OF_MONTH = "expires.day-of-month";
+
+    private String dayOfMonth;
 
     @Override
     protected void adjustExpires(Calendar next) {
-        next.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+
+        if (StringUtils.equalsIgnoreCase(LAST, dayOfMonth)) {
+            next.set(Calendar.DAY_OF_MONTH, next.getActualMaximum(Calendar.DAY_OF_MONTH));
+        } else {
+            next.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dayOfMonth));
+        }
         if (next.before(Calendar.getInstance())) {
-            next.add(Calendar.DAY_OF_WEEK, next.getMaximum(Calendar.DAY_OF_WEEK));;
+            next.add(Calendar.MONTH, 1);
         }
     }
 
@@ -91,9 +86,28 @@ public class WeeklyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 
         @SuppressWarnings("unchecked")
         Dictionary<String, Object> props = context.getProperties();
-        dayOfWeek = PropertiesUtil.toInteger(props.get(PROP_EXPIRES_DAY_OF_WEEK), -1);
-        if (dayOfWeek < Calendar.SUNDAY || dayOfWeek > Calendar.SATURDAY) {
-            throw new ConfigurationException(PROP_EXPIRES_DAY_OF_WEEK, "Day of week must be valid value from Calendar DAY_OF_WEEK attribute.");
+        dayOfMonth = PropertiesUtil.toString(props.get(PROP_EXPIRES_DAY_OF_MONTH), null);
+
+        if (StringUtils.isBlank(dayOfMonth)) {
+            throw new ConfigurationException(PROP_EXPIRES_DAY_OF_MONTH, "Day of month must be specified.");
+        }
+
+        if (!StringUtils.equalsIgnoreCase(LAST, dayOfMonth)) {
+            // Make sure it's a valid value for Calendar.
+            try {
+                int intDay = Integer.parseInt(dayOfMonth);
+                Calendar test = Calendar.getInstance();
+                if (intDay < test.getMinimum(Calendar.DAY_OF_MONTH)) {
+                    throw new ConfigurationException(PROP_EXPIRES_DAY_OF_MONTH,
+                            "Day of month is smaller than minimum allowed value.");
+                }
+                if (intDay > test.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+                    throw new ConfigurationException(PROP_EXPIRES_DAY_OF_MONTH,
+                            "Day of month is larger than least maximum allowed value.");
+                }
+            } catch (NumberFormatException ex) {
+                throw new ConfigurationException(PROP_EXPIRES_DAY_OF_MONTH, "Day of month is not a valid value.");
+            }
         }
     }
 }

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.http.headers;
+package com.adobe.acs.commons.http.headers.impl;
 
 import static org.junit.Assert.*;
 
@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.http.headers.DailyExpiresHeaderFilter;
+import com.adobe.acs.commons.http.headers.impl.DailyExpiresHeaderFilter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DailyExpiresHeaderFilterTest {

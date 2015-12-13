@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.http.headers;
+package com.adobe.acs.commons.http.headers.impl;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -51,7 +51,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
-import com.adobe.acs.commons.http.headers.AbstractDispatcherCacheHeaderFilter;
+import com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractDispatcherCacheHeaderFilterTest {
