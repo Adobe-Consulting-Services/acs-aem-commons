@@ -255,13 +255,11 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
      * @return the relative resource if it resolves otherwise the resource
      */
     private Resource getRelativeAwareResource(final Resource resource, final String relPath) {
-        if (resource != null) {
-            if (StringUtils.isNotBlank(relPath)) {
-                final Resource relResource = resource.getChild(relPath);
+        if (resource != null && StringUtils.isNotBlank(relPath)) {
+            final Resource relResource = resource.getChild(relPath);
 
-                if (relResource != null) {
-                    return relResource;
-                }
+            if (relResource != null) {
+                return relResource;
             }
         }
 
