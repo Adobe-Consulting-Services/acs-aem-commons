@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,17 @@
  */
 package com.adobe.acs.commons.util;
 
-import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
-import org.junit.*;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.MockSling;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.apache.sling.testing.mock.sling.servlet.MockRequestPathInfo;
+import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -30,6 +39,9 @@ public class PathInfoUtilTest {
 
     public PathInfoUtilTest() {
     }
+
+    @Rule
+    public final SlingContext context = new SlingContext();
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -52,16 +64,13 @@ public class PathInfoUtilTest {
      */
     @Test
     public void testGetQueryParam_HttpServletRequest_String() {
-        // MockSlingHttpServletRequest doesn't natively support getParameter
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show", "html", "simple", null) {
-            public String getParameter(String name) {
-                if (name.equals("ghz")) {
-                    return "2.4";
-                } else {
-                    return null;
-                }
-            };
-        };
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource("/apple/macbookair"));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString("show");
+        requestPathInfo.setExtension("html");
+        request.setQueryString("cpu=i7&ghz=2.4");
 
         String key = "ghz";
         String expResult = "2.4";
@@ -74,16 +83,14 @@ public class PathInfoUtilTest {
      */
     @Test
     public void testGetQueryParam_withDefault() {
-        // MockSlingHttpServletRequest doesn't natively support getParameter
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show", "html", "simple", "cpu=i7&ghz=2.4") {
-            public String getParameter(String name) {
-                if (name.equals("ghz")) {
-                    return "2.4";
-                } else {
-                    return null;
-                }
-            };
-        };
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource("/apple/macbookair"));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString("show");
+        requestPathInfo.setExtension("html");
+        request.setQueryString("cpu=i7&ghz=2.4");
+
 
         String key = "ghz";
         String expResult = "2.4";
@@ -102,7 +109,13 @@ public class PathInfoUtilTest {
      */
     @Test
     public void testGetSelector() {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test", "html", "simple", "cpu=i7&ghz=2.4");
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource("/apple/macbookair"));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString("show.test");
+        requestPathInfo.setExtension("html");
+        request.setQueryString("cpu=i7&ghz=2.4");
 
         String expResult = "show";
         String result = PathInfoUtil.getSelector(request, 0);
@@ -124,7 +137,14 @@ public class PathInfoUtilTest {
      */
     @Test
     public void testGetSuffixSegment() {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test", "html", "super/simple", "cpu=i7&ghz=2.4");
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource("/apple/macbookair"));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString("show.test");
+        requestPathInfo.setExtension("html");
+        requestPathInfo.setSuffix("super/simple");
+        request.setQueryString("cpu=i7&ghz=2.4");
 
         String expResult = "super";
         String result = PathInfoUtil.getSuffixSegment(request, 0);
@@ -146,7 +166,14 @@ public class PathInfoUtilTest {
      */
     @Test
     public void testGetSuffix() {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test", "html", "super/simple", "cpu=i7&ghz=2.4");
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource("/apple/macbookair"));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString("show.test");
+        requestPathInfo.setExtension("html");
+        requestPathInfo.setSuffix("super/simple");
+        request.setQueryString("cpu=i7&ghz=2.4");
 
         String expResult = "super/simple";
         String result = PathInfoUtil.getSuffix(request);
@@ -155,7 +182,14 @@ public class PathInfoUtilTest {
 
     @Test
     public void testGetSuffixSegments() {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test", "html", "super/simple", "cpu=i7&ghz=2.4");
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource("/apple/macbookair"));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString("show.test");
+        requestPathInfo.setExtension("html");
+        requestPathInfo.setSuffix("super/simple");
+        request.setQueryString("cpu=i7&ghz=2.4");
 
         String[] expResult = new String[] { "super", "simple" };
         String[] result = PathInfoUtil.getSuffixSegments(request);
@@ -164,7 +198,13 @@ public class PathInfoUtilTest {
 
     @Test
     public void testGetSuffixSegments_empty() {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test", "html", "", "cpu=i7&ghz=2.4");
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource("/apple/macbookair"));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString("show.test");
+        requestPathInfo.setExtension("html");
+        request.setQueryString("cpu=i7&ghz=2.4");
 
         String[] expResult = new String[] { };
         String[] result = PathInfoUtil.getSuffixSegments(request);
@@ -173,8 +213,14 @@ public class PathInfoUtilTest {
 
     @Test
     public void testGetFirstSuffixSegments() {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test",
-                "html", "first/second", "cpu=i7&ghz=2.4");
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource("/apple/macbookair"));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString("show.test");
+        requestPathInfo.setExtension("html");
+        requestPathInfo.setSuffix("first/second");
+        request.setQueryString("cpu=i7&ghz=2.4");
 
         String expResult = "first";
         String result = PathInfoUtil.getFirstSuffixSegment(request);
@@ -183,8 +229,14 @@ public class PathInfoUtilTest {
 
     @Test
     public void testGetLastSuffixSegments() {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest("/apple/macbookair", "show.test",
-                "html", "first/second/third", "cpu=i7&ghz=2.4");
+        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        request.setResource(resourceResolver.getResource("/apple/macbookair"));
+        MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
+        requestPathInfo.setSelectorString("show.test");
+        requestPathInfo.setExtension("html");
+        requestPathInfo.setSuffix("first/second/third");
+        request.setQueryString("cpu=i7&ghz=2.4");
 
         String expResult = "third";
         String result = PathInfoUtil.getLastSuffixSegment(request);

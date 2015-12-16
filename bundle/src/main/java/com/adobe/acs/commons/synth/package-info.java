@@ -18,4 +18,7 @@
  * #L%
  */
 
+@Version("2.1.2")
 package com.adobe.acs.commons.synth;
+
+import aQute.bnd.annotation.Version;
