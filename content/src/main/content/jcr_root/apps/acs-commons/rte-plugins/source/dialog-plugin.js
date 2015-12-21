@@ -38,19 +38,11 @@
     var _ = window._,
         Class = window.Class,
         CUI = window.CUI,
-        REQUESTER = "requester",
-        GROUP = "acs-commons",
-        INSERT_DIALOG_CONTENT_FEATURE = "insertDialogContent",
-        INSERT_DIALOG_CONTENT_DIALOG = "insertDialogContentDialog",
-        AcsCuiToolbarBuilder,
-        InsertDialogContentPluginDialog,
-        AcsDialogManager,
-        AcsToolkitImpl,
-        InsertTouchUIDialogPlugin,
+        RTE = ACS.TouchUI.RTE,
         InsertTouchUIDialogCmd;
 
     function getUISetting() {
-        return GROUP + "#" + INSERT_DIALOG_CONTENT_FEATURE;
+        return RTE.GROUP + "#" + RTE.INSERT_DIALOG_CONTENT_FEATURE;
     }
 
     function showErrorAlert(message, title){
@@ -66,103 +58,21 @@
         fui.prompt(title, message, "notice", options);
     }
 
-    //extend the toolbar builder to register plugin icon in fullscreen mode
-    AcsCuiToolbarBuilder = new Class({
-        toString: "ACSCuiToolbarBuilder",
-
-        extend: CUI.rte.ui.cui.CuiToolbarBuilder,
-
-        _getUISettings: function (options) {
-            var uiSettings = this.superClass._getUISettings(options),
-                toolbar = uiSettings.fullscreen.toolbar,
-                feature = getUISetting();
-
-            if (toolbar.indexOf(feature) === -1) {
-                toolbar.splice(3, 0, feature);
-            }
-
-            if (!this._getClassesForCommand(feature)) {
-                this.registerAdditionalClasses(feature, "coral-Icon coral-Icon--tableEdit");
-            }
-
-            return uiSettings;
-        }
-    });
-
     //popover dialog hosting iframe
-    InsertDialogContentPluginDialog = new Class({
+    RTE.InsertDialogContentPluginDialog = new Class({
         extend: CUI.rte.ui.cui.AbstractBaseDialog,
 
         toString: "ACSPluginDialog",
 
         getDataType: function () {
-            return INSERT_DIALOG_CONTENT_DIALOG;
+            return RTE.INSERT_DIALOG_CONTENT_DIALOG;
         }
     });
 
-    //extend the CUI dialog manager to register popover dialog
-    AcsDialogManager = new Class({
-        toString: "ACSDialogManager",
-
-        extend: CUI.rte.ui.cui.CuiDialogManager,
-
-        create: function (dialogId, config) {
-            if (dialogId !== INSERT_DIALOG_CONTENT_DIALOG) {
-                return this.superClass.create.call(this, dialogId, config);
-            }
-
-            var context = this.editorKernel.getEditContext(),
-                $container = CUI.rte.UIUtils.getUIContainer($(context.root)),
-                dialog = new InsertDialogContentPluginDialog();
-
-            dialog.attach(config, $container, this.editorKernel, true);
-
-            return dialog;
-        }
-    });
-
-    //extend the toolkit implementation for custom toolbar builder and dialog manager
-    AcsToolkitImpl = new Class({
-        toString: "ACSToolkitImpl",
-
-        extend: CUI.rte.ui.cui.ToolkitImpl,
-
-        createToolbarBuilder: function () {
-            return new AcsCuiToolbarBuilder();
-        },
-
-        createDialogManager: function (editorKernel) {
-            return new AcsDialogManager(editorKernel);
-        }
-    });
-
-    CUI.rte.ui.ToolkitRegistry.register("cui", AcsToolkitImpl);
-
-    InsertTouchUIDialogPlugin = new Class({
+    RTE.InsertTouchUIDialogPlugin = new Class({
         toString: "TouchUIInsertDialogPlugin",
 
-        extend: CUI.rte.plugins.Plugin,
-
-        pickerUI: null,
-
-        getFeatures: function () {
-            return [ INSERT_DIALOG_CONTENT_FEATURE ];
-        },
-
-        initializeUI: function (tbGenerator) {
-            var plg = CUI.rte.plugins;
-
-            if (!this.isFeatureEnabled(INSERT_DIALOG_CONTENT_FEATURE)) {
-                return;
-            }
-
-            var config = this.config[INSERT_DIALOG_CONTENT_FEATURE];
-
-            this.pickerUI = tbGenerator.createElement(INSERT_DIALOG_CONTENT_FEATURE,
-                                            this, true, config.tooltip || "Insert TouchUI Dialog");
-
-            tbGenerator.addElement(GROUP, plg.Plugin.SORT_FORMAT, this.pickerUI, 120);
-        },
+        extend: RTE.DialogPlugin,
 
         execute: function (id) {
             var ek = this.editorKernel,
@@ -174,24 +84,24 @@
                     }
                 };
 
-            popoverConfig = this.config[INSERT_DIALOG_CONTENT_FEATURE];
+            popoverConfig = this.config[RTE.INSERT_DIALOG_CONTENT_FEATURE];
 
             if(_.isEmpty(popoverConfig)){
-                showErrorAlert("Config node '" + INSERT_DIALOG_CONTENT_FEATURE + "' not defined");
+                showErrorAlert("Config node '" + RTE.INSERT_DIALOG_CONTENT_FEATURE + "' not defined");
                 return;
             }
 
             if(_.isEmpty(popoverConfig.dialogPath)){
-                showErrorAlert("Parameter dialogPath of '" + INSERT_DIALOG_CONTENT_FEATURE + "' not defined");
+                showErrorAlert("Parameter dialogPath of '" + RTE.INSERT_DIALOG_CONTENT_FEATURE + "' not defined");
                 return;
             }
 
             if(_.isEmpty(popoverConfig.onsubmit)){
-                showErrorAlert("Parameter onsubmit listener of '" + INSERT_DIALOG_CONTENT_FEATURE + "' not defined");
+                showErrorAlert("Parameter onsubmit listener of '" + RTE.INSERT_DIALOG_CONTENT_FEATURE + "' not defined");
                 return;
             }
 
-            dialog = this.dialog = dm.create(INSERT_DIALOG_CONTENT_DIALOG, dialogConfig);
+            dialog = this.dialog = dm.create(RTE.INSERT_DIALOG_CONTENT_DIALOG, dialogConfig);
 
             dm.prepareShow(this.dialog);
 
@@ -223,7 +133,7 @@
                 var message = JSON.parse(event.data),
                     action;
 
-                if (!message || message.sender !== GROUP) {
+                if (!message || message.sender !== RTE.GROUP) {
                     return;
                 }
 
@@ -241,7 +151,7 @@
             }
 
             function loadPopoverUI($popover) {
-                var url = popoverConfig.dialogPath + ".html?" + REQUESTER + "=" + GROUP;
+                var url = popoverConfig.dialogPath + ".html?" + RTE.REQUESTER + "=" + RTE.GROUP;
 
                 $popover.parent().css("width", ".1px").height(".1px").css("border", "none");
                 $popover.css("width", ".1px").height(".1px");
@@ -256,7 +166,7 @@
 
         //to mark the icon selected/deselected
         updateState: function (selDef) {
-            var hasUC = this.editorKernel.queryState(INSERT_DIALOG_CONTENT_FEATURE, selDef);
+            var hasUC = this.editorKernel.queryState(RTE.INSERT_DIALOG_CONTENT_FEATURE, selDef);
 
             if (this.pickerUI !== null) {
                 this.pickerUI.setSelected(hasUC);
@@ -264,15 +174,13 @@
         }
     });
 
-    CUI.rte.plugins.PluginRegistry.register(GROUP, InsertTouchUIDialogPlugin);
-
     InsertTouchUIDialogCmd = new Class({
         toString: "TouchUIInsertDialogCmd",
 
         extend: CUI.rte.commands.Command,
 
         isCommand: function (cmdStr) {
-            return (cmdStr.toLowerCase() === INSERT_DIALOG_CONTENT_FEATURE);
+            return (cmdStr.toLowerCase() === RTE.INSERT_DIALOG_CONTENT_FEATURE);
         },
 
         getProcessingOptions: function () {
@@ -281,8 +189,8 @@
         },
 
         execute: function (execDef) {
-            var acsPlugins = execDef.component.registeredPlugins[GROUP],
-                popoverConfig = acsPlugins.config[INSERT_DIALOG_CONTENT_FEATURE],
+            var acsPlugins = execDef.component.registeredPlugins[RTE.GROUP],
+                popoverConfig = acsPlugins.config[RTE.INSERT_DIALOG_CONTENT_FEATURE],
                 /*jshint -W061 */
                 onSubmitFn = eval("(" + popoverConfig.onsubmit + ")"),
                 html = onSubmitFn(execDef.value);
@@ -291,13 +199,13 @@
         }
     });
 
-    CUI.rte.commands.CommandRegistry.register(INSERT_DIALOG_CONTENT_FEATURE, InsertTouchUIDialogCmd);
+    CUI.rte.commands.CommandRegistry.register(RTE.INSERT_DIALOG_CONTENT_FEATURE, InsertTouchUIDialogCmd);
 
     //returns the picker dialog html
     //Handlebars doesn't do anything useful here, but the framework expects a template
     function dlgTemplate() {
-        CUI.rte.Templates["dlg-" + INSERT_DIALOG_CONTENT_DIALOG] =
-            Handlebars.compile('<div data-rte-dialog="' + INSERT_DIALOG_CONTENT_DIALOG +
+        CUI.rte.Templates["dlg-" + RTE.INSERT_DIALOG_CONTENT_DIALOG] =
+            Handlebars.compile('<div data-rte-dialog="' + RTE.INSERT_DIALOG_CONTENT_DIALOG +
                 '" class="coral--dark coral-Popover coral-RichText-dialog">' +
                 '<iframe width="1100px" height="700px"></iframe>' +
                 '</div>');
@@ -307,8 +215,7 @@
 })(jQuery, jQuery(document), Handlebars);
 
 (function($, $document){
-    var SENDER = "acs-commons",
-        REQUESTER = "requester",
+    var RTE = ACS.TouchUI.RTE,
         HELP_BUTTON_SEL = ".cq-dialog-help",
         CANCEL_BUTTON_SEL = ".cq-dialog-cancel",
         SUBMIT_BUTTON_SEL = ".cq-dialog-submit";
@@ -332,7 +239,7 @@
     }
 
     function stylePopoverIframe(){
-        if(queryParameters()[REQUESTER] !== SENDER ){
+        if(queryParameters()[RTE.REQUESTER] !== RTE.GROUP ){
             return;
         }
 
@@ -353,7 +260,7 @@
 
     function sendCloseMessage(){
         var message = {
-            sender: SENDER,
+            sender: RTE.GROUP,
             action: "close"
         };
 
@@ -362,7 +269,7 @@
 
     function sendDataMessage(){
         var message = {
-            sender: SENDER,
+            sender: RTE.GROUP,
             action: "submit"
         }, dialogData = {}, $dialog, $field;
 
