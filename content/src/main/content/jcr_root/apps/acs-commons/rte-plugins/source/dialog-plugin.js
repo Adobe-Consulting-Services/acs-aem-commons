@@ -162,15 +162,6 @@
             }
 
             loadPopoverUI($popover);
-        },
-
-        //to mark the icon selected/deselected
-        updateState: function (selDef) {
-            var hasUC = this.editorKernel.queryState(RTE.INSERT_DIALOG_CONTENT_FEATURE, selDef);
-
-            if (this.pickerUI !== null) {
-                this.pickerUI.setSelected(hasUC);
-            }
         }
     });
 

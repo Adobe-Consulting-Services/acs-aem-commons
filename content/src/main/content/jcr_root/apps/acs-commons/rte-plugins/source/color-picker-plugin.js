@@ -5,7 +5,7 @@
         Class = window.Class,
         CUI = window.CUI,
         RTE = ACS.TouchUI.RTE,
-        DIALOG_URL = "/apps/experience-aem-samples/dialogs/color-picker-popover/cq:dialog",
+        DIALOG_URL = "/apps/acs-commons/dialogs/color-picker-popover/cq:dialog",
         PICKER_NAME_IN_POPOVER = "color",
         ColorPickerCmd;
 
@@ -123,19 +123,8 @@
             }
 
             loadPopoverUI($popover, $(tag).css("color"));
-        },
-
-        //to mark the icon selected/deselected
-        updateState: function (selDef) {
-            var hasUC = this.editorKernel.queryState(RTE.COLOR_PICKER_FEATURE, selDef);
-
-            if (this.pickerUI !== null) {
-                this.pickerUI.setSelected(hasUC);
-            }
         }
     });
-
-    CUI.rte.plugins.PluginRegistry.register(RTE.GROUP, RTE.ColorPickerPlugin);
 
     ColorPickerCmd = new Class({
         toString: "ColorPickerDialogCmd",
@@ -148,8 +137,6 @@
 
         getProcessingOptions: function () {
             var cmd = CUI.rte.commands.Command;
-
-            /*jslint bitwise: false*/
             return cmd.PO_SELECTION | cmd.PO_BOOKMARK | cmd.PO_NODELIST;
         },
 

@@ -137,33 +137,55 @@
 
         extend: CUI.rte.plugins.Plugin,
 
-        pickerUI: null,
+        featuresUI: [],
 
         getFeatures: function () {
             return [ RTE.INSERT_DIALOG_CONTENT_FEATURE, RTE.COLOR_PICKER_FEATURE ];
         },
 
         initializeUI: function (tbGenerator) {
-            var plg = CUI.rte.plugins, config;
+            var plg = CUI.rte.plugins, config, featureUI;
 
             if (this.isFeatureEnabled(RTE.INSERT_DIALOG_CONTENT_FEATURE)) {
                 config = this.config[RTE.INSERT_DIALOG_CONTENT_FEATURE];
 
-                this.pickerUI = tbGenerator.createElement(RTE.INSERT_DIALOG_CONTENT_FEATURE,
-                    this, true, config.tooltip || "Insert TouchUI Dialog");
+                featureUI = tbGenerator.createElement(RTE.INSERT_DIALOG_CONTENT_FEATURE,
+                    this, true, (config && config.tooltip) || "Insert TouchUI Dialog");
 
-            }else if(this.isFeatureEnabled(RTE.COLOR_PICKER_FEATURE)){
-                config = this.config[RTE.COLOR_PICKER_FEATURE];
+                tbGenerator.addElement(RTE.GROUP, plg.Plugin.SORT_FORMAT, featureUI, 120);
 
-                this.pickerUI = tbGenerator.createElement(RTE.COLOR_PICKER_FEATURE,
-                    this, true, config.tooltip || "Select Color");
+                this.featuresUI.push(featureUI);
             }
 
-            tbGenerator.addElement(RTE.GROUP, plg.Plugin.SORT_FORMAT, this.pickerUI, 120);
+            if(this.isFeatureEnabled(RTE.COLOR_PICKER_FEATURE)){
+                featureUI = tbGenerator.createElement(RTE.COLOR_PICKER_FEATURE,
+                                    this, true, "Select Color");
+
+                tbGenerator.addElement(RTE.GROUP, plg.Plugin.SORT_FORMAT, featureUI, 130);
+
+                this.featuresUI.push(featureUI);
+            }
         },
 
         execute: function (id, value, envOptions) {
-            return new RTE.InsertTouchUIDialogPlugin(id, value, envOptions);
+            var plugin;
+
+            if(id === RTE.COLOR_PICKER_FEATURE){
+                plugin = RTE.ColorPickerPlugin();
+            }else if(id === RTE.INSERT_DIALOG_CONTENT_FEATURE){
+                plugin = new RTE.InsertTouchUIDialogPlugin();
+            }else{
+                return;
+            }
+
+            return plugin.execute.call(this, id, value, envOptions);
+        },
+
+        //to mark the icon selected/deselected
+        updateState: function (selDef) {
+            _.each(this.featuresUI, function(featureUI){
+                featureUI.setSelected(this.editorKernel.queryState(featureUI.id, selDef));
+            }, this);
         }
     });
 
