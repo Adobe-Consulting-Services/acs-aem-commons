@@ -18,7 +18,7 @@
                     <picker
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/foundation/form/colorpicker"
-                        classicPaletteType="{Boolean}true"
+                        freestylePaletteType="{Boolean}true"
                         editType="{Boolean}true"
                         fieldLabel="Select Color"
                         name="./color">

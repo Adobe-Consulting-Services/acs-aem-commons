@@ -170,6 +170,10 @@
                 return;
             }
 
+            if(color && color.indexOf("rgb") >= 0){
+                color = CUI.util.color.RGBAToHex(color);
+            }
+
             common = CUI.rte.Common;
             context = execDef.editContext;
             tagObj = this._getTagObject(color);
