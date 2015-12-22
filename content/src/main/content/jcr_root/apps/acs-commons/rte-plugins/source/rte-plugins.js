@@ -36,7 +36,39 @@
         INSERT_DIALOG_CONTENT_DIALOG: "insertDialogContentDialog",
         COLOR_PICKER_FEATURE: "colorPicker",
         COLOR_PICKER_DIALOG: "colorPickerDialog",
-        REQUESTER: "requester"
+        REQUESTER: "requester",
+
+        removeReceiveDataListener: function(handler) {
+            if (window.removeEventListener) {
+                window.removeEventListener("message", handler);
+            } else if (window.detachEvent) {
+                window.detachEvent("onmessage", handler);
+            }
+        },
+
+        registerReceiveDataListener: function(handler) {
+            if (window.addEventListener) {
+                window.addEventListener("message", handler, false);
+            } else if (window.attachEvent) {
+                window.attachEvent("onmessage", handler);
+            }
+        },
+
+        queryParameters: function() {
+            var result = {}, param,
+                params = document.location.search.split(/\?|\&/);
+
+            params.forEach( function(it) {
+                if (_.isEmpty(it)) {
+                    return;
+                }
+
+                param = it.split("=");
+                result[param[0]] = param[1];
+            });
+
+            return result;
+        }
     };
 
     var _ = window._,
@@ -62,29 +94,23 @@
 
         extend: CUI.rte.ui.cui.CuiToolbarBuilder,
 
+        addFeatureToToolbar: function(toolbar, feature, iconClass){
+            if (toolbar.indexOf(feature) === -1) {
+                toolbar.splice(3, 0, feature);
+            }
+
+            if (!this._getClassesForCommand(feature)) {
+                this.registerAdditionalClasses(feature, "coral-Icon " + iconClass);
+            }
+        },
+
         _getUISettings: function (options) {
             var uiSettings = this.superClass._getUISettings(options),
-                toolbar = uiSettings.fullscreen.toolbar,
-                feature = getInsertDialogUISetting();
+                toolbar = uiSettings.fullscreen.toolbar;
 
-            if (toolbar.indexOf(feature) === -1) {
-                toolbar.splice(3, 0, feature);
-            }
+            this.addFeatureToToolbar(toolbar, getInsertDialogUISetting(), "coral-Icon--tableEdit");
 
-            if (!this._getClassesForCommand(feature)) {
-                this.registerAdditionalClasses(feature, "coral-Icon coral-Icon--tableEdit");
-            }
-
-            feature = getColorPickerUISetting();
-
-            if (toolbar.indexOf(feature) === -1) {
-                toolbar.splice(3, 0, feature);
-            }
-
-            if (!this._getClassesForCommand(feature)) {
-                //.coral-ColorPicker-button
-                this.registerAdditionalClasses(feature, "coral-Icon coral-Icon--textColor");
-            }
+            this.addFeatureToToolbar(toolbar, getColorPickerUISetting(), "coral-Icon--textColor");
 
             return uiSettings;
         }
@@ -133,7 +159,7 @@
     CUI.rte.ui.ToolkitRegistry.register("cui", AcsToolkitImpl);
 
     RTE.DialogPlugin = new Class({
-        toString: "TouchUIInsertDialogPlugin",
+        toString: "ACSTouchUIDialogPlugin",
 
         extend: CUI.rte.plugins.Plugin,
 

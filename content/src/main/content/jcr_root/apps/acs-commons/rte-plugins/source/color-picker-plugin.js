@@ -1,3 +1,30 @@
+/*
+ * #%L
+ * ACS AEM Commons Package
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ *
+ * TouchUI RTE Plugin for color picker
+ *
+ * Steps:
+ *
+ * 1) Create ACS Commons plugin nt:unstructured node "acs-commons"
+ *      eg. /apps/<project>/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons
+ * 3) Add property "features" of type String[] and single value "colorPicker"
+ */
 (function ($, $document, Handlebars) {
     "use strict";
 
@@ -64,22 +91,6 @@
 
             tag = CUI.rte.Common.getTagInPath(context, selection.startNode, "span" );
 
-            function removeReceiveDataListener(handler) {
-                if (window.removeEventListener) {
-                    window.removeEventListener("message", handler);
-                } else if (window.detachEvent) {
-                    window.detachEvent("onmessage", handler);
-                }
-            }
-
-            function registerReceiveDataListener(handler) {
-                if (window.addEventListener) {
-                    window.addEventListener("message", handler, false);
-                } else if (window.attachEvent) {
-                    window.attachEvent("onmessage", handler);
-                }
-            }
-
             function receiveMessage(event) {
                 if (_.isEmpty(event.data)) {
                     return;
@@ -104,7 +115,7 @@
 
                 dialog.hide();
 
-                removeReceiveDataListener(receiveMessage);
+                RTE.removeReceiveDataListener(receiveMessage);
             }
 
             function loadPopoverUI($popover, color) {
@@ -119,7 +130,7 @@
                 $popover.find("iframe").attr("src", url);
 
                 //receive the dialog values from child window
-                registerReceiveDataListener(receiveMessage);
+                RTE.registerReceiveDataListener(receiveMessage);
             }
 
             loadPopoverUI($popover, $(tag).css("color"));
@@ -127,7 +138,7 @@
     });
 
     ColorPickerCmd = new Class({
-        toString: "ColorPickerDialogCmd",
+        toString: "ACSColorPickerDialogCmd",
 
         extend: CUI.rte.commands.Command,
 
@@ -183,12 +194,11 @@
     CUI.rte.commands.CommandRegistry.register(RTE.COLOR_PICKER_FEATURE, ColorPickerCmd);
 
     //returns the picker dialog html
-    //Handlebars doesn't do anything useful here, but the framework expects a template
     function dlgTemplate() {
         CUI.rte.Templates["dlg-" + RTE.COLOR_PICKER_DIALOG] =
             Handlebars.compile('<div data-rte-dialog="' + RTE.COLOR_PICKER_DIALOG +
                 '" class="coral--dark coral-Popover coral-RichText-dialog">' +
-                '<iframe width="525px" height="435px"></iframe>' +
+                '<iframe width="525px" height="470px"></iframe>' +
                 '</div>');
     }
 
@@ -209,23 +219,7 @@
         SUBMIT_BUTTON_SEL = ".cq-dialog-submit",
         pickerInstance;
 
-    function queryParameters() {
-        var result = {}, param,
-            params = document.location.search.split(/\?|\&/);
-
-        params.forEach( function(it) {
-            if (_.isEmpty(it)) {
-                return;
-            }
-
-            param = it.split("=");
-            result[param[0]] = param[1];
-        });
-
-        return result;
-    }
-
-    if(queryParameters()[RTE.REQUESTER] !== RTE.GROUP ){
+    if(RTE.queryParameters()[RTE.REQUESTER] !== RTE.GROUP ){
         return;
     }
 
@@ -268,21 +262,22 @@
     }
 
     function stylePopoverIframe(){
-        var queryParams = queryParameters(),
+        var queryParams = RTE.queryParameters(),
             $dialog = $(".cq-dialog"),
             $cancel = $dialog.find(CANCEL_BUTTON_SEL),
             $submit = $dialog.find(SUBMIT_BUTTON_SEL),
             $addColor = $dialog.find(ADD_COLOR_BUT),
             $removeColor = $dialog.find(REMOVE_COLOR_BUT);
 
-        if(!_.isEmpty(queryParameters()[COLOR])){
+        if(!_.isEmpty(RTE.queryParameters()[COLOR])){
             pickerInstance._setColor(decodeURIComponent(queryParams[COLOR]));
         }
 
         $dialog.css("border", "solid 2px");
         $dialog.find(HELP_BUTTON_SEL).hide();
+
         $document.find(".coral-ColorPicker").closest(".coral-Form-fieldwrapper")
-            .css("margin-bottom", "20px");
+                        .css("margin-bottom", "20px");
 
         $document.off("click", CANCEL_BUTTON_SEL);
         $document.off("click", SUBMIT_BUTTON_SEL);

@@ -70,7 +70,7 @@
     });
 
     RTE.InsertTouchUIDialogPlugin = new Class({
-        toString: "TouchUIInsertDialogPlugin",
+        toString: "ACSTouchUIInsertDialogPlugin",
 
         extend: RTE.DialogPlugin,
 
@@ -109,22 +109,6 @@
 
             $popover = this.dialog.$dialog.find(".coral-Popover-content");
 
-            function removeReceiveDataListener(handler) {
-                if (window.removeEventListener) {
-                    window.removeEventListener("message", handler);
-                } else if (window.detachEvent) {
-                    window.detachEvent("onmessage", handler);
-                }
-            }
-
-            function registerReceiveDataListener(handler) {
-                if (window.addEventListener) {
-                    window.addEventListener("message", handler, false);
-                } else if (window.attachEvent) {
-                    window.attachEvent("onmessage", handler);
-                }
-            }
-
             function receiveMessage(event) {
                 if (_.isEmpty(event.data)) {
                     return;
@@ -147,7 +131,7 @@
 
                 dialog.hide();
 
-                removeReceiveDataListener(receiveMessage);
+                RTE.removeReceiveDataListener(receiveMessage);
             }
 
             function loadPopoverUI($popover) {
@@ -158,7 +142,7 @@
                 $popover.find("iframe").attr("src", url);
 
                 //receive the dialog values from child window
-                registerReceiveDataListener(receiveMessage);
+                RTE.registerReceiveDataListener(receiveMessage);
             }
 
             loadPopoverUI($popover);
@@ -166,7 +150,7 @@
     });
 
     InsertTouchUIDialogCmd = new Class({
-        toString: "TouchUIInsertDialogCmd",
+        toString: "ACSTouchUIInsertDialogCmd",
 
         extend: CUI.rte.commands.Command,
 
@@ -193,7 +177,6 @@
     CUI.rte.commands.CommandRegistry.register(RTE.INSERT_DIALOG_CONTENT_FEATURE, InsertTouchUIDialogCmd);
 
     //returns the picker dialog html
-    //Handlebars doesn't do anything useful here, but the framework expects a template
     function dlgTemplate() {
         CUI.rte.Templates["dlg-" + RTE.INSERT_DIALOG_CONTENT_DIALOG] =
             Handlebars.compile('<div data-rte-dialog="' + RTE.INSERT_DIALOG_CONTENT_DIALOG +
@@ -213,24 +196,8 @@
 
     $document.on("foundation-contentloaded", stylePopoverIframe);
 
-    function queryParameters() {
-        var result = {}, param,
-            params = document.location.search.split(/\?|\&/);
-
-        params.forEach( function(it) {
-            if (_.isEmpty(it)) {
-                return;
-            }
-
-            param = it.split("=");
-            result[param[0]] = param[1];
-        });
-
-        return result;
-    }
-
     function stylePopoverIframe(){
-        if(queryParameters()[RTE.REQUESTER] !== RTE.GROUP ){
+        if(RTE.queryParameters()[RTE.REQUESTER] !== RTE.GROUP ){
             return;
         }
 
