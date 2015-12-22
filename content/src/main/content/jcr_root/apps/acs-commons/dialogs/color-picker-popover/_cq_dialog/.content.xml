@@ -61,13 +61,13 @@
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/foundation/button"
                         class="coral-Button--primary"
-                        id="EAEM_CP_ADD_COLOR"
+                        id="ACS_CP_ADD_COLOR"
                         text="Add Color"/>
                     <remove
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/foundation/button"
                         class="coral-Button--warning"
-                        id="EAEM_CP_REMOVE_COLOR"
+                        id="ACS_CP_REMOVE_COLOR"
                         text="Remove Color"/>
                 </items>
             </column>
