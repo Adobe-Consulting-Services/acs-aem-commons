@@ -75,6 +75,7 @@ public class EnsureOakIndex {
                     + "ACS AEM Commons ensure definitions",
             value = DEFAULT_ENSURE_DEFINITIONS_PATH)
     public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure-definitions.path";
+    private String ensureDefinitionsPath;
 
     private static final String DEFAULT_OAK_INDEXES_PATH = "/oak:index";
 
@@ -82,6 +83,12 @@ public class EnsureOakIndex {
             description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
             value = DEFAULT_OAK_INDEXES_PATH)
     public static final String PROP_OAK_INDEXES_PATH = "oak-indexes.path";
+    private String oakIndexesPath;
+    
+    @Property(label = "Apply on startup",
+    		description = "Apply the indexes on startup of service",
+    		boolValue = true)
+    public static final String PROP_APPLY_ON_START = "oak-index.applyOnStartup";
 
     @Activate
     protected final void activate(Map<String, Object> config) throws RepositoryException {
@@ -90,13 +97,11 @@ public class EnsureOakIndex {
             return;
         }
 
-        final String ensureDefinitionsPath = PropertiesUtil.toString(config.get(PROP_ENSURE_DEFINITIONS_PATH),
+        ensureDefinitionsPath = PropertiesUtil.toString(config.get(PROP_ENSURE_DEFINITIONS_PATH),
                 DEFAULT_ENSURE_DEFINITIONS_PATH);
 
-        final String oakIndexesPath = PropertiesUtil.toString(config.get(PROP_OAK_INDEXES_PATH),
+        oakIndexesPath = PropertiesUtil.toString(config.get(PROP_OAK_INDEXES_PATH),
                 DEFAULT_OAK_INDEXES_PATH);
-
-        log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
 
         if (StringUtils.isBlank(ensureDefinitionsPath)) {
             throw new IllegalArgumentException("OSGi Configuration Property `"
@@ -105,6 +110,20 @@ public class EnsureOakIndex {
             throw new IllegalArgumentException("OSGi Configuration Property `"
                     + PROP_OAK_INDEXES_PATH + "` " + "cannot be blank.");
         }
+        
+        final boolean applyOnStartup = PropertiesUtil.toBoolean(config.get(PROP_APPLY_ON_START), true);
+
+        if (applyOnStartup) {
+            StartJobHandler ();
+        }
+    }
+
+
+
+
+
+	private void StartJobHandler() {
+		log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
 
         // Start the indexing process asynchronously, so the activate won't get blocked
         // by rebuilding a synchronous index
@@ -118,7 +137,11 @@ public class EnsureOakIndex {
         scheduler.schedule(jobHandler, options);
 
         log.info("Job scheduled for ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
-    }
+	}
+    
+    
+    
+    
 
     final ChecksumGenerator getChecksumGenerator() {
         return checksumGenerator;
