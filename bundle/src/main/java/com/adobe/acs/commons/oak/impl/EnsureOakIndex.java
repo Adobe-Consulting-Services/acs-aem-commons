@@ -56,7 +56,7 @@ import java.util.Map;
 })
 @Service
 //@formatter:on
-public class EnsureOakIndex implements AppliableEnsureOakIndex {
+public class EnsureOakIndex implements IndexApplier {
 
     static final Logger log = LoggerFactory.getLogger(EnsureOakIndex.class);
 
@@ -137,7 +137,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         final boolean applyOnStartup = PropertiesUtil.toBoolean(config.get(PROP_APPLY_ON_START), true);
 
         if (applyOnStartup) {
-            StartJobHandler ();
+            applyIndex ();
         }
     }
 
@@ -145,7 +145,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
 
 
 
-	private void StartJobHandler() {
+	public void applyIndex() {
 		log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
 
         this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
