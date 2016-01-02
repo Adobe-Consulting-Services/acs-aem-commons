@@ -52,7 +52,7 @@ import java.util.Map;
         )
 })
 //@formatter:on
-public class EnsureOakIndex {
+public class EnsureOakIndex implements IndexApplier {
 
     static final Logger log = LoggerFactory.getLogger(EnsureOakIndex.class);
 
@@ -114,7 +114,7 @@ public class EnsureOakIndex {
         final boolean applyOnStartup = PropertiesUtil.toBoolean(config.get(PROP_APPLY_ON_START), true);
 
         if (applyOnStartup) {
-            StartJobHandler ();
+            applyIndex ();
         }
     }
 
@@ -122,7 +122,7 @@ public class EnsureOakIndex {
 
 
 
-	private void StartJobHandler() {
+	public void applyIndex() {
 		log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
 
         // Start the indexing process asynchronously, so the activate won't get blocked
