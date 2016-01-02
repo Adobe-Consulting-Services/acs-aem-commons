@@ -80,6 +80,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
                     + "ACS AEM Commons ensure definitions",
             value = DEFAULT_ENSURE_DEFINITIONS_PATH)
     public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure-definitions.path";
+    private String ensureDefinitionsPath;
 
     private String ensureDefinitionsPath;
 
@@ -89,6 +90,12 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
             description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
             value = DEFAULT_OAK_INDEXES_PATH)
     public static final String PROP_OAK_INDEXES_PATH = "oak-indexes.path";
+    private String oakIndexesPath;
+    
+    @Property(label = "Apply on startup",
+    		description = "Apply the indexes on startup of service",
+    		boolValue = true)
+    public static final String PROP_APPLY_ON_START = "oak-index.applyOnStartup";
 
     private String oakIndexesPath;
 
@@ -126,6 +133,20 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
             throw new IllegalArgumentException("OSGi Configuration Property `"
                     + PROP_OAK_INDEXES_PATH + "` " + "cannot be blank.");
         }
+        
+        final boolean applyOnStartup = PropertiesUtil.toBoolean(config.get(PROP_APPLY_ON_START), true);
+
+        if (applyOnStartup) {
+            StartJobHandler ();
+        }
+    }
+
+
+
+
+
+	private void StartJobHandler() {
+		log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
 
         this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
 
@@ -160,7 +181,11 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         applied = true;
 
         log.info("Job scheduled for ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
-    }
+	}
+    
+    
+    
+    
 
     @Override
     public final boolean isApplied() {
