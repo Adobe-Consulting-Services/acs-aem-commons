@@ -73,6 +73,7 @@ public class EnsureOakIndex implements IndexApplier {
     private Scheduler scheduler;
 
     private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
+    
 
 
     @Property(label = "Ensure Definitions Path",
@@ -96,6 +97,9 @@ public class EnsureOakIndex implements IndexApplier {
     		description = "Apply the indexes on startup of service",
     		boolValue = true)
     public static final String PROP_APPLY_ON_START = "oak-index.applyOnStartup";
+    
+    private boolean definitionApplied = false;
+    
 
     private String oakIndexesPath;
 
@@ -146,6 +150,11 @@ public class EnsureOakIndex implements IndexApplier {
 
 
 	public void applyIndex() {
+	    
+	    if (definitionApplied) {
+	        return;
+	    }
+	    
 		log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
 
         this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
@@ -181,10 +190,14 @@ public class EnsureOakIndex implements IndexApplier {
         applied = true;
 
         log.info("Job scheduled for ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
+        definitionApplied = true;
 	}
     
     
-    
+    public String toString() {
+        String s = String.format("EnsureOakIndex(%s => %s)",new Object[]{ensureDefinitionsPath,oakIndexesPath});
+        return s;
+    }
     
 
     @Override
