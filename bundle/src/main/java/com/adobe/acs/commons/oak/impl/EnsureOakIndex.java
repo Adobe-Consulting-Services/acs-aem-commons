@@ -67,6 +67,7 @@ public class EnsureOakIndex implements IndexApplier {
     private Scheduler scheduler;
 
     private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
+    
 
     @Property(label = "Ensure Definitions Path",
             description = "The absolute path to the resource containing the "
@@ -87,6 +88,9 @@ public class EnsureOakIndex implements IndexApplier {
     		description = "Apply the indexes on startup of service",
     		boolValue = true)
     public static final String PROP_APPLY_ON_START = "oak-index.applyOnStartup";
+    
+    private boolean definitionApplied = false;
+    
 
     @Activate
     protected final void activate(Map<String, Object> config) throws RepositoryException {
@@ -121,6 +125,11 @@ public class EnsureOakIndex implements IndexApplier {
 
 
 	public void applyIndex() {
+	    
+	    if (definitionApplied) {
+	        return;
+	    }
+	    
 		log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
 
         // Start the indexing process asynchronously, so the activate won't get blocked
@@ -129,16 +138,19 @@ public class EnsureOakIndex implements IndexApplier {
         EnsureOakIndexJobHandler jobHandler =
                 new EnsureOakIndexJobHandler(this, oakIndexesPath, ensureDefinitionsPath);
         ScheduleOptions options = scheduler.NOW();
-        String name = String.format("Ensure index %s => %s", new Object[]{ oakIndexesPath, ensureDefinitionsPath });
-        options.name(name);
+        options.name(toString());
         options.canRunConcurrently(false);
         scheduler.schedule(jobHandler, options);
 
         log.info("Job scheduled for ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
+        definitionApplied = true;
 	}
     
     
-    
+    public String toString() {
+        String s = String.format("EnsureOakIndex(%s => %s)",new Object[]{ensureDefinitionsPath,oakIndexesPath});
+        return s;
+    }
     
 
     final ChecksumGenerator getChecksumGenerator() {
