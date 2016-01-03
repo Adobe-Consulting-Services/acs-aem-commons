@@ -21,6 +21,7 @@ package com.adobe.acs.commons.oak.impl;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.util.AemCapabilityHelper;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -28,6 +29,7 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
@@ -36,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+
 import java.util.Map;
 
 //@formatter:off
@@ -44,6 +47,7 @@ import java.util.Map;
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE,
         metatype = true)
+@Service
 @Properties({
         @Property(
                 name = "webconsole.configurationFactory.nameHint",
@@ -96,6 +100,7 @@ public class EnsureOakIndex implements IndexApplier {
 
     @Activate
     protected final void activate(Map<String, Object> config) throws RepositoryException {
+        
         if (!capabilityHelper.isOak()) {
             log.info("Cowardly refusing to create indexes on non-Oak instance.");
             return;
@@ -106,6 +111,7 @@ public class EnsureOakIndex implements IndexApplier {
 
         oakIndexesPath = PropertiesUtil.toString(config.get(PROP_OAK_INDEXES_PATH),
                 DEFAULT_OAK_INDEXES_PATH);
+   
 
         if (StringUtils.isBlank(ensureDefinitionsPath)) {
             throw new IllegalArgumentException("OSGi Configuration Property `"
@@ -167,5 +173,10 @@ public class EnsureOakIndex implements IndexApplier {
         OakIndexDefinitionException(String message) {
             super(message);
         }
+    }
+
+    @Override
+    public boolean isApplied() {
+        return definitionApplied;
     }
 }
