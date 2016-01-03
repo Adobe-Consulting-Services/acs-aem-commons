@@ -32,5 +32,12 @@ public interface IndexApplier {
      * Apply the index to the system
      */
     public void applyIndex ();
+    
+    /**
+     * Determines if the index definition has been applied to the system. This that not
+     * necessarily mean, that the index has already been created.
+     * @return true if the index definition has been applied
+     */
+    public boolean isApplied();
 
 }
