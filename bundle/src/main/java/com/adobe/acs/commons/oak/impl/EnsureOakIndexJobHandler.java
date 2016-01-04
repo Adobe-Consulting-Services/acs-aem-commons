@@ -232,7 +232,7 @@ class EnsureOakIndexJobHandler implements Runnable {
                     boolean forceReindex = ensureDefinitionProperties.get(PN_FORCE_REINDEX, false);
 
                     if (ensureDefinitionProperties.get(PN_RECREATE_ON_UPDATE, false)) {
-                        // Recreate on Update, refresh not reuqired (is implicit)
+                        // Recreate on Update, refresh not required (is implicit)
                         this.delete(oakIndex);
                         this.create(ensureDefinition, oakIndexes);
                     } else {
@@ -241,7 +241,7 @@ class EnsureOakIndexJobHandler implements Runnable {
                     }
                 }
             } catch (OakIndexDefinitionException e) {
-                log.error("Skipping " + ensureDefinitions.getPath() + ": " + e.getMessage());
+                log.error("Skipping {} : {}", ensureDefinitions.getPath(), e.getMessage());
             }
         }
 
@@ -402,7 +402,7 @@ class EnsureOakIndexJobHandler implements Runnable {
 
         // Compile checksum for the ensureDefinition node system
         final CustomChecksumGeneratorOptions ensureDefinitionOptions = new CustomChecksumGeneratorOptions();
-        ensureDefinitionOptions.addIncludedNodeTypes(new String[]{ NT_OAK_UNSTRUCTURED });
+        ensureDefinitionOptions.addIncludedNodeTypes(new String[]{NT_OAK_UNSTRUCTURED});
         ensureDefinitionOptions.addExcludedProperties(IGNORE_PROPERTIES);
 
         final Map<String, String> srcChecksum =
@@ -410,7 +410,7 @@ class EnsureOakIndexJobHandler implements Runnable {
 
         // Compile checksum for the oakIndex node system
         final CustomChecksumGeneratorOptions oakIndexOptions = new CustomChecksumGeneratorOptions();
-        oakIndexOptions.addIncludedNodeTypes(new String[]{ NT_OAK_QUERY_INDEX_DEFINITION });
+        oakIndexOptions.addIncludedNodeTypes(new String[]{NT_OAK_QUERY_INDEX_DEFINITION});
         oakIndexOptions.addExcludedProperties(IGNORE_PROPERTIES);
 
         final Map<String, String> destChecksum =
