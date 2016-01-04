@@ -21,7 +21,6 @@ package com.adobe.acs.commons.oak.impl;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.util.AemCapabilityHelper;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -38,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-
 import java.util.Map;
 
 //@formatter:off
@@ -48,7 +46,7 @@ import java.util.Map;
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE,
         metatype = true
-        metatype = true)
+)
 @Properties({
         @Property(
                 name = "webconsole.configurationFactory.nameHint",
@@ -58,7 +56,7 @@ import java.util.Map;
 })
 @Service
 //@formatter:on
-public class EnsureOakIndex implements IndexApplier {
+public class EnsureOakIndex implements AppliableEnsureOakIndex {
 
     static final Logger log = LoggerFactory.getLogger(EnsureOakIndex.class);
 
@@ -75,7 +73,7 @@ public class EnsureOakIndex implements IndexApplier {
     private Scheduler scheduler;
 
     private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
-    
+
 
 
     @Property(label = "Ensure Definitions Path",
@@ -83,6 +81,7 @@ public class EnsureOakIndex implements IndexApplier {
                     + "ACS AEM Commons ensure definitions",
             value = DEFAULT_ENSURE_DEFINITIONS_PATH)
     public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure-definitions.path";
+
     private String ensureDefinitionsPath;
 
     private String ensureDefinitionsPath;
@@ -93,15 +92,21 @@ public class EnsureOakIndex implements IndexApplier {
             description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
             value = DEFAULT_OAK_INDEXES_PATH)
     public static final String PROP_OAK_INDEXES_PATH = "oak-indexes.path";
+
     private String oakIndexesPath;
-    
-    @Property(label = "Apply on startup",
-    		description = "Apply the indexes on startup of service",
-    		boolValue = true)
-    public static final String PROP_APPLY_ON_START = "oak-index.applyOnStartup";
-    
-    private boolean definitionApplied = false;
-    
+
+
+    private static final boolean DEFAULT_IMMEDIATE = true;
+    @Property(
+            label = "Immediate",
+            description = "Apply the indexes on startup of service. Defaults to [ true ]",
+            boolValue = DEFAULT_IMMEDIATE
+    )
+    public static final String PROP_IMMEDIATE = "immediate";
+
+    private boolean immediate = DEFAULT_IMMEDIATE;
+
+    private boolean applied = false;
 
     private String oakIndexesPath;
 
@@ -120,6 +125,7 @@ public class EnsureOakIndex implements IndexApplier {
 
     @Activate
     protected final void activate(Map<String, Object> config) throws RepositoryException {
+
         if (!capabilityHelper.isOak()) {
             log.info("Cowardly refusing to create indexes on non-Oak instance.");
             return;
@@ -130,7 +136,6 @@ public class EnsureOakIndex implements IndexApplier {
 
         oakIndexesPath = PropertiesUtil.toString(config.get(PROP_OAK_INDEXES_PATH),
                 DEFAULT_OAK_INDEXES_PATH);
-   
 
         if (StringUtils.isBlank(ensureDefinitionsPath)) {
             throw new IllegalArgumentException("OSGi Configuration Property `"
@@ -139,25 +144,26 @@ public class EnsureOakIndex implements IndexApplier {
             throw new IllegalArgumentException("OSGi Configuration Property `"
                     + PROP_OAK_INDEXES_PATH + "` " + "cannot be blank.");
         }
-        
-        final boolean applyOnStartup = PropertiesUtil.toBoolean(config.get(PROP_APPLY_ON_START), true);
 
-        if (applyOnStartup) {
-            applyIndex ();
+        this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
+
+        if (this.immediate) {
+            apply();
         }
     }
 
 
+    /**
+     * {@inheritDoc}
+     **/
+    @Override
+    public final void apply() {
 
+        if (this.applied) {
+            return;
+        }
 
-
-	public void applyIndex() {
-	    
-	    if (definitionApplied) {
-	        return;
-	    }
-	    
-		log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
+        log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
 
         this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
 
@@ -192,15 +198,32 @@ public class EnsureOakIndex implements IndexApplier {
         applied = true;
 
         log.info("Job scheduled for ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
-        definitionApplied = true;
-	}
-    
-    
-    public String toString() {
-        String s = String.format("EnsureOakIndex(%s => %s)",new Object[]{ensureDefinitionsPath,oakIndexesPath});
-        return s;
     }
-    
+
+    @Override
+    public final boolean isApplied() {
+        return this.applied;
+    }
+
+    @Override
+    public boolean isImmediate() {
+        return this.immediate;
+    }
+
+    @Override
+    public final String getEnsureDefinitionsPath() {
+        return StringUtils.trim(this.ensureDefinitionsPath);
+    }
+
+    @Override
+    public String getOakIndexesPath() {
+        return StringUtils.trim(this.oakIndexesPath);
+    }
+
+    public final String toString() {
+        return String.format("EnsureOakIndex( %s => %s )",
+                new Object[]{ensureDefinitionsPath, oakIndexesPath});
+    }
 
     @Override
     public final boolean isApplied() {
