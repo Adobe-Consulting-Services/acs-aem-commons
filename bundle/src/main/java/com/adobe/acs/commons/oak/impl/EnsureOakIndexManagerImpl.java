@@ -88,32 +88,38 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
      * {@inheritDoc}
      */
     @Override
-    public final void ensureAll(boolean force) {
+    public final int ensureAll(boolean force) {
         log.info("Applying all un-applied ensure index definitions");
 
+        int count = 0;
         for (AppliableEnsureOakIndex index : this.ensureIndexes) {
             if (!index.isApplied() || force) {
                 index.apply();
+                count++;
                 log.debug("Started applying index definition on {}", index);
             }
         }
+
+        return count;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final void ensure(final boolean force,
+    public final int ensure(final boolean force,
                              final String ensureDefinitionPath) {
-
+        int count = 0;
         for (AppliableEnsureOakIndex index : this.ensureIndexes) {
             if ((!index.isApplied() || force)
                     && StringUtils.equals(ensureDefinitionPath, index.getEnsureDefinitionsPath())) {
 
                 index.apply();
+                count++;
                 log.debug("Started async job applying index definition for {}", index);
             }
         }
+        return count;
     }
 
     protected final void bindAppliableEnsureOakIndex(AppliableEnsureOakIndex index) {
