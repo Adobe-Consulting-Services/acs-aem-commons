@@ -30,16 +30,18 @@ public interface EnsureOakIndexManager {
     /**
      * Applies all un-applied Ensure Oak Index definitions.
      * @param force true to re-apply Ensure Oak Indexes that have been marked as applied, false to skip.
+     * @return the number of ensure oak indexes processed
      */
     @Description("Ensure all Ensure Oak Index Definitions")
-    void ensureAll(@Name(value="force") boolean force);
+    int ensureAll(@Name(value="force") boolean force);
 
     /**
      * Applies un-applied Ensure Oak Index definitions whose ensure-definition.path @Property is a parameter.
      * @param force true to re-apply Ensure Oak Indexes that have been marked as applied, false to skip.
      * @param ensureDefinitionsPath the path of the Ensure Oak Index Definitions to apply.
+     * @return the number of ensure oak indexes processed
      */
     @Description("Ensure select Ensure Oak Index Definitions")
-    void ensure(@Name(value="force") boolean force,
+    int ensure(@Name(value="force") boolean force,
                 @Name(value="ensureDefinitionsPath") String ensureDefinitionsPath);
 }
