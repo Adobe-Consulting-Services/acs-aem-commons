@@ -1,6 +1,5 @@
 package com.adobe.acs.commons.synth.children;
 
-import com.adobe.acs.commons.util.TypeUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -412,15 +411,6 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         @Override
         public int compare(final Resource o1, final Resource o2) {
             return o1.getName().compareTo(o2.getName().toString());
-        }
-    }
-
-    /**
-     * Exception indicating the data representing the children is invalid.
-     */
-    public final class InvalidDataFormatException extends Exception {
-        public InvalidDataFormatException(final Resource resource, final String propertyName, final String data) {
-            super("Property Value in invalid format [ " + resource.getPath() + "/" + propertyName + " = " + data);
         }
     }
 }
