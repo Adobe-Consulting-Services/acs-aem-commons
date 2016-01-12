@@ -310,20 +310,14 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         final Map<String, Object> serializedData = new HashMap<String, Object>();
 
         for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
-            if (TypeUtil.isArray(entry.getValue())) {
-                // Multi-value
-
+            if (entry.getValue() instanceof Calendar) {
+                final Calendar cal = (Calendar) entry.getValue();
+                serializedData.put(entry.getKey(), CALENDAR_ID + dtf.print(cal.getTimeInMillis()));
+            } else if (entry.getValue() instanceof Date) {
+                final Date date = (Date) entry.getValue();
+                serializedData.put(entry.getKey(), DATE_ID + dtf.print(date.getTime()));
             } else {
-                // Single-value
-                if (entry.getValue() instanceof Calendar) {
-                    final Calendar cal = (Calendar) entry.getValue();
-                    serializedData.put(entry.getKey(), CALENDAR_ID + dtf.print(cal.getTimeInMillis()));
-                } else if (entry.getValue() instanceof Date) {
-                    final Date date = (Date) entry.getValue();
-                    serializedData.put(entry.getKey(), DATE_ID + dtf.print(date.getTime()));
-                } else {
-                    serializedData.put(entry.getKey(), entry.getValue());
-                }
+                serializedData.put(entry.getKey(), entry.getValue());
             }
         }
 
