@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.synth.children;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -44,6 +45,8 @@ public class ChildrenAsPropertyResourceWrapperTest {
 
     Map<String, Object> entry3 = new HashMap<String, Object>();
 
+    Map<String, Object> entry100 = new HashMap<String, Object>();
+
     ChildrenAsPropertyResourceWrapper childrenAsPropertyResource;
 
     @Before
@@ -57,20 +60,23 @@ public class ChildrenAsPropertyResourceWrapperTest {
 
         entry1.put("name", "dog");
         entry1.put("sound", "woof");
-        entry1.put("double", 20.002D);
-        entry1.put("long", 2000L);
-        Calendar cal = Calendar.getInstance();
-        cal.set(2001, 1, 1, 1, 1, 1);
-        entry1.put("date", cal.getTime());
-        entry1.put("calendar", cal);
-        entry1.put("boolean", true);
-        entry1.put("strArray", new String[]{"one", "two"});
 
         entry2.put("name", "cat");
         entry2.put("sound", "meow");
 
         entry3.put("name", "fish");
         entry3.put("sound", "...");
+
+        entry100.put("name", "dog");
+        entry100.put("sound", "woof");
+        entry100.put("double", 20.002D);
+        entry100.put("long", 2000L);
+        Calendar cal = Calendar.getInstance();
+        cal.set(2001, 1, 1, 1, 1, 1);
+        entry100.put("date", cal.getTime());
+        entry100.put("calendar", cal);
+        entry100.put("boolean", true);
+        entry100.put("strArray", new String[]{"one", "two"});
 
         unsortedJSON.put("entry-2", new JSONObject(entry2));
         unsortedJSON.put("entry-1", new JSONObject(entry1));
@@ -79,21 +85,18 @@ public class ChildrenAsPropertyResourceWrapperTest {
         sortedJSON.put("entry-1", new JSONObject(entry1));
         sortedJSON.put("entry-2", new JSONObject(entry2));
         sortedJSON.put("entry-3", new JSONObject(entry3));
-
-        childrenAsPropertyResource =
-                new ChildrenAsPropertyResourceWrapper(resource, "animals");
     }
 
     @Test
     public void testSerialization() throws Exception {
-        SyntheticChildAsPropertyResource test =
-                childrenAsPropertyResource.build("entry-10", entry1);
+        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
+            new ChildrenAsPropertyResourceWrapper(resource, "animals");
 
-        childrenAsPropertyResource.add(test, null);
-        List<Resource> actuals = childrenAsPropertyResource.get();
+        childrenAsPropertyResource.createChild("entry-100", "nt:unstructured", entry100);
+        List<Resource> actuals = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
 
         ValueMap actual = actuals.get(0).getValueMap();
-        ValueMap expected = new ValueMapDecorator(entry1);
+        ValueMap expected = new ValueMapDecorator(entry100);
 
         Assert.assertEquals(expected.get("name", String.class), actual.get("name", String.class));
         Assert.assertEquals(expected.get("double", String.class), actual.get("double", String.class));
@@ -108,19 +111,22 @@ public class ChildrenAsPropertyResourceWrapperTest {
         valueMap.put("animals", sortedJSON.toString());
 
         List<Resource> expected = new ArrayList<Resource>();
-        expected.add(new SyntheticChildAsPropertyResource(resource, "entry-1", new ValueMapDecorator(entry1)));
-        expected.add(new SyntheticChildAsPropertyResource(resource, "entry-3", new ValueMapDecorator(entry3)));
+        expected.add(new SyntheticChildAsPropertyResource(resource, "entry-1", entry1));
+        expected.add(new SyntheticChildAsPropertyResource(resource, "entry-3", entry3));
 
-        List<Resource> actual = childrenAsPropertyResource.get();
-        Assert.assertEquals(expected.size() + 1, actual.size());
+        childrenAsPropertyResource =
+                new ChildrenAsPropertyResourceWrapper(resource, "animals");
 
-        Assert.assertTrue(childrenAsPropertyResource.remove("entry-2"));
+        List<Resource> actuals = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
+        Assert.assertEquals(expected.size() + 1, actuals.size());
 
-        actual = childrenAsPropertyResource.get();
+        childrenAsPropertyResource.removeChild("entry-2");
 
-        Assert.assertEquals(expected.size(), actual.size());
+        actuals = IteratorUtils .toList(childrenAsPropertyResource.listChildren());
+
+        Assert.assertEquals(expected.size(), actuals.size());
         for (int i = 0; i < expected.size(); i++) {
-            Assert.assertEquals(expected.get(i).getName(), actual.get(i).getName());
+            Assert.assertEquals(expected.get(i).getName(), actuals.get(i).getName());
         }
     }
 
@@ -131,12 +137,14 @@ public class ChildrenAsPropertyResourceWrapperTest {
         ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
         properties.put("name", "hyena");
         properties.put("sound", "lolz");
-        SyntheticChildAsPropertyResource hyena = new SyntheticChildAsPropertyResource(resource, "entry-4", properties);
 
         JSONObject expectedJSON = new JSONObject(unsortedJSON.toString());
         expectedJSON.put("entry-4", new JSONObject(properties));
 
-        childrenAsPropertyResource.add(hyena, null);
+        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
+                new ChildrenAsPropertyResourceWrapper(resource, "animals");
+
+        childrenAsPropertyResource.createChild("entry-4", "nt:unstructured", null);
 
         String actual = resource.getValueMap().get("animals", String.class);
         String expected = expectedJSON.toString();
@@ -151,12 +159,15 @@ public class ChildrenAsPropertyResourceWrapperTest {
         ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
         properties.put("name", "hyena");
         properties.put("sound", "lolz");
-        SyntheticChildAsPropertyResource hyena = new SyntheticChildAsPropertyResource(resource, "entry-4", properties);
 
         JSONObject expectedJSON = new JSONObject(sortedJSON.toString());
         expectedJSON.put("entry-4", new JSONObject(properties));
 
-        childrenAsPropertyResource.add(hyena, ChildrenAsPropertyResourceWrapper.RESOURCE_NAME_COMPARATOR);
+        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
+                new ChildrenAsPropertyResourceWrapper(resource, "animals");
+
+        childrenAsPropertyResource.createChild("entry-4", "nt:unstructured", properties);
+        childrenAsPropertyResource.commit();
 
         String actual = resource.getValueMap().get("animals", String.class);
         String expected = expectedJSON.toString();
@@ -174,7 +185,10 @@ public class ChildrenAsPropertyResourceWrapperTest {
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-2", new ValueMapDecorator(entry2)));
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-3", new ValueMapDecorator(entry3)));
 
-        List<Resource> actual = childrenAsPropertyResource.get();
+        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
+                new ChildrenAsPropertyResourceWrapper(resource, "animals");
+
+        List<Resource> actual = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
 
         Assert.assertEquals(expected.size(), actual.size());
         for (int i = 0; i < expected.size(); i++) {
@@ -191,7 +205,10 @@ public class ChildrenAsPropertyResourceWrapperTest {
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-2", new ValueMapDecorator(entry2)));
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-3", new ValueMapDecorator(entry3)));
 
-        List<Resource> actual = childrenAsPropertyResource.get(ChildrenAsPropertyResourceWrapper.RESOURCE_NAME_COMPARATOR);
+        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
+                new ChildrenAsPropertyResourceWrapper(resource, "animals");
+
+        List<Resource> actual = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
 
         Assert.assertEquals(expected.size(), actual.size());
         for (int i = 0; i < expected.size(); i++) {
