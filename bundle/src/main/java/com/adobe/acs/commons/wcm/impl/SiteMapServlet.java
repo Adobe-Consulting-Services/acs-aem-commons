@@ -20,15 +20,15 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.day.cq.dam.api.Asset;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -39,6 +39,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
@@ -78,13 +79,21 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             description = "If true, the last modified value will be included in the sitemap.")
     private static final String PROP_INCLUDE_LAST_MODIFIED = "include.lastmod";
 
-    @Property(label = "Change Frequency Properties",
+    @Property(label = "Change Frequency Properties", unbounded = PropertyUnbounded.ARRAY,
             description = "The set of JCR property names which will contain the change frequency value.")
     private static final String PROP_CHANGE_FREQUENCY_PROPERTIES = "changefreq.properties";
 
-    @Property(label = "Priority Properties",
+    @Property(label = "Priority Properties", unbounded = PropertyUnbounded.ARRAY,
             description = "The set of JCR property names which will contain the priority value.")
     private static final String PROP_PRIORITY_PROPERTIES = "priority.properties";
+
+    @Property(label = "DAM Folder Property",
+            description = "The JCR property name which will contain DAM folders to include in the sitemap.")
+    private static final String PROP_DAM_ASSETS_PROPERTY = "damassets.property";
+
+    @Property(label = "DAM Asset MIME Types", unbounded = PropertyUnbounded.ARRAY,
+            description = "MIME types allowed for DAM assets.")
+    private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
@@ -99,6 +108,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private String[] priorityProperties;
 
+    private String damAssetProperty;
+
+    private List<String> damAssetTypes;
+
     @Activate
     protected void activate(Map<String, Object> properties) {
         this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
@@ -106,6 +119,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.includeLastModified = PropertiesUtil.toBoolean(properties.get(PROP_INCLUDE_LAST_MODIFIED), DEFAULT_INCLUDE_LAST_MODIFIED);
         this.changefreqProperties = PropertiesUtil.toStringArray(properties.get(PROP_CHANGE_FREQUENCY_PROPERTIES), new String[0]);
         this.priorityProperties = PropertiesUtil.toStringArray(properties.get(PROP_PRIORITY_PROPERTIES), new String[0]);
+        this.damAssetProperty = PropertiesUtil.toString(properties.get(PROP_DAM_ASSETS_PROPERTY), "");
+        this.damAssetTypes = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
     }
 
     @Override
@@ -131,12 +146,51 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
                 write(children.next(), stream, resourceResolver);
             }
 
+            if (damAssetTypes.size() > 0 && damAssetProperty.length() > 0) {
+                for (Resource assetFolder : getAssetFolders(page, resourceResolver)) {
+                    writeAssets(stream, assetFolder, resourceResolver);
+                }
+            }
+
             stream.writeEndElement();
 
             stream.writeEndDocument();
         } catch (XMLStreamException e) {
             throw new IOException(e);
         }
+    }
+
+    private Collection<Resource> getAssetFolders(Page page, ResourceResolver resolver) {
+        Map<String, Resource> allAssetFolders = new TreeMap<String, Resource>();
+        ValueMap properties = page.getProperties();
+        String[] configuredAssetFolderPaths = properties.get(damAssetProperty, String[].class);
+        if (configuredAssetFolderPaths != null) {
+            for (String configuredAssetFolderPath : configuredAssetFolderPaths) {
+                if (StringUtils.isNotBlank(configuredAssetFolderPath)) {
+                    Resource configuredAssetFolder = resolver.getResource(configuredAssetFolderPath);
+                    if (configuredAssetFolder != null && configuredAssetFolder.isResourceType("sling:OrderedFolder")) {
+                        for (Resource assetFolder : getAssetFolders(configuredAssetFolder)) {
+                            if (!allAssetFolders.containsKey(assetFolder.getPath())) {
+                                allAssetFolders.put(assetFolder.getPath(), assetFolder);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return allAssetFolders.values();
+    }
+
+    private List<Resource> getAssetFolders(Resource assetFolder) {
+        List<Resource> damFolders = new ArrayList<Resource>();
+        damFolders.add(assetFolder);
+        for (Iterator<Resource> children = assetFolder.listChildren(); children.hasNext();) {
+            Resource assetFolderChild = children.next();
+            if (assetFolderChild.isResourceType("sling:OrderedFolder")) {
+                damFolders.addAll(getAssetFolders(assetFolderChild));
+            }
+        }
+        return damFolders;
     }
 
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
@@ -159,6 +213,41 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         writeFirstPropertyValue(stream, "priority", priorityProperties, properties);
 
         stream.writeEndElement();
+    }
+
+    private void writeAsset(Asset asset, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
+        stream.writeStartElement(NS, "url");
+
+
+        String loc = externalizer.externalLink(resolver, externalizerDomain, asset.getPath());
+        writeElement(stream, "loc", loc);
+
+        if (includeLastModified) {
+            long lastModified = asset.getLastModified();
+            if (lastModified > 0) {
+                writeElement(stream, "lastmod", DATE_FORMAT.format(lastModified));
+            }
+        }
+
+        final ValueMap properties = asset.adaptTo(Resource.class).getChild("jcr:content").getValueMap();
+        writeFirstPropertyValue(stream, "changefreq", changefreqProperties, properties);
+        writeFirstPropertyValue(stream, "priority", priorityProperties, properties);
+
+        stream.writeEndElement();
+    }
+
+    private void writeAssets(final XMLStreamWriter stream, final Resource assetFolder, final ResourceResolver resolver)
+            throws XMLStreamException {
+        for (Iterator<Resource> children = assetFolder.listChildren(); children.hasNext();) {
+            Resource assetFolderChild = children.next();
+            if (assetFolderChild.isResourceType("dam:Asset")) {
+                Asset asset = assetFolderChild.adaptTo(Asset.class);
+
+                if (damAssetTypes.contains(asset.getMimeType())) {
+                    writeAsset(asset, stream, resolver);
+                }
+            }
+        }
     }
 
     private void writeFirstPropertyValue(final XMLStreamWriter stream, final String elementName, final String[] propertyNames,
