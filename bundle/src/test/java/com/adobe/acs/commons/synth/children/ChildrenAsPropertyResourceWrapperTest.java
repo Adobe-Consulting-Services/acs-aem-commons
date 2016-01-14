@@ -60,12 +60,15 @@ public class ChildrenAsPropertyResourceWrapperTest {
 
         entry1.put("name", "dog");
         entry1.put("sound", "woof");
+        entry1.put("jcr:primaryType", "nt:unstructured");
 
         entry2.put("name", "cat");
         entry2.put("sound", "meow");
+        entry1.put("jcr:primaryType", "nt:unstructured");
 
         entry3.put("name", "fish");
         entry3.put("sound", "...");
+        entry1.put("jcr:primaryType", "nt:unstructured");
 
         entry100.put("name", "dog");
         entry100.put("sound", "woof");
@@ -77,6 +80,8 @@ public class ChildrenAsPropertyResourceWrapperTest {
         entry100.put("calendar", cal);
         entry100.put("boolean", true);
         entry100.put("strArray", new String[]{"one", "two"});
+        entry1.put("jcr:primaryType", "nt:unstructured");
+
 
         unsortedJSON.put("entry-2", new JSONObject(entry2));
         unsortedJSON.put("entry-1", new JSONObject(entry1));
@@ -89,7 +94,7 @@ public class ChildrenAsPropertyResourceWrapperTest {
 
     @Test
     public void testSerialization() throws Exception {
-        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
+        childrenAsPropertyResource =
             new ChildrenAsPropertyResourceWrapper(resource, "animals");
 
         childrenAsPropertyResource.createChild("entry-100", "nt:unstructured", entry100);
@@ -137,14 +142,16 @@ public class ChildrenAsPropertyResourceWrapperTest {
         ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
         properties.put("name", "hyena");
         properties.put("sound", "lolz");
+        properties.put("jcr:primaryType", "nt:unstructured");
 
         JSONObject expectedJSON = new JSONObject(unsortedJSON.toString());
         expectedJSON.put("entry-4", new JSONObject(properties));
 
-        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
+        childrenAsPropertyResource =
                 new ChildrenAsPropertyResourceWrapper(resource, "animals");
 
-        childrenAsPropertyResource.createChild("entry-4", "nt:unstructured", null);
+        childrenAsPropertyResource.createChild("entry-4", "nt:unstructured", properties);
+        childrenAsPropertyResource.persist();
 
         String actual = resource.getValueMap().get("animals", String.class);
         String expected = expectedJSON.toString();
@@ -159,15 +166,17 @@ public class ChildrenAsPropertyResourceWrapperTest {
         ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
         properties.put("name", "hyena");
         properties.put("sound", "lolz");
+        properties.put("jcr:primaryType", "nt:unstructured");
 
         JSONObject expectedJSON = new JSONObject(sortedJSON.toString());
         expectedJSON.put("entry-4", new JSONObject(properties));
 
-        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
-                new ChildrenAsPropertyResourceWrapper(resource, "animals");
+        childrenAsPropertyResource =
+                new ChildrenAsPropertyResourceWrapper(resource, "animals",
+                        ChildrenAsPropertyResourceWrapper.RESOURCE_NAME_COMPARATOR);
 
         childrenAsPropertyResource.createChild("entry-4", "nt:unstructured", properties);
-        childrenAsPropertyResource.commit();
+        childrenAsPropertyResource.persist();
 
         String actual = resource.getValueMap().get("animals", String.class);
         String expected = expectedJSON.toString();
@@ -205,8 +214,9 @@ public class ChildrenAsPropertyResourceWrapperTest {
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-2", new ValueMapDecorator(entry2)));
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-3", new ValueMapDecorator(entry3)));
 
-        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
-                new ChildrenAsPropertyResourceWrapper(resource, "animals");
+        childrenAsPropertyResource =
+                new ChildrenAsPropertyResourceWrapper(resource, "animals",
+                        ChildrenAsPropertyResourceWrapper.RESOURCE_NAME_COMPARATOR);;
 
         List<Resource> actual = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
 

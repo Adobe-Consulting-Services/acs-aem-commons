@@ -4,6 +4,7 @@ import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceWrapper;
 import org.apache.sling.api.resource.ValueMap;
@@ -50,20 +51,20 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
     private static final Logger log = LoggerFactory.getLogger(ChildrenAsPropertyResourceWrapper.class);
 
     private static final String EMPTY_JSON = "{}";
+
     private static final String CALENDAR_ID = "{" + Calendar.class.getName() + "}";
+
     private static final String DATE_ID = "{" + Date.class.getName() + "}";
 
     private final Resource resource;
 
     private final String propertyName;
 
-    private boolean initialized;
-
     private Map<String, Resource> lookupCache = null;
 
     private Set<Resource> orderedCache = null;
 
-    private final Comparator<Resource> comparator = null;
+    private Comparator<Resource> comparator = null;
 
     public static final Comparator<Resource> RESOURCE_NAME_COMPARATOR = new ResourceNameComparator();
 
@@ -73,60 +74,54 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
      * @param resource     the resource to store the children as properties on
      * @param propertyName the property name to store the children as properties in
      */
-    public ChildrenAsPropertyResourceWrapper(Resource resource, String propertyName) {
+    public ChildrenAsPropertyResourceWrapper(Resource resource, String propertyName) throws InvalidDataFormatException {
+        this(resource, propertyName, null);
+    }
+
+    public ChildrenAsPropertyResourceWrapper(Resource resource, String propertyName, Comparator<Resource> comparator) throws InvalidDataFormatException {
         super(resource);
 
-        this.initialized = false;
         this.resource = resource;
         this.propertyName = propertyName;
+        this.comparator = comparator;
 
-        this.init();
-    }
+        if (this.comparator == null) {
+            this.orderedCache = new LinkedHashSet<Resource>();
+        } else {
+            this.orderedCache = new TreeSet<Resource>(this.comparator);
+        }
 
-    public Iterator<Resource> listChildren() {
-        return IteratorUtils.getIterator(this.orderedCache);
-    }
+        this.lookupCache = new HashMap<String, Resource>();
 
-    public Iterable<Resource> getChildren() {
-        return this.orderedCache;
-    }
-
-    private void init() {
-        if(!this.initialized) {
-            try {
-                if (this.comparator == null) {
-                    this.orderedCache = new LinkedHashSet<Resource>();
-                } else {
-                    this.orderedCache = new TreeSet<Resource>(this.comparator);
-                }
-
-                this.lookupCache = new HashMap<String, Resource>();
-
-                for (SyntheticChildAsPropertyResource r : this.get()) {
-                    this.orderedCache.add(r);
-                    this.lookupCache.put(r.getName(), r);
-                }
-
-                this.initialized = true;
-            } catch (InvalidDataFormatException e) {
-                this.orderedCache = null;
-                this.lookupCache = null;
-            }
+        for (SyntheticChildAsPropertyResource r : this.deserialize()) {
+            this.orderedCache.add(r);
+            this.lookupCache.put(r.getName(), r);
         }
     }
 
     @Override
-    public Resource getChild(String name) {
+    public final Iterator<Resource> listChildren() {
+        return IteratorUtils.getIterator(this.orderedCache);
+    }
+
+    @Override
+    public final Iterable<Resource> getChildren() {
+        return this.orderedCache;
+    }
+
+
+    @Override
+    public final Resource getChild(String name) {
         return this.lookupCache.get(name);
     }
 
     @Override
-    public Resource getParent() {
+    public final Resource getParent() {
         return this.resource;
     }
 
-    public Resource createChild(String name, String primaryType, Map<String, Object> data) {
-        if(data == null) {
+    public final Resource createChild(String name, String primaryType, Map<String, Object> data) throws PersistenceException {
+        if (data == null) {
             data = new HashMap<String, Object>();
         }
 
@@ -134,8 +129,8 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
             data.put(JcrConstants.JCR_PRIMARYTYPE, primaryType);
         }
 
-
-        final SyntheticChildAsPropertyResource child = new SyntheticChildAsPropertyResource(this.resource, name, data);
+        final SyntheticChildAsPropertyResource child =
+                new SyntheticChildAsPropertyResource(this.resource, name, data);
 
         if (this.lookupCache.containsKey(child.getName())) {
             log.info("Existing synthetic child [ {} ] overwritten", name);
@@ -147,7 +142,7 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         return child;
     }
 
-    public void removeChild(String name) {
+    public final void removeChild(String name) throws PersistenceException {
         if (this.lookupCache.containsKey(name)) {
             Resource tmp = this.lookupCache.get(name);
             this.orderedCache.remove(tmp);
@@ -155,8 +150,8 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         }
     }
 
-    public void removeAll() {
-        // Clear the caches; requires persist
+    public final void removeChildren() throws InvalidDataFormatException {
+        // Clear the caches; requires serialize
         if (this.comparator == null) {
             this.orderedCache = new LinkedHashSet<Resource>();
         } else {
@@ -166,12 +161,11 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         this.lookupCache = new HashMap<String, Resource>();
     }
 
-    public void commit() throws InvalidDataFormatException {
-        if(this.orderedCache == null) {
-            // Data was never retrieved so it could never be changed
-            return;
-        }
+    public final void persist() throws PersistenceException {
+        this.serialize();
+    }
 
+    private void serialize() throws InvalidDataFormatException {
         final long start = System.currentTimeMillis();
 
         final ModifiableValueMap modifiableValueMap = this.resource.adaptTo(ModifiableValueMap.class);
@@ -186,7 +180,7 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
             // Persist the JSON back to the Node
             modifiableValueMap.put(this.propertyName, childrenJSON.toString());
 
-            log.debug("Put operation for [ {} ] in [ {} ms ]",
+            log.debug("Persist operation for [ {} ] in [ {} ms ]",
                     this.resource.getPath() + "/" + this.propertyName,
                     System.currentTimeMillis() - start);
 
@@ -205,7 +199,7 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
      * @return the list of children sorting using the comparator.
      * @throws InvalidDataFormatException
      */
-    private List<SyntheticChildAsPropertyResource> get() throws InvalidDataFormatException {
+    private List<SyntheticChildAsPropertyResource> deserialize() throws InvalidDataFormatException {
         final long start = System.currentTimeMillis();
 
         final String propertyData = this.resource.getValueMap().get(this.propertyName, EMPTY_JSON);
@@ -227,26 +221,6 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
                 System.currentTimeMillis() - start);
 
         return resources;
-    }
-
-
-    /**
-     *
-     * @param resources
-     * @return
-     * @throws JSONException
-     * @throws IllegalAccessException
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     */
-    protected final JSONObject serializeToJSON(List<Resource> resources) throws JSONException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        final JSONObject jsonObject = new JSONObject();
-
-        for (final Resource resource : resources) {
-            jsonObject.put(resource.getName(), serializeToJSON(resource));
-        }
-
-        return jsonObject;
     }
 
     /**
