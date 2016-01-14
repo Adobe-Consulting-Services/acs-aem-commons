@@ -112,6 +112,14 @@ public class ComponentDisabler implements EventHandler {
         }
     }
 
+    /**
+     * Disables a component. Because different AEM versions expose different service interfaces
+     * and there's no effective way to compile this project having both interfaces on the classpath,
+     * the actual work of disabling the component is offloaded to an ECMA Script file.
+     * 
+     * @param componentName the name of the component
+     * @return true
+     */
     private boolean disableComponent(String componentName) {
         Bindings bindings = engine.createBindings();
         bindings.put("bundleContext", bundleContext);
