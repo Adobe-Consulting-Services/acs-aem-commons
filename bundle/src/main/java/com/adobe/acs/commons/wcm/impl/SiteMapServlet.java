@@ -229,9 +229,12 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             }
         }
 
-        final ValueMap properties = asset.adaptTo(Resource.class).getChild("jcr:content").getValueMap();
-        writeFirstPropertyValue(stream, "changefreq", changefreqProperties, properties);
-        writeFirstPropertyValue(stream, "priority", priorityProperties, properties);
+        Resource contentResource = asset.adaptTo(Resource.class).getChild("jcr:content");
+        if (contentResource != null) {
+            final ValueMap properties = contentResource.getValueMap();
+            writeFirstPropertyValue(stream, "changefreq", changefreqProperties, properties);
+            writeFirstPropertyValue(stream, "priority", priorityProperties, properties);
+        }
 
         stream.writeEndElement();
     }
