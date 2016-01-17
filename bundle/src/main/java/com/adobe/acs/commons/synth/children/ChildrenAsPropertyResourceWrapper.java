@@ -120,7 +120,7 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         return this.resource;
     }
 
-    public final Resource createChild(String name, String primaryType, Map<String, Object> data) throws PersistenceException {
+    public final Resource create(String name, String primaryType, Map<String, Object> data) throws PersistenceException {
         if (data == null) {
             data = new HashMap<String, Object>();
         }
@@ -142,7 +142,7 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         return child;
     }
 
-    public final void removeChild(String name) throws PersistenceException {
+    public final void delete(String name) throws PersistenceException {
         if (this.lookupCache.containsKey(name)) {
             Resource tmp = this.lookupCache.get(name);
             this.orderedCache.remove(tmp);
@@ -150,7 +150,7 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         }
     }
 
-    public final void removeChildren() throws InvalidDataFormatException {
+    public final void deleteAll() throws InvalidDataFormatException {
         // Clear the caches; requires serialize
         if (this.comparator == null) {
             this.orderedCache = new LinkedHashSet<Resource>();

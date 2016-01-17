@@ -97,7 +97,7 @@ public class ChildrenAsPropertyResourceWrapperTest {
         childrenAsPropertyResource =
             new ChildrenAsPropertyResourceWrapper(resource, "animals");
 
-        childrenAsPropertyResource.createChild("entry-100", "nt:unstructured", entry100);
+        childrenAsPropertyResource.create("entry-100", "nt:unstructured", entry100);
         List<Resource> actuals = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
 
         ValueMap actual = actuals.get(0).getValueMap();
@@ -125,7 +125,7 @@ public class ChildrenAsPropertyResourceWrapperTest {
         List<Resource> actuals = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
         Assert.assertEquals(expected.size() + 1, actuals.size());
 
-        childrenAsPropertyResource.removeChild("entry-2");
+        childrenAsPropertyResource.delete("entry-2");
 
         actuals = IteratorUtils .toList(childrenAsPropertyResource.listChildren());
 
@@ -150,7 +150,7 @@ public class ChildrenAsPropertyResourceWrapperTest {
         childrenAsPropertyResource =
                 new ChildrenAsPropertyResourceWrapper(resource, "animals");
 
-        childrenAsPropertyResource.createChild("entry-4", "nt:unstructured", properties);
+        childrenAsPropertyResource.create("entry-4", "nt:unstructured", properties);
         childrenAsPropertyResource.persist();
 
         String actual = resource.getValueMap().get("animals", String.class);
@@ -175,7 +175,7 @@ public class ChildrenAsPropertyResourceWrapperTest {
                 new ChildrenAsPropertyResourceWrapper(resource, "animals",
                         ChildrenAsPropertyResourceWrapper.RESOURCE_NAME_COMPARATOR);
 
-        childrenAsPropertyResource.createChild("entry-4", "nt:unstructured", properties);
+        childrenAsPropertyResource.create("entry-4", "nt:unstructured", properties);
         childrenAsPropertyResource.persist();
 
         String actual = resource.getValueMap().get("animals", String.class);
