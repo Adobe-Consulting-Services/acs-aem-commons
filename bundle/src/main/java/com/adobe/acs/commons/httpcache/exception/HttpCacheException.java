@@ -22,6 +22,6 @@ public class HttpCacheException extends Exception {
     }
 
     public HttpCacheException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+        this(message, cause);
     }
 }
