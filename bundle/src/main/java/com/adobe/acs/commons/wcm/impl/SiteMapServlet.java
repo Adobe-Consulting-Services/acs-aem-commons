@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLOutputFactory;
@@ -168,36 +167,29 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     private Collection<Resource> getAssetFolders(Page page, ResourceResolver resolver) {
-        Map<String, Resource> allAssetFolders = new TreeMap<String, Resource>();
+        List<Resource> allAssetFolders = new ArrayList<Resource>();
         ValueMap properties = page.getProperties();
         String[] configuredAssetFolderPaths = properties.get(damAssetProperty, String[].class);
         if (configuredAssetFolderPaths != null) {
+            // Sort to aid in removal of duplicate paths.
+            Arrays.sort(configuredAssetFolderPaths);
+            String prevPath = "#";
             for (String configuredAssetFolderPath : configuredAssetFolderPaths) {
                 if (StringUtils.isNotBlank(configuredAssetFolderPath)) {
-                    Resource configuredAssetFolder = resolver.getResource(configuredAssetFolderPath);
-                    if (configuredAssetFolder != null && configuredAssetFolder.isResourceType("sling:OrderedFolder")) {
-                        for (Resource assetFolder : getAssetFolders(configuredAssetFolder)) {
-                            if (!allAssetFolders.containsKey(assetFolder.getPath())) {
-                                allAssetFolders.put(assetFolder.getPath(), assetFolder);
-                            }
+                    // Ensure that this folder is not a child folder of another
+                    // configured folder, since it will already be included when
+                    // the parent folder is traversed.
+                    if (!configuredAssetFolderPath.equals(prevPath) && !StringUtils.startsWith(configuredAssetFolderPath, prevPath + "/")) {
+                        Resource assetFolder = resolver.getResource(configuredAssetFolderPath);
+                        if (assetFolder != null && assetFolder.isResourceType("sling:OrderedFolder")) {
+                            prevPath = configuredAssetFolderPath;
+                            allAssetFolders.add(assetFolder);
                         }
                     }
                 }
             }
         }
-        return allAssetFolders.values();
-    }
-
-    private List<Resource> getAssetFolders(Resource assetFolder) {
-        List<Resource> damFolders = new ArrayList<Resource>();
-        damFolders.add(assetFolder);
-        for (Iterator<Resource> children = assetFolder.listChildren(); children.hasNext();) {
-            Resource assetFolderChild = children.next();
-            if (assetFolderChild.isResourceType("sling:OrderedFolder")) {
-                damFolders.addAll(getAssetFolders(assetFolderChild));
-            }
-        }
-        return damFolders;
+        return allAssetFolders;
     }
 
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
@@ -256,6 +248,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
                 if (damAssetTypes.contains(asset.getMimeType())) {
                     writeAsset(asset, stream, resolver);
                 }
+            } else if (assetFolderChild.isResourceType("sling:OrderedFolder")) {
+                writeAssets(stream, assetFolderChild, resolver);
             }
         }
     }
