@@ -20,7 +20,14 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLOutputFactory;
