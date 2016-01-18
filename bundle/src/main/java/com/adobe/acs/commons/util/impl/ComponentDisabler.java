@@ -26,6 +26,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.event.Event;
@@ -62,7 +63,7 @@ public class ComponentDisabler implements EventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ComponentDisabler.class);
 
-    @Reference
+    @Reference(policyOption = ReferencePolicyOption.GREEDY)
     private ComponentDisablerDriver componentDisabler;
 
     @Property(label = "Disabled components", description = "The names of the components/services you want to disable",

@@ -20,13 +20,16 @@
 
 import org.apache.felix.scr.ScrService;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component
 @Service
+@Property(name = Constants.SERVICE_RANKING, intValue = 100)
 public class ComponentDisablerDriverFelix implements ComponentDisablerDriver {
 
     // purposely using a different logger name
