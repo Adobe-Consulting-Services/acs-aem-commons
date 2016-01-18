@@ -75,10 +75,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 7643ad8ccc73824355d4e7eb75ddbb6d5a3adc5a
     @Property(label = "Ensure Definitions Path",
             description = "The absolute path to the resource containing the "
                     + "ACS AEM Commons ensure definitions",
@@ -87,11 +83,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
 
     private String ensureDefinitionsPath;
 
-<<<<<<< HEAD
-    private String ensureDefinitionsPath;
-
-=======
->>>>>>> 7643ad8ccc73824355d4e7eb75ddbb6d5a3adc5a
     private static final String DEFAULT_OAK_INDEXES_PATH = "/oak:index";
 
     @Property(label = "Oak Indexes Path",
@@ -114,24 +105,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
 
     private boolean applied = false;
 
-<<<<<<< HEAD
-    private String oakIndexesPath;
-
-
-    private static final boolean DEFAULT_IMMEDIATE = true;
-    @Property(
-            label = "Immediate",
-            description = "Apply the indexes on startup of service. Defaults to [ true ]",
-            boolValue = DEFAULT_IMMEDIATE
-    )
-    public static final String PROP_IMMEDIATE = "immediate";
-
-    private boolean immediate = DEFAULT_IMMEDIATE;
-
-    private boolean applied = false;
-
-=======
->>>>>>> 7643ad8ccc73824355d4e7eb75ddbb6d5a3adc5a
     @Activate
     protected final void activate(Map<String, Object> config) throws RepositoryException {
 
@@ -162,26 +135,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     }
 
 
-    /**
-     * {@inheritDoc}
-     **/
-    @Override
-    public final void apply() {
-
-        if (this.applied) {
-            return;
-        }
-
-        log.info("Ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
-
-<<<<<<< HEAD
-        this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
-
-        if (this.immediate) {
-            apply();
-        }
-    }
-
 
     /**
      * {@inheritDoc}
@@ -208,31 +161,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         applied = true;
 
         log.info("Job scheduled for ensuring Oak Indexes [ {} ~> {} ]", ensureDefinitionsPath, oakIndexesPath);
-    }
-
-    @Override
-    public final boolean isApplied() {
-        return this.applied;
-    }
-
-    @Override
-    public boolean isImmediate() {
-        return this.immediate;
-    }
-
-    @Override
-    public final String getEnsureDefinitionsPath() {
-        return StringUtils.trim(this.ensureDefinitionsPath);
-    }
-
-    @Override
-    public String getOakIndexesPath() {
-        return StringUtils.trim(this.oakIndexesPath);
-    }
-
-    public final String toString() {
-        return String.format("EnsureOakIndex( %s => %s )",
-                new Object[]{ensureDefinitionsPath, oakIndexesPath});
     }
 
     @Override
