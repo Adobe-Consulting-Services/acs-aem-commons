@@ -42,6 +42,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import javax.jcr.Session;
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -89,7 +90,7 @@ public class EmailServiceImplTest {
         when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(resourceResolver);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
 
-        emailTemplatePath = this.getClass().getResource("/emailTemplate.txt").getFile().toString();
+        emailTemplatePath = new File(this.getClass().getResource("/emailTemplate.txt").toURI()).getPath();
 
         // Mock the Mail Template
         PowerMockito.mockStatic(MailTemplate.class);

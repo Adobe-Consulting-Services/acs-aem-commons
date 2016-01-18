@@ -1,0 +1,58 @@
+/*
+ * #%L
+ * ACS AEM Commons Package
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+ function disableWithFelix(service, componentName) {
+    var components = service.getComponents(componentName);
+    if (components != null) {
+        for (var i = 0; i < components.length; i++) {
+            var component = components[i];
+            if (component.getState() != component.STATE_DISABLED) {
+                log.info("Component {} disabled by configuration (pid={}) ", component.getClassName(), component.getConfigurationPid());
+-               component.disable();
+            }
+        }
+    }
+}
+
+function disableWithOsgi(bundleContext, service, componentName) {
+    var bundles = bundleContext.getBundles();
+    for (var i = 0; i < bundles.length; i++) {
+        var bundle = bundles[i];
+        var dto = service.getComponentDescriptionDTO(bundle, componentName);
+        if (dto != null) {
+            if (service.isComponentEnabled(dto)) {
+                log.info("Component {} disabled by configuration.", dto.implementationClass);
+                service.disableComponent(dto);
+            }
+        }
+    }
+}
+
+var ref = bundleContext.getServiceReference("org.apache.felix.scr.ScrService");
+if (ref != null) {
+    disableWithFelix(bundleContext.getService(ref), componentName);
+    bundleContext.ungetService(ref);
+} else {
+    ref = bundleContext.getServiceReference("org.osgi.service.component.runtime.ServiceComponentRuntime");
+    if (ref != null) {
+        disableWithOsgi(bundleContext, bundleContext.getService(ref), componentName);
+        bundleContext.ungetService(ref);
+    }
+}
+
