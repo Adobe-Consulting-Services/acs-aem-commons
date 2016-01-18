@@ -19,26 +19,15 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Dictionary;
+import java.util.Map;
 
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -74,7 +63,7 @@ public class ComponentDisabler implements EventHandler {
     private static final Logger log = LoggerFactory.getLogger(ComponentDisabler.class);
 
     @Reference
-    private ScriptEngineManager scriptEngineManager;
+    private ComponentDisablerDriver componentDisabler;
 
     @Property(label = "Disabled components", description = "The names of the components/services you want to disable",
             cardinality = Integer.MAX_VALUE)
@@ -82,22 +71,9 @@ public class ComponentDisabler implements EventHandler {
 
     private String[] disabledComponents;
 
-    private BundleContext bundleContext;
-
-    private ScriptEngine engine;
-
-    private String script;
-
     @Activate
-    protected void activate(ComponentContext componentContext) throws IOException {
-        this.engine = scriptEngineManager.getEngineByName("ecma");
-        InputStream stream = getClass().getResourceAsStream("component-disabler.ecma");
-        this.script = IOUtils.toString(stream, Charset.forName("UTF-8"));
-
-        this.bundleContext = componentContext.getBundleContext();
-        Dictionary<?, ?> properties = componentContext.getProperties();
-        disabledComponents = PropertiesUtil
-                .toStringArray(properties.get(DISABLED_COMPONENTS), new String[0]);
+    protected void activate(Map<String, Object> properties) {
+        disabledComponents = PropertiesUtil.toStringArray(properties.get(DISABLED_COMPONENTS), new String[0]);
         handleEvent(null);
     }
 
@@ -108,30 +84,7 @@ public class ComponentDisabler implements EventHandler {
         log.trace("Disabling components and services {}", Arrays.toString(disabledComponents));
 
         for (String component : disabledComponents) {
-            disableComponent(component);
+            componentDisabler.disable(component);
         }
-    }
-
-    /**
-     * Disables a component. Because different AEM versions expose different service interfaces
-     * and there's no effective way to compile this project having both interfaces on the classpath,
-     * the actual work of disabling the component is offloaded to an ECMA Script file.
-     * 
-     * @param componentName the name of the component
-     * @return true
-     */
-    private boolean disableComponent(String componentName) {
-        Bindings bindings = engine.createBindings();
-        bindings.put("bundleContext", bundleContext);
-        bindings.put("log", log);
-        bindings.put("componentName", componentName);
-
-        try {
-            engine.eval(script, bindings);
-        } catch (ScriptException e) {
-            log.error("Unable to disable script", e);
-        }
-
-        return true;
     }
 }
