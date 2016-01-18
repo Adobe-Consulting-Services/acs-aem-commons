@@ -170,3 +170,4 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
         return tabularData;
     }
 }
+
