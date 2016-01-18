@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 @Component
 @Service
-@Property(name = Constants.SERVICE_RANKING, intValue = 100)
+@Property(name = Constants.SERVICE_RANKING, intValue = 200)
 public class ComponentDisablerDriverDS13 implements ComponentDisablerDriver {
 
     // purposely using a different logger name
