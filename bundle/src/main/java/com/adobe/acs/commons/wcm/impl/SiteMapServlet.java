@@ -181,7 +181,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
                     // the parent folder is traversed.
                     if (!configuredAssetFolderPath.equals(prevPath) && !StringUtils.startsWith(configuredAssetFolderPath, prevPath + "/")) {
                         Resource assetFolder = resolver.getResource(configuredAssetFolderPath);
-                        if (assetFolder != null && assetFolder.isResourceType("sling:OrderedFolder")) {
+                        if (assetFolder != null) {
                             prevPath = configuredAssetFolderPath;
                             allAssetFolders.add(assetFolder);
                         }
@@ -248,7 +248,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
                 if (damAssetTypes.contains(asset.getMimeType())) {
                     writeAsset(asset, stream, resolver);
                 }
-            } else if (assetFolderChild.isResourceType("sling:OrderedFolder")) {
+            } else {
                 writeAssets(stream, assetFolderChild, resolver);
             }
         }
