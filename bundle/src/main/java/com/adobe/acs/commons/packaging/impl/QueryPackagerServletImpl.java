@@ -20,18 +20,24 @@
 
 package com.adobe.acs.commons.packaging.impl;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.QueryBuilder;
-import com.day.cq.search.result.Hit;
-import com.day.jcr.vault.fs.io.AccessControlHandling;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import com.day.jcr.vault.packaging.Packaging;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.query.Query;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.jackrabbit.vault.fs.io.AccessControlHandling;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -43,15 +49,11 @@ import org.apache.sling.commons.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.query.Query;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.Hit;
 
 /**
  * ACS AEM Commons - Query Packager Servlet

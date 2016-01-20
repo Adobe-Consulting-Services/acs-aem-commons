@@ -25,9 +25,6 @@ import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.day.cq.jcrclustersupport.ClusterAware;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationStatus;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.PackageException;
-import com.day.jcr.vault.packaging.Packaging;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -40,6 +37,9 @@ import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -88,8 +88,10 @@ import java.util.Map;
                 propertyPrivate = true
         ),
         @Property(
+                label = "Job Topics",
                 name = JobConsumer.PROPERTY_TOPICS,
-                value = JcrPackageReplicationStatusEventHandler.JOB_TOPIC
+                value = JcrPackageReplicationStatusEventHandler.JOB_TOPIC,
+                propertyPrivate = true
         )
 })
 @Service

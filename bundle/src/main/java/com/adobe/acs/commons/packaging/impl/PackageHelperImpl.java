@@ -20,23 +20,32 @@
 
 package com.adobe.acs.commons.packaging.impl;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.day.cq.commons.jcr.JcrUtil;
-import com.day.jcr.vault.fs.api.PathFilterSet;
-import com.day.jcr.vault.fs.config.DefaultWorkspaceFilter;
-import com.day.jcr.vault.fs.io.ImportOptions;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import com.day.jcr.vault.packaging.JcrPackageManager;
-import com.day.jcr.vault.packaging.PackageException;
-import com.day.jcr.vault.packaging.PackageId;
-import com.day.jcr.vault.packaging.Packaging;
-import com.day.jcr.vault.packaging.Version;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
+import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
+import org.apache.jackrabbit.vault.fs.io.ImportOptions;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -47,15 +56,8 @@ import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.day.cq.commons.jcr.JcrUtil;
 
 /**
  * ACS AEM Commons - Package Helper
