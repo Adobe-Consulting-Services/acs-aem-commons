@@ -26,7 +26,6 @@ import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.apache.sling.event.EventUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -246,7 +245,7 @@ public class JsonEventLogger implements EventHandler {
      */
     @Override
     public void handleEvent(Event event) {
-        if (EventUtil.isLocal(event) && this.isLoggerEnabled()) {
+        if (event.getProperty("event.application") == null && this.isLoggerEnabled()) {
             logEvent(event);
         }
     }

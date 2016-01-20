@@ -23,7 +23,6 @@ package com.adobe.acs.commons.workflow.synthetic.impl;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticCompleteWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticRestartWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticTerminateWorkflowException;
-import com.day.cq.security.Authorizable;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
@@ -36,6 +35,8 @@ import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.exec.filter.WorkItemFilter;
 import com.day.cq.workflow.model.WorkflowModel;
 import com.day.cq.workflow.model.WorkflowModelFilter;
+
+import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +113,6 @@ public class SyntheticWorkflowSession implements WorkflowSession {
         return true;
     }
 
-    @Deprecated
     @Override
     public final Authorizable getUser() {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
@@ -289,13 +289,11 @@ public class SyntheticWorkflowSession implements WorkflowSession {
         return new SyntheticWorkflowData(payloadType, payload);
     }
 
-    @Deprecated
     @Override
     public final List<Authorizable> getDelegatees(final WorkItem workItem) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    @Deprecated
     @Override
     public final void delegateWorkItem(final WorkItem workItem, final Authorizable authorizable)
             throws WorkflowException {
