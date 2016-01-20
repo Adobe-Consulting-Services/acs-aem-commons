@@ -1,22 +1,21 @@
 package com.adobe.acs.commons.synth.children;
 
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceWrapper;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.RepositoryException;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,29 +31,37 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * resource@animals="{
- * <p/>
- * animal-1: {
- * property-1: "cat",
- * property-2: "meow"
- * },
- * <p/>
- * animal-1: {
- * property-1: "dog",
- * property-2: "bark"
+ * Class to wrapper a real resource to facilitate the persistence of children resources in a property (serialized as
+ * JSON).
+ *
+ * Can be used as follows...
+ *
+ * To write data:
+ *
+ * Resource real = resolve.getResource("/content/real");
+ * ChildrenAsPropertyResourceWrapper wrapper = new ChildrenAsPropertyResourceWrapper(real);
+ * Resource child = wrapper.create("child-1", "nt:unstructured");
+ * ModifiableValueMap mvm = child.adaptTo(ModifiableValueMap.class);
+ * mvm.put("prop-1", "some data");
+ * mvm.put("prop-2", Calendar.getInstance());
+ * wrapper.persist();
+ * resolver.commit();
+ *
+ * To read data:
+ *
+ * Resource real = resolve.getResource("/content/real");
+ * ChildrenAsPropertyResourceWrapper wrapper = new ChildrenAsPropertyResourceWrapper(real);
+ * for(Resource child : wrapper.getChildren()) {
+ *     child.getValueMap().get("prop-1", String.class);
  * }
- * }"
+ *
  */
-
-
 public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
     private static final Logger log = LoggerFactory.getLogger(ChildrenAsPropertyResourceWrapper.class);
 
     private static final String EMPTY_JSON = "{}";
 
-    private static final String CALENDAR_ID = "{" + Calendar.class.getName() + "}";
-
-    private static final String DATE_ID = "{" + Date.class.getName() + "}";
+    private static final String DEFAULT_PROPERTY_NAME = "children";
 
     private final Resource resource;
 
@@ -69,6 +76,17 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
     public static final Comparator<Resource> RESOURCE_NAME_COMPARATOR = new ResourceNameComparator();
 
     /**
+     * ResourceWrapper that allows resource children to be modeled in data stored into a property using the default
+     * property name of "children".
+     *
+     * @param resource     the resource to store the children as properties on
+     * @throws InvalidDataFormatException
+     */
+    public ChildrenAsPropertyResourceWrapper(Resource resource) throws InvalidDataFormatException {
+        this(resource, DEFAULT_PROPERTY_NAME, null);
+    }
+
+    /**
      * ResourceWrapper that allows resource children to be modeled in data stored into a property.
      *
      * @param resource     the resource to store the children as properties on
@@ -78,7 +96,16 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         this(resource, propertyName, null);
     }
 
-    public ChildrenAsPropertyResourceWrapper(Resource resource, String propertyName, Comparator<Resource> comparator) throws InvalidDataFormatException {
+    /**
+     * ResourceWrapper that allows resource children to be modeled in data stored into a property.
+     *
+     * @param resource     the resource to store the children as properties on
+     * @param propertyName the property name to store the children as properties in
+     * @param comparator   the comparator used to order the serialized children
+     * @throws InvalidDataFormatException
+     */
+    public ChildrenAsPropertyResourceWrapper(Resource resource, String propertyName, Comparator<Resource> comparator)
+            throws InvalidDataFormatException {
         super(resource);
 
         this.resource = resource;
@@ -99,33 +126,49 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     **/
     @Override
     public final Iterator<Resource> listChildren() {
         return IteratorUtils.getIterator(this.orderedCache);
     }
 
+    /**
+     * {@inheritDoc}
+     **/
     @Override
     public final Iterable<Resource> getChildren() {
         return this.orderedCache;
     }
 
-
+    /**
+     * {@inheritDoc}
+     **/
     @Override
     public final Resource getChild(String name) {
         return this.lookupCache.get(name);
     }
 
+    /**
+     * {@inheritDoc}
+     **/
     @Override
     public final Resource getParent() {
         return this.resource;
     }
 
-    public final Resource create(String name, String primaryType, Map<String, Object> data) throws PersistenceException {
+
+    public final Resource create(String name, String primaryType) throws RepositoryException {
+        return create(name, primaryType, null);
+    }
+
+    public final Resource create(String name, String primaryType, Map<String, Object> data) throws RepositoryException {
         if (data == null) {
             data = new HashMap<String, Object>();
         }
 
-        if (!data.containsKey(JcrConstants.JCR_PRIMARYTYPE)) {
+        if (data.containsKey(JcrConstants.JCR_PRIMARYTYPE) && primaryType != null) {
             data.put(JcrConstants.JCR_PRIMARYTYPE, primaryType);
         }
 
@@ -142,7 +185,15 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         return child;
     }
 
-    public final void delete(String name) throws PersistenceException {
+    /**
+     * Deletes the named child.
+     *
+     * Requires subsequent call to persist().
+     *
+     * @param name the child node name to delete
+     * @throws RepositoryException
+     */
+    public final void delete(String name) throws RepositoryException {
         if (this.lookupCache.containsKey(name)) {
             Resource tmp = this.lookupCache.get(name);
             this.orderedCache.remove(tmp);
@@ -150,6 +201,13 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         }
     }
 
+    /**
+     * Delete all children.
+     *
+     * Requires subsequent call to persist().
+     *
+     * @throws InvalidDataFormatException
+     */
     public final void deleteAll() throws InvalidDataFormatException {
         // Clear the caches; requires serialize
         if (this.comparator == null) {
@@ -161,10 +219,21 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         this.lookupCache = new HashMap<String, Resource>();
     }
 
-    public final void persist() throws PersistenceException {
+    /**
+     * Persist changes to the underlying valuemap so they are available for persisting to the JCR.
+     *
+     * @throws RepositoryException
+     */
+    public final void persist() throws RepositoryException {
         this.serialize();
     }
 
+
+    /**
+     * Serializes all children data as JSON to the resource's propertyName.
+     *
+     * @throws InvalidDataFormatException
+     */
     private void serialize() throws InvalidDataFormatException {
         final long start = System.currentTimeMillis();
 
@@ -177,8 +246,13 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
                 childrenJSON.put(childResource.getName(), this.serializeToJSON(childResource));
             }
 
-            // Persist the JSON back to the Node
-            modifiableValueMap.put(this.propertyName, childrenJSON.toString());
+            if (childrenJSON.length() > 0) {
+                // Persist the JSON back to the Node
+                modifiableValueMap.put(this.propertyName, childrenJSON.toString());
+            } else {
+                // Nothing to persist; delete the property
+                modifiableValueMap.remove(this.propertyName);
+            }
 
             log.debug("Persist operation for [ {} ] in [ {} ms ]",
                     this.resource.getPath() + "/" + this.propertyName,
@@ -196,6 +270,8 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
     }
 
     /**
+     * Convert the serialized JSON data found in the node property to Resources.
+     *
      * @return the list of children sorting using the comparator.
      * @throws InvalidDataFormatException
      */
@@ -226,21 +302,23 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
     /**
      * Converts a list of SyntheticChildAsPropertyResource to their JSON representation, keeping the provided order.
      *
-     * @param resource the resources to serialize to JSON.
+     * @param resourceToSerialize the resource to serialize to JSON.
      * @return the JSONObject representing the resources.
      * @throws JSONException
      */
-    protected final JSONObject serializeToJSON(Resource resource) throws JSONException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    protected final JSONObject serializeToJSON(final Resource resourceToSerialize)
+            throws JSONException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+
         final DateTimeFormatter dtf = ISODateTimeFormat.dateTime();
         final Map<String, Object> serializedData = new HashMap<String, Object>();
 
-        for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
+        for (Map.Entry<String, Object> entry : resourceToSerialize.getValueMap().entrySet()) {
             if (entry.getValue() instanceof Calendar) {
                 final Calendar cal = (Calendar) entry.getValue();
-                serializedData.put(entry.getKey(), CALENDAR_ID + dtf.print(cal.getTimeInMillis()));
+                serializedData.put(entry.getKey(), dtf.print(cal.getTimeInMillis()));
             } else if (entry.getValue() instanceof Date) {
                 final Date date = (Date) entry.getValue();
-                serializedData.put(entry.getKey(), DATE_ID + dtf.print(date.getTime()));
+                serializedData.put(entry.getKey(), dtf.print(date.getTime()));
             } else {
                 serializedData.put(entry.getKey(), entry.getValue());
             }
@@ -256,7 +334,8 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
      * @return the list of SyntheticChildAsPropertyResources the jsonObject represents.
      * @throws JSONException
      */
-    protected final List<SyntheticChildAsPropertyResource> deserializeToSyntheticChildResources(JSONObject jsonObject) throws JSONException {
+    protected final List<SyntheticChildAsPropertyResource> deserializeToSyntheticChildResources(JSONObject jsonObject)
+            throws JSONException {
         final List<SyntheticChildAsPropertyResource> resources = new ArrayList<SyntheticChildAsPropertyResource>();
 
         final Iterator<String> keys = jsonObject.keys();
@@ -274,26 +353,8 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
             final Iterator<String> propertyNames = entryJSON.keys();
 
             while (propertyNames.hasNext()) {
-                final String propertyName = propertyNames.next();
-                final String propertyStrValue = entryJSON.optString(propertyName);
-
-                boolean calendar = this.isCalendarPropertyValue(propertyStrValue);
-                boolean date = this.isDatePropertyValue(propertyStrValue);
-
-                if (calendar || date) {
-                    final String dateTimeStr = this.getCalendarOrDatePropertyValue(propertyStrValue);
-                    final DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime(dateTimeStr);
-
-                    if (calendar) {
-                        final Calendar cal = Calendar.getInstance();
-                        cal.setTime(dateTime.toDate());
-                        properties.put(propertyName, cal);
-                    } else {
-                        properties.put(propertyName, dateTime.toDate());
-                    }
-                } else {
-                    properties.put(propertyName, entryJSON.get(propertyName));
-                }
+                final String propName = propertyNames.next();
+                properties.put(propName, entryJSON.optString(propName));
             }
 
             resources.add(new SyntheticChildAsPropertyResource(this.getParent(), nodeName, properties));
@@ -302,28 +363,12 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
         return resources;
     }
 
-    private boolean isCalendarPropertyValue(String propertyValue) {
-        return StringUtils.startsWith(propertyValue, CALENDAR_ID);
-    }
-
-    private boolean isDatePropertyValue(String propertyValue) {
-        return StringUtils.startsWith(propertyValue, DATE_ID);
-    }
-
-    private String getCalendarOrDatePropertyValue(String propertyValue) {
-        if (StringUtils.startsWith(propertyValue, CALENDAR_ID)) {
-            return StringUtils.removeStart(propertyValue, CALENDAR_ID);
-        } else if (StringUtils.startsWith(propertyValue, DATE_ID)) {
-            return StringUtils.removeStart(propertyValue, DATE_ID);
-        } else {
-            return propertyValue;
-        }
-    }
-
     /**
      * Sort by resource name ascending (resource.getName()).
      */
-    private final static class ResourceNameComparator implements Comparator<Resource> {
+    private static final class ResourceNameComparator implements Comparator<Resource>, Serializable {
+        private static final long serialVersionUID = 0L;
+
         @Override
         public int compare(final Resource o1, final Resource o2) {
             return o1.getName().compareTo(o2.getName().toString());

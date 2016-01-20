@@ -1,13 +1,11 @@
 package com.adobe.acs.commons.synth.children;
 
+import com.adobe.acs.commons.synth.children.impl.JSONModifiableValueMapDecorator;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.SyntheticResource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -16,19 +14,32 @@ import java.util.Map;
 public class SyntheticChildAsPropertyResource extends SyntheticResource {
     public static final String RESOURCE_TYPE = "acs-commons/synthetic/synthetic-child-as-property-resource";
 
-    private final HashMap<String, Object> data;
+    private final JSONModifiableValueMapDecorator data;
 
+    /**
+     * Creates a new SyntheticChildAsPropertyResource.
+     *
+     * @param parent the synthetic nodes parent (a real JCR Resource)
+     * @param nodeName the name of the synthetic child resource
+     */
     public SyntheticChildAsPropertyResource(Resource parent, String nodeName) {
         super(parent.getResourceResolver(), parent.getPath() + "/" + nodeName, RESOURCE_TYPE);
-        this.data = new HashMap<String, Object>();
+        this.data = new JSONModifiableValueMapDecorator();
     }
 
+    /**
+     * Creates a new SyntheticChildAsPropertyResource.
+     *
+     * @param parent the synthetic nodes parent (a real JCR Resource)
+     * @param nodeName the name of the synthetic child resource
+     * @param data initial value map data
+     */
     public SyntheticChildAsPropertyResource(Resource parent, String nodeName, Map<String, Object> data) {
         super(parent.getResourceResolver(), parent.getPath() + "/" + nodeName, RESOURCE_TYPE);
         if (data != null) {
-            this.data = new HashMap<String, Object>(data);
+            this.data = new JSONModifiableValueMapDecorator(data);
         } else {
-            this.data = new HashMap<String, Object>();
+            this.data = new JSONModifiableValueMapDecorator();
         }
     }
 
@@ -37,7 +48,7 @@ public class SyntheticChildAsPropertyResource extends SyntheticResource {
      */
     @Override
     public final ValueMap getValueMap() {
-        return new ValueMapDecorator(this.data);
+        return this.data;
     }
 
     /**
@@ -47,9 +58,9 @@ public class SyntheticChildAsPropertyResource extends SyntheticResource {
     @SuppressWarnings("unchecked")
     public final <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
         if (type == ValueMap.class) {
-            return (AdapterType) new ValueMapDecorator(this.data);
+            return (AdapterType) this.data;
         } else if (type == ModifiableValueMap.class) {
-            return (AdapterType) new ModifiableValueMapDecorator(this.data);
+            return (AdapterType) this.data;
         }
 
         return super.adaptTo(type);

@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -74,6 +75,10 @@ public class ChildrenAsPropertyResourceWrapperTest {
         entry100.put("sound", "woof");
         entry100.put("double", 20.002D);
         entry100.put("long", 2000L);
+        entry100.put("bigdecimal", "10000.000001");
+        entry100.put("bigdecimal2", "20000.000002");
+
+
         Calendar cal = Calendar.getInstance();
         cal.set(2001, 1, 1, 1, 1, 1);
         entry100.put("date", cal.getTime());
@@ -81,7 +86,6 @@ public class ChildrenAsPropertyResourceWrapperTest {
         entry100.put("boolean", true);
         entry100.put("strArray", new String[]{"one", "two"});
         entry1.put("jcr:primaryType", "nt:unstructured");
-
 
         unsortedJSON.put("entry-2", new JSONObject(entry2));
         unsortedJSON.put("entry-1", new JSONObject(entry1));
@@ -98,6 +102,7 @@ public class ChildrenAsPropertyResourceWrapperTest {
             new ChildrenAsPropertyResourceWrapper(resource, "animals");
 
         childrenAsPropertyResource.create("entry-100", "nt:unstructured", entry100);
+
         List<Resource> actuals = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
 
         ValueMap actual = actuals.get(0).getValueMap();
@@ -109,6 +114,14 @@ public class ChildrenAsPropertyResourceWrapperTest {
         Assert.assertEquals(expected.get("boolean", Boolean.class), actual.get("boolean", Boolean.class));
         Assert.assertEquals(expected.get("date", Date.class), actual.get("date", Date.class));
         Assert.assertEquals(expected.get("calendar", Calendar.class), actual.get("calendar", Calendar.class));
+        Assert.assertEquals(expected.get("bigdecimal", BigDecimal.class), actual.get("bigdecimal", BigDecimal.class));
+        Assert.assertEquals(expected.get("bigdecimal2", BigDecimal.class), actual.get("bigdecimal2", BigDecimal.class));
+
+        Assert.assertNotNull(actual.get("date", Calendar.class));
+        Assert.assertEquals(expected.get("calendar", Calendar.class), actual.get("date", Calendar.class));
+
+        Assert.assertNotNull(actual.get("calendar", Date.class));
+        Assert.assertEquals(expected.get("date", Date.class), actual.get("calendar", Date.class));
     }
 
     @Test
