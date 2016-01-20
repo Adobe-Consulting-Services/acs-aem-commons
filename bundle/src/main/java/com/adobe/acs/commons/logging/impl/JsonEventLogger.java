@@ -45,7 +45,7 @@ import java.util.*;
 @Properties({
     @Property(
             name = "webconsole.configurationFactory.nameHint",
-            value = "Logger: {event.logger.category} for events matching '{event.filter}'")
+            value = "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'")
 })
 public class JsonEventLogger implements EventHandler {
 
