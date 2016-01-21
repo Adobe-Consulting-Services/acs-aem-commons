@@ -32,6 +32,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
@@ -49,8 +50,11 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(metatype = true, label = "ACS AEM Commons - Site Map Servlet", description = "Site Map Servlet",
-        configurationFactory = true)
+@Component(metatype = true,
+        label = "ACS AEM Commons - Site Map Servlet",
+        description = "Site Map Servlet",
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE)
 @Service
 @SuppressWarnings("serial")
 @Properties({ @Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY,
