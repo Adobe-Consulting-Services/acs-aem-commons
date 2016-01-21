@@ -27,6 +27,7 @@ import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemov
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -50,7 +51,8 @@ import java.util.regex.Pattern;
 @Component(
         label = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service",
         metatype = true,
-        configurationFactory = true
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
         @Property(
