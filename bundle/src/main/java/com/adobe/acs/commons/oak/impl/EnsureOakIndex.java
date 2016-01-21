@@ -24,6 +24,7 @@ import com.adobe.acs.commons.util.AemCapabilityHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -41,6 +42,7 @@ import java.util.Map;
 @Component(label = "ACS AEM Commons - Ensure Oak Index",
         description = "Component Factory to manage Oak indexes.",
         configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE,
         metatype = true)
 @Properties({
         @Property(
