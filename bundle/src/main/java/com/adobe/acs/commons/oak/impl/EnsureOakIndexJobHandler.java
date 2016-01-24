@@ -306,10 +306,7 @@ class EnsureOakIndexJobHandler implements Runnable {
      * @param oakIndex the index representing the oak index
      * @throws PersistenceException
      */
-    void forceRefresh(final Resource oakIndex) throws PersistenceException {
-        if (oakIndex == null) {
-            return;
-        }
+    void forceRefresh(final @Nonnull Resource oakIndex) throws PersistenceException {
 
         final ModifiableValueMap mvm = oakIndex.adaptTo(ModifiableValueMap.class);
         mvm.put(PN_REINDEX, true);
@@ -493,12 +490,8 @@ class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws OakIndexDefinitionException
      */
-    void validateEnsureDefinition(Resource ensureDefinition)
+    void validateEnsureDefinition(@Nonnull Resource ensureDefinition)
             throws RepositoryException, OakIndexDefinitionException {
-
-        if (ensureDefinition == null) {
-            throw new EnsureOakIndex.OakIndexDefinitionException("Resource is null");
-        }
 
         Node node = ensureDefinition.adaptTo(Node.class);
 
@@ -511,11 +504,11 @@ class EnsureOakIndexJobHandler implements Runnable {
         }
 
         final ValueMap properties = ensureDefinition.getValueMap();
-        if (StringUtils.isBlank(properties.get("type", String.class))) {
+        if (StringUtils.isBlank(properties.get(PN_TYPE, String.class))) {
             throw new EnsureOakIndex.OakIndexDefinitionException(
                     "Ensure Definition at "
                             + ensureDefinition.getPath()
-                            + " missing required property 'text'");
+                            + " missing required property 'type'");
         }
     }
 }
