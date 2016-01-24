@@ -74,7 +74,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Service(value = { DynamicMBean.class, EnsureOakIndexManager.class })
 public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements EnsureOakIndexManager, EnsureOakIndexManagerMBean {
 
-    private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexManagerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EnsureOakIndexManagerImpl.class);
 
     // Thread-safe ArrayList to track EnsureIndex service registrations
     private CopyOnWriteArrayList<AppliableEnsureOakIndex> ensureIndexes =
@@ -89,14 +89,14 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
      */
     @Override
     public final int ensureAll(boolean force) {
-        log.info("Applying all un-applied ensure index definitions");
+        LOG.info("Applying all un-applied ensure index definitions");
 
         int count = 0;
         for (AppliableEnsureOakIndex index : this.ensureIndexes) {
             if (!index.isApplied() || force) {
                 index.apply();
                 count++;
-                log.debug("Started applying index definition on {}", index);
+                LOG.debug("Started applying index definition on {}", index);
             }
         }
 
@@ -116,7 +116,7 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
 
                 index.apply();
                 count++;
-                log.debug("Started async job applying index definition for {}", index);
+                LOG.debug("Started async job applying index definition for {}", index);
             }
         }
         return count;
