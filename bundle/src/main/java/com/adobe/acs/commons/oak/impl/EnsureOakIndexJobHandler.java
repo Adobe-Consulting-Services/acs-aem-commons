@@ -323,7 +323,7 @@ class EnsureOakIndexJobHandler implements Runnable {
      * @throws PersistenceException
      * @throws RepositoryException
      */
-    Resource create(final Resource ensuredDefinition, final Resource oakIndexes) throws PersistenceException,
+    Resource create(final @Nonnull Resource ensuredDefinition, final @Nonnull Resource oakIndexes) throws PersistenceException,
             RepositoryException {
 
         final Node oakIndex = JcrUtil.copy(
@@ -349,7 +349,7 @@ class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws IOException
      */
-    Resource update(final Resource ensureDefinition, final Resource oakIndexes, boolean forceReindex)
+    Resource update(final @Nonnull Resource ensureDefinition, final @Nonnull Resource oakIndexes, boolean forceReindex)
             throws RepositoryException, IOException {
 
         final ValueMap ensureDefinitionProperties = ensureDefinition.getValueMap();
@@ -442,7 +442,7 @@ class EnsureOakIndexJobHandler implements Runnable {
      * @throws IOException
      * @throws RepositoryException
      */
-    boolean needsUpdate(Resource ensureDefinition, Resource oakIndex) throws IOException, RepositoryException {
+    boolean needsUpdate(@Nonnull Resource ensureDefinition, @Nonnull Resource oakIndex) throws IOException, RepositoryException {
         final Session session = ensureDefinition.getResourceResolver().adaptTo(Session.class);
         final ChecksumGenerator checksumGenerator = this.ensureOakIndex.getChecksumGenerator();
 
