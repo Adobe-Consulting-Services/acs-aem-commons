@@ -21,9 +21,11 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalForceQuitException;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalMaxDurationExceededException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalMaxDurationExceededException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;

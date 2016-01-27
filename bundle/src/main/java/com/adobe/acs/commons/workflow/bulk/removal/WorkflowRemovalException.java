@@ -17,8 +17,14 @@
  * limitations under the License.
  * #L%
  */
-/**
- * Bulk Workflow Removal.
- */
-@aQute.bnd.annotation.Version("2.0.0")
+
 package com.adobe.acs.commons.workflow.bulk.removal;
+
+@SuppressWarnings("serial")
+public final class WorkflowRemovalException extends Exception {
+
+    public WorkflowRemovalException(final String message) {
+        super(message);
+    }
+
+}

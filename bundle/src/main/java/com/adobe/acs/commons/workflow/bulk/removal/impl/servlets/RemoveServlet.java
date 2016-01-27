@@ -21,8 +21,8 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
 
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalForceQuitException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;

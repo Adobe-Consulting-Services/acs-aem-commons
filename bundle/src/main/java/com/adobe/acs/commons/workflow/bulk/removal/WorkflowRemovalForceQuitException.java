@@ -17,14 +17,8 @@
  * limitations under the License.
  * #L%
  */
-
-package com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions;
+package com.adobe.acs.commons.workflow.bulk.removal;
 
 @SuppressWarnings("serial")
-public class WorkflowRemovalException extends Exception {
-
-    public WorkflowRemovalException(final String message) {
-        super(message);
-    }
-
+public final class WorkflowRemovalForceQuitException extends Exception {
 }

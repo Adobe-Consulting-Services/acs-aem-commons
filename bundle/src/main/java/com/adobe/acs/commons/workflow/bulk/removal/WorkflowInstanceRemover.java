@@ -20,9 +20,6 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal;
 
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalForceQuitException;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowRemovalStatus;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
