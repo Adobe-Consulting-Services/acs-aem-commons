@@ -74,7 +74,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Service(value = { DynamicMBean.class, EnsureOakIndexManager.class })
 public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements EnsureOakIndexManager, EnsureOakIndexManagerMBean {
 
-    private static Logger log = LoggerFactory.getLogger(EnsureOakIndexManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexManagerImpl.class);
 
     // Thread-safe ArrayList to track EnsureIndex service registrations
     private CopyOnWriteArrayList<AppliableEnsureOakIndex> ensureIndexes =
