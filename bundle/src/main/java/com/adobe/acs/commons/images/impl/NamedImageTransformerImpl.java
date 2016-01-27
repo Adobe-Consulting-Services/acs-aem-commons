@@ -29,6 +29,7 @@ import com.day.image.Layer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Reference;
@@ -50,6 +51,7 @@ import java.util.Map;
         description = "Instances of this factory define registered Named Image transformers which are comprised of "
                 + "ordered, parameter-ized image transformers.",
         configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE,
         metatype = true
 )
 @Reference(
