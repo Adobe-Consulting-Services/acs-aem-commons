@@ -226,8 +226,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             Object> configs) {
 
         String servicePid = PropertiesUtil.toString(configs.get("service.pid"), StringUtils.EMPTY);
-        if (cacheHandlingRules.contains(servicePid)) {
-            cacheHandlingRules.remove(cacheHandlingRule);
+        if (cacheHandlingRules.remove(servicePid) != null) {
             log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
             log.debug("Total number of cache handling rules available after removal: {}", cacheHandlingRules.size());
         }
@@ -237,7 +236,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     protected void activate(Map<String, Object> configs) {
 
         // PIDs of global cache handling rules.
-        globalCacheHandlingRulesPid = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get
+        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get
                 (PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
