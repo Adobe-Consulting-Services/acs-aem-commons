@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.engine.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
@@ -5,6 +24,7 @@ import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigComparator;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
+import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.*;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
@@ -226,8 +246,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             Object> configs) {
 
         String servicePid = PropertiesUtil.toString(configs.get("service.pid"), StringUtils.EMPTY);
-        if (cacheHandlingRules.contains(servicePid)) {
-            cacheHandlingRules.remove(cacheHandlingRule);
+        if (cacheHandlingRules.remove(servicePid) != null) {
             log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
             log.debug("Total number of cache handling rules available after removal: {}", cacheHandlingRules.size());
         }
@@ -237,7 +256,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     protected void activate(Map<String, Object> configs) {
 
         // PIDs of global cache handling rules.
-        globalCacheHandlingRulesPid = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get
+        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get
                 (PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
@@ -369,10 +388,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse
             response, HttpCacheConfig cacheConfig) throws HttpCacheDataStreamException,
             HttpCacheKeyCreationException, HttpCachePersistenceException {
-
-        // Create cache key.
-        CacheKey cacheKey = cacheConfig.buildCacheKey(request);
-
         // Wrap the response to get the copy of the stream.
         // Temp sink for the duplicate stream is chosen based on the cache store configured at cache config.
         try {

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.httpcache.keys;
+package com.adobe.acs.commons.util.impl;
 
 /**
- * Generic CacheKey interface that allows multiple implementations of CacheKey's via CacheKeyFactories. All CacheKeys
- * are scoped to being build off the Request object. Implementations are expected to override <code> hashCode(),
- * equals(Object), toString()</code> methods.
+ * Internal service interface for actually disabling components. Allows for implementation details
+ * between different SCR versions to be extracted.
  */
-public interface CacheKey {
-    /**
-     * Get URI.
-     * @return
-     */
-    String getUri();
+public interface ComponentDisablerDriver {
+
+    void disable(String componentName);
+
 }

@@ -18,8 +18,8 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions;
+package com.adobe.acs.commons.workflow.bulk.removal;
 
-
-public class WorkflowRemovalMaxDurationExceededException extends Exception {
+@SuppressWarnings("serial")
+public final class WorkflowRemovalMaxDurationExceededException extends Exception {
 }

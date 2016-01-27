@@ -21,9 +21,11 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalForceQuitException;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalMaxDurationExceededException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalMaxDurationExceededException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -82,6 +84,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     private static final int BATCH_SIZE = 1000;
 
     private static final int MAX_SAVE_RETRIES = 5;
+
+    private static final long MS_IN_ONE_MINUTE = 60000;
+
     
     private final AtomicReference<WorkflowRemovalStatus> status
             = new AtomicReference<WorkflowRemovalStatus>();
@@ -143,7 +148,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
         final long start = System.currentTimeMillis();
         long end = -1;
-        
+
         int count = 0;
         int checkedCount = 0;
         int workflowRemovedCount = 0;
@@ -152,7 +157,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             // Max duration has been requested (greater than 0)
 
             // Convert minutes to milliseconds
-            long maxDurationInMs = maxDurationInMins * 60 * 1000;
+            long maxDurationInMs = maxDurationInMins * MS_IN_ONE_MINUTE;
 
             // Compute the end time
             end = start + maxDurationInMs;

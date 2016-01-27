@@ -18,19 +18,16 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk.removal.impl;
+package com.adobe.acs.commons.workflow.bulk.removal;
 
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class WorkflowRemovalStatus {
-    private static final Logger log = LoggerFactory.getLogger(WorkflowRemovalStatus.class);
+public final class WorkflowRemovalStatus {
 
     String KEY_CHECKED_COUNT = "checkedCount";
     String KEY_COMPLETED_AT = "completedAt";
