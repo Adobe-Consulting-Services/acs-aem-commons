@@ -61,16 +61,14 @@ class MemCachePersistenceObject {
     public MemCachePersistenceObject buildForCaching(String charEncoding, String contentType, Map<String,
             List<String>> headers, InputStream dataInputStream) throws HttpCacheDataStreamException {
 
-        // Taken copy of arguments before caching them to avoid chances of memory leak.
-        // Take copy of originals
-        this.charEncoding = new String(charEncoding);
-        this.contentType = new String(contentType);
+        this.charEncoding = charEncoding;
+        this.contentType = contentType;
 
         // Iterate headers and take a copy.
         this.headers = HashMultimap.create();
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             for (String value : entry.getValue()) {
-                this.headers.put(new String(entry.getKey()), new String(value));
+                this.headers.put(entry.getKey(), value);
             }
         }
 

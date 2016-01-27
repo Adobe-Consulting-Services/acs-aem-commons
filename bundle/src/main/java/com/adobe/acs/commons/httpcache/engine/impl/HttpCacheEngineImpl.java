@@ -387,10 +387,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse
             response, HttpCacheConfig cacheConfig) throws HttpCacheDataStreamException,
             HttpCacheKeyCreationException, HttpCachePersistenceException {
-
-        // Create cache key.
-        CacheKey cacheKey = cacheConfig.buildCacheKey(request);
-
         // Wrap the response to get the copy of the stream.
         // Temp sink for the duplicate stream is chosen based on the cache store configured at cache config.
         try {

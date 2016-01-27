@@ -230,8 +230,8 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         // Iterate through the cache entries and compute the total size of byte array.
         long size = 0L;
         ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
-        for (final CacheKey key : cacheAsMap.keySet()) {
-            size += cacheAsMap.get(key).getBytes().length;
+        for (final Map.Entry<CacheKey, MemCachePersistenceObject> entry : cacheAsMap.entrySet()) {
+            size += entry.getValue().getBytes().length;
         }
 
         // Convert bytes to human-friendly format
