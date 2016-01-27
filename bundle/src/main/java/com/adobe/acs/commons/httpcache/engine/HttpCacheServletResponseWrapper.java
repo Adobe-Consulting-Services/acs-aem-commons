@@ -17,8 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.httpcache.engine.impl;
+package com.adobe.acs.commons.httpcache.engine;
 
+import com.adobe.acs.commons.httpcache.engine.impl.TeePrintWriter;
+import com.adobe.acs.commons.httpcache.engine.impl.TeeServletOutputStream;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import org.apache.sling.api.SlingHttpServletResponse;

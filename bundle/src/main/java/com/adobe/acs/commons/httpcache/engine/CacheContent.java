@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.httpcache.engine;
 
-import com.adobe.acs.commons.httpcache.engine.impl.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import org.slf4j.Logger;

@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.httpcache.engine;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.engine.impl.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
