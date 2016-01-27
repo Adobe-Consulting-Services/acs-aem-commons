@@ -54,7 +54,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
 import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.adobe.acs.commons.util.impl.AbstractCacheMBean;
+import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.GenericCacheMBean;
 import com.day.cq.commons.PathInfo;
 import com.day.cq.widget.HtmlLibrary;
@@ -79,7 +79,7 @@ import com.google.common.cache.CacheBuilder;
         value = "com.adobe.acs.commons.rewriter:type=VersionedClientlibsTransformerMd5Cache", propertyPrivate = true)
 })
 @Service(value = {DynamicMBean.class, TransformerFactory.class, EventHandler.class})
-public final class VersionedClientlibsTransformerFactory extends AbstractCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, GenericCacheMBean {
+public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, GenericCacheMBean {
 
     private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);
     

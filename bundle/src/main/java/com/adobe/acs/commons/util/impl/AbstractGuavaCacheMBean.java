@@ -40,13 +40,13 @@ import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;
 
-public abstract class AbstractCacheMBean<K, V> extends AnnotatedStandardMBean implements GenericCacheMBean {
+public abstract class AbstractGuavaCacheMBean<K, V> extends AnnotatedStandardMBean implements GenericCacheMBean {
 
-    public <T> AbstractCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException {
+    public <T> AbstractGuavaCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException {
         super(implementation, mbeanInterface);
     }
 
-    protected AbstractCacheMBean(Class<?> mbeanInterface) throws NotCompliantMBeanException {
+    protected AbstractGuavaCacheMBean(Class<?> mbeanInterface) throws NotCompliantMBeanException {
         super(mbeanInterface);
     }
 
