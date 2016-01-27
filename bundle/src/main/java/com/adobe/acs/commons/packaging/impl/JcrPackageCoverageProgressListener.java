@@ -20,10 +20,10 @@
 
 package com.adobe.acs.commons.packaging.impl;
 
+import com.day.jcr.vault.fs.api.ProgressTrackerListener;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
 
 public class JcrPackageCoverageProgressListener implements ProgressTrackerListener {
     private final List<String> coverage = new ArrayList<String>();

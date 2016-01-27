@@ -20,31 +20,18 @@
 
 package com.adobe.acs.commons.packaging.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.Session;
-
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.day.cq.commons.jcr.JcrUtil;
+import com.day.jcr.vault.fs.api.PathFilterSet;
+import com.day.jcr.vault.fs.api.WorkspaceFilter;
+import com.day.jcr.vault.fs.config.MetaInf;
+import com.day.jcr.vault.packaging.JcrPackage;
+import com.day.jcr.vault.packaging.JcrPackageDefinition;
+import com.day.jcr.vault.packaging.JcrPackageManager;
+import com.day.jcr.vault.packaging.PackageId;
+import com.day.jcr.vault.packaging.Packaging;
+import com.day.jcr.vault.packaging.Version;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
-import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
-import org.apache.jackrabbit.vault.fs.config.MetaInf;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
-import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.jackrabbit.vault.packaging.PackageId;
-import org.apache.jackrabbit.vault.packaging.Packaging;
-import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
@@ -61,8 +48,24 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.day.cq.commons.jcr.JcrUtil;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.Session;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(JcrUtil.class)

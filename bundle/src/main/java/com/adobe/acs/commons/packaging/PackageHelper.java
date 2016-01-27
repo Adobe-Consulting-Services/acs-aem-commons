@@ -22,11 +22,12 @@ package com.adobe.acs.commons.packaging;
 
 import aQute.bnd.annotation.ProviderType;
 
-import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.jackrabbit.vault.packaging.PackageException;
-import org.apache.jackrabbit.vault.packaging.Version;
+import com.day.jcr.vault.fs.api.PathFilterSet;
+import com.day.jcr.vault.packaging.JcrPackage;
+import com.day.jcr.vault.packaging.JcrPackageManager;
+import com.day.jcr.vault.packaging.PackageException;
+import com.day.jcr.vault.packaging.Version;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 

@@ -1,21 +1,12 @@
 package com.adobe.acs.commons.replication.status.impl;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.jcr.Node;
-
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.jcr.vault.packaging.JcrPackage;
+import com.day.jcr.vault.packaging.JcrPackageDefinition;
+import com.day.jcr.vault.packaging.PackageId;
+import com.day.jcr.vault.packaging.Packaging;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
-import org.apache.jackrabbit.vault.packaging.PackageId;
-import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -28,9 +19,20 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.osgi.service.event.Event;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import javax.jcr.Node;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JcrPackageReplicationStatusEventHandlerTest {
