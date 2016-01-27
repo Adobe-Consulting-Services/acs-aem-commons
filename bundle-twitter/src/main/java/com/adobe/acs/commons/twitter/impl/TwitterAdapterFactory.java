@@ -100,6 +100,7 @@ public final class TwitterAdapterFactory implements AdapterFactory {
     private Configuration buildConfiguration() {
         final ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.setUseSSL(true);
+        builder.setJSONStoreEnabled(true);
         builder.setApplicationOnlyAuthEnabled(true);
         if (StringUtils.isNotBlank(httpProxyHost) && httpProxyPort > 0) {
             builder.setHttpProxyHost(httpProxyHost);
