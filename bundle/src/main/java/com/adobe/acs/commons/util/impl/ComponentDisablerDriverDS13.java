@@ -49,11 +49,9 @@ public class ComponentDisablerDriverDS13 implements ComponentDisablerDriver {
     public void disable(String componentName) {
         for (Bundle bundle : bundleContext.getBundles()) {
             ComponentDescriptionDTO dto = scr.getComponentDescriptionDTO(bundle, componentName);
-            if (dto != null) {
-                if (scr.isComponentEnabled(dto)) {
-                    log.info("Component {} disabled by configuration.", dto.implementationClass);
-                    scr.disableComponent(dto);
-                }
+            if (dto != null && scr.isComponentEnabled(dto)) {
+                log.info("Component {} disabled by configuration.", dto.implementationClass);
+                scr.disableComponent(dto);
             }
         }
     }
