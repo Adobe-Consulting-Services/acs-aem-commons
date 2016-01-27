@@ -19,24 +19,37 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.day.cq.commons.PathInfo;
-import com.day.cq.widget.HtmlLibrary;
-import com.day.cq.widget.HtmlLibraryManager;
-import com.day.cq.widget.LibraryType;
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingConstants;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
+
+import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.day.cq.commons.PathInfo;
+import com.day.cq.widget.HtmlLibrary;
+import com.day.cq.widget.HtmlLibraryManager;
+import com.day.cq.widget.LibraryType;
+import com.google.common.base.Objects;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter
@@ -44,10 +57,48 @@ import org.xml.sax.helpers.AttributesImpl;
  * selector; in the form: /path/to/clientlib.123456789.css
  */
 @Component
-@Property(name = "pipeline.type",
-        value = "versioned-clientlibs")
+@Properties({
+    @Property(name = "pipeline.type",
+        value = "versioned-clientlibs"),
+    @Property(name = EventConstants.EVENT_TOPIC,
+        value = "com/adobe/granite/ui/librarymanager/INVALIDATED")
+})
 @Service
-public final class VersionedClientlibsTransformerFactory implements TransformerFactory {
+public final class VersionedClientlibsTransformerFactory implements TransformerFactory, EventHandler {
+    private class CacheKey {
+        private final String path;
+        private final LibraryType type;
+
+        private CacheKey(HtmlLibrary htmlLibrary) {
+            this.path = htmlLibrary.getLibraryPath();
+            this.type = htmlLibrary.getType();
+        }
+
+        private CacheKey(String path, LibraryType type) {
+            this.path = path;
+            this.type = type;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final CacheKey other = (CacheKey) obj;
+
+            return Objects.equal(this.path, other.path) && Objects.equal(this.type, other.type);
+        }
+
+        @Override
+        public int hashCode() {
+            return com.google.common.base.Objects.hashCode(this.path, this.type);
+        }
+
+    }
+
     private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);
 
     private static final String ATTR_JS_PATH = "src";
@@ -55,6 +106,12 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
 
     private static final String CSS_TYPE = "text/css";
     private static final String JS_TYPE = "text/javascript";
+
+    private Cache<CacheKey, String> md5Cache;
+
+    public VersionedClientlibsTransformerFactory() {
+        this.md5Cache = CacheBuilder.newBuilder().maximumSize(300).build();
+    }
 
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
@@ -138,7 +195,7 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
                 if (selector != null) {
                     builder.append(selector).append(".");
                 }
-                builder.append(DigestUtils.md5Hex(htmlLibrary.getInputStream()));
+                builder.append(getMd5(htmlLibrary));
                 builder.append(libraryType.extension);
 
                 return builder.toString();
@@ -154,11 +211,28 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
         }
     }
 
+    private String getMd5(final HtmlLibrary htmlLibrary) throws IOException, ExecutionException {
+        return md5Cache.get(new CacheKey(htmlLibrary), new Callable<String>() {
+
+            @Override
+            public String call() throws Exception {
+                return DigestUtils.md5Hex(htmlLibrary.getInputStream());
+            }
+        });
+    }
+
     private class VersionableClientlibsTransformer extends AbstractTransformer {
         public void startElement(final String namespaceURI, final String localName, final String qName,
                                  final Attributes attrs)
                 throws SAXException {
             getContentHandler().startElement(namespaceURI, localName, qName, versionClientLibs(localName, attrs));
         }
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
+        md5Cache.invalidate(new CacheKey(path, LibraryType.JS));
+        md5Cache.invalidate(new CacheKey(path, LibraryType.CSS));
     }
 }
