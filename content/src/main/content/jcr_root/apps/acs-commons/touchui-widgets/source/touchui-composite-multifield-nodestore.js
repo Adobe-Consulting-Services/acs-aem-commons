@@ -169,6 +169,12 @@
                 $form = $("form.cq-dialog"),
                 actionUrl = $form.attr("action") + ".infinity.json";
 
+            $(".js-coral-Multifield-add").click(function(){
+                setTimeout(function(){
+                    cmf.addCompositeMultifieldValidator();
+                }, 500);
+            });
+
             $.ajax(actionUrl).done(postProcess);
 
             function postProcess(data){
@@ -177,6 +183,8 @@
                 });
 
                 $document.trigger("touchui-composite-multifield-nodestore-ready", mNames);
+
+                cmf.addCompositeMultifieldValidator();
             }
         },
 
