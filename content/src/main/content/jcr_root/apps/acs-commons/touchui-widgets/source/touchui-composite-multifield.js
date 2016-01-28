@@ -123,6 +123,12 @@
                 actionUrl = $form.attr("action") + ".json",
                 mValues, $field, name;
 
+            $(".js-coral-Multifield-add").click(function(){
+                setTimeout(function(){
+                    cmf.addCompositeMultifieldValidator();
+                }, 500);
+            });
+
             if (_.isEmpty($fieldSets)) {
                 return;
             }
@@ -188,6 +194,8 @@
                 });
 
                 $document.trigger("touchui-composite-multifield-ready", mNames);
+
+                cmf.addCompositeMultifieldValidator();
             }
 
             $.ajax(actionUrl).done(postProcess);
