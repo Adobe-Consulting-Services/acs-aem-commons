@@ -31,7 +31,9 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
 
 /**
  * Wrapper for <code>SlingHttpServletResponse</code>. Wrapped to get hold of the copy of servlet response stream.
@@ -72,8 +74,8 @@ public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWra
             throw new IllegalStateException("Cannot invoke getWriter() once getOutputStream() has been called.");
         } else if (this.printWriter == null) {
             try {
-                this.printWriter = new TeePrintWriter(super.getWriter(), new PrintWriter(tempSink.createOutputStream
-                        ()));
+                final Writer tempWriter = new OutputStreamWriter(tempSink.createOutputStream(), getResponse().getCharacterEncoding());
+                this.printWriter = new TeePrintWriter(super.getWriter(), new PrintWriter(tempWriter));
             } catch (HttpCacheDataStreamException e) {
                 log.error("Temp sink is unable to provide an output stream.");
             }
