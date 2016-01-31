@@ -203,7 +203,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         order = PropertiesUtil.toInteger(configs.get(PROP_ORDER), DEFAULT_ORDER);
 
         // PIDs of cache handling rules.
-        cacheHandlingRulesPid = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get
+        cacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get
                 (PROP_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = cacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {

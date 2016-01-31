@@ -91,7 +91,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
     /** Thread safe list to contain the registered HttpCacheConfig references. */
-    private static final CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<HttpCacheConfig>();
+    private CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<HttpCacheConfig>();
 
     /** Method name that binds cache store */
     static final String METHOD_NAME_TO_BIND_CACHE_STORE = "httpCacheStore";
@@ -118,7 +118,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     private List<String> globalCacheHandlingRulesPid;
 
     /** Thread safe list containing the OSGi configurations for the registered httpCacheConfigs. Used only for mbean.*/
-    private static final ConcurrentHashMap<HttpCacheConfig, Map<String, Object>> cacheConfigConfigs = new
+    private final ConcurrentHashMap<HttpCacheConfig, Map<String, Object>> cacheConfigConfigs = new
             ConcurrentHashMap<HttpCacheConfig, Map<String, Object>>();
 
     //-------------------<OSGi specific methods>---------------//
@@ -143,15 +143,12 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             return;
         }
 
-        // Sort cacheConfigs by order; Synchronized since this bind/un-bind is a rare/limited event
-        synchronized (this.cacheConfigs) {
-            final List<HttpCacheConfig> tmp = new ArrayList<HttpCacheConfig>(this.cacheConfigs);
-            tmp.add(cacheConfig);
+        // Sort cacheConfigs by order
+        final CopyOnWriteArrayList<HttpCacheConfig> tmp = new CopyOnWriteArrayList<HttpCacheConfig>(this.cacheConfigs);
+        tmp.add(cacheConfig);
 
-            Collections.sort(tmp, new HttpCacheConfigComparator());
-            this.cacheConfigs.clear();
-            this.cacheConfigs.addAll(tmp);
-        }
+        Collections.sort(tmp, new HttpCacheConfigComparator());
+        this.cacheConfigs = tmp;
 
         this.cacheConfigConfigs.put(cacheConfig, configs);
 
@@ -188,15 +185,13 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * Binds cache store implementation
      *
      * @param cacheStore
-     * @param configs
+     * @param properties
      */
-    protected void bindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> configs) {
+    protected void bindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> properties) {
+        final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
+        if (cacheStoreType != null && cacheStoresMap.putIfAbsent(cacheStoreType, cacheStore) == null) {
 
-        if (configs.containsKey(HttpCacheStore.KEY_CACHE_STORE_TYPE) && !cacheStoresMap.containsKey((String) configs
-                .get(HttpCacheStore.KEY_CACHE_STORE_TYPE))) {
-            cacheStoresMap.put(PropertiesUtil.toString(configs.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null),
-                    cacheStore);
-            log.debug("Cache store implementation {} has been added", (String) configs.get(HttpCacheStore
+            log.debug("Cache store implementation {} has been added", (String) properties.get(HttpCacheStore
                     .KEY_CACHE_STORE_TYPE));
             log.debug("Total number of cache stores in the map: {}", cacheStoresMap.size());
         }
@@ -206,14 +201,12 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * Unbinds cache store.
      *
      * @param cacheStore
-     * @param config
+     * @param properties
      */
-    protected void unbindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> config) {
-
-        if (config.containsKey(HttpCacheStore.KEY_CACHE_STORE_TYPE) && cacheStoresMap.containsKey((String) config.get
-                (HttpCacheStore.KEY_CACHE_STORE_TYPE))) {
-            cacheStoresMap.remove((String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
-            log.debug("Cache store removed - {}.", (String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
+    protected void unbindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> properties) {
+        final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
+        if (cacheStoreType != null && cacheStoresMap.remove(cacheStoreType) != null) {
+            log.debug("Cache store removed - {}.", (String) properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
             log.debug("Total number of cache stores after removal: {}", cacheStoresMap.size());
         }
     }
@@ -222,15 +215,14 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * Binds cache handling rule
      *
      * @param cacheHandlingRule
-     * @param configs
+     * @param properties
      */
     protected void bindHttpCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String, Object>
-            configs) {
+            properties) {
 
         // Get the service pid and make it as key.
-        String servicePid = PropertiesUtil.toString(configs.get("service.pid"), StringUtils.EMPTY);
-        if (!cacheHandlingRules.containsKey(servicePid)) {
-            cacheHandlingRules.put(servicePid, cacheHandlingRule);
+        String servicePid = PropertiesUtil.toString(properties.get("service.pid"), StringUtils.EMPTY);
+        if (cacheHandlingRules.putIfAbsent(servicePid, cacheHandlingRule) == null) {
             log.debug("Cache handling rule implementation {} has been added", cacheHandlingRule.getClass().getName());
             log.debug("Total number of cache handling rule available after addition: {}", cacheHandlingRules.size());
         }

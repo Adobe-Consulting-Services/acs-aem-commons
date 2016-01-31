@@ -74,7 +74,7 @@ import com.day.cq.wcm.api.PageManager;
                 value = "Site Map for: {externalizer.domain}, on resource types: [{sling.servlet.resourceTypes}]")
 })
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
-    
+
     private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd");
 
     private static final boolean DEFAULT_INCLUDE_LAST_MODIFIED = false;
@@ -179,16 +179,15 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             Arrays.sort(configuredAssetFolderPaths);
             String prevPath = "#";
             for (String configuredAssetFolderPath : configuredAssetFolderPaths) {
-                if (StringUtils.isNotBlank(configuredAssetFolderPath)) {
-                    // Ensure that this folder is not a child folder of another
-                    // configured folder, since it will already be included when
-                    // the parent folder is traversed.
-                    if (!configuredAssetFolderPath.equals(prevPath) && !StringUtils.startsWith(configuredAssetFolderPath, prevPath + "/")) {
-                        Resource assetFolder = resolver.getResource(configuredAssetFolderPath);
-                        if (assetFolder != null) {
-                            prevPath = configuredAssetFolderPath;
-                            allAssetFolders.add(assetFolder);
-                        }
+                // Ensure that this folder is not a child folder of another
+                // configured folder, since it will already be included when
+                // the parent folder is traversed.
+                if (StringUtils.isNotBlank(configuredAssetFolderPath) &&
+                        !configuredAssetFolderPath.equals(prevPath) && !StringUtils.startsWith(configuredAssetFolderPath, prevPath + "/")) {
+                    Resource assetFolder = resolver.getResource(configuredAssetFolderPath);
+                    if (assetFolder != null) {
+                        prevPath = configuredAssetFolderPath;
+                        allAssetFolders.add(assetFolder);
                     }
                 }
             }
