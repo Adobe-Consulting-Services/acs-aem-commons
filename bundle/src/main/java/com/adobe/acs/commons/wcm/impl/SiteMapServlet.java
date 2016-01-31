@@ -183,7 +183,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
                 // configured folder, since it will already be included when
                 // the parent folder is traversed.
                 if (StringUtils.isNotBlank(configuredAssetFolderPath) &&
-                        !configuredAssetFolderPath.equals(prevPath) && !StringUtils.startsWith(configuredAssetFolderPath, prevPath + "/")) {
+                        !configuredAssetFolderPath.equals(prevPath) &&
+                        !StringUtils.startsWith(configuredAssetFolderPath, prevPath + "/")) {
                     Resource assetFolder = resolver.getResource(configuredAssetFolderPath);
                     if (assetFolder != null) {
                         prevPath = configuredAssetFolderPath;
