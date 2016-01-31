@@ -79,6 +79,67 @@
 
         isNodeStore: function(name){
             return (name === this.NODE_STORE);
+        },
+
+        addCompositeMultifieldValidator: function(){
+            var fieldErrorEl = $("<span class='coral-Form-fielderror coral-Icon coral-Icon--alert coral-Icon--sizeS' " +
+                                "data-init='quicktip' data-quicktip-type='error' />"),
+                cmf = this,
+                selector = "[" + cmf.DATA_ACS_COMMONS_NESTED + "] >* input, [" + cmf.DATA_ACS_COMMONS_NESTED + "] >* textarea";
+
+            $.validator.register({
+                selector: selector,
+                validate: validate,
+                show: show,
+                clear: clear
+            });
+
+            function validate($el){
+                var $multifield = $el.closest(".coral-Multifield"),
+                    $inputs = $multifield.find("input, textarea"),
+                    $input, isRequired, message = null;
+
+                $inputs.each(function(index, input){
+                    $input = $(input);
+
+                    isRequired = $input.attr("required") || ($input.attr("aria-required") === "true");
+
+                    if (isRequired && $input.val().length === 0) {
+                        $input.addClass("is-invalid");
+                        message = "Please fill the required multifield items";
+                    }else{
+                        $input.removeClass("is-invalid");
+                    }
+                });
+
+                if(message){
+                    $(".cq-dialog-submit").attr("disabled", "disabled");
+                }else{
+                    $(".cq-dialog-submit").removeAttr("disabled");
+                }
+
+                return message;
+            }
+
+            function show($el, message){
+                /* jshint validthis: true */
+                this.clear($el);
+
+                var $multifield = $el.closest(".coral-Multifield"),
+                    arrow = $el.closest("form").hasClass("coral-Form--vertical") ? "right" : "top";
+
+                fieldErrorEl.clone()
+                    .attr("data-quicktip-arrow", arrow)
+                    .attr("data-quicktip-content", message)
+                    .insertAfter($multifield);
+            }
+
+            function clear($el){
+                var $multifield = $el.closest(".coral-Multifield");
+                $multifield.nextAll(".coral-Form-fielderror").tooltip("hide").remove();
+            }
+
+            validate($($(selector)[0]));
         }
     });
 }());
