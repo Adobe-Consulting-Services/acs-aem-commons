@@ -161,8 +161,7 @@
                     <configuration>
                         <excludePackageNames>
                             *.impl
-                        </excludePackageNames>
-                        <additionalparam>-Xdoclint:none</additionalparam>
+                        </excludePackageNames>          
                     </configuration>
                 </plugin>
                 <plugin>
@@ -484,6 +483,26 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+        	<id>jdk18-pedantic-javadoc</id>
+        	<activation>
+        		<jdk>[1.8,)</jdk>
+        	</activation>
+        	<build>
+        		<plugins>
+        			<plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                        	<excludePackageNames>
+                            	*.impl
+                        	</excludePackageNames>
+                        <additionalparam>-Xdoclint:none</additionalparam>
+                    </configuration>
+                    </plugin>
+        		</plugins>
+        	</build>
+        
         </profile>
     </profiles>
 
