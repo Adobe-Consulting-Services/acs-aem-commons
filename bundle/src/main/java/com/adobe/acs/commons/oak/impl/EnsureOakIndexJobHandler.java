@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class EnsureOakIndexJobHandler implements Runnable {
+public class EnsureOakIndexJobHandler implements Runnable {
     static final Logger log = LoggerFactory.getLogger(EnsureOakIndexJobHandler.class);
 
     private final EnsureOakIndex ensureOakIndex;
