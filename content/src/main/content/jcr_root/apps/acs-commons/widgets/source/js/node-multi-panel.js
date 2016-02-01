@@ -36,6 +36,10 @@ ACS.CQ.NodeMultiFieldPanel = CQ.Ext.extend(ACS.CQ.MultiFieldPanel, {
 
             i.name = prefix + "/" + (counter) + "/" + i.key;
 
+            if(i.hiddenField){
+                i.hiddenField.name = prefix + "/" + (counter) + "/" + i.key;
+            }
+
             if(i.el && i.el.dom){ //form serialization workaround
                 i.el.dom.name = prefix + "/" + (counter) + "/" + i.key;
             }
@@ -93,6 +97,8 @@ ACS.CQ.NodeMultiFieldPanel = CQ.Ext.extend(ACS.CQ.MultiFieldPanel, {
             }
 
             i.setValue(item[i.key]);
+
+            i.fireEvent('loadcontent', this);
         });
 
         if(multiPanels.length == 1){
