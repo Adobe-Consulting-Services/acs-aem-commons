@@ -306,7 +306,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @param oakIndex the index representing the oak index
      * @throws PersistenceException
      */
-    void forceRefresh(final @Nonnull Resource oakIndex) throws PersistenceException {
+    public void forceRefresh(final @Nonnull Resource oakIndex) throws PersistenceException {
 
         final ModifiableValueMap mvm = oakIndex.adaptTo(ModifiableValueMap.class);
         mvm.put(PN_REINDEX, true);
@@ -323,7 +323,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws PersistenceException
      * @throws RepositoryException
      */
-    Resource create(final @Nonnull Resource ensuredDefinition, final @Nonnull Resource oakIndexes) throws PersistenceException,
+    public Resource create(final @Nonnull Resource ensuredDefinition, final @Nonnull Resource oakIndexes) throws PersistenceException,
             RepositoryException {
 
         final Node oakIndex = JcrUtil.copy(
@@ -349,7 +349,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws IOException
      */
-    Resource update(final @Nonnull Resource ensureDefinition, final @Nonnull Resource oakIndexes, boolean forceReindex)
+    public Resource update(final @Nonnull Resource ensureDefinition, final @Nonnull Resource oakIndexes, boolean forceReindex)
             throws RepositoryException, IOException {
 
         final ValueMap ensureDefinitionProperties = ensureDefinition.getValueMap();
@@ -490,7 +490,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws OakIndexDefinitionException
      */
-    void validateEnsureDefinition(@Nonnull Resource ensureDefinition)
+    public void validateEnsureDefinition(@Nonnull Resource ensureDefinition)
             throws RepositoryException, OakIndexDefinitionException {
 
         Node node = ensureDefinition.adaptTo(Node.class);
