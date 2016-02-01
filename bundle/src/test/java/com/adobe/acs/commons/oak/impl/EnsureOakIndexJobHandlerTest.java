@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.Spy;
 
 import static org.mockito.Mockito.*;
 
@@ -52,27 +53,25 @@ import com.adobe.acs.commons.oak.impl.EnsureOakIndex.OakIndexDefinitionException
 @RunWith(MockitoJUnitRunner.class)
 public class EnsureOakIndexJobHandlerTest {
 
-    EnsureOakIndexJobHandler handler;
+    // Create a job handler, where we mock the execution of the index actions
+    @Spy
+    private EnsureOakIndexJobHandler handler = new EnsureOakIndexJobHandler(null, OAK_INDEX, DEFINITION_PATH);
 
     private static final String OAK_INDEX = "/oak:index";
     private static final String INDEX_NAME = "testIndex";
     private static final String DEFINITION_PATH = "/apps/mydefinitions/index/" + INDEX_NAME;
 
     private Resource oakIndexResource;
+    
 
     @Before
     public void init() throws RepositoryException, IOException, OakIndexDefinitionException {
-
         oakIndexResource = mock(Resource.class);
 
-        // Create a job handler, where we mock the execution of the index actions
-        EnsureOakIndexJobHandler e = new EnsureOakIndexJobHandler(null, OAK_INDEX, DEFINITION_PATH);
-        handler = spy(e);
-
-        doNothing().when(handler).disableIndex(Matchers.any(Resource.class));
-        doNothing().when(handler).delete(Matchers.any(Resource.class));
-        doNothing().when(handler).forceRefresh(Matchers.any(Resource.class));
-        doNothing().when(handler).validateEnsureDefinition(Matchers.any(Resource.class));
+        doNothing().when(handler).disableIndex(any(Resource.class));
+        doNothing().when(handler).delete(any(Resource.class));
+        doNothing().when(handler).forceRefresh(any(Resource.class));
+        doNothing().when(handler).validateEnsureDefinition(any(Resource.class));
 
         doReturn(null).when(handler).update(any(Resource.class), any(Resource.class), anyBoolean());
         doReturn(null).when(handler).create(any(Resource.class), any(Resource.class));
