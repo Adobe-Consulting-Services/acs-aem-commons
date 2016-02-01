@@ -426,7 +426,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @param oakIndex the index
      * @throws PersistenceException
      */
-    void disableIndex(@Nonnull Resource oakIndex) throws PersistenceException {
+    public void disableIndex(@Nonnull Resource oakIndex) throws PersistenceException {
         final ModifiableValueMap oakIndexProperties = oakIndex.adaptTo(ModifiableValueMap.class);
         oakIndexProperties.put(PN_TYPE, DISABLED);
 
@@ -473,7 +473,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws PersistenceException
      */
-    void delete(final @Nonnull Resource oakIndex) throws RepositoryException, PersistenceException {
+    public void delete(final @Nonnull Resource oakIndex) throws RepositoryException, PersistenceException {
 
         if (oakIndex.adaptTo(Node.class) != null) {
             // Remove the node and its descendants
