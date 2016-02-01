@@ -1,3 +1,28 @@
+/*
+ * #%L
+ * ACS AEM Commons Package
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ *
+ * Extends /libs/foundation/components/parsys to limit the components that be added
+ * using drag/drop, copy/paste or insert actions
+ * To enable limit feature set the property acsComponentsLimit with required limit on design node
+ * eg. to limit the components to 4 on rightpar of /content/geometrixx/en.html
+ * set acsComponentsLimit=4 on /etc/designs/geometrixx/jcr:content/homepage/rightpar
+ */
 (function(){
     var pathName = window.location.pathname,
         ACS_COMPONENTS_LIMIT = "acsComponentsLimit";
@@ -39,7 +64,9 @@
             parName = parentPath.substring(parentPath.lastIndexOf("/") + 1);
             currentLimit = pageInfo.designObject.content[cellSearchPath][parName][ACS_COMPONENTS_LIMIT];
 
-            isWithin = getSiblings(editComponent).length <= parseInt(currentLimit);
+            if(currentLimit){
+                isWithin = getSiblings(editComponent).length <= parseInt(currentLimit);
+            }
         }catch(err){
             console.log("ACS Commons - error getting the component limit", err);
         }
@@ -52,8 +79,6 @@
 
     function extendDrop(dropFn){
         return function(dragSource, e, data){
-            CQ.utils.WCM.getDesign(this.path).getContent();
-
             var limit = isWithinLimit(this.editComponent);
 
             if(!limit.isWithin){
