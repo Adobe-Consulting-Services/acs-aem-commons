@@ -149,7 +149,7 @@ public abstract class AbstractGuavaCacheMBean<K, V> extends AnnotatedStandardMBe
     }
 
     @Override
-    public final TabularData getCacheKeys() throws OpenDataException {
+    public final TabularData getCacheContents() throws OpenDataException {
         final CompositeType cacheEntryType = getCacheEntryType();
 
         final TabularDataSupport tabularData = new TabularDataSupport(
