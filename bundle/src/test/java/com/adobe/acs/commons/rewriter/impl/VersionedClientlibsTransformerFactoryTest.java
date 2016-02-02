@@ -23,6 +23,9 @@ package com.adobe.acs.commons.rewriter.impl;
 import com.day.cq.widget.HtmlLibrary;
 import com.day.cq.widget.HtmlLibraryManager;
 import com.day.cq.widget.LibraryType;
+
+import junitx.util.PrivateAccessor;
+
 import org.apache.sling.rewriter.Transformer;
 import org.junit.After;
 import org.junit.Before;
@@ -31,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.configuration.InjectingAnnotationEngine;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -44,6 +48,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
 @RunWith(MockitoJUnitRunner.class)
 public class VersionedClientlibsTransformerFactoryTest {
     @Mock
@@ -55,8 +61,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Mock
     private ContentHandler handler;
 
-    @InjectMocks
-    private VersionedClientlibsTransformerFactory factory = new VersionedClientlibsTransformerFactory();
+    private VersionedClientlibsTransformerFactory factory;
 
     private Transformer transformer;
 
@@ -65,6 +70,10 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Before
     public void setUp() throws Exception {
+        factory = new VersionedClientlibsTransformerFactory();
+        PrivateAccessor.setField(factory, "htmlLibraryManager", htmlLibraryManager);
+        factory.activate(Collections.<String, Object>emptyMap());
+
         when(htmlLibrary.getLibraryPath()).thenReturn(PATH);
         when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings".getBytes()));
         //when(htmlLibrary.getLastModified()).thenReturn(123L);
