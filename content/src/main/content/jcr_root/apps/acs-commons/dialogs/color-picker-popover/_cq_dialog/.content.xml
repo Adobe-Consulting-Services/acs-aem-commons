@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Color Picker"
+    sling:resourceType="cq/gui/components/authoring/dialog">
+    <content
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="granite/ui/components/foundation/container">
+        <layout
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
+            margin="{Boolean}false"/>
+        <items jcr:primaryType="nt:unstructured">
+            <column
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <picker
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/form/colorpicker"
+                        freestylePaletteType="{Boolean}true"
+                        editType="{Boolean}true"
+                        fieldLabel="Select Color"
+                        name="./color">
+                        <colors jcr:primaryType="nt:unstructured">
+                            <red
+                                jcr:primaryType="nt:unstructured"
+                                name="Red"
+                                value="#FF0000"/>
+                            <green
+                                jcr:primaryType="nt:unstructured"
+                                name="Green"
+                                value="#00FF00"/>
+                            <blue
+                                jcr:primaryType="nt:unstructured"
+                                name="Blue"
+                                value="#0000FF"/>
+                            <black
+                                jcr:primaryType="nt:unstructured"
+                                name="Black"
+                                value="#000000"/>
+                            <brown
+                                jcr:primaryType="nt:unstructured"
+                                name="Brown"
+                                value="#996633"/>
+                            <orange
+                                jcr:primaryType="nt:unstructured"
+                                name="Orange"
+                                value="#FF7F00"/>
+                            <purple
+                                jcr:primaryType="nt:unstructured"
+                                name="Purple"
+                                value="#7F007F"/>
+                            <yellow
+                                jcr:primaryType="nt:unstructured"
+                                name="Yellow"
+                                value="#FFFF00"/>
+                        </colors>
+                    </picker>
+                    <add
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/button"
+                        class="coral-Button--primary"
+                        id="ACS_CP_ADD_COLOR"
+                        text="Add Color"/>
+                    <remove
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/button"
+                        class="coral-Button--warning"
+                        id="ACS_CP_REMOVE_COLOR"
+                        text="Remove Color"/>
+                </items>
+            </column>
+        </items>
+    </content>
+</jcr:root>

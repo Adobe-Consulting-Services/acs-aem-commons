@@ -1,3 +1,5 @@
 #base=source
 
+rte-plugins.js
 dialog-plugin.js
+color-picker-plugin.js
