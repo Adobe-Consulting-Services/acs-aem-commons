@@ -97,7 +97,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
 
     private static final String[] DEFAULT_REPLICATION_STATUS_NODE_TYPES = {
             ReplicationStatus.NODE_TYPE,
-            "cq:PageContent",
+            "cq:Page/cq:PageContent",
             "dam:AssetContent",
             "rep:User",
             "rep:Group",
