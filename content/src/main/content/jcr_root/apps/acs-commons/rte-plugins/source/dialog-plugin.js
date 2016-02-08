@@ -74,8 +74,15 @@
 
         _getUISettings: function (options) {
             var uiSettings = this.superClass._getUISettings(options),
-                toolbar = uiSettings.fullscreen.toolbar,
-                feature = getUISetting();
+                toolbar, feature;
+
+            //insertDialogContent feature is supported in fullscreen mode only
+            if(!uiSettings.fullscreen){
+                return uiSettings;
+            }
+
+            toolbar = uiSettings.fullscreen.toolbar;
+            feature = getUISetting();
 
             if (toolbar.indexOf(feature) === -1) {
                 toolbar.splice(3, 0, feature);
