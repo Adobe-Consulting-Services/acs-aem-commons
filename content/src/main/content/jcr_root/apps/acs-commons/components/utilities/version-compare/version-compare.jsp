@@ -28,7 +28,7 @@
 
         <div class="page" role="main"
                  ng-controller="MainCtrl"
-                 ng-init="app.resource = '${model.resourcePath}'; app.home = '${currentPage.path}.html'; init();">
+                 ng-init="app.resource = '${model.resourcePath}'; app.home = '${request.contextPath}${currentPage.path}.html'; init();">
 
             <div ng-show="notifications.length > 0"
                  class="notifications">
