@@ -42,7 +42,7 @@
 
         var resouceType = editable.params["./sling:resourceType"];
 
-        return ( resouceType === CQ.wcm.EditBase.PARSYS_NEW || resouceType === "foundation/components/iparsys/par");
+        return ( resouceType === CQ.wcm.EditBase.PARSYS_NEW || resouceType === "foundation/components/iparsys/new");
     }
 
     function getColor(color){
