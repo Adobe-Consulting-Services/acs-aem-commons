@@ -68,7 +68,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Calendar calendar = Calendar.getInstance();
 
         final List<String> contentPaths = new ArrayList<String>();
-        contentPaths.add("/content/foo");
+        contentPaths.add("/content/foo/jcr:content");
         contentPaths.add("/content/bar");
         contentPaths.add("/content/dam/folder/jcr:content");
 
@@ -81,11 +81,13 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Resource jcrPackageJcrContent = mock(Resource.class);
 
         final Resource contentResource1 = mock(Resource.class);
+        final Resource contentResource1parent = mock(Resource.class);
         final Resource contentResource2 = mock(Resource.class);
         final Resource contentResource3 = mock(Resource.class);
         final Resource contentResource3parent = mock(Resource.class);
 
         final Node contentNode1 = mock(Node.class);
+        final Node contentNode1parent = mock(Node.class);
         final Node contentNode2 = mock(Node.class);
         final Node contentNode3 = mock(Node.class);
         final Node contentNode3parent = mock(Node.class);
@@ -109,9 +111,12 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         properties.put(JcrConstants.JCR_LASTMODIFIED, calendar);
         when(jcrPackageJcrContent.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(properties));
 
-        when(adminResourceResolver.getResource("/content/foo")).thenReturn(contentResource1);
+        when(adminResourceResolver.getResource("/content/foo/jcr:content")).thenReturn(contentResource1);
         when(contentResource1.adaptTo(Node.class)).thenReturn(contentNode1);
         when(contentNode1.isNodeType("cq:PageContent")).thenReturn(true);
+        when(contentResource1.getParent()).thenReturn(contentResource1parent);
+        when(contentResource1parent.adaptTo(Node.class)).thenReturn(contentNode1parent);
+        when(contentNode1parent.isNodeType("cq:Page")).thenReturn(true);
 
         when(adminResourceResolver.getResource("/content/bar")).thenReturn(contentResource2);
         when(contentResource2.adaptTo(Node.class)).thenReturn(contentNode2);

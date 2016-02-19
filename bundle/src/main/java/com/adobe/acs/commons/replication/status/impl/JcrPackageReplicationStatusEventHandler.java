@@ -105,7 +105,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
     private static final String[] DEFAULT_REPLICATION_STATUS_NODE_TYPES = {
             ReplicationStatus.NODE_TYPE,
-            "cq:PageContent",
+            "cq:Page/cq:PageContent",
             "dam:AssetContent",
             "rep:User",
             "rep:Group",
