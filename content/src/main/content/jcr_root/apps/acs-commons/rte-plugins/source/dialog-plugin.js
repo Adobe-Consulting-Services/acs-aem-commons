@@ -26,12 +26,12 @@
  *      eg. /apps/<project>/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons
  * 3) Add property "features" of type String[] and single value "insertDialogContent"
  * 4) Create nt:unstructured "insertDialogContent" under "acs-commons"
- *      eg. /libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons/insertDialogContent
+ *      eg. /apps/<project>/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons/insertDialogContent
  * 5) Set the property "dialogPath" in "insertDialogContent" to path created in step 1 eg. /apps/test-dialogs/cq:dialog
  * 6) Set the property "onsubmit" in "insertDialogContent" with listener function (executed on dialog submit)
  *      eg. <code>function(dialogData) { return '<h1>' + dialogData.heading + '</h1>'; }</code>
- * 7) Add to the fullscreen "toolbar" property. Include "acs-commons#insertDialogContent" in the desired location
- *      e.g. /apps/<project>/components/text/cq:editConfig/cq:inplaceEditing/inplaceEditingTextConfig/uiSettings/cui/fullscreen
+ * 7) Add to the fullscreen uiSettings "toolbar" property. Include "acs-commons#insertDialogContent" in the desired location
+ *      e.g. /apps/<project>/components/text/dialog/items/tab1/items/text/uiSettings/cui/fullscreen
  *
  */
 (function ($, $document, Handlebars) {
