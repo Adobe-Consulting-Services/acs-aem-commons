@@ -100,7 +100,7 @@
                                             this, true, config.tooltip || "Insert TouchUI Dialog");
 
             tbGenerator.addElement(GROUP, plg.Plugin.SORT_FORMAT, this.pickerUI, 120);
-            tbGenerator.registerIcon(GROUP + "#" + INSERT_DIALOG_CONTENT_FEATURE, "coral-Icon coral-Icon--tableEdit coral-RichText--trigger");
+            tbGenerator.registerIcon(GROUP + "#" + INSERT_DIALOG_CONTENT_FEATURE, "coral-Icon coral-Icon--tableEdit");
         },
 
         execute: function (id) {
