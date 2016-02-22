@@ -444,20 +444,19 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         final Resource root = resourceResolver.getResource(WORKFLOW_INSTANCES_PATH);
         final Iterator<Resource> itr = root.listChildren();
 
-        boolean addedRoot = false;
+        boolean rootContainsDatedFolders = false;
 
         while (itr.hasNext()) {
             Resource resource = itr.next();
 
             if (NN_SERVER_FOLDER_PATTERN.matcher(resource.getName()).matches()) {
                 folders.add(resource);
-            } else if (!addedRoot && NN_DATE_FOLDER_PATTERN.matcher(resource.getName()).matches()) {
-                folders.add(root);
-                addedRoot = true;
+            } else if (!rootContainsDatedFolders && NN_DATE_FOLDER_PATTERN.matcher(resource.getName()).matches()) {
+                rootContainsDatedFolders = true;
             }
         }
 
-        if (folders.isEmpty()) {
+        if (folders.isEmpty() && rootContainsDatedFolders) {
             folders.add(root);
         }
 
