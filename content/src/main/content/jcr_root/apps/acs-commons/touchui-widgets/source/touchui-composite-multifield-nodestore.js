@@ -134,16 +134,6 @@
             return mNames;
         },
 
-        addRemoveListener: function($multifield){
-            var cmf = this;
-
-            $multifield.find(".js-coral-Multifield-remove").click(function(){
-                setTimeout(function () {
-                    cmf.addCompositeMultifieldValidator();
-                }, 500);
-            });
-        },
-
         buildMultiField: function(data, $multifield, mName){
             var cmf = this;
 
@@ -171,8 +161,6 @@
 
                     cmf.setWidgetValue($field, fValue);
                 });
-
-                cmf.addRemoveListener($multifield);
             });
         },
 
@@ -185,7 +173,7 @@
                 $multifield = $(this).parent();
 
                 setTimeout(function(){
-                    cmf.addRemoveListener($multifield);
+                    cmf.addCompositeMultifieldRemoveListener($multifield);
                     cmf.addCompositeMultifieldValidator();
                 }, 500);
             });
