@@ -26,10 +26,12 @@
  *      eg. /apps/<project>/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons
  * 3) Add property "features" of type String[] and single value "insertDialogContent"
  * 4) Create nt:unstructured "insertDialogContent" under "acs-commons"
- *      eg. /libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons/insertDialogContent
+ *      eg. /apps/<project>/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons/insertDialogContent
  * 5) Set the property "dialogPath" in "insertDialogContent" to path created in step 1 eg. /apps/test-dialogs/cq:dialog
  * 6) Set the property "onsubmit" in "insertDialogContent" with listener function (executed on dialog submit)
  *      eg. <code>function(dialogData) { return '<h1>' + dialogData.heading + '</h1>'; }</code>
+ * 7) Add to the fullscreen uiSettings "toolbar" property. Include "acs-commons#insertDialogContent" in the desired location
+ *      e.g. /apps/<project>/components/text/dialog/items/tab1/items/text/uiSettings/cui/fullscreen
  *
  */
 (function ($, $document, Handlebars) {
@@ -42,10 +44,7 @@
         GROUP = "acs-commons",
         INSERT_DIALOG_CONTENT_FEATURE = "insertDialogContent",
         INSERT_DIALOG_CONTENT_DIALOG = "insertDialogContentDialog",
-        AcsCuiToolbarBuilder,
         InsertDialogContentPluginDialog,
-        AcsDialogManager,
-        AcsToolkitImpl,
         InsertTouchUIDialogPlugin,
         InsertTouchUIDialogCmd;
 
@@ -66,36 +65,6 @@
         fui.prompt(title, message, "notice", options);
     }
 
-    //extend the toolbar builder to register plugin icon in fullscreen mode
-    AcsCuiToolbarBuilder = new Class({
-        toString: "ACSCuiToolbarBuilder",
-
-        extend: CUI.rte.ui.cui.CuiToolbarBuilder,
-
-        _getUISettings: function (options) {
-            var uiSettings = this.superClass._getUISettings(options),
-                toolbar, feature;
-
-            //insertDialogContent feature is supported in fullscreen mode only
-            if(!uiSettings.fullscreen){
-                return uiSettings;
-            }
-
-            toolbar = uiSettings.fullscreen.toolbar;
-            feature = getUISetting();
-
-            if (toolbar.indexOf(feature) === -1) {
-                toolbar.splice(3, 0, feature);
-            }
-
-            if (!this._getClassesForCommand(feature)) {
-                this.registerAdditionalClasses(feature, "coral-Icon coral-Icon--tableEdit");
-            }
-
-            return uiSettings;
-        }
-    });
-
     //popover dialog hosting iframe
     InsertDialogContentPluginDialog = new Class({
         extend: CUI.rte.ui.cui.AbstractBaseDialog,
@@ -106,44 +75,6 @@
             return INSERT_DIALOG_CONTENT_DIALOG;
         }
     });
-
-    //extend the CUI dialog manager to register popover dialog
-    AcsDialogManager = new Class({
-        toString: "ACSDialogManager",
-
-        extend: CUI.rte.ui.cui.CuiDialogManager,
-
-        create: function (dialogId, config) {
-            if (dialogId !== INSERT_DIALOG_CONTENT_DIALOG) {
-                return this.superClass.create.call(this, dialogId, config);
-            }
-
-            var context = this.editorKernel.getEditContext(),
-                $container = CUI.rte.UIUtils.getUIContainer($(context.root)),
-                dialog = new InsertDialogContentPluginDialog();
-
-            dialog.attach(config, $container, this.editorKernel, true);
-
-            return dialog;
-        }
-    });
-
-    //extend the toolkit implementation for custom toolbar builder and dialog manager
-    AcsToolkitImpl = new Class({
-        toString: "ACSToolkitImpl",
-
-        extend: CUI.rte.ui.cui.ToolkitImpl,
-
-        createToolbarBuilder: function () {
-            return new AcsCuiToolbarBuilder();
-        },
-
-        createDialogManager: function (editorKernel) {
-            return new AcsDialogManager(editorKernel);
-        }
-    });
-
-    CUI.rte.ui.ToolkitRegistry.register("cui", AcsToolkitImpl);
 
     InsertTouchUIDialogPlugin = new Class({
         toString: "TouchUIInsertDialogPlugin",
@@ -169,12 +100,14 @@
                                             this, true, config.tooltip || "Insert TouchUI Dialog");
 
             tbGenerator.addElement(GROUP, plg.Plugin.SORT_FORMAT, this.pickerUI, 120);
+            tbGenerator.registerIcon(GROUP + "#" + INSERT_DIALOG_CONTENT_FEATURE, "coral-Icon coral-Icon--tableEdit");
         },
 
         execute: function (id) {
             var ek = this.editorKernel,
                 dm = ek.getDialogManager(),
-                $popover, dialog, popoverConfig,
+                context = ek.getEditContext(),
+                $popover, dialog, popoverConfig, $container,
                 dialogConfig = {
                     parameters: {
                         "command": getUISetting()
@@ -198,7 +131,9 @@
                 return;
             }
 
-            dialog = this.dialog = dm.create(INSERT_DIALOG_CONTENT_DIALOG, dialogConfig);
+            $container = CUI.rte.UIUtils.getUIContainer($(context.root));
+            dialog = this.dialog = new InsertDialogContentPluginDialog();
+            dialog.attach(dialogConfig, $container, ek);
 
             dm.prepareShow(this.dialog);
 
