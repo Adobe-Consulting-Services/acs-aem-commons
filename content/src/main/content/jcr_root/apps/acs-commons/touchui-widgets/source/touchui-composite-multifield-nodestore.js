@@ -166,11 +166,14 @@
 
         addDataInFields: function () {
             var cmf = this, mNames = cmf.getMultiFieldNames(),
-                $form = $("form.cq-dialog"),
+                $form = $("form.cq-dialog"), $multifield,
                 actionUrl = $form.attr("action") + ".infinity.json";
 
             $(".js-coral-Multifield-add").click(function(){
+                $multifield = $(this).parent();
+
                 setTimeout(function(){
+                    cmf.addCompositeMultifieldRemoveListener($multifield);
                     cmf.addCompositeMultifieldValidator();
                 }, 500);
             });

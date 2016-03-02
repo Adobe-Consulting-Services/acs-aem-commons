@@ -81,6 +81,16 @@
             return (name === this.NODE_STORE);
         },
 
+        addCompositeMultifieldRemoveListener: function($multifield){
+            var cmf = this;
+
+            $multifield.find(".js-coral-Multifield-remove").click(function(){
+                setTimeout(function () {
+                    cmf.addCompositeMultifieldValidator();
+                }, 500);
+            });
+        },
+
         addCompositeMultifieldValidator: function(){
             var fieldErrorEl = $("<span class='coral-Form-fielderror coral-Icon coral-Icon--alert coral-Icon--sizeS' " +
                                 "data-init='quicktip' data-quicktip-type='error' />"),
