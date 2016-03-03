@@ -165,7 +165,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
                 return false;
             }
             if (isResource()) {
-                Node node = version.getLinearPredecessor().getFrozenNode().getNode(relativePath);
+                Node node = version.getLinearSuccessor().getFrozenNode().getNode(relativePath);
                 return node == null;
             } else {
                 Property prop = version.getLinearSuccessor().getFrozenNode().getProperty(relativePath);
