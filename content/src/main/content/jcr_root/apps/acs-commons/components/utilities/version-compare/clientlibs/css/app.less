@@ -86,8 +86,11 @@
     
     .version-entry{
         border-top: 1px solid grey;
-        padding: 2px;
         overflow: hidden;
+
+    }
+    .inner-version-entry {
+        padding: 2px;
     }
     span.key {
         font-weight: bold;
@@ -111,6 +114,12 @@
     }
     .orange, .status-changed {
         border-right: 5px solid orange;
+    }
+    .status-added-removed {
+        border-right: 2px solid red;
+        .inner-version-entry {
+            border-right: 3px solid green;
+        }
     }
     
     .depth-0 {

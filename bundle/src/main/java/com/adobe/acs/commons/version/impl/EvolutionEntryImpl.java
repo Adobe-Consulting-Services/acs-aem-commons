@@ -38,6 +38,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
     private static String V_ADDED = "added";
     private static String V_CHANGED = "changed";
     private static String V_REMOVED = "removed";
+    private static String V_ADDED_REMOVED = "added-removed";
 
     private EvolutionEntryType type;
     private String name;
@@ -129,7 +130,9 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public String getStatus() {
-        if (isAdded()) {
+        if (isAdded() && isWillBeRemoved()) {
+            return V_ADDED_REMOVED;
+        } else if (isAdded()) {
             return V_ADDED;
         } else if (isWillBeRemoved()) {
             return V_REMOVED;
