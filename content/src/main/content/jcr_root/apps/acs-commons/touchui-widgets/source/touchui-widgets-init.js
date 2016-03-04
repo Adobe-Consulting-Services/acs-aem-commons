@@ -59,6 +59,29 @@
             $field.prop("checked", $field.attr("value") === value);
         },
 
+        isHiddenField: function ($field) {
+            return !_.isEmpty($field) && ($field.prop("type") === "hidden");
+        },
+
+        setHiddenField: function($field, value) {
+            var $parent = $field.parent();
+            if ($parent.hasClass("coral-DatePicker")) {
+                var displayFormat = $parent.attr("data-displayed-format");
+                var storedFormat = $parent.attr("data-stored-format");
+                var date = moment(new Date(value));
+                var dateFormatted = date.format(displayFormat);
+                $parent.find("input.coral-Textfield").val(dateFormatted);
+                value = date.format(storedFormat);
+            }
+            $field.val(value);
+
+            if (!$parent.hasClass("richtext-container") || $field.hasClass("coral-RichText-isRichTextFlag")) {
+                return;
+            }
+
+            $parent.find(".coral-RichText-editable.coral-RichText").empty().append(value);
+        },
+
         setWidgetValue: function ($field, value) {
             if (_.isEmpty($field)) {
                 return;
@@ -68,6 +91,8 @@
                 this.setSelectOne($field, value);
             } else if (this.isCheckbox($field)) {
                 this.setCheckBox($field, value);
+            } else if (this.isHiddenField($field)) {
+                this.setHiddenField($field, value);
             } else {
                 $field.val(value);
             }
