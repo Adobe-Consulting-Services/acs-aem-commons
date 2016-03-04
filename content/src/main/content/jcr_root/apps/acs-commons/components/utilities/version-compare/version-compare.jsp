@@ -74,6 +74,7 @@
                                 <div class="status-changed">changed</div>
                                 <div class="status-removed">removed in next version</div>
                                 <div class="status-added-removed"><div class="inner-version-entry">added and removed in next version</div></div>
+                                <div class="status-changed-removed"><div class="inner-version-entry">changed and removed in next version</div></div>
                             </div>
                         </section>
 
