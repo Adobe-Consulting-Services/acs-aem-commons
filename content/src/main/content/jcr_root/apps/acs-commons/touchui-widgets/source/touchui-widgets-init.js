@@ -59,27 +59,24 @@
             $field.prop("checked", $field.attr("value") === value);
         },
 
-        isHiddenField: function ($field) {
-            return !_.isEmpty($field) && ($field.prop("type") === "hidden");
+        isDateField: function ($field) {
+            return !_.isEmpty($field) && $field.prop("type") === "hidden" && $field.parent().hasClass("coral-DatePicker");
         },
 
-        setHiddenField: function($field, value) {
+        setDateField: function ($field, value) {
+            var date = moment(new Date(value));
             var $parent = $field.parent();
-            if ($parent.hasClass("coral-DatePicker")) {
-                var displayFormat = $parent.attr("data-displayed-format");
-                var storedFormat = $parent.attr("data-stored-format");
-                var date = moment(new Date(value));
-                var dateFormatted = date.format(displayFormat);
-                $parent.find("input.coral-Textfield").val(dateFormatted);
-                value = date.format(storedFormat);
-            }
+            $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
+            $field.val(date.format($parent.attr("data-stored-format")));
+        },
+
+        isRichTextField: function ($field) {
+            return !_.isEmpty($field) && $field.prop("type") === "hidden" && !$field.hasClass("coral-RichText-isRichTextFlag") && $field.parent().hasClass("richtext-container");
+        },
+
+        setRichTextField: function ($field, value) {
             $field.val(value);
-
-            if (!$parent.hasClass("richtext-container") || $field.hasClass("coral-RichText-isRichTextFlag")) {
-                return;
-            }
-
-            $parent.find(".coral-RichText-editable.coral-RichText").empty().append(value);
+            $field.parent().find(".coral-RichText-editable.coral-RichText").empty().append(value);
         },
 
         setWidgetValue: function ($field, value) {
@@ -91,8 +88,10 @@
                 this.setSelectOne($field, value);
             } else if (this.isCheckbox($field)) {
                 this.setCheckBox($field, value);
-            } else if (this.isHiddenField($field)) {
-                this.setHiddenField($field, value);
+            } else if (this.isRichTextField($field)) {
+                this.setRichTextField($field, value);
+            } else if (this.isDateField($field)) {
+                this.setDateField($field, value);
             } else {
                 $field.val(value);
             }
