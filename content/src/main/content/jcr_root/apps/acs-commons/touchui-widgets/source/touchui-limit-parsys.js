@@ -23,6 +23,7 @@
  * eg. to limit the components to 4 on rightpar of /content/geometrixx/en.html
  * set acsComponentsLimit=4 on /etc/designs/geometrixx/jcr:content/homepage/rightpar
  */
+ window.Granite.author = window.Granite.author || {};
 (function ($, $document, gAuthor) {
     "use strict";
 
