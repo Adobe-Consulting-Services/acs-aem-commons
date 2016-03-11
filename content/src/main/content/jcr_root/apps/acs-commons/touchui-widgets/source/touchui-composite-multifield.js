@@ -121,10 +121,13 @@
                 $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
                 $form = $fieldSets.closest("form.foundation-form"),
                 actionUrl = $form.attr("action") + ".json",
-                mValues, $field, name;
+                mValues, $field, name, $multifield;
 
             $(".js-coral-Multifield-add").click(function(){
+                $multifield = $(this).parent();
+
                 setTimeout(function(){
+                    cmf.addCompositeMultifieldRemoveListener($multifield);
                     cmf.addCompositeMultifieldValidator();
                 }, 500);
             });

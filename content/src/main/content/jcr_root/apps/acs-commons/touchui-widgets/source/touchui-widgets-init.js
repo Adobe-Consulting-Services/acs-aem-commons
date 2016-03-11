@@ -59,6 +59,26 @@
             $field.prop("checked", $field.attr("value") === value);
         },
 
+        isDateField: function ($field) {
+            return !_.isEmpty($field) && $field.prop("type") === "hidden" && $field.parent().hasClass("coral-DatePicker");
+        },
+
+        setDateField: function ($field, value) {
+            var date = moment(new Date(value));
+            var $parent = $field.parent();
+            $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
+            $field.val(date.format($parent.attr("data-stored-format")));
+        },
+
+        isRichTextField: function ($field) {
+            return !_.isEmpty($field) && $field.prop("type") === "hidden" && !$field.hasClass("coral-RichText-isRichTextFlag") && $field.parent().hasClass("richtext-container");
+        },
+
+        setRichTextField: function ($field, value) {
+            $field.val(value);
+            $field.parent().find(".coral-RichText-editable.coral-RichText").empty().append(value);
+        },
+
         setWidgetValue: function ($field, value) {
             if (_.isEmpty($field)) {
                 return;
@@ -68,6 +88,10 @@
                 this.setSelectOne($field, value);
             } else if (this.isCheckbox($field)) {
                 this.setCheckBox($field, value);
+            } else if (this.isRichTextField($field)) {
+                this.setRichTextField($field, value);
+            } else if (this.isDateField($field)) {
+                this.setDateField($field, value);
             } else {
                 $field.val(value);
             }
@@ -79,6 +103,16 @@
 
         isNodeStore: function(name){
             return (name === this.NODE_STORE);
+        },
+
+        addCompositeMultifieldRemoveListener: function($multifield){
+            var cmf = this;
+
+            $multifield.find(".js-coral-Multifield-remove").click(function(){
+                setTimeout(function () {
+                    cmf.addCompositeMultifieldValidator();
+                }, 500);
+            });
         },
 
         addCompositeMultifieldValidator: function(){
