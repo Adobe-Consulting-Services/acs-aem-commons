@@ -99,7 +99,7 @@
     }
 
     function extendComponentDrop(){
-        if(!gAuthor || !gAuthor.ui || !gAuthor.ui.dropController){
+        if(!gAuthor || !gAuthor.ui || !gAuthor.ui.dropController || !gAuthor.edit || !gAuthor.edit.actions){
           return;
         }
         var dropController = gAuthor.ui.dropController,
