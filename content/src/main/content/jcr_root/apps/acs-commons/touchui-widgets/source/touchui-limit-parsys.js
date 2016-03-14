@@ -23,7 +23,6 @@
  * eg. to limit the components to 4 on rightpar of /content/geometrixx/en.html
  * set acsComponentsLimit=4 on /etc/designs/geometrixx/jcr:content/homepage/rightpar
  */
-Granite.author = Granite.author || {};
 (function ($, $document, gAuthor) {
     "use strict";
 
@@ -61,7 +60,6 @@ Granite.author = Granite.author || {};
     }
 
     function getChildEditables(parsys){
-        gAuthor.edit = gAuthor.edit || {};
         var editables = gAuthor.edit.findEditables(),
             children = [], parent;
 
@@ -101,14 +99,11 @@ Granite.author = Granite.author || {};
     }
 
     function extendComponentDrop(){
-        gAuthor.ui = gAuthor.ui || {};
-        gAuthor.ui.dropController = gAuthor.ui.dropController || {};
-        gAuthor.ui.dropController.get = gAuthor.ui.dropController.get || function(){return};
-        gAuthor.Component = gAuthor.Component || {};
-        gAuthor.Component.prototype = gAuthor.Component.prototype || {};
-        gAuthor.Component.prototype.getTypeName = gAuthor.Component.prototype.getTypeName || function(){return};
-        var dropController = gAuthor.ui.dropController;
-        var compDragDrop = dropController.get(gAuthor.Component.prototype.getTypeName()) || {};
+        if(!gAuthor || !gAuthor.ui || !gAuthor.ui.dropController){
+          return;
+        }
+        var dropController = gAuthor.ui.dropController,
+            compDragDrop = dropController.get(gAuthor.Component.prototype.getTypeName());
 
         //handle drop action
         compDragDrop.handleDrop = function(dropFn){
@@ -120,9 +115,7 @@ Granite.author = Granite.author || {};
                 return dropFn.call(this, event);
             };
         }(compDragDrop.handleDrop);
-        gAuthor.edit = gAuthor.edit || {};
-        gAuthor.edit.actions = gAuthor.edit.actions || {};
-        gAuthor.edit.actions.openInsertDialog = gAuthor.edit.actions.openInsertDialog || {};
+
         //handle insert action
         gAuthor.edit.actions.openInsertDialog = function(openDlgFn){
             return function (editable) {
@@ -134,11 +127,6 @@ Granite.author = Granite.author || {};
             };
         }(gAuthor.edit.actions.openInsertDialog);
 
-
-        gAuthor.edit = gAuthor.edit || {};
-        gAuthor.edit.Toolbar = gAuthor.edit.Toolbar || {};
-        gAuthor.edit.Toolbar.defaultActions = gAuthor.edit.Toolbar.defaultActions || {};
-        gAuthor.edit.Toolbar.defaultActions.INSERT = gAuthor.edit.Toolbar.defaultActions.INSERT || {};
         //handle paste action
         var insertAction = gAuthor.edit.Toolbar.defaultActions.INSERT;
 
