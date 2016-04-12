@@ -40,6 +40,10 @@
             designSrc = parsys.config.designDialogSrc,
             result = {}, param;
 
+        if (designSrc === undefined) {
+            return undefined;
+        }
+
         designSrc = designSrc.substring(designSrc.indexOf("?") + 1);
 
         designSrc.split(/&/).forEach( function(it) {
@@ -93,6 +97,8 @@
         }
 
         function configure(data){
+            var designPath;
+
             if(_.isEmpty(data)){
                 return;
             }
@@ -119,7 +125,10 @@
         }
 
         if(_.isEmpty(configCache[parsys.getParent().path])){
-            $.ajax( getDesignPath(parsys) + ".2.json" ).done(configure);
+            designPath = getDesignPath(parsys);
+            if (designPath !== undefined) {
+                $.ajax( designPath + ".2.json" ).done(configure);
+            }
         }else{
             configure(configCache[parsys.getParent().path]);
         }
