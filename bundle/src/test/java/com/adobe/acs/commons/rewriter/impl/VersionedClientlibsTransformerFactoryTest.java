@@ -20,9 +20,9 @@
 
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.day.cq.widget.HtmlLibrary;
-import com.day.cq.widget.HtmlLibraryManager;
-import com.day.cq.widget.LibraryType;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
 
 import junitx.util.PrivateAccessor;
 
@@ -32,9 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.configuration.InjectingAnnotationEngine;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
