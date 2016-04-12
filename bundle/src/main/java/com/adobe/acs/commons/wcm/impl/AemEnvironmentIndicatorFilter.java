@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.BufferingResponse;
-import com.adobe.granite.xss.XSSAPI;
+import org.apache.sling.xss.XSSAPI;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrLookup;

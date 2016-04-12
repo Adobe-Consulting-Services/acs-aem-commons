@@ -40,7 +40,7 @@ import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import com.adobe.acs.commons.util.PathInfoUtil;
-import com.adobe.granite.xss.XSSAPI;
+import org.apache.sling.xss.XSSAPI;
 
 /**
  * Servlet which allows for dynamic selection of tag widget configuration.
