@@ -100,42 +100,46 @@
 
     function extendComponentDrop(){
         var dropController = gAuthor.ui.dropController,
+            compDragDrop;
+
+        if (dropController !== undefined) {
             compDragDrop = dropController.get(gAuthor.Component.prototype.getTypeName());
 
-        //handle drop action
-        compDragDrop.handleDrop = function(dropFn){
-            return function (event) {
-                if(!isWithinLimit(event.currentDropTarget.targetEditable)){
-                    return;
-                }
+            //handle drop action
+            compDragDrop.handleDrop = function(dropFn){
+                return function (event) {
+                    if(!isWithinLimit(event.currentDropTarget.targetEditable)){
+                        return;
+                    }
 
-                return dropFn.call(this, event);
-            };
-        }(compDragDrop.handleDrop);
+                    return dropFn.call(this, event);
+                };
+            }(compDragDrop.handleDrop);
 
-        //handle insert action
-        gAuthor.edit.actions.openInsertDialog = function(openDlgFn){
-            return function (editable) {
-                if(!isWithinLimit(editable)){
-                    return;
-                }
+            //handle insert action
+            gAuthor.edit.actions.openInsertDialog = function(openDlgFn){
+                return function (editable) {
+                    if(!isWithinLimit(editable)){
+                        return;
+                    }
 
-                return openDlgFn.call(this, editable);
-            };
-        }(gAuthor.edit.actions.openInsertDialog);
+                    return openDlgFn.call(this, editable);
+                };
+            }(gAuthor.edit.actions.openInsertDialog);
 
-        //handle paste action
-        var insertAction = gAuthor.edit.Toolbar.defaultActions.INSERT;
+            //handle paste action
+            var insertAction = gAuthor.edit.Toolbar.defaultActions.INSERT;
 
-        insertAction.handler = function(insertHandlerFn){
-            return function(editableBefore, param, target){
-                if(!isWithinLimit(editableBefore)){
-                    return;
-                }
+            insertAction.handler = function(insertHandlerFn){
+                return function(editableBefore, param, target){
+                    if(!isWithinLimit(editableBefore)){
+                        return;
+                    }
 
-                return insertHandlerFn.call(this, editableBefore, param, target);
-            };
-        }(insertAction.handler);
+                    return insertHandlerFn.call(this, editableBefore, param, target);
+                };
+            }(insertAction.handler);
+        }
     }
 
     $(extendComponentDrop);
