@@ -56,7 +56,6 @@ import org.xml.sax.helpers.AttributesImpl;
 import com.adobe.acs.commons.rewriter.AbstractTransformer;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.GenericCacheMBean;
-import com.day.cq.commons.PathInfo;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
@@ -93,6 +92,9 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private static final String CSS_TYPE = "text/css";
     private static final String JS_TYPE = "text/javascript";
+
+    private static final String MIN_SELECTOR = "min";
+    private static final String MIN_SELECTOR_SEGMENT = "." + MIN_SELECTOR;
 
     private Cache<VersionedClientLibraryMd5CacheKey, String> md5Cache;
 
@@ -180,25 +182,29 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private String getVersionedPath(final String originalPath, final LibraryType libraryType) {
         try {
-            final PathInfo pathInfo = new PathInfo(originalPath);
+            boolean appendMinSelector = false;
+            String libraryPath = StringUtils.substringBeforeLast(originalPath, ".");
+            if (libraryPath.endsWith(MIN_SELECTOR_SEGMENT)) {
+                appendMinSelector = true;
+                libraryPath = StringUtils.substringBeforeLast(libraryPath, ".");
+            }
 
-            final HtmlLibrary htmlLibrary = htmlLibraryManager.getLibrary(libraryType, pathInfo.getResourcePath());
+            final HtmlLibrary htmlLibrary = htmlLibraryManager.getLibrary(libraryType, libraryPath);
 
             if (htmlLibrary != null) {
                 StringBuilder builder = new StringBuilder();
                 builder.append(htmlLibrary.getLibraryPath());
                 builder.append(".");
 
-                String selector = pathInfo.getSelectorString();
-                if (selector != null) {
-                    builder.append(selector).append(".");
+                if (appendMinSelector) {
+                    builder.append(MIN_SELECTOR).append(".");
                 }
                 builder.append(getMd5(htmlLibrary));
                 builder.append(libraryType.extension);
 
                 return builder.toString();
             } else {
-                log.debug("Could not find HtmlLibrary at path: {}", pathInfo.getResourcePath());
+                log.debug("Could not find HtmlLibrary at path: {}", libraryPath);
                 return null;
             }
         } catch (Exception ex) {
