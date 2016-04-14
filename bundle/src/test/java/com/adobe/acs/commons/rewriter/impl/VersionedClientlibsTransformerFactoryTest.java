@@ -106,7 +106,6 @@ public class VersionedClientlibsTransformerFactoryTest {
         assertEquals(PATH + ".css", attributesCaptor.getValue().getValue(0));
     }
 
-
     @Test
     public void testCSSClientLibrary() throws Exception {
 
@@ -125,6 +124,28 @@ public class VersionedClientlibsTransformerFactoryTest {
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testCSSClientLibraryWithDot() throws Exception {
+        final String path = PATH + ".foo";
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(path))).thenReturn(htmlLibrary);
+        when(htmlLibrary.getLibraryPath()).thenReturn(path);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", path + ".css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(path + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
     }
 
     @Test
@@ -164,6 +185,27 @@ public class VersionedClientlibsTransformerFactoryTest {
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testJavaScriptClientLibraryWithDot() throws Exception {
+        final String path = PATH + ".foo";
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(path))).thenReturn(htmlLibrary);
+        when(htmlLibrary.getLibraryPath()).thenReturn(path);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", path + ".js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(path + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
     }
 
     @Test
