@@ -134,6 +134,8 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
                         log.error("Exception while loading twitter feed on resource:" + twitterResource.getPath(),
                                 e);
                     }
+                } else {
+                    log.warn("Twitter component found on {}, but page cannot be adapted to Twitter API. Check Cloud SErvice configuration", page.getPath());
                 }
             }
 
