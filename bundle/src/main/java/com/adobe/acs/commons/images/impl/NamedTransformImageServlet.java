@@ -352,6 +352,15 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             } else {
                 return new Image(resource);
             }
+        } else {
+        	if (resourceResolver.isResourceType(resource, "social:asiFile")
+                    && resource.getValueMap().get("mimetype", StringUtils.EMPTY).startsWith("image/")) {
+                // Is a UGC image
+                return new SocialImageImpl(resource, "image");
+            } else if (resourceResolver.isResourceType(resource, "nt:adobesocialtype")) {
+                // Is a UGC image
+                return new SocialRemoteImageImpl(resource, "image");
+            }
         }
 
         return new Image(resource);
