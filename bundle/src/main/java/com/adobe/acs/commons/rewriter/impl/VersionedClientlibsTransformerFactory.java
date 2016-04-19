@@ -243,7 +243,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
             } else {
                 nextAttributes = versionClientLibs(localName, attrs);
             }
-            getContentHandler().startElement(namespaceURI, localName, qName, attrs);
+            getContentHandler().startElement(namespaceURI, localName, qName, nextAttributes);
         }
     }
 
