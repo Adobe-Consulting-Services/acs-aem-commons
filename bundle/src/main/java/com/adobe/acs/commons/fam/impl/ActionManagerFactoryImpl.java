@@ -17,6 +17,7 @@ package com.adobe.acs.commons.fam.impl;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import java.util.HashMap;
@@ -37,12 +38,12 @@ import org.apache.sling.api.resource.ResourceResolver;
 @Component(metatype = true, immediate = true, label = "Action Manager Factory")
 @Service(ActionManagerFactory.class)
 @Properties({
-    @Property(name = "jmx.objectname", value = "com.adobe.acs:type=Action Manager")
+    @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Action Manager")
 })
 public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements ActionManagerFactory {
 
     @Reference
-    ThrottledTaskRunnerImpl taskRunner;
+    ThrottledTaskRunner taskRunner;
     
     private final Map<String, ActionManagerImpl> tasks;
     

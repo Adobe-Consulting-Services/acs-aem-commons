@@ -48,4 +48,9 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
      * @param error Exception caught, if any.
      */
     public void logCompletion(long created, long started, long executed, long finished, boolean successful, Throwable error);    
+
+    /**
+     * @return maximum threads that will be spun up at a time
+     */
+    public int getMaxThreads();
 }

@@ -38,7 +38,6 @@ public interface ActionManager {
      * more complex logic perform faster than having the query engine do the same.
      * @param queryStatement Query string
      * @param language Query language to use
-     * @param requiresCommit True if the ActionManager should handle commits automatically
      * @param callback Callback action to perform for every query result
      * @param filters Optional filters return true if action should be taken
      * @return Count of items found in query
@@ -46,21 +45,19 @@ public interface ActionManager {
      * @throws PersistenceException
      * @throws Exception 
      */
-    int withQueryResults(final String queryStatement, final String language, final boolean requiresCommit, final BiConsumer<ResourceResolver, String> callback, final BiFunction<ResourceResolver, String, Boolean>... filters) throws RepositoryException, PersistenceException, Exception;
+    int withQueryResults(final String queryStatement, final String language, final BiConsumer<ResourceResolver, String> callback, final BiFunction<ResourceResolver, String, Boolean>... filters) throws RepositoryException, PersistenceException, Exception;
 
     /**
      * Perform action at some later time using a provided pooled resolver
      * @param action Action to perform
-     * @param requiresCommit If true, resource resolver should require a commit
      */
-    void deferredWithResolver(final Consumer<ResourceResolver> action, final boolean requiresCommit);
+    void deferredWithResolver(final Consumer<ResourceResolver> action);
 
     /**
      * Perform action right now using a provided pooled resolver
      * @param action Action to perform
-     * @param requiresCommit If true, resource resolver should require a commit
      */
-    void withResolver(Consumer<ResourceResolver> action, boolean requiresCommit) throws Exception;
+    void withResolver(Consumer<ResourceResolver> action) throws Exception;
     
     /**
      * After scheduling actions withQueryResults or deferredWithResolver, schedule

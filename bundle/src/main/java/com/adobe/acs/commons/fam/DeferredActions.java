@@ -106,6 +106,28 @@ public class DeferredActions {
     }
 
     //-- Query Result consumers (for using withQueryResults)
+    public BiConsumer<ResourceResolver, String> retry(final int retries, final long pausePerRetry, final BiConsumer<ResourceResolver, String> action) {
+        return new BiConsumer<ResourceResolver, String>() {
+            @Override
+            public void accept(ResourceResolver r, String s) throws Exception {
+                int remaining = retries;
+                while (remaining > 0) {
+                    try {
+                        action.accept(r, s);
+                        return;
+                    } catch (Exception e) {
+                        if (remaining-- <= 0) {
+                            throw e;
+                        } else {
+                            r.revert();
+                            r.refresh();
+                            Thread.sleep(pausePerRetry);
+                        }
+                    }
+                }
+            }
+        };        
+    }    
     /**
      * Run nodes through synthetic workflow
      * @param model Synthetic workflow model
@@ -199,6 +221,29 @@ public class DeferredActions {
     }
 
     //-- Single work consumers (for use for single invocation using deferredWithResolver)
+    public Consumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final Consumer<ResourceResolver> action) {
+        return new Consumer<ResourceResolver>() {
+            @Override
+            public void accept(ResourceResolver r) throws Exception {
+                int remaining = retries;
+                while (remaining > 0) {
+                    try {
+                        action.accept(r);
+                        return;
+                    } catch (Exception e) {
+                        if (remaining-- <= 0) {
+                            throw e;
+                        } else {
+                            r.revert();
+                            r.refresh();
+                            Thread.sleep(pausePerRetry);
+                        }
+                    }
+                }
+            }
+        };        
+    }
+    
     public Consumer<ResourceResolver> startSyntheticWorkflow(final SyntheticWorkflowModel model, final String path) {
         return new Consumer<ResourceResolver>() {
             @Override

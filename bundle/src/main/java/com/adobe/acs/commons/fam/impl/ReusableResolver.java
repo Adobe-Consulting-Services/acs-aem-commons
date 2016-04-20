@@ -46,7 +46,7 @@ public class ReusableResolver {
         return currentItem;
     }
 
-    public void free(boolean save) throws PersistenceException {
+    public void free() throws PersistenceException {
         if (!resolver.isLive()) {
             return;
         }
@@ -54,7 +54,7 @@ public class ReusableResolver {
             setChangeCount(getChangeCount() + 1);
             getPendingItems().add(getCurrentItem());
         }
-        if (save && getChangeCount() >= getSaveInterval()) {
+        if (getChangeCount() >= getSaveInterval()) {
             commit();
         }
     }
@@ -65,6 +65,7 @@ public class ReusableResolver {
             try {
                 getResolver().commit();
             } catch (PersistenceException e) {
+                getResolver().revert();
                 getResolver().refresh();
                 throw e;
             } finally {

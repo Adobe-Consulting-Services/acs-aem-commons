@@ -17,6 +17,7 @@ package com.adobe.acs.commons.fam.impl;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.Failure;
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.functions.*;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -57,11 +58,11 @@ public class ActionManagerImpl implements ActionManager {
     private long finished;
 
     private final Deque<ReusableResolver> resolvers = new LinkedList<ReusableResolver>();
-    private final ThrottledTaskRunnerImpl taskRunner;
+    private final ThrottledTaskRunner taskRunner;
     private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
 
-    public ActionManagerImpl(String name, ThrottledTaskRunnerImpl taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
+    public ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;
         this.taskRunner = taskRunner;
         initResolverPool(resolver, saveInterval);
@@ -77,21 +78,19 @@ public class ActionManagerImpl implements ActionManager {
 
     @Override
     public void deferredWithResolver(
-            final Consumer<ResourceResolver> action,
-            final boolean requiresCommit) {
-        deferredWithResolver(action, requiresCommit, false);
+            final Consumer<ResourceResolver> action) {
+        deferredWithResolver(action, false);
     }
 
     @Override
-    public void withResolver(Consumer<ResourceResolver> action, boolean requiresCommit) throws Exception {
-        withResolver(action, requiresCommit, false);
+    public void withResolver(Consumer<ResourceResolver> action) throws Exception {
+        withResolver(action, false);
     }
     
     @Override
     public int withQueryResults(
             final String queryStatement,
             final String language,
-            final boolean requiresCommit,
             final BiConsumer<ResourceResolver, String> callback,
             final BiFunction<ResourceResolver, String, Boolean>... filters
     )
@@ -121,13 +120,13 @@ public class ActionManagerImpl implements ActionManager {
                                 }
                                 callback.accept(r, nodePath);
                             }
-                        }, requiresCommit);
+                        });
                     }
                 } catch (RepositoryException ex) {
                     LOG.error("Repository exception processing query "+queryStatement, ex);
                 }
             }
-        }, false, false);
+        }, false);
         return tasksAdded;
     }
 
@@ -144,19 +143,18 @@ public class ActionManagerImpl implements ActionManager {
                         LOG.error("Persistence exception closing session pool", ex);
                     }
                 }
-            }, false, true);
+            }, true);
         }
     }
 
     private void deferredWithResolver(
             final Consumer<ResourceResolver> action,
-            final boolean requiresCommit,
             final boolean closesResolver) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
                 try {
-                    withResolver(action, requiresCommit, closesResolver);
+                    withResolver(action, closesResolver);
                     if (!closesResolver) {
                         logCompletetion();
                     }
@@ -173,7 +171,7 @@ public class ActionManagerImpl implements ActionManager {
         }
     }
 
-    private void withResolver(Consumer<ResourceResolver> action, boolean requiresCommit, boolean closesResolver) throws Exception {
+    private void withResolver(Consumer<ResourceResolver> action, boolean closesResolver) throws Exception {
         ReusableResolver resolver = null;
         while (resolver == null || !resolver.getResolver().isLive()) {
             resolver = resolvers.pop();
@@ -188,7 +186,7 @@ public class ActionManagerImpl implements ActionManager {
             throw ex;
         } finally {
             try {
-                resolver.free(requiresCommit);
+                resolver.free();
             } catch (PersistenceException ex) {
                 logPersistenceException(resolver.getPendingItems(), ex);
                 throw ex;
