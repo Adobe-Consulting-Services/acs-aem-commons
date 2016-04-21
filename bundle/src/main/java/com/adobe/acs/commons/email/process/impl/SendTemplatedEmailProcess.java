@@ -257,7 +257,9 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
      * {@link com.adobe.acs.commons.email.process.impl.SendTemplatedEmailConstants#WF_MODEL_TITLE
      * WF_MODEL_TITLE} and adds the Workflow Step Title:
      * {@link com.adobe.acs.commons.email.process.impl.SendTemplatedEmailConstants#WF_STEP_TITLE
-     * WF_STEP_TITLE} Protected so that implementing classes can override and
+     * WF_STEP_TITLE}
+     * {@link com.adobe.acs.commons.email.process.impl.SendTemplatedEmailConstants#WF_INITIATOR
+     * WF_INITIATOR} Protected so that implementing classes can override and
      * add additional parameters.
      * 
      * @param workItem
@@ -274,6 +276,8 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
             wfParams.put(SendTemplatedEmailConstants.WF_STEP_TITLE, workItem.getNode().getTitle());
             wfParams.put(SendTemplatedEmailConstants.WF_MODEL_TITLE, workItem.getWorkflow().getWorkflowModel()
                     .getTitle());
+            // Set workflow initiator
+            wfParams.put(SendTemplatedEmailConstants.WF_INITIATOR, workItem.getWorkflow().getInitiator());
         } catch (Exception e) {
             log.warn("Error getting workflow title and workflow step title {}", e);
         }

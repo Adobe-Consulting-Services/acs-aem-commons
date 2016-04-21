@@ -263,7 +263,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                     }
 
                     if (remaining == 0
-                            && NN_DATE_FOLDER_PATTERN.matcher(folder.getName()).matches()
+                            && isWorkflowDatedFolder(folder)
                             && !StringUtils.startsWith(folder.getName(), new SimpleDateFormat(WORKFLOW_FOLDER_FORMAT).format(new Date()))) {
                         // Dont remove folders w items and dont remove any of "today's" folders
                         // MUST match the YYYY-MM-DD(.*) pattern; do not try to remove root folders
@@ -321,15 +321,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private Collection<Resource> getSortedAndFilteredFolders(Resource folderResource) {
         final Collection<Resource> sortedCollection = new TreeSet(new WorkflowInstanceFolderComparator());
-        final Iterator<Resource> folders = folderResource.listChildren();
-
-        while (folders.hasNext()) {
-            final Resource folder = folders.next();
-
-            if (!folder.isResourceType(NT_SLING_FOLDER)) {
-                // Only process sling:Folders; eg. skip rep:Policy
-                continue;
-            } else {
+        for (Resource folder : folderResource.getChildren()) {
+            // Only process sling:Folders; eg. skip rep:Policy, serverN folders
+            if (folder.isResourceType(NT_SLING_FOLDER) && !isWorkflowServerFolder(folder)) {
                 sortedCollection.add(folder);
             }
         }
@@ -449,9 +443,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         while (itr.hasNext()) {
             Resource resource = itr.next();
 
-            if (NN_SERVER_FOLDER_PATTERN.matcher(resource.getName()).matches()) {
+            if (isWorkflowServerFolder(resource)) {
                 folders.add(resource);
-            } else if (!addedRoot && NN_DATE_FOLDER_PATTERN.matcher(resource.getName()).matches()) {
+            } else if (!addedRoot && isWorkflowDatedFolder(resource)) {
                 folders.add(root);
                 addedRoot = true;
             }
@@ -464,6 +458,13 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         return folders;
     }
 
+    private boolean isWorkflowDatedFolder(final Resource resource) {
+        return NN_DATE_FOLDER_PATTERN.matcher(resource.getName()).matches();
+    }
+
+    private boolean isWorkflowServerFolder(final Resource folder) {
+        return NN_SERVER_FOLDER_PATTERN.matcher(folder.getName()).matches();
+    }
 
     @Activate
     @Deactivate
