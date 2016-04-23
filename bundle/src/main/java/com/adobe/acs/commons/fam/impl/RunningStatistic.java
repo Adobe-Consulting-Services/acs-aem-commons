@@ -15,7 +15,10 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.management.openmbean.CompositeData;
@@ -32,51 +35,51 @@ import javax.management.openmbean.TabularType;
 public class RunningStatistic {
 
     static private int rollingAverageWidth = 20;
+    private final String name;
+    private final AtomicLong counter = new AtomicLong();
+    private final AtomicLong min = new AtomicLong();
+    private final AtomicLong max = new AtomicLong();
     private double total;
-    private long counter;
     private double rollingCounter;
-    private long min;
-    private long max;
-    private LinkedList<Long> rollingSeries;
-    private String name;
+    private List<Long> rollingSeries;
 
     public RunningStatistic(String name) {
         this.name = name;
         reset();
     }
 
-    public void log(long l) {
+    public synchronized void log(long l) {
         total += l;
-        counter++;
+        counter.incrementAndGet();
         rollingCounter += l;
         rollingSeries.add(l);
         rollingCounter -= rollingSeries.remove(0);
-        min = Math.min(min, l);
-        max = Math.max(max, l);
+        min.set(Math.min(min.get(), l));
+        max.set(Math.max(max.get(), l));
     }
 
     public void reset() {
-        rollingSeries = new LinkedList<Long>();
+        rollingSeries = Collections.synchronizedList(new LinkedList<Long>());
         for (int i = 0; i < rollingAverageWidth; i++) {
             rollingSeries.add(0L);
         }
-        counter = 0;
-        rollingCounter = 0;
-        total = 0;
-        min = Long.MAX_VALUE;
-        max = Long.MIN_VALUE;
+        counter.set(0);
+        rollingCounter=0;
+        total=0;
+        min.set(Long.MAX_VALUE);
+        max.set(Long.MIN_VALUE);
     }
 
     public long getMin() {
-        return min;
+        return min.get();
     }
 
     public long getMax() {
-        return max;
+        return max.get();
     }
 
     public double getMean() {
-        return total / counter;
+        return total / counter.get();
     }
 
     public double getRollingMean() {
@@ -84,7 +87,13 @@ public class RunningStatistic {
     }
 
     public CompositeData getStatistics() throws OpenDataException {
-        return new CompositeDataSupport(compositeType,itemNames, new Object[] {name, min, max, getMean(), getRollingMean()});
+        return new CompositeDataSupport(compositeType,itemNames, new Object[] {
+            name, 
+            min.get(), 
+            max.get(), 
+            getMean(), 
+            getRollingMean()
+        });
     }
 
     public static TabularType getStaticsTableType() {

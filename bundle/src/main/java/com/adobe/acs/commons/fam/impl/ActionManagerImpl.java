@@ -21,8 +21,9 @@ import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.functions.*;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -48,16 +49,16 @@ import org.slf4j.LoggerFactory;
 public class ActionManagerImpl implements ActionManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
-    private int tasksAdded = 0;
-    private int tasksCompleted = 0;
-    private int tasksFilteredOut = 0;
-    private int tasksSuccessful = 0;
-    private int tasksError = 0;
+    private final AtomicInteger tasksAdded = new AtomicInteger();
+    private final AtomicInteger tasksCompleted = new AtomicInteger();
+    private final AtomicInteger tasksFilteredOut = new AtomicInteger();
+    private final AtomicInteger tasksSuccessful = new AtomicInteger();
+    private final AtomicInteger tasksError = new AtomicInteger();
     private final String name;
     private final long started;
     private long finished;
 
-    private final Deque<ReusableResolver> resolvers = new LinkedList<ReusableResolver>();
+    private final Deque<ReusableResolver> resolvers = new ConcurrentLinkedDeque<ReusableResolver>();
     private final ThrottledTaskRunner taskRunner;
     private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
@@ -77,8 +78,7 @@ public class ActionManagerImpl implements ActionManager {
     }
 
     @Override
-    public void deferredWithResolver(
-            final Consumer<ResourceResolver> action) {
+    public void deferredWithResolver(final Consumer<ResourceResolver> action) {
         deferredWithResolver(action, false);
     }
 
@@ -127,7 +127,7 @@ public class ActionManagerImpl implements ActionManager {
                 }
             }
         }, false);
-        return tasksAdded;
+        return tasksAdded.get();
     }
 
     @Override
@@ -145,6 +145,11 @@ public class ActionManagerImpl implements ActionManager {
                 }
             }, true);
         }
+    }
+
+    @Override
+    public void setCurrentItem(String item) {
+        currentPath.set(item);
     }
 
     private void deferredWithResolver(
@@ -167,7 +172,7 @@ public class ActionManagerImpl implements ActionManager {
         };
         taskRunner.scheduleWork(r);
         if (!closesResolver) {
-            tasksAdded++;
+            tasksAdded.incrementAndGet();
         }
     }
 
@@ -208,8 +213,8 @@ public class ActionManagerImpl implements ActionManager {
     }
 
     private void logCompletetion() {
-        tasksCompleted++;
-        tasksSuccessful++;
+        tasksCompleted.incrementAndGet();
+        tasksSuccessful.incrementAndGet();
         if (isComplete()) {
             finished = System.currentTimeMillis();
         }
@@ -221,8 +226,8 @@ public class ActionManagerImpl implements ActionManager {
         fail.setNodePath(currentPath.get());
         fail.setException(ex);
         failures.add(fail);
-        tasksCompleted++;
-        tasksError++;
+        tasksCompleted.incrementAndGet();
+        tasksError.incrementAndGet();
         if (isComplete()) {
             finished = System.currentTimeMillis();
         }
@@ -236,15 +241,15 @@ public class ActionManagerImpl implements ActionManager {
             fail.setNodePath(item);
             fail.setException(ex);
             failures.add(fail);
-            tasksError++;
-            tasksSuccessful--;
+            tasksError.incrementAndGet();
+            tasksSuccessful.decrementAndGet();
         }        
         LOG.error("Persistence error prevented saving changes for: "+itemList, ex);
     }
 
     private void logFilteredOutItem(String path) {
-        tasksCompleted++;
-        tasksFilteredOut++;
+        tasksCompleted.incrementAndGet();
+        tasksFilteredOut.incrementAndGet();
         LOG.info("Filtered out {0}", path);
     }
 
@@ -262,18 +267,31 @@ public class ActionManagerImpl implements ActionManager {
 
     @Override
     public boolean isComplete() {
-        return tasksCompleted == tasksAdded;
+        return tasksCompleted.get() == tasksAdded.get();
     }
 
     @Override
     public CompositeData getStatistics() throws OpenDataException {
-        return new CompositeDataSupport(statsCompositeType, statsItemNames, new Object[]{name, tasksAdded, tasksCompleted, tasksFilteredOut, tasksSuccessful, tasksError, getRuntime()});
+        return new CompositeDataSupport(statsCompositeType, statsItemNames, 
+                new Object[]{
+                    name, 
+                    tasksAdded.get(), 
+                    tasksCompleted.get(), 
+                    tasksFilteredOut.get(), 
+                    tasksSuccessful.get(), 
+                    tasksError.get(), 
+                    getRuntime()
+                }
+        );
     }
 
     @Override
     public void closeAllResolvers() {
-        while (!resolvers.isEmpty()) {
-            resolvers.pop().getResolver().close();
+        if (!resolvers.isEmpty()) {
+            for (ReusableResolver resolver : resolvers) {
+                resolver.getResolver().close();
+            }
+            resolvers.clear();
         }
     }
 
@@ -286,6 +304,7 @@ public class ActionManagerImpl implements ActionManager {
         ArrayList<CompositeData> failureData = new ArrayList<CompositeData>();
         int count = 0;
         for (Failure fail : failures) {
+            if (count > 5000) break;
             failureData.add(new CompositeDataSupport(
                     failureCompositeType,
                     failureItemNames,
@@ -316,7 +335,7 @@ public class ActionManagerImpl implements ActionManager {
             failureItemNames = new String[]{"_taskName", "_count", "item", "error"};
             failureCompositeType = new CompositeType(
                     "Failure",
-                    "Failue",
+                    "Failure",
                     failureItemNames,
                     new String[]{"Name", "#", "Item", "Error"},
                     new OpenType[]{SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING});
