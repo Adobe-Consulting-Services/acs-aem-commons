@@ -27,7 +27,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  *
- * @author brobert
  */
 public interface ActionManager {
 
