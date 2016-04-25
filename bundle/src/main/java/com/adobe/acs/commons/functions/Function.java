@@ -48,7 +48,9 @@ public abstract class Function<T, R> {
      * @see #andThen(Function)
      */
     public <V> Function<V, R> compose(final Function<? super V, ? extends T> before) {
-//        Objects.requireNonNull(before);
+        if (before == null) {
+            throw new NullPointerException();
+        }
         final Function<T,R> thiss = this;
         return new Function<V, R>() {
             @Override
@@ -74,7 +76,9 @@ public abstract class Function<T, R> {
      * @see #compose(Function)
      */
     public <V> Function<T, V> andThen(final Function<? super R, ? extends V> after) {
-//        Objects.requireNonNull(after);
+        if (after == null) {
+            throw new NullPointerException();
+        }
         final Function<T,R> thiss = this;
         return new Function<T, V>() {
             @Override
@@ -90,7 +94,7 @@ public abstract class Function<T, R> {
      * @param <T> the type of the input and output objects to the function
      * @return a function that always returns its input argument
      */
-    static <T> Function<T, T> identity() {
+    public static <T> Function<T, T> identity() {
         return new Function<T, T>() {
             @Override
             public T apply(T t) {

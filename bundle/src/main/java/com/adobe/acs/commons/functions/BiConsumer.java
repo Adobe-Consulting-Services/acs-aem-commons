@@ -50,6 +50,9 @@ public abstract class BiConsumer<T, U> {
      * @throws NullPointerException if {@code after} is null
      */
     public BiConsumer<T, U> andThen(final BiConsumer<? super T, ? super U> after) {
+        if (after == null) {
+            throw new NullPointerException();
+        }
         final BiConsumer<T, U> thiss = this;
         return new BiConsumer<T, U>() {
             @Override

@@ -45,7 +45,9 @@ public abstract class Consumer<T> {
      * @throws NullPointerException if {@code after} is null
      */
     public Consumer<T> andThen(final Consumer<? super T> after) {
-//        Objects.requireNonNull(after);
+        if (after == null) {
+            throw new NullPointerException();
+        }
         final Consumer<T> thiss = this;
         return new Consumer<T>() {
             @Override
