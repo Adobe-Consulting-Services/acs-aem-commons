@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -29,12 +30,12 @@ public class TimedRunnable implements Runnable {
     long executed = -1;
     long finished = -1;
     Runnable work;
-    ThrottledTaskRunnerImpl runner;
+    ThrottledTaskRunner runner;
     int timeout;
     TimeUnit timeoutUnit;
     private static final Logger LOG = LoggerFactory.getLogger(TimedRunnable.class);
 
-    public TimedRunnable(Runnable work, ThrottledTaskRunnerImpl runner, int timeout, TimeUnit timeoutUnit) {
+    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit) {
         this.work = work;
         this.runner = runner;
         this.timeout = timeout;

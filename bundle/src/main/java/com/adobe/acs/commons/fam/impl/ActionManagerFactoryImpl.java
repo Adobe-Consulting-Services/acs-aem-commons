@@ -34,7 +34,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 
-@Component(label = "Action Manager Factory")
+@Component
 @Service(ActionManagerFactory.class)
 @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Action Manager")
 public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements ActionManagerFactory {

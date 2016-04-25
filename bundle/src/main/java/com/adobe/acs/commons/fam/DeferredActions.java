@@ -106,28 +106,6 @@ public class DeferredActions {
     }
 
     //-- Query Result consumers (for using withQueryResults)
-    public BiConsumer<ResourceResolver, String> retry(final int retries, final long pausePerRetry, final BiConsumer<ResourceResolver, String> action) {
-        return new BiConsumer<ResourceResolver, String>() {
-            @Override
-            public void accept(ResourceResolver r, String s) throws Exception {
-                int remaining = retries;
-                while (remaining > 0) {
-                    try {
-                        action.accept(r, s);
-                        return;
-                    } catch (Exception e) {
-                        if (remaining-- <= 0) {
-                            throw e;
-                        } else {
-                            r.revert();
-                            r.refresh();
-                            Thread.sleep(pausePerRetry);
-                        }
-                    }
-                }
-            }
-        };        
-    }    
     /**
      * Run nodes through synthetic workflow
      * @param model Synthetic workflow model

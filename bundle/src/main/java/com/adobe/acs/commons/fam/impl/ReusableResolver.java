@@ -47,9 +47,6 @@ public class ReusableResolver {
     }
 
     public void free() throws PersistenceException {
-        if (!resolver.isLive()) {
-            return;
-        }
         if (getResolver().hasChanges()) {
             setChangeCount(getChangeCount() + 1);
             getPendingItems().add(getCurrentItem());

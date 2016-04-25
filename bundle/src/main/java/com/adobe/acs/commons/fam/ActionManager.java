@@ -37,6 +37,7 @@ public interface ActionManager {
      * more complex logic perform faster than having the query engine do the same.
      * @param queryStatement Query string
      * @param language Query language to use
+     * @param requiresCommit True if the ActionManager should handle commits automatically
      * @param callback Callback action to perform for every query result
      * @param filters Optional filters return true if action should be taken
      * @return Count of items found in query
@@ -49,12 +50,14 @@ public interface ActionManager {
     /**
      * Perform action at some later time using a provided pooled resolver
      * @param action Action to perform
+     * @param requiresCommit If true, resource resolver should require a commit
      */
     void deferredWithResolver(final Consumer<ResourceResolver> action);
 
     /**
      * Perform action right now using a provided pooled resolver
      * @param action Action to perform
+     * @param requiresCommit If true, resource resolver should require a commit
      */
     void withResolver(Consumer<ResourceResolver> action) throws Exception;
     
@@ -96,4 +99,11 @@ public interface ActionManager {
      * @throws OpenDataException 
      */
     CompositeData getStatistics() throws OpenDataException;
+
+    /**
+     * Note the name or path of the item currently being processed
+     * This is particularly useful for error reporting
+     * @param item Item name or path being processed currently
+     */
+    void setCurrentItem(String item);
 }
