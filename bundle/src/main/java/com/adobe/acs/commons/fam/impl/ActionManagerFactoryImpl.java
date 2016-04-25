@@ -28,18 +28,15 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 
-@Component(metatype = true, immediate = true, label = "Action Manager Factory")
+@Component(label = "Action Manager Factory")
 @Service(ActionManagerFactory.class)
-@Properties({
-    @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Action Manager")
-})
+@Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Action Manager")
 public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements ActionManagerFactory {
 
     @Reference
