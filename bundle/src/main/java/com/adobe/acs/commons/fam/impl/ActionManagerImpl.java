@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages a pool of reusable resource resolvers and injects them into tasks
  */
-public class ActionManagerImpl implements ActionManager {
+class ActionManagerImpl implements ActionManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
     private int tasksAdded = 0;
@@ -62,7 +62,7 @@ public class ActionManagerImpl implements ActionManager {
     private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
 
-    public ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
+    ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;
         this.taskRunner = taskRunner;
         initResolverPool(resolver, saveInterval);
