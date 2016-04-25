@@ -42,10 +42,10 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(metatype = true, immediate = true, label = "Throttled Task Runner Service")
+@Component(metatype = true, immediate = true, label = "ACS AEM Commons - Throttled Task Runner Service")
 @Service(ThrottledTaskRunner.class)
 @Properties({
-    @Property(name = "jmx.objectname", value = "com.adobe.acs:type=Throttled Task Runner", propertyPrivate = true),
+    @Property(name = "jmx.objectname", value = "com.adobe.acs.commons.fam:type=Throttled Task Runner", propertyPrivate = true),
     @Property(name = "max.threads", label = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",value = "4"),
     @Property(name = "max.cpu", label = "Max cpu %", description = "Range is 0..1; -1 means disable this check", value = "0.85"),
     @Property(name = "max.heap", label = "Max heap %", description = "Range is 0..1; -1 means disable this check", value = "0.75"),
@@ -156,9 +156,12 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     public void stopExecution() {
         workerPool.shutdownNow();
         isPaused = false;
-        resumeList.clear();
+        if (resumeList != null) {
+            resumeList.clear();
+        }
     }
 
+    @Override
     public int getMaxThreads() {
         return maxThreads;
     }

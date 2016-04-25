@@ -16,7 +16,6 @@
 package com.adobe.acs.commons.fam;
 
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
-
 /**
  * In addition to MBean operations, a ThrottledTaskRunner lets the caller schedule work and provides a throttle method.
  * The logCompletion method should also allow a runnable action provide appropriate notification of success/failure
@@ -48,9 +47,10 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
      * @param error Exception caught, if any.
      */
     public void logCompletion(long created, long started, long executed, long finished, boolean successful, Throwable error);    
-
+    
     /**
-     * @return maximum threads that will be spun up at a time
+     * Get number of maximum threads supported by this thread manager
+     * @return Thread pool maximum size
      */
     public int getMaxThreads();
 }
