@@ -107,6 +107,38 @@ public class DeferredActions {
 
     //-- Query Result consumers (for using withQueryResults)
     /**
+     * Retry provided action a given number of times before giving up and throwing an error.
+     * Before each retry attempt, the resource resolver is reverted so when using
+     * this it is a good idea to commit from your action directly.
+     * @param retries Number of retries to attempt
+     * @param pausePerRetry Milliseconds to wait between attempts
+     * @param action Action to attempt
+     * @return New retry wrapper around provided action
+     */
+    public BiConsumer<ResourceResolver, String> retryAll(final int retries, final long pausePerRetry, final BiConsumer<ResourceResolver, String> action) {
+        return new BiConsumer<ResourceResolver, String>() {
+            @Override
+            public void accept(ResourceResolver r, String s) throws Exception {
+                int remaining = retries;
+                while (remaining > 0) {
+                    try {
+                        action.accept(r, s);
+                        return;
+                    } catch (Exception e) {
+                        if (remaining-- <= 0) {
+                            throw e;
+                        } else {
+                            r.revert();
+                            r.refresh();
+                            Thread.sleep(pausePerRetry);
+                        }
+                    }
+                }
+            }
+        };        
+    }
+
+    /**
      * Run nodes through synthetic workflow
      * @param model Synthetic workflow model
      */
@@ -138,6 +170,26 @@ public class DeferredActions {
                 for (Iterator<? extends Rendition> renditions = asset.listRenditions(); renditions.hasNext();) {
                     Rendition rendition = renditions.next();
                     if (!rendition.getName().equalsIgnoreCase("original")) {
+                        asset.removeRendition(rendition.getName());
+                    }
+                }
+            }
+        };
+    }
+
+    /**
+     * Remove all renditions with a given name
+     */
+    public BiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
+        return new BiConsumer<ResourceResolver, String>() {
+            @Override
+            public void accept(ResourceResolver r, String path) {
+                nameThread("removeRenditions-" + path);
+                AssetManager assetManager = r.adaptTo(AssetManager.class);
+                Asset asset = assetManager.getAsset(path);
+                for (Iterator<? extends Rendition> renditions = asset.listRenditions(); renditions.hasNext();) {
+                    Rendition rendition = renditions.next();
+                    if (rendition.getName().equalsIgnoreCase(name)) {
                         asset.removeRendition(rendition.getName());
                     }
                 }
@@ -199,6 +251,13 @@ public class DeferredActions {
     }
 
     //-- Single work consumers (for use for single invocation using deferredWithResolver)
+    /**
+     * Retry a single action
+     * @param retries Number of retries to attempt
+     * @param pausePerRetry Milliseconds to wait between attempts
+     * @param action Action to attempt
+     * @return New retry wrapper around provided action
+     */
     public Consumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final Consumer<ResourceResolver> action) {
         return new Consumer<ResourceResolver>() {
             @Override
@@ -222,61 +281,67 @@ public class DeferredActions {
         };        
     }
     
-    public Consumer<ResourceResolver> startSyntheticWorkflow(final SyntheticWorkflowModel model, final String path) {
-        return new Consumer<ResourceResolver>() {
-            @Override
-            public void accept(ResourceResolver r) throws Exception {
-                startSyntheticWorkflows(model).accept(r, path);
-            }
-        };
+    /**
+     * Run a synthetic workflow on a single node
+     */
+    final public Consumer<ResourceResolver> startSyntheticWorkflow(SyntheticWorkflowModel model, String path) {
+        return createSingleAction(startSyntheticWorkflows(model), path);
     }
     
-    public Consumer<ResourceResolver> removeRenditions(final String path) {
-        return new Consumer<ResourceResolver>() {
-            @Override
-            public void accept(ResourceResolver r) throws Exception {
-                removeAllRenditions().accept(r, path);
-            }
-        };
+    /**
+     * Remove all non-original renditions from an asset.
+     */
+    final public Consumer<ResourceResolver> removeRenditions(String path) {
+        return createSingleAction(removeAllRenditions(), path);
+    }
+    
+    /**
+     * Remove all renditions with a given name
+     */
+    final public Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
+        return createSingleAction(removeAllRenditionsNamed(name), path);
+    }
+    
+
+    /**
+     * Activate a single node.
+     */
+    final public Consumer<ResourceResolver> activate(String path) {
+        return createSingleAction(activateAll(), path);
     }
 
-    public Consumer<ResourceResolver> activate(final String path) {
-        return new Consumer<ResourceResolver>() {
-            @Override
-            public void accept(ResourceResolver r) throws Exception {
-                activateAll().accept(r, path);
-            }
-        };
+    /**
+     * Activate a single node using provided replication options.
+     */
+    final public Consumer<ResourceResolver> activateWithOptions(String path, ReplicationOptions options) {
+        return createSingleAction(activateAllWithOptions(options), path);
     }
 
-    public Consumer<ResourceResolver> activateWithOptions(final String path, final ReplicationOptions options) {
-        return new Consumer<ResourceResolver>() {
-            @Override
-            public void accept(ResourceResolver r) throws Exception {
-                activateAllWithOptions(options).accept(r, path);
-            }
-        };
+    /**
+     * Deactivate a single node.
+     */
+    final public Consumer<ResourceResolver> deactivate(String path) {
+        return createSingleAction(deactivateAll(), path);
     }
 
-    public Consumer<ResourceResolver> deactivate(final String path) {
-        return new Consumer<ResourceResolver>() {
-            @Override
-            public void accept(ResourceResolver r) throws Exception {
-                deactivateAll().accept(r, path);
-            }
-        };
-    }
-
-    public Consumer<ResourceResolver> deactivateWithOptions(final String path, final ReplicationOptions options) {
-        return new Consumer<ResourceResolver>() {
-            @Override
-            public void accept(ResourceResolver r) throws Exception {
-                deactivateAllWithOptions(options).accept(r, path);
-            }
-        };
+    /**
+     * Deactivate a single node using provided replication options.
+     */
+    final public Consumer<ResourceResolver> deactivateWithOptions(String path, ReplicationOptions options) {
+        return createSingleAction(deactivateAllWithOptions(options), path);
     }
 
     private void nameThread(String string) {
         Thread.currentThread().setName(string);
+    }
+
+    private Consumer<ResourceResolver> createSingleAction(
+            final BiConsumer<ResourceResolver, String> action, final String path) {
+        return new Consumer<ResourceResolver>() {
+            @Override
+            public void accept(ResourceResolver res) throws Exception {
+                action.accept(res, path);
+            }
+        };
     }
 }

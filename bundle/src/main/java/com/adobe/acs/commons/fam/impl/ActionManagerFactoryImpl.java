@@ -86,7 +86,7 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
     public void purgeCompletedTasks() {
         for (Iterator<ActionManagerImpl> taskIterator = tasks.values().iterator(); taskIterator.hasNext();) {
             ActionManagerImpl task = taskIterator.next();
-            if (task.isComplete()) {
+            if (task.isComplete() || taskRunner.getActiveCount() == 0) {
                 task.closeAllResolvers();
                 taskIterator.remove();
             }

@@ -16,6 +16,7 @@
 package com.adobe.acs.commons.fam.mbean;
 
 import com.adobe.granite.jmx.annotation.Description;
+import com.adobe.granite.jmx.annotation.Name;
 import javax.management.openmbean.TabularDataSupport;
 
 /**
@@ -50,4 +51,8 @@ public interface ThrottledTaskRunnerMBean {
     
     @Description("Reset job processing statistics")
     public void clearProcessingStatistics();
+    
+    @Description("Change thread pool size (preserves running queue)")
+    public void setThreadPoolSize(@Name("New size") @Description("4 is the suggested default.") int size);
+    
 }
