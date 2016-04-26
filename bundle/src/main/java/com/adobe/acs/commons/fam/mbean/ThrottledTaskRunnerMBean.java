@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam.mbean;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.granite.jmx.annotation.Description;
 import com.adobe.granite.jmx.annotation.Name;
 import javax.management.openmbean.TabularDataSupport;
@@ -23,6 +24,7 @@ import javax.management.openmbean.TabularDataSupport;
  * Throttled task runner definition
  */
 @Description("Throttled Task Runner")
+@ProviderType
 public interface ThrottledTaskRunnerMBean {
     
     @Description("Processes currently running")
