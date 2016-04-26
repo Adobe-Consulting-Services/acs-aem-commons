@@ -15,13 +15,16 @@
  */
 package com.adobe.acs.commons.fam.mbean;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.granite.jmx.annotation.Description;
+import com.adobe.granite.jmx.annotation.Name;
 import javax.management.openmbean.TabularDataSupport;
 
 /**
  * Throttled task runner definition
  */
 @Description("Throttled Task Runner")
+@ProviderType
 public interface ThrottledTaskRunnerMBean {
     
     @Description("Processes currently running")
@@ -50,4 +53,8 @@ public interface ThrottledTaskRunnerMBean {
     
     @Description("Reset job processing statistics")
     public void clearProcessingStatistics();
+    
+    @Description("Change thread pool size (preserves running queue)")
+    public void setThreadPoolSize(@Name("New size") @Description("4 is the suggested default.") int size);
+    
 }

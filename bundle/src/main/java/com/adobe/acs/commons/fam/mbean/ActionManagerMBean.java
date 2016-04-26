@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam.mbean;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.granite.jmx.annotation.Description;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
@@ -23,6 +24,7 @@ import javax.management.openmbean.TabularDataSupport;
  * Provide details about running tasks
  */
 @Description("Task Manager")
+@ProviderType
 public interface ActionManagerMBean {
     @Description("Tasks")
     public TabularDataSupport getStatistics() throws OpenDataException;

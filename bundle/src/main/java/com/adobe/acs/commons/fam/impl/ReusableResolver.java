@@ -47,12 +47,14 @@ public class ReusableResolver {
     }
 
     public void free() throws PersistenceException {
-        if (getResolver().hasChanges()) {
-            setChangeCount(getChangeCount() + 1);
-            getPendingItems().add(getCurrentItem());
-        }
-        if (getChangeCount() >= getSaveInterval()) {
-            commit();
+        if (getResolver().isLive()) {
+            if (getResolver().hasChanges()) {
+                setChangeCount(getChangeCount() + 1);
+                getPendingItems().add(getCurrentItem());
+            }
+            if (getChangeCount() >= getSaveInterval()) {
+                commit();
+            }
         }
     }
 

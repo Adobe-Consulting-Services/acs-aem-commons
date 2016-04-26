@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.functions.BiConsumer;
 import com.adobe.acs.commons.functions.BiFunction;
 import com.adobe.acs.commons.functions.Consumer;
@@ -28,6 +29,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  *
  */
+@ProviderType
 public interface ActionManager {
 
     /**
@@ -106,4 +108,9 @@ public interface ActionManager {
      * @param item Item name or path being processed currently
      */
     void setCurrentItem(String item);
+    
+    /**
+     * @return The name set on this action manager at the time of its creation
+     */
+    String getName();
 }

@@ -15,10 +15,13 @@
  */
 package com.adobe.acs.commons.fam;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Represents a failure on a specific node
  */
-public class Failure {
+@ProviderType
+public final class Failure {
     
     private String nodePath;
     private Exception exception;

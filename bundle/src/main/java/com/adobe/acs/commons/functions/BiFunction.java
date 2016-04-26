@@ -15,6 +15,8 @@
  */
 package com.adobe.acs.commons.functions;
 
+import aQute.bnd.annotation.ConsumerType;
+
 /**
  * Created work-alike for functionality not introduced until Java 8
  * Represents a function that accepts two arguments and produces a result.
@@ -26,6 +28,7 @@ package com.adobe.acs.commons.functions;
  *
  * @see Function
  */
+@ConsumerType
 public abstract class BiFunction<T, U, R> {
 
     /**

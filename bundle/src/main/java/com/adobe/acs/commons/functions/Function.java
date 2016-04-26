@@ -15,6 +15,8 @@
  */
 package com.adobe.acs.commons.functions;
 
+import aQute.bnd.annotation.ConsumerType;
+
 /**
  * Created work-alike for functionality not introduced until Java 8
  * Represents a function that accepts one argument and produces a result.
@@ -22,6 +24,7 @@ package com.adobe.acs.commons.functions;
  * @param <T> the type of the input to the function
  * @param <R> the type of the result of the function
  */
+@ConsumerType
 public abstract class Function<T, R> {
 
     /**

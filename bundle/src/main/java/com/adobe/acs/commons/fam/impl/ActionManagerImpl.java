@@ -73,6 +73,11 @@ class ActionManagerImpl implements ActionManager {
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+    
+    @Override
     public List<Failure> getFailureList() {
         return failures;
     }
@@ -105,14 +110,14 @@ class ActionManagerImpl implements ActionManager {
                     QueryResult results = query.execute();
                     for (NodeIterator nodeIterator = results.getNodes(); nodeIterator.hasNext();) {
                         final String nodePath = nodeIterator.nextNode().getPath();
-                        LOG.info("Processing found result {0}", nodePath);
+                        LOG.info("Processing found result " + nodePath);
                         deferredWithResolver(new Consumer<ResourceResolver>() {
                             @Override
                             public void accept(ResourceResolver r) throws Exception {
                                 currentPath.set(nodePath);
                                 if (filters != null) {
                                     for (BiFunction<ResourceResolver, String, Boolean> filter : filters) {
-                                        if (!filter.apply(r, name)) {
+                                        if (!filter.apply(r, nodePath)) {
                                             logFilteredOutItem(nodePath);
                                             return;
                                         }
@@ -179,9 +184,14 @@ class ActionManagerImpl implements ActionManager {
     private void withResolver(Consumer<ResourceResolver> action, boolean closesResolver) throws Exception {
         ReusableResolver resolver = null;
         while (resolver == null || !resolver.getResolver().isLive()) {
-            resolver = resolvers.pop();
+            if (!resolvers.isEmpty()) {
+                resolver = resolvers.remove();
+            }
             if (resolver == null) {
-                logError(new RepositoryException("No available resource resolvers in pool!"));
+                if (!closesResolver) {
+                    logError(new RepositoryException("No available resource resolvers in pool!"));
+                }
+                return;
             }
         }
         resolver.setCurrentItem(currentPath.get());
@@ -248,9 +258,8 @@ class ActionManagerImpl implements ActionManager {
     }
 
     private void logFilteredOutItem(String path) {
-        tasksCompleted.incrementAndGet();
         tasksFilteredOut.incrementAndGet();
-        LOG.info("Filtered out {0}", path);
+        LOG.info("Filtered out " + path);
     }
 
     private long getRuntime() {
