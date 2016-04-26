@@ -107,4 +107,9 @@ public interface ActionManager {
      * @param item Item name or path being processed currently
      */
     void setCurrentItem(String item);
+    
+    /**
+     * @return The name set on this action manager at the time of its creation
+     */
+    String getName();
 }

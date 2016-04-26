@@ -214,6 +214,12 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         }
     }
 
+    @Override
+    public void setThreadPoolSize(int newSize) {
+        maxThreads = newSize;
+        initThreadPool();
+    }
+    
     private void initThreadPool() {
         if (workQueue == null) {
             workQueue = new LinkedBlockingDeque<Runnable>();
