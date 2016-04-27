@@ -79,6 +79,24 @@
             $field.parent().find(".coral-RichText-editable.coral-RichText").empty().append(value);
         },
 
+        isAutocomplete: function($field) {
+       		return !_.isEmpty($field) && ($field.find("ul").hasClass("js-coral-Autocomplete-tagList") || $field.closest("ul").hasClass("js-coral-Autocomplete-tagList"));
+       	},
+
+        setAutocomplete: function($field,value) {
+        		var tagsArray = value.split(',');
+
+			var $tagList = CUI.Widget.fromElement(CUI.TagList,$field);
+
+			if ($tagList) {
+				$(tagsArray).each(function(i,item) {
+            	    		var selectedItem = $field.closest(".coral-Form-fieldwrapper").find("li[data-value='" + item + "']");
+
+            			$tagList._appendItem({"display":selectedItem.text(),"value":item});
+            		});
+			}
+        },
+
         setWidgetValue: function ($field, value) {
             if (_.isEmpty($field)) {
                 return;
@@ -92,6 +110,8 @@
                 this.setRichTextField($field, value);
             } else if (this.isDateField($field)) {
                 this.setDateField($field, value);
+            } else if (this.isAutocomplete($field)) {
+            		this.setAutocomplete($field,value);
             } else {
                 $field.val(value);
             }
