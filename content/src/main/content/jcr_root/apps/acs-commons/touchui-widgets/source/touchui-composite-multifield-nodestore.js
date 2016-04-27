@@ -155,8 +155,12 @@
 
                     var $field = $multifield.find("[name='./" + fKey + "']").last();
 
-                    if(_.isEmpty($field)){
-                        return;
+                    if (_.isEmpty($field)) {
+                     	$field = $multifield.find("[data-fieldname='./" + fKey + "']").last();
+
+                     	if (_.isEmpty($field)) {
+                          	return;
+                     	}
                     }
 
                     cmf.setWidgetValue($field, fValue);
@@ -229,6 +233,15 @@
 
                 if (cmf.isCheckbox($field)) {
                     value = $field.prop("checked") ? $field.val() : "";
+                }
+
+                if (cmf.isAutocomplete($field)) {
+                 	var tags = [];
+                 	var tagItems = $field.closest("ul").find("li.coral-TagList-tag");
+                 	$(tagItems).each(function (k, tagItem) {
+                 		tags[k] = $(tagItem).find("input[name='./" + name + "']").attr("value");
+                 	});
+                 	value = tags.toString();
                 }
 
                 //remove the field, so that individual values are not POSTed

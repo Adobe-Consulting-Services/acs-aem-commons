@@ -153,7 +153,17 @@
 
                     //a setTimeout may be needed
                     _.each(record, function (value, key) {
-                        cmf.setWidgetValue($($multifield.find("[name='./" + key + "']")[index]), value);
+                   		var $item = $multifield.find("[name='./" + key + "']");
+
+                    	if (_.isEmpty($item)) {
+                            $item = $multifield.find("[data-fieldname='./" + key + "']").last();
+
+                            if (_.isEmpty($item)) {
+                                return;
+                            }
+                        }
+
+                        cmf.setWidgetValue($($item), value);
                     });
                 });
             }
@@ -187,7 +197,11 @@
                         _.each(record, function (rValue, rKey) {
                             $field = $($fieldSets[i]).find("[name='./" + rKey + "']");
 
-                            if (_.isArray(rValue) && !_.isEmpty(rValue)) {
+                    		if (_.isEmpty($field)) {
+                     			$field = $($fieldSets[i]).find("[data-fieldname='./" + rKey + "']").last();
+                  		   	}
+                  		   	
+                           	if (_.isArray(rValue) && !_.isEmpty(rValue)) {
                                 fillNestedFields($($fieldSets[i]).find("[data-init='multifield']"), rValue);
                             } else {
                                 cmf.setWidgetValue($field, rValue);
@@ -222,6 +236,16 @@
                 value = $field.prop("checked") ? $field.val() : "";
             }
 
+            if (this.isAutocomplete($field)) {
+             	var tags = [];
+               	var tagItems = $field.closest("ul").find("li.coral-TagList-tag");
+              	$(tagItems).each(function (k, tagItem) {
+               		tags[k] = $(tagItem).find("input[name='./" + name + "']").attr("value");
+               	});
+
+               	value = tags.toString();
+            }
+
             record[name] = value;
 
             //remove the field, so that individual values are not POSTed
@@ -239,8 +263,10 @@
                 record = {};
 
                 $fields.each(function (j, field) {
-                    cmf.fillValue($(field), record);
-                });
+                		if (!record[$(field).attr('name').substring(2)]) {
+	                    cmf.fillValue($(field), record);
+                		}
+                 });
 
                 if (!$.isEmptyObject(record)) {
                     records.push(record);
