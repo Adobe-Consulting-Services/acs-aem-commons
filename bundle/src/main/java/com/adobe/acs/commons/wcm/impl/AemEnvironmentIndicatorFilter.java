@@ -1,8 +1,8 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.BufferingResponse;
-import org.apache.sling.xss.XSSAPI;
-
+import com.adobe.granite.xss.XSSAPI;
+import com.day.cq.wcm.api.WCMMode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -104,6 +104,14 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     public static final String PROP_TITLE_PREFIX = "browser-title-prefix";
 
 
+    @Property (label = "Excluded WCM modes",
+    		description = "Do not display the indicator when these WCM modes",
+    		cardinality = Integer.MAX_VALUE)
+    public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
+    private String[] excludedWCMModes;
+
+
+
     private static final String[] REJECT_PATH_PREFIXES = new String[]{
     };
 
@@ -138,10 +146,22 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
         filterChain.doFilter(request, capturedResponse);
 
+        boolean doInclude = true;
+        if (excludedWCMModes != null) {
+        	// Test for configured WCM modes, where the indicators are not displayed
+        	WCMMode wcmmode = extractFromRequest (request);
+        	log.info("extracted wcm mode = {}", wcmmode.name());
+        	for (String m : excludedWCMModes) {
+        		if (wcmmode.equals(WCMMode.valueOf(m))) {
+        			doInclude = false;
+        		}
+        	}
+        }
+
         // Get contents
         final String contents = capturedResponse.getContents();
 
-        if (contents != null && StringUtils.contains(response.getContentType(), "html")) {
+        if (doInclude && contents != null && StringUtils.contains(response.getContentType(), "html")) {
 
             final int bodyIndex = contents.indexOf("</body>");
 
@@ -231,6 +251,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             filterProps.put("pattern", ".*");
             filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
         }
+
+        excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES));
     }
 
 
@@ -244,4 +266,13 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         // Reset CSS variable
         css = "";
     }
+
+    // extract the WCMMode from the request; we cannot use
+    // WCMMode.fromRequest(), because this is not a SlingHttpServletRequest
+    private WCMMode extractFromRequest (HttpServletRequest request) {
+
+        return (WCMMode) request.getAttribute(
+                WCMMode.REQUEST_ATTRIBUTE_NAME);
+    }
+
 }
