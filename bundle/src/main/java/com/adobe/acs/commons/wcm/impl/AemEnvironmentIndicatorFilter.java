@@ -102,8 +102,14 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             description = "A prefix to add to the browser tab/window title; <THIS VALUE> | <ORIGINAL DOC TITLE>",
             value = DEFAULT_TITLE_PREFIX)
     public static final String PROP_TITLE_PREFIX = "browser-title-prefix";
+<<<<<<< HEAD
 
 
+=======
+    
+    
+    private static final String[] DEFAULT_EXCLUDED_WCMMODES = {"DISABLED"};
+>>>>>>> 7cd3052... implement feedback, thanks @dg
     @Property (label = "Excluded WCM modes",
     		description = "Do not display the indicator when these WCM modes",
     		cardinality = Integer.MAX_VALUE)
@@ -150,10 +156,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         if (excludedWCMModes != null) {
         	// Test for configured WCM modes, where the indicators are not displayed
         	WCMMode wcmmode = extractFromRequest (request);
-        	log.info("extracted wcm mode = {}", wcmmode.name());
         	for (String m : excludedWCMModes) {
-        		if (wcmmode.equals(WCMMode.valueOf(m))) {
+        		if (WCMMode.valueOf(m).equals(wcmmode)) {
         			doInclude = false;
+        			break;
         		}
         	}
         }
@@ -251,8 +257,13 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             filterProps.put("pattern", ".*");
             filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
         }
+<<<<<<< HEAD
 
         excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES));
+=======
+        
+        excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),DEFAULT_EXCLUDED_WCMMODES);
+>>>>>>> 7cd3052... implement feedback, thanks @dg
     }
 
 
