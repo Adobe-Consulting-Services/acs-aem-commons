@@ -83,7 +83,7 @@
 
             if(!limit.isWithin){
                 this.editComponent.hideTarget();
-                CQ.Ext.Msg.alert('Error', "Limit exceeded, allowed - " + limit.currentLimit);
+                CQ.Ext.Msg.alert('Error', "Limit exceeded, allowed: " + limit.currentLimit);
                 return false;
             }
 
