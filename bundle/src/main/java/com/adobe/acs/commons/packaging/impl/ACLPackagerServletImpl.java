@@ -22,13 +22,8 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.util.AemCapabilityHelper;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
 import com.day.jcr.vault.fs.api.PathFilterSet;
 import com.day.jcr.vault.fs.filter.DefaultPathFilter;
-import com.day.jcr.vault.fs.io.AccessControlHandling;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageDefinition;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
@@ -38,14 +33,10 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import javax.jcr.query.Query;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,7 +45,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -71,28 +61,13 @@ import java.util.regex.Pattern;
         selectors = { "package" },
         extensions = { "json" }
 )
-public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
-    private static final Logger log = LoggerFactory.getLogger(ACLPackagerServletImpl.class);
+public class ACLPackagerServletImpl extends AbstractPackagerServlet {
 
     private static final String INCLUDE_PATTERNS = "includePatterns";
 
     private static final String PRINCIPAL_NAMES = "principalNames";
 
-    private static final String PACKAGE_NAME = "packageName";
-
-    private static final String PACKAGE_GROUP_NAME = "packageGroupName";
-
-    private static final String PACKAGE_VERSION = "packageVersion";
-
-    private static final String PACKAGE_DESCRIPTION = "packageDescription";
-
-    private static final String PACKAGE_ACL_HANDLING = "packageACLHandling";
-
-    private static final String CONFLICT_RESOLUTION = "conflictResolution";
-
     private static final String INCLUDE_PRINCIPALS = "includePrincipals";
-
-    private static final String INCLUDE_CONFIGURATION = "includeConfiguration";
 
     private static final String DEFAULT_PACKAGE_NAME = "acls";
 
@@ -104,8 +79,6 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
             + "ACL Packager configuration.";
 
     private static final boolean DEFAULT_INCLUDE_PRINCIPALS = false;
-
-    private static final boolean DEFAULT_INCLUDE_CONFIGURATION = false;
 
     private static final String QUERY_LANG = Query.JCR_SQL2;
 
@@ -149,53 +122,9 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
             if (properties.get(INCLUDE_PRINCIPALS, DEFAULT_INCLUDE_PRINCIPALS)) {
                 packageResources.addAll(this.getPrincipalResources(resourceResolver, principalNames));
             }
+            doPackaging(request, response, preview, properties, packageResources);
 
-            // Add the ACL Packager Configuration page
-            if (properties.get(INCLUDE_CONFIGURATION, DEFAULT_INCLUDE_CONFIGURATION)) {
-                final PathFilterSet tmp = this.getACLPackagerPageResource(request);
-                if (tmp != null) {
-                    packageResources.add(tmp);
-                }
-            }
 
-            final Map<String, String> packageDefinitionProperties = new HashMap<String, String>();
-
-            // ACL Handling
-            packageDefinitionProperties.put(JcrPackageDefinition.PN_AC_HANDLING,
-                    properties.get(PACKAGE_ACL_HANDLING, AccessControlHandling.OVERWRITE.toString()));
-
-            // Package Description
-            packageDefinitionProperties.put(
-                    JcrPackageDefinition.PN_DESCRIPTION,
-                    properties.get(PACKAGE_DESCRIPTION, DEFAULT_PACKAGE_DESCRIPTION));
-
-            if (preview) {
-                // Handle preview mode
-                response.getWriter().print(packageHelper.getPathFilterSetPreviewJSON(packageResources));
-            } else if (packageResources == null || packageResources.isEmpty()) {
-                // Do not create empty packages; This will only clutter up CRX Package Manager
-                response.getWriter().print(packageHelper.getErrorJSON("Refusing to create a package with no filter "
-                        + "set rules."));
-            } else {
-                // Create JCR Package; Defaults should always be passed in via Request Parameters, but just in case
-                final JcrPackage jcrPackage = packageHelper.createPackageFromPathFilterSets(packageResources,
-                        request.getResourceResolver().adaptTo(Session.class),
-                        properties.get(PACKAGE_GROUP_NAME, DEFAULT_PACKAGE_GROUP_NAME),
-                        properties.get(PACKAGE_NAME, DEFAULT_PACKAGE_NAME),
-                        properties.get(PACKAGE_VERSION, DEFAULT_PACKAGE_VERSION),
-                        PackageHelper.ConflictResolution.valueOf(properties.get(CONFLICT_RESOLUTION,
-                                PackageHelper.ConflictResolution.IncrementVersion.toString())),
-                        packageDefinitionProperties
-                );
-
-                // Add thumbnail to the package definition
-                packageHelper.addThumbnail(jcrPackage,
-                        request.getResourceResolver().getResource(ACL_PACKAGE_THUMBNAIL_RESOURCE_PATH));
-
-                log.debug("Successfully created JCR package");
-                response.getWriter().print(
-                        packageHelper.getSuccessJSON(jcrPackage));
-            }
         } catch (RepositoryException ex) {
             log.error(ex.getMessage());
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
@@ -325,22 +254,29 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
         return pathFilterSets;
     }
 
-    /**
-     * Gets the ACL Packager Page resource.
-     *
-     * @param request the Sling HTTP Servlet Request object
-     * @return a the PathFilterSet wrapping the cq:Page or null
-     */
-    private PathFilterSet getACLPackagerPageResource(final SlingHttpServletRequest request) {
-        final ResourceResolver resourceResolver = request.getResourceResolver();
-        final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-        final Page page = pageManager.getContainingPage(request.getResource());
+    @Override
+    protected String getPackageThumbnailPath() {
+        return ACL_PACKAGE_THUMBNAIL_RESOURCE_PATH;
+    }
 
-        if (page != null) {
-            return new PathFilterSet(page.getPath());
-        }
+    @Override
+    protected String getDefaultPackageDescription() {
+        return DEFAULT_PACKAGE_DESCRIPTION;
+    }
 
-        return null;
+    @Override
+    protected String getDefaultPackageGroupName() {
+        return DEFAULT_PACKAGE_GROUP_NAME;
+    }
+
+    @Override
+    protected String getDefaultPackageName() {
+        return DEFAULT_PACKAGE_NAME;
+    }
+
+    @Override
+    protected PackageHelper getPackageHelper() {
+        return packageHelper;
     }
 
     /**
@@ -384,7 +320,7 @@ public class ACLPackagerServletImpl extends SlingAllMethodsServlet {
      * @param data List of strings to compile into patterns
      * @return a list of patterns
      */
-    private static List<Pattern> toPatterns(final List<String> data) {
+    private List<Pattern> toPatterns(final List<String> data) {
         final List<Pattern> patterns = new ArrayList<Pattern>();
 
         for (final String item : data) {
