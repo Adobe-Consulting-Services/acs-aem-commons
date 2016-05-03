@@ -15,6 +15,12 @@ From the root directory, run ``mvn -PautoInstallPackage clean install`` to build
 
 From the bundle directory, run ``mvn -PautoInstallBundle clean install`` to build *just* the bundle and install to a CQ instance.
 
+### UberJar
+
+This branch (feature/6.2-compatibility) relies on the unobfuscated AEM 6.2 UberJar. This is not publicly available from http://repo.adobe.com and must be manually downloaded from https://daycare.day.com/home/products/uberjar.html. After downloading the file (_cq-quickstart-6.2.0-apis.jar_), you must install it into your local Maven repository with this command:
+
+    mvn install:install-file -Dfile=cq-quickstart-6.2.0-apis.jar -DgroupId=com.adobe.aem -DartifactId=uber-jar -Dversion=6.2.0 -Dclassifier=apis
+
 ## Using with VLT
 
 To use vlt with this project, first build and install the package to your local CQ instance as described above. Then cd to `content/src/main/content/jcr_root` and run
