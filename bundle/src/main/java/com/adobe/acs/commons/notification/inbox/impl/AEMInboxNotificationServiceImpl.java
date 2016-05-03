@@ -51,6 +51,13 @@ public class AEMInboxNotificationServiceImpl implements
     public static final String NOTIFICATION_TASK_TYPE = "Notification";
 
     @Override
+    public AEMInboxNotificationDetails buildNotificationsDetails() {
+        AEMInboxNotificationDetails notificationDetails = new AEMInboxNotificationDetailsImpl();
+
+        return notificationDetails;
+    }
+
+    @Override
     public void sendAEMInboxNotification(ResourceResolver resourceResolver,
             AEMInboxNotificationDetails notificationDetails)
             throws TaskManagerException {
@@ -69,7 +76,9 @@ public class AEMInboxNotificationServiceImpl implements
     private Task createTask(TaskManager taskManager,
             AEMInboxNotificationDetails notificationDetails)
             throws TaskManagerException {
-        Task newTask = getTask(taskManager, NOTIFICATION_TASK_TYPE);
+        
+        Task newTask = taskManager.getTaskManagerFactory().newTask(
+                NOTIFICATION_TASK_TYPE);
 
         newTask.setName(notificationDetails.getTitle());
         newTask.setContentPath(notificationDetails.getContentPath());
@@ -85,16 +94,6 @@ public class AEMInboxNotificationServiceImpl implements
 
             newTask.setActions(taskActions);
         }
-
-        return newTask;
-    }
-
-    private Task getTask(TaskManager taskManager, String taskType)
-            throws TaskManagerException {
-
-        TaskManagerFactory taskManagerFactory = taskManager
-                .getTaskManagerFactory();
-        Task newTask = taskManagerFactory.newTask(NOTIFICATION_TASK_TYPE);
 
         return newTask;
     }

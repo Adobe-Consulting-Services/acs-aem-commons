@@ -26,6 +26,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import com.adobe.granite.taskmanagement.TaskManagerException;
 
 public interface AEMInboxNotificationService {
+    
+    public AEMInboxNotificationDetails buildNotificationsDetails();
 
     public void sendAEMInboxNotification(ResourceResolver resourceResolver,
             AEMInboxNotificationDetails notificationDetails)
