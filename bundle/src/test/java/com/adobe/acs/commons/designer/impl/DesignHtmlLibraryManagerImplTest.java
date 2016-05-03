@@ -47,10 +47,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.adobe.acs.commons.designer.DesignHtmlLibraryManager;
 import com.adobe.acs.commons.designer.PageRegion;
 import com.day.cq.wcm.api.designer.Design;
-import com.day.cq.widget.ClientLibrary;
-import com.day.cq.widget.HtmlLibrary;
-import com.day.cq.widget.HtmlLibraryManager;
-import com.day.cq.widget.LibraryType;
+import com.adobe.granite.ui.clientlibs.ClientLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DesignHtmlLibraryManagerImplTest {

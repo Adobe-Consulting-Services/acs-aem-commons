@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>2.4.3-SNAPSHOT</version>
+    <version>3.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -255,8 +255,9 @@
             </dependency>
             <dependency>
                 <groupId>com.adobe.aem</groupId>
-                <artifactId>aem-api</artifactId>
-                <version>6.0.0.1</version>
+                <artifactId>uber-jar</artifactId>
+                <version>6.2.0</version>
+                <classifier>apis</classifier>
                 <scope>provided</scope>
             </dependency>
             <dependency>

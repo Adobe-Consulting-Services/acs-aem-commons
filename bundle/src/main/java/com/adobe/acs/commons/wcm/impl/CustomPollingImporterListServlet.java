@@ -41,7 +41,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.adobe.granite.xss.XSSAPI;
+import org.apache.sling.xss.XSSAPI;
 import com.day.cq.polling.importer.Importer;
 
 @SlingServlet(paths = "/bin/acs-commons/custom-importers")

@@ -56,9 +56,9 @@ import org.xml.sax.helpers.AttributesImpl;
 import com.adobe.acs.commons.rewriter.AbstractTransformer;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.GenericCacheMBean;
-import com.day.cq.widget.HtmlLibrary;
-import com.day.cq.widget.HtmlLibraryManager;
-import com.day.cq.widget.LibraryType;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 

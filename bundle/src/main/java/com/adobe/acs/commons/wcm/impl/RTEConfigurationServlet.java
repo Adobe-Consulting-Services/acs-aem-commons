@@ -40,7 +40,7 @@ import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import com.adobe.acs.commons.util.PathInfoUtil;
-import com.adobe.granite.xss.XSSAPI;
+import org.apache.sling.xss.XSSAPI;
 
 /**
  * Servlets which allows for dynamic selection of RTE configuration. To use in a component, specify the xtype of

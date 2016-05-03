@@ -47,7 +47,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
