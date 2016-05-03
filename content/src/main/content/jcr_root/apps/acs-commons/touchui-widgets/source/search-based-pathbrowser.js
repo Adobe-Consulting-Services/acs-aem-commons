@@ -1,7 +1,7 @@
 (function($, CUI){
     var ACS_PREFIX = "acs.granite.ui.search.pathBrowser",
         ROOT_PATH = "rootPath",
-        QUERY_PARAMS = "queryparameters", // somehow queryParameters is read as queryparameters
+        QUERY_PARAMS = "predicates",
         QUERY = "/bin/querybuilder.json?";
 
     //executed when user initiates search in pathbrowser by typing in a keyword
