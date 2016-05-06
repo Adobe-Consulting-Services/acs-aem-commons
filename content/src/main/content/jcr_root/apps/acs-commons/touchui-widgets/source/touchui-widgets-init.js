@@ -80,21 +80,21 @@
         },
 
         isAutocomplete: function($field) {
-       		return !_.isEmpty($field) && ($field.find("ul").hasClass("js-coral-Autocomplete-tagList") || $field.closest("ul").hasClass("js-coral-Autocomplete-tagList"));
-       	},
+            return !_.isEmpty($field) && ($field.find("ul").hasClass("js-coral-Autocomplete-tagList") || $field.closest("ul").hasClass("js-coral-Autocomplete-tagList"));
+        },
 
         setAutocomplete: function($field,value) {
-        		var tagsArray = value.split(',');
+            var tagsArray = value.split(',');
 
-			var $tagList = CUI.Widget.fromElement(CUI.TagList,$field);
+            var $tagList = CUI.Widget.fromElement(CUI.TagList,$field);
 
-			if ($tagList) {
-				$(tagsArray).each(function(i,item) {
-            	    		var selectedItem = $field.closest(".coral-Form-fieldwrapper").find("li[data-value='" + item + "']");
+            if ($tagList) {
+                $(tagsArray).each(function(i,item) {
+                    var selectedItem = $field.closest(".coral-Form-fieldwrapper").find("li[data-value='" + item + "']");
 
-            			$tagList._appendItem({"display":selectedItem.text(),"value":item});
-            		});
-			}
+                    $tagList._appendItem({"display":selectedItem.text(),"value":item});
+                });
+            }
         },
 
         setWidgetValue: function ($field, value) {
@@ -111,7 +111,7 @@
             } else if (this.isDateField($field)) {
                 this.setDateField($field, value);
             } else if (this.isAutocomplete($field)) {
-            		this.setAutocomplete($field,value);
+                this.setAutocomplete($field,value);
             } else {
                 $field.val(value);
             }
@@ -137,7 +137,7 @@
 
         addCompositeMultifieldValidator: function(){
             var fieldErrorEl = $("<span class='coral-Form-fielderror coral-Icon coral-Icon--alert coral-Icon--sizeS' " +
-                                "data-init='quicktip' data-quicktip-type='error' />"),
+                    "data-init='quicktip' data-quicktip-type='error' />"),
                 cmf = this,
                 selector = "[" + cmf.DATA_ACS_COMMONS_NESTED + "] >* input, [" + cmf.DATA_ACS_COMMONS_NESTED + "] >* textarea";
 

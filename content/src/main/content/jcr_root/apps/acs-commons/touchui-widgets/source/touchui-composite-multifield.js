@@ -22,89 +22,89 @@
  *
  * <code>
  <?xml version="1.0" encoding="UTF-8"?>
-    <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:primaryType="nt:unstructured"
-    jcr:title="ACS AEM Commions Multifield TouchUI Component"
-    sling:resourceType="cq/gui/components/authoring/dialog"
-    helpPath="en/cq/current/wcm/default_components.html#Text">
-        <content
-        jcr:primaryType="nt:unstructured"
-        sling:resourceType="granite/ui/components/foundation/container">
-            <layout
-            jcr:primaryType="nt:unstructured"
-            sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
-            <items jcr:primaryType="nt:unstructured">
-                <column
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="granite/ui/components/foundation/container">
-                    <items jcr:primaryType="nt:unstructured">
-                        <fieldset
-                        jcr:primaryType="nt:unstructured"
-                        jcr:title="Sample Dashboard"
-                        sling:resourceType="granite/ui/components/foundation/form/fieldset">
-                            <layout
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
-                            <items jcr:primaryType="nt:unstructured">
-                                <column
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="granite/ui/components/foundation/container">
-                                    <items jcr:primaryType="nt:unstructured">
-                                        <dashboard
-                                        jcr:primaryType="nt:unstructured"
-                                        sling:resourceType="granite/ui/components/foundation/form/textfield"
-                                        fieldDescription="Enter Dashboard name"
-                                        fieldLabel="Dashboard name"
-                                        name="./dashboard"/>
-                                        <pages
-                                        jcr:primaryType="nt:unstructured"
-                                        sling:resourceType="granite/ui/components/foundation/form/multifield"
-                                        class="full-width"
-                                        fieldDescription="Click '+' to add a new page"
-                                        fieldLabel="Pages">
-                                            <field
-                                            jcr:primaryType="nt:unstructured"
-                                            sling:resourceType="granite/ui/components/foundation/form/fieldset"
-                                            acs-commons-nested="JSON_STORE"
-                                            name="./pages">
-                                                <layout
-                                                jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
-                                                method="absolute"/>
-                                                <items jcr:primaryType="nt:unstructured">
-                                                    <column
-                                                    jcr:primaryType="nt:unstructured"
-                                                    sling:resourceType="granite/ui/components/foundation/container">
-                                                        <items jcr:primaryType="nt:unstructured">
-                                                            <page
-                                                            jcr:primaryType="nt:unstructured"
-                                                            sling:resourceType="granite/ui/components/foundation/form/textfield"
-                                                            fieldDescription="Name of Page"
-                                                            fieldLabel="Page Name"
-                                                            name="./page"/>
-                                                            <path
-                                                            jcr:primaryType="nt:unstructured"
-                                                            sling:resourceType="granite/ui/components/foundation/form/pathbrowser"
-                                                            fieldDescription="Select Path"
-                                                            fieldLabel="Path"
-                                                            name="./path"
-                                                            rootPath="/content"/>
-                                                        </items>
-                                                    </column>
-                                                </items>
-                                            </field>
-                                        </pages>
-                                    </items>
-                                </column>
-                            </items>
-                        </fieldset>
-                    </items>
-                </column>
-            </items>
-        </content>
-    </jcr:root>
-</code>
-*/
+ <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+ jcr:primaryType="nt:unstructured"
+ jcr:title="ACS AEM Commions Multifield TouchUI Component"
+ sling:resourceType="cq/gui/components/authoring/dialog"
+ helpPath="en/cq/current/wcm/default_components.html#Text">
+ <content
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/container">
+ <layout
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
+ <items jcr:primaryType="nt:unstructured">
+ <column
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/container">
+ <items jcr:primaryType="nt:unstructured">
+ <fieldset
+ jcr:primaryType="nt:unstructured"
+ jcr:title="Sample Dashboard"
+ sling:resourceType="granite/ui/components/foundation/form/fieldset">
+ <layout
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
+ <items jcr:primaryType="nt:unstructured">
+ <column
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/container">
+ <items jcr:primaryType="nt:unstructured">
+ <dashboard
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/form/textfield"
+ fieldDescription="Enter Dashboard name"
+ fieldLabel="Dashboard name"
+ name="./dashboard"/>
+ <pages
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/form/multifield"
+ class="full-width"
+ fieldDescription="Click '+' to add a new page"
+ fieldLabel="Pages">
+ <field
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/form/fieldset"
+ acs-commons-nested="JSON_STORE"
+ name="./pages">
+ <layout
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
+ method="absolute"/>
+ <items jcr:primaryType="nt:unstructured">
+ <column
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/container">
+ <items jcr:primaryType="nt:unstructured">
+ <page
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/form/textfield"
+ fieldDescription="Name of Page"
+ fieldLabel="Page Name"
+ name="./page"/>
+ <path
+ jcr:primaryType="nt:unstructured"
+ sling:resourceType="granite/ui/components/foundation/form/pathbrowser"
+ fieldDescription="Select Path"
+ fieldLabel="Path"
+ name="./path"
+ rootPath="/content"/>
+ </items>
+ </column>
+ </items>
+ </field>
+ </pages>
+ </items>
+ </column>
+ </items>
+ </fieldset>
+ </items>
+ </column>
+ </items>
+ </content>
+ </jcr:root>
+ </code>
+ */
 (function ($, $document) {
     "use strict";
 
@@ -153,9 +153,9 @@
 
                     //a setTimeout may be needed
                     _.each(record, function (value, key) {
-                   		var $item = $multifield.find("[name='./" + key + "']");
+                        var $item = $multifield.find("[name='./" + key + "']");
 
-                    	if (_.isEmpty($item)) {
+                        if (_.isEmpty($item)) {
                             $item = $multifield.find("[data-fieldname='./" + key + "']").last();
 
                             if (_.isEmpty($item)) {
@@ -197,11 +197,11 @@
                         _.each(record, function (rValue, rKey) {
                             $field = $($fieldSets[i]).find("[name='./" + rKey + "']");
 
-                    		if (_.isEmpty($field)) {
-                     			$field = $($fieldSets[i]).find("[data-fieldname='./" + rKey + "']").last();
-                  		   	}
-                  		   	
-                           	if (_.isArray(rValue) && !_.isEmpty(rValue)) {
+                            if (_.isEmpty($field)) {
+                                $field = $($fieldSets[i]).find("[data-fieldname='./" + rKey + "']").last();
+                            }
+
+                            if (_.isArray(rValue) && !_.isEmpty(rValue)) {
                                 fillNestedFields($($fieldSets[i]).find("[data-init='multifield']"), rValue);
                             } else {
                                 cmf.setWidgetValue($field, rValue);
@@ -237,13 +237,13 @@
             }
 
             if (this.isAutocomplete($field)) {
-             	var tags = [];
-               	var tagItems = $field.closest("ul").find("li.coral-TagList-tag");
-              	$(tagItems).each(function (k, tagItem) {
-               		tags[k] = $(tagItem).find("input[name='./" + name + "']").attr("value");
-               	});
+                var tags = [];
+                var tagItems = $field.closest("ul").find("li.coral-TagList-tag");
+                $(tagItems).each(function (k, tagItem) {
+                    tags[k] = $(tagItem).find("input[name='./" + name + "']").attr("value");
+                });
 
-               	value = tags.toString();
+                value = tags.toString();
             }
 
             record[name] = value;
@@ -263,10 +263,10 @@
                 record = {};
 
                 $fields.each(function (j, field) {
-                		if (!record[$(field).attr('name').substring(2)]) {
-	                    cmf.fillValue($(field), record);
-                		}
-                 });
+                    if (!record[$(field).attr('name').substring(2)]) {
+                        cmf.fillValue($(field), record);
+                    }
+                });
 
                 if (!$.isEmptyObject(record)) {
                     records.push(record);
