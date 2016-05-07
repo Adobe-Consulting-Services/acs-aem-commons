@@ -17,11 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.notification.inbox.impl;
+package com.adobe.acs.commons.notifications.impl;
 
-import com.adobe.acs.commons.notification.inbox.AEMInboxNotificationDetails;
+import com.adobe.acs.commons.notifications.InboxNotification;
 
-public class AEMInboxNotificationDetailsImpl implements AEMInboxNotificationDetails {
+public class InboxNotificationImpl implements InboxNotification {
 
     private static final long serialVersionUID = -5976192100927192675L;
 
@@ -31,9 +31,9 @@ public class AEMInboxNotificationDetailsImpl implements AEMInboxNotificationDeta
 
     private String assignee;
 
-    private String messageDetails;
+    private String message;
 
-    private String[] notificationAction;
+    private String[] notificationActions;
 
     private String instructions;
 
@@ -61,20 +61,20 @@ public class AEMInboxNotificationDetailsImpl implements AEMInboxNotificationDeta
         this.assignee = assignee;
     }
 
-    public String getMessageDetails() {
-        return messageDetails;
+    public String getMessage() {
+        return message;
     }
 
-    public void setMessageDetails(String messageDetails) {
-        this.messageDetails = messageDetails;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    public String[] getNotificationAction() {
-        return notificationAction;
+    public String[] getNotificationActions() {
+        return notificationActions;
     }
 
-    public void setNotificationAction(String[] notificationAction) {
-        this.notificationAction = notificationAction;
+    public void setNotificationActions(String... notificationActions) {
+        this.notificationActions = notificationActions;
     }
 
     public String getInstructions() {

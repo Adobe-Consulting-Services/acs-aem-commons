@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.notification.inbox;
+package com.adobe.acs.commons.notifications;
 
 import java.util.List;
 
@@ -25,16 +25,15 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import com.adobe.granite.taskmanagement.TaskManagerException;
 
-public interface AEMInboxNotificationService {
-    
-    public AEMInboxNotificationDetails buildNotificationsDetails();
+public interface InboxNotificationSender {
 
-    public void sendAEMInboxNotification(ResourceResolver resourceResolver,
-            AEMInboxNotificationDetails notificationDetails)
-            throws TaskManagerException;
+    public InboxNotification buildInboxNotification();
 
-    public void sendAEMInboxNotification(ResourceResolver resourceResolver,
-            List<AEMInboxNotificationDetails> notificationDetailList)
+    public void sendInboxNotification(ResourceResolver resourceResolver,
+            InboxNotification inboxNotification) throws TaskManagerException;
+
+    public void sendInboxNotifications(ResourceResolver resourceResolver,
+            List<InboxNotification> inboxNotifications)
             throws TaskManagerException;
 
 }
