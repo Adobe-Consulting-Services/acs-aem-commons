@@ -59,4 +59,3 @@
 
     request.setAttribute(Field.class.getName(), vm);
 %>
-<ui:includeClientLib categories="acs-commons.granite.draggablelist"/>

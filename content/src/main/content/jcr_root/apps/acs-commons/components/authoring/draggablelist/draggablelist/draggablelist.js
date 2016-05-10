@@ -296,7 +296,7 @@
     CUI.Widget.registry.register("draggable-list", CUI.DraggableList);
 
     if (CUI.options.dataAPI) {
-        $(document).on('cui-contentloaded.data-api', function () {
+        $(document).on('foundation-contentloaded', function () {
             CUI.DraggableList.init($("[data-init~=draggable-list]"));
         });
     }
