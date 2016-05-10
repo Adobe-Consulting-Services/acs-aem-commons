@@ -77,7 +77,7 @@
 
     <%
         AttrBuilder ulAttrs = new AttrBuilder(request, xssAPI);
-        ulAttrs.addClass("draggable coral-Draggablelist-Addon-ul");
+        ulAttrs.addClass("acs-commons-draggablelist-draggable coral-Draggablelist-Addon-ul");
     %>
     <ul <%= ulAttrs.build() %>>
         <%

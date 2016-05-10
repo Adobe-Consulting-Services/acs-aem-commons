@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-ul.draggable {
+ul.acs-commons-draggablelist-draggable {
     position: relative;
     padding-bottom: 2.5rem;
     padding-top: 0.5rem;
@@ -34,7 +34,7 @@ ul.draggable {
     user-select: none;
 }
 
-ul.draggable li {
+ul.acs-commons-draggablelist-draggable li {
     position: relative;
     height: 2.5rem;
     margin: 0;
@@ -45,21 +45,21 @@ ul.draggable li {
     color: #4b4b4b;
 }
 
-ul.draggable li:hover {
+ul.acs-commons-draggablelist-draggable li:hover {
     cursor: url('/etc/clientlibs/granite/coralui/res/components/cursors/openhand.cur'), default;
     background-color: #ffffff;
 }
 
-ul.draggable li:active {
+ul.acs-commons-draggablelist-draggable li:active {
     cursor: url('/etc/clientlibs/granite/coralui/res/components/cursors/closedhand.cur'), default;
 }
 
-ul.draggable li:disabled {
+ul.acs-commons-draggablelist-draggable li:disabled {
     background-color: #d1d1d1;
     color: #b3b3b3;
 }
 
-ul.draggable li.dragging {
+ul.acs-commons-draggablelist-draggable li.dragging {
     cursor: url('/etc/clientlibs/granite/coralui/res/components/cursors/closedhand.cur'), move;
     opacity: 0.9;
     position: absolute;
@@ -69,21 +69,21 @@ ul.draggable li.dragging {
     z-index: 10000;
 }
 
-ul.draggable li.drag-before {
+ul.acs-commons-draggablelist-draggable li.drag-before {
     position: relative;
     top: 0rem;
 }
 
-ul.draggable li.drag-after {
+ul.acs-commons-draggablelist-draggable li.drag-after {
     position: relative;
     top: 0rem;
 }
 
-ul.draggable li + li {
+ul.acs-commons-draggablelist-draggable li + li {
     margin-top: -0.0625rem;
 }
 
-ul.draggable li:before {
+ul.acs-commons-draggablelist-draggable li:before {
     display: block;
     position: absolute;
     left: 0;
@@ -95,7 +95,7 @@ ul.draggable li:before {
     background: repeating-linear-gradient(-45deg, #eeeeee, #dcdbdb 1px, #dcdbdb 1px, #eeeeee 3px);
 }
 
-ul.draggable li .close {
+ul.acs-commons-draggablelist-draggable li .close {
     position: absolute;
     right: 0;
     top: 0;
@@ -116,7 +116,7 @@ ul.draggable li .close {
     font-size: 0.8125rem;
 }*/
 
-.dropzone.drag-over {
+.acs-commons-draggablelist-dropzone.drag-over {
     background-color: #e1e1e1;
 }
 

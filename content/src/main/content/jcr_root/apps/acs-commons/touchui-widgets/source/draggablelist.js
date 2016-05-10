@@ -18,7 +18,7 @@
  * #L%
  */
 (function ($) {
-    var dropZoneClassName = "dropzone";
+    var dropZoneClassName = "acs-commons-draggablelist-dropzone";
 
     /* Define some private helpers */
     function boundingBox(element) {
@@ -297,7 +297,7 @@
 
     if (CUI.options.dataAPI) {
         $(document).on('foundation-contentloaded', function () {
-            CUI.DraggableList.init($("[data-init~=draggable-list]"));
+            CUI.DraggableList.init($("[data-init~=draggablelist]"));
         });
     }
 }(window.jQuery));

@@ -92,11 +92,11 @@
     <input <%= deleteAttrs.build() %>>
     <input <%= typeHintAttrs.build() %>>
 
-    <div class="dropzone">
+    <div class="acs-commons-draggablelist-dropzone">
         <%
             AttrBuilder ulAttrs = new AttrBuilder(request, xssAPI);
-            ulAttrs.addClass("draggable coral-Addon-Draggablelist-ul");
-            ulAttrs.add("data-init", "draggable-list");
+            ulAttrs.addClass("acs-commons-draggablelist-draggable coral-Addon-Draggablelist-ul");
+            ulAttrs.add("data-init", "draggablelist");
             ulAttrs.add("data-allow", "reorder drop");
         %>
         <ul <%= ulAttrs.build() %>>
