@@ -52,8 +52,6 @@
             this.clone = dragElement.clone();
             this.clone.hide();
             this.clone.removeClass("is-dragging");
-            //this.clone.addClass("dragging");
-            //this.clone.css({top: "", left: "", width: ""});
             this.clone.insertBefore(dragElement);
             this.sourceZone = source;
             this.dragElement = dragElement; //temp
@@ -136,16 +134,11 @@
             if ($(event.target).hasClass("scf-js-item-action")) return; // Don't drag on close button!        
             event.preventDefault();
 
-            //this.dragging = $(event.target).closest("li");
-
             var el = $(event.target).closest("li");
-            //var copy = el.clone();
             el.prevAll().addClass("drag-before");
             el.nextAll().addClass("drag-after");
 
             // Fix height of list element to avoid flickering of page
-
-
             this.$element.css({
                 height: "600px"
             });
@@ -156,7 +149,6 @@
             } else {
                 new CUI.CopyDragAction(event, this.$element, el, [this.dropZone], "vertical");
             }
-
 
             el.css({
                 position: "absolute",
