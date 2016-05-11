@@ -84,15 +84,17 @@
         },
 
         setAutocomplete: function($field,value) {
+            var cmf = this;
+
             var tagsArray = value.split(',');
 
             var $tagList = CUI.Widget.fromElement(CUI.TagList,$field);
 
             if ($tagList) {
-                $(tagsArray).each(function(i,item) {
-                    var selectedItem = $field.closest(".coral-Form-fieldwrapper").find("li[data-value='" + item + "']");
+                $(tagsArray).each(function (i, item) {
+                    var selectedItem = $field.closest(cmf.CFFW).find("li[data-value='" + item + "']");
 
-                    $tagList._appendItem({"display":selectedItem.text(),"value":item});
+                    $tagList._appendItem({"display": selectedItem.text(), "value": item});
                 });
             }
         },

@@ -155,7 +155,7 @@
 
                     var $field = $multifield.find("[name='./" + fKey + "']").last();
 
-                    if (_.isEmpty($field)) {
+                    if (_.isEmpty($field) || $field.closest('ul').hasClass('js-coral-Autocomplete-tagList')) {
                         $field = $multifield.find("[data-fieldname='./" + fKey + "']").last();
 
                         if (_.isEmpty($field)) {
@@ -237,15 +237,19 @@
 
                 if (cmf.isAutocomplete($field)) {
                     var tags = [];
-                    var tagItems = $field.closest("ul").find("li.coral-TagList-tag");
-                    $(tagItems).each(function (k, tagItem) {
-                        tags[k] = $(tagItem).find("input[name='./" + name + "']").attr("value");
+                    var $tagItems = $field.closest("ul").find("li.coral-TagList-tag");
+                    $tagItems.each(function (k, tagItem) {
+                        var $inputItem = $(tagItem).find("input[name='./" + name + "']");
+                        tags[k] = $inputItem.val();
+                        $inputItem.remove();
                     });
                     value = tags.toString();
                 }
 
                 //remove the field, so that individual values are not POSTed
-                $field.remove();
+                if (!cmf.isAutocomplete($field)) {
+                    $field.remove();
+                }
 
                 $('<input />').attr('type', 'hidden')
                     .attr('name', fieldSetName + "/" + counter + "/" + name)

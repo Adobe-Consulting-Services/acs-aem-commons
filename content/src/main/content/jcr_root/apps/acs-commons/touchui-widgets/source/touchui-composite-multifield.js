@@ -136,6 +136,7 @@
                 return;
             }
 
+
             $fieldSets.each(function (i, fieldSet) {
                 if(!cmf.isJsonStore($(fieldSet).data(cmf.ACS_COMMONS_NESTED))){
                     return;
@@ -153,10 +154,10 @@
 
                     //a setTimeout may be needed
                     _.each(record, function (value, key) {
-                        var $item = $multifield.find("[name='./" + key + "']");
+                        var $item = $multifield.find("[name='./" + key + "']").last();
 
-                        if (_.isEmpty($item)) {
-                            $item = $multifield.find("[data-fieldname='./" + key + "']").last();
+                        if (_.isEmpty($item) || $item.closest('ul').hasClass('js-coral-Autocomplete-tagList')) {
+                            $item = $multifield.find("ul[data-fieldname='./" + key + "']").last();
 
                             if (_.isEmpty($item)) {
                                 return;
@@ -195,10 +196,10 @@
                         }
 
                         _.each(record, function (rValue, rKey) {
-                            $field = $($fieldSets[i]).find("[name='./" + rKey + "']");
+                            $field = $($fieldSets[i]).find("[name='./" + rKey + "']").last();
 
-                            if (_.isEmpty($field)) {
-                                $field = $($fieldSets[i]).find("[data-fieldname='./" + rKey + "']").last();
+                            if (_.isEmpty($field) || $field.closest('ul').hasClass('js-coral-Autocomplete-tagList')) {
+                                $field = $($fieldSets[i]).find("ul[data-fieldname='./" + rKey + "']").last();
                             }
 
                             if (_.isArray(rValue) && !_.isEmpty(rValue)) {
@@ -238,9 +239,11 @@
 
             if (this.isAutocomplete($field)) {
                 var tags = [];
-                var tagItems = $field.closest("ul").find("li.coral-TagList-tag");
-                $(tagItems).each(function (k, tagItem) {
-                    tags[k] = $(tagItem).find("input[name='./" + name + "']").attr("value");
+                var $tagItems = $field.closest("ul").find("li.coral-TagList-tag");
+                $tagItems.each(function (k, tagItem) {
+                    var $inputItem = $(tagItem).find("input[name='./" + name + "']");
+                    tags[k] = $inputItem.val();
+                    $inputItem.remove();
                 });
 
                 value = tags.toString();
@@ -249,7 +252,9 @@
             record[name] = value;
 
             //remove the field, so that individual values are not POSTed
-            $field.remove();
+            if (!this.isAutocomplete($field)) {
+                $field.remove();
+            }
         },
 
         //for getting the nested multifield data as js objects
