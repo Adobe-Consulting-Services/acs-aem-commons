@@ -22,88 +22,75 @@
  *
  * <code>
  <?xml version="1.0" encoding="UTF-8"?>
- <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
- jcr:primaryType="nt:unstructured"
- jcr:title="ACS AEM Commions Multifield TouchUI Component"
- sling:resourceType="cq/gui/components/authoring/dialog"
- helpPath="en/cq/current/wcm/default_components.html#Text">
- <content
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/container">
- <layout
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
- <items jcr:primaryType="nt:unstructured">
- <column
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/container">
- <items jcr:primaryType="nt:unstructured">
- <fieldset
- jcr:primaryType="nt:unstructured"
- jcr:title="Sample Dashboard"
- sling:resourceType="granite/ui/components/foundation/form/fieldset">
- <layout
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
- <items jcr:primaryType="nt:unstructured">
- <column
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/container">
- <items jcr:primaryType="nt:unstructured">
- <dashboard
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/form/textfield"
- fieldDescription="Enter Dashboard name"
- fieldLabel="Dashboard name"
- name="./dashboard"/>
- <pages
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/form/multifield"
- class="full-width"
- fieldDescription="Click '+' to add a new page"
- fieldLabel="Pages">
- <field
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/form/fieldset"
- acs-commons-nested="JSON_STORE"
- name="./pages">
- <layout
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
- method="absolute"/>
- <items jcr:primaryType="nt:unstructured">
- <column
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/container">
- <items jcr:primaryType="nt:unstructured">
- <page
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/form/textfield"
- fieldDescription="Name of Page"
- fieldLabel="Page Name"
- name="./page"/>
- <path
- jcr:primaryType="nt:unstructured"
- sling:resourceType="granite/ui/components/foundation/form/pathbrowser"
- fieldDescription="Select Path"
- fieldLabel="Path"
- name="./path"
- rootPath="/content"/>
- </items>
- </column>
- </items>
- </field>
- </pages>
- </items>
- </column>
- </items>
- </fieldset>
- </items>
- </column>
- </items>
- </content>
- </jcr:root>
- </code>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+        jcr:primaryType="nt:unstructured"
+        jcr:title="ACS AEM Commions Multifield TouchUI Component"
+        sling:resourceType="cq/gui/components/authoring/dialog"
+        helpPath="en/cq/current/wcm/default_components.html#Text">
+    <content jcr:primaryType="nt:unstructured"
+        sling:resourceType="granite/ui/components/foundation/container">
+        <layout jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
+        <items jcr:primaryType="nt:unstructured">
+            <column jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <fieldset jcr:primaryType="nt:unstructured"
+                            jcr:title="Sample Dashboard"
+                            sling:resourceType="granite/ui/components/foundation/form/fieldset">
+                        <layout jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
+                        <items jcr:primaryType="nt:unstructured">
+                            <column jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <dashboard jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/foundation/form/textfield"
+                                            fieldDescription="Enter Dashboard name"
+                                            fieldLabel="Dashboard name"
+                                            name="./dashboard"/>
+                                    <pages jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/foundation/form/multifield"
+                                            class="full-width"
+                                            fieldDescription="Click '+' to add a new page"
+                                            fieldLabel="Pages">
+                                        <field jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/foundation/form/fieldset"
+                                                acs-commons-nested="JSON_STORE"
+                                                name="./pages">
+                                            <layout jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
+                                                    method="absolute"/>
+                                            <items jcr:primaryType="nt:unstructured">
+                                                <column jcr:primaryType="nt:unstructured"
+                                                        sling:resourceType="granite/ui/components/foundation/container">
+                                                    <items jcr:primaryType="nt:unstructured">
+                                                        <page jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/foundation/form/textfield"
+                                                                fieldDescription="Name of Page"
+                                                                fieldLabel="Page Name"
+                                                                name="./page"/>
+                                                        <path jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/foundation/form/pathbrowser"
+                                                                fieldDescription="Select Path"
+                                                                fieldLabel="Path"
+                                                                name="./path"
+                                                                rootPath="/content"/>
+                                                    </items>
+                                                </column>
+                                            </items>
+                                        </field>
+                                    </pages>
+                                </items>
+                            </column>
+                        </items>
+                    </fieldset>
+                </items>
+            </column>
+        </items>
+    </content>
+</jcr:root>
+</code>
  */
 (function ($, $document) {
     "use strict";
