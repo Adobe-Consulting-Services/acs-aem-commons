@@ -21,12 +21,18 @@ package com.adobe.acs.commons.httpcache.invalidator;
 
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
+import com.day.cq.wcm.commons.ReferenceSearch;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * ACS AEM Commons - HTTP Cache - Cache invalidation job consumer
@@ -46,6 +52,9 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
                policy = ReferencePolicy.DYNAMIC)
     private HttpCacheEngine httpCacheEngine;
 
+    @Reference
+    private ResourceResolverFactory resolverFactory;
+
     @Override
     public JobResult process(final Job job) {
 
@@ -56,16 +65,53 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
             return JobResult.CANCEL;
         }
 
+        invalidate(path);
+
+        invalidateReferences(path);
+
+        log.trace("Invalidation job for the path processed.", path);
+        return JobResult.OK;
+    }
+
+    /**
+     * Invalidate the cache for the given path
+     *
+     * @param path the resource to invalidate
+     */
+    void invalidate(String path){
         // Check if the path in the job is applicable for the set cache configs.
         if (httpCacheEngine.isPathPotentialToInvalidate(path)) {
             // Invalidate the cache.
             try{
+                log.debug("invalidating {}", path);
                 httpCacheEngine.invalidateCache(path);
             } catch (HttpCacheException e){
                 log.debug("Job with the payload path - {} has invalidated the cache", path);
             }
         }
-        log.trace("Invalidation job for the path processed.", path);
-        return JobResult.OK;
+
+    }
+
+    /**
+     * Searches for references to the given path and invalidates them in the cache
+     *
+     * @param path the path to search for
+     */
+    void invalidateReferences(String path){
+        ResourceResolver adminResolver = null;
+        try {
+            adminResolver = resolverFactory.getServiceResourceResolver(null);
+            Collection<ReferenceSearch.Info> refs = new ReferenceSearch()
+                    .search(adminResolver, path).values();
+            for (ReferenceSearch.Info info : refs) {
+                String refPath = info.getPage().getPath();
+                invalidate(refPath);
+
+            }
+        } catch (Exception e){
+            log.debug("failed to invalidate references of {}", path);
+        } finally {
+            if(adminResolver != null) adminResolver.close();
+        }
     }
 }
