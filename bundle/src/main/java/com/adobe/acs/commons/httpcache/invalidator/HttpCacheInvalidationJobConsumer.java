@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.slf4j.Logger;
@@ -41,19 +42,36 @@ import java.util.Map;
  * Sling job consumer consuming the job created for invalidating cache. For creating an invalidation job for this
  * consumer, make use of the topic and associated constants defined at {@link CacheInvalidationJobConstants}
  */
-@Component(immediate = true)
+@Component(label = "ACS AEM Commons - HTTP Cache - Cache invalidation job consumer",
+           description = "Consumes job for invalidating the http cache",
+           immediate = true,
+           metatype = true)
 @Service
 @Property(name = JobConsumer.PROPERTY_TOPICS,
-          value = CacheInvalidationJobConstants.TOPIC_HTTP_CACHE_INVALIDATION_JOB)
+          value = CacheInvalidationJobConstants.TOPIC_HTTP_CACHE_INVALIDATION_JOB,
+          propertyPrivate = true
+)
 public class HttpCacheInvalidationJobConsumer implements JobConsumer {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheInvalidationJobConsumer.class);
 
+    @Property(label = "Invalidate references",
+            description = "Whether to search for references and invalidate them in the cache.",
+            boolValue = HttpCacheInvalidationJobConsumer.DEFAULT_REFERENCES)
+    private static final String PROP_REFERENCES = "httpcache.config.invalidation.references";
+    private static final boolean DEFAULT_REFERENCES = false;
+    private boolean invalidateRefs;
+
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
-               policy = ReferencePolicy.DYNAMIC)
+            policy = ReferencePolicy.DYNAMIC)
     private HttpCacheEngine httpCacheEngine;
 
     @Reference
     private ResourceResolverFactory resolverFactory;
+
+    @Activate
+    protected void activate(Map<String, Object> configs) {
+        invalidateRefs = PropertiesUtil.toBoolean(configs.get(PROP_REFERENCES), DEFAULT_REFERENCES);
+    }
 
     @Override
     public JobResult process(final Job job) {
@@ -67,7 +85,9 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
 
         invalidate(path);
 
-        invalidateReferences(path);
+        if(invalidateRefs) {
+            invalidateReferences(path);
+        }
 
         log.trace("Invalidation job for the path processed.", path);
         return JobResult.OK;
