@@ -143,4 +143,4 @@
     }
 
     $(extendComponentDrop);
-}(jQuery, jQuery(document), Granite.author));
+}(jQuery, jQuery(document), (window.Granite.author = window.Granite.author || {})));
