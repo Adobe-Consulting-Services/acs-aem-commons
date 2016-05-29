@@ -97,18 +97,39 @@ public class ReviewTaskAssetMoveHandler implements EventHandler {
 
     @Override
     public void handleEvent(Event event) {
-        final String path = (String) event.getProperty("TaskId");
+        ResourceResolver resourceResolver = null;
 
-        log.debug("Handling event for Assets Review Task @ [ {} ]", path);
+        try {
+            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final String path = (String) event.getProperty("TaskId");
+            final Resource taskResource = resourceResolver.getResource(path);
 
-        ScheduleOptions options = scheduler.NOW();
-        String jobName = this.getClass().getSimpleName().toString().replace(".", "/") + "/" + path;
-        options.name(jobName);
+            if (taskResource != null) {
+                final ValueMap taskProperties = taskResource.getValueMap();
 
-        options.canRunConcurrently(false);
-        ImmediateJob job = new ImmediateJob(path);
+                // Perform a fast check to see if this project has the required properties to perform the asset moving
+                if (StringUtils.startsWith(taskProperties.get(PN_ON_APPROVE, String.class), PATH_CONTENT_DAM)
+                        || StringUtils.startsWith(taskProperties.get(PN_ON_REJECT, String.class), PATH_CONTENT_DAM)) {
 
-        scheduler.schedule(job, options);
+                    log.debug("Handling event (creating a Job) for Assets Review Task @ [ {} ]", path);
+
+                    ScheduleOptions options = scheduler.NOW();
+                    String jobName = this.getClass().getSimpleName().toString().replace(".", "/") + "/" + path;
+                    options.name(jobName);
+
+                    options.canRunConcurrently(false);
+
+                    scheduler.schedule(new ImmediateJob(path), options);
+                }
+            }
+        } catch (LoginException e) {
+            log.error("Could not get resource resolver", e);
+        } finally {
+            // Always close resource resolvers you open
+            if (resourceResolver != null) {
+                resourceResolver.close();
+            }
+        }
     }
 
     private class ImmediateJob implements Runnable {
@@ -149,7 +170,7 @@ public class ReviewTaskAssetMoveHandler implements EventHandler {
                     }
                 }
             } catch (LoginException e) {
-                log.error("Could not get service resolver", e);
+                log.error("Could not get resource resolver", e);
             } catch (PersistenceException e) {
                 log.error("Could not persist changes", e);
             } finally {
