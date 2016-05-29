@@ -19,16 +19,6 @@
  */
 package com.adobe.acs.commons.notifications.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adobe.acs.commons.notifications.InboxNotification;
 import com.adobe.acs.commons.notifications.InboxNotificationSender;
 import com.adobe.granite.taskmanagement.Task;
@@ -36,46 +26,57 @@ import com.adobe.granite.taskmanagement.TaskAction;
 import com.adobe.granite.taskmanagement.TaskManager;
 import com.adobe.granite.taskmanagement.TaskManagerException;
 import com.adobe.granite.taskmanagement.TaskManagerFactory;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Component(
-        label = "ACS AEM Commons - AEM Inbox Notification Sender",
-        description = "Service for sending AEM Inbox Notification",
-        immediate = false,
-        metatype = false)
+import java.util.ArrayList;
+import java.util.List;
+
+/*
+    ACS AEM Commons - AEM Inbox Notification Sender
+    Service for sending AEM Inbox Notification
+ */
+@Component
 @Service
 public class InboxNotificationSenderImpl implements InboxNotificationSender {
-
-    private static final Logger log = LoggerFactory
-            .getLogger(InboxNotificationSenderImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(InboxNotificationSenderImpl.class);
 
     public static final String NOTIFICATION_TASK_TYPE = "Notification";
 
     @Override
     public InboxNotification buildInboxNotification() {
-        InboxNotification notification = new InboxNotificationImpl();
-
-        return notification;
+        return new InboxNotificationImpl();
     }
 
     @Override
     public void sendInboxNotification(ResourceResolver resourceResolver,
-            InboxNotification inboxNotification) throws TaskManagerException {
+                                      InboxNotification inboxNotification) throws TaskManagerException {
 
-        log.debug("Sending Inbox Notification to {} with title {}",
-                inboxNotification.getAssignee(), inboxNotification.getTitle());
+        log.debug("Sending Inbox Notification [ {} ] to [ {} ]",
+                inboxNotification.getTitle(), inboxNotification.getAssignee());
 
         TaskManager taskManager = resourceResolver.adaptTo(TaskManager.class);
+        taskManager.createTask(createTask(taskManager, inboxNotification));
+    }
 
-        Task newTask = createTask(taskManager, inboxNotification);
+    @Override
+    public void sendInboxNotifications(ResourceResolver resourceResolver,
+                                       List<InboxNotification> inboxNotifications)
+            throws TaskManagerException {
 
-        taskManager.createTask(newTask);
+        for (InboxNotification notificationDetails : inboxNotifications) {
+            sendInboxNotification(resourceResolver, notificationDetails);
+        }
     }
 
     private Task createTask(TaskManager taskManager,
-            InboxNotification inboxNotification) throws TaskManagerException {
+                            InboxNotification inboxNotification) throws TaskManagerException {
 
-        Task newTask = taskManager.getTaskManagerFactory().newTask(
-                NOTIFICATION_TASK_TYPE);
+        Task newTask = taskManager.getTaskManagerFactory().newTask(NOTIFICATION_TASK_TYPE);
 
         newTask.setName(inboxNotification.getTitle());
         newTask.setContentPath(inboxNotification.getContentPath());
@@ -83,12 +84,10 @@ public class InboxNotificationSenderImpl implements InboxNotificationSender {
         newTask.setInstructions(inboxNotification.getInstructions());
         newTask.setCurrentAssignee(inboxNotification.getAssignee());
 
-        String[] notificationActions = inboxNotification
-                .getNotificationActions();
-        if (ArrayUtils.isNotEmpty(notificationActions)) {
-            List<TaskAction> taskActions = createTaskActionsList(
-                    notificationActions, taskManager);
+        String[] notificationActions = inboxNotification.getNotificationActions();
 
+        if (ArrayUtils.isNotEmpty(notificationActions)) {
+            List<TaskAction> taskActions = createTaskActionsList(notificationActions, taskManager);
             newTask.setActions(taskActions);
         }
 
@@ -98,27 +97,14 @@ public class InboxNotificationSenderImpl implements InboxNotificationSender {
     private List<TaskAction> createTaskActionsList(
             String[] notificationActions, TaskManager taskManager) {
 
-        TaskManagerFactory taskManagerFactory = taskManager
-                .getTaskManagerFactory();
+        TaskManagerFactory taskManagerFactory = taskManager.getTaskManagerFactory();
         List<TaskAction> taskActions = new ArrayList<TaskAction>();
 
         for (String action : notificationActions) {
-
             TaskAction newTaskAction = taskManagerFactory.newTaskAction(action);
             taskActions.add(newTaskAction);
         }
 
         return taskActions;
-    }
-
-    @Override
-    public void sendInboxNotifications(ResourceResolver resourceResolver,
-            List<InboxNotification> notificationDetailList)
-            throws TaskManagerException {
-
-        for (InboxNotification notificationDetails : notificationDetailList) {
-
-            sendInboxNotification(resourceResolver, notificationDetails);
-        }
     }
 }

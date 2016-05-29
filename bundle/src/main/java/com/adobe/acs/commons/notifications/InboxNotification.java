@@ -19,31 +19,82 @@
  */
 package com.adobe.acs.commons.notifications;
 
+import aQute.bnd.annotation.ConsumerType;
+
 import java.io.Serializable;
 
-public interface InboxNotification extends Serializable {
+/**
+ * Represents a Inbox Notification.
+ *
+ * This is a sub-set of attributes of the generic AEM Task object.
+ */
+@ConsumerType
+public abstract class InboxNotification implements Serializable {
 
-    public String getTitle();
+    /**
+     * @return the notification title.
+     */
+    public abstract String getTitle();
 
-    public void setTitle(String title);
+    /**
+     * Sets the notification title.
+     * @param title the title
+     */
+    public abstract void setTitle(String title);
 
-    public String getContentPath();
+    /**
+     * @return the notifications associated content path.
+     */
+    public abstract String getContentPath();
 
-    public void setContentPath(String contentPath);
+    /**
+     * Sets the content path.
+     * @param contentPath the content path
+     */
+    public abstract void setContentPath(String contentPath);
 
-    public String getAssignee();
+    /**
+     * @return the principal name of the notification recipient
+     */
+    public abstract String getAssignee();
 
-    public void setAssignee(String assignee);
+    /**
+     * Sets the assignee.
+     * @param assignee the principal name of the notification recipient
+     */
+    public abstract void setAssignee(String assignee);
 
-    public String getMessage();
+    /**
+     * @return the notification message.
+     */
+    public abstract String getMessage();
 
-    public void setMessage(String message);
+    /**
+     * Sets the message.
+     * @param message the message.
+     */
+    public abstract void setMessage(String message);
 
-    public String[] getNotificationActions();
+    /**
+     * Gets the notification's actions.
+     * @return the notification's actions.
+     */
+    public abstract String[] getNotificationActions();
 
-    public void setNotificationActions(String... notificationActions);
+    /**
+     * Sets the notification's actions.
+     * @param notificationActions the notification's actions.
+     */
+    public abstract void setNotificationActions(String... notificationActions);
 
-    public String getInstructions();
+    /**
+     * @return the notification's instructions.
+     */
+    public abstract String getInstructions();
 
-    public void setInstructions(String instructions);
+    /**
+     * Sets the notification's instructions.
+     * @param instructions the instructions.
+     */
+    public abstract void setInstructions(String instructions);
 }

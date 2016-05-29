@@ -21,7 +21,7 @@ package com.adobe.acs.commons.notifications.impl;
 
 import com.adobe.acs.commons.notifications.InboxNotification;
 
-public class InboxNotificationImpl implements InboxNotification {
+public class InboxNotificationImpl extends InboxNotification {
 
     private static final long serialVersionUID = -5976192100927192675L;
 
