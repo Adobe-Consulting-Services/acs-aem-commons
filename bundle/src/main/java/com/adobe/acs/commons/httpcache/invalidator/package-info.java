@@ -24,7 +24,7 @@
  * invalidates the cache. For a typical implementation, invalidation event could be custom supplied based on the cache
  * config invalidation requirements. A sample implementation based on sling eventing is provided.
  */
-@aQute.bnd.annotation.Version("1.0.0")
+@aQute.bnd.annotation.Version("1.1.0")
 package com.adobe.acs.commons.httpcache.invalidator;
 
 
