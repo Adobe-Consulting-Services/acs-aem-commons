@@ -3,6 +3,7 @@ package com.adobe.acs.commons.wcm.impl;
 import com.adobe.acs.commons.util.BufferingResponse;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.WCMMode;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -103,7 +104,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             value = DEFAULT_TITLE_PREFIX)
     public static final String PROP_TITLE_PREFIX = "browser-title-prefix";
 
-
     private static final String[] DEFAULT_EXCLUDED_WCMMODES = {"DISABLED"};
     @Property (label = "Excluded WCM modes",
     		description = "Do not display the indicator when these WCM modes",
@@ -111,10 +111,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
 
-
-
-    private static final String[] REJECT_PATH_PREFIXES = new String[]{
-    };
+    private static final String[] REJECT_PATH_PREFIXES = new String[]{};
 
     private String css = "";
 
@@ -146,7 +143,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         final BufferingResponse capturedResponse = new BufferingResponse(response);
 
         filterChain.doFilter(request, capturedResponse);
-
+        
         boolean doInclude = true;
         if (excludedWCMModes != null) {
         	// Test for configured WCM modes, where the indicators are not displayed
@@ -253,7 +250,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
         }
 
-
         excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),DEFAULT_EXCLUDED_WCMMODES);
     }
 
@@ -276,5 +272,4 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         return (WCMMode) request.getAttribute(
                 WCMMode.REQUEST_ATTRIBUTE_NAME);
     }
-
 }

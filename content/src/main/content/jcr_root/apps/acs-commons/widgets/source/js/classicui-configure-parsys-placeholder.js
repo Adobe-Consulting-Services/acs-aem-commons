@@ -102,6 +102,9 @@
             }
 
             designConfig = getConfiguration(parsys);
+            if (!designConfig) {
+              return;
+            }
 
             placeholder = parsys.emptyComponent.findByType("static")[0];
 

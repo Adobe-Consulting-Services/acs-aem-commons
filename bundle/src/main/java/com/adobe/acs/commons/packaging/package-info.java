@@ -20,5 +20,5 @@
 /**
  * Packaging utilities.
  */
-@aQute.bnd.annotation.Version("1.8.1")
+@aQute.bnd.annotation.Version("1.9.0")
 package com.adobe.acs.commons.packaging;
