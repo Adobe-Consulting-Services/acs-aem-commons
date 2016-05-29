@@ -4,6 +4,7 @@ import com.adobe.acs.commons.util.BufferingResponse;
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.WCMMode;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -143,17 +145,22 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         final BufferingResponse capturedResponse = new BufferingResponse(response);
 
         filterChain.doFilter(request, capturedResponse);
-        
+
         boolean doInclude = true;
-        if (excludedWCMModes != null) {
+        if (ArrayUtils.isNotEmpty(excludedWCMModes)) {
         	// Test for configured WCM modes, where the indicators are not displayed
-        	WCMMode wcmmode = extractFromRequest (request);
-        	for (String m : excludedWCMModes) {
-        		if (WCMMode.valueOf(m).equals(wcmmode)) {
-        			doInclude = false;
-        			break;
-        		}
-        	}
+        	WCMMode wcmmode = extractFromRequest(request);
+
+        	if (wcmmode != null) {
+                for (String m : excludedWCMModes) {
+                    if (StringUtils.equalsIgnoreCase(wcmmode.name(), m)) {
+                        doInclude = false;
+                        break;
+                    }
+                }
+            } else {
+                // No wcmmode could be extracted from the request
+            }
         }
 
         // Get contents
