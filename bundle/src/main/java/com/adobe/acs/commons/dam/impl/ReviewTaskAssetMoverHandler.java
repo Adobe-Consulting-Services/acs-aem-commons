@@ -29,6 +29,7 @@ import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -52,7 +53,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-@Component(immediate = true)
+@Component(
+        immediate = true,
+        policy = ConfigurationPolicy.REQUIRE
+)
 @Properties({
         @Property(
                 label = "Event Topics",
@@ -74,8 +78,8 @@ import java.util.Map;
         )
 })
 @Service
-public class ReviewTaskAssetMoveHandler implements EventHandler {
-    private static final Logger log = LoggerFactory.getLogger(ReviewTaskAssetMoveHandler.class);
+public class ReviewTaskAssetMoverHandler implements EventHandler {
+    private static final Logger log = LoggerFactory.getLogger(ReviewTaskAssetMoverHandler.class);
 
     private static final String PATH_CONTENT_DAM = "/content/dam";
     private static final String APPROVED = "approved";
