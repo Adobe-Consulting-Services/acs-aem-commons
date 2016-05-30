@@ -51,8 +51,11 @@
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
                         <Import-Package>
+                        	
                             com.adobe.cq.dialogconversion;resolution:=optional,
                             sun.misc.*;resolution:=optional,
+                            org.apache.sling.models.annotations.*;resolution:=optional, <!-- the used class InjectionStrategy is only since Sling Models API 1.2 -->
+                            org.apache.sling.models.spi.injectorspecific.*;resolution:=optional, <!-- that package was added with Sling Models API 1.1 -->
                             *
                         </Import-Package>
                         <Embed-Dependency>guava</Embed-Dependency>
@@ -267,16 +270,11 @@
             <version>2.7.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.models.api</artifactId>
-            <version>1.1.0</version>
-            <scope>test</scope>
-        </dependency>
+        
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.impl</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -284,6 +282,12 @@
             <artifactId>org.apache.sling.commons.html</artifactId>
             <version>1.0.0</version>
             <scope>test</scope>
+        </dependency>
+        <!-- the custom annotation for AemObject -->
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.models.api</artifactId>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.jackrabbit</groupId>
