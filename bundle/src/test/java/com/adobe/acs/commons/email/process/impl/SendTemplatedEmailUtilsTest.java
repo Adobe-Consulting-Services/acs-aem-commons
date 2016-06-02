@@ -67,7 +67,7 @@ public class SendTemplatedEmailUtilsTest {
     private ValueMap vmap;
 
     private static final String PN_CALENDAR = "cq:lastModified";
-    private static final String CALENDAR_TOSTRING = "2014-09-12 01:30 AM";
+    private static final String CALENDAR_TOSTRING = "2014-09-12 01:30";
 
     private static final String PN_LONG = "long";
     private static final String LONG_TOSTRING = "123456";
@@ -215,7 +215,7 @@ public class SendTemplatedEmailUtilsTest {
     }
 
     private void mockJcrProperties() {
-        sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
+        sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
         // Mock jcr properties
         Map<String, Object> jcrProps = new HashMap<String, Object>();
