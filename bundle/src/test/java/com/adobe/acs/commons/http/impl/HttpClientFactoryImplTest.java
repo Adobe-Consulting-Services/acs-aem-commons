@@ -1,0 +1,130 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package com.adobe.acs.commons.http.impl;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.mockserver.model.HttpRequest.*;
+import static org.mockserver.model.HttpResponse.*;
+
+import com.adobe.acs.commons.http.JsonObjectResponseHandler;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.sling.commons.json.JSONObject;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockserver.client.server.MockServerClient;
+import org.mockserver.junit.MockServerRule;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class HttpClientFactoryImplTest {
+
+    @Rule
+    public MockServerRule mockServerRule = new MockServerRule(this);
+
+    private MockServerClient mockServerClient;
+
+    @Test
+    public void testAnonymousGet() throws Exception {
+        mockServerClient.when(
+                request().withMethod("GET").withPath("/foo")
+        ).respond(
+                response().withStatusCode(200).withBody("OK")
+        );
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("hostname", "localhost");
+        config.put("port", mockServerRule.getPort().intValue());
+        HttpClientFactoryImpl impl = new HttpClientFactoryImpl();
+        impl.activate(config);
+
+        Request get = impl.get("/foo");
+        Executor exec = impl.getExecutor();
+        String str = exec.execute(get).handleResponse(new BasicResponseHandler());
+        assertThat(str, is("OK"));
+    }
+
+    @Test
+    public void testJsonGet() throws Exception {
+        mockServerClient.when(
+                request().withMethod("GET").withPath("/foo")
+        ).respond(
+                response().withStatusCode(200).withBody("{ 'foo' : 'bar' }")
+        );
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("hostname", "localhost");
+        config.put("port", mockServerRule.getPort().intValue());
+        HttpClientFactoryImpl impl = new HttpClientFactoryImpl();
+        impl.activate(config);
+
+        Request get = impl.get("/foo");
+        Executor exec = impl.getExecutor();
+        JSONObject jsonObject = exec.execute(get).handleResponse(new JsonObjectResponseHandler());
+        assertThat(jsonObject.has("foo"), is(true));
+        assertThat(jsonObject.getString("foo"), is("bar"));
+    }
+
+    @Test
+    public void testAuthenticatedGet() throws Exception {
+        String username = RandomStringUtils.randomAlphabetic(5);
+        String password = RandomStringUtils.randomAlphabetic(6);
+        String authHeaderValue = Base64.encodeBase64String((username + ":" + password).getBytes());
+
+        mockServerClient.when(
+                request().withMethod("GET").withPath("/foo").
+                        withHeader("Authorization", "Basic " + authHeaderValue)
+        ).respond(
+                response().withStatusCode(200).withBody("OK")
+        );
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("hostname", "localhost");
+        config.put("port", mockServerRule.getPort().intValue());
+        config.put("username", username);
+        config.put("password", password);
+        HttpClientFactoryImpl impl = new HttpClientFactoryImpl();
+        impl.activate(config);
+
+        Request get = impl.get("/foo");
+        Executor exec = impl.getExecutor();
+        String str = exec.execute(get).handleResponse(new BasicResponseHandler());
+        assertThat(str, is("OK"));
+    }
+
+    @Test
+    public void testDisableSSLCertCheck() throws Exception {
+        // this test doesn't actually test anything, but at least ensures that the SSL
+        // initialization code doesn't throw exceptions
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("hostname", "localhost");
+        config.put("port", mockServerRule.getPort().intValue());
+        config.put("use.ssl", true);
+        config.put("disable.certificate.check", true);
+        HttpClientFactoryImpl impl = new HttpClientFactoryImpl();
+        impl.activate(config);
+    }
+
+}
