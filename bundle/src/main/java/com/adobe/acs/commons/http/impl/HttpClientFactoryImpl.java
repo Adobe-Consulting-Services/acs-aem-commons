@@ -37,8 +37,8 @@ import java.util.Map;
 
 
 @Component(
-        label = "Http Components Fluent Executor Factory",
-        description = "Http Components Fluent Executor Factory", immediate = false,
+        label = "ACS AEM Commons - Http Components Fluent Executor Factory",
+        description = "ACS AEM Commons - Http Components Fluent Executor Factory",
         configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Property(label = "Factory Name", description = "Name of this factory", name = "factory.name")
