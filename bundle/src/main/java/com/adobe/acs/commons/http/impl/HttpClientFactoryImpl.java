@@ -23,14 +23,17 @@ import com.adobe.acs.commons.http.HttpClientFactory;
 import org.apache.felix.scr.annotations.*;
 import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
+import javax.net.ssl.SSLContext;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -44,7 +47,12 @@ import java.util.Map;
 @Property(label = "Factory Name", description = "Name of this factory", name = "factory.name")
 public class HttpClientFactoryImpl implements HttpClientFactory {
     public static final boolean DEFAULT_USE_SSL = false;
+
     public static final boolean DEFAULT_DISABLE_CERT_CHECK = false;
+
+    public static final int DEFAULT_CONNECT_TIMEOUT = 30000;
+
+    public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
 
     @Property(label = "host name", description = "host name")
     private static final String PROP_HOST_DOMAIN = "hostname";
@@ -60,12 +68,18 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
             boolValue = DEFAULT_DISABLE_CERT_CHECK)
     private static final String PROP_DISABLE_CERT_CHECK = "disable.certificate.check";
 
-    @Property(label = "username", description = "username")
+    @Property(label = "Username", description = "Username for requests (using basic authentication)")
     private static final String PROP_USERNAME = "username";
 
 
-    @Property(label = "password", description = "password")
+    @Property(label = "Password", description = "Password for requests (using basic authentication)")
     private static final String PROP_PASSWORD = "password";
+
+    @Property(label = "Socket Timeout", description = "Socket timeout in milliseconds", intValue = DEFAULT_SOCKET_TIMEOUT)
+    private static final String PROP_SO_TIMEOUT = "so.timeout";
+
+    @Property(label = "Connect Timeout", description = "Connect timeout in milliseconds", intValue = DEFAULT_CONNECT_TIMEOUT)
+    private static final String PROP_CONNECT_TIMEOUT = "conn.timeout";
 
     private Executor executor;
     private String baseUrl;
@@ -85,18 +99,27 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
 
         baseUrl = String.format("%s://%s:%s", scheme, hostname, port);
 
+        int connectTimeout = PropertiesUtil.toInteger(config.get(PROP_CONNECT_TIMEOUT), DEFAULT_CONNECT_TIMEOUT);
+        int soTimeout = PropertiesUtil.toInteger(config.get(PROP_SO_TIMEOUT), DEFAULT_SOCKET_TIMEOUT);
+
+        HttpClientBuilder builder = HttpClients.custom();
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(connectTimeout)
+                .setSocketTimeout(soTimeout)
+                .build();
+        builder.setDefaultRequestConfig(requestConfig);
+
         if (useSSL && disableCertCheck) {
-            HttpClient client = HttpClients.custom().
-                    setHostnameVerifier(new AllowAllHostnameVerifier()).
-                    setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-                        public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                            return true;
-                        }
-                    }).build()).build();
-            executor = Executor.newInstance();
-        } else {
-            executor = Executor.newInstance();
+            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
+                public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+                    return true;
+                }
+            }).build();
+            builder.setHostnameVerifier(new AllowAllHostnameVerifier()).setSslcontext(sslContext);
         }
+        HttpClient client = builder.build();
+        executor = Executor.newInstance(client);
 
         String username = PropertiesUtil.toString(config.get(PROP_USERNAME), null);
         String password = PropertiesUtil.toString(config.get(PROP_PASSWORD), null);
