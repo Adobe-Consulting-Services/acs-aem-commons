@@ -22,15 +22,14 @@ package com.adobe.acs.commons.http.impl;
 import com.adobe.acs.commons.http.HttpClientFactory;
 import org.apache.felix.scr.annotations.*;
 import org.apache.http.HttpHost;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
@@ -85,6 +84,7 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
 
     private Executor executor;
     private String baseUrl;
+    private CloseableHttpClient httpClient;
 
     @Activate
     protected void activate(Map<String, Object> config) throws Exception {
@@ -120,14 +120,21 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
             }).build();
             builder.setHostnameVerifier(new AllowAllHostnameVerifier()).setSslcontext(sslContext);
         }
-        HttpClient client = builder.build();
-        executor = Executor.newInstance(client);
+        httpClient = builder.build();
+        executor = Executor.newInstance(httpClient);
 
         String username = PropertiesUtil.toString(config.get(PROP_USERNAME), null);
         String password = PropertiesUtil.toString(config.get(PROP_PASSWORD), null);
         if (username != null && password != null) {
             HttpHost httpHost = new HttpHost(hostname, port);
             executor.auth(httpHost, username, password).authPreemptive(httpHost);
+        }
+    }
+
+    @Deactivate
+    protected void deactivate() throws Exception {
+        if (httpClient != null) {
+            httpClient.close();
         }
     }
 
