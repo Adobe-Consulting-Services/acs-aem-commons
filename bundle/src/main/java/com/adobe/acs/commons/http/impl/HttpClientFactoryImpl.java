@@ -34,6 +34,7 @@ import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -132,9 +133,13 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
     }
 
     @Deactivate
-    protected void deactivate() throws Exception {
+    protected void deactivate() {
         if (httpClient != null) {
-            httpClient.close();
+            try {
+                httpClient.close();
+            } catch (final IOException e) {
+                // do nothing
+            }
         }
     }
 
