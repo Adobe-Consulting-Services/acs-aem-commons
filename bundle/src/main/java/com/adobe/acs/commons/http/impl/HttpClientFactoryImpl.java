@@ -31,6 +31,7 @@ import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import javax.net.ssl.SSLContext;
@@ -57,7 +58,6 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
     @Property(label = "host name", description = "host name")
     private static final String PROP_HOST_DOMAIN = "hostname";
 
-
     @Property(label = "port", description = "port")
     private static final String PROP_GATEWAY_PORT = "port";
 
@@ -71,7 +71,6 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
     @Property(label = "Username", description = "Username for requests (using basic authentication)")
     private static final String PROP_USERNAME = "username";
 
-
     @Property(label = "Password", description = "Password for requests (using basic authentication)")
     private static final String PROP_PASSWORD = "password";
 
@@ -80,6 +79,9 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
 
     @Property(label = "Connect Timeout", description = "Connect timeout in milliseconds", intValue = DEFAULT_CONNECT_TIMEOUT)
     private static final String PROP_CONNECT_TIMEOUT = "conn.timeout";
+
+    @Reference
+    private HttpClientBuilderFactory httpClientBuilderFactory;
 
     private Executor executor;
     private String baseUrl;
@@ -102,7 +104,7 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
         int connectTimeout = PropertiesUtil.toInteger(config.get(PROP_CONNECT_TIMEOUT), DEFAULT_CONNECT_TIMEOUT);
         int soTimeout = PropertiesUtil.toInteger(config.get(PROP_SO_TIMEOUT), DEFAULT_SOCKET_TIMEOUT);
 
-        HttpClientBuilder builder = HttpClients.custom();
+        HttpClientBuilder builder = httpClientBuilderFactory.newBuilder();
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(connectTimeout)

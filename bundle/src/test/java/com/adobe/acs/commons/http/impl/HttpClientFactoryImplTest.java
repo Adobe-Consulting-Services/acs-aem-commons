@@ -25,12 +25,17 @@ import static org.mockserver.model.HttpRequest.*;
 import static org.mockserver.model.HttpResponse.*;
 
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
+import junitx.util.PrivateAccessor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.commons.json.JSONObject;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockserver.client.server.MockServerClient;
@@ -46,21 +51,54 @@ public class HttpClientFactoryImplTest {
 
     private MockServerClient mockServerClient;
 
-    @Test
-    public void testAnonymousGet() throws Exception {
+    private HttpClientFactoryImpl impl;
+
+    private Map<String, Object> config;
+
+    private String username;
+
+    private String password;
+
+    @Before
+    public void setup() throws Exception {
+        config = new HashMap<String, Object>();
+        username = RandomStringUtils.randomAlphabetic(5);
+        password = RandomStringUtils.randomAlphabetic(6);
+        String authHeaderValue = Base64.encodeBase64String((username + ":" + password).getBytes());
+
+        config.put("hostname", "localhost");
+        config.put("port", mockServerRule.getPort().intValue());
+
         mockServerClient.when(
-                request().withMethod("GET").withPath("/foo")
+                request().withMethod("GET").withPath("/anon")
         ).respond(
                 response().withStatusCode(200).withBody("OK")
         );
+        mockServerClient.when(
+                request().withMethod("GET").withPath("/anonJson")
+        ).respond(
+                response().withStatusCode(200).withBody("{ 'foo' : 'bar' }")
+        );
+        mockServerClient.when(
+                request().withMethod("GET").withPath("/auth").
+                        withHeader("Authorization", "Basic " + authHeaderValue)
+        ).respond(
+                response().withStatusCode(200).withBody("OK")
+        );
+        impl = new HttpClientFactoryImpl();
+        PrivateAccessor.setField(impl, "httpClientBuilderFactory", new HttpClientBuilderFactory() {
+            @Override
+            public HttpClientBuilder newBuilder() {
+                return HttpClients.custom();
+            }
+        });
+    }
 
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("hostname", "localhost");
-        config.put("port", mockServerRule.getPort().intValue());
-        HttpClientFactoryImpl impl = new HttpClientFactoryImpl();
+    @Test
+    public void testAnonymousGet() throws Exception {
         impl.activate(config);
 
-        Request get = impl.get("/foo");
+        Request get = impl.get("/anon");
         Executor exec = impl.getExecutor();
         String str = exec.execute(get).handleResponse(new BasicResponseHandler());
         assertThat(str, is("OK"));
@@ -68,19 +106,9 @@ public class HttpClientFactoryImplTest {
 
     @Test
     public void testJsonGet() throws Exception {
-        mockServerClient.when(
-                request().withMethod("GET").withPath("/foo")
-        ).respond(
-                response().withStatusCode(200).withBody("{ 'foo' : 'bar' }")
-        );
-
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("hostname", "localhost");
-        config.put("port", mockServerRule.getPort().intValue());
-        HttpClientFactoryImpl impl = new HttpClientFactoryImpl();
         impl.activate(config);
 
-        Request get = impl.get("/foo");
+        Request get = impl.get("/anonJson");
         Executor exec = impl.getExecutor();
         JSONObject jsonObject = exec.execute(get).handleResponse(new JsonObjectResponseHandler());
         assertThat(jsonObject.has("foo"), is(true));
@@ -89,26 +117,11 @@ public class HttpClientFactoryImplTest {
 
     @Test
     public void testAuthenticatedGet() throws Exception {
-        String username = RandomStringUtils.randomAlphabetic(5);
-        String password = RandomStringUtils.randomAlphabetic(6);
-        String authHeaderValue = Base64.encodeBase64String((username + ":" + password).getBytes());
-
-        mockServerClient.when(
-                request().withMethod("GET").withPath("/foo").
-                        withHeader("Authorization", "Basic " + authHeaderValue)
-        ).respond(
-                response().withStatusCode(200).withBody("OK")
-        );
-
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("hostname", "localhost");
-        config.put("port", mockServerRule.getPort().intValue());
         config.put("username", username);
         config.put("password", password);
-        HttpClientFactoryImpl impl = new HttpClientFactoryImpl();
         impl.activate(config);
 
-        Request get = impl.get("/foo");
+        Request get = impl.get("/auth");
         Executor exec = impl.getExecutor();
         String str = exec.execute(get).handleResponse(new BasicResponseHandler());
         assertThat(str, is("OK"));
@@ -118,12 +131,8 @@ public class HttpClientFactoryImplTest {
     public void testDisableSSLCertCheck() throws Exception {
         // this test doesn't actually test anything, but at least ensures that the SSL
         // initialization code doesn't throw exceptions
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("hostname", "localhost");
-        config.put("port", mockServerRule.getPort().intValue());
         config.put("use.ssl", true);
         config.put("disable.certificate.check", true);
-        HttpClientFactoryImpl impl = new HttpClientFactoryImpl();
         impl.activate(config);
     }
 
