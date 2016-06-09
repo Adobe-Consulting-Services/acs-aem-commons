@@ -1,11 +1,8 @@
 package com.adobe.acs.commons.wcm.tags;
 
 import aQute.bnd.annotation.ProviderType;
-
-import com.adobe.granite.ui.components.Value;
 import com.day.cq.commons.LanguageUtil;
 import com.day.cq.wcm.api.components.Component;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -17,7 +14,6 @@ import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
-import javax.jcr.Value;
 import javax.servlet.ServletRequest;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import java.util.HashMap;
@@ -81,7 +77,7 @@ public class DefineObjects extends BodyTagSupport {
                     Property p = it.nextProperty();
                     String propName = p.getName();
                     if (!"jcr:primaryType".equalsIgnoreCase(propName)) {
-                        Value v = p.getValue();
+                        javax.jcr.Value v = p.getValue();
                         if (v != null) {
                             propertyMap.put(p.getName(), v.toString());
                         } else {
