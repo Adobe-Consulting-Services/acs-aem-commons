@@ -1,4 +1,5 @@
-<%--
+<%@ page import="javax.jcr.Session" %>
+<%@ page import="com.day.cq.commons.jcr.JcrUtil" %><%--
   ADOBE CONFIDENTIAL
 
   Copyright 2013 Adobe Systems Incorporated
@@ -17,7 +18,8 @@
 <%@taglib prefix="sling" uri="http://sling.apache.org/taglibs/sling" %><%
 %><sling:defineObjects />
 <%
-    String dataPathG = slingRequest.getRequestPathInfo().getSuffix();
-
+    String dialogSitewideDataPath = slingRequest.getRequestPathInfo().getSuffix();
+    Session dialogSitewideSession = resourceResolver.adaptTo(Session.class);
+    JcrUtil.createPath(dialogSitewideDataPath, "nt:unstructured", "nt:unstructured", dialogSitewideSession, false);
 %>
 <%@include file="/libs/cq/gui/components/authoring/dialog/dialog.jsp" %>
