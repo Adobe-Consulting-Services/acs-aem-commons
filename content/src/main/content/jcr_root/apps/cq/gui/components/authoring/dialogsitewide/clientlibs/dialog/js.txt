@@ -1,0 +1,3 @@
+#base=js
+dialog.js
+validations.js

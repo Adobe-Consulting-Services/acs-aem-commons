@@ -1,0 +1,2 @@
+js/RTE.GraniteI18nProvider.js
+js/richtext.js

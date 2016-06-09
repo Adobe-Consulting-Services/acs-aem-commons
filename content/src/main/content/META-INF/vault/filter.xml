@@ -48,4 +48,5 @@
         <include pattern="/etc/acs-commons/workflow-remover(.*)"/>
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
+    <filter root="/apps/cq/gui/components/authoring/dialogsitewide"/>
 </workspaceFilter>

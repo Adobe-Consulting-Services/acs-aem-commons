@@ -1,0 +1,106 @@
+.cq-FileUpload {
+
+	&-thumbnail,
+	&-clear,
+	&-thumbnail-dropHere {
+		display: none;
+	}
+
+	&-thumbnail {
+		position: relative;
+		max-width: 100%;
+		margin-bottom: 0.9375rem;
+
+		> img {
+			position: relative;
+			width: 100%;
+		}
+	}
+
+	// Filled
+	&.is-filled {
+		> .cq-FileUpload-thumbnail {
+			display: block;
+		}
+		> .cq-FileUpload-clear {
+			display: inline-block;
+		}
+		> .coral-FileUpload-trigger {
+			display: none;
+		}
+
+		.cq-FileUpload-thumbnail-img {
+			max-width: 200px;
+		}
+		
+		img {
+			max-width: 100%;
+			max-height: 200px;
+		}
+	}
+
+	// Empty
+	// Define drop zone and drop here text
+	&:not(.is-filled) {
+
+		> .cq-FileUpload-thumbnail {
+			display: none;
+			height: 150px;
+			margin-top: 0.9375rem;
+			background: #414141;
+			border: 1px solid #2d2d2d;
+
+			> .cq-FileUpload-thumbnail-dropHere {
+				display: block;
+				position: relative;
+				line-height: 150px;
+				margin: auto;
+				width: 90px;
+				color: #dcdcdc;
+			}
+		}
+	}
+
+	// Active means that the drop support has been activated (dragstart usually)
+	// Display border around dropzone
+	&.is-active {
+
+		// Empty
+		&:not(.is-filled) > .cq-FileUpload-thumbnail {
+			display: block;
+		}
+	}
+
+	// When a dragged element hovers it
+	// Display blue overlay on thumbnail
+	&.is-hovered {
+
+		// Handle hover without activated (from Finder)
+		&:not(.is-filled) > .cq-FileUpload-thumbnail {
+			display: block;
+		}
+
+		// Empty
+		&:not(.is-filled) > .cq-FileUpload-thumbnail::before {
+			content: " ";
+			display: block;
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: #2583DB;
+			z-index: 99999;
+			box-shadow: 0.0625rem 0.4375rem 1.5rem 0rem #414141;
+		}
+
+		// Filled
+		&.is-filled .cq-FileUpload-thumbnail-img {
+			background: #2583DB;
+			box-shadow: 0.0625rem 0.4375rem 1.5rem 0rem #414141;
+			> img {
+				visibility: hidden;
+			}
+		}
+	}
+}
