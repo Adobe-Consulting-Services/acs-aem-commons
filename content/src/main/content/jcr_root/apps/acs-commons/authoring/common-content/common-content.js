@@ -1,16 +1,34 @@
 (function ($, ns, channel, window, undefined) {
 
     var actionDef = {
-        icon: 'coral-Icon--add',
+        icon: 'coral-Icon--game',
         text: Granite.I18n.get('Configure Shared Content'),
         handler: function (editable, param, target) { // will be called on click
-        	editable.config.dialogSrc = editable.config.dialogSrc.replace("_cq_dialog.html", "_cq_dialogsitewide.html");
+        	var originalDialogSrc = editable.config.dialogSrc;
+        	var originalDialog = editable.config.dialog;
+        	
+        	var dialogSrcArray = editable.config.dialogSrc.split(".html");
+        	
+        	var langRootRegexp = /^(\/content\/[^/]+\/(([a-z]{2}_[A-Z]{2})|([a-z]{2})))/g;
+        	var match = langRootRegexp.exec(dialogSrcArray[1]);
+        	
+        	var siteWideDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "_cq_dialogsitewide") +
+						        	".html" +
+						        	match[0] +
+						        	"/jcr:content/sitewideprops/" +
+						        	editable.type;
+        	
+        	editable.config.dialogSrc = siteWideDialogSrc;
         	editable.config.dialog = editable.config.dialog.replace("cq:dialog", "cq:dialogsitewide");
         	
-        	ns.edit.actions.doConfigure(editable); 
+        	ns.edit.actions.doConfigure(editable);
+        	
+        	//set the dialog and dialogSrc back to the original values so normal edit dialog continues to work
+        	editable.config.dialogSrc = originalDialogSrc;
+        	editable.config.dialog = originalDialog;
+        	
             // do not close toolbar
             return false;
-        	
         },
         /*
          * In the event that we need to restrict this to specific components or something, we would potentially
