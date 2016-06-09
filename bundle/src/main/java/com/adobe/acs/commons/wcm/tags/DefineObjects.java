@@ -1,9 +1,16 @@
 package com.adobe.acs.commons.wcm.tags;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import aQute.bnd.annotation.ProviderType;
+
+import com.adobe.granite.ui.components.Value;
 import com.day.cq.wcm.api.components.Component;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import tldgen.BodyContentType;
 import tldgen.Tag;
 
@@ -62,12 +69,14 @@ public class DefineObjects extends BodyTagSupport {
         try {
             ServletRequest req = this.pageContext.getRequest();
             NodeIterator it = componentPropertyHome.getNodes();
+            Map<String,  String> propertyMap = new HashMap<String,  String>();
             while (it.hasNext()) {
                 Node n = it.nextNode();
                 Property nameProp = n.getProperty("name");
-                Property valueProp = n.getProperty("value");
+                javax.jcr.Value valueProp = n.getProperty("value").getValue();
+                propertyMap.put(nameProp.getString(), valueProp.getString());
                 log.info("Setting " + nameProp.getString() + " to " + valueProp.getString());
-                req.setAttribute(nameProp.getString(), valueProp.getString());
+                pageContext.setAttribute("PropertyMap", propertyMap);
             }
         } catch (RepositoryException e) {
             log.error("Could node set properties on node.", e);
