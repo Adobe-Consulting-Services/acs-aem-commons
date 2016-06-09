@@ -1,27 +1,77 @@
 package com.adobe.acs.commons.wcm.tags;
 
-import org.apache.sling.api.scripting.SlingBindings;
+import aQute.bnd.annotation.ProviderType;
+import com.day.cq.wcm.api.components.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tldgen.BodyContentType;
+import tldgen.Tag;
+
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
+import javax.servlet.ServletRequest;
+import javax.servlet.jsp.tagext.BodyTagSupport;
 
 /**
  * Created by derek on 6/9/16.
  */
-public class DefineObjects extends com.day.cq.wcm.tags.DefineObjectsTag {
+@ProviderType
+@Tag(bodyContentType = BodyContentType.JSP, value = "defineObjects")
+public class DefineObjects extends BodyTagSupport {
 
-    public static final String DEFAULT_DUMMY_PROPERTY_NAME = "dummyProperty";
-
-    private String dummyProperty = "dummyProperty";
+    private static final Logger log = LoggerFactory.getLogger(DefineObjects.class);
 
     public DefineObjects() {
 
     }
 
+    @Override
     public int doEndTag() {
-        SlingBindings bindings = (SlingBindings)this.pageContext.getRequest().getAttribute(SlingBindings.class.getName());
-        this.pageContext.setAttribute(this.dummyProperty, bindings.get(DEFAULT_DUMMY_PROPERTY_NAME));
-        return super.doEndTag();
+        log.info("Starting the doEndTag");
+        this.pageContext.getRequest().setAttribute("dummyPropertyName", "dummy property value");
+        Node componentPropertyHome = getComponentPropertyHome();
+        setProperties(componentPropertyHome);
+        return EVAL_PAGE;
     }
 
-    public void setDummyProperty(String dummyProperty) {
-        this.dummyProperty = dummyProperty;
+    protected Node getComponentPropertyHome() {
+        Node currentNode = (Node) this.pageContext.findAttribute("currentNode");
+        try {
+            log.info("Current node is " + currentNode.getPath());
+            Node baseNode = currentNode.getParent().getParent();
+            log.info("Base node is " + baseNode.getPath());
+            Node sitewideProps = baseNode.getNode("sitewideprops");
+            log.info("sitewideprops path is " + sitewideProps.getPath());
+
+            Component component = (Component) pageContext.findAttribute("component");
+            log.info("Component path is " + component.getPath());
+
+            Node sitewidePropsComponent = sitewideProps.getNode("." + component.getPath());
+            log.info("sitewideprops component path is " + sitewidePropsComponent.getPath());
+
+            return sitewidePropsComponent;
+        } catch (RepositoryException e) {
+            log.error("Could node get current node info.", e);
+        }
+
+        return null;
+    }
+
+    protected void setProperties(Node componentPropertyHome) {
+        try {
+            ServletRequest req = this.pageContext.getRequest();
+            NodeIterator it = componentPropertyHome.getNodes();
+            while (it.hasNext()) {
+                Node n = it.nextNode();
+                Property nameProp = n.getProperty("name");
+                Property valueProp = n.getProperty("value");
+                log.info("Setting " + nameProp.getString() + " to " + valueProp.getString());
+                req.setAttribute(nameProp.getString(), valueProp.getString());
+            }
+        } catch (RepositoryException e) {
+            log.error("Could node set properties on node.", e);
+        }
     }
 }

@@ -16,7 +16,9 @@
 
   Draws a title either store on the resource or from the page
 
---%><%@include file="/libs/foundation/global.jsp"%><%
+--%><%@include file="/libs/foundation/global.jsp"%>
+<%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %>
+<wcm:defineObjects /><%
 %><%@ page import="java.util.Iterator,
         org.apache.commons.lang3.StringEscapeUtils,
         com.day.cq.commons.Doctype,
@@ -38,7 +40,7 @@
     }
 
     // escape title
-    title = xssAPI.filterHTML(title);
+    title = xssAPI.filterHTML(title + " * WITH CUSTOM PROPERTY: " + request.getAttribute("prop1"));
 
     // check if we need to compute a diff
     String vLabel = request.getParameter(DiffService.REQUEST_PARAM_DIFF_TO);
