@@ -1,2 +1,0 @@
-css/droparea.less
-css/slideshow.less
