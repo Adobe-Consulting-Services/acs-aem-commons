@@ -16,9 +16,12 @@
 
   Draws a title either store on the resource or from the page
 
---%><%@include file="/libs/foundation/global.jsp"%><%
+--%><%@include file="/libs/foundation/global.jsp"%>
+<%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %>
+<wcm:defineObjects /><%
 %>
   <h1>Proof of concept</h1>
   <h2>Instance: ${properties.text}<h1>
   <h2>Sitewide: ${properties.textSitewide}</h2>
+  <h2>prop1: ${prop1}</h2>
 

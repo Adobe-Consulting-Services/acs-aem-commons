@@ -30,7 +30,6 @@ public class DefineObjects extends BodyTagSupport {
     @Override
     public int doEndTag() {
         log.info("Starting the doEndTag");
-        this.pageContext.getRequest().setAttribute("dummyPropertyName", "dummy property value");
         Node componentPropertyHome = getComponentPropertyHome();
         setProperties(componentPropertyHome);
         return EVAL_PAGE;
