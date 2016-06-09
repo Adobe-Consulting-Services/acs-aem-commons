@@ -76,7 +76,7 @@ public class DefineObjects extends BodyTagSupport {
                 javax.jcr.Value valueProp = n.getProperty("value").getValue();
                 propertyMap.put(nameProp.getString(), valueProp.getString());
                 log.info("Setting " + nameProp.getString() + " to " + valueProp.getString());
-                pageContext.setAttribute("PropertyMap", propertyMap);
+                pageContext.setAttribute("sitewideProperties", propertyMap);
             }
         } catch (RepositoryException e) {
             log.error("Could node set properties on node.", e);
