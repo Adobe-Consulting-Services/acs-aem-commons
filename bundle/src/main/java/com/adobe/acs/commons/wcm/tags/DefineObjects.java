@@ -1,7 +1,13 @@
 package com.adobe.acs.commons.wcm.tags;
 
 import aQute.bnd.annotation.ProviderType;
+
+import com.adobe.granite.ui.components.Value;
+import com.day.cq.commons.LanguageUtil;
 import com.day.cq.wcm.api.components.Component;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tldgen.BodyContentType;
@@ -42,19 +48,22 @@ public class DefineObjects extends BodyTagSupport {
     protected Node getComponentPropertyHome() {
         Node currentNode = (Node) this.pageContext.findAttribute("currentNode");
         try {
-            log.info("Current node is " + currentNode.getPath());
-            Node baseNode = currentNode.getParent().getParent();
-            log.info("Base node is " + baseNode.getPath());
-            Node sitewideProps = baseNode.getNode("sitewideprops");
-            log.info("sitewideprops path is " + sitewideProps.getPath());
+            ResourceResolver resourceResolver = (ResourceResolver) pageContext.findAttribute("resourceResolver");
 
+            // Build the path to the global config for this component
+            // <Lang Root>/jcr:content/sitewideprops/<component resource type>
+            String languageRoot = LanguageUtil.getLanguageRoot(currentNode.getPath());
+            String globalPropsPath = languageRoot + "/jcr:content/sitewideprops/";
             Component component = (Component) pageContext.findAttribute("component");
-            log.info("Component path is " + component.getPath());
+            globalPropsPath = globalPropsPath + component.getResourceType();
 
-            Node sitewidePropsComponent = sitewideProps.getNode("." + component.getPath());
-            log.info("sitewideprops component path is " + sitewidePropsComponent.getPath());
+            Resource r = resourceResolver.getResource(globalPropsPath);
 
-            return sitewidePropsComponent;
+            // Send the Node back if it exist
+            if (r != null) {
+                return r.adaptTo(Node.class);
+            }
+
         } catch (RepositoryException e) {
             log.error("Could node get current node info.", e);
         }
