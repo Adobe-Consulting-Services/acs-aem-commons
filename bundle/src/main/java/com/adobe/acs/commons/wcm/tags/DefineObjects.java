@@ -19,7 +19,17 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by derek on 6/9/16.
+ * This tag is similar to the OOTB cq:defineObjects tag which adds
+ * component instance-level properties to the pageContext of a JSP,
+ * but it instead sets sitewideProperties and mergedProperties maps.
+ *
+ * sitewideProperties contains the site-wide properties for the
+ * current component.
+ *
+ * mergedProperties is a merge of the instance-level and site-wide
+ * properties for the current component, giving preference to an
+ * instance-level property value when a site-wide property exists
+ * with the same name.
  */
 @ProviderType
 @Tag(bodyContentType = BodyContentType.JSP, value = "defineObjects")
@@ -30,12 +40,12 @@ public class DefineObjects extends BodyTagSupport {
     @Override
     public int doEndTag() {
         log.info("Starting the doEndTag");
-        getComponentPropertyHome();
+        setSitewideProperties();
         setMergedProperties();
         return EVAL_PAGE;
     }
 
-    private Node getComponentPropertyHome() {
+    private void setSitewideProperties() {
         Node currentNode = (Node) this.pageContext.findAttribute("currentNode");
         try {
             ResourceResolver resourceResolver = (ResourceResolver) pageContext.findAttribute("resourceResolver");
@@ -58,8 +68,6 @@ public class DefineObjects extends BodyTagSupport {
         } catch (RepositoryException e) {
             log.error("Could node get current node info.", e);
         }
-
-        return null;
     }
 
     private void setMergedProperties() {
@@ -69,7 +77,7 @@ public class DefineObjects extends BodyTagSupport {
         pageContext.setAttribute("mergedProperties", mergeProperties(localPropertyMap, sitewidePropertyMap));
     }
 
-    protected Map<String, Object> mergeProperties(JcrPropertyMap instanceProps, JcrPropertyMap sitewideProps) {
+    private Map<String, Object> mergeProperties(JcrPropertyMap instanceProps, JcrPropertyMap sitewideProps) {
         Map<String, Object> mergedProperties = new HashMap<String, Object>();
 
         // Add Component Global Configs
