@@ -22,7 +22,7 @@
 %>
   <h1>Proof of concept</h1>
   <h2>Instance Title: ${properties.text}</h2>
-  <h2>Sitewide Title: ${sitewideProperties.text}</h2>
+  <h2>Site-wide Title: ${sitewideProperties.text}</h2>
   <h2>Merged Title: ${mergedProperties.text}</h2>
 
   
