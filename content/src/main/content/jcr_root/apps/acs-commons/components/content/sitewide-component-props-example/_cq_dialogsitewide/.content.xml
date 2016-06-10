@@ -19,6 +19,11 @@
                         sling:resourceType="granite/ui/components/foundation/form/textfield"
                         fieldLabel="Sitewide Title Text"
                         name="./text"/>
+                    <path
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/form/pathbrowser"
+                        fieldLabel="Referenced Page"
+                        name="./referencedPage"/>
                 </items>
             </column>
         </items>
