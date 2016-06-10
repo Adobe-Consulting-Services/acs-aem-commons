@@ -20,10 +20,16 @@
 <%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %>
 <wcm:defineObjects /><%
 %>
-  <h1>Proof of concept</h1>
-  <h2>Instance Title: ${properties.text}</h2>
-  <h2>Sitewide Title: ${sitewideProperties.text}</h2>
-  <h2>MergedMap: ${mergedProperties.text}</h2>
+<h1>Proof of concept</h1>
+<h2>Instance Title: ${properties.text}</h2>
+<h2>Site-wide Title: ${sitewideProperties.text}</h2>
+<br><br>
+<h3>Instance Quantity: ${properties.quantity}</h3>
+<h3>Site-wide Page Ref: ${sitewideProperties.referencedPage}</h3>
+<br><br>
+<h4>Merged Title: ${mergedProperties.text}</h4>
+<h4>Merged Quantity: ${mergedProperties.quantity}</h4>
+<h4>Merged Page Ref: ${mergedProperties.referencedPage}</h4>
 
   
 
