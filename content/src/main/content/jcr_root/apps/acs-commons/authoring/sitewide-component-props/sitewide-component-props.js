@@ -33,11 +33,11 @@
          * In the event that we need to restrict this to specific components or something, we would potentially
          * do that in this "condition" function. If we don't, we , we would do that here. Otherwise, leave it out!
          */
-//        condition: function(editable) {
-//            //restrict to just a specific component, otherwise it will show up on all components.
-//            var result = editable.type === "fmmp-base/components/content/[path to component here]";
-//            return result;
-//        },
+        //Restrict to users with correct permissions and if the dialog exists
+        condition: function(editable) {
+        	var canModify = ns.page.info.permissions && ns.page.info.permissions.modify;
+            return !!editable.config.dialog && canModify;
+        },
         isNonMulti: true
     };
 
