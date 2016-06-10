@@ -8,13 +8,12 @@
         	var originalDialog = editable.config.dialog;
         	
         	var dialogSrcArray = editable.config.dialogSrc.split(".html");
-        	
-        	var langRootRegexp = /^(\/content\/[^/]+\/(([a-z]{2}_[A-Z]{2})|([a-z]{2})))/g;
+        	var langRootRegexp = /^(\/content\/([^/]+\/)+([a-zA-Z]{2}([_-][a-zA-Z]{2})?))(|\/.*)$/g;
         	var match = langRootRegexp.exec(dialogSrcArray[1]);
         	
         	var siteWideDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "_cq_dialogsitewide") +
 						        	".html" +
-						        	match[0] +
+						        	match[1] +
 						        	"/jcr:content/sitewideprops/" +
 						        	editable.type;
         	
