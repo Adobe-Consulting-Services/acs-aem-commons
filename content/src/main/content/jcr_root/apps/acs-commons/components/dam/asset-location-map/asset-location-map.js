@@ -20,7 +20,7 @@ use(function() {
 
     if (itemPath) {
         var itemResource = request.resourceResolver.getResource(itemPath),
-			asset = itemResource.adaptTo(com.day.cq.dam.api.Asset),
+            asset = itemResource.adaptTo(com.day.cq.dam.api.Asset),
             metadata = asset.getMetadata(),
             latitudeParsed = REGEX.exec(metadata['exif:GPSLatitude']),
             longitudeParsed = REGEX.exec(metadata['exif:GPSLongitude']);
