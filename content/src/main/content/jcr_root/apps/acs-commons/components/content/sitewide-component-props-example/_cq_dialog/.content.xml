@@ -19,6 +19,14 @@
                         sling:resourceType="granite/ui/components/foundation/form/textfield"
                         fieldLabel="Title Text"
                         name="./text"/>
+                    <qty
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/form/numberfield"
+                        fieldLabel="Quantity"
+                        max="{Long}10"
+                        min="{Long}1"
+                        name="./quantity"
+                        value="{Long}1"/>
                 </items>
             </column>
         </items>
