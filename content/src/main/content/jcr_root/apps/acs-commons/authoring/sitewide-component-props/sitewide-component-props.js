@@ -35,8 +35,9 @@
          */
         //Restrict to users with correct permissions and if the dialog exists
         condition: function(editable) {
+            var enabled = ns.page.info.sitewideComponentProps && ns.page.info.sitewideComponentProps.enabled;
         	var canModify = ns.page.info.permissions && ns.page.info.permissions.modify;
-            return !!editable.config.dialog && canModify;
+            return !!enabled && !!editable.config.dialog && canModify;
         },
         isNonMulti: true
     };
