@@ -2,6 +2,6 @@
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:description="Proof of Concept component using the title."
     jcr:primaryType="cq:Component"
-    jcr:title="Proof of Concept - Title"
-    sling:resourceSuperType="foundation/components/title"
-    componentGroup="General"/>
+    jcr:title="Site-wide Component Properties Example"
+    sling:resourceSuperType="foundation/components/parbase"
+    componentGroup="ACS Commons"/>

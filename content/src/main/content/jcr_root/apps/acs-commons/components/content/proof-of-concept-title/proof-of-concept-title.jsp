@@ -21,6 +21,7 @@
 <wcm:defineObjects /><%
 %>
   <h1>Proof of concept</h1>
-  <h2>PropertyMap: ${sitewideProperties}</h2>
+  <h2>Instance Title: ${properties.text}</h2>
+  <h2>Sitewide Title: ${sitewideProperties.text}</h2>
   
 
