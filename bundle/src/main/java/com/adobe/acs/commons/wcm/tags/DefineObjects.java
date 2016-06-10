@@ -5,6 +5,7 @@ import com.day.cq.commons.LanguageUtil;
 import com.day.cq.wcm.api.components.Component;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.jcr.resource.JcrPropertyMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tldgen.BodyContentType;
@@ -36,8 +37,8 @@ public class DefineObjects extends BodyTagSupport {
     @Override
     public int doEndTag() {
         log.info("Starting the doEndTag");
-        Node componentPropertyHome = getComponentPropertyHome();
-        setProperties(componentPropertyHome);
+        getComponentPropertyHome();
+        setMergedProperties();
         return EVAL_PAGE;
     }
 
@@ -57,7 +58,8 @@ public class DefineObjects extends BodyTagSupport {
 
             // Send the Node back if it exist
             if (r != null) {
-                return r.adaptTo(Node.class);
+                JcrPropertyMap jpm = new JcrPropertyMap(r.adaptTo(Node.class));
+                pageContext.setAttribute("sitewideProperties", jpm);
             }
 
         } catch (RepositoryException e) {
@@ -67,45 +69,28 @@ public class DefineObjects extends BodyTagSupport {
         return null;
     }
 
-    protected void setProperties(Node componentPropertyHome) {
-        try {
-            if (componentPropertyHome != null) {
-                ServletRequest req = this.pageContext.getRequest();
-                PropertyIterator it = componentPropertyHome.getProperties();
-                Map<String,  String> propertyMap = new HashMap<String,  String>();
-                while (it.hasNext()) {
-                    Property p = it.nextProperty();
-                    String propName = p.getName();
-                    if (!"jcr:primaryType".equalsIgnoreCase(propName)) {
-                        javax.jcr.Value v = p.getValue();
-                        if (v != null) {
-                            propertyMap.put(p.getName(), v.toString());
-                        } else {
-                            propertyMap.put(p.getName(), null);
-                        }
-                    }
-                }
+    protected void setMergedProperties() {
+        JcrPropertyMap sitewidePropertyMap = (JcrPropertyMap) pageContext.getAttribute("sitewideProperties");
+        JcrPropertyMap localPropertyMap = (JcrPropertyMap) pageContext.getAttribute("properties");
 
-                pageContext.setAttribute("sitewideProperties", propertyMap);
-            }
-        } catch (RepositoryException e) {
-            log.error("Could node set properties on node.", e);
-        }
+        log.info("Merging Properties " + sitewidePropertyMap.toString() + " ----- " + localPropertyMap.toString());
+
+        pageContext.setAttribute("mergedProperties", mergeProperties(localPropertyMap,sitewidePropertyMap));
     }
 
-    protected Map<String, String> mergeProperties(Map<String, String> instanceProps, Map<String, String> sitewideProps) {
-        Map<String, String> mergedProperties = new HashMap<String, String>();
+    protected Map<String, Object> mergeProperties(JcrPropertyMap instanceProps, JcrPropertyMap sitewideProps) {
+        Map<String, Object> mergedProperties = new HashMap<String, Object>();
 
+        // Add Component Global Configs
+        Set<String> sitewideKeys = sitewideProps.keySet();
+        for (String sitewideKey : sitewideKeys) {
+            mergedProperties.put(sitewideKey, sitewideProps.get(sitewideKey));
+        }
+
+        // Merge in the Component Local Configs
         Set<String> instanceKeys = instanceProps.keySet();
         for (String instanceKey : instanceKeys) {
             mergedProperties.put(instanceKey, instanceProps.get(instanceKey));
-        }
-
-        Set<String> sitewideKeys = sitewideProps.keySet();
-        for (String sitewideKey : sitewideKeys) {
-            if (!mergedProperties.containsKey(sitewideKey)) {
-                mergedProperties.put(sitewideKey, sitewideProps.get(sitewideKey));
-            }
         }
 
         return mergedProperties;
