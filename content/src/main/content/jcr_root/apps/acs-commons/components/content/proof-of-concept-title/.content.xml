@@ -3,5 +3,4 @@
     jcr:description="Proof of Concept component using the title."
     jcr:primaryType="cq:Component"
     jcr:title="Site-wide Component Properties Example"
-    sling:resourceSuperType="foundation/components/parbase"
     componentGroup="ACS Commons"/>
