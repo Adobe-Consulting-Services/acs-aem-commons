@@ -12,10 +12,7 @@ import tldgen.BodyContentType;
 import tldgen.Tag;
 
 import javax.jcr.Node;
-import javax.jcr.Property;
-import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
-import javax.servlet.ServletRequest;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,10 +27,6 @@ public class DefineObjects extends BodyTagSupport {
 
     private static final Logger log = LoggerFactory.getLogger(DefineObjects.class);
 
-    public DefineObjects() {
-
-    }
-
     @Override
     public int doEndTag() {
         log.info("Starting the doEndTag");
@@ -42,7 +35,7 @@ public class DefineObjects extends BodyTagSupport {
         return EVAL_PAGE;
     }
 
-    protected Node getComponentPropertyHome() {
+    private Node getComponentPropertyHome() {
         Node currentNode = (Node) this.pageContext.findAttribute("currentNode");
         try {
             ResourceResolver resourceResolver = (ResourceResolver) pageContext.findAttribute("resourceResolver");
@@ -69,28 +62,30 @@ public class DefineObjects extends BodyTagSupport {
         return null;
     }
 
-    protected void setMergedProperties() {
+    private void setMergedProperties() {
         JcrPropertyMap sitewidePropertyMap = (JcrPropertyMap) pageContext.getAttribute("sitewideProperties");
         JcrPropertyMap localPropertyMap = (JcrPropertyMap) pageContext.getAttribute("properties");
 
-        log.info("Merging Properties " + sitewidePropertyMap.toString() + " ----- " + localPropertyMap.toString());
-
-        pageContext.setAttribute("mergedProperties", mergeProperties(localPropertyMap,sitewidePropertyMap));
+        pageContext.setAttribute("mergedProperties", mergeProperties(localPropertyMap, sitewidePropertyMap));
     }
 
     protected Map<String, Object> mergeProperties(JcrPropertyMap instanceProps, JcrPropertyMap sitewideProps) {
         Map<String, Object> mergedProperties = new HashMap<String, Object>();
 
         // Add Component Global Configs
-        Set<String> sitewideKeys = sitewideProps.keySet();
-        for (String sitewideKey : sitewideKeys) {
-            mergedProperties.put(sitewideKey, sitewideProps.get(sitewideKey));
+        if (sitewideProps != null) {
+            Set<String> sitewideKeys = sitewideProps.keySet();
+            for (String sitewideKey : sitewideKeys) {
+                mergedProperties.put(sitewideKey, sitewideProps.get(sitewideKey));
+            }
         }
 
         // Merge in the Component Local Configs
-        Set<String> instanceKeys = instanceProps.keySet();
-        for (String instanceKey : instanceKeys) {
-            mergedProperties.put(instanceKey, instanceProps.get(instanceKey));
+        if (instanceProps != null) {
+            Set<String> instanceKeys = instanceProps.keySet();
+            for (String instanceKey : instanceKeys) {
+                mergedProperties.put(instanceKey, instanceProps.get(instanceKey));
+            }
         }
 
         return mergedProperties;
