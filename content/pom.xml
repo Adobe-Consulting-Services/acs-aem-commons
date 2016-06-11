@@ -89,7 +89,6 @@
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/leaflet/js/leaflet.js</exclude>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/components/dam/asset-location-map/asset-location-map.js</exclude>
                     </excludes>
                 </configuration>
             </plugin>
