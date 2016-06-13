@@ -118,7 +118,7 @@ public class ColorSwatches implements Use {
         }
         if (color != null) {
             result.put("color", color);
-            if (plateNames.containsKey(swatchName)) {
+            if (plateNames != null && plateNames.containsKey(swatchName)) {
                 plateNames.put(swatchName, color);
             }
         }
