@@ -20,9 +20,7 @@
 package apps.acs_commons.components.dam.color_swatches;
 
 import com.adobe.acs.commons.dam.ColorConversion;
-import com.adobe.cq.sightly.WCMUsePojo;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
