@@ -40,6 +40,7 @@ import java.awt.color.ICC_Profile;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,11 +49,23 @@ public class ColorSwatches implements Use {
 
     private static final Logger log = LoggerFactory.getLogger(ColorSwatches.class);
 
+    private static final Map<String, String> STANDARD_PLATE_COLORS;
+
     private List<Map<String, String>> colorants;
+
+    private LinkedHashMap<String, String> plateNames;
 
     private List<SwatchGroup> swatchGroups;
 
     private ColorConversion colorConversion;
+
+    static {
+        STANDARD_PLATE_COLORS = new HashMap<String, String>();
+        STANDARD_PLATE_COLORS.put("Cyan", formatRGB(0, 255, 255));
+        STANDARD_PLATE_COLORS.put("Magenta", formatRGB(255, 0, 255));
+        STANDARD_PLATE_COLORS.put("Yellow", formatRGB(255, 255, 0));
+        STANDARD_PLATE_COLORS.put("Black", formatRGB(0, 0, 0));
+    }
 
     private String extractLAB(ValueMap properties) {
         ColorConversion.LAB lab = new ColorConversion.LAB(
@@ -83,14 +96,15 @@ public class ColorSwatches implements Use {
         return formatRGB(properties.get("xmpG:red", 0), properties.get("xmpG:green", 0), properties.get("xmpG:blue", 0));
     }
 
-    private String formatRGB(int red, int green, int blue) {
+    private static String formatRGB(int red, int green, int blue) {
         return String.format("rgb(%s,%s,%s)", red, green, blue);
     }
 
     private Map<String, String> createColorant(Resource res) {
         Map<String, String> result = new HashMap<String, String>();
         ValueMap properties = res.getValueMap();
-        result.put("name", properties.get("xmpG:swatchName", String.class));
+        String swatchName = properties.get("xmpG:swatchName", String.class);
+        result.put("name", swatchName);
         result.put("type", properties.get("xmpG:type", "process").toLowerCase());
         String colorSpace = properties.get("xmpG:mode", "unknown").toLowerCase();
         result.put("colorSpace", colorSpace);
@@ -104,6 +118,9 @@ public class ColorSwatches implements Use {
         }
         if (color != null) {
             result.put("color", color);
+            if (plateNames.containsKey(swatchName)) {
+                plateNames.put(swatchName, color);
+            }
         }
         return result;
     }
@@ -133,15 +150,25 @@ public class ColorSwatches implements Use {
 
         if (itemPath != null) {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            Resource colorantsResource = resourceResolver.getResource(itemPath + "/jcr:content/metadata/xmpTPg:Colorants");
+            Resource metadataResource = resourceResolver.getResource(itemPath + "/jcr:content/metadata");
+            ValueMap properties = metadataResource.getValueMap();
 
+            String[] plateNamesProperty = properties.get("xmpTPg:PlateNames", String[].class);
+            if (plateNamesProperty != null) {
+                plateNames = new LinkedHashMap<String, String>();
+                for (String plateName : plateNamesProperty) {
+                    plateNames.put(plateName, STANDARD_PLATE_COLORS.get(plateName));
+                }
+            }
+
+            Resource colorantsResource = metadataResource.getChild("xmpTPg:Colorants");
             if (colorantsResource != null) {
                 this.colorants = new ArrayList<Map<String, String>>();
                 for (Resource colorantResource : colorantsResource.getChildren()) {
                     this.colorants.add(createColorant(colorantResource));
                 }
             } else {
-                Resource swatchGroupsResource = resourceResolver.getResource(itemPath + "/jcr:content/metadata/xmpTPg:SwatchGroups");
+                Resource swatchGroupsResource = metadataResource.getChild("xmpTPg:SwatchGroups");
                 if (swatchGroupsResource != null) {
                     this.swatchGroups = new ArrayList<SwatchGroup>();
                     for (Resource swatchGroupResource : swatchGroupsResource.getChildren()) {
@@ -159,6 +186,10 @@ public class ColorSwatches implements Use {
 
     public List<SwatchGroup> getSwatchGroups() {
         return swatchGroups;
+    }
+
+    public Map<String, String> getPlateNames() {
+        return plateNames;
     }
 
     public boolean getHasContent() {

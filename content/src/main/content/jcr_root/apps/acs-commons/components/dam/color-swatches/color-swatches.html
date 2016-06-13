@@ -19,15 +19,6 @@
 */-->
 <template data-sly-template.colorantsTable="${ @ colorants}">
     <table>
-        <!--
-        <thead>
-        <tr>
-            <th class="acs-dam-color-swatches-column-name">Name</th>
-            <th class="acs-dam-color-swatches-column-type">Type</th>
-            <th class="acs-dam-color-swatches-column-colorspace">Color Space</th>
-        </tr>
-        </thead>
-        -->
         <tbody>
         <tr data-sly-repeat="${colorants}">
             <td class="acs-dam-color-swatches-column-name"><div class="acs-dam-color-swatches-column-color"
@@ -42,6 +33,18 @@
 <div class="foundation-field-editable acs-dam-color-swatches" data-sly-use.swatches="ColorSwatches"
         data-sly-use.clientLib="${'/libs/granite/sightly/templates/clientlib.html'}" data-sly-test="${swatches.hasContent}">
     <sly data-sly-call="${clientLib.all @ categories='acs-commons.dam.color-swatches'}"></sly>
+    <span class="coral-Form-fieldwrapper" data-sly-test="${swatches.plateNames}">
+        <label class="coral-Form-fieldlabel">Plate Names</label>
+        <table>
+            <tbody>
+                <tr data-sly-repeat="${swatches.plateNames}">
+                    <td class="acs-dam-color-swatches-plates-column-name">
+                        <div class="acs-dam-color-swatches-column-color"
+                             style="background-color: ${swatches.plateNames[item] @ context='styleString'}"></div> ${item}</td>
+                </tr>
+            </tbody>
+        </table>
+    </span>
     <span class="coral-Form-fieldwrapper">
         <label class="coral-Form-fieldlabel">${properties.fieldLabel || 'Color Swatches'}</label>
         <span class="coral-Form-field">

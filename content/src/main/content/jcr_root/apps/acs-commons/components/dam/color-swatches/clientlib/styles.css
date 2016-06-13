@@ -64,7 +64,8 @@
     padding-bottom: .25em;
 }
 
-.acs-dam-color-swatches table td.acs-dam-color-swatches-column-name {
+.acs-dam-color-swatches table td.acs-dam-color-swatches-column-name,
+.acs-dam-color-swatches table td.acs-dam-color-swatches-plates-column-name {
     padding-left: .25em;
 }
 
