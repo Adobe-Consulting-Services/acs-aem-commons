@@ -1,0 +1,15 @@
+<div class="foundation-field-editable acs-dam-fonts" data-sly-use.fonts="Fonts"
+     data-sly-use.clientLib="${'/libs/granite/sightly/templates/clientlib.html'}" data-sly-test="${fonts.hasContent}">
+    <sly data-sly-call="${clientLib.all @ categories='acs-commons.dam.fonts'}"></sly>
+    <span class="coral-Form-fieldwrapper">
+        <label class="coral-Form-fieldlabel">${properties.fieldLabel || 'Fonts'}</label>
+        <table>
+            <tbody>
+                <tr data-sly-repeat="${fonts.fonts}">
+                    <td class="acs-dam-fonts-column-family">${item['stFNT:fontFamily']}</td>
+                    <td class="acs-dam-fonts-column-face">${item['stFNT:fontFace']}</td>
+                </tr>
+            </tbody>
+        </table>
+    </span>
+</div>
