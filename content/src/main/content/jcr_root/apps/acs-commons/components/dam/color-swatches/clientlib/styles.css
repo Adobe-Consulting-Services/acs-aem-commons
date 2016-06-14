@@ -36,23 +36,23 @@
 }
 
 .acs-dam-color-swatches-column-type--spot {
-    background-image: url(images/spot.png);
+    background-image: url(images/spot.svg);
 }
 
 .acs-dam-color-swatches-column-type--process {
-    background-image: url(images/process.png);
+    background-image: url(images/process.svg);
 }
 
 .acs-dam-color-swatches-column-colorspace--cmyk {
-    background-image: url(images/cmyk.png);
+    background-image: url(images/cmyk.svg);
 }
 
 .acs-dam-color-swatches-column-colorspace--rgb {
-    background-image: url(images/rgb.png);
+    background-image: url(images/rgb.svg);
 }
 
 .acs-dam-color-swatches-column-colorspace--lab {
-    background-image: url(images/lab.png);
+    background-image: url(images/lab.svg);
 }
 
 .acs-dam-color-swatches-swatch-group-toggle {
