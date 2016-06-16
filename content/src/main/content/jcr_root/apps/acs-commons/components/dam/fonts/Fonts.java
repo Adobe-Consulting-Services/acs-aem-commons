@@ -29,14 +29,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.script.Bindings;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class Fonts implements Use {
 
     private static final Logger log = LoggerFactory.getLogger(Fonts.class);
 
-    private List<ValueMap> fonts;
+    private Map<String, FontFamily> fonts;
 
     @Override
     public void init(Bindings bindings) {
@@ -49,22 +51,39 @@ public class Fonts implements Use {
 
             Resource fontsResource = metadataResource.getChild("xmpTPg:Fonts");
             if (fontsResource != null) {
-                this.fonts = new ArrayList<ValueMap>();
+                this.fonts = new TreeMap<String, FontFamily>();
                 for (Resource fontResource : fontsResource.getChildren()) {
                     ValueMap properties = fontResource.getValueMap();
-                    this.fonts.add(properties);
+                    String fontFamily = properties.get("stFNT:fontFamily", String.class);
+                    String fontFace = properties.get("stFNT:fontFace", String.class);
+                    if (fontFace != null && fontFamily != null) {
+                        FontFamily family = this.fonts.get(fontFamily);
+                        if (family == null) {
+                            family = new FontFamily();
+                            this.fonts.put(fontFamily, family);
+                        }
+                        family.faces.add(fontFace);
+                    }
                 }
             }
         }
 
     }
 
-    public List<ValueMap> getFonts() {
+    public Map<String, FontFamily> getFonts() {
         return fonts;
     }
 
     public boolean getHasContent() {
         return fonts != null && fonts.size() > 0;
+    }
+
+    public class FontFamily {
+        public Collection<String> faces = new TreeSet<String>();
+
+        public boolean getHasMultiple() {
+            return faces.size() > 1;
+        }
     }
 
 }

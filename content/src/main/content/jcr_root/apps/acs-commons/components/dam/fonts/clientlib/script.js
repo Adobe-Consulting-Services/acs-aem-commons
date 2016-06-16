@@ -17,33 +17,11 @@
  * limitations under the License.
  * #L%
  */
-.acs-dam-fonts table{
-    width: 100%;
-}
-
-.acs-dam-fonts tr {
-    border-width: 2px;
-    border-style: solid;
-}
-
-.acs-dam-fonts table td {
-    padding-top: .25em;
-    padding-bottom: .25em;
-}
-
-.acs-dam-fonts table td.acs-dam-fonts-column-family {
-    padding-left: .25em;
-    vertical-align: top;
-}
-
-.acs-dam-fonts table td.acs-dam-fonts-column-face {
-    padding-right: .25em;
-}
-.acs-dam-fonts-toggle-text {
-    font-style: italic;
-}
-.acs-dam-fonts-column-face ul {
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-}
+$(function() {
+    $(document).on("click", ".acs-dam-fonts-toggle", function(e) {
+        var $toggle = $(e.target),
+            $toggleParent = $toggle.parent();
+        $toggle.toggleClass("coral-Icon--chevronRight").toggleClass("coral-Icon--chevronDown");
+        $toggleParent.find("ul").toggle();
+    });
+});

@@ -25,8 +25,18 @@
         <table>
             <tbody>
                 <tr data-sly-repeat="${fonts.fonts}">
-                    <td class="acs-dam-fonts-column-family">${item['stFNT:fontFamily']}</td>
-                    <td class="acs-dam-fonts-column-face">${item['stFNT:fontFace']}</td>
+                    <td class="acs-dam-fonts-column-family">${item}</td>
+                    <td class="acs-dam-fonts-column-face">
+                        <span data-sly-test="${!fonts.fonts[item].hasMultiple}" data-sly-repeat.face="${fonts.fonts[item].faces}"
+                              class="acs-dam-fonts-face--singular">${face}</span>
+                        <sly data-sly-test="${fonts.fonts[item].hasMultiple}">
+                            <coral-icon class="acs-dam-fonts-toggle" icon="chevronRight" size="XS"></coral-icon>
+                            <span class="acs-dam-fonts-toggle-text">multiple</span>
+                            <ul data-sly-list.face="${fonts.fonts[item].faces}" style="display: none;">
+                                <li>${face}</li>
+                            </ul>
+                        </sly>
+                    </td>
                 </tr>
             </tbody>
         </table>
