@@ -29,7 +29,7 @@
         for (i = 0; i < queryParams.length; i++) {
             queryParam = queryParams[i].split('=');
 
-            if (queryParam[0] === sParam) {
+            if (queryParam[0] === paramName) {
                 return queryParam[1] === undefined ? "" : queryParam[1];
             }
         }
