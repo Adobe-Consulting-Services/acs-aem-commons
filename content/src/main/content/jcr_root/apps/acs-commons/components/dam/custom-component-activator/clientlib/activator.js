@@ -53,6 +53,6 @@
         activate("xmpMM:History", "/apps/acs-commons/dam/content/admin/history");
         activate("xmpTPg:Fonts", "/apps/acs-commons/dam/content/admin/fonts");
         activate("xmpTPg:Colorants", "/apps/acs-commons/dam/content/admin/color-swatches");
-        activate("location", "acs-commons/components/dam/asset-location-map");
+        activate("location", "/apps/acs-commons/dam/content/admin/asset-location-map");
     });
 })(document, Granite.$);
