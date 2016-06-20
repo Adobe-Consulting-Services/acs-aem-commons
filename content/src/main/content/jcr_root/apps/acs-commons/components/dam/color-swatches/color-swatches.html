@@ -30,7 +30,7 @@
     </table>
 </template>
 
-<div class="foundation-field-editable acs-dam-color-swatches" data-sly-use.swatches="ColorSwatches"
+<div class="foundation-field-editable acs-dam-color-swatches" data-sly-use.swatches="color-swatches.js"
         data-sly-use.clientLib="${'/libs/granite/sightly/templates/clientlib.html'}" data-sly-test="${swatches.hasContent}">
     <sly data-sly-call="${clientLib.all @ categories='acs-commons.dam.color-swatches'}"></sly>
     <span class="coral-Form-fieldwrapper" data-sly-test="${swatches.plateNames}">
