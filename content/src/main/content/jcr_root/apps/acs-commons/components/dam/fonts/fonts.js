@@ -18,7 +18,7 @@
  * #L%
  */
 
-/*global use: false, request: false, Packages: false, java: false */
+/*global use: false, request: false, resolver: false, Packages: false, java: false */
 use(function() {
     function parseFontResource(res) {
         var properties = res.adaptTo(Packages.org.apache.sling.api.resource.ValueMap),
@@ -45,9 +45,9 @@ use(function() {
         childrenIterator;
 
     if (itemPath) {
-        fontsResource = request.resourceResolver.getResource(itemPath + "/jcr:content/metadata/xmpTPg:Fonts");
+        fontsResource = resolver.getResource(itemPath + "/jcr:content/metadata/xmpTPg:Fonts");
         if (fontsResource) {
-            childrenIterator = request.resourceResolver.listChildren(fontsResource);
+            childrenIterator = resolver.listChildren(fontsResource);
             while (childrenIterator.hasNext()) {
                 parseFontResource(childrenIterator.next());
             }

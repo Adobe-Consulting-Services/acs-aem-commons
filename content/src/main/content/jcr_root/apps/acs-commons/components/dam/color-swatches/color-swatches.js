@@ -21,7 +21,7 @@
 /*global use: false, request: false, Packages: false, java: false */
 use(function() {
     function extractPlateNames(itemPath) {
-        var metadataResource = resourceResolver.getResource(itemPath + "/jcr:content/metadata"),
+        var metadataResource = resolver.getResource(itemPath + "/jcr:content/metadata"),
             metadataProperties = metadataResource.adaptTo(Packages.org.apache.sling.api.resource.ValueMap),
             plateNamesProperty = metadataProperties.get("xmpTPg:PlateNames"),
             i;
@@ -74,7 +74,7 @@ use(function() {
 
         colorantsResource = res.getChild("xmpG:Colorants");
         if (colorantsResource) {
-            childrenIterator = request.resourceResolver.listChildren(colorantsResource);
+            childrenIterator = resolver.listChildren(colorantsResource);
             while (childrenIterator.hasNext()) {
                 swatchGroup.colorants.push(parseColorant(childrenIterator.next()));
             }
@@ -116,7 +116,6 @@ use(function() {
 
     var result = {},
         itemPath = request.getParameter("item"),
-        resourceResolver = request.resourceResolver,
         STANDARD_PLATE_COLORS = {
             Cyan : formatRGB(0, 255, 255),
             Magenta : formatRGB(255, 0, 255),
@@ -131,18 +130,18 @@ use(function() {
     if (itemPath) {
         extractPlateNames(itemPath);
 
-        colorantsResource = resourceResolver.getResource(itemPath + "/jcr:content/metadata/xmpTPg:Colorants");
+        colorantsResource = resolver.getResource(itemPath + "/jcr:content/metadata/xmpTPg:Colorants");
         if (colorantsResource) {
             result.colorants = [];
-            childrenIterator = request.resourceResolver.listChildren(colorantsResource);
+            childrenIterator = resolver.listChildren(colorantsResource);
             while (childrenIterator.hasNext()) {
                 result.colorants.push(parseColorant(childrenIterator.next()));
             }
         } else {
-            swatchGroupsResource = resourceResolver.getResource(itemPath + "/jcr:content/metadata/xmpTPg:SwatchGroups");
+            swatchGroupsResource = resolver.getResource(itemPath + "/jcr:content/metadata/xmpTPg:SwatchGroups");
             if (swatchGroupsResource) {
                 result.swatchGroups = [];
-                childrenIterator = request.resourceResolver.listChildren(swatchGroupsResource);
+                childrenIterator = resolver.listChildren(swatchGroupsResource);
                 while (childrenIterator.hasNext()) {
                     result.swatchGroups.push(parseSwatchGroup(childrenIterator.next()));
                 }

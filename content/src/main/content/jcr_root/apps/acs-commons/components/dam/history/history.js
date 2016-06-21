@@ -18,7 +18,7 @@
  * #L%
  */
 
-/*global use: false, request: false, Packages: false, java: false, importClass: false */
+/*global use: false, request: false, resolver: false, Packages: false, java: false, importClass: false */
 use(function() {
     function formatAgent(agent) {
         var result = {};
@@ -67,9 +67,9 @@ use(function() {
     dateFormat = FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.FULL);
 
     if (itemPath) {
-        historyResource = request.resourceResolver.getResource(itemPath + "/jcr:content/metadata/xmpMM:History");
+        historyResource = resolver.getResource(itemPath + "/jcr:content/metadata/xmpMM:History");
         if (historyResource) {
-            childrenIterator = request.resourceResolver.listChildren(historyResource);
+            childrenIterator = resolver.listChildren(historyResource);
             while (childrenIterator.hasNext()) {
                 createHistoryEntry(childrenIterator.next());
             }
