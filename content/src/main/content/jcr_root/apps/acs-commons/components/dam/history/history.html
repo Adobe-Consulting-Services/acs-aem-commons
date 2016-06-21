@@ -21,7 +21,7 @@
      data-sly-use.clientLib="${'/libs/granite/sightly/templates/clientlib.html'}" data-sly-test="${history.hasContent}">
     <sly data-sly-call="${clientLib.all @ categories='acs-commons.dam.history'}"></sly>
     <span class="coral-Form-fieldwrapper">
-        <label class="coral-Form-fieldlabel">${properties.fieldLabel || 'History'}</label>
+        <label class="coral-Form-fieldlabel acs-dam-label-replacement">${properties.fieldLabel || 'History'}</label>
         <table>
             <tbody>
                 <tr data-sly-repeat="${history.history}">

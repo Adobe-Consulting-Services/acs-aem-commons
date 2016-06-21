@@ -42,7 +42,7 @@
             currentFieldLabel = $container.find(".coral-Form-fieldlabel").html();
 
         $container.load(path + ".html?item=" + encodedItemPath, function() {
-            $container.find(".coral-Form-fieldlabel").html(currentFieldLabel);
+            $container.find(".coral-Form-fieldlabel.acs-dam-label-replacement").html(currentFieldLabel);
             $(this).find(".foundation-field-editable").first().unwrap();
         });
     }
