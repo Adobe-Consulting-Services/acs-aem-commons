@@ -24,6 +24,7 @@
 .acs-dam-history tr {
     border-width: 2px;
     border-style: solid;
+    border-color: #969696;
 }
 
 .acs-dam-history table td {
