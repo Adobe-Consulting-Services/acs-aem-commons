@@ -50,9 +50,18 @@
     var encodedItemPath = encodeURIComponent(getQueryParameter("item"));
 
     $(document).on("foundation-contentloaded", function(e) {
-        activate("xmpMM:History", "/apps/acs-commons/dam/content/admin/history");
+/*        activate("xmpMM:History", "/apps/acs-commons/dam/content/admin/history");
         activate("xmpTPg:Fonts", "/apps/acs-commons/dam/content/admin/fonts");
         activate("xmpTPg:Colorants", "/apps/acs-commons/dam/content/admin/color-swatches");
-        activate("location", "/apps/acs-commons/dam/content/admin/asset-location-map");
+        activate("location", "/apps/acs-commons/dam/content/admin/asset-location-map");*/
+        $.get("/bin/acs-commons/dam/custom-components.json", function(data) {
+            var i;
+
+            if (data.components) {
+                for (i = 0; i < data.components.length; i++) {
+                    activate(data.components[i].propertyName, data.components[i].componentPath);
+                }
+            }
+        });
     });
 })(document, Granite.$);
