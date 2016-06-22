@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-(function(document, $) {
+(function(document, Granite, $) {
     "use strict";
 
     function getQueryParameter(paramName) {
@@ -49,12 +49,8 @@
 
     var encodedItemPath = encodeURIComponent(getQueryParameter("item"));
 
-    $(document).on("foundation-contentloaded", function(e) {
-/*        activate("xmpMM:History", "/apps/acs-commons/dam/content/admin/history");
-        activate("xmpTPg:Fonts", "/apps/acs-commons/dam/content/admin/fonts");
-        activate("xmpTPg:Colorants", "/apps/acs-commons/dam/content/admin/color-swatches");
-        activate("location", "/apps/acs-commons/dam/content/admin/asset-location-map");*/
-        $.get("/bin/acs-commons/dam/custom-components.json", function(data) {
+    $(document).on("foundation-contentloaded", function() {
+        $.get(Granite.HTTP.getContextPath() + "/bin/acs-commons/dam/custom-components.json", function(data) {
             var i;
 
             if (data.components) {
@@ -64,4 +60,4 @@
             }
         });
     });
-})(document, Granite.$);
+})(document, Granite, Granite.$);
