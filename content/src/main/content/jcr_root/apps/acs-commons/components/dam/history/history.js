@@ -60,9 +60,8 @@ use(function() {
         itemPath = request.getParameter("item"),
         dateFormat,
         historyResource,
-        childrenIterator;
-
-    importClass(Packages.org.apache.commons.lang3.time.FastDateFormat);
+        childrenIterator,
+        FastDateFormat = Packages.org.apache.commons.lang3.time.FastDateFormat;
 
     dateFormat = FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.FULL);
 
