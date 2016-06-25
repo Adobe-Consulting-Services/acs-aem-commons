@@ -31,6 +31,10 @@
                 <directory>src/main/content/META-INF/vault/definition</directory>
                 <targetPath>../vault-work/META-INF/vault/definition</targetPath>
             </resource>
+            <resource>
+                <directory>src/main/resources/META-INF</directory>
+                <targetPath>../vault-work/META-INF</targetPath>
+            </resource>
         </resources>
 
         <plugins>
