@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by shamalroy on 12/7/15.
- *
  * Original source https://github.com/Adobe-Consulting-Services/acs-aem-commons/blob/master/bundle/src/main/java/com/adobe/acs/commons/email/impl/EmailServiceImpl.java
  *
  * A Generic Email service that sends an email with attachments to a given list of recipients.

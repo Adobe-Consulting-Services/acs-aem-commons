@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by shamalroy on 12/7/15.
- *
  * A Generic Email service that sends an email with attachments to a given list of recipients.
  * The mailType is set to HTMLEmail by default if there are any attachments. Since we are using
  * the template to determine the mailType, the template name has to be *.html.
