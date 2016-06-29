@@ -20,7 +20,6 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
