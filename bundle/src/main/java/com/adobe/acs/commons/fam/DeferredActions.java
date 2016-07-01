@@ -44,6 +44,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 @Service(DeferredActions.class)
 @ProviderType
 public final class DeferredActions {
+    public static final String ORIGINAL_RENDITION = "original";
+
     @Reference
     private SyntheticWorkflowRunner workflowRunner;
 
@@ -109,6 +111,38 @@ public final class DeferredActions {
         };
     }
 
+    /**
+     * This filter identifies assets where the original rendition is newer than any of the other renditions.
+     * This is an especially useful function for updating assets with missing or outdated thumbnails.
+     * @return True if asset has no thumbnails or outdated thumbnails
+     */
+    public BiFunction<ResourceResolver, String, Boolean> filterAssetsWithOutdatedRenditions() {
+        return new BiFunction<ResourceResolver, String, Boolean>() {
+            @Override
+            public Boolean apply(ResourceResolver r, String path) {
+                nameThread("filterAssetsWithOutdatedRenditions-" + path);
+                Resource res = r.getResource(path);
+                com.day.cq.dam.api.Asset asset = DamUtil.resolveToAsset(res);
+                if (asset == null) {
+                    return false;
+                }
+                com.day.cq.dam.api.Rendition original = asset.getRendition(ORIGINAL_RENDITION);
+                if (original == null) {
+                    return false;
+                }
+                long originalTime = original.getResourceMetadata().getCreationTime();
+                int counter = 0;
+                for (com.day.cq.dam.api.Rendition rendition : asset.getRenditions()) {
+                    counter++;
+                    long time = rendition.getResourceMetadata().getCreationTime();
+                    if (time < originalTime) {
+                        return true;
+                    }                        
+                }
+                return counter <= 1;
+            }
+        };    
+    }
     //-- Query Result consumers (for using withQueryResults)
     /**
      * Retry provided action a given number of times before giving up and throwing an error.
