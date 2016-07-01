@@ -3,7 +3,6 @@ package com.adobe.acs.commons.functions;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.IntUnaryOperator;
 
 /**
  * Provides a thread-safe iterator that loops though a list, useful for providing
@@ -31,12 +30,7 @@ public class RoundRobin<T> implements Iterable<T> {
 
             @Override
             public synchronized T next() {
-                int idx = index.getAndUpdate(new IntUnaryOperator() {
-                    @Override
-                    public int applyAsInt(int operand) {
-                        return (operand + 1) >= items.size() ? 0 : operand + 1;
-                    }
-                });
+                int idx = index.getAndIncrement() % items.size();
                 return items.get(idx);
             }
 
