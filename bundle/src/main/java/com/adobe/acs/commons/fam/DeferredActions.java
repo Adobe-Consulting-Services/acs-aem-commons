@@ -26,7 +26,9 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import javax.jcr.Session;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -157,6 +159,33 @@ public class DeferredActions {
         };
     }
 
+    public BiConsumer<ResourceResolver, String> withAllRenditions(
+            final BiConsumer<ResourceResolver, String> action, 
+            final BiFunction<ResourceResolver, String, Boolean>... filters) {
+        return new BiConsumer<ResourceResolver, String>() {
+            @Override
+            public void accept(ResourceResolver r, String path) throws Exception {
+                AssetManager assetManager = r.adaptTo(AssetManager.class);
+                Asset asset = assetManager.getAsset(path);
+                for (Iterator<? extends Rendition> renditions = asset.listRenditions(); renditions.hasNext();) {
+                    Rendition rendition = renditions.next();
+                    boolean skip = false;
+                    if (filters != null) {
+                        for (BiFunction<ResourceResolver, String, Boolean> filter : filters) {
+                            if (!filter.apply(r, rendition.getPath())) {
+                                skip=true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!skip) {
+                        action.accept(r, path);
+                    }
+                }                
+            }
+        };
+    }
+    
     /**
      * Remove all renditions except for the original rendition for assets
      */
@@ -212,6 +241,7 @@ public class DeferredActions {
 
     /**
      * Activate all nodes using provided options
+     * NOTE: If using large batch publishing it is highly recommended to set synchronous to true on the replication options
      */
     public BiConsumer<ResourceResolver, String> activateAllWithOptions(final ReplicationOptions options) {
         return new BiConsumer<ResourceResolver, String>() {
@@ -222,6 +252,22 @@ public class DeferredActions {
             }
         };
     }
+
+    /**
+     * Activate all nodes using provided options
+     * NOTE: If using large batch publishing it is highly recommended to set synchronous to true on the replication options
+     */
+    public BiConsumer<ResourceResolver, String> activateAllWithRoundRobin(final ReplicationOptions... options) {
+        final List<ReplicationOptions> allTheOptions = Arrays.asList(options);
+        final Iterator<ReplicationOptions> roundRobin = new RoundRobin(allTheOptions).iterator();
+        return new BiConsumer<ResourceResolver, String>() {
+            @Override
+            public void accept(ResourceResolver r, String path) throws ReplicationException {
+                nameThread("activate-" + path);
+                replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path, roundRobin.next());
+            }
+        };
+    }    
 
     /**
      * Deactivate all nodes using default replicators
