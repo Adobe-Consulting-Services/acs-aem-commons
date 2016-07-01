@@ -122,13 +122,20 @@ import java.util.regex.Pattern;
 })
 @Service(Servlet.class)
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
-	private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
-	public static final String NAMED_IMAGE_FILENAME_PATTERN = "acs.commons.namedimage.filename.pattern";
+    private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
-	public static final String DEFAULT_FILENAME_PATTERN = "(image|img)\\.(.+)";
+    public static final String NAME_IMAGE = "image";
 
-	@Reference
+    public static final String NAMED_IMAGE_FILENAME_PATTERN = "acs.commons.namedimage.filename.pattern";
+
+    public static final String DEFAULT_FILENAME_PATTERN = "(image|img)\\.(.+)";
+
+    public static final String RT_LOCAL_SOCIAL_IMAGE = "social:asiFile";
+
+    public static final String RT_REMOTE_SOCIAL_IMAGE = "nt:adobesocialtype";
+
+    @Reference
     private MimeTypeService mimeTypeService;
 
     private static final ValueMap EMPTY_PARAMS = new ValueMapDecorator(new LinkedHashMap<String, Object>());
@@ -348,9 +355,18 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             if (resourceResolver.isResourceType(resource, NameConstants.NT_PAGE)
                     || StringUtils.equals(resource.getPath(), page.getContentResource().getPath())) {
                 // Is a Page or Page's Content Resource; use the Page's image resource
-                return new Image(page.getContentResource(), "image");
+                return new Image(page.getContentResource(), NAME_IMAGE);
             } else {
                 return new Image(resource);
+            }
+        } else {
+        	if (resourceResolver.isResourceType(resource, RT_LOCAL_SOCIAL_IMAGE)
+                    && resource.getValueMap().get("mimetype", StringUtils.EMPTY).startsWith("image/")) {
+                // Is a UGC image
+                return new SocialImageImpl(resource, NAME_IMAGE);
+            } else if (resourceResolver.isResourceType(resource, RT_REMOTE_SOCIAL_IMAGE)) {
+                // Is a UGC image
+                return new SocialRemoteImageImpl(resource, NAME_IMAGE);
             }
         }
 

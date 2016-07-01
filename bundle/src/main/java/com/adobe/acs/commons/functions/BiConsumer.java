@@ -15,6 +15,8 @@
  */
 package com.adobe.acs.commons.functions;
 
+import aQute.bnd.annotation.ConsumerType;
+
 /**
  * Created work-alike for functionality not introduced until Java 8
  * Represents an operation that accepts two input arguments and returns no
@@ -27,6 +29,7 @@ package com.adobe.acs.commons.functions;
  *
  * @see Consumer
  */
+@ConsumerType
 public abstract class BiConsumer<T, U> {
 
     /**
@@ -50,6 +53,9 @@ public abstract class BiConsumer<T, U> {
      * @throws NullPointerException if {@code after} is null
      */
     public BiConsumer<T, U> andThen(final BiConsumer<? super T, ? super U> after) {
+        if (after == null) {
+            throw new NullPointerException();
+        }
         final BiConsumer<T, U> thiss = this;
         return new BiConsumer<T, U>() {
             @Override

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -81,11 +82,16 @@ import com.google.common.cache.CacheBuilder;
 public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, GenericCacheMBean {
 
     private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);
-    
+
     private static final int DEFAULT_MD5_CACHE_SIZE = 300;
-    
+
+    private static final boolean DEFAULT_DISABLE_VERSIONING = false;
+
     @Property(label="MD5 Cache Size", description="Maximum size of the md5 cache.", intValue = DEFAULT_MD5_CACHE_SIZE)
     private static final String PROP_MD5_CACHE_SIZE = "md5cache.size";
+
+    @Property(label="Disable Versioning", description="Should versioning of clientlibs be disabled", boolValue = DEFAULT_DISABLE_VERSIONING)
+    private static final String PROP_DISABLE_VERSIONING = "disable.versioning";
 
     private static final String ATTR_JS_PATH = "src";
     private static final String ATTR_CSS_PATH = "href";
@@ -98,6 +104,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private Cache<VersionedClientLibraryMd5CacheKey, String> md5Cache;
 
+    private boolean disableVersioning;
+
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
 
@@ -109,6 +117,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     protected void activate(Map<String, Object> props) {
         final int size = PropertiesUtil.toInteger(props.get(PROP_MD5_CACHE_SIZE), DEFAULT_MD5_CACHE_SIZE);
         this.md5Cache = CacheBuilder.newBuilder().recordStats().maximumSize(size).build();
+        this.disableVersioning = PropertiesUtil.toBoolean(props.get(PROP_DISABLE_VERSIONING), DEFAULT_DISABLE_VERSIONING);
     }
 
     @Deactivate
@@ -229,7 +238,13 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         public void startElement(final String namespaceURI, final String localName, final String qName,
                                  final Attributes attrs)
                 throws SAXException {
-            getContentHandler().startElement(namespaceURI, localName, qName, versionClientLibs(localName, attrs));
+            final Attributes nextAttributes;
+            if (disableVersioning) {
+                nextAttributes = attrs;
+            } else {
+                nextAttributes = versionClientLibs(localName, attrs);
+            }
+            getContentHandler().startElement(namespaceURI, localName, qName, nextAttributes);
         }
     }
 
@@ -247,7 +262,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     @Override
     protected long getBytesLength(String cacheObj) {
-        return cacheObj.getBytes().length;
+        return cacheObj.getBytes(Charset.forName("UTF-8")).length;
     }
 
     @Override

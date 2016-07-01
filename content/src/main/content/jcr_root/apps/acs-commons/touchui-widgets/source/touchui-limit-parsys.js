@@ -142,5 +142,9 @@
         }
     }
 
-    $(extendComponentDrop);
-}(jQuery, jQuery(document), Granite.author));
+    $(function() {
+        if (gAuthor && gAuthor.ui && gAuthor.ui.dropController) {
+            extendComponentDrop();
+        }
+    });
+}(jQuery, jQuery(document), (window.Granite.author = window.Granite.author || {})));

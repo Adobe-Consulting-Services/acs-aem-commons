@@ -15,6 +15,8 @@
  */
 package com.adobe.acs.commons.functions;
 
+import aQute.bnd.annotation.ConsumerType;
+
 /**
  * Created work-alike for functionality not introduced until Java 8
  * Represents a function that accepts two arguments and produces a result.
@@ -26,6 +28,7 @@ package com.adobe.acs.commons.functions;
  *
  * @see Function
  */
+@ConsumerType
 public abstract class BiFunction<T, U, R> {
 
     /**
@@ -51,7 +54,9 @@ public abstract class BiFunction<T, U, R> {
      * @throws NullPointerException if after is null
      */
     public <V> BiFunction<T, U, V> andThen(final Function<? super R, ? extends V> after) {
-//        Objects.requireNonNull(after);
+        if (after == null) {
+            throw new NullPointerException();
+        }
         final BiFunction<T, U, R> thiss = this;
         return new BiFunction<T, U, V>() {
             @Override

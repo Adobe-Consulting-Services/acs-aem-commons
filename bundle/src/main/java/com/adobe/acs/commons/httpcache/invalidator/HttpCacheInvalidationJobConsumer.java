@@ -21,12 +21,19 @@ package com.adobe.acs.commons.httpcache.invalidator;
 
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
+import com.day.cq.wcm.commons.ReferenceSearch;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * ACS AEM Commons - HTTP Cache - Cache invalidation job consumer
@@ -35,16 +42,36 @@ import org.slf4j.LoggerFactory;
  * Sling job consumer consuming the job created for invalidating cache. For creating an invalidation job for this
  * consumer, make use of the topic and associated constants defined at {@link CacheInvalidationJobConstants}
  */
-@Component(immediate = true)
+@Component(label = "ACS AEM Commons - HTTP Cache - Cache invalidation job consumer",
+           description = "Consumes job for invalidating the http cache",
+           immediate = true,
+           metatype = true)
 @Service
 @Property(name = JobConsumer.PROPERTY_TOPICS,
-          value = CacheInvalidationJobConstants.TOPIC_HTTP_CACHE_INVALIDATION_JOB)
+          value = CacheInvalidationJobConstants.TOPIC_HTTP_CACHE_INVALIDATION_JOB,
+          propertyPrivate = true
+)
 public class HttpCacheInvalidationJobConsumer implements JobConsumer {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheInvalidationJobConsumer.class);
 
+    @Property(label = "Invalidate references",
+            description = "Whether to search for references and invalidate them in the cache.",
+            boolValue = HttpCacheInvalidationJobConsumer.DEFAULT_REFERENCES)
+    private static final String PROP_REFERENCES = "httpcache.config.invalidation.references";
+    private static final boolean DEFAULT_REFERENCES = false;
+    private boolean invalidateRefs;
+
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
-               policy = ReferencePolicy.DYNAMIC)
+            policy = ReferencePolicy.DYNAMIC)
     private HttpCacheEngine httpCacheEngine;
+
+    @Reference
+    private ResourceResolverFactory resolverFactory;
+
+    @Activate
+    protected void activate(Map<String, Object> configs) {
+        invalidateRefs = PropertiesUtil.toBoolean(configs.get(PROP_REFERENCES), DEFAULT_REFERENCES);
+    }
 
     @Override
     public JobResult process(final Job job) {
@@ -56,16 +83,55 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
             return JobResult.CANCEL;
         }
 
+        invalidate(path);
+
+        if(invalidateRefs) {
+            invalidateReferences(path);
+        }
+
+        log.trace("Invalidation job for the path processed.", path);
+        return JobResult.OK;
+    }
+
+    /**
+     * Invalidate the cache for the given path
+     *
+     * @param path the resource to invalidate
+     */
+    void invalidate(String path){
         // Check if the path in the job is applicable for the set cache configs.
         if (httpCacheEngine.isPathPotentialToInvalidate(path)) {
             // Invalidate the cache.
             try{
+                log.debug("invalidating {}", path);
                 httpCacheEngine.invalidateCache(path);
             } catch (HttpCacheException e){
                 log.debug("Job with the payload path - {} has invalidated the cache", path);
             }
         }
-        log.trace("Invalidation job for the path processed.", path);
-        return JobResult.OK;
+
+    }
+
+    /**
+     * Searches for references to the given path and invalidates them in the cache
+     *
+     * @param path the path to search for
+     */
+    void invalidateReferences(String path){
+        ResourceResolver adminResolver = null;
+        try {
+            adminResolver = resolverFactory.getServiceResourceResolver(null);
+            Collection<ReferenceSearch.Info> refs = new ReferenceSearch()
+                    .search(adminResolver, path).values();
+            for (ReferenceSearch.Info info : refs) {
+                String refPath = info.getPage().getPath();
+                invalidate(refPath);
+
+            }
+        } catch (Exception e){
+            log.debug("failed to invalidate references of {}", path);
+        } finally {
+            if(adminResolver != null) adminResolver.close();
+        }
     }
 }

@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.functions.*;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
@@ -41,7 +42,8 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 @Component(metatype = true, immediate = true, label = "Deferred Actions")
 @Service(DeferredActions.class)
-public class DeferredActions {
+@ProviderType
+public final class DeferredActions {
     @Reference
     private SyntheticWorkflowRunner workflowRunner;
 

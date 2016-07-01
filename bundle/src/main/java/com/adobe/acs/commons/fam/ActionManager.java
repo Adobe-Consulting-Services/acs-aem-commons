@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.functions.BiConsumer;
 import com.adobe.acs.commons.functions.BiFunction;
 import com.adobe.acs.commons.functions.Consumer;
@@ -27,8 +28,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  *
- * @author brobert
  */
+@ProviderType
 public interface ActionManager {
 
     /**

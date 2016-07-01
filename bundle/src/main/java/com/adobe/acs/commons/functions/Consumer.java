@@ -15,6 +15,8 @@
  */
 package com.adobe.acs.commons.functions;
 
+import aQute.bnd.annotation.ConsumerType;
+
 /**
  * Created work-alike for functionality not introduced until Java 8
  * Represents an operation that accepts a single input argument and returns no
@@ -23,6 +25,7 @@ package com.adobe.acs.commons.functions;
  *
  * @param <T> the type of the input to the operation
  */
+@ConsumerType
 public abstract class Consumer<T> {
 
     /**
@@ -45,7 +48,9 @@ public abstract class Consumer<T> {
      * @throws NullPointerException if {@code after} is null
      */
     public Consumer<T> andThen(final Consumer<? super T> after) {
-//        Objects.requireNonNull(after);
+        if (after == null) {
+            throw new NullPointerException();
+        }
         final Consumer<T> thiss = this;
         return new Consumer<T>() {
             @Override
