@@ -27,11 +27,19 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
-import com.google.common.cache.*;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +50,6 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
-
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -167,7 +174,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
 
     @Override
     public boolean contains(CacheKey key) {
-        if (null == this.getIfPresent(key)) {
+        if (null == cache.getIfPresent(key)) {
             return false;
         }
         return true;
@@ -179,6 +186,10 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         if (null == value) {
             return null;
         }
+
+        // Increment hit count
+        value.incrementHitCount();
+
         return new CacheContent(value.getCharEncoding(), value.getContentType(), value.getHeaders(), new
                 ByteArrayInputStream(value.getBytes()));
     }
@@ -244,9 +255,14 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
 
     @Override
     protected void addCacheData(Map<String, Object> data, MemCachePersistenceObject cacheObj) {
-        data.put("Size", FileUtils.byteCountToDisplaySize(cacheObj.getBytes().length));
+        int hitCount = cacheObj.getHitCount();
+        long size = cacheObj.getBytes().length;
+        data.put("Size", FileUtils.byteCountToDisplaySize(size));
         data.put("Content Type", cacheObj.getContentType());
         data.put("Character Encoding", cacheObj.getCharEncoding());
+        data.put("Hits", hitCount);
+        data.put("Total Size Served from Cache", FileUtils.byteCountToDisplaySize(hitCount * size));
+
     }
 
     @Override
@@ -259,9 +275,9 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     @Override
     protected CompositeType getCacheEntryType() throws OpenDataException {
        return new CompositeType("Cache Entry", "Cache Entry",
-                new String[] { "Cache Key", "Size", "Content Type", "Character Encoding" },
-                new String[] { "Cache Key", "Size", "Content Type", "Character Encoding" },
-                new OpenType[] { SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
+                new String[] { "Cache Key", "Size", "Content Type", "Character Encoding", "Hits", "Total Size Served from Cache" },
+                new String[] { "Cache Key", "Size", "Content Type", "Character Encoding", "Hits", "Total Size Served from Cache" },
+                new OpenType[] { SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING });
 
     }
 

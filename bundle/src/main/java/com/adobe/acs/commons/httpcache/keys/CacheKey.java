@@ -27,7 +27,26 @@ package com.adobe.acs.commons.httpcache.keys;
 public interface CacheKey {
     /**
      * Get URI.
-     * @return
+     * @return the universal resource id. This can be a RequestURI or a Resource path based on the context of the key.
      */
     String getUri();
+
+    /**
+     * The hashCode for the cache key.
+     * @return the hash code.
+     */
+    int hashCode();
+
+    /**
+     * The useful string representation of this cache key. This should be generally unique as it drives display in the mbean.
+     * @return the string representing the cache key for human consumption.
+     */
+    String toString();
+
+    /**
+     * The equals method used to match up request-derived cache keys with keys in the httpcache.
+     * @param o the object to evaluate this against.
+     * @return true if the objects represent the same cache item, false otherwise.
+     */
+    boolean equals(Object o);
 }
