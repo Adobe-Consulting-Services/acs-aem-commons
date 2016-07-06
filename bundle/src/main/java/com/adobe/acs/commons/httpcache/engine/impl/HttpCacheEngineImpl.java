@@ -25,15 +25,28 @@ import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
-import com.adobe.acs.commons.httpcache.exception.*;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
+import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -43,9 +56,22 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.*;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -87,6 +113,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 // @formatter:on
 public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpCacheEngine, HttpCacheEngineMBean {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
+
+    private static final String REQUEST_ATTR_IS_REQUEST_CACHEABLE = "acs-commons--http-cache--global-rules--is-request-cacheable";
 
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
@@ -270,6 +298,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public boolean isRequestCacheable(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
             HttpCacheRepositoryAccessException {
 
+        // Only evaluate global rules once
+        //if (request.getAttribute(REQUEST_ATTR_IS_REQUEST_CACHEABLE) != null) {
+        //    return (Boolean) request.getAttribute(REQUEST_ATTR_IS_REQUEST_CACHEABLE);
+        //}
+
         // Execute custom rules.
         for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
             // Apply rule if it's a configured global or cache-config tied rule.
@@ -281,18 +314,25 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                                 .getRequestURL(), rule.getClass().getName());
                     }
                     // Only a single rule need to fail to cause the caching mechanism to be by-passed
+                    request.setAttribute(REQUEST_ATTR_IS_REQUEST_CACHEABLE, Boolean.FALSE);
                     return false;
                 }
             }
         }
 
         // All rules have accepted this request, so request is cache-able.
+        request.setAttribute(REQUEST_ATTR_IS_REQUEST_CACHEABLE, Boolean.TRUE);
         return true;
     }
 
     @Override
     public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException,
             HttpCacheConfigConflictException {
+        return getCacheConfig(request, HttpCacheConfig.FilterScope.REQUEST);
+    }
+
+    @Override
+    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request, HttpCacheConfig.FilterScope filterScope) throws HttpCacheConfigConflictException, HttpCacheRepositoryAccessException {
 
         // Get the first accepting cache config based on the cache config order.
         HttpCacheConfig bestCacheConfig = null;
@@ -309,7 +349,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                     // Since cacheConfigs is sorted by order, this means all other orders will not match
                     break;
                 }
-            } else if (cacheConfig.accepts(request)) {
+            } else if (filterScope.equals(cacheConfig.getFilterScope()) && cacheConfig.accepts(request)) {
                 bestCacheConfig = cacheConfig;
             }
         }
@@ -365,7 +405,8 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Copy the cached data into the servlet output stream.
         try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+            // TODO CHECK THIS OUTPUTSTREAM TO WRITER
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
             if (log.isDebugEnabled()) {
                 log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
             }
