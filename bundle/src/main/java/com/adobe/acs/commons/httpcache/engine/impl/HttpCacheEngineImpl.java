@@ -114,8 +114,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpCacheEngine, HttpCacheEngineMBean {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
 
-    private static final String REQUEST_ATTR_IS_REQUEST_CACHEABLE = "acs-commons--http-cache--global-rules--is-request-cacheable";
-
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
     /** Thread safe list to contain the registered HttpCacheConfig references. */
@@ -298,11 +296,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public boolean isRequestCacheable(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
             HttpCacheRepositoryAccessException {
 
-        // Only evaluate global rules once
-        //if (request.getAttribute(REQUEST_ATTR_IS_REQUEST_CACHEABLE) != null) {
-        //    return (Boolean) request.getAttribute(REQUEST_ATTR_IS_REQUEST_CACHEABLE);
-        //}
-
         // Execute custom rules.
         for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
             // Apply rule if it's a configured global or cache-config tied rule.
@@ -314,14 +307,12 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                                 .getRequestURL(), rule.getClass().getName());
                     }
                     // Only a single rule need to fail to cause the caching mechanism to be by-passed
-                    request.setAttribute(REQUEST_ATTR_IS_REQUEST_CACHEABLE, Boolean.FALSE);
                     return false;
                 }
             }
         }
 
         // All rules have accepted this request, so request is cache-able.
-        request.setAttribute(REQUEST_ATTR_IS_REQUEST_CACHEABLE, Boolean.TRUE);
         return true;
     }
 
@@ -405,7 +396,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Copy the cached data into the servlet output stream.
         try {
-            // TODO CHECK THIS OUTPUTSTREAM TO WRITER
             IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
             if (log.isDebugEnabled()) {
                 log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
@@ -435,7 +425,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             cacheConfig) throws HttpCacheKeyCreationException, HttpCacheDataStreamException,
             HttpCachePersistenceException {
 
-        // TODO - This can be made asynchronous to avoid performance penality on response cache.
+        // TODO - This can be made asynchronous to avoid performance penalty on response cache.
 
         CacheContent cacheContent = null;
         try {

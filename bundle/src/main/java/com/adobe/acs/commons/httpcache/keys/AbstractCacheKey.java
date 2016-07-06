@@ -22,6 +22,7 @@ package com.adobe.acs.commons.httpcache.keys;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.day.cq.commons.PathInfo;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 public abstract class AbstractCacheKey {
@@ -54,6 +55,13 @@ public abstract class AbstractCacheKey {
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(getUri())
+                .append(getAuthenticationRequirement()).toHashCode();
     }
 
     public String getAuthenticationRequirement() {

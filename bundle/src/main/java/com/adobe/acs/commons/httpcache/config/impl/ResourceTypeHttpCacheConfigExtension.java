@@ -135,7 +135,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     /**
      * The ResourceTypeCacheKey is a custom CacheKey bound to this particular factory.
      */
-    class ResourceTypeCacheKey extends AbstractCacheKey implements CacheKey {
+    static class ResourceTypeCacheKey extends AbstractCacheKey implements CacheKey {
         public ResourceTypeCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
                 HttpCacheKeyCreationException {
             super(request, cacheConfig);
