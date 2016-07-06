@@ -20,7 +20,28 @@
 
 package com.adobe.acs.commons.httpcache.keys;
 
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import com.day.cq.commons.PathInfo;
+import org.apache.sling.api.SlingHttpServletRequest;
+
 public abstract class AbstractCacheKey {
+
+    protected String authenticationRequirement;
+    protected String uri;
+    protected String resourcePath;
+
+    public AbstractCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
+        this.authenticationRequirement = cacheConfig.getAuthenticationRequirement();
+        this.uri = request.getRequestURI();
+        this.resourcePath = request.getResource().getPath();
+    }
+
+
+    public AbstractCacheKey(String uri, HttpCacheConfig cacheConfig) {
+        this.authenticationRequirement = cacheConfig.getAuthenticationRequirement();
+        this.uri = uri;
+        this.resourcePath = new PathInfo(uri).getResourcePath();
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -33,5 +54,13 @@ public abstract class AbstractCacheKey {
         }
 
         return true;
+    }
+
+    public String getAuthenticationRequirement() {
+        return authenticationRequirement;
+    }
+
+    public String getUri() {
+        return uri;
     }
 }

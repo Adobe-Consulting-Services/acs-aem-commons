@@ -137,15 +137,13 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
      * The ResourceTypeCacheKey is a custom CacheKey bound to this particular factory.
      */
     class ResourceTypeCacheKey extends AbstractCacheKey implements CacheKey {
-        private String resourcePath;
-
         public ResourceTypeCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
                 HttpCacheKeyCreationException {
-            this.resourcePath = request.getResource().getPath();
+            super(request, cacheConfig);
         }
 
         public ResourceTypeCacheKey(String uri, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
-            this.resourcePath = new PathInfo(uri).getResourcePath();
+            super(uri, cacheConfig);
         }
 
         @Override
@@ -155,17 +153,23 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
             }
 
             ResourceTypeCacheKey that = (ResourceTypeCacheKey) o;
-            return new EqualsBuilder().append(resourcePath, that.resourcePath).isEquals();
+            return new EqualsBuilder()
+                    .append(getUri(), that.getUri())
+                    .append(getAuthenticationRequirement(), that.getAuthenticationRequirement())
+                    .isEquals();
         }
 
         @Override
         public int hashCode() {
-            return new HashCodeBuilder(17, 37).append(resourcePath).toHashCode();
+            return new HashCodeBuilder(17, 37)
+                    .append(getUri())
+                    .append(getAuthenticationRequirement()).toHashCode();
         }
 
         @Override
         public String toString() {
-            return this.resourcePath;
+            return this.resourcePath + " [AUTH_REQ:" + getAuthenticationRequirement() + "]";
+
         }
 
         @Override
