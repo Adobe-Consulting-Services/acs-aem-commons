@@ -27,7 +27,9 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import javax.jcr.Session;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -42,6 +44,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 @Service(DeferredActions.class)
 @ProviderType
 public final class DeferredActions {
+    public static final String ORIGINAL_RENDITION = "original";
+
     @Reference
     private SyntheticWorkflowRunner workflowRunner;
 
@@ -107,6 +111,38 @@ public final class DeferredActions {
         };
     }
 
+    /**
+     * This filter identifies assets where the original rendition is newer than any of the other renditions.
+     * This is an especially useful function for updating assets with missing or outdated thumbnails.
+     * @return True if asset has no thumbnails or outdated thumbnails
+     */
+    public BiFunction<ResourceResolver, String, Boolean> filterAssetsWithOutdatedRenditions() {
+        return new BiFunction<ResourceResolver, String, Boolean>() {
+            @Override
+            public Boolean apply(ResourceResolver r, String path) {
+                nameThread("filterAssetsWithOutdatedRenditions-" + path);
+                Resource res = r.getResource(path);
+                com.day.cq.dam.api.Asset asset = DamUtil.resolveToAsset(res);
+                if (asset == null) {
+                    return false;
+                }
+                com.day.cq.dam.api.Rendition original = asset.getRendition(ORIGINAL_RENDITION);
+                if (original == null) {
+                    return false;
+                }
+                long originalTime = original.getResourceMetadata().getCreationTime();
+                int counter = 0;
+                for (com.day.cq.dam.api.Rendition rendition : asset.getRenditions()) {
+                    counter++;
+                    long time = rendition.getResourceMetadata().getCreationTime();
+                    if (time < originalTime) {
+                        return true;
+                    }                        
+                }
+                return counter <= 1;
+            }
+        };    
+    }
     //-- Query Result consumers (for using withQueryResults)
     /**
      * Retry provided action a given number of times before giving up and throwing an error.
@@ -159,6 +195,33 @@ public final class DeferredActions {
         };
     }
 
+    public BiConsumer<ResourceResolver, String> withAllRenditions(
+            final BiConsumer<ResourceResolver, String> action, 
+            final BiFunction<ResourceResolver, String, Boolean>... filters) {
+        return new BiConsumer<ResourceResolver, String>() {
+            @Override
+            public void accept(ResourceResolver r, String path) throws Exception {
+                AssetManager assetManager = r.adaptTo(AssetManager.class);
+                Asset asset = assetManager.getAsset(path);
+                for (Iterator<? extends Rendition> renditions = asset.listRenditions(); renditions.hasNext();) {
+                    Rendition rendition = renditions.next();
+                    boolean skip = false;
+                    if (filters != null) {
+                        for (BiFunction<ResourceResolver, String, Boolean> filter : filters) {
+                            if (!filter.apply(r, rendition.getPath())) {
+                                skip=true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!skip) {
+                        action.accept(r, path);
+                    }
+                }                
+            }
+        };
+    }
+    
     /**
      * Remove all renditions except for the original rendition for assets
      */
@@ -214,6 +277,7 @@ public final class DeferredActions {
 
     /**
      * Activate all nodes using provided options
+     * NOTE: If using large batch publishing it is highly recommended to set synchronous to true on the replication options
      */
     public BiConsumer<ResourceResolver, String> activateAllWithOptions(final ReplicationOptions options) {
         return new BiConsumer<ResourceResolver, String>() {
@@ -224,6 +288,22 @@ public final class DeferredActions {
             }
         };
     }
+
+    /**
+     * Activate all nodes using provided options
+     * NOTE: If using large batch publishing it is highly recommended to set synchronous to true on the replication options
+     */
+    public BiConsumer<ResourceResolver, String> activateAllWithRoundRobin(final ReplicationOptions... options) {
+        final List<ReplicationOptions> allTheOptions = Arrays.asList(options);
+        final Iterator<ReplicationOptions> roundRobin = new RoundRobin(allTheOptions).iterator();
+        return new BiConsumer<ResourceResolver, String>() {
+            @Override
+            public void accept(ResourceResolver r, String path) throws ReplicationException {
+                nameThread("activate-" + path);
+                replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path, roundRobin.next());
+            }
+        };
+    }    
 
     /**
      * Deactivate all nodes using default replicators
