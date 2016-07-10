@@ -20,9 +20,10 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
@@ -46,21 +47,15 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
     
     public ActionManagerFactoryImpl() throws NotCompliantMBeanException {
         super(ActionManagerMBean.class);
-        tasks = new HashMap<String, ActionManagerImpl>();
+        tasks = new ConcurrentHashMap<String, ActionManagerImpl>();
     }
     
     @Override
     public ActionManager createTaskManager(String name, ResourceResolver resourceResolver, int saveInterval) throws LoginException {
-        String tryName = name;
-        int counter = 1;
-        while (tasks.containsKey(tryName)) {
-            counter++;
-            tryName = name + " (" + counter + ")";
-        }
-        name = tryName;
+        String fullName = String.format("%s (%s)", name, UUID.randomUUID().toString());
         
         ActionManagerImpl manager = new ActionManagerImpl(name, taskRunner, resourceResolver, saveInterval);
-        tasks.put(tryName, manager);
+        tasks.put(fullName, manager);
         return manager;
     }
     
