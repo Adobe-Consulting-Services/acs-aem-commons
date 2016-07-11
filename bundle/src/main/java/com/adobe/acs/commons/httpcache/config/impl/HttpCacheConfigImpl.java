@@ -165,9 +165,9 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Property(label = "Filter scope",
             description = "Specify the scope of this HttpCacheConfig in the scope of the Sling Servlet Filter processing chain.",
             options = {
-                    @PropertyOption(name = "Request",
+                    @PropertyOption(name = FILTER_SCOPE_REQUEST,
                             value = FILTER_SCOPE_REQUEST),
-                    @PropertyOption(name = "Include",
+                    @PropertyOption(name = FILTER_SCOPE_INCLUDE,
                             value = FILTER_SCOPE_INCLUDE)
             },
             value = DEFAULT_FILTER_SCOPE)
@@ -236,7 +236,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
         order = PropertiesUtil.toInteger(configs.get(PROP_ORDER), DEFAULT_ORDER);
 
-        filterScope = FilterScope.valueOf(PropertiesUtil.toString(PROP_FILTER_SCOPE, DEFAULT_FILTER_SCOPE).toUpperCase());
+        filterScope = FilterScope.valueOf(PropertiesUtil.toString(configs.get(PROP_FILTER_SCOPE), DEFAULT_FILTER_SCOPE).toUpperCase());
 
         // PIDs of cache handling rules.
         cacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get

@@ -27,7 +27,6 @@ import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.util.ParameterUtil;
-import com.day.cq.commons.PathInfo;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.felix.scr.annotations.Activate;
@@ -136,16 +135,14 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     /**
      * The ResourceTypeCacheKey is a custom CacheKey bound to this particular factory.
      */
-    class ResourceTypeCacheKey extends AbstractCacheKey implements CacheKey {
-        private String resourcePath;
-
+    static class ResourceTypeCacheKey extends AbstractCacheKey implements CacheKey {
         public ResourceTypeCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
                 HttpCacheKeyCreationException {
-            this.resourcePath = request.getResource().getPath();
+            super(request, cacheConfig);
         }
 
         public ResourceTypeCacheKey(String uri, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
-            this.resourcePath = new PathInfo(uri).getResourcePath();
+            super(uri, cacheConfig);
         }
 
         @Override
@@ -155,17 +152,23 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
             }
 
             ResourceTypeCacheKey that = (ResourceTypeCacheKey) o;
-            return new EqualsBuilder().append(resourcePath, that.resourcePath).isEquals();
+            return new EqualsBuilder()
+                    .append(getUri(), that.getUri())
+                    .append(getAuthenticationRequirement(), that.getAuthenticationRequirement())
+                    .isEquals();
         }
 
         @Override
         public int hashCode() {
-            return new HashCodeBuilder(17, 37).append(resourcePath).toHashCode();
+            return new HashCodeBuilder(17, 37)
+                    .append(getUri())
+                    .append(getAuthenticationRequirement()).toHashCode();
         }
 
         @Override
         public String toString() {
-            return this.resourcePath;
+            return this.resourcePath + " [AUTH_REQ:" + getAuthenticationRequirement() + "]";
+
         }
 
         @Override

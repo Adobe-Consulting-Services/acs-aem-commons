@@ -23,6 +23,7 @@ import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
+import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.util.UserUtils;
@@ -142,67 +143,52 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     /**
      * The GroupCacheKey is a custom CacheKey bound to this particular factory.
      */
-    class GroupCacheKey implements CacheKey {
+    class GroupCacheKey extends AbstractCacheKey implements CacheKey {
 
         /* This key is composed of uri, list of user groups and authentication requirement details */
-        private String uri;
         private List<String> cacheKeyUserGroups;
-        private String authenticationRequirement;
 
         public GroupCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
                 HttpCacheKeyCreationException {
 
-            this.uri = request.getRequestURI();
+            super(request, cacheConfig);
             this.cacheKeyUserGroups = userGroups;
-            this.authenticationRequirement = cacheConfig.getAuthenticationRequirement();
         }
 
         public GroupCacheKey(String uri, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
-
-            this.uri = uri;
-            // Note - Custom attribute in this case is user group names.
+            super(uri, cacheConfig);
             this.cacheKeyUserGroups = userGroups;
-            this.authenticationRequirement = cacheConfig.getAuthenticationRequirement();
         }
 
         @Override
         public boolean equals(Object o) {
-
-            if (this == o) {
-                return true;
-            }
-
-            if (o == null || getClass() != o.getClass()) {
+            if (!super.equals(o)) {
                 return false;
             }
 
             GroupCacheKey that = (GroupCacheKey) o;
 
-            return new EqualsBuilder().append(uri, that.uri).append(cacheKeyUserGroups, that.cacheKeyUserGroups)
-                    .append(authenticationRequirement, that.authenticationRequirement).isEquals();
+            return new EqualsBuilder()
+                    .append(getUri(), that.getUri())
+                    .append(cacheKeyUserGroups, that.cacheKeyUserGroups)
+                    .append(getAuthenticationRequirement(), that.getAuthenticationRequirement())
+                    .isEquals();
         }
 
         @Override
         public int hashCode() {
-
-            return new HashCodeBuilder(17, 37).append(uri).append(cacheKeyUserGroups).append
-                    (authenticationRequirement).toHashCode();
+            return new HashCodeBuilder(17, 37)
+                    .append(getUri())
+                    .append(cacheKeyUserGroups)
+                    .append(getAuthenticationRequirement()).toHashCode();
         }
 
         @Override
         public String toString() {
-
-            StringBuilder formattedString = new StringBuilder(this.uri.replace('/', '_')).append("_");
-            for (String userGroup : cacheKeyUserGroups) {
-                formattedString.append(userGroup).append("_");
-            }
-            formattedString.append(authenticationRequirement);
+            StringBuilder formattedString = new StringBuilder(this.uri).append(" [GROUPS:");
+            formattedString.append(StringUtils.join(cacheKeyUserGroups, "|"));
+            formattedString.append("] [AUTH_REQ:" + getAuthenticationRequirement() + "]");
             return formattedString.toString();
-        }
-
-        @Override
-        public String getUri() {
-            return this.uri;
         }
     }
 
