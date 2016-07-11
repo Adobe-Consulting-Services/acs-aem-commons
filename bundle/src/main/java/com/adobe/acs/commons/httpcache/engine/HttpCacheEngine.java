@@ -20,11 +20,7 @@
 package com.adobe.acs.commons.httpcache.engine;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
+import com.adobe.acs.commons.httpcache.exception.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
@@ -48,8 +44,6 @@ public interface HttpCacheEngine {
     /**
      * Get the first, based on cache config order, cache config applicable for the given request.
      *
-     * Defaults to the Request scope.
-     *
      * @param request
      * @return Applicable CacheConfig
      * @throws HttpCacheConfigConflictException When more than one cache config matches.
@@ -57,19 +51,6 @@ public interface HttpCacheEngine {
      */
     HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheConfigConflictException,
             HttpCacheRepositoryAccessException;
-
-    /**
-     * Get the first, based on cache config order, cache config applicable for the given request.
-     *
-     * @param request
-     * @param slingFilterScope
-     * @return Applicable CacheConfig
-     * @throws HttpCacheConfigConflictException When more than one cache config matches.
-     * @throws HttpCacheRepositoryAccessException
-     */
-    HttpCacheConfig getCacheConfig(SlingHttpServletRequest request, HttpCacheConfig.FilterScope filterScope) throws HttpCacheConfigConflictException,
-            HttpCacheRepositoryAccessException;
-
 
     /**
      * Check if the given request can be served from available cache.

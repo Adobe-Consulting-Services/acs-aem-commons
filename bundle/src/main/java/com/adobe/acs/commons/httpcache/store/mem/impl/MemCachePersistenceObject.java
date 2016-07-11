@@ -27,12 +27,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 
 /**
  * Value for cache item in mem store.
@@ -46,7 +41,6 @@ class MemCachePersistenceObject {
     Multimap<String, String> headers;
     /** Byte array to hold the data from the stream */
     private byte[] bytes;
-    AtomicInteger count = new AtomicInteger(0);
 
     /**
      * Create <code>MemCachePersistenceObject</code>. Use <code>buildForCaching</code> method to initialize parameters.
@@ -84,7 +78,6 @@ class MemCachePersistenceObject {
         } catch (IOException e) {
             throw new HttpCacheDataStreamException("Unable to get byte array out of stream", e);
         }
-
         return this;
     }
 
@@ -132,17 +125,4 @@ class MemCachePersistenceObject {
     public byte[] getBytes() {
         return bytes;
     }
-
-
-    /**
-     * Increments the hit for this cache entry.
-     */
-    public void incrementHitCount() {
-        count.incrementAndGet();
-    }
-
-    /**
-     * @return the number of times this cache entry has been requested
-     */
-    public int getHitCount() { return count.get(); }
 }
