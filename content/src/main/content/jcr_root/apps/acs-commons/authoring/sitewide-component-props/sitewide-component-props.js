@@ -7,25 +7,29 @@
             var originalDialogSrc = editable.config.dialogSrc;
             var originalDialog = editable.config.dialog;
             
-            var dialogSrcArray = editable.config.dialogSrc.split(".html");
-            var langRootRegexp = /^(\/content\/([^/]+\/)+([a-zA-Z]{2}([_-][a-zA-Z]{2})?))(|\/.*)$/g;
-            var match = langRootRegexp.exec(dialogSrcArray[1]);
+            try {
+                var dialogSrcArray = editable.config.dialogSrc.split(".html");
+                var langRootRegexp = /^(\/content\/([^/]+\/)+([a-zA-Z]{2}([_-][a-zA-Z]{2})?))(|\/.*)$/g;
+                var match = langRootRegexp.exec(dialogSrcArray[1]);
+                
+                var siteWideDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "_cq_dialogsitewide") +
+                                        ".html" +
+                                        match[1] +
+                                        "/jcr:content/sitewideprops/" +
+                                        editable.type;
+                
+                editable.config.dialogSrc = siteWideDialogSrc;
+                editable.config.dialog = editable.config.dialog.replace("cq:dialog", "cq:dialogsitewide");
+                
+                ns.edit.actions.doConfigure(editable);
             
-            var siteWideDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "_cq_dialogsitewide") +
-                                    ".html" +
-                                    match[1] +
-                                    "/jcr:content/sitewideprops/" +
-                                    editable.type;
-            
-            editable.config.dialogSrc = siteWideDialogSrc;
-            editable.config.dialog = editable.config.dialog.replace("cq:dialog", "cq:dialogsitewide");
-            
-            ns.edit.actions.doConfigure(editable);
-            
-            //set the dialog and dialogSrc back to the original values so normal edit dialog continues to work
-            editable.config.dialogSrc = originalDialogSrc;
-            editable.config.dialog = originalDialog;
-            
+            } catch(err) {
+                console.error("Error getting the dialogsitewide dialog: " + err);
+            } finally {
+                //set the dialog and dialogSrc back to the original values so normal edit dialog continues to work
+                editable.config.dialogSrc = originalDialogSrc;
+                editable.config.dialog = originalDialog;
+            }
             // do not close toolbar
             return false;
         },
