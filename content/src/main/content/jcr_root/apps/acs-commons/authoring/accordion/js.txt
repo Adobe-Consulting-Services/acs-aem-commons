@@ -1,1 +1,1 @@
-accordion.js
+rte-accordion.js
