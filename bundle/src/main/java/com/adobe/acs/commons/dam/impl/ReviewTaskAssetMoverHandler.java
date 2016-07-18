@@ -358,11 +358,14 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
             if (destPath != null) {
                 if (StringUtils.startsWith(destPath, PATH_CONTENT_DAM)) {
+
                     String destAssetPath = destPath + "/" + asset.getName();
                     final boolean exists = assetManager.assetExists(destAssetPath);
 
                     if (exists) {
-                        if(CONFLICT_RESOLUTION_OVERWRITE.equals(conflictResolution)) {
+                        if (StringUtils.equals(asset.getPath(), destAssetPath)) {
+                            log.info("Reviewed asset [ {} ] is already in its final location, so there is nothing to do.", asset.getPath());
+                        } else if(CONFLICT_RESOLUTION_OVERWRITE.equals(conflictResolution)) {
                             assetManager.removeAsset(destAssetPath);
                             resourceResolver.commit();
                             assetManager.moveAsset(asset.getPath(), destAssetPath);
