@@ -106,7 +106,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
     private static final String PN_CONTENT_PATH = "contentPath";
     private static final String PN_CONFLICT_RESOLUTION = "onReviewConflictResolution";
     private static final String CONFLICT_RESOLUTION_SKIP = "skip";
-    private static final String CONFLICT_RESOLUTION_OVERWRITE = "overwrite";
+    private static final String CONFLICT_RESOLUTION_REPLACE = "replace";
     private static final String CONFLICT_RESOLUTION_NEW_ASSET = "new-asset";
     private static final String CONFLICT_RESOLUTION_NEW_VERSION = "new-version";
 
@@ -126,7 +126,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             options = {
                     @PropertyOption(name = CONFLICT_RESOLUTION_NEW_VERSION, value = "Add as version (new-version)"),
                     @PropertyOption(name = CONFLICT_RESOLUTION_NEW_ASSET, value = "Add as new asset (new-asset)"),
-                    @PropertyOption(name = CONFLICT_RESOLUTION_OVERWRITE, value = "Overwrite (overwrite)"),
+                    @PropertyOption(name = CONFLICT_RESOLUTION_REPLACE, value = "Replace (replace)"),
                     @PropertyOption(name = CONFLICT_RESOLUTION_SKIP, value = "Skip (skip)")
             },
             value = DEFAULT_DEFAULT_CONFLICT_RESOLUTION)
@@ -365,11 +365,11 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                     if (exists) {
                         if (StringUtils.equals(asset.getPath(), destAssetPath)) {
                             log.info("Reviewed asset [ {} ] is already in its final location, so there is nothing to do.", asset.getPath());
-                        } else if(CONFLICT_RESOLUTION_OVERWRITE.equals(conflictResolution)) {
+                        } else if(CONFLICT_RESOLUTION_REPLACE.equals(conflictResolution)) {
                             assetManager.removeAsset(destAssetPath);
                             resourceResolver.commit();
                             assetManager.moveAsset(asset.getPath(), destAssetPath);
-                            log.info("Moved with overwrite [ {} ] ~> [ {} ] based on approval status [ " + status + " ]",
+                            log.info("Moved with replace [ {} ] ~> [ {} ] based on approval status [ " + status + " ]",
                                     asset.getPath(), destAssetPath);
                         } else if(CONFLICT_RESOLUTION_NEW_ASSET.equals(conflictResolution)) {
                             destAssetPath = createUniqueAssetPath(assetManager, destPath, asset.getName());
