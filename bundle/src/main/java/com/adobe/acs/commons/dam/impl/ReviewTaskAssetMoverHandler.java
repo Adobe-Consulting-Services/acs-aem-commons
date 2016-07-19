@@ -209,7 +209,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                     if (StringUtils.startsWith(contentPath, PATH_CONTENT_DAM)) {
                         final Iterator<Resource> assets = findAssets(resourceResolver, contentPath);
 
-                        resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.review-task-move");
+                        resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.review-task-mover");
 
                         while (assets.hasNext()) {
                             final Asset asset = assets.next().adaptTo(Asset.class);
@@ -218,6 +218,8 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                                 moveAsset(resourceResolver, assetManager, asset, taskProperties);
                             } catch (Exception e) {
                                 log.error("Could not move reviewed asset [ {} ]", asset.getPath(), e);
+                                resourceResolver.revert();
+                                resourceResolver.refresh();
                             }
                         }
                     }
