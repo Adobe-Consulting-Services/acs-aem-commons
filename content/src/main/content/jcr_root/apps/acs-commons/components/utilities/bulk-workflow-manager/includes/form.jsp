@@ -28,15 +28,39 @@
         <h3 class="coral-Form-fieldset-legend">Bulk workflow setup</h3>
 
         <div class="coral-Form-fieldwrapper">
-            <label class="coral-Form-fieldlabel">JCR-SQL2 Query</label>
+            <label class="coral-Form-fieldlabel">Bulk Workflow Runner</label>
+
+            <select
+                    class="acs-select"
+                    name="runnerType"
+                    ng-required="true"
+                    ng-model="form.runnerType"
+                    ng-init="form.runnerType = 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl'"
+                    ng-options="runnerType.value as runnerType.label for runnerType in formOptions.runnerTypes">
+            </select>
+        </div>
+
+        <div class="coral-Form-fieldwrapper">
+            <label class="coral-Form-fieldlabel">Query Type</label>
+
+            <select
+                    class="acs-select"
+                    name="queryTpe"
+                    ng-required="true"
+                    ng-model="form.queryType"
+                    ng-init="form.queryType = 'queryBuilder'"
+                    ng-options="queryType.value as queryType.label for queryType in formOptions.queryTypes">
+            </select>
+        </div>
+
+        <div class="coral-Form-fieldwrapper">
+            <label class="coral-Form-fieldlabel">Query</label>
 
             <textarea
                     class="coral-Form-field coral-Textfield coral-Textfield--multiline"
-                    name="query"
+                    name="queryStatement"
                     ng-required="true"
-                    ng-model="form.query"
-                    ng-pattern="/^SELECT\s.*/"
-                    placeholder="SELECT * FROM [cq:Page] WHERE ISDESCENDANTNODE([/content])"></textarea>
+                    ng-model="form.queryStatement"></textarea>
 
             <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
                 data-quicktip-content="Ensure that this query is correct prior to submitting form as it will collect the resources for processing which can be an expensive operation for large bulk workflow processes. Example: SELECT * FROM [cq:Page] WHERE ISDESCENDANTNODE([/content])"></span>
@@ -66,76 +90,22 @@
             </select>
         </div>
 
-        <div class="coral-Form-fieldwrapper">
-            <label class="coral-Form-fieldlabel">Total Size</label>
-
-            <input name="estimatedTotal"
-                   type="text"
-                   class="coral-Form-field coral-Textfield"
-                   ng-required="true"
-                   ng-pattern="/\d+/"
-                   ng-model="form.estimatedTotal"
-                   placeholder="Total number of payloads to process. If unsure, make this larger than the actual number of items to process."/>
-            <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-                  data-quicktip-content="Total number of payloads to process. If unsure, make this larger than the actual number of items to process."></span>
-
+        <div ng-show="isWorkflow()">
+            <%@include file="aem-workflow/form.jsp"%>
         </div>
 
-        <div class="coral-Form-fieldwrapper">
-            <label class="coral-Form-fieldlabel">Batch Size</label>
-
-            <input name="batchSize"
-                   type="text"
-                   class="coral-Form-field coral-Textfield"
-                   ng-pattern="/(^[2-9]\d*)|(^[1-9]\d+)/"
-                   ng-model="form.batchSize"
-                   placeholder="# of payloads to process at once [ Default: 10 ]"/>
-            <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-                data-quicktip-content="Batch size must be greater than 1"></span>
+        <div ng-show="isSynthetic()">
+            <%@include file="synthetic-workflow/form.jsp"%>
         </div>
 
-        <div class="coral-Form-fieldwrapper">
-            <label class="coral-Form-fieldlabel">Batch Interval</label>
-
-            <input name="interval"
-                   type="text"
-                   class="coral-Form-field coral-Textfield"
-                   ng-pattern="/\d+/"
-                   ng-model="form.interval"
-                   placeholder="in seconds [ Default: 10 ]"/>
-            <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-                data-quicktip-content="The minimum number of seconds to wait before trying to process the next batch. If unsure: [ Batch Size ] x [ Seconds for One WF to Complete ] / 2"></span>
-        </div>
-
-        <div class="coral-Form-fieldwrapper">
-            <label class="coral-Form-fieldlabel">Batch Timeout</label>
-
-            <input name="batchTimeout"
-                   type="text"
-                   class="coral-Form-field coral-Textfield"
-                   ng-pattern="/\d*/"
-                   ng-model="form.batchTimeout"
-                   placeholder="Number of batch intervals to wait for entire batch to complete [ Default: 20 ]"/>
-            <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-                data-quicktip-content="Any active workflows in a batch after this duration will be terminated and marked as \"FORCE TERMINATED\". [ Time to Process One Batch ] x [ Batch Interval ] should be sufficient for all workflows to complete for the entire batch under normal conditions."></span>
-        </div>
-
-        <div class="coral-Form-fieldwrapper">
-            <label class="coral-Form-fieldlabel">Purge Workflows</label>
-
-            <label acs-coral-checkbox>
-                <input type="checkbox"
-                       name="purgeWorkflow"
-                       ng-model="form.purgeWorkflow"
-                       checked>
-                <span>Delete completed workflow instances after each batch is processed.</span>
-            </label>
+        <div ng-show="isFAM()">
+            <%@include file="fast-action-manager/form.jsp"%>
         </div>
 
         <hr/>
 
         <div class="coral-Form-fieldwrapper"
-                ng-show="data.status.state === 'not started'">
+                ng-show="data.status.status === 'NOT_STARTED'">
 
             <button type="submit"
                     role="button"
@@ -148,7 +118,6 @@
                     class="coral-Button coral-Button--primary"
                     ng-show="params.$invalid || params.$pristine"
                     disabled>Start Bulk Workflow</button>
-
         </div>
     </section>
 </form>

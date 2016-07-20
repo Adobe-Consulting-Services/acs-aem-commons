@@ -18,18 +18,17 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk.impl.servlets;
+package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
-import com.adobe.acs.commons.workflow.bulk.BulkWorkflowEngine;
-
+import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
@@ -37,19 +36,17 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
-
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * ACS AEM Commons - Bulk Workflow Manager - Start Servlet
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = { "POST" },
-        resourceTypes = { BulkWorkflowEngine.SLING_RESOURCE_TYPE },
-        selectors = { "start" },
-        extensions = { "json" }
+        methods = {"POST"},
+        resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
+        selectors = {"start"},
+        extensions = {"json"}
 )
 public class StartServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(StartServlet.class);
@@ -66,63 +63,54 @@ public class StartServlet extends SlingAllMethodsServlet {
 
         try {
             final JSONObject params = new JSONObject(request.getParameter("params"));
-            final ValueMap map = new ValueMapDecorator(new HashMap<String, Object>());
+            final ModifiableValueMap properties = request.getResource().adaptTo(ModifiableValueMap.class);
 
-            map.put(BulkWorkflowEngine.KEY_QUERY,
-                    params.getString(BulkWorkflowEngine.KEY_QUERY));
+            properties.put("runnerType", params.getString("runnerType"));
+            properties.put("queryType", params.getString("queryType"));
+            properties.put("queryStatement", params.getString("queryStatement"));
+            properties.put("relativePath", StringUtils.removeStart(params.optString("relativePath", ""), "/"));
+            properties.put("workflowModel", params.getString("workflowModel"));
+            properties.put("batchSize", params.optInt("batchSize", 10));
+            properties.put("interval", params.optInt("interval", 10));
+            properties.put("timeout", params.optInt("timeout", 30));
+            properties.put("throttle", params.optInt("throttle", 10));
+            properties.put("retryCount", params.optInt("retryCount", 0));
+            properties.put("purgeWorkflow", params.optBoolean("purgeWorkflow", false));
 
-            map.put(BulkWorkflowEngine.KEY_RELATIVE_PATH,
-                    StringUtils.removeStart(params.optString(BulkWorkflowEngine.KEY_RELATIVE_PATH, ""), "/"));
+            request.getResourceResolver().commit();
 
-            map.put(BulkWorkflowEngine.KEY_WORKFLOW_MODEL,
-                    params.getString(BulkWorkflowEngine.KEY_WORKFLOW_MODEL));
+            Config config = request.getResource().adaptTo(Config.class);
 
-            map.put(BulkWorkflowEngine.KEY_BATCH_SIZE,
-                    params.optInt(BulkWorkflowEngine.KEY_BATCH_SIZE, BulkWorkflowEngine.DEFAULT_BATCH_SIZE));
-
-            map.put(BulkWorkflowEngine.KEY_INTERVAL,
-                    params.optInt(BulkWorkflowEngine.KEY_INTERVAL, BulkWorkflowEngine.DEFAULT_INTERVAL));
-
-            map.put(BulkWorkflowEngine.KEY_BATCH_TIMEOUT,
-                    params.optInt(BulkWorkflowEngine.KEY_BATCH_TIMEOUT, BulkWorkflowEngine.DEFAULT_BATCH_TIMEOUT));
-
-            map.put(BulkWorkflowEngine.KEY_ESTIMATED_TOTAL,
-                    params.optLong(BulkWorkflowEngine.KEY_ESTIMATED_TOTAL, BulkWorkflowEngine.DEFAULT_ESTIMATED_TOTAL));
-
-            map.put(BulkWorkflowEngine.KEY_PURGE_WORKFLOW,
-                    params.optBoolean(BulkWorkflowEngine.KEY_PURGE_WORKFLOW,
-                            BulkWorkflowEngine.DEFAULT_PURGE_WORKFLOW));
-
-            bulkWorkflowEngine.initialize(request.getResource(), map);
-            bulkWorkflowEngine.start(request.getResource());
+            bulkWorkflowEngine.initialize(config);
+            bulkWorkflowEngine.start(config);
 
             response.sendRedirect(request.getResourceResolver().map(request, request.getResource().getPath()) + ".status.json");
 
         } catch (JSONException e) {
             log.error("Could not parse HTTP Request params: {}", e);
 
-            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not initialize Bulk Workflow due to invalid parameters."
                             + " Please review the form and try again.",
                     e.getMessage());
         } catch (RepositoryException e) {
             log.error("Could not initialize Bulk Workflow: {}", e);
 
-            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not initialize Bulk Workflow.",
                     e.getMessage());
 
         } catch (IllegalArgumentException e) {
             log.warn("Could not initialize Bulk Workflow due to invalid arguments: {}", e);
 
-            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not initialize Bulk Workflow due to invalid arguments.",
                     e.getMessage());
 
         } catch (Exception e) {
             log.error("Could not initialize Bulk Workflow due to unexpected error: {}", e);
 
-            HttpErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not start Bulk Workflow.",
                     e.getMessage());
         }

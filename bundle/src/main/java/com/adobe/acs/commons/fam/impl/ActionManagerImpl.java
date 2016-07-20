@@ -79,7 +79,33 @@ class ActionManagerImpl implements ActionManager {
     public String getName() {
         return name;
     }
-    
+
+
+    @Override
+    public int getAddedCount() {
+        return tasksAdded.get();
+    }
+
+    @Override
+    public int getSuccessCount() {
+        return tasksSuccessful.get();
+    }
+
+    @Override
+    public int getErrorCount() {
+        return tasksError.get();
+    }
+
+    @Override
+    public int getCompletedCount() {
+        return tasksCompleted.get();
+    }
+
+    @Override
+    public int getRemainingCount() {
+        return getAddedCount() - (getSuccessCount() + getErrorCount());
+    }
+
     @Override
     public List<Failure> getFailureList() {
         return failures;

@@ -2,7 +2,7 @@
   ~ #%L
   ~ ACS AEM Commons Bundle
   ~ %%
-  ~ Copyright (C) 2013 Adobe
+  ~ Copyright (C) 2016 Adobe
   ~ %%
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,19 +17,15 @@
   ~ limitations under the License.
   ~ #L%
   --%>
-<%@include file="/libs/foundation/global.jsp" %><%
-%><%@page session="false" %><%
+<div   style="margin-left: 12.5rem; line-height: 2.5rem"
+       ng-show="data.status.status === 'STOPPED'">
+    Update batch interval to
 
-%><div class="page"
-         role="main"
-         ng-controller="MainCtrl"
-         ng-init="app.uri = '${resourcePath}'; init();">
+    <input type="text"
+           class="coral-Form-field coral-Textfield"
+           ng-required="false"
+           ng-model="form.interval"
+           placeholder="{{ form.interval }}"/>
 
-    <div ng-show="showForm()">
-        <%@include file="includes/form.jsp" %>
-    </div>
-
-    <div ng-hide="showForm()">
-        <%@include file="includes/status.jsp" %>
-    </div>
- </div>
+    seconds.
+</div>
