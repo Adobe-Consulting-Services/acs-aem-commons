@@ -384,8 +384,8 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                                     new String[]{asset.getPath(), destAssetPath, status});
                             createRevision(resourceResolver, assetManager, assetManager.getAsset(destAssetPath), asset);
                         } else if (CONFLICT_RESOLUTION_SKIP.equals(conflictResolution)) {
-                            log.info("Skipping with due to existing asset at the same destination [ {} ] ~> [ {} ] based on approval status [ " + status + " ]",
-                                    asset.getPath(), destAssetPath);
+                            log.info("Skipping with due to existing asset at the same destination [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                    new String[] { asset.getPath(), destAssetPath, status });
                         }
                     } else {
                         assetManager.moveAsset(asset.getPath(), destAssetPath);
