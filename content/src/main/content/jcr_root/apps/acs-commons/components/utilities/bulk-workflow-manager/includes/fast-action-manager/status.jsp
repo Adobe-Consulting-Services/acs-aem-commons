@@ -91,24 +91,34 @@
                 <td class="coral-Table-cell">{{ data.status.totalCount }}</td>
             </tr>
 
-            <tr class="coral-Table-row"
-                ng-show="data.status.startedAt">
+            <tr class="coral-Table-row">
                 <td class="coral-Table-cell">
                 <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="bottom"
-                      data-quicktip-content="CPU usage throttled via 'ACS AEM Commons - Throttled Task Runner Service' configurable via OSGi configuration"></span>
+                      data-quicktip-content="When true, execution is throttled via 'ACS AEM Commons - Throttled Task Runner Service' configurable via OSGi configuration"></span>
+                    Auto-Throttle</td>
+                <td class="coral-Table-cell">{{ data.status.autoThrottle }}</td>
+            </tr>
+
+            <tr class="coral-Table-row"
+                ng-show="data.status.startedAt && data.status.autoThrottle">
+                <td class="coral-Table-cell">
+                <span   ng-show="data.status.autoThrottle"
+                        class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="bottom"
+                        data-quicktip-content="CPU usage throttled via 'ACS AEM Commons - Throttled Task Runner Service' configurable via OSGi configuration"></span>
                     CPU Usage
                 </td>
-                <td class="coral-Table-cell">{{ data.status.systemStats.cpu }} / {{ data.status.systemStats.maxCpu }}</td>
+                <td class="coral-Table-cell">{{ data.status.systemStats.cpu }} <span ng-show="data.status.autoThrottle">/ {{ data.status.systemStats.maxCpu }}</span></td>
             </tr>
 
             <tr class="coral-Table-row"
                 ng-show="data.status.startedAt">
                 <td class="coral-Table-cell">
-                    <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="top"
-                          data-quicktip-content="Memory usage throttled via 'ACS AEM Commons - Throttled Task Runner Service' configurable via OSGi configuration"></span>
-                    Memory Usage
+                    <span   ng-show="data.status.autoThrottle"
+                            class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="top"
+                            data-quicktip-content="Memory usage throttled via 'ACS AEM Commons - Throttled Task Runner Service' configurable via OSGi configuration"></span>
+                    Memory (Heap) Usage
                 </td>
-                <td class="coral-Table-cell">{{ data.status.systemStats.mem }} / {{ data.status.systemStats.maxMem }}</td>
+                <td class="coral-Table-cell">{{ data.status.systemStats.mem }} <span ng-show="data.status.autoThrottle">/ {{ data.status.systemStats.maxMem }}</span></td>
             </tr>
 
         </tbody>

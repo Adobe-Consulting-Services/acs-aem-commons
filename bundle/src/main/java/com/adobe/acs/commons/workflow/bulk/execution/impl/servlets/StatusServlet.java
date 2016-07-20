@@ -97,6 +97,7 @@ public class StatusServlet extends SlingAllMethodsServlet {
             json.put("queryStatement", config.getQueryStatement());
             json.put("workflowModel", StringUtils.removeEnd(config.getWorkflowModelId(), "/jcr:content/model"));
             json.put("batchSize", config.getBatchSize());
+            json.put("autoThrottle", config.isAutoThrottle());
 
             json.put("purgeWorkflow", config.isPurgeWorkflow());
             json.put("interval", config.getInterval());

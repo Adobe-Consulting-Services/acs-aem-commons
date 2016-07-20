@@ -32,8 +32,8 @@
         style="float: left;"
         class="primary">Resume Bulk Workflow</button>
 
-<div style="clear: both;"></div>
-
 <div ng-show="isWorkflow()">
     <%@include file="aem-workflow/interval-update.jsp"%>
 </div>
+
+<div style="clear: both;"></div>

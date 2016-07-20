@@ -59,6 +59,19 @@
         data-quicktip-content="Any active workflows that are still active after this amount of time will be marked as 'FORCE TERMINATED'."></span>
 </div>
 
+
+<div class="coral-Form-fieldwrapper">
+    <label class="coral-Form-fieldlabel">Auto-Throttle</label>
+
+    <label acs-coral-checkbox>
+        <input type="checkbox"
+               name="autoThrottle"
+               ng-model="form.autoThrottle"
+               ng-init="form.autoThrottle=true">
+        <span>Enable ACS Commons ThrottledTaskRunner CPU/Memory-baed throttling.</span>
+    </label>
+</div>
+
 <div class="coral-Form-fieldwrapper">
     <label class="coral-Form-fieldlabel">Purge Workflows</label>
 
@@ -66,7 +79,7 @@
         <input type="checkbox"
                name="purgeWorkflow"
                ng-model="form.purgeWorkflow"
-               checked>
+               ng-init="form.purgeWorkflow=true">
         <span>Delete completed workflow instances after each batch is processed.</span>
     </label>
 </div>

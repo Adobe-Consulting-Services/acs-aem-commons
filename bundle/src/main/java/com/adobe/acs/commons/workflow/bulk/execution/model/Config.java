@@ -85,6 +85,11 @@ public class Config {
     @Default(intValues = 10)
     private int retryCount;
 
+    @Inject
+    @Default(booleanValues = true)
+    private boolean autoThrottle;
+
+
     public Config(Resource resource) {
         this.resource = resource;
         this.properties = resource.adaptTo(ModifiableValueMap.class);
@@ -141,6 +146,10 @@ public class Config {
 
     public int getRetryCount() { return retryCount; }
 
+    public boolean isAutoThrottle() {
+        return autoThrottle;
+    }
+
     public Workspace getWorkspace() {
         // Collecting workspace on get to avoid cyclic recursion between models
         if (this.workspace == null) {
@@ -181,6 +190,7 @@ public class Config {
             this.getResourceResolver().commit();
         }
     }
+
 }
 
 

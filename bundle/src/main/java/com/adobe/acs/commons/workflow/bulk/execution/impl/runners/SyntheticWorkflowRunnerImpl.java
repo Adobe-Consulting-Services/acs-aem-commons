@@ -172,8 +172,10 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
                             }
 
                             try {
-                                // Wait before starting more work
-                                throttledTaskRunner.waitForLowCpuAndLowMemory();
+                                if (config.isAutoThrottle()) {
+                                    // Wait before starting more work
+                                    throttledTaskRunner.waitForLowCpuAndLowMemory();
+                                }
 
                                 long processStart = System.currentTimeMillis();
                                 swr.execute(resourceResolver, payload.getPayloadPath(), model, false, false);

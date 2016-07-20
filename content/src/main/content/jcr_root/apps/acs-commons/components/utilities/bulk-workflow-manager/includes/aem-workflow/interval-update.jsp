@@ -17,7 +17,7 @@
   ~ limitations under the License.
   ~ #L%
   --%>
-<div   style="margin-left: 12.5rem; line-height: 2.5rem"
+<div   style="margin-left: 13.25rem; line-height: 2.5rem"
        ng-show="data.status.status === 'STOPPED'">
     Update batch interval to
 

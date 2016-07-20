@@ -359,8 +359,6 @@ public class AEMWorkflowRunnerImpl extends AbstractWorkflowRunner implements Bul
                         // Bring new payloads into the active workspace
                         Payload payload = onboardNextPayload(workspace);
                         if (payload != null) {
-                            // Wait before starting more work
-                            throttledTaskRunner.waitForLowCpuAndLowMemory();
 
                             log.debug("Onboarding payload [ {} ~> {} ]", payload.getPath(), payload.getPayloadPath());
 
