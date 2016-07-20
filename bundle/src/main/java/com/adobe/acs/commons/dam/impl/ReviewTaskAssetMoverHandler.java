@@ -301,6 +301,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          * Creates a new revision of an asset and replaces its renditions (including original), and metadata node.
          *
          * @param resourceResolver the ResourceResolver object
+         * @param assetManager the AssetManager object
          * @param originalAsset    the asset to create a new version for
          * @param reviewedAsset    the asset to that will represent the new version
          * @throws PersistenceException
