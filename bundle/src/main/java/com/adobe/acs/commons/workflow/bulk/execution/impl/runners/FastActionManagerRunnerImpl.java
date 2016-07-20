@@ -138,7 +138,11 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
         super.complete(workspace);
 
         manager.closeAllResolvers();
-        actionManagerFactoryRef.purgeCompletedTasks();
+        if (actionManagerFactoryRef != null) {
+            actionManagerFactoryRef.purgeCompletedTasks();
+        } else {
+            log.warn("Action Manager Factory reference is null. Please purge completed tasks via the JMX console.");
+        }
     }
 
     @Override
