@@ -64,7 +64,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 @Component(
-        label= "ACS AEM Commons - Review Task Move Handler",
+        label = "ACS AEM Commons - Review Task Move Handler",
         description = "Create an OSGi configuration to enable this feature.",
         metatype = true,
         immediate = true,
@@ -94,7 +94,7 @@ import java.util.Map;
 public class ReviewTaskAssetMoverHandler implements EventHandler {
     private static final Logger log = LoggerFactory.getLogger(ReviewTaskAssetMoverHandler.class);
 
-    private static final String PATH_CONTENT_DAM = "/content/dam";
+    private static final String PATH_CONTENT_DAM = DamConstants.MOUNTPOINT_ASSETS;
     private static final String APPROVED = "approved";
     private static final String REJECTED = "rejected";
     private static final String REL_ASSET_METADATA = "jcr:content/metadata";
@@ -109,6 +109,8 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
     private static final String CONFLICT_RESOLUTION_REPLACE = "replace";
     private static final String CONFLICT_RESOLUTION_NEW_ASSET = "new-asset";
     private static final String CONFLICT_RESOLUTION_NEW_VERSION = "new-version";
+
+    public static final String USER_EVENT_TYPE = "acs-aem-commons.review-task-mover";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -145,7 +147,6 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
         lastModifiedBy = PropertiesUtil.toString(config.get(PROP_LAST_MODIFIED_BY), DEFAULT_LAST_MODIFIED_BY);
         defaultConflictResolution = PropertiesUtil.toString(config.get(PROP_DEFAULT_CONFLICT_RESOLUTION), DEFAULT_DEFAULT_CONFLICT_RESOLUTION);
     }
-
 
     @Override
     public void handleEvent(Event event) {
@@ -209,7 +210,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                     if (StringUtils.startsWith(contentPath, PATH_CONTENT_DAM)) {
                         final Iterator<Resource> assets = findAssets(resourceResolver, contentPath);
 
-                        resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.review-task-mover");
+                        resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(USER_EVENT_TYPE);
 
                         while (assets.hasNext()) {
                             final Asset asset = assets.next().adaptTo(Asset.class);
@@ -268,8 +269,8 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          * Create a unique asset name based on the current time and a up-to-1000 counter.
          *
          * @param assetManager assetManager object
-         * @param destPath the folder the asset will be moved into
-         * @param assetName the asset name
+         * @param destPath     the folder the asset will be moved into
+         * @param assetName    the asset name
          * @return a unique asset path to the asset
          * @throws Exception
          */
@@ -280,7 +281,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
             int count = 0;
             while (assetManager.assetExists(destAssetPath)) {
-                if(count > 1000) {
+                if (count > 1000) {
                     throw new Exception("Unable to generate a unique name after 1000 attempts. Something must be wrong!");
                 }
 
@@ -288,7 +289,6 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                     destAssetPath = destPath + "/" + now + "_" + assetName;
                 } else {
                     destAssetPath = destPath + "/" + now + "_" + count + "_" + assetName;
-
                 }
 
                 count++;
@@ -299,16 +299,16 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
         /**
          * Creates a new revision of an asset and replaces its renditions (including original), and metadata node.
+         *
          * @param resourceResolver the ResourceResolver object
-         * @param originalAsset the asset to create a new version for
-         * @param reviewedAsset the asset to that will represent the new version
+         * @param originalAsset    the asset to create a new version for
+         * @param reviewedAsset    the asset to that will represent the new version
          * @throws PersistenceException
          */
-        private void createRevision(ResourceResolver resourceResolver, Asset originalAsset, Asset reviewedAsset) throws PersistenceException {
+        private void createRevision(ResourceResolver resourceResolver, AssetManager assetManager, Asset originalAsset, Asset reviewedAsset) throws PersistenceException {
             Session session = resourceResolver.adaptTo(Session.class);
 
             // Create the new version
-            AssetManager assetManager = resourceResolver.adaptTo(AssetManager.class);
             AssetVersionManager versionManager = resourceResolver.adaptTo(AssetVersionManager.class);
             versionManager.createVersion(originalAsset.getPath(), "Review Task (" + reviewedAsset.getValueMap().get(REL_PN_DAM_STATUS, "Unknown") + ")");
 
@@ -317,7 +317,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             // Delete the existing metadata and renditions from the old asset
 
             resourceResolver.delete(resourceResolver.getResource(assetPath + "/" + REL_ASSET_METADATA));
-            resourceResolver.delete(resourceResolver.getResource(assetPath +  "/" + REL_ASSET_RENDITIONS));
+            resourceResolver.delete(resourceResolver.getResource(assetPath + "/" + REL_ASSET_RENDITIONS));
 
             try {
                 Node originalAssetJcrContentNode = session.getNode(originalAsset.getPath() + "/" + JcrConstants.JCR_CONTENT);
@@ -367,29 +367,29 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                     if (exists) {
                         if (StringUtils.equals(asset.getPath(), destAssetPath)) {
                             log.info("Reviewed asset [ {} ] is already in its final location, so there is nothing to do.", asset.getPath());
-                        } else if(CONFLICT_RESOLUTION_REPLACE.equals(conflictResolution)) {
+                        } else if (CONFLICT_RESOLUTION_REPLACE.equals(conflictResolution)) {
                             assetManager.removeAsset(destAssetPath);
                             resourceResolver.commit();
                             assetManager.moveAsset(asset.getPath(), destAssetPath);
-                            log.info("Moved with replace [ {} ] ~> [ {} ] based on approval status [ " + status + " ]",
-                                    asset.getPath(), destAssetPath);
-                        } else if(CONFLICT_RESOLUTION_NEW_ASSET.equals(conflictResolution)) {
+                            log.info("Moved with replace [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                    new String[]{asset.getPath(), destAssetPath, status});
+                        } else if (CONFLICT_RESOLUTION_NEW_ASSET.equals(conflictResolution)) {
                             destAssetPath = createUniqueAssetPath(assetManager, destPath, asset.getName());
                             assetManager.moveAsset(asset.getPath(), destAssetPath);
-                            log.info("Moved with unique asset name [ {} ] ~> [ {} ] based on approval status [ " + status + " ]",
-                                    asset.getPath(), destAssetPath);
+                            log.info("Moved with unique asset name [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                    new String[]{asset.getPath(), destAssetPath, status});
                         } else if (CONFLICT_RESOLUTION_NEW_VERSION.equals(conflictResolution)) {
-                            log.info("Creating new version of existing asset [ {} ] ~> [ {} ] based on approval status [ " + status + " ]",
-                                    asset.getPath(), destAssetPath);
-                            createRevision(resourceResolver, assetManager.getAsset(destAssetPath), asset);
+                            log.info("Creating new version of existing asset [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                    new String[]{asset.getPath(), destAssetPath, status});
+                            createRevision(resourceResolver, assetManager, assetManager.getAsset(destAssetPath), asset);
                         } else if (CONFLICT_RESOLUTION_SKIP.equals(conflictResolution)) {
                             log.info("Skipping with due to existing asset at the same destination [ {} ] ~> [ {} ] based on approval status [ " + status + " ]",
                                     asset.getPath(), destAssetPath);
                         }
                     } else {
                         assetManager.moveAsset(asset.getPath(), destAssetPath);
-                        log.info("Moved [ {} ] ~> [ {} ] based on approval status [ " + status + " ]",
-                                asset.getPath(), destAssetPath);
+                        log.info("Moved [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                new String[]{asset.getPath(), destAssetPath, status});
                     }
                 } else {
                     log.warn("Request to move reviewed asset to a non DAM Asset path [ {} ]", destPath);
