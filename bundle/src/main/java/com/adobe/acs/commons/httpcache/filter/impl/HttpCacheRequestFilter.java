@@ -57,7 +57,7 @@ public class HttpCacheRequestFilter extends AbstractHttpCacheFilter implements F
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
             target = "(httpcache.config.filter-scope=REQUEST)"
     )
-    private HttpCacheConfig inludeScopeCacheConfigs;
+    private HttpCacheConfig requestScopeCacheConfigs;
 
 
     @Override

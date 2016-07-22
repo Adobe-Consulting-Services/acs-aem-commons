@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 @ProviderType
 public interface HttpCacheConfig {
 
-    public enum FilterScope {
+    enum FilterScope {
         REQUEST,
         INCLUDE
     }
