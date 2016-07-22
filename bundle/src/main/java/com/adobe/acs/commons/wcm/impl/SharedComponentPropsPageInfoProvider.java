@@ -33,14 +33,14 @@ import org.apache.sling.commons.json.JSONObject;
  */
 @Component
 @Service
-public class SitewideComponentPropsPageInfoProvider implements PageInfoProvider {
+public class SharedComponentPropsPageInfoProvider implements PageInfoProvider {
 
     @Override
     public void updatePageInfo(SlingHttpServletRequest request, JSONObject info, Resource resource)
             throws JSONException {
         JSONObject props = new JSONObject();
         props.put("enabled", true);
-        info.put("sitewideComponentProps", props);
+        info.put("sharedComponentProperties", props);
     }
 
 }

@@ -2,7 +2,7 @@
 
     var actionDef = {
         icon: 'coral-Icon--globe',
-        text: Granite.I18n.get('Configure Site-wide Component Properties'),
+        text: Granite.I18n.get('Configure Shared Component Properties'),
         handler: function (editable, param, target) { // will be called on click
             var originalDialogSrc = editable.config.dialogSrc;
             var originalDialog = editable.config.dialog;
@@ -12,19 +12,19 @@
                 var langRootRegexp = /^(\/content\/([^/]+\/)+([a-zA-Z]{2}([_-][a-zA-Z]{2})?))(|\/.*)$/g;
                 var match = langRootRegexp.exec(dialogSrcArray[1]);
                 
-                var siteWideDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "_cq_dialogsitewide") +
+                var sharedComponentDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "_cq_dialogsharedcomponent") +
                                         ".html" +
                                         match[1] +
-                                        "/jcr:content/sitewideprops/" +
+                                        "/jcr:content/sharedcomponentproperties/" +
                                         editable.type;
                 
-                editable.config.dialogSrc = siteWideDialogSrc;
-                editable.config.dialog = editable.config.dialog.replace("cq:dialog", "cq:dialogsitewide");
+                editable.config.dialogSrc = sharedComponentDialogSrc;
+                editable.config.dialog = editable.config.dialog.replace("cq:dialog", "cq:dialogsharedcomponent");
                 
                 ns.edit.actions.doConfigure(editable);
             
             } catch(err) {
-                console.error("Error getting the dialogsitewide dialog: " + err);
+                console.error("Error getting the dialogsharedcomponent dialog: " + err);
             } finally {
                 //set the dialog and dialogSrc back to the original values so normal edit dialog continues to work
                 editable.config.dialogSrc = originalDialogSrc;
@@ -35,7 +35,7 @@
         },
         //Restrict to users with correct permissions and if the dialog exists
         condition: function(editable) {
-            var enabled = ns.page.info.sitewideComponentProps && ns.page.info.sitewideComponentProps.enabled;
+            var enabled = ns.page.info.sharedComponentProperties && ns.page.info.sharedComponentProperties.enabled;
             var canModify = ns.page.info.permissions && ns.page.info.permissions.modify;
             return !!enabled && !!editable.config.dialog && canModify;
         },
@@ -48,7 +48,7 @@
         // we continue if the user switched to the Edit layer
         if (ev.layer === 'Edit') {
             // we use the editable toolbar and register an additional action
-            ns.EditorFrame.editableToolbar.registerAction('SITEWIDE-PROPS', actionDef);
+            ns.EditorFrame.editableToolbar.registerAction('SHARED-COMPONENT-PROPS', actionDef);
         }
     });
 
