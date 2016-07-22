@@ -71,6 +71,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
     private static final String ARG_REPLICATION_ACTION_TYPE = "replicationActionType";
     private static final String ARG_REPLICATION_SYNCHRONOUS = "synchronous";
     private static final String ARG_REPLICATION_SUPPRESS_VERSIONS = "suppressVersions";
+    private static final String ARG_THROTTLE = "throttle";
 
     @Reference
     private WorkflowPackageManager workflowPackageManager;
@@ -100,11 +101,14 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
             final ResourceRunnable replicatorRunnable = new ResourceRunnable() {
                 @Override
                 public void run(final Resource resource) throws Exception {
-                    throttledTaskRunner.waitForLowCpuAndLowMemory();
+                    if (processArgs.isThrottle()) {
+                        throttledTaskRunner.waitForLowCpuAndLowMemory();
+                    }
                     replicator.replicate(resource.getResourceResolver().adaptTo(Session.class),
                             processArgs.getReplicationActionType(),
                             resource.getPath(),
                             processArgs.getReplicationOptions());
+                    count.incrementAndGet();
                 }
             };
 
@@ -135,11 +139,14 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
         private ReplicationActionType replicationActionType = null;
         private ReplicationOptions replicationOptions = new ReplicationOptions();
         private boolean traverseTree = false;
+        private boolean throttle = false;
+
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
             String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
+            throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));
             traverseTree = Boolean.parseBoolean(data.get(ARG_TRAVERSE_TREE));
             replicationActionType = ReplicationActionType.fromName(data.get(ARG_REPLICATION_ACTION_TYPE));
             if (replicationActionType == null) {
@@ -160,5 +167,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
         public boolean isTraverseTree() {
             return traverseTree;
         }
+        public boolean isThrottle() { return throttle; }
+
     }
 }

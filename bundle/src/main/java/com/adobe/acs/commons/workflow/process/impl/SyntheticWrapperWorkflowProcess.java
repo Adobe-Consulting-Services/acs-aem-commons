@@ -40,6 +40,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +67,7 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
     private static final String ARG_TRAVERSE_TREE = "traverseTree";
     private static final String ARG_SAVE_INTERVAL = "saveInterval";
     private static final String ARG_WORKFLOW_MODEL_ID = "workflowModelId";
+    private static final String ARG_THROTTLE = "throttle";
 
     @Reference
     private SyntheticWorkflowRunner syntheticWorkflowRunner;
@@ -92,7 +95,10 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
             final ResourceRunnable syntheticRunnable = new ResourceRunnable() {
                 @Override
                 public void run(final Resource resource) throws java.lang.Exception {
-                    throttledTaskRunner.waitForLowCpuAndLowMemory();
+                    if (processArgs.isThrottle()) {
+                        throttledTaskRunner.waitForLowCpuAndLowMemory();
+                    }
+
                     syntheticWorkflowRunner.execute(resource.getResourceResolver(), resource.getPath(), syntheticWorkflowModel, false, false);
 
                     // Commit as needed
@@ -117,14 +123,19 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
                 // Commit any stranglers
                 resourceResolver.commit();
             }
+
+            log.info("Synthetic Workflow Wrapper processed [ {} ] total payloads", count.get());
         } catch (Exception e) {
             throw new WorkflowException(e);
         }
     }
 
-
+    /**
+     * ProcessArgs parsed from the WF metadata map
+     */
     private  static class ProcessArgs {
         private boolean traverseTree = false;
+        private boolean throttle = false;
         private String workflowModelId;
         int saveInterval;
 
@@ -132,6 +143,7 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
             String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
+            throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));
             traverseTree = Boolean.parseBoolean(data.get(ARG_TRAVERSE_TREE));
             workflowModelId = data.get(ARG_WORKFLOW_MODEL_ID);
             try {
@@ -157,5 +169,7 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
         public int getSaveInterval() {
             return saveInterval;
         }
+
+        public boolean isThrottle() { return throttle; }
     }
 }
