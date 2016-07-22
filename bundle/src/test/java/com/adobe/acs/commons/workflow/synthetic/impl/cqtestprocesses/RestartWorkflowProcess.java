@@ -18,27 +18,27 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl.testprocesses;
+package com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses;
 
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NoNextWorkflowProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(NoNextWorkflowProcess.class);
+public class RestartWorkflowProcess implements WorkflowProcess {
+    private static final Logger log = LoggerFactory.getLogger(RestartWorkflowProcess.class);
 
-    public NoNextWorkflowProcess() {
+    public RestartWorkflowProcess() {
 
     }
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
 
-        Assert.assertTrue(false);
+        workflowSession.restartWorkflow(workItem.getWorkflow());
+
     }
 }

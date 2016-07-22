@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,19 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl;
+package com.adobe.acs.commons.workflow.synthetic.impl.granite;
 
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.Workflow;
-import com.day.cq.workflow.exec.WorkflowData;
-import com.day.cq.workflow.exec.filter.WorkItemFilter;
-import com.day.cq.workflow.metadata.MetaDataMap;
-import com.day.cq.workflow.model.WorkflowModel;
+import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowData;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.Workflow;
+import com.adobe.granite.workflow.exec.WorkflowData;
+import com.adobe.granite.workflow.exec.filter.WorkItemFilter;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
+import com.adobe.granite.workflow.model.WorkflowModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 
 public class SyntheticWorkflow implements Workflow {
@@ -39,18 +38,18 @@ public class SyntheticWorkflow implements Workflow {
 
     private final Date timeStarted;
 
-    private WorkflowData workflowData;
+    private final SyntheticWorkflowData workflowData;
 
-    private SyntheticWorkItem activeWorkItem;
+    private WorkItem activeWorkItem;
 
     public SyntheticWorkflow(final String id,
-                             final WorkflowData workflowData) {
+                             final SyntheticWorkflowData workflowData) {
         this.id = id;
         this.workflowData = workflowData;
         this.timeStarted = new Date();
     }
 
-    public final void setActiveWorkItem(final SyntheticWorkItem workItem) {
+    public final void setActiveWorkItem(final WorkItem workItem) {
         this.activeWorkItem = workItem;
     }
 
@@ -113,19 +112,7 @@ public class SyntheticWorkflow implements Workflow {
     }
 
     public final void setWorkflowData(final WorkflowData workflowData) {
-        this.workflowData = workflowData;
-    }
-
-    @Deprecated
-    @Override
-    public final Dictionary<String, String> getMetaData() {
-        final Dictionary<String, String> dictionary = new Hashtable<String, String>();
-
-        for (String key : this.getMetaDataMap().keySet()) {
-            dictionary.put(key, this.getMetaDataMap().get(key, String.class));
-        }
-
-        return dictionary;
+        this.workflowData.resetTo(workflowData);
     }
 
     @Override

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
-import com.day.cq.workflow.metadata.MetaDataMap;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class SyntheticMetaDataMap implements MetaDataMap {
-    private ValueMap metaDataMap;
+public class SyntheticMetaDataMap implements MetaDataMap, com.day.cq.workflow.metadata.MetaDataMap {
+    private final ValueMap metaDataMap;
 
     public SyntheticMetaDataMap() {
         this.metaDataMap = new ValueMapDecorator(new HashMap<String, Object>());
@@ -112,5 +112,11 @@ public class SyntheticMetaDataMap implements MetaDataMap {
     @Override
     public final Set<Entry<String, Object>> entrySet() {
         return this.metaDataMap.entrySet();
+    }
+
+    void resetTo(Map<String, ? extends Object> newData) {
+        Map<String, ? extends Object> tmp = new HashMap(newData);
+        this.metaDataMap.clear();
+        this.metaDataMap.putAll(tmp);
     }
 }

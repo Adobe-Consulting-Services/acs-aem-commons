@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,50 +18,33 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl;
+package com.adobe.acs.commons.workflow.synthetic.impl.granite;
 
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.Workflow;
-import com.day.cq.workflow.exec.WorkflowData;
-import com.day.cq.workflow.metadata.MetaDataMap;
-import com.day.cq.workflow.model.WorkflowNode;
+import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticMetaDataMap;
+import com.adobe.granite.workflow.exec.Status;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.Workflow;
+import com.adobe.granite.workflow.exec.WorkflowData;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
+import com.adobe.granite.workflow.model.WorkflowNode;
 
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.UUID;
 
 public class SyntheticWorkItem implements WorkItem {
     private static final String CURRENT_ASSIGNEE = "Synthetic Workflow";
-
-    private Date timeStarted = null;
-
-    private Date timeEnded = null;
-
     private final UUID uuid = UUID.randomUUID();
-
+    private Date timeStarted = null;
+    private Date timeEnded = null;
     private Workflow workflow;
 
-    private WorkflowData workflowData;
+    private final WorkflowData workflowData;
 
     private MetaDataMap metaDataMap = new SyntheticMetaDataMap();
 
     public SyntheticWorkItem(final WorkflowData workflowData) {
         this.workflowData = workflowData;
         this.timeStarted = new Date();
-    }
-
-    public final void setWorkflow(final SyntheticWorkflow workflow) {
-        workflow.setActiveWorkItem(this);
-        this.workflow = workflow;
-    }
-
-    public final void setTimeEnded(final Date timeEnded) {
-        if (timeEnded == null) {
-            this.timeEnded = null;
-        } else {
-            this.timeEnded = (Date) timeEnded.clone();
-        }
     }
 
     @Override
@@ -79,6 +62,14 @@ public class SyntheticWorkItem implements WorkItem {
         return this.timeEnded == null ? null : (Date) this.timeEnded.clone();
     }
 
+    public final void setTimeEnded(final Date timeEnded) {
+        if (timeEnded == null) {
+            this.timeEnded = null;
+        } else {
+            this.timeEnded = (Date) timeEnded.clone();
+        }
+    }
+
     @Override
     public final WorkflowData getWorkflowData() {
         return this.workflowData;
@@ -87,18 +78,6 @@ public class SyntheticWorkItem implements WorkItem {
     @Override
     public final String getCurrentAssignee() {
         return CURRENT_ASSIGNEE;
-    }
-
-    @Deprecated
-    @Override
-    public final Dictionary<String, String> getMetaData() {
-        final Dictionary<String, String> dictionary = new Hashtable<String, String>();
-
-        for (String key : this.getMetaDataMap().keySet()) {
-            dictionary.put(key, this.getMetaDataMap().get(key, String.class));
-        }
-
-        return dictionary;
     }
 
     /**
@@ -117,6 +96,16 @@ public class SyntheticWorkItem implements WorkItem {
         return this.workflow;
     }
 
+    public final void setWorkflow(final SyntheticWorkflow workflow) {
+        workflow.setActiveWorkItem(this);
+        this.workflow = workflow;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.ACTIVE;
+    }
+
     /* Unimplemented Methods */
 
     @Override
@@ -124,4 +113,21 @@ public class SyntheticWorkItem implements WorkItem {
         return null;
     }
 
+    @Override
+    public String getItemType() {
+        return "Synthetic Workflow";
+    }
+
+    @Override
+    public String getItemSubType() {
+        return null;
+    }
+
+    public String getContentPath() {
+        if ("JCR_PATH".equals(this.workflowData.getPayloadType())) {
+            return (String) this.workflowData.getPayload();
+        } else {
+            return null;
+        }
+    }
 }

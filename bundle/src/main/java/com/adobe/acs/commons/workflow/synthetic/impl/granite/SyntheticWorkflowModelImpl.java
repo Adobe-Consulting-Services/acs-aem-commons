@@ -18,14 +18,14 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl;
+package com.adobe.acs.commons.workflow.synthetic.impl.granite;
 
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
-import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticWorkflowModelException;
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.model.WorkflowModel;
-import com.day.cq.workflow.model.WorkflowNode;
+import com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticWorkflowModelException;
+import com.adobe.granite.workflow.WorkflowException;
+import com.adobe.granite.workflow.WorkflowSession;
+import com.adobe.granite.workflow.model.WorkflowModel;
+import com.adobe.granite.workflow.model.WorkflowNode;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl;
+package com.adobe.acs.commons.workflow.synthetic.impl.cq;
 
-import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticCompleteWorkflowException;
-import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticRestartWorkflowException;
-import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticTerminateWorkflowException;
+import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowData;
+import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowRunnerImpl;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticCompleteWorkflowException;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticRestartWorkflowException;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticTerminateWorkflowException;
 import com.day.cq.security.Authorizable;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;

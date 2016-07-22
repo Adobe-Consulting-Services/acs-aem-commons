@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl;
+package com.adobe.acs.commons.workflow.synthetic.impl.granite;
 
-import com.day.cq.workflow.exec.Route;
-import com.day.cq.workflow.model.WorkflowTransition;
+import com.adobe.granite.workflow.exec.Route;
+import com.adobe.granite.workflow.model.WorkflowTransition;
 
 import java.util.ArrayList;
 import java.util.List;
