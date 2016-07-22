@@ -23,6 +23,8 @@ import com.adobe.acs.commons.email.impl.EmailServiceImpl;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
+import org.apache.commons.mail.ByteArrayDataSource;
+import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -32,27 +34,24 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import javax.activation.DataSource;
 import javax.jcr.Session;
+import javax.mail.internet.MimeMultipart;
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(MailTemplate.class)
@@ -71,6 +70,9 @@ public class EmailServiceImplTest {
     private MessageGateway<SimpleEmail> messageGateway;
 
     @Mock
+    private MessageGateway<HtmlEmail> messageGatewayHtmlEmail;
+
+    @Mock
     private Session session;
 
     @InjectMocks
@@ -81,21 +83,30 @@ public class EmailServiceImplTest {
 
     private String emailTemplatePath;
 
+    private String emailTemplateAttachmentPath;
+
     @Before
     public final void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
 
         when(messageGatewayService.getGateway(SimpleEmail.class)).thenReturn(messageGateway);
+        when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGatewayHtmlEmail);
         when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(resourceResolver);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
 
         emailTemplatePath = new File(this.getClass().getResource("/emailTemplate.txt").toURI()).getPath();
 
+        emailTemplateAttachmentPath = new File(this.getClass().getResource("/emailTemplateAttachment.html").toURI()).getPath();
+
         // Mock the Mail Template
         PowerMockito.mockStatic(MailTemplate.class);
         when(MailTemplate.create(emailTemplatePath, session)).thenReturn(
             new MailTemplate(new FileInputStream(emailTemplatePath), "UTF-8"));
+
+        when(MailTemplate.create(emailTemplateAttachmentPath, session)).thenReturn(
+                new MailTemplate(new FileInputStream(emailTemplateAttachmentPath), "UTF-8"));
+
     }
 
 
@@ -161,6 +172,47 @@ public class EmailServiceImplTest {
         assertEquals(expectedSenderName, captor.getValue().getFromAddress().getPersonal());
         assertEquals(expectedSubject, captor.getValue().getSubject());
         assertEquals(recipient, captor.getValue().getToAddresses().get(0).toString());
+
+        //If email is sent to the recipient successfully, the response is an empty failureList
+        assertTrue(failureList.isEmpty());
+    }
+
+    @Test
+    public final void testSendEmailAttachment() throws Exception {
+
+        final String expectedMessage = "This is just a message";
+        final String expectedSenderName = "John Smith";
+        final String expectedSenderEmailAddress = "john@smith.com";
+        String attachment = "This is a attachment.";
+        String attachmentName = "attachment.txt";
+        //Subject is provided inside the HtmlTemplate directly
+        final String expectedSubject = "Greetings";
+
+        final Map<String, String> params = new HashMap<String, String>();
+        params.put("message", expectedMessage);
+        params.put("senderName", expectedSenderName);
+        params.put("senderEmailAddress", expectedSenderEmailAddress);
+
+        final String recipient =  "upasanac@acs.com";
+
+        Map<String, DataSource> attachments = new HashMap();
+        attachments.put(attachmentName, new ByteArrayDataSource(attachment, "text/plain"));
+
+        ArgumentCaptor<HtmlEmail> captor = ArgumentCaptor.forClass(HtmlEmail.class);
+
+        List<String> failureList = emailService.sendEmail(emailTemplateAttachmentPath, params, attachments, recipient);
+
+        verify(messageGatewayHtmlEmail, times(1)).send(captor.capture());
+
+        assertEquals(expectedSenderEmailAddress, captor.getValue().getFromAddress().getAddress());
+        assertEquals(expectedSenderName, captor.getValue().getFromAddress().getPersonal());
+        assertEquals(expectedSubject, captor.getValue().getSubject());
+        assertEquals(recipient, captor.getValue().getToAddresses().get(0).toString());
+        Method getContainer = captor.getValue().getClass().getSuperclass().getDeclaredMethod("getContainer");
+        getContainer.setAccessible(true);
+        MimeMultipart mimeMultipart = (MimeMultipart) getContainer.invoke(captor.getValue());
+        getContainer.setAccessible(false);
+        assertEquals(attachment, mimeMultipart.getBodyPart(0).getContent().toString());
 
         //If email is sent to the recipient successfully, the response is an empty failureList
         assertTrue(failureList.isEmpty());
