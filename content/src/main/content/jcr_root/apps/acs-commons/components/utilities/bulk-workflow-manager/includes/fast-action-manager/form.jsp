@@ -18,20 +18,25 @@
   ~ #L%
   --%>
 
-<div class="coral-Form-fieldwrapper">
+
+<div class="coral-Form-fieldwrapper"
+    ng-show="!form.retryCount">
     <label class="coral-Form-fieldlabel">Batch Size</label>
 
     <input name="batchSize"
            type="number"
-           min="2"
+           min="1"
            class="coral-Form-field coral-Textfield"
            ng-model="form.batchSize"
-           value="100"
            placeholder="# of payloads to process per commit [ Default: 10 ]"/>
-            <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-                  data-quicktip-content="Batch size must be greater than 1"></span>
 </div>
 
+<div    ng-hide="!form.retryCount"
+        class="coral-Alert coral-Alert--info">
+    <i class="coral-Alert-typeIcon coral-Icon coral-Icon--sizeS coral-Icon--alert"></i>
+    <strong class="coral-Alert-title">Info</strong>
+    <div class="coral-Alert-message">If Retry Count is > 0, then Batch Size is auto-set to 1</div>
+</div>
 
 <div class="coral-Form-fieldwrapper">
     <label class="coral-Form-fieldlabel">Retry Count</label>
@@ -41,6 +46,8 @@
            min="0"
            class="coral-Form-field coral-Textfield"
            ng-model="form.retryCount"
+           ng-change="if (form.retryCount > 1) { form.batchSize = 0 }"
+           ng-init="form.retryCount=3"
            placeholder="# of time to retry processing a payload [ Default: 0 ]"/>
             <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
                   data-quicktip-content="0 disabled retries"></span>

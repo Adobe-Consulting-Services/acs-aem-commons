@@ -24,7 +24,7 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerStats;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
-import com.adobe.acs.commons.workflow.bulk.execution.impl.Status;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Failure;

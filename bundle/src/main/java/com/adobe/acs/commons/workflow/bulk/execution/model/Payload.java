@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution.model;
 
-import com.adobe.acs.commons.workflow.bulk.execution.impl.Status;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;

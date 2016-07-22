@@ -70,13 +70,19 @@ public class StartServlet extends SlingAllMethodsServlet {
             properties.put("queryStatement", params.getString("queryStatement"));
             properties.put("relativePath", StringUtils.removeStart(params.optString("relativePath", ""), "/"));
             properties.put("workflowModel", params.getString("workflowModel"));
-            properties.put("batchSize", params.optInt("batchSize", 10));
             properties.put("interval", params.optInt("interval", 10));
             properties.put("timeout", params.optInt("timeout", 30));
             properties.put("throttle", params.optInt("throttle", 10));
             properties.put("retryCount", params.optInt("retryCount", 0));
+            properties.put("batchSize", params.optInt("batchSize", 10));
+
             properties.put("purgeWorkflow", params.optBoolean("purgeWorkflow", false));
             properties.put("autoThrottle", params.optBoolean("autoThrottle", true));
+
+            // If FAM retires are enabled, then force BatchSize to be 1
+            if (properties.get("retryCount", 0) > 0) {
+                properties.put("batchSize", 1);
+            }
 
             request.getResourceResolver().commit();
 

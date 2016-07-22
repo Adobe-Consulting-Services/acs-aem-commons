@@ -68,7 +68,7 @@
                name="autoThrottle"
                ng-model="form.autoThrottle"
                ng-init="form.autoThrottle=true">
-        <span>Enable ACS Commons ThrottledTaskRunner CPU/Memory-baed throttling.</span>
+        <span>Enable ACS Commons ThrottledTaskRunner CPU/Memory-based throttling.</span>
     </label>
 </div>
 

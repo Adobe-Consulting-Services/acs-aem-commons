@@ -23,14 +23,10 @@
 
     <input name="batchSize"
            type="number"
-           min="2"
+           min="1"
            class="coral-Form-field coral-Textfield"
-           ng-pattern="/(^[2-9]\d*)|(^[1-9]\d+)/"
            ng-model="form.batchSize"
-           value="100"
            placeholder="# of payloads to process per commit [ Default: 10 ]"/>
-            <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-                  data-quicktip-content="Batch size must be greater than 1"></span>
 </div>
 
 <div class="coral-Form-fieldwrapper">
@@ -41,6 +37,6 @@
                name="autoThrottle"
                ng-model="form.autoThrottle"
                ng-init="form.autoThrottle=true">
-        <span>Enable ACS Commons ThrottledTaskRunner CPU/Memory-baed throttling.</span>
+        <span>Enable ACS Commons ThrottledTaskRunner CPU/Memory-based throttling.</span>
     </label>
 </div>

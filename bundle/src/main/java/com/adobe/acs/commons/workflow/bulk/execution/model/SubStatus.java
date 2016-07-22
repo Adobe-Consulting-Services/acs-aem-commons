@@ -18,17 +18,12 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk.execution.impl;
+package com.adobe.acs.commons.workflow.bulk.execution.model;
 
-public enum Status {
-    NOT_STARTED,
-    FAILED,
-    STOPPED,
-    RUNNING,
-
-    ABORTED,
-    COMPLETED,
-    SUSPENDED,
-    TERMINATED,
-    FORCE_TERMINATED
+public enum SubStatus {
+    ERROR,
+    DEACTIVATED,
+    STOPPING,
+    FORCE_TERMINATED,
+    SLEEPING
 }
