@@ -322,8 +322,8 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         return getCacheConfig(request, HttpCacheConfig.FilterScope.REQUEST);
     }
 
-    //@Override
-    private HttpCacheConfig getCacheConfig(SlingHttpServletRequest request, HttpCacheConfig.FilterScope filterScope) throws HttpCacheConfigConflictException, HttpCacheRepositoryAccessException {
+    @Override
+    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request, HttpCacheConfig.FilterScope filterScope) throws HttpCacheConfigConflictException, HttpCacheRepositoryAccessException {
 
         // Get the first accepting cache config based on the cache config order.
         HttpCacheConfig bestCacheConfig = null;
