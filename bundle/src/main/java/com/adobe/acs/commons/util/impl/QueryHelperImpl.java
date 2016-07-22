@@ -82,7 +82,7 @@ public class QueryHelperImpl implements QueryHelper {
             for (final Hit hit : hits) {
                 resources.add(hit.getResource());
             }
-        } else if (LIST.equalsIgnoreCase(statement)) {
+        } else if (LIST.equalsIgnoreCase(language)) {
             if (StringUtils.isNotBlank(statement)) {
                 final String[] lines = statement.split("[,;\\s\\n\\t]+");
 
