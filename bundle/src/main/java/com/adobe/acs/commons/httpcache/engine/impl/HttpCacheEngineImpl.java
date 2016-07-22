@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,28 @@ import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
-import com.adobe.acs.commons.httpcache.exception.*;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
+import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -43,9 +56,22 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.*;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -293,6 +319,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     @Override
     public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException,
             HttpCacheConfigConflictException {
+        return getCacheConfig(request, HttpCacheConfig.FilterScope.REQUEST);
+    }
+
+    @Override
+    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request, HttpCacheConfig.FilterScope filterScope) throws HttpCacheConfigConflictException, HttpCacheRepositoryAccessException {
 
         // Get the first accepting cache config based on the cache config order.
         HttpCacheConfig bestCacheConfig = null;
@@ -309,7 +340,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                     // Since cacheConfigs is sorted by order, this means all other orders will not match
                     break;
                 }
-            } else if (cacheConfig.accepts(request)) {
+            } else if (filterScope.equals(cacheConfig.getFilterScope()) && cacheConfig.accepts(request)) {
                 bestCacheConfig = cacheConfig;
             }
         }
@@ -365,7 +396,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Copy the cached data into the servlet output stream.
         try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
             if (log.isDebugEnabled()) {
                 log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
             }
@@ -384,7 +415,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         // Temp sink for the duplicate stream is chosen based on the cache store configured at cache config.
         try {
             return new HttpCacheServletResponseWrapper(response, getCacheStore(cacheConfig).createTempSink());
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             throw new HttpCacheDataStreamException(e);
         }
     }
@@ -394,7 +425,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             cacheConfig) throws HttpCacheKeyCreationException, HttpCacheDataStreamException,
             HttpCachePersistenceException {
 
-        // TODO - This can be made asynchronous to avoid performance penality on response cache.
+        // TODO - This can be made asynchronous to avoid performance penalty on response cache.
 
         CacheContent cacheContent = null;
         try {

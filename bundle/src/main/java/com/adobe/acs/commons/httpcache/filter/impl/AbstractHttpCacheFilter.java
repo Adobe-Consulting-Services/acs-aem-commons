@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,42 +17,34 @@
  * limitations under the License.
  * #L%
  */
+
 package com.adobe.acs.commons.httpcache.filter.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.sling.SlingFilter;
-import org.apache.felix.scr.annotations.sling.SlingFilterScope;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 
-/**
- * ACS AEM Samples - Http Cache - Intercepting request filter for dealing with cache. Intercepting sling request filter
- * to introduce caching layer. Works with {@link com.adobe.acs.commons.httpcache .engine.HttpCacheEngine} to deal with
- * caching aspects.
- */
-@SlingFilter(
-        generateComponent = true,
-        generateService = true,
-        order = 4999, // Magic number places it immediately after the Granite inner cache
-        scope = SlingFilterScope.REQUEST)
-public class HttpCacheFilter implements Filter {
-    private static final Logger log = LoggerFactory.getLogger(HttpCacheFilter.class);
-
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    private HttpCacheEngine cacheEngine;
+public abstract class AbstractHttpCacheFilter implements Filter {
+    private static final Logger log = LoggerFactory.getLogger(AbstractHttpCacheFilter.class);
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-            ServletException {
+    public abstract void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
+            ServletException;
+
+    protected void doFilter(ServletRequest request, ServletResponse response, FilterChain chain,
+                            HttpCacheEngine cacheEngine, HttpCacheConfig.FilterScope filterScope) throws IOException, ServletException {
         log.trace("In HttpCache filter.");
 
         final long start = System.currentTimeMillis();
@@ -65,7 +57,7 @@ public class HttpCacheFilter implements Filter {
 
         try {
             // Get the first accepting cache config, or null if no accepting cacheConfigs can be found.
-            cacheConfig = cacheEngine.getCacheConfig(slingRequest);
+            cacheConfig = cacheEngine.getCacheConfig(slingRequest, filterScope);
 
             // Check if the url is cache-able as per configs and rules.
             // An accepting cacheConfig must exist and all cache rules must be met.
@@ -75,7 +67,7 @@ public class HttpCacheFilter implements Filter {
                     // Deliver the response from cache.
                     if (cacheEngine.deliverCacheContent(slingRequest, slingResponse, cacheConfig)) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Delivered cached request [ {} ] in {} ms", slingRequest.getRequestURI(),
+                            log.debug("Delivered cached request [ {} ] in {} ms", slingRequest.getResource().getPath(),
                                     System.currentTimeMillis() - start);
                         }
                         return;
@@ -101,7 +93,7 @@ public class HttpCacheFilter implements Filter {
             }
 
             if (log.isTraceEnabled()) {
-                log.trace("Delivered un-cached request [ {} ] in {} ms", slingRequest.getRequestURI(),
+                log.trace("Delivered un-cached request [ {} ] in {} ms",  slingRequest.getResource().getPath(),
                         System.currentTimeMillis() - start);
             }
         } catch (HttpCacheException e) {
