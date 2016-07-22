@@ -106,12 +106,21 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         }
         if (ttl != DEFAULT_TTL) {
             // If ttl is present, attach it to guava cache configuration.
-            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).expireAfterWrite(ttl, TimeUnit
-                    .SECONDS).removalListener(new MemCacheEntryRemovalListener()).recordStats().build();
+            cache = CacheBuilder.newBuilder()
+                    .maximumWeight(maxSizeInMb * MEGABYTE)
+                    .weigher(new MemCacheEntryWeigher())
+                    .expireAfterWrite(ttl, TimeUnit.SECONDS)
+                    .removalListener(new MemCacheEntryRemovalListener())
+                    .recordStats()
+                    .build();
         } else {
             // If ttl is absent, go only with the maximum weight condition.
-            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).weigher(new MemCacheEntryWeigher
-                    ()).removalListener(new MemCacheEntryRemovalListener()).recordStats().build();
+            cache = CacheBuilder.newBuilder()
+                    .maximumWeight(maxSizeInMb * MEGABYTE)
+                    .weigher(new MemCacheEntryWeigher())
+                    .removalListener(new MemCacheEntryRemovalListener())
+                    .recordStats()
+                    .build();
         }
 
         log.info("MemHttpCacheStoreImpl activated / modified.");

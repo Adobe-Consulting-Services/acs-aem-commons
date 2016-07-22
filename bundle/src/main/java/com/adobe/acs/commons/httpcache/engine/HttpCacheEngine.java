@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public interface HttpCacheEngine {
 
     /**
      * Check if the supplied JCR repository path has the potential to invalidate cache. This can be identified based on
-     * the {@link com.adobe.acs.commons.httpcache.config.HttpCacheConfig}.
+     * the {@link HttpCacheConfig}.
      *
      * @param path JCR repository path.
      * @return
@@ -120,7 +120,7 @@ public interface HttpCacheEngine {
     boolean isPathPotentialToInvalidate(String path);
 
     /**
-     * Invalidate the cache for the {@linkplain com.adobe.acs.commons.httpcache.config.HttpCacheConfig} which is
+     * Invalidate the cache for the {@linkplain HttpCacheConfig} which is
      * interested in the given path. Custom cache handling rule hook {@link com.adobe.acs.commons.httpcache.rule
      * .HttpCacheHandlingRule#onCacheInvalidate(String)} exposed.
      *
