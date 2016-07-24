@@ -8,3 +8,4 @@ notifications:
 branches:
   except:
     - feature/6.2-compatibility
+    - feature/httpcomponentsfactory
