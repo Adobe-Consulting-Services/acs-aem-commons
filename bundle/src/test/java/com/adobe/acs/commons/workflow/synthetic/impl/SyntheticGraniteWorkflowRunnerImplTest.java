@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,18 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
-import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.NoNextWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.ReadDataWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.RestartWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.SetDataWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.TerminateDataWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.UpdateWorkflowDataWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFArgsWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.testprocesses.WFDataWorkflowProcess;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.metadata.MetaDataMap;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.NoNextWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.ReadDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.RestartWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.SetDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.TerminateDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.UpdateWorkflowDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WFArgsWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WFDataWorkflowProcess;
+
+import com.adobe.granite.workflow.WorkflowSession;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +50,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SyntheticWorkflowRunnerImplTest {
+public class SyntheticGraniteWorkflowRunnerImplTest {
 
     @Mock
     ResourceResolver resourceResolver;
@@ -69,7 +70,7 @@ public class SyntheticWorkflowRunnerImplTest {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "test");
-        swr.bindWorkflowProcesses(new WFDataWorkflowProcess(), map);
+        swr.bindGraniteWorkflowProcesses(new WFDataWorkflowProcess(), map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
@@ -84,10 +85,10 @@ public class SyntheticWorkflowRunnerImplTest {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "set");
-        swr.bindWorkflowProcesses(new SetDataWorkflowProcess(), map);
+        swr.bindGraniteWorkflowProcesses(new SetDataWorkflowProcess(), map);
 
         map.put("process.label", "read");
-        swr.bindWorkflowProcesses(new ReadDataWorkflowProcess(), map);
+        swr.bindGraniteWorkflowProcesses(new ReadDataWorkflowProcess(), map);
 
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
@@ -103,10 +104,10 @@ public class SyntheticWorkflowRunnerImplTest {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "update");
-        swr.bindWorkflowProcesses(new UpdateWorkflowDataWorkflowProcess(), map);
+        swr.bindGraniteWorkflowProcesses(new UpdateWorkflowDataWorkflowProcess(), map);
 
         map.put("process.label", "read");
-        swr.bindWorkflowProcesses(new ReadDataWorkflowProcess(), map);
+        swr.bindGraniteWorkflowProcesses(new ReadDataWorkflowProcess(), map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
@@ -121,7 +122,7 @@ public class SyntheticWorkflowRunnerImplTest {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "wf-args");
-        swr.bindWorkflowProcesses(new WFArgsWorkflowProcess(), map);
+        swr.bindGraniteWorkflowProcesses(new WFArgsWorkflowProcess(), map);
 
         /** WF Process Metadata */
 
@@ -144,7 +145,7 @@ public class SyntheticWorkflowRunnerImplTest {
 
         map.put("process.label", "restart");
         RestartWorkflowProcess restartWorkflowProcess = spy(new RestartWorkflowProcess());
-        swr.bindWorkflowProcesses(restartWorkflowProcess, map);
+        swr.bindGraniteWorkflowProcesses(restartWorkflowProcess, map);
 
         /** Restart */
 
@@ -171,10 +172,10 @@ public class SyntheticWorkflowRunnerImplTest {
 
         map.put("process.label", "terminate");
         TerminateDataWorkflowProcess terminateDataWorkflowProcess = spy(new TerminateDataWorkflowProcess());
-        swr.bindWorkflowProcesses(terminateDataWorkflowProcess, map);
+        swr.bindGraniteWorkflowProcesses(terminateDataWorkflowProcess, map);
 
         map.put("process.label", "nonext");
-        swr.bindWorkflowProcesses(new NoNextWorkflowProcess(), map);
+        swr.bindGraniteWorkflowProcesses(new NoNextWorkflowProcess(), map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
@@ -197,7 +198,7 @@ public class SyntheticWorkflowRunnerImplTest {
 
         map.put("process.label", "terminate");
         TerminateDataWorkflowProcess terminateDataWorkflowProcess = spy(new TerminateDataWorkflowProcess());
-        swr.bindWorkflowProcesses(terminateDataWorkflowProcess, map);
+        swr.bindGraniteWorkflowProcesses(terminateDataWorkflowProcess, map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
@@ -224,7 +225,7 @@ public class SyntheticWorkflowRunnerImplTest {
 
         map.put("process.label", "terminate");
         TerminateDataWorkflowProcess terminateDataWorkflowProcess = spy(new TerminateDataWorkflowProcess());
-        swr.bindWorkflowProcesses(terminateDataWorkflowProcess, map);
+        swr.bindGraniteWorkflowProcesses(terminateDataWorkflowProcess, map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 

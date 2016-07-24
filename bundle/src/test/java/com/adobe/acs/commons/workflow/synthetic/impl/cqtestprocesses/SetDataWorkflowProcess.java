@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl.testprocesses;
+package com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses;
 
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
@@ -29,18 +29,21 @@ import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TerminateDataWorkflowProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(TerminateDataWorkflowProcess.class);
+public class SetDataWorkflowProcess implements WorkflowProcess {
+    private static final Logger log = LoggerFactory.getLogger(SetDataWorkflowProcess.class);
 
-    public TerminateDataWorkflowProcess() {
+    public SetDataWorkflowProcess() {
 
     }
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        log.debug("Terminate Workflow Process");
+        workItem.getWorkflowData().getMetaDataMap().put("workflowdata", "set on workflowdata");
+        workItem.getWorkflow().getMetaDataMap().put("workflow", "set on workflow");
+        workItem.getMetaDataMap().put("workitem", "local to work item");
 
-        workflowSession.terminateWorkflow(workItem.getWorkflow());
-        Assert.assertTrue(false);
+        // WorkItem map is scoped only to this WorkItem step
+        String actual = workItem.getMetaDataMap().get("workitem", String.class);
+        Assert.assertEquals("local to work item", actual);
     }
 }

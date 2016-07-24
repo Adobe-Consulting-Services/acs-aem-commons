@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl.exceptions;
+package com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions;
 
-import com.day.cq.workflow.WorkflowException;
+import com.adobe.granite.workflow.WorkflowException;
 
 @SuppressWarnings("serial")
-public class SyntheticRestartWorkflowException extends WorkflowException {
-
-    public SyntheticRestartWorkflowException(String message) {
+public class SyntheticCompleteWorkflowException extends WorkflowException {
+    public SyntheticCompleteWorkflowException(String message) {
         super(message);
     }
 }

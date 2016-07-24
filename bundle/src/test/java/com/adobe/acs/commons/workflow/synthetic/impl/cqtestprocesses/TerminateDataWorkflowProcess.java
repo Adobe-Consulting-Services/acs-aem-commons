@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl.testprocesses;
+package com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses;
 
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
@@ -29,26 +29,18 @@ import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WFDataWorkflowProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(WFDataWorkflowProcess.class);
+public class TerminateDataWorkflowProcess implements WorkflowProcess {
+    private static final Logger log = LoggerFactory.getLogger(TerminateDataWorkflowProcess.class);
 
-    public WFDataWorkflowProcess() {
+    public TerminateDataWorkflowProcess() {
 
     }
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        // Workflow Data
-        Assert.assertEquals("JCR_PATH", workItem.getWorkflowData().getPayloadType());
-        Assert.assertEquals("/content/test", workItem.getWorkflowData().getPayload());
+        log.debug("Terminate Workflow Process");
 
-        // Workitem
-        Assert.assertTrue(workItem.getId().matches("[a-z0-9]{8}-([a-z0-9]{4}-){3}[a-z0-9]{12}_.+"));
-        Assert.assertEquals(null, workItem.getNode());
-        Assert.assertTrue(workItem.getTimeStarted() != null);
-        Assert.assertTrue(workItem.getTimeEnded() == null);
-        Assert.assertTrue(workItem.getWorkflow() != null);
-        Assert.assertEquals("Synthetic Workflow", workItem.getCurrentAssignee());
-
+        workflowSession.terminateWorkflow(workItem.getWorkflow());
+        Assert.assertTrue(false);
     }
 }

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,27 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.synthetic.impl.testprocesses;
+package com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses;
 
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowProcess;
-import com.day.cq.workflow.metadata.MetaDataMap;
-import junit.framework.Assert;
+import com.adobe.granite.workflow.WorkflowException;
+import com.adobe.granite.workflow.WorkflowSession;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.WorkflowProcess;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GoNextWorkflowProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(GoNextWorkflowProcess.class);
+public class NoNextWorkflowProcess implements WorkflowProcess {
+    private static final Logger log = LoggerFactory.getLogger(NoNextWorkflowProcess.class);
 
-    public GoNextWorkflowProcess() {
+    public NoNextWorkflowProcess() {
 
     }
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        Assert.assertTrue(true);
+
+        Assert.assertTrue(false);
     }
 }
