@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
-import com.adobe.granite.workflow.metadata.MetaDataMap;
+import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class SyntheticMetaDataMap implements MetaDataMap, com.day.cq.workflow.metadata.MetaDataMap {
+public class SyntheticMetaDataMap implements MetaDataMap, com.adobe.granite.workflow.metadata.MetaDataMap {
     private final ValueMap metaDataMap;
 
     public SyntheticMetaDataMap() {
