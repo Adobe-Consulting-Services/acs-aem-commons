@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.http;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
@@ -28,9 +27,8 @@ import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+
+import static com.day.cq.wcm.foundation.List.log;
 
 /**
  * Converts response to a JSON Object.
@@ -53,6 +51,7 @@ public class JsonObjectResponseHandler implements ResponseHandler<JSONObject> {
             try {
                 jsonObject.put("error", e.getMessage());
             } catch (JSONException e1) {
+                log.error("Could not form a JSON error response", e);
             }
             return jsonObject;
         }
