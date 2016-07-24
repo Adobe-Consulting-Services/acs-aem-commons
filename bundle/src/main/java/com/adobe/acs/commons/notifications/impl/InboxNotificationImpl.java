@@ -20,6 +20,9 @@
 package com.adobe.acs.commons.notifications.impl;
 
 import com.adobe.acs.commons.notifications.InboxNotification;
+import org.apache.commons.lang.ArrayUtils;
+
+import java.util.Arrays;
 
 public class InboxNotificationImpl extends InboxNotification {
 
@@ -70,11 +73,19 @@ public class InboxNotificationImpl extends InboxNotification {
     }
 
     public String[] getNotificationActions() {
-        return notificationActions;
+        if (notificationActions == null) {
+            return ArrayUtils.EMPTY_STRING_ARRAY;
+        } else {
+            return Arrays.copyOf(notificationActions, notificationActions.length);
+        }
     }
 
     public void setNotificationActions(String... notificationActions) {
-        this.notificationActions = notificationActions;
+        if (notificationActions == null) {
+            this.notificationActions = ArrayUtils.EMPTY_STRING_ARRAY;
+        } else {
+            this.notificationActions = Arrays.copyOf(notificationActions, notificationActions.length);
+        }
     }
 
     public String getInstructions() {

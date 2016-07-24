@@ -17,6 +17,8 @@ package com.adobe.acs.commons.fam;
 
 import aQute.bnd.annotation.ProviderType;
 
+import java.util.Calendar;
+
 /**
  * Represents a failure on a specific node
  */
@@ -25,6 +27,11 @@ public final class Failure {
     
     private String nodePath;
     private Exception exception;
+    private Calendar failedAt;
+
+    public Failure() {
+        this.failedAt = Calendar.getInstance();
+    }
 
     /**
      * @return the nodePath
@@ -53,5 +60,11 @@ public final class Failure {
     public void setException(Exception exception) {
         this.exception = exception;
     }
-    
+
+    /**
+     * @return the time the failure occurred.
+     */
+    public Calendar getTime() {
+        return failedAt;
+    }
 }

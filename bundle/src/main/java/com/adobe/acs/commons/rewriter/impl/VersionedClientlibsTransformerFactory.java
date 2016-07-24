@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -261,7 +262,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     @Override
     protected long getBytesLength(String cacheObj) {
-        return cacheObj.getBytes().length;
+        return cacheObj.getBytes(Charset.forName("UTF-8")).length;
     }
 
     @Override

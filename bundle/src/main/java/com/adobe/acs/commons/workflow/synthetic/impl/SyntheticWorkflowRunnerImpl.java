@@ -22,23 +22,28 @@ package com.adobe.acs.commons.workflow.synthetic.impl;
 
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
-import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticCompleteWorkflowException;
-import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticRestartWorkflowException;
-import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticTerminateWorkflowException;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.SyntheticWorkItem;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.SyntheticWorkflow;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.SyntheticWorkflowSession;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticCompleteWorkflowException;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticRestartWorkflowException;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticTerminateWorkflowException;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.exec.WorkflowProcess;
-import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,13 +61,23 @@ import java.util.concurrent.ConcurrentHashMap;
  * Facilitates the execution of synthetic workflow.
  */
 @Component
-@Reference(
-        name = "workflowProcesses",
-        referenceInterface = WorkflowProcess.class,
-        policy = ReferencePolicy.DYNAMIC,
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
-)
-@Service(value = SyntheticWorkflowRunner.class)
+@References({
+        @Reference(
+                referenceInterface = WorkflowProcess.class,
+                policy = ReferencePolicy.DYNAMIC,
+                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+                bind = "bindCqWorkflowProcesses",
+                unbind = "unbindCqWorkflowProcesses"
+        ),
+        @Reference(
+                referenceInterface = com.adobe.granite.workflow.exec.WorkflowProcess.class,
+                policy = ReferencePolicy.DYNAMIC,
+                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+                bind = "bindGraniteWorkflowProcesses",
+                unbind = "unbindGraniteWorkflowProcesses"
+        )
+})
+@Service
 public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowRunnerImpl.class);
 
@@ -72,13 +87,16 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     private static final int MAX_RESTART_COUNT = 3;
 
-    private Map<String, WorkflowProcess> workflowProcessesByLabel = new ConcurrentHashMap<String, WorkflowProcess>();
+    private Map<String, SyntheticWorkflowProcess> workflowProcessesByLabel = new ConcurrentHashMap<String, SyntheticWorkflowProcess>();
 
-    private Map<String, WorkflowProcess> workflowProcessesByProcessName =
-            new ConcurrentHashMap<String, WorkflowProcess>();
+    private Map<String, SyntheticWorkflowProcess> workflowProcessesByProcessName =
+            new ConcurrentHashMap<String, SyntheticWorkflowProcess>();
 
     @Reference
     private WorkflowService aemWorkflowService;
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
 
     /**
      * {@inheritDoc}
@@ -134,7 +152,6 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
             try {
                 run(resourceResolver, payloadPath, workflowProcessIdType, workflowProcessIds, processArgs,
                         autoSaveAfterEachWorkflowProcess, autoSaveAtEnd);
-
                 if (log.isInfoEnabled()) {
                     long duration = System.currentTimeMillis() - start;
                     log.info("Synthetic workflow execution of payload [ {} ] completed in [ {} ] ms",
@@ -145,12 +162,13 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
             } catch (SyntheticRestartWorkflowException ex) {
                 if (count < MAX_RESTART_COUNT) {
-                    log.info("Restarting synthetic workflow for [ {} ]", payloadPath);
+                    log.info("Restarting CQ synthetic workflow for [ {} ]", payloadPath);
                 } else {
-                    log.warn("Synthetic workflow execution of payload [ {} ] reached max restart rate of [ {} ]",
+                    log.warn("Synthetic CQ workflow execution of payload [ {} ] reached max restart rate of [ {} ]",
                             payloadPath, count);
                 }
             }
+
         } while (count < MAX_RESTART_COUNT);
     }
 
@@ -163,19 +181,22 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                      final boolean autoSaveAtEnd) throws WorkflowException {
 
         final Session session = resourceResolver.adaptTo(Session.class);
-        final WorkflowSession workflowSession = this.getWorkflowSession(session);
 
         // Create the WorkflowData obj; This will persist through all WF Process Steps
-        final WorkflowData workflowData = new SyntheticWorkflowData("JCR_PATH", payloadPath);
+        // This must be remained defined once to it can be shared by reference across CQ and Granite SyntheticWorkflow isntances
+        final SyntheticWorkflowData workflowData = new SyntheticWorkflowData("JCR_PATH", payloadPath);
 
         // Create the Workflow obj; This will persist through all WF Process Steps
         // The Workflow MetadataMap will leverage the WorkflowData's MetadataMap as these two maps should be in sync
-        final SyntheticWorkflow workflow =
+        final SyntheticWorkflow cqWorkflow =
                 new SyntheticWorkflow("Synthetic Workflow ( " + payloadPath + " )", workflowData);
+        final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflow graniteWorkflow =
+                new com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflow("Synthetic Workflow ( " + payloadPath + " )", workflowData);
+
         boolean terminated = false;
 
         for (final String workflowProcessId : workflowProcessIds) {
-            WorkflowProcess workflowProcess;
+            SyntheticWorkflowProcess workflowProcess;
 
             if (WorkflowProcessIdType.PROCESS_LABEL.equals(workflowProcessIdType)) {
                 workflowProcess = this.workflowProcessesByLabel.get(workflowProcessId);
@@ -184,33 +205,40 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
             }
 
             if (workflowProcess != null) {
-
-                // Each Workflow Process Step gets its own workItem whose life starts and ends w the WF Process
-                final SyntheticWorkItem workItem = new SyntheticWorkItem(workflowData);
-                workItem.setWorkflow(workflow);
-
-                // Used to pass in per-Step parameters
-                final MetaDataMap workflowProcessMetaDataMap =
-                        new SyntheticMetaDataMap(metaDataMaps.get(workflowProcessId));
-
                 final long start = System.currentTimeMillis();
-                log.trace("Executing synthetic workflow process [ {} ] on [ {} ]", workflowProcessId, payloadPath);
 
                 try {
-                    // Execute the Workflow Process
-                    workflowProcess.execute(workItem, workflowSession, workflowProcessMetaDataMap);
-                    workItem.setTimeEnded(new Date());
+                    final SyntheticMetaDataMap workflowProcessMetaDataMap = new SyntheticMetaDataMap(metaDataMaps.get(workflowProcessId));
 
-                } catch (SyntheticCompleteWorkflowException ex) {
-                    // Workitem force-completed via a call to workflowSession.complete(..)
-                    workItem.setTimeEnded(new Date());
-                    log.trace(ex.getMessage());
-
+                    if (SyntheticWorkflowProcess.Type.GRANITE.equals(workflowProcess.getWorkflowType())) {
+                        runGraniteWorkflowProcess(session, graniteWorkflow, workflowProcessMetaDataMap, workflowProcess);
+                    } else if (SyntheticWorkflowProcess.Type.CQ.equals(workflowProcess.getWorkflowType())) {
+                        runCqWorkflowProcess(session, cqWorkflow, workflowProcessMetaDataMap, workflowProcess);
+                    } else {
+                        log.warn("Workflow process step is of an unknown type [ {} ]. Skipping.", workflowProcess.getWorkflowType());
+                    }
                 } catch (SyntheticTerminateWorkflowException ex) {
                     // Terminate entire Workflow execution for this payload
                     terminated = true;
-                    log.info("Synthetic workflow execution stopped via terminate for [ {} ]", payloadPath);
+                    log.info("Synthetic CQ workflow execution stopped via terminate for [ {} ]", payloadPath);
                     break;
+                } catch (com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticTerminateWorkflowException ex) {
+                    // Terminate entire Workflow execution for this payload
+                    terminated = true;
+                    log.info("Synthetic Granite workflow execution stopped via terminate for [ {} ]", payloadPath);
+                    break;
+                } catch (SyntheticRestartWorkflowException ex) {
+                    // Handle CQ Restart Workflow; catch/throw for clarity in whats happening
+                    throw ex;
+                } catch (com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticRestartWorkflowException ex) {
+                    // Handle Granite Restart Exceptions by transforming them into CQ Worlflow Restart Exceptions which the rest of this API leverages
+                    throw new SyntheticRestartWorkflowException(ex.getMessage());
+                } catch (WorkflowException ex) {
+                    // Handle CQ Workflow Exception; catch/throw for clarity in whats happening
+                    throw ex;
+                } catch (com.adobe.granite.workflow.WorkflowException ex) {
+                    // Handle Granite Workflow Exceptions by transforming them into CQ Workflow Exceptions which the rest of this API leverages
+                    throw new WorkflowException(ex);
                 } finally {
                     try {
                         if (!terminated && autoSaveAfterEachWorkflowProcess && session.hasPendingChanges()) {
@@ -244,6 +272,69 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         }
     }
 
+
+    private void runCqWorkflowProcess(Session session,
+                                      SyntheticWorkflow workflow,
+                                      SyntheticMetaDataMap workflowProcessMetaDataMap,
+                                      SyntheticWorkflowProcess workflowProcess) throws WorkflowException {
+        final WorkflowSession workflowSession = this.getCqWorkflowSession(session);
+
+        // Each Workflow Process Step gets its own workItem whose life starts and ends w the WF Process
+        final SyntheticWorkItem workItem = new SyntheticWorkItem(workflow.getWorkflowData());
+        workItem.setWorkflow(workflow);
+
+        log.trace("Executing CQ synthetic workflow process [ {} ] on [ {} ]",
+                workflowProcess.getProcessId(),
+                workflow.getWorkflowData().getPayload());
+
+        // Execute the Workflow Process
+        try {
+            workflowProcess.getCqWorkflowProcess().execute(workItem, workflowSession, workflowProcessMetaDataMap);
+            workItem.setTimeEnded(new Date());
+        } catch (SyntheticCompleteWorkflowException ex) {
+            // Workitem force-completed via a call to workflowSession.complete(..)
+            workItem.setTimeEnded(new Date());
+            log.trace(ex.getMessage());
+        } catch (SyntheticTerminateWorkflowException ex) {
+            workItem.setTimeEnded(new Date());
+            log.trace(ex.getMessage());
+            throw ex;
+        }
+    }
+
+    private void runGraniteWorkflowProcess(Session session,
+                                           com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflow workflow,
+                                           SyntheticMetaDataMap workflowProcessMetaDataMap,
+                                           SyntheticWorkflowProcess workflowProcess) throws com.adobe.granite.workflow.WorkflowException {
+
+        final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession workflowSession =
+                this.getGraniteWorkflowSession(session);
+
+
+        // Each Workflow Process Step gets its own workItem whose life starts and ends w the WF Process
+        final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkItem workItem =
+                new com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkItem(workflow.getWorkflowData());
+        workItem.setWorkflow(workflow);
+
+        log.trace("Executing Granite synthetic workflow process [ {} ] on [ {} ]",
+                workflowProcess.getProcessId(),
+                workflow.getWorkflowData().getPayload());
+        // Execute the Workflow Process
+        try {
+            workflowProcess.getGraniteWorkflowProcess().execute(workItem, workflowSession, workflowProcessMetaDataMap);
+            workItem.setTimeEnded(new Date());
+        } catch (com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticCompleteWorkflowException ex) {
+            // Workitem force-completed via a call to workflowSession.complete(..)
+            workItem.setTimeEnded(new Date());
+            log.trace(ex.getMessage());
+        } catch (com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticTerminateWorkflowException ex) {
+            workItem.setTimeEnded(new Date());
+            log.trace(ex.getMessage());
+            throw ex;
+        }
+    }
+
+
     @Override
     public final void execute(final ResourceResolver resourceResolver,
                               final String payloadPath,
@@ -269,10 +360,9 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                                                                   final boolean ignoreIncompatibleTypes)
             throws WorkflowException {
 
-        final WorkflowSession workflowSession = this.getWorkflowSession(resourceResolver.adaptTo(Session.class));
+        final WorkflowSession workflowSession = aemWorkflowService.getWorkflowSession(resourceResolver.adaptTo(Session.class));
         return new SyntheticWorkflowModelImpl(workflowSession, workflowModelId, ignoreIncompatibleTypes);
     }
-
 
     /**
      * Unsupported operation.
@@ -293,13 +383,35 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     }
 
     /**
+     * Deprecated. Please use getCqWorkflowSession(..)
      * Creates a Synthetic Workflow Session from a JCR Session.
      *
      * @param session the JCR Session to create the Synthetic Workflow Session from
      * @return the Synthetic Workflow Session
      */
+    @Deprecated
     public final WorkflowSession getWorkflowSession(final Session session) {
+        return getCqWorkflowSession(session);
+    }
+
+    /**
+     * Creates a CQ Synthetic Workflow Session from a JCR Session.
+     *
+     * @param session the JCR Session to create the Synthetic Workflow Session from
+     * @return the CQ Synthetic Workflow Session
+     */
+    public final WorkflowSession getCqWorkflowSession(final Session session) {
         return new SyntheticWorkflowSession(this, session);
+    }
+
+    /**
+     * Creates a Granite Synthetic Workflow Session from a JCR Session.
+     *
+     * @param session the JCR Session to create the Synthetic Workflow Session from
+     * @return the Granite Synthetic Workflow Session
+     */
+    public final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession getGraniteWorkflowSession(final Session session) {
+        return new com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession(this, session);
     }
 
     /**
@@ -314,50 +426,83 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         return this.aemWorkflowService;
     }
 
+
+    public final ResourceResolver getResourceResolver(Session session) throws LoginException {
+        Map<String, Object> authInfo = new HashMap<String, Object>();
+        authInfo.put(JcrResourceConstants.AUTHENTICATION_INFO_SESSION, session);
+        return resourceResolverFactory.getResourceResolver(authInfo);
+    }
+
+
     @Deprecated
     @Override
     public final Dictionary<String, Object> getConfig() {
         return new Hashtable<String, Object>();
     }
 
+
     @Deactivate
     protected final void deactivate(final Map<String, Object> config) {
         log.trace("Deactivating Synthetic Workflow Runner");
-        this.workflowProcessesByLabel = new ConcurrentHashMap<String, WorkflowProcess>();
+        this.workflowProcessesByLabel = new ConcurrentHashMap<String, SyntheticWorkflowProcess>();
+        this.workflowProcessesByProcessName = new ConcurrentHashMap<String, SyntheticWorkflowProcess>();
     }
 
-    protected final void bindWorkflowProcesses(final WorkflowProcess service, final Map<Object, Object> props) {
-        // Workflow Process Labels
-        final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
-        if (label != null) {
-            this.workflowProcessesByLabel.put(label, service);
-            log.trace("Synthetic Workflow Runner added Workflow Process by Label [ {} ]", label);
-        }
 
-        // Workflow Process Name
-        if (service != null) {
-            final String processName = service.getClass().getCanonicalName();
+    protected final void bindCqWorkflowProcesses(final WorkflowProcess service, final Map<Object, Object> props) {
+        bindSyntheticWorkflowProcesses(new SyntheticWorkflowProcess(service), props);
+    }
+
+    protected final void unbindCqWorkflowProcesses(final WorkflowProcess service, final Map<Object, Object> props) {
+        unbindSyntheticWorkflowProcesses(new SyntheticWorkflowProcess(service), props);
+    }
+
+    protected final void bindGraniteWorkflowProcesses(final com.adobe.granite.workflow.exec.WorkflowProcess service, final Map<Object, Object> props) {
+        bindSyntheticWorkflowProcesses(new SyntheticWorkflowProcess(service), props);
+    }
+
+    protected final void unbindGraniteWorkflowProcesses(final com.adobe.granite.workflow.exec.WorkflowProcess service, final Map<Object, Object> props) {
+        unbindSyntheticWorkflowProcesses(new SyntheticWorkflowProcess(service), props);
+    }
+
+    protected final void bindSyntheticWorkflowProcesses(final SyntheticWorkflowProcess process, final Map<Object, Object> props) {
+        if (process != null) {
+            // Workflow Process Labels
+            final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
+            if (label != null) {
+                this.workflowProcessesByLabel.put(label, process);
+                log.trace("Synthetic {} Workflow Runner added Workflow Process by Label [ {} ]", process.getWorkflowType(), label);
+            }
+
+            // Workflow Process Name
+            String processName = (String) process.getProcessId();
+
             if (processName != null) {
-                this.workflowProcessesByProcessName.put(processName, service);
-                log.trace("Synthetic Workflow Runner added Workflow Process by Process Name [ {} ]", processName);
+                this.workflowProcessesByProcessName.put(processName, process);
+                log.trace("Synthetic {} Workflow Runner added Workflow Process by Process Name [ {} ]", process.getWorkflowType(), processName);
+            } else {
+                log.trace("Process name is null for [ {} ]", label);
             }
         }
     }
 
-    protected final void unbindWorkflowProcesses(final WorkflowProcess service, final Map<Object, Object> props) {
-        // Workflow Process Labels
-        final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
-        if (label != null) {
-            this.workflowProcessesByLabel.remove(label);
-            log.trace("Synthetic Workflow Runner removed Workflow Process by Label [ {} ]", label);
-        }
+    protected final void unbindSyntheticWorkflowProcesses(final SyntheticWorkflowProcess process, final Map<Object, Object> props) {
+        if (process != null) {
+            // Workflow Process Labels
+            final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
+            if (label != null) {
+                this.workflowProcessesByLabel.remove(label);
+                log.trace("Synthetic {} Workflow Runner removed Workflow Process by Label [ {} ]", process.getWorkflowType(), label);
+            }
 
-        // Workflow Process Name
-        if (service != null) {
-            final String processName = service.getClass().getCanonicalName();
+            // Workflow Process Name
+            String processName = (String) process.getProcessId();
+
             if (processName != null) {
                 this.workflowProcessesByProcessName.remove(processName);
-                log.trace("Synthetic Workflow Runner removed Workflow Process by Process Name [ {} ]", processName);
+                log.trace("Synthetic {} Workflow Runner removed Workflow Process by Process Name [ {} ]", process.getWorkflowType(), processName);
+            } else {
+                log.trace("Process name is null for [ {} ]", label);
             }
         }
     }

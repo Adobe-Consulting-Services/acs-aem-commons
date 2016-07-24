@@ -1,0 +1,84 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+package com.adobe.acs.commons.workflow.bulk.execution.model;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+@Model(adaptables = Resource.class)
+public class Failure {
+    private static final Logger log = LoggerFactory.getLogger(Failure.class);
+
+    public static final String PN_PATH = "path";
+    public static final String PN_PAYLOAD_PATH = "payloadPath";
+    public static final String PN_FAILED_AT = "failedAt";
+
+    @Inject
+    @Optional
+    private String path;
+
+    @Inject
+    private String payloadPath;
+
+    @Inject
+    private Calendar failedAt;
+
+    public String getPath() {
+        return StringUtils.removeStart(path, "-");
+    }
+
+    public String getPayloadPath() {
+        return StringUtils.removeStart(payloadPath, "-");
+    }
+
+    public String getDereferencedPath() {
+        return path;
+    }
+
+    public String getDereferencedPayloadPath() {
+        return payloadPath;
+    }
+
+    public Calendar getFailedAt() {
+        return failedAt;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy hh:mm:ss aaa");
+
+        JSONObject json = new JSONObject();
+        json.put(PN_PATH, getPath());
+        json.put(PN_PAYLOAD_PATH, getPayloadPath());
+        json.put(PN_FAILED_AT, sdf.format(getFailedAt().getTime()));
+
+        return json;
+    }
+}

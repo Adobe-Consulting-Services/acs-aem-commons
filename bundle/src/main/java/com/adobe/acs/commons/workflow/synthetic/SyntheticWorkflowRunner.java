@@ -27,11 +27,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import java.util.Map;
 
 public interface SyntheticWorkflowRunner extends WorkflowService {
-    enum WorkflowProcessIdType {
-        PROCESS_LABEL,
-        PROCESS_NAME
-    }
-
     String PROCESS_ARGS = "PROCESS_ARGS";
 
     /**
@@ -93,11 +88,11 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
     /**
      * Execute the provided Synthetic Workflow Model in the context of Synthetic Workflow.
      *
-     * @param resourceResolver                  the resourceResolver object that provides access to the JCR for WF operations
-     * @param payloadPath                       the path to execute the workflow against
-     * @param syntheticWorkflowModel            the Synthetic Workflow Model to execute
-     * @param autoSaveAfterEachWorkflowProcess  persist changes to JCR after each Workflow Process completes
-     * @param autoSaveAtEnd                     persist changes to JCR after all Workflow Process complete
+     * @param resourceResolver                 the resourceResolver object that provides access to the JCR for WF operations
+     * @param payloadPath                      the path to execute the workflow against
+     * @param syntheticWorkflowModel           the Synthetic Workflow Model to execute
+     * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
+     * @param autoSaveAtEnd                    persist changes to JCR after all Workflow Process complete
      * @throws WorkflowException
      */
     void execute(ResourceResolver resourceResolver,
@@ -109,15 +104,20 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
     /**
      * Generates the SyntheticWorkflowModel that represents the AEM Workflow Model to execute in the context of Synthetic Workflow.
      *
-     * @param resourceResolver          the resourceResolver object that provides access to the JCR for WF operations
-     * @param workflowModelId           the AEM Workflow Model ID
-     * @param ignoreIncompatibleTypes   ignore incompatible workflow node types to the best of Synthetic Workflow ability
-     * @return                          the Synthetic Workflow Model
+     * @param resourceResolver        the resourceResolver object that provides access to the JCR for WF operations
+     * @param workflowModelId         the AEM Workflow Model ID
+     * @param ignoreIncompatibleTypes ignore incompatible workflow node types to the best of Synthetic Workflow ability
+     * @return the Synthetic Workflow Model
      * @throws WorkflowException
      */
     SyntheticWorkflowModel getSyntheticWorkflowModel(ResourceResolver resourceResolver,
                                                      String workflowModelId,
                                                      boolean ignoreIncompatibleTypes) throws WorkflowException;
+
+    enum WorkflowProcessIdType {
+        PROCESS_LABEL,
+        PROCESS_NAME
+    }
 }
 
 
