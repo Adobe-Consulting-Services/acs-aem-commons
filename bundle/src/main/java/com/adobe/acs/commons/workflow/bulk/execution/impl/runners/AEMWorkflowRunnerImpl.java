@@ -309,33 +309,37 @@ public class AEMWorkflowRunnerImpl extends AbstractWorkflowRunner implements Bul
                             workflow = payload.getWorkflow();
 
                             // First check if workflow is complete (aka not active)
-                            if (workflow == null && !isTransient(adminResourceResolver, config.getWorkflowModelId())) {
-                                // Something bad happened; Workflow is missing.
-                                // This could be a result of a purge.
-                                // Dont know what the status is so mark as Force Terminated
-                                forceTerminate(workspace, payload);
-                                log.warn("Force terminated payload [ {} ] when running under a non-transient Workflow, as workflow is null.", payload.getPath());
-                            } if (workflow == null && isTransient(adminResourceResolver, config.getWorkflowModelId())) {
-                                // Transient WF.. very possible this WF instance has gone away
-                                complete(workspace, payload);
-                            } else if (!workflow.isActive()) {
-                                // Workflow has ended, so mark payload as complete
-                                payload.updateWith(workflow);
-                                complete(workspace, payload);
-                            } else {
-                                // If active, check that the workflow has not expired
-                                Calendar expiresAt = Calendar.getInstance();
-                                expiresAt.setTime(workflow.getTimeStarted());
-                                expiresAt.add(Calendar.SECOND, config.getTimeout());
-
-                                if (!Calendar.getInstance().before(expiresAt)) {
-                                    payload.updateWith(workflow);
+                            if (workflow == null) {
+                                if (!isTransient(adminResourceResolver, config.getWorkflowModelId())) {
+                                    // Something bad happened; Workflow is missing.
+                                    // This could be a result of a purge.
+                                    // Dont know what the status is so mark as Force Terminated
                                     forceTerminate(workspace, payload);
-                                    log.warn("Force terminated payload [ {} ~> {} ] as processing time has expired.", payload.getPath(), payload.getPayloadPath());
+                                    log.warn("Force terminated payload [ {} ] when running under a non-transient Workflow, as workflow is null.", payload.getPath());
                                 } else {
-                                    // Finally, if active and not expired, update status and let the workflow continue
+                                    // Transient WF.. very possible this WF instance has gone away
+                                    complete(workspace, payload);
+                                }
+                            } else {
+                                if (!workflow.isActive()) {
+                                    // Workflow has ended, so mark payload as complete
                                     payload.updateWith(workflow);
-                                    currentActivePayloads.add(payload);
+                                    complete(workspace, payload);
+                                } else {
+                                    // If active, check that the workflow has not expired
+                                    Calendar expiresAt = Calendar.getInstance();
+                                    expiresAt.setTime(workflow.getTimeStarted());
+                                    expiresAt.add(Calendar.SECOND, config.getTimeout());
+
+                                    if (!Calendar.getInstance().before(expiresAt)) {
+                                        payload.updateWith(workflow);
+                                        forceTerminate(workspace, payload);
+                                        log.warn("Force terminated payload [ {} ~> {} ] as processing time has expired.", payload.getPath(), payload.getPayloadPath());
+                                    } else {
+                                        // Finally, if active and not expired, update status and let the workflow continue
+                                        payload.updateWith(workflow);
+                                        currentActivePayloads.add(payload);
+                                    }
                                 }
                             }
                         } catch (WorkflowException e) {

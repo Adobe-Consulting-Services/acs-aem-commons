@@ -466,17 +466,15 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     }
 
     protected final void bindSyntheticWorkflowProcesses(final SyntheticWorkflowProcess process, final Map<Object, Object> props) {
-        // Workflow Process Labels
-        final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
-        if (label != null) {
-            if (process != null) {
+        if (process != null) {
+            // Workflow Process Labels
+            final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
+            if (label != null) {
                 this.workflowProcessesByLabel.put(label, process);
                 log.trace("Synthetic {} Workflow Runner added Workflow Process by Label [ {} ]", process.getWorkflowType(), label);
             }
-        }
 
-        // Workflow Process Name
-        if (process != null) {
+            // Workflow Process Name
             String processName = (String) process.getProcessId();
 
             if (processName != null) {
@@ -489,17 +487,15 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     }
 
     protected final void unbindSyntheticWorkflowProcesses(final SyntheticWorkflowProcess process, final Map<Object, Object> props) {
-        // Workflow Process Labels
-        final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
-        if (label != null) {
-            if (process != null) {
+        if (process != null) {
+            // Workflow Process Labels
+            final String label = PropertiesUtil.toString(props.get(WORKFLOW_PROCESS_LABEL), null);
+            if (label != null) {
                 this.workflowProcessesByLabel.remove(label);
                 log.trace("Synthetic {} Workflow Runner removed Workflow Process by Label [ {} ]", process.getWorkflowType(), label);
             }
-        }
 
-        // Workflow Process Name
-        if (process != null) {
+            // Workflow Process Name
             String processName = (String) process.getProcessId();
 
             if (processName != null) {
@@ -510,6 +506,4 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
             }
         }
     }
-
-
 }

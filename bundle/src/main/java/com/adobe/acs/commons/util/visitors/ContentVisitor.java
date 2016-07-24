@@ -30,6 +30,8 @@ import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+
 public class ContentVisitor<T extends ResourceRunnable> extends AbstractResourceVisitor {
     private static final Logger log = LoggerFactory.getLogger(ContentVisitor.class);
 
@@ -47,8 +49,8 @@ public class ContentVisitor<T extends ResourceRunnable> extends AbstractResource
     }
     public ContentVisitor(T runnable, String[] containerTypes, String[] contentTypes) {
         this.runnable = runnable;
-        this.containerTypes = containerTypes;
-        this.contentTypes = contentTypes;
+        this.containerTypes = Arrays.copyOf(containerTypes, containerTypes.length);
+        this.contentTypes = Arrays.copyOf(contentTypes, contentTypes.length);
     }
 
     @Override
