@@ -2,7 +2,7 @@
   ~ #%L
   ~ ACS AEM Commons Bundle
   ~ %%
-  ~ Copyright (C) 2013 Adobe
+  ~ Copyright (C) 2016 Adobe
   ~ %%
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,19 +17,18 @@
   ~ limitations under the License.
   ~ #L%
   --%>
-<%@include file="/libs/foundation/global.jsp" %><%
-%><%@page session="false" %><%
-
-%><div class="page"
-         role="main"
-         ng-controller="MainCtrl"
-         ng-init="app.uri = '${resourcePath}'; init();">
-
-    <div ng-show="showForm()">
-        <%@include file="includes/form.jsp" %>
-    </div>
-
-    <div ng-hide="showForm()">
-        <%@include file="includes/status.jsp" %>
-    </div>
- </div>
+<h3>Current Batch</h3>
+<table class="coral-Table" current-batch-table>
+    <thead>
+    <tr class="coral-Table-row">
+        <th class="coral-Table-headerCell status-col">Status</th>
+        <th class="coral-Table-headerCell">Payload</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="coral-Table-row" ng-repeat="item in data.status.activePayloads ">
+        <td class="coral-Table-cell {{ item.status }}">{{ item.status || 'NOT_STARTED' }}</td>
+        <td class="coral-Table-cell">{{ item.path }}</td>
+    </tr>
+    </tbody>
+</table>

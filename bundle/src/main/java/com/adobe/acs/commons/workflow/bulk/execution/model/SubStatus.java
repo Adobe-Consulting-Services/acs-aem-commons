@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,12 @@
  * #L%
  */
 
-#acs-commons-bulk-workflow-manager-app {
-  .acs-form {
-    width: 600px;
-    margin: 0 auto;
-  }
+package com.adobe.acs.commons.workflow.bulk.execution.model;
 
-  hr {
-    margin: 1rem 0;
-  }
-  
-  .acs-progress-bar {
-    width: 100%
-  }
+public enum SubStatus {
+    ERROR,
+    DEACTIVATED,
+    STOPPING,
+    FORCE_TERMINATED,
+    SLEEPING
 }

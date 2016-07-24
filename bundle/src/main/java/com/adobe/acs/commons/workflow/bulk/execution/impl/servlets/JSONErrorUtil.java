@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk.impl.servlets;
+package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.json.JSONException;
@@ -26,9 +26,9 @@ import org.apache.sling.commons.json.JSONObject;
 
 import java.io.IOException;
 
-public final class HttpErrorUtil {
+public final class JSONErrorUtil {
 
-    private HttpErrorUtil() {
+    private JSONErrorUtil() {
         // Util class
     }
 

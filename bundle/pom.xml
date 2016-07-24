@@ -56,7 +56,10 @@
                             *
                         </Import-Package>
                         <Embed-Dependency>guava</Embed-Dependency>
-                        <Sling-Model-Packages>com.adobe.acs.commons.version.model</Sling-Model-Packages>
+                        <Sling-Model-Packages>
+                            com.adobe.acs.commons.version.model,
+                            com.adobe.acs.commons.workflow.bulk.execution.model
+                        </Sling-Model-Packages>
                     </instructions>
                 </configuration>
             </plugin>

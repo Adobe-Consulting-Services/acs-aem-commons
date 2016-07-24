@@ -18,10 +18,10 @@
  * #L%
  */
 
-package com.adobe.acs.commons.workflow.bulk.impl.servlets;
+package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
-import com.adobe.acs.commons.workflow.bulk.BulkWorkflowEngine;
-
+import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -29,7 +29,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 
 import javax.servlet.ServletException;
-
 import java.io.IOException;
 
 /**
@@ -37,10 +36,10 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = { "POST" },
-        resourceTypes = { BulkWorkflowEngine.SLING_RESOURCE_TYPE },
-        selectors = { "stop" },
-        extensions = { "json" }
+        methods = {"POST"},
+        resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
+        selectors = {"stop"},
+        extensions = {"json"}
 )
 public class StopServlet extends SlingAllMethodsServlet {
 
@@ -54,7 +53,7 @@ public class StopServlet extends SlingAllMethodsServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        bulkWorkflowEngine.stop(request.getResource());
+        bulkWorkflowEngine.stopping(request.getResource().adaptTo(Config.class));
 
         response.sendRedirect(request.getResourceResolver().map(request, request.getResource().getPath()) + ".status.json");
     }
