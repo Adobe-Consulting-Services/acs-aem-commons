@@ -134,9 +134,9 @@ public class AEMWorkflowRunnerImpl extends AbstractWorkflowRunner implements Bul
 
     private void purge(Payload payload) throws PersistenceException, WorkflowException {
         Workflow workflow = payload.getWorkflow();
-        ResourceResolver resourceResolver = payload.getResourceResolver();
 
         if (workflow != null) {
+            ResourceResolver resourceResolver = payload.getResourceResolver();
             final Resource resource = resourceResolver.getResource(workflow.getId());
 
             if (resource != null) {

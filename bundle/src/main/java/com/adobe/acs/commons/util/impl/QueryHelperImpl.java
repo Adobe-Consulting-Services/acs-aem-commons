@@ -75,7 +75,9 @@ public class QueryHelperImpl implements QueryHelper {
             final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
 
             // ensure all results are returned
-            params.put("p.limit", "-1");
+            if (!params.containsKey("p.limit")) {
+                params.put("p.limit", "-1");
+            }
 
             final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
             final List<Hit> hits = query.getResult().getHits();
