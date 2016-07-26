@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
@@ -80,7 +81,7 @@ public class StartServlet extends SlingAllMethodsServlet {
             properties.put("autoThrottle", params.optBoolean("autoThrottle", true));
 
             // If FAM retires are enabled, then force BatchSize to be 1
-            if (properties.get("retryCount", 0) > 0) {
+            if (FastActionManagerRunnerImpl.class.getName().equals(properties.get("runnerType", "")) && properties.get("retryCount", 0) > 0) {
                 properties.put("batchSize", 1);
             }
 

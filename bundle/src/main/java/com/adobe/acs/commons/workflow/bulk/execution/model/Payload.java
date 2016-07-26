@@ -112,7 +112,9 @@ public class Payload {
         String tmp = getWorkflowInstanceId();
 
         try {
-            return workflowSession.getWorkflow(tmp);
+            if (resource.getResourceResolver().getResource(tmp) != null){
+                return workflowSession.getWorkflow(tmp);
+            }
         } catch (Exception e) {
             log.error(String.format("Could not get workflow with id [ %s ] for payload [ %s ~> %s ]", tmp, getPath(), getPayloadPath()), e);
         }
