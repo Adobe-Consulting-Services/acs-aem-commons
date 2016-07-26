@@ -77,7 +77,8 @@ import java.util.concurrent.ConcurrentHashMap;
                 unbind = "unbindGraniteWorkflowProcesses"
         )
 })
-@Service
+// Explicitly register to the SyntheticWorkflowRunner interface (as this extends WorkflowService, which we do not want to register a service against)
+@Service(value = SyntheticWorkflowRunner.class)
 public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowRunnerImpl.class);
 
