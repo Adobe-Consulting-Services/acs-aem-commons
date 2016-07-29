@@ -245,9 +245,6 @@ public class EnsureOakIndexJobHandlerTest {
         EnsureOakIndex eoi = mock(EnsureOakIndex.class);
         when(eoi.getIgnoreProperties()).thenReturn(ignoreProperties);
 
-        EnsureOakIndexJobHandler customHandler = spy(new EnsureOakIndexJobHandler(eoi, OAK_INDEX, DEFINITION_PATH));
-        doReturn(true).when(customHandler).needsUpdate(any(Resource.class), any(Resource.class));
-
 
         Map<String, Object> ensureProps = spy(new HashMap<String, Object>());
         ensureProps.put(EnsureOakIndexJobHandler.PN_RECREATE_ON_UPDATE, true);
@@ -259,6 +256,9 @@ public class EnsureOakIndexJobHandlerTest {
         Resource oak = getOakDefinition(oakProps);
 
         when(oakIndexResource.getChild(INDEX_NAME)).thenReturn(oak);
+
+        EnsureOakIndexJobHandler customHandler = spy(new EnsureOakIndexJobHandler(eoi, OAK_INDEX, DEFINITION_PATH));
+        doReturn(true).when(customHandler).needsUpdate(def, oak);
 
         customHandler.update(def, oakIndexResource, false);
 
