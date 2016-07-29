@@ -344,6 +344,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 ensuredDefinition.getName());
 
         oakIndex.setPrimaryType(NT_OAK_QUERY_INDEX_DEFINITION);
+        oakIndex.setProperty(JcrConstants.JCR_CREATED, Calendar.getInstance());
+        oakIndex.setProperty(JcrConstants.JCR_CREATED_BY, "Ensure Oak Index");
 
         log.info("Created Oak Index at [ {} ] with Ensure Definition [ {} ]", oakIndex.getPath(),
                 ensuredDefinition.getPath());

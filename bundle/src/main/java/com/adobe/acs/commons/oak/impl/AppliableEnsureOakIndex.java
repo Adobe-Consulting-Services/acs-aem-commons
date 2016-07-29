@@ -55,7 +55,13 @@ public interface AppliableEnsureOakIndex {
     boolean isImmediate();
 
 
+    /**
+     * @param ignoreProperties additional properties to ignore.
+     */
     void setIgnoreProperties(String[] ignoreProperties);
 
+    /**
+     * @return the list of additional properties to ignore
+     */
     List<String> getIgnoreProperties();
 }
