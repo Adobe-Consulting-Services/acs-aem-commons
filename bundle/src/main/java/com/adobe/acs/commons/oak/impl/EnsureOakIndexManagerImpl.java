@@ -21,7 +21,9 @@ package com.adobe.acs.commons.oak.impl;
 
 import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -29,6 +31,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,15 +57,24 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 
 @Component(
-        immediate = true
+        label = "ACS AEM Commons - Ensure Oak Index Manager",
+        description = "Manage for ensuring oak indexes.",
+        immediate = true,
+        metatype = true
 )
 @Properties({
-    @Property(name = "felix.webconsole.title", value = "Ensure Oak Index"),
-    @Property(name = "felix.webconsole.label", value = "ensureOakIndex"),
-    @Property(name = "felix.webconsole.category", value = "Sling"),
+
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Additional Ignore properties: {properties.ignore}",
+            propertyPrivate = true
+    ),
+    @Property(name = "felix.webconsole.title", value = "Ensure Oak Index", propertyPrivate = true),
+    @Property(name = "felix.webconsole.label", value = "ensureOakIndex", propertyPrivate = true),
+    @Property(name = "felix.webconsole.category", value = "Sling", propertyPrivate = true),
     @Property(
             name = "jmx.objectname",
-            value = "com.adobe.acs.oak:type=Ensure Oak Index",
+            value = "com.adobe.acs.commons.oak:type=Ensure Oak Index",
             propertyPrivate = true
     )
 })
@@ -73,8 +85,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 )
 @Service(value = { DynamicMBean.class, EnsureOakIndexManager.class })
 public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements EnsureOakIndexManager, EnsureOakIndexManagerMBean {
-
     private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexManagerImpl.class);
+
+    private static final String[] DEFAULT_CUSTOM_IGNORE_PROPERTIES = new String[]{};
+    private String[] customIgnoreProperties = DEFAULT_CUSTOM_IGNORE_PROPERTIES;
+    @Property(label = "Additional ignore properties",
+            description = "Property names that are to be ignored when determining if an oak index has changed, as well as what properties should be removed/updated.",
+            cardinality = Integer.MAX_VALUE,
+            value = {})
+    public static final String PROP_CUSTOM_IGNORE_PROPERTIES = "properties.ignore";
 
     // Thread-safe ArrayList to track EnsureIndex service registrations
     private CopyOnWriteArrayList<AppliableEnsureOakIndex> ensureIndexes =
@@ -94,9 +113,11 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
         int count = 0;
         for (AppliableEnsureOakIndex index : this.ensureIndexes) {
             if (!index.isApplied() || force) {
-                index.apply();
+                index.apply(force);
                 count++;
-                log.debug("Started applying index definition on {}", index);
+                log.debug("Started applying index definition on [ {} ]", index);
+            } else {
+                log.debug("Skipping... [ {} ] is already applied.", index);
             }
         }
 
@@ -113,10 +134,11 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
         for (AppliableEnsureOakIndex index : this.ensureIndexes) {
             if ((!index.isApplied() || force)
                     && StringUtils.equals(ensureDefinitionPath, index.getEnsureDefinitionsPath())) {
-
-                index.apply();
+                index.apply(force);
                 count++;
                 log.debug("Started async job applying index definition for {}", index);
+            } else {
+                log.debug("Skipping... [ {} ] is already applied.", index);
             }
         }
         return count;
@@ -124,6 +146,7 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
 
     protected final void bindAppliableEnsureOakIndex(AppliableEnsureOakIndex index) {
         if (index != null && !this.ensureIndexes.contains(index)) {
+            index.setIgnoreProperties(this.customIgnoreProperties);
             this.ensureIndexes.add(index);
         }
     }
@@ -168,5 +191,11 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
         }
 
         return tabularData;
+    }
+
+
+    @Activate
+    protected void activate(Map<String, Object> config) {
+        customIgnoreProperties = PropertiesUtil.toStringArray(config.get(PROP_CUSTOM_IGNORE_PROPERTIES), DEFAULT_CUSTOM_IGNORE_PROPERTIES);
     }
 }

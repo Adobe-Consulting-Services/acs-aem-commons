@@ -20,6 +20,8 @@
 
 package com.adobe.acs.commons.oak.impl;
 
+import java.util.List;
+
 /**
  * Internal interface that exposes methods for interacting the EnsureOakIndexes.
  */
@@ -28,7 +30,7 @@ public interface AppliableEnsureOakIndex {
     /**
      * Apply this Ensure Oak Index.
      */
-    void apply();
+    void apply(boolean force);
 
     /**
      * @return the ensure definition path for this Ensure Oak Index path for this Ensure Oak Index component.
@@ -51,4 +53,9 @@ public interface AppliableEnsureOakIndex {
      * @return true is Ensure Oak Index is immediate.
      */
     boolean isImmediate();
+
+
+    void setIgnoreProperties(String[] ignoreProperties);
+
+    List<String> getIgnoreProperties();
 }

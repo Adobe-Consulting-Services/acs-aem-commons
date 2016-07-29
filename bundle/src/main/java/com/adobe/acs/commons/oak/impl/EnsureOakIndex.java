@@ -37,7 +37,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 //@formatter:off
 @Component(
@@ -104,6 +107,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     private boolean immediate = DEFAULT_IMMEDIATE;
 
     private boolean applied = false;
+    private CopyOnWriteArrayList<String> ignoreProperties = new CopyOnWriteArrayList<String>();
 
     @Activate
     protected final void activate(Map<String, Object> config) throws RepositoryException {
@@ -130,7 +134,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
 
         if (this.immediate) {
-            apply();
+            apply(false);
         }
     }
 
@@ -139,9 +143,9 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
      * {@inheritDoc}
      **/
     @Override
-    public final void apply() {
+    public final void apply(boolean force) {
 
-        if (this.applied) {
+        if (!force && this.applied) {
             return;
         }
 
@@ -170,6 +174,16 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     @Override
     public boolean isImmediate() {
         return this.immediate;
+    }
+
+    @Override
+    public void setIgnoreProperties(String[] ignoreProperties) {
+        this.ignoreProperties = new CopyOnWriteArrayList<String>(ignoreProperties);
+    }
+
+    @Override
+    public List<String> getIgnoreProperties() {
+        return this.ignoreProperties;
     }
 
     @Override

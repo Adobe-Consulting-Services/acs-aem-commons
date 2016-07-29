@@ -20,11 +20,16 @@
 package com.adobe.acs.commons.oak.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
 
+import org.apache.commons.collections.IteratorUtils;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.junit.Assert;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -79,16 +84,29 @@ public class EnsureOakIndexJobHandlerTest {
     }
 
     Resource getEnsureOakDefinition(Map<String, Object> properties) {
-
         Resource r = mock(Resource.class);
         ValueMap vm = new MockValueMap(r, properties);
         when(r.getValueMap()).thenReturn(vm);
+        when(r.adaptTo(ModifiableValueMap.class)).thenReturn(new ModifiableValueMapDecorator(properties));
         when(r.getName()).thenReturn(INDEX_NAME);
         when(r.getPath()).thenReturn(DEFINITION_PATH);
+        when(r.listChildren()).thenReturn(IteratorUtils.EMPTY_LIST_ITERATOR);
 
         return r;
-
     }
+
+    Resource getOakDefinition(Map<String, Object> properties) {
+        Resource r = mock(Resource.class);
+        ValueMap vm = new MockValueMap(r, properties);
+        when(r.adaptTo(ModifiableValueMap.class)).thenReturn(new ModifiableValueMapDecorator(properties));
+        when(r.getValueMap()).thenReturn(vm);
+        when(r.getName()).thenReturn(INDEX_NAME);
+        when(r.getPath()).thenReturn(OAK_INDEX + "/" + INDEX_NAME);
+        when(r.listChildren()).thenReturn(IteratorUtils.EMPTY_LIST_ITERATOR);
+
+        return r;
+    }
+
 
     @Test
     public void testIgnoreProperty() throws PersistenceException, RepositoryException {
@@ -104,6 +122,7 @@ public class EnsureOakIndexJobHandlerTest {
         verify(handler, never()).delete(any(Resource.class));
 
     }
+
 
     @Test
     public void testDisableProperty() throws PersistenceException, RepositoryException {
@@ -218,22 +237,31 @@ public class EnsureOakIndexJobHandlerTest {
     }
 
     @Test
-    public void testUpdateWithRecreate() throws RepositoryException, IOException {
+    public void testUpdateOperation() throws RepositoryException, IOException {
+        String PN_IGNORE_ME = "ignoreMe";
 
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EnsureOakIndexJobHandler.PN_RECREATE_ON_UPDATE, true);
-        Resource def = getEnsureOakDefinition(props);
+        List<String> ignoreProperties = new ArrayList<String>();
+        ignoreProperties.add(PN_IGNORE_ME);
+        EnsureOakIndex eoi = mock(EnsureOakIndex.class);
+        when(eoi.getIgnoreProperties()).thenReturn(ignoreProperties);
 
-        Resource index = mock(Resource.class);
+        EnsureOakIndexJobHandler customHandler = spy(new EnsureOakIndexJobHandler(eoi, OAK_INDEX, DEFINITION_PATH));
+        doReturn(true).when(customHandler).needsUpdate(any(Resource.class), any(Resource.class));
 
-        Assert.assertFalse(handler.handleLightWeightIndexOperations(def, index));
-        handler.handleHeavyWeightIndexOperations(oakIndexResource, def, index);
-        verify(handler, never()).disableIndex(any(Resource.class));
-        verify(handler, times(1)).delete(any(Resource.class));
 
-        verify(handler, times(1)).create(any(Resource.class), any(Resource.class));
-        verify(handler, never()).update(eq(def), eq(oakIndexResource), eq(false));
-        verify(handler, never()).forceRefresh(any(Resource.class));
+        Map<String, Object> ensureProps = spy(new HashMap<String, Object>());
+        ensureProps.put(EnsureOakIndexJobHandler.PN_RECREATE_ON_UPDATE, true);
+        Resource def = getEnsureOakDefinition(ensureProps);
+
+        Map<String, Object> oakProps = spy(new HashMap<String, Object>());
+        oakProps.put(EnsureOakIndexJobHandler.PN_RECREATE_ON_UPDATE, true);
+        oakProps.put(PN_IGNORE_ME, "true");
+        Resource oak = getOakDefinition(oakProps);
+
+        when(oakIndexResource.getChild(INDEX_NAME)).thenReturn(oak);
+
+        customHandler.update(def, oakIndexResource, false);
+
+        verify(oakProps, never()).remove(PN_IGNORE_ME);
     }
-
 }
