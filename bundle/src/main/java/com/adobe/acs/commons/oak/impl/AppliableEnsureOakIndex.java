@@ -45,6 +45,7 @@ public interface AppliableEnsureOakIndex {
     /**
      * Determines if the index definition has been applied to the system.
      * This does not necessarily mean, that the index has already been created.
+     *
      * @return true if the index definition has been applied.
      */
     boolean isApplied();
@@ -54,14 +55,13 @@ public interface AppliableEnsureOakIndex {
      */
     boolean isImmediate();
 
+    /**
+     * @return the list of additional properties to ignore
+     */
+    List<String> getIgnoreProperties();
 
     /**
      * @param ignoreProperties additional properties to ignore.
      */
     void setIgnoreProperties(String[] ignoreProperties);
-
-    /**
-     * @return the list of additional properties to ignore
-     */
-    List<String> getIgnoreProperties();
 }
