@@ -26,7 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.CustomChecksumGeneratorOptions;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
@@ -38,10 +41,10 @@ import org.apache.sling.testing.resourceresolver.MockValueMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Spy;
 
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
 
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -240,11 +243,13 @@ public class EnsureOakIndexJobHandlerTest {
     public void testUpdateOperation() throws RepositoryException, IOException {
         String PN_IGNORE_ME = "ignoreMe";
 
+        ChecksumGenerator checksumGenerator = mock(ChecksumGenerator.class);
+
         List<String> ignoreProperties = new ArrayList<String>();
         ignoreProperties.add(PN_IGNORE_ME);
         EnsureOakIndex eoi = mock(EnsureOakIndex.class);
         when(eoi.getIgnoreProperties()).thenReturn(ignoreProperties);
-
+        when(eoi.getChecksumGenerator()).thenReturn(checksumGenerator);
 
         Map<String, Object> ensureProps = spy(new HashMap<String, Object>());
         ensureProps.put(EnsureOakIndexJobHandler.PN_RECREATE_ON_UPDATE, true);
@@ -255,12 +260,17 @@ public class EnsureOakIndexJobHandlerTest {
         oakProps.put(PN_IGNORE_ME, "true");
         Resource oak = getOakDefinition(oakProps);
 
+        Map<String,String> defChecksum = new HashMap<String, String>();
+        defChecksum.put(def.getPath(), "123");
+        when(checksumGenerator.generateChecksums(any(Session.class), any(String.class), any(CustomChecksumGeneratorOptions.class))).thenReturn(defChecksum);
+
+        Map<String,String> oakChecksum = new HashMap<String, String>();
+        oakChecksum.put(oak.getPath(), "456");
+        when(checksumGenerator.generateChecksums(any(Session.class), any(String.class), any(CustomChecksumGeneratorOptions.class))).thenReturn(oakChecksum);
+
         when(oakIndexResource.getChild(INDEX_NAME)).thenReturn(oak);
 
-        EnsureOakIndexJobHandler customHandler = spy(new EnsureOakIndexJobHandler(eoi, OAK_INDEX, DEFINITION_PATH));
-        doReturn(true).when(customHandler).needsUpdate(def, oak);
-
-        customHandler.update(def, oakIndexResource, false);
+        handler.update(def, oakIndexResource, false);
 
         verify(oakProps, never()).remove(PN_IGNORE_ME);
     }
