@@ -39,6 +39,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.testing.resourceresolver.MockValueMap;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
@@ -239,8 +240,7 @@ public class EnsureOakIndexJobHandlerTest {
         verify(handler, never()).forceRefresh(any(Resource.class));
     }
 
-    // TODO This test passes locally but fails on TravisCI; Figure out how to make this test pass on TravisCI
-    // @Test
+    @Ignore("This test passes locally but fails on TravisCI; Figure out how to make this test pass on TravisCI")
     public void testUpdateOperation() throws RepositoryException, IOException {
         String PN_IGNORE_ME = "ignoreMe";
 
