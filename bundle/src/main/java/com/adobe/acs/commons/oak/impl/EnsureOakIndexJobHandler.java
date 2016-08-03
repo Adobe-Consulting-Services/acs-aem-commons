@@ -25,6 +25,7 @@ import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.CustomChecksumGen
 import com.adobe.acs.commons.oak.impl.EnsureOakIndex.OakIndexDefinitionException;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -38,17 +39,17 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class EnsureOakIndexJobHandler implements Runnable {
     //@formatter:off
@@ -95,6 +96,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
             PN_REINDEX,
             PN_REINDEX_COUNT,
     };
+    private static final String[] NAME_PROPERTIES = new String[] {"propertyNames", "declaringNodeTypes"} ;
 
     private final EnsureOakIndex ensureOakIndex;
 
@@ -197,8 +199,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
         if (resourceResolver.hasChanges()) {
             log.info("Saving all DELETES, IGNORES, and DISABLES to [ {} ]", oakIndexesPath);
-
             resourceResolver.commit();
+            log.debug("Commit succeeded");
         }
 
         // Combine the index updates which will potentially result in a repository traversal into a single commit.
@@ -214,13 +216,14 @@ public class EnsureOakIndexJobHandler implements Runnable {
         }
 
         if (resourceResolver.hasChanges()) {
-            log.info("Saving all CREATE, UPDATES, and RE-INDEXES, re-indexing may start now.");
+            log.info("Saving all CREATE, UPDATES, and RE-INDEXES, re-indexing may start now..");
             resourceResolver.commit();
+            log.debug("Commit succeeded");
         }
     }
 
     /**
-     * Handle CREATE and UPDATE operations
+     * Handle CREATE and UPDATE operations.
      *
      * @param oakIndexes
      * @param ensureDefinition
@@ -371,6 +374,9 @@ public class EnsureOakIndexJobHandler implements Runnable {
         final Resource oakIndex = oakIndexes.getChild(ensureDefinition.getName());
         final ModifiableValueMap oakIndexProperties = oakIndex.adaptTo(ModifiableValueMap.class);
 
+        final Node oakIndexNode = oakIndex.adaptTo(Node.class);
+        final Node ensureDefinitionNode = ensureDefinition.adaptTo(Node.class);
+
         if (!this.needsUpdate(ensureDefinition, oakIndex)) {
             if (ensureDefinitionProperties.get(PN_FORCE_REINDEX, false)) {
                 log.info("Skipping update... Oak Index at [ {} ] is the same as [ {} ] and forceIndex flag is ignored",
@@ -387,34 +393,43 @@ public class EnsureOakIndexJobHandler implements Runnable {
         // Do NOT delete it as this will delete the existing index below it
 
         // Clear out existing properties
-        Set<String> keys = new HashSet<String>(oakIndexProperties.keySet());
+        final Iterator<Property> existingOakIndexProperties = copyIterator(oakIndexNode.getProperties());
+        while(existingOakIndexProperties.hasNext()) {
+            final Property property = existingOakIndexProperties.next();
+            final String propertyName = property.getName();
 
-        for (final String key : keys) {
-            if (this.ignoreProperties.contains(key)) {
+            if (this.ignoreProperties.contains(propertyName)) {
                 continue;
             }
 
-            oakIndexProperties.remove(key);
+            JcrUtil.setProperty(oakIndexNode, propertyName, null);
         }
 
+
         // Add new properties
-        for (final Map.Entry<String, Object> entry : ensureDefinitionProperties.entrySet()) {
-            if (this.ignoreProperties.contains(entry.getKey())) {
+        final Iterator<Property> addProperties = copyIterator(ensureDefinitionNode.getProperties());
+        while (addProperties.hasNext()) {
+            final Property property = addProperties.next();
+
+            if (this.ignoreProperties.contains(property.getName())) {
                 // Skip ignored properties
                 continue;
             }
 
-            oakIndexProperties.put(entry.getKey(), entry.getValue());
+            if (ArrayUtils.contains(NAME_PROPERTIES, property.getName()) && property.getType() != PropertyType.NAME) {
+                log.warn("{}@{} property should be of type: Name[]", oakIndex.getPath(), property.getName());
+            }
+
+            JcrUtil.copy(property, oakIndexNode, property.getName());
         }
 
-        oakIndexProperties.put(JcrConstants.JCR_LAST_MODIFIED_BY, ENSURE_OAK_INDEX_USER_NAME);
-        oakIndexProperties.put(JcrConstants.JCR_LASTMODIFIED, Calendar.getInstance());
+        JcrUtil.setProperty(oakIndexNode, JcrConstants.JCR_LAST_MODIFIED_BY, ENSURE_OAK_INDEX_USER_NAME);
+        JcrUtil.setProperty(oakIndexNode, JcrConstants.JCR_LASTMODIFIED, Calendar.getInstance());
 
         // Handle all sub-nodes (ex. Lucene Property Indexes)
-        Iterator<Resource> children;
 
         // Delete child nodes
-        children = oakIndex.listChildren();
+        Iterator<Resource> children = oakIndex.listChildren();
         while (children.hasNext()) {
             children.next().adaptTo(Node.class).remove();
         }
@@ -529,5 +544,19 @@ public class EnsureOakIndexJobHandler implements Runnable {
                             + ensureDefinition.getPath()
                             + " missing required property 'type'");
         }
+    }
+
+    /**
+     * Creates a copy of an iterator. This allows us to safely change the underlying structure of the src iterator, without disturbing the wrapping iteration;
+     * @param src the src iterator to copy.
+     * @return a copy of the src iterator.
+     */
+    private Iterator<Property> copyIterator(Iterator<Property> src) {
+        List<Property> dest = new ArrayList<Property>();
+        while (src.hasNext()) {
+            dest.add(src.next());
+        }
+
+        return dest.iterator();
     }
 }
