@@ -34,8 +34,8 @@
             result = {}, param;
 
         if (designSrc === undefined) {
- +        return undefined;
- +      }
+            return undefined;
+        }
 
         designSrc = designSrc.substring(designSrc.indexOf("?") + 1);
 
