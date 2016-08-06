@@ -97,10 +97,10 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
         FFMpegWrapper wrapper = null;
         try {
             // creating temp directory
-            tmpDir = createTempDir(null);
+            tmpDir = FFMpegAudioUtils.createTempDir(null);
 
             // creating temp working directory for ffmpeg
-            tmpWorkingDir = createTempDir(getWorkingDir());
+            tmpWorkingDir = FFMpegAudioUtils.createTempDir(getWorkingDir());
 
             // streaming file to temp directory
             final File tmpFile = new File(tmpDir, asset.getName().replace(' ', '_'));
@@ -171,56 +171,9 @@ public abstract class AbstractFFMpegAudioProcess extends AbstractAssetWorkflowPr
         return workingDir;
     }
 
-    private static File resolveWorkingDir(String slingHome, String path) {
-        if (path == null) {
-            path = "";
-        }
-        // ensure proper separator in the path (esp. for systems, which do
-        // not use "slash" as a separator, e.g Windows)
-        path = path.replace('/', File.separatorChar);
-
-        // create a file instance and check whether this is absolute. If not
-        // create a new absolute file instance with the base dir (sling.home or
-        // working dir of current JVM) and get the absolute path name from that
-        File workingDir = new File(path);
-        if (!workingDir.isAbsolute()) {
-            File baseDir;
-            if (slingHome == null) {
-                /* use jvm working dir */
-                baseDir = new File("").getAbsoluteFile();
-            } else {
-                baseDir = new File(slingHome).getAbsoluteFile();
-            }
-            workingDir = new File(baseDir, path).getAbsoluteFile();
-        }
-        try {
-            log.info("ffmpeg working directory: {}", workingDir.getCanonicalPath());
-        } catch (IOException e) {
-            log.info("ffmpeg working directory: {}", workingDir.getAbsolutePath());
-        }
-
-        return workingDir;
-    }
-
     protected final void activate(ComponentContext ctx) {
         String slingHome = ctx.getBundleContext().getProperty("sling.home");
-        workingDir = resolveWorkingDir(slingHome, (String) ctx.getProperties().get(PROP_WORKING_DIR));
-    }
-
-    protected final File createTempDir(File parentDir) throws IOException {
-        File tempDir = null;
-        try {
-            tempDir = File.createTempFile("cqdam", null, parentDir);
-            if (!tempDir.delete()) {
-                throw new IOException("Unable to delete temp directory.");
-            }
-            if (!tempDir.mkdir()) {
-                throw new IOException("Unable to create temp directory.");
-            }
-        } catch (IOException e) {
-            log.warn("could not create temp directory in the [{}] with the exception", parentDir, e);
-        }
-        return tempDir;
+        workingDir = FFMpegAudioUtils.resolveWorkingDir(slingHome, (String) ctx.getProperties().get(PROP_WORKING_DIR));
     }
 
     protected abstract void processAudio(final MetaDataMap metaData, final Asset asset, final File tmpFile,

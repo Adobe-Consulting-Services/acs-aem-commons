@@ -79,7 +79,7 @@ public final class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
             if (profile != null) {
                 log.info("processAudio: creating audio using profile [{}]", videoProfile);
                 // creating temp working directory for ffmpeg
-                File tmpWorkingDir = createTempDir(getWorkingDir());
+                File tmpWorkingDir = FFMpegAudioUtils.createTempDir(getWorkingDir());
                 FFMpegWrapper ffmpegWrapper = FFMpegWrapper.fromProfile(tmpFile, profile, tmpWorkingDir);
                 ffmpegWrapper.setExecutableLocator(getLocator());
                 FileInputStream fis = null;
