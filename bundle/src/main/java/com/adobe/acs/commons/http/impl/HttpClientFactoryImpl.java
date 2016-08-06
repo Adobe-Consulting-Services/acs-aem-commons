@@ -43,7 +43,8 @@ import java.util.Map;
 @Component(
         label = "ACS AEM Commons - Http Components Fluent Executor Factory",
         description = "ACS AEM Commons - Http Components Fluent Executor Factory",
-        configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
+        configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
+        metatype = true)
 @Service
 @Property(label = "Factory Name", description = "Name of this factory", name = "factory.name")
 public class HttpClientFactoryImpl implements HttpClientFactory {
@@ -127,7 +128,7 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
         String username = PropertiesUtil.toString(config.get(PROP_USERNAME), null);
         String password = PropertiesUtil.toString(config.get(PROP_PASSWORD), null);
         if (username != null && password != null) {
-            HttpHost httpHost = new HttpHost(hostname, port);
+            HttpHost httpHost = new HttpHost(hostname, port, useSSL ? "https" : "http");
             executor.auth(httpHost, username, password).authPreemptive(httpHost);
         }
     }
