@@ -23,15 +23,45 @@ import aQute.bnd.annotation.ProviderType;
 
 import java.io.InputStream;
 
+/**
+ * Service fronting Watson Speech to Text API.
+ */
 @ProviderType
 public interface TranscriptionService {
 
+    /**
+     * Start a transcription job with Watson.
+     *
+     * @param stream the audio stream. must be in a supported format.
+     * @param mimeType the content type of the stream.
+     * @return a job ID
+     */
     String startTranscriptionJob(InputStream stream, String mimeType);
 
+    /**
+     * Retrieve the current result for the job ID.
+     *
+     * @param jobId the job ID
+     * @return the current result
+     */
     Result getResult(String jobId);
 
+    /**
+     * Result value interface.
+     */
     interface Result {
+        /**
+         * Checks if the job is complete.
+         *
+         * @return true if the job is complete
+         */
         boolean isCompleted();
+
+        /**
+         * Get the text transcription for a completed job.
+         *
+         * @return the text content or null for an incomplete job
+         */
         String getContent();
     }
 }
