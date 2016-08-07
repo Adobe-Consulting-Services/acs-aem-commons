@@ -54,7 +54,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         Request request = httpClientFactory.post("/speech-to-text/api/v1/recognitions?continuous=true&timestamps=true").
                 addHeader("Content-Type", mimeType).
                 bodyStream(stream);
-//                bodyFile(file, ContentType.create(mimeType));
 
         try {
             JSONObject json = httpClientFactory.getExecutor().execute(request).handleResponse(new JsonObjectResponseHandler());
