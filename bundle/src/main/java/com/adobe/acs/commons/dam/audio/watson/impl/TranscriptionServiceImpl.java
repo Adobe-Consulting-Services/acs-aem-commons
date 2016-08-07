@@ -42,6 +42,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionServiceImpl.class);
 
+    private static final JsonObjectResponseHandler HANDLER = new JsonObjectResponseHandler();
+
     @Reference(target = "(factory.name=watson-speech-to-text)")
     private HttpClientFactory httpClientFactory;
 
@@ -56,7 +58,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 bodyStream(stream);
 
         try {
-            JSONObject json = httpClientFactory.getExecutor().execute(request).handleResponse(new JsonObjectResponseHandler());
+            JSONObject json = httpClientFactory.getExecutor().execute(request).handleResponse(HANDLER);
 
             log.trace("content: {}", json.toString(2));
             return json.getString("id");
@@ -71,7 +73,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         log.debug("getting result for {}", jobId);
         Request request = httpClientFactory.get("/speech-to-text/api/v1/recognitions/" + jobId);
         try {
-            JSONObject json = httpClientFactory.getExecutor().execute(request).handleResponse(new JsonObjectResponseHandler());
+            JSONObject json = httpClientFactory.getExecutor().execute(request).handleResponse(HANDLER);
 
             log.trace("content: {}", json.toString(2));
             if (json.getString("status").equals("completed")) {
