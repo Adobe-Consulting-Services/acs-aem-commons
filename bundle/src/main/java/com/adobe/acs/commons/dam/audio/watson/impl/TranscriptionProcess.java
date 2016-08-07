@@ -68,8 +68,6 @@ public class TranscriptionProcess implements WorkflowExternalProcess {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionProcess.class);
 
-    private static final Serializable NOOP = Long.valueOf(-1);
-
     @Reference
     private TranscriptionService transcriptionService;
 
@@ -89,12 +87,12 @@ public class TranscriptionProcess implements WorkflowExternalProcess {
         ResourceResolver resolver = workflowSession.adaptTo(ResourceResolver.class);
         Asset asset = getAssetFromPayload(workItem, resolver);
         if (asset == null) {
-            return NOOP;
+            return null;
         }
 
         String mimeType = asset.getMimeType();
-        if (!mimeType.startsWith("video/")) {
-            return NOOP;
+        if (!mimeType.startsWith("video/") && !mimeType.startsWith("audio/")) {
+            return null;
         }
 
         String jobId = null;
@@ -186,14 +184,13 @@ public class TranscriptionProcess implements WorkflowExternalProcess {
         if (jobId != null) {
             return jobId;
         } else {
-            return NOOP;
+            return null;
         }
     }
 
     @Override
     public boolean hasFinished(Serializable serializable, WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) {
-        log.info("hasFinished? " + serializable);
-        if (isNoopValue(serializable)) {
+        if (serializable == null) {
             return true;
         }
         ResourceResolver resolver = workflowSession.adaptTo(ResourceResolver.class);
@@ -224,7 +221,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess {
 
     @Override
     public void handleResult(Serializable serializable, WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        log.info("handleResult " + serializable);
+        // nothing to do here because the result is handled in hasFinished
     }
 
     private Asset getAssetFromPayload(WorkItem item, ResourceResolver resourceResolver) {
@@ -239,10 +236,6 @@ public class TranscriptionProcess implements WorkflowExternalProcess {
         }
 
         return null;
-    }
-
-    private boolean isNoopValue(Serializable serializable) {
-        return NOOP.equals(serializable);
     }
 
     @Activate
