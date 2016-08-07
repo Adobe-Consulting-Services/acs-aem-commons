@@ -28,17 +28,13 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.entity.ContentType;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Map;
-
-import static aQute.lib.osgi.Processor.append;
 
 @Component
 @Service
@@ -54,10 +50,11 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
-    public String startTranscriptionJob(File file, String mimeType) {
+    public String startTranscriptionJob(InputStream stream, String mimeType) {
         Request request = httpClientFactory.post("/speech-to-text/api/v1/recognitions?continuous=true&timestamps=true").
                 addHeader("Content-Type", mimeType).
-                bodyFile(file, ContentType.create(mimeType));
+                bodyStream(stream);
+//                bodyFile(file, ContentType.create(mimeType));
 
         try {
             JSONObject json = httpClientFactory.getExecutor().execute(request).handleResponse(new JsonObjectResponseHandler());

@@ -129,7 +129,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess {
                 FileInputStream fis = null;
                 try {
                     final File transcodedAudio = ffmpegWrapper.transcode();
-                    jobId = transcriptionService.startTranscriptionJob(transcodedAudio, ffmpegWrapper.getOutputMimetype());
+                    jobId = transcriptionService.startTranscriptionJob(new FileInputStream(transcodedAudio), ffmpegWrapper.getOutputMimetype());
                     if (!transcodedAudio.delete()) {
                         log.error("Transcoded audio file @ {} coud not be deleted");
                     }
@@ -206,6 +206,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess {
             if (result.isCompleted()) {
                 try {
                     asset.addRendition("transcription.txt", new ByteArrayInputStream(result.getContent().getBytes("UTF-8")), "text/plain");
+                    log.info("Transcription for {} created.", asset.getPath());
                 } catch (Exception e) {
                     log.error("Unable to save new rendition", e);
                 }

@@ -21,12 +21,12 @@ package com.adobe.acs.commons.dam.audio.watson;
 
 import aQute.bnd.annotation.ProviderType;
 
-import java.io.File;
+import java.io.InputStream;
 
 @ProviderType
 public interface TranscriptionService {
 
-    String startTranscriptionJob(File file, String mimeType);
+    String startTranscriptionJob(InputStream stream, String mimeType);
 
     Result getResult(String jobId);
 
