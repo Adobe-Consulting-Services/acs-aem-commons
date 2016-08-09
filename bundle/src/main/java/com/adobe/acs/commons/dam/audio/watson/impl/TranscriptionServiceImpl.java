@@ -99,7 +99,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 return new ResultImpl(false, null);
             }
         } catch (Exception e) {
-
+            log.error("Unable to get result. assuming failure.", e);
             return new ResultImpl(true, "error");
         }
 
