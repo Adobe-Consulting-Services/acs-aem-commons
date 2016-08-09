@@ -20,22 +20,7 @@
 (function(document, Granite, $) {
     "use strict";
 
-    function getQueryParameter(paramName) {
-        var queryString = decodeURIComponent(window.location.search.substring(1)),
-            queryParams = queryString.split('&'),
-            queryParam,
-            i;
-
-        for (i = 0; i < queryParams.length; i++) {
-            queryParam = queryParams[i].split('=');
-
-            if (queryParam[0] === paramName) {
-                return queryParam[1] === undefined ? "" : queryParam[1];
-            }
-        }
-    }
-
-    function activate(propertyName, path) {
+    function activate(encodedItemPath, propertyName, path) {
         var selector = "input[name='./jcr:content/metadata/" + propertyName + "'][disabled]",
             $placeholder = $(selector),
             $container = $placeholder.parents(".foundation-field-editable").first(),
@@ -47,15 +32,14 @@
         });
     }
 
-    var encodedItemPath = encodeURIComponent(getQueryParameter("item"));
-
     $(document).on("foundation-contentloaded", function() {
+        var encodedItemPath = encodeURIComponent($("#aem-assets-metadataeditor-formid").data("formid"));
         $.get(Granite.HTTP.getContextPath() + "/bin/acs-commons/dam/custom-components.json", function(data) {
             var i;
 
             if (data.components) {
                 for (i = 0; i < data.components.length; i++) {
-                    activate(data.components[i].propertyName, data.components[i].componentPath);
+                    activate(encodedItemPath, data.components[i].propertyName, data.components[i].componentPath);
                 }
             }
         });
