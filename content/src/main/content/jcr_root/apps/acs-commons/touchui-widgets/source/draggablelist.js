@@ -138,12 +138,6 @@
             el.prevAll().addClass("drag-before");
             el.nextAll().addClass("drag-after");
 
-            // Fix height of list element to avoid flickering of page
-            this.$element.css({
-                height: "600px"
-            });
-
-
             if (this.options.allowDrag) {
                 new CUI.CopyDragAction(event, this.$element, el, dropZones);
             } else {
