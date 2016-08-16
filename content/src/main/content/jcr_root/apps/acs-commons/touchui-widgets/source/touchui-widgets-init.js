@@ -31,6 +31,14 @@
         window.ACS.TouchUI = {};
     }
 
+    if (typeof window.ACS.TouchUI.Util === "undefined") {
+        window.ACS.TouchUI.Util = {};
+    }
+
+    ACS.TouchUI.Util.onPropertiesPage = function() {
+        return $("form#cq-sites-properties-form").length === 1;
+    };
+
     ACS.TouchUI.Widget = new Class({
         toString: 'ACS TouchUI Widget Base Class',
         ACS_COMMONS_NESTED:  "acs-commons-nested",

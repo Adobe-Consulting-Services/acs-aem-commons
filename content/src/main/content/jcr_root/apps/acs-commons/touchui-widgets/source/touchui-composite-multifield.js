@@ -98,10 +98,6 @@
     var _ = window._, CUI = window.CUI,
         Class = window.Class;
 
-    function onPropertiesPage() {
-        return $("form#cq-sites-properties-form").length === 1;
-    }
-
     ACS.TouchUI.CompositeMultiField = new Class({
         toString: 'ACS TouchUI Composite Multifield',
         extend: ACS.TouchUI.Widget,
@@ -327,7 +323,7 @@
     $document.ready(function () {
         var compositeMultiField = new ACS.TouchUI.CompositeMultiField();
 
-        if (onPropertiesPage()) {
+        if (ACS.TouchUI.Util.onPropertiesPage()) {
             compositeMultiField.addDataInFields();
 
             $document.on("click", "[form=cq-sites-properties-form]", function(){
