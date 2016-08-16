@@ -105,7 +105,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     }
 
-    private class ResultImpl implements Result {
+    private static class ResultImpl implements Result {
 
         private final boolean completed;
         private final String content;
