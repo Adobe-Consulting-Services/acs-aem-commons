@@ -98,6 +98,10 @@
     var _ = window._, CUI = window.CUI,
         Class = window.Class;
 
+    function onPropertiesPage() {
+        return $("form#cq-sites-properties-form").length === 1;
+    }
+
     ACS.TouchUI.CompositeMultiField = new Class({
         toString: 'ACS TouchUI Composite Multifield',
         extend: ACS.TouchUI.Widget,
@@ -270,7 +274,7 @@
 
         //collect data from widgets in multifield and POST them to CRX as JSON
         collectDataFromFields: function () {
-            var cmf = this, $form = $("form.cq-dialog"),
+            var cmf = this, $form = $("form.cq-dialog,form#cq-sites-properties-form"),
                 $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
                 record, $fields, $field, $fieldSet, name, $nestedMultiField;
 
@@ -323,13 +327,21 @@
     $document.ready(function () {
         var compositeMultiField = new ACS.TouchUI.CompositeMultiField();
 
-        $document.on("dialog-ready", function(){
+        if (onPropertiesPage()) {
             compositeMultiField.addDataInFields();
-        });
 
-        $document.on("click", ".cq-dialog-submit", function(){
-            compositeMultiField.collectDataFromFields();
-        });
+            $document.on("click", "[form=cq-sites-properties-form]", function(){
+                compositeMultiField.collectDataFromFields();
+            });
+        } else {
+            $document.on("dialog-ready", function(){
+                compositeMultiField.addDataInFields();
+            });
+
+            $document.on("click", ".cq-dialog-submit", function(){
+                compositeMultiField.collectDataFromFields();
+            });
+        }
     });
 
     //extend otb multifield for adjusting event propagation when there are nested multifields
