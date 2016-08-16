@@ -323,7 +323,7 @@
     $document.ready(function () {
         var compositeMultiField = new ACS.TouchUI.CompositeMultiField();
 
-        if (ACS.TouchUI.Util.onPropertiesPage()) {
+        if (compositeMultiField.isPropertiesPage($document)) {
             compositeMultiField.addDataInFields();
 
             $document.on("click", "[form=cq-sites-properties-form]", function(){
