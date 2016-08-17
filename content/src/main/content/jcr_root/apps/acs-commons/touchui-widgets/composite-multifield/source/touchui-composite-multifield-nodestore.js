@@ -192,7 +192,7 @@
                 return;
             }
 
-            var $form = $("form.cq-dialog,form#cq-sites-properties-form"), $fields,
+            var $form = $(this.getPropertiesFormSelector()), $fields,
                 cmf = this;
 
             $multifields.each(function(counter, multifield){
