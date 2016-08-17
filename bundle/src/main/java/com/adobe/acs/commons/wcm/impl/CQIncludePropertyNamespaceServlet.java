@@ -282,6 +282,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
             return jsonObject;
         }
 
+        @SuppressWarnings("PMD.CollapsibleIfStatements")
         @Override
         protected void visit(JSONObject jsonObject) {
 
