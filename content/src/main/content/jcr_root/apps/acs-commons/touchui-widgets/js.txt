@@ -1,8 +1,5 @@
 #base=source
 
-touchui-widgets-init.js
-touchui-composite-multifield.js
-touchui-composite-multifield-nodestore.js
 icon-picker.js
 touchui-limit-parsys.js
 touchui-configure-parsys-placeholder.js

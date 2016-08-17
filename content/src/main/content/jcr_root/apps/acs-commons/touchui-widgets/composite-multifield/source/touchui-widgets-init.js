@@ -38,6 +38,9 @@
         CFFW:  ".coral-Form-fieldwrapper",
         JSON_STORE: "JSON_STORE",
         NODE_STORE: "NODE_STORE",
+        SELECTOR_FORM_CQ_DIALOG: "form.cq-dialog",
+        SELECTOR_FORM_SITES_PROPERTIES: "form#cq-sites-properties-form",
+        SELECTOR_FORM_CREATE_PAGE: "form.cq-siteadmin-admin-createpage",
 
         isSelectOne: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "select-one");
@@ -196,6 +199,18 @@
             }
 
             validate($($(selector)[0]));
+        },
+
+        isPropertiesPage: function($document) {
+            return $document.find(this.SELECTOR_FORM_SITES_PROPERTIES).length === 1;
+        },
+
+        isCreatePageWizard: function($document) {
+            return $document.find(this.SELECTOR_FORM_CREATE_PAGE).length == 1;
+        },
+
+        getPropertiesFormSelector: function() {
+            return this.SELECTOR_FORM_CQ_DIALOG + "," + this.SELECTOR_FORM_SITES_PROPERTIES + "," + this.SELECTOR_FORM_CREATE_PAGE;
         }
     });
 }());

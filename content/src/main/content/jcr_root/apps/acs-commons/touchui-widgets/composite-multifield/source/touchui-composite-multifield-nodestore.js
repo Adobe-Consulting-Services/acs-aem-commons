@@ -156,7 +156,7 @@
 
         addDataInFields: function () {
             var cmf = this, mNames = cmf.getMultiFieldNames(),
-                $form = $("form.cq-dialog"), $multifield,
+                $form = $(cmf.getPropertiesFormSelector()), $multifield,
                 actionUrl = $form.attr("action") + ".infinity.json";
 
             $(".js-coral-Multifield-add").click(function(){
@@ -192,7 +192,7 @@
                 return;
             }
 
-            var $form = $("form.cq-dialog"), $fields,
+            var $form = $(this.getPropertiesFormSelector()), $fields,
                 cmf = this;
 
             $multifields.each(function(counter, multifield){
@@ -248,12 +248,24 @@
     $document.ready(function () {
         var compositeMultiField = new ACS.TouchUI.NodeCompositeMultiField();
 
-        $document.on("dialog-ready", function(){
+        if (compositeMultiField.isPropertiesPage($document)) {
             compositeMultiField.addDataInFields();
-        });
 
-        $document.on("click", ".cq-dialog-submit", function(){
-            compositeMultiField.collectDataFromFields();
-        });
+            $document.on("click", "[form=cq-sites-properties-form]", function(){
+                compositeMultiField.collectDataFromFields();
+            });
+        } else if (compositeMultiField.isCreatePageWizard($document)) {
+            $document.on("click", ".foundation-wizard-control[type='submit']", function () {
+                compositeMultiField.collectDataFromFields();
+            });
+        } else {
+            $document.on("dialog-ready", function(){
+                compositeMultiField.addDataInFields();
+            });
+
+            $document.on("click", ".cq-dialog-submit", function(){
+                compositeMultiField.collectDataFromFields();
+            });
+        }
     });
 }(jQuery, jQuery(document)));
