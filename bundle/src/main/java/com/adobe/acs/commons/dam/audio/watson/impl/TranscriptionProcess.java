@@ -33,12 +33,14 @@ import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.dam.handler.ffmpeg.FFMpegWrapper;
 import com.day.cq.dam.video.VideoProfile;
 import org.apache.commons.io.IOUtils;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +49,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Map;
 
-@Component
+@Component(metatype = true, label = "ACS AEM Commons - Watson Transcription Workflow Process",
+           description = "ACS AEM Commons - Watson Transcription Workflow Process")
 @Service(WorkflowExternalProcess.class)
-@Property(name = "process.name", value = "Generate Audio Transcript with IBM Watson")
+@Property(name = "process.name", value = "Generate Audio Transcript with IBM Watson", propertyPrivate = true)
 public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelper.AudioProcessor<MetaDataMap, Serializable> {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionProcess.class);
@@ -60,6 +64,19 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
 
     @Reference
     private AudioHelper audioHelper;
+
+    private static final String DEFAULT_PROFILE = "flacmono";
+
+    @Property(label = "Trancode Profile", description = "Profile name for audio transcoding. Must be a format acceptable to Watson",
+              value = DEFAULT_PROFILE)
+    private static final String PROP_PROFILE = "profile";
+
+    private String profileName;
+
+    @Activate
+    protected void activate(Map<String, Object> config) {
+        this.profileName = PropertiesUtil.toString(config.get(PROP_PROFILE), DEFAULT_PROFILE);
+    }
 
     @Override
     public Serializable execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
@@ -95,11 +112,9 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
 
         log.info("processing asset [{}]...", asset.getPath());
 
-        // create videos from profiles
-        String videoProfile = "flacmono";
-        VideoProfile profile = VideoProfile.get(resourceResolver, videoProfile);
+        VideoProfile profile = VideoProfile.get(resourceResolver, profileName);
         if (profile != null) {
-            log.info("processAudio: creating audio using profile [{}]", videoProfile);
+            log.info("processAudio: creating audio using profile [{}]", profileName);
             // creating temp working directory for ffmpeg
             FFMpegWrapper ffmpegWrapper = FFMpegWrapper.fromProfile(tempFile, profile, workingDir);
             ffmpegWrapper.setExecutableLocator(locator);
@@ -113,7 +128,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
                 }
             } catch (IOException e) {
                 log.error("processAudio: failed creating audio from profile [{}]: {}",
-                        videoProfile, e.getMessage());
+                        profileName, e.getMessage());
             }
         }
         if (log.isInfoEnabled()) {
