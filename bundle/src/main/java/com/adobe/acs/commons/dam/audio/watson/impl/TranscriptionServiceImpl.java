@@ -86,7 +86,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                         String line = firstAlternative.getString("transcript");
                         if (StringUtils.isNotBlank(line)) {
                             double firstTimestamp = firstAlternative.getJSONArray("timestamps").getJSONArray(0).getDouble(1);
-                            builder.append("[").append(firstTimestamp).append("]: ").append(line).append("\n");
+                            builder.append("[").append(firstTimestamp).append("s]: ").append(line).append("\n");
                         }
                     }
                 }
