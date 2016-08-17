@@ -156,7 +156,7 @@
 
         addDataInFields: function () {
             var cmf = this, mNames = cmf.getMultiFieldNames(),
-                $form = $("form.cq-dialog,form#cq-sites-properties-form"), $multifield,
+                $form = $(cmf.getPropertiesFormSelector()), $multifield,
                 actionUrl = $form.attr("action") + ".infinity.json";
 
             $(".js-coral-Multifield-add").click(function(){
@@ -252,6 +252,10 @@
             compositeMultiField.addDataInFields();
 
             $document.on("click", "[form=cq-sites-properties-form]", function(){
+                compositeMultiField.collectDataFromFields();
+            });
+        } else if (compositeMultiField.isCreatePageWizard($document)) {
+            $document.on("click", ".foundation-wizard-control[type='submit']", function () {
                 compositeMultiField.collectDataFromFields();
             });
         } else {

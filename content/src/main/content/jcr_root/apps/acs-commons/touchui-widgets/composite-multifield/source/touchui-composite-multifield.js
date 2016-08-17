@@ -270,7 +270,7 @@
 
         //collect data from widgets in multifield and POST them to CRX as JSON
         collectDataFromFields: function () {
-            var cmf = this, $form = $("form.cq-dialog,form#cq-sites-properties-form"),
+            var cmf = this, $form = $(cmf.getPropertiesFormSelector()),
                 $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
                 record, $fields, $field, $fieldSet, name, $nestedMultiField;
 
@@ -326,7 +326,11 @@
         if (compositeMultiField.isPropertiesPage($document)) {
             compositeMultiField.addDataInFields();
 
-            $document.on("click", "[form=cq-sites-properties-form]", function(){
+            $document.on("click", "[form=cq-sites-properties-form]", function () {
+                compositeMultiField.collectDataFromFields();
+            });
+        } else if (compositeMultiField.isCreatePageWizard($document)) {
+            $document.on("click", ".foundation-wizard-control[type='submit']", function () {
                 compositeMultiField.collectDataFromFields();
             });
         } else {
