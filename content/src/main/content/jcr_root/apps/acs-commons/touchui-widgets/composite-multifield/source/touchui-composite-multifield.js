@@ -134,6 +134,10 @@
 
             mNames = _.uniq(mNames);
 
+            if (_.isUndefined(actionUrl)) {
+                return;
+            }
+
             //creates & fills the nested multifield with data
             function fillNestedFields($multifield, valueArr) {
                 _.each(valueArr, function (record, index) {
@@ -343,33 +347,4 @@
             });
         }
     });
-
-    //extend otb multifield for adjusting event propagation when there are nested multifields
-    //for working around the nested multifield add and reorder
-    CUI.Multifield = new Class({
-        toString: "Multifield",
-        extend: CUI.Multifield,
-
-        construct: function (options) {
-            this.script = this.$element.find(".js-coral-Multifield-input-template:last");
-        },
-
-        _addListeners: function () {
-            this.superClass._addListeners.call(this);
-
-            //otb coral event handler is added on selector .js-coral-Multifield-add
-            //any nested multifield add click events are propagated to the parent multifield;
-            //to prevent adding a new composite field in both nested multifield and parent multifield
-            //when user clicks on add of nested multifield, stop the event propagation to parent multifield
-            this.$element.on("click", ".js-coral-Multifield-add", function (e) {
-                e.stopPropagation();
-            });
-
-            this.$element.on("drop", function (e) {
-                e.stopPropagation();
-            });
-        }
-    });
-
-    CUI.Widget.registry.register("multifield", CUI.Multifield);
 }(jQuery, jQuery(document)));
