@@ -134,6 +134,10 @@
 
             mNames = _.uniq(mNames);
 
+            if (_.isUndefined(actionUrl)) {
+                return;
+            }
+
             //creates & fills the nested multifield with data
             function fillNestedFields($multifield, valueArr) {
                 _.each(valueArr, function (record, index) {

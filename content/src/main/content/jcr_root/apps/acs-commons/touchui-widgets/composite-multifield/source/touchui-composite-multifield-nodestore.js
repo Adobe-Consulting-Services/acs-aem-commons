@@ -168,6 +168,10 @@
                 }, 500);
             });
 
+            if (_.isUndefined(actionUrl)) {
+                return;
+            }
+
             $.ajax(actionUrl).done(postProcess);
 
             function postProcess(data){
