@@ -134,6 +134,10 @@
 
             mNames = _.uniq(mNames);
 
+            if (_.isUndefined(actionUrl)) {
+                return;
+            }
+
             //creates & fills the nested multifield with data
             function fillNestedFields($multifield, valueArr) {
                 _.each(valueArr, function (record, index) {
@@ -270,7 +274,7 @@
 
         //collect data from widgets in multifield and POST them to CRX as JSON
         collectDataFromFields: function () {
-            var cmf = this, $form = $("form.cq-dialog"),
+            var cmf = this, $form = $(cmf.getPropertiesFormSelector()),
                 $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
                 record, $fields, $field, $fieldSet, name, $nestedMultiField;
 
@@ -323,41 +327,24 @@
     $document.ready(function () {
         var compositeMultiField = new ACS.TouchUI.CompositeMultiField();
 
-        $document.on("dialog-ready", function(){
+        if (compositeMultiField.isPropertiesPage($document)) {
             compositeMultiField.addDataInFields();
-        });
 
-        $document.on("click", ".cq-dialog-submit", function(){
-            compositeMultiField.collectDataFromFields();
-        });
-    });
-
-    //extend otb multifield for adjusting event propagation when there are nested multifields
-    //for working around the nested multifield add and reorder
-    CUI.Multifield = new Class({
-        toString: "Multifield",
-        extend: CUI.Multifield,
-
-        construct: function (options) {
-            this.script = this.$element.find(".js-coral-Multifield-input-template:last");
-        },
-
-        _addListeners: function () {
-            this.superClass._addListeners.call(this);
-
-            //otb coral event handler is added on selector .js-coral-Multifield-add
-            //any nested multifield add click events are propagated to the parent multifield;
-            //to prevent adding a new composite field in both nested multifield and parent multifield
-            //when user clicks on add of nested multifield, stop the event propagation to parent multifield
-            this.$element.on("click", ".js-coral-Multifield-add", function (e) {
-                e.stopPropagation();
+            $document.on("click", "[form=cq-sites-properties-form]", function () {
+                compositeMultiField.collectDataFromFields();
+            });
+        } else if (compositeMultiField.isCreatePageWizard($document)) {
+            $document.on("click", ".foundation-wizard-control[type='submit']", function () {
+                compositeMultiField.collectDataFromFields();
+            });
+        } else {
+            $document.on("dialog-ready", function(){
+                compositeMultiField.addDataInFields();
             });
 
-            this.$element.on("drop", function (e) {
-                e.stopPropagation();
+            $document.on("click", ".cq-dialog-submit", function(){
+                compositeMultiField.collectDataFromFields();
             });
         }
     });
-
-    CUI.Widget.registry.register("multifield", CUI.Multifield);
 }(jQuery, jQuery(document)));

@@ -38,6 +38,9 @@
         CFFW:  ".coral-Form-fieldwrapper",
         JSON_STORE: "JSON_STORE",
         NODE_STORE: "NODE_STORE",
+        SELECTOR_FORM_CQ_DIALOG: "form.cq-dialog",
+        SELECTOR_FORM_SITES_PROPERTIES: "form#cq-sites-properties-form",
+        SELECTOR_FORM_CREATE_PAGE: "form.cq-siteadmin-admin-createpage",
 
         isSelectOne: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "select-one");
@@ -196,6 +199,50 @@
             }
 
             validate($($(selector)[0]));
+        },
+
+        isPropertiesPage: function($document) {
+            return $document.find(this.SELECTOR_FORM_SITES_PROPERTIES).length === 1;
+        },
+
+        isCreatePageWizard: function($document) {
+            return $document.find(this.SELECTOR_FORM_CREATE_PAGE).length == 1;
+        },
+
+        getPropertiesFormSelector: function() {
+            return this.SELECTOR_FORM_CQ_DIALOG + "," + this.SELECTOR_FORM_SITES_PROPERTIES + "," + this.SELECTOR_FORM_CREATE_PAGE;
         }
     });
+
+    if (!ACS.TouchUI.extendedMultfield) {
+        //extend otb multifield for adjusting event propagation when there are nested multifields
+        //for working around the nested multifield add and reorder
+        CUI.Multifield = new Class({
+            toString: "Multifield",
+            extend: CUI.Multifield,
+
+            construct: function (options) {
+                this.script = this.$element.find(".js-coral-Multifield-input-template:last");
+            },
+
+            _addListeners: function () {
+                this.superClass._addListeners.call(this);
+
+                //otb coral event handler is added on selector .js-coral-Multifield-add
+                //any nested multifield add click events are propagated to the parent multifield;
+                //to prevent adding a new composite field in both nested multifield and parent multifield
+                //when user clicks on add of nested multifield, stop the event propagation to parent multifield
+                this.$element.on("click", ".js-coral-Multifield-add", function (e) {
+                    e.stopPropagation();
+                });
+
+                this.$element.on("drop", function (e) {
+                    e.stopPropagation();
+                });
+            }
+        });
+
+        CUI.Widget.registry.register("multifield", CUI.Multifield);
+        ACS.TouchUI.extendedMultfield = true;
+    }
 }());
