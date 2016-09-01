@@ -53,6 +53,7 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import com.day.cq.commons.Externalizer;
+import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
@@ -106,7 +107,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
     
     @Property(label = "Hide In Sitemap Property",
-            description = "The JCR property name which will allow editor to hide page from sitemap.")
+            description = "The JCR property name which will allow editor to hide page from sitemap. By default hideInNav property will be used to hide pages from sitemap.")
     private static final String PROP_HIDE_IN_SITEMAP = "hideinsitemap.property";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
@@ -138,6 +139,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.damAssetProperty = PropertiesUtil.toString(properties.get(PROP_DAM_ASSETS_PROPERTY), "");
         this.damAssetTypes = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
         this.hideProperty = PropertiesUtil.toString(properties.get(PROP_HIDE_IN_SITEMAP), "");
+        if(StringUtils.isBlank(this.hideProperty)) {
+        	this.hideProperty = NameConstants.PN_HIDE_IN_NAV;
+        }
     }
 
     @Override
