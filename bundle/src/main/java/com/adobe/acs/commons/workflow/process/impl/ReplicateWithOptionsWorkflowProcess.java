@@ -126,7 +126,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
                 }
             }
 
-            log.info("Synthetic Workflow Wrapper processed [ {} ] total payloads", count.get());
+            log.info("Replicate with Options processed [ {} ] total payloads", count.get());
         } catch (Exception e) {
             throw new WorkflowException(e);
         }
