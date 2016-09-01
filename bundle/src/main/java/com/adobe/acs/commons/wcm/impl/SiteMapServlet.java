@@ -106,9 +106,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             description = "MIME types allowed for DAM assets.")
     private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
     
-    @Property(label = "Hide In Sitemap Property",
-            description = "The JCR property name which will allow editor to hide page from sitemap. By default hideInNav property will be used to hide pages from sitemap.")
-    private static final String PROP_HIDE_IN_SITEMAP = "hideinsitemap.property";
+    @Property(label = "Exclude from Sitemap Property",
+            description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
+    private static final String PROP_HIDE_IN_SITEMAP = "exclude.property";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
