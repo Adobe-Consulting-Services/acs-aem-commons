@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.dam.audio;
+package com.adobe.acs.commons.dam.audio.impl;
 
 /**
  * Generic exception for audio processing.

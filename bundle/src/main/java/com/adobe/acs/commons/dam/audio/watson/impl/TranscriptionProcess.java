@@ -19,9 +19,8 @@
  */
 package com.adobe.acs.commons.dam.audio.watson.impl;
 
-import com.adobe.acs.commons.dam.audio.AudioException;
-import com.adobe.acs.commons.dam.audio.AudioHelper;
-import com.adobe.acs.commons.dam.audio.watson.TranscriptionService;
+import com.adobe.acs.commons.dam.audio.impl.AudioException;
+import com.adobe.acs.commons.dam.audio.impl.AudioHelper;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkItem;

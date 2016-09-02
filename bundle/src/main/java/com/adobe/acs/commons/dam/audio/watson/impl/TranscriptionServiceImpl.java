@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.dam.audio.watson.impl;
 
-import com.adobe.acs.commons.dam.audio.watson.TranscriptionService;
 import com.adobe.acs.commons.http.HttpClientFactory;
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
 import org.apache.commons.lang3.StringUtils;

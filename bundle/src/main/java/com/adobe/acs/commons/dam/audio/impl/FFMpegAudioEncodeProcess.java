@@ -22,14 +22,11 @@ package com.adobe.acs.commons.dam.audio.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import com.adobe.acs.commons.dam.audio.AudioException;
-import com.adobe.acs.commons.dam.audio.AudioHelper;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.commons.process.AbstractAssetWorkflowProcess;
 import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;

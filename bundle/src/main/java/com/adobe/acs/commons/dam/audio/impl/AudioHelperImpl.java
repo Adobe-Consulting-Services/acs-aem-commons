@@ -19,8 +19,6 @@
  */
 package com.adobe.acs.commons.dam.audio.impl;
 
-import com.adobe.acs.commons.dam.audio.AudioException;
-import com.adobe.acs.commons.dam.audio.AudioHelper;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.dam.handler.ffmpeg.FfmpegNotFoundException;

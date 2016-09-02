@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.dam.audio;
+package com.adobe.acs.commons.dam.audio.impl;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;

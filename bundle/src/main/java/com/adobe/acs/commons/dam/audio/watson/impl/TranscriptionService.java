@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.dam.audio.watson;
+package com.adobe.acs.commons.dam.audio.watson.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
