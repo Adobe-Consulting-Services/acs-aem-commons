@@ -28,6 +28,9 @@ import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * @deprecated use ParameterUtil instead.
+ */
 @Deprecated
 @ProviderType
 public class OsgiPropertyUtil {
