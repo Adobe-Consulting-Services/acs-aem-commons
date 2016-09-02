@@ -139,8 +139,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.damAssetProperty = PropertiesUtil.toString(properties.get(PROP_DAM_ASSETS_PROPERTY), "");
         this.damAssetTypes = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
         this.hideProperty = PropertiesUtil.toString(properties.get(PROP_HIDE_IN_SITEMAP), "");
-        if(StringUtils.isBlank(this.hideProperty)) {
-        	this.hideProperty = NameConstants.PN_HIDE_IN_NAV;
+        if (StringUtils.isBlank(this.hideProperty)) {
+            this.hideProperty = NameConstants.PN_HIDE_IN_NAV;
         }
     }
 
@@ -208,9 +208,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
-    	if(isHidden(page)) {
-    		return;
-    	}
+        if (isHidden(page)) {
+            return;
+        }
         stream.writeStartElement(NS, "url");
 
 
