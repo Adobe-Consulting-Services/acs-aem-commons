@@ -50,11 +50,11 @@
                                                  '</div>' +
                                                  '<div class="selector-popup" style="display: none;">' + ((this.settings.hasSearch) ?
                                                          '<div class="selector-search">' +
-                                                                 '<input type="text" name="" value="" placeholder="Search icon" class="icons-search-input"/>' +
+                                                                 '<input type="text" value="" placeholder="Search icon" class="icons-search-input"/>' +
                                                                  '<i class="fip-icon-search"></i>' +
                                                          '</div>' : '') +
                                                          '<div class="selector-category">' +
-                                                                 '<select name="" class="icon-category-select" style="display: none">' +
+                                                                 '<select class="icon-category-select" style="display: none">' +
                                                                  '</select>' +
                                                          '</div>' +
                                                          '<div class="fip-icons-container"></div>' +
