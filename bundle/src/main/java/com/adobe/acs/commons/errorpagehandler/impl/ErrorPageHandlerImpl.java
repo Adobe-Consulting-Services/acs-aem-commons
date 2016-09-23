@@ -750,8 +750,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Replace with proper API call is HtmlLibraryManager provides one in the future;
         // Currently this is our only option.
-        request.setAttribute(com.day.cq.widget.HtmlLibraryManager.class.getName() + ".included",
+        request.setAttribute("com.day.cq.widget.HtmlLibraryManager.included",
                 new HashSet<String>());
+
+        // Fixes AEM 6.2 issue (https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/790)
+        request.setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included",
+                new HashSet<String>());
+
         // Clear the response
         response.reset();
         response.setContentType("text/html");
