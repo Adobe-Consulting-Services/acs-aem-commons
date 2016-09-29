@@ -23,6 +23,7 @@ package com.adobe.acs.commons.quickly.impl;
 import com.adobe.acs.commons.quickly.QuicklyEngine;
 import com.adobe.acs.commons.util.BufferingResponse;
 import com.adobe.acs.commons.util.ResourceDataUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -44,6 +45,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Map;
 
@@ -61,15 +63,12 @@ public class QuicklyFilter implements Filter {
             "/libs/granite/core/content/login",
     };
 
-    private static final String HTML_FILE = "/apps/acs-commons/components/utilities/quickly/inject.html";
+    private static final String HTML_FILE = "/quickly/inject.html";
 
     private static String appHTML = "";
 
     @Reference
     private QuicklyEngine quicklyEngine;
-
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -141,15 +140,13 @@ public class QuicklyFilter implements Filter {
     }
 
     @Activate
-    protected final void activate(final Map<String, String> config) throws IOException, RepositoryException, LoginException {
-        ResourceResolver resourceResolver = null;
+    protected final void activate(final Map<String, String> config) throws IOException {
+        InputStream inputStream = null;
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            appHTML = ResourceDataUtil.getNTFileAsString(HTML_FILE, resourceResolver);
+            inputStream = getClass().getResourceAsStream(HTML_FILE);
+            appHTML = IOUtils.toString(inputStream, "UTF-8");
         } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
+            IOUtils.closeQuietly(inputStream);
         }
     }
 }
