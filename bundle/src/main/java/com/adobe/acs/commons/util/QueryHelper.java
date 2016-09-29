@@ -20,12 +20,14 @@
 
 package com.adobe.acs.commons.util;
 
+import aQute.bnd.annotation.ProviderType;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.RepositoryException;
 import java.util.List;
 
+@ProviderType
 public interface QueryHelper {
 
     /**
