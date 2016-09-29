@@ -61,8 +61,6 @@ import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component(metatype = true,
         label = "ACS AEM Commons - Site Map Servlet",
