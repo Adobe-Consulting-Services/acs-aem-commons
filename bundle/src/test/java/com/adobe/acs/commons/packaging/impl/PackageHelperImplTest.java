@@ -236,7 +236,7 @@ public class PackageHelperImplTest {
         Node thumbnailNode = mock(Node.class);
 
         when(thumbnailResource.adaptTo(Node.class)).thenReturn(thumbnailNode);
-        when(thumbnailResource.isResourceType("nt:file")).thenReturn(true);
+        when(thumbnailNode.isNodeType("nt:file")).thenReturn(true);
 
         when(packageOneDefNode.getSession()).thenReturn(mock(Session.class));
 
