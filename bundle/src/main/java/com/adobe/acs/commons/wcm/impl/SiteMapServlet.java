@@ -33,6 +33,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
@@ -60,6 +61,8 @@ import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(metatype = true,
         label = "ACS AEM Commons - Site Map Servlet",
@@ -78,6 +81,8 @@ import com.day.cq.wcm.api.PageManager;
                 value = "Site Map for: {externalizer.domain}, on resource types: [{sling.servlet.resourceTypes}]")
 })
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
+
+    private static final Logger log = LoggerFactory.getLogger(SiteMapServlet.class);
 
     private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd");
 
@@ -215,20 +220,14 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
+        log.debug("writing page {}", page.getPath());
+
         if (isHidden(page)) {
             return;
         }
         stream.writeStartElement(NS, "url");
 
-        String loc;
-        if(StringUtils.isNotEmpty(externalizerDomainProperty)) {
-            InheritanceValueMap inheritanceValueMap = page.getContentResource().adaptTo(InheritanceValueMap.class);
-            loc = externalizer.externalLink(resolver, inheritanceValueMap.getInherited(externalizerDomainProperty, externalizerDomain),
-                    String.format("%s.html", page.getPath()));
-        } else {
-            loc = externalizer.externalLink(resolver, externalizerDomain,
-                    String.format("%s.html", page.getPath()));
-        }
+        String loc = getLoc(page, resolver);
 
         writeElement(stream, "loc", loc);
 
@@ -244,6 +243,19 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         writeFirstPropertyValue(stream, "priority", priorityProperties, properties);
 
         stream.writeEndElement();
+    }
+
+    private String getLoc(Page page, ResourceResolver resolver) {
+        String loc;
+        if(StringUtils.isNotEmpty(externalizerDomainProperty)) {
+            InheritanceValueMap inheritanceValueMap = new HierarchyNodeInheritanceValueMap(page.getContentResource());
+            loc = externalizer.externalLink(resolver, inheritanceValueMap.getInherited(externalizerDomainProperty, externalizerDomain),
+                    String.format("%s.html", page.getPath()));
+        } else {
+            loc = externalizer.externalLink(resolver, externalizerDomain,
+                    String.format("%s.html", page.getPath()));
+        }
+        return loc;
     }
 
     private boolean isHidden(final Page page) {
