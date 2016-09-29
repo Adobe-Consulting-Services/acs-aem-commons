@@ -58,6 +58,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -112,6 +113,12 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
     public static final String USER_EVENT_TYPE = "acs-aem-commons.review-task-mover";
 
+    private static final String SERVICE_NAME = "review-task-asset-mover";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
+
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
@@ -153,7 +160,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
         ResourceResolver resourceResolver = null;
 
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
             final String path = (String) event.getProperty("TaskId");
             final Resource taskResource = resourceResolver.getResource(path);
 
@@ -197,7 +204,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             ResourceResolver resourceResolver = null;
             try {
                 // Always use service users; never admin resource resolvers for "real" code
-                resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
                 // Access data passed into the Job from the Event
                 Resource resource = resourceResolver.getResource(path);

@@ -53,6 +53,9 @@
                 <configuration>
                     <group>adobe/consulting</group>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+                    <properties>
+                        <acHandling>merge_preserve</acHandling>
+                    </properties>
                     <embeddeds>
                         <embedded>
                             <groupId>${project.groupId}</groupId>

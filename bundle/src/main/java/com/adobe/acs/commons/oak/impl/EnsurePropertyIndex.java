@@ -66,7 +66,7 @@ public class EnsurePropertyIndex {
 
     private static final Logger log = LoggerFactory.getLogger(EnsurePropertyIndex.class);
 
-    private static final String NN_OAK_INDEX = "oak:index";
+    private static final String PATH_OAK_INDEX = "/oak:index";
 
     private static final String NT_QID = "oak:QueryIndexDefinition";
 
@@ -162,9 +162,9 @@ public class EnsurePropertyIndex {
 
             Session session = null;
             try {
-                session = repository.loginAdministrative(null);
+                session = repository.loginService(EnsureOakIndexJobHandler.SERVICE_NAME, null);
 
-                Node oakIndexContainer = session.getRootNode().getNode(NN_OAK_INDEX);
+                Node oakIndexContainer = session.getNode(PATH_OAK_INDEX);
                 if (oakIndexContainer.hasNode(name)) {
                     Node indexNode = oakIndexContainer.getNode(name);
                     if (needsUpdate(indexNode, def)) {

@@ -51,4 +51,10 @@
         <include pattern="/etc/acs-commons/exporters/jcr:content" />
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
+    <filter root="/home/users/system/acs-commons"/>
+    <filter root="/apps/rep:policy"/>
+    <filter root="/oak:index/rep:policy"/>
+    <filter root="/etc/notification/email/rep:policy"/>
+    <filter root="/content/dam/rep:policy"/>
+    <filter root="/content/rep:policy"/>
 </workspaceFilter>
