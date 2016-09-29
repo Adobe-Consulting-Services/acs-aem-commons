@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +33,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
@@ -88,6 +89,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             description = "Must correspond to a configuration of the Externalizer component.")
     private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
 
+    @Property(value = "", label = "Externalizer Domain Property",
+              description = "If specified, the externalizer domain will be read as an inherited page property.")
+    private static final String PROP_EXTERNALIZER_DOMAIN_PROPERTY = "externalizer.domainProperty";
+
     @Property(boolValue = DEFAULT_INCLUDE_LAST_MODIFIED, label = "Include Last Modified",
             description = "If true, the last modified value will be included in the sitemap.")
     private static final String PROP_INCLUDE_LAST_MODIFIED = "include.lastmod";
@@ -119,6 +124,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private String externalizerDomain;
 
+    private String externalizerDomainProperty;
+
     private boolean includeLastModified;
 
     private String[] changefreqProperties;
@@ -135,6 +142,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     protected void activate(Map<String, Object> properties) {
         this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
                 DEFAULT_EXTERNALIZER_DOMAIN);
+        this.externalizerDomainProperty = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN_PROPERTY), "");
         this.includeLastModified = PropertiesUtil.toBoolean(properties.get(PROP_INCLUDE_LAST_MODIFIED), DEFAULT_INCLUDE_LAST_MODIFIED);
         this.changefreqProperties = PropertiesUtil.toStringArray(properties.get(PROP_CHANGE_FREQUENCY_PROPERTIES), new String[0]);
         this.priorityProperties = PropertiesUtil.toStringArray(properties.get(PROP_PRIORITY_PROPERTIES), new String[0]);
@@ -212,8 +220,16 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         }
         stream.writeStartElement(NS, "url");
 
-        String loc = externalizer.externalLink(resolver, externalizerDomain,
-                String.format("%s.html", page.getPath()));
+        String loc;
+        if(StringUtils.isNotEmpty(externalizerDomainProperty)) {
+            InheritanceValueMap inheritanceValueMap = page.getContentResource().adaptTo(InheritanceValueMap.class);
+            loc = externalizer.externalLink(resolver, inheritanceValueMap.getInherited(externalizerDomainProperty, externalizerDomain),
+                    String.format("%s.html", page.getPath()));
+        } else {
+            loc = externalizer.externalLink(resolver, externalizerDomain,
+                    String.format("%s.html", page.getPath()));
+        }
+
         writeElement(stream, "loc", loc);
 
         if (includeLastModified) {
