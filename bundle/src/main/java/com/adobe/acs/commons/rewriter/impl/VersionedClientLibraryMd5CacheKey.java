@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.day.cq.widget.HtmlLibrary;
-import com.day.cq.widget.LibraryType;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.LibraryType;
 import com.google.common.base.Objects;
 
 class VersionedClientLibraryMd5CacheKey {

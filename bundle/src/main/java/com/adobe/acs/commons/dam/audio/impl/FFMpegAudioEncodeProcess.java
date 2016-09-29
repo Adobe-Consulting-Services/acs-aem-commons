@@ -24,14 +24,21 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.dam.commons.process.AbstractAssetWorkflowProcess;
+import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
+import com.day.cq.workflow.WorkflowException;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowProcess;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,18 +50,24 @@ import com.day.cq.dam.video.VideoProfile;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
+import static com.day.cq.dam.api.DamConstants.DC_EXTENT;
+import static com.day.cq.dam.api.DamConstants.METADATA_FOLDER;
+
 /**
  * CQ DAM FFmpeg Audio Encode Process
  * Workflow process that transcodes audio files into different formats
  */
 @Component
-@Service
+@Service(WorkflowProcess.class)
 @Properties({ @Property(name = "process.label", value = "Encode Audio") })
-public final class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
+public final class FFMpegAudioEncodeProcess extends AbstractAssetWorkflowProcess implements AudioHelper.AudioProcessor<MetaDataMap, Void> {
+
+    @Reference
+    private AudioHelper helper;
 
     private static final Logger log = LoggerFactory.getLogger(FFMpegAudioEncodeProcess.class);
 
-    String[] buildArguments(MetaDataMap metaData) {
+    private String[] buildArguments(MetaDataMap metaData) {
         String processArgs = metaData.get("PROCESS_ARGS", String.class);
         if (processArgs != null && !processArgs.equals("")) {
             return processArgs.split(",");
@@ -63,25 +76,53 @@ public final class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
         }
     }
 
-    protected void processAudio(final MetaDataMap metaData, final Asset asset, final File tmpFile,
-            final WorkflowSession wfSession) throws IOException, RepositoryException {
+    @SuppressWarnings("PMD.CollapsibleIfStatements")
+    public final void execute(WorkItem workItem, WorkflowSession wfSession, MetaDataMap metaData)
+            throws WorkflowException {
+
+        final Asset asset = getAssetFromPayload(workItem, wfSession.getSession());
+
+        final ResourceResolver resolver = getResourceResolver(wfSession.getSession());
+
+        if (asset == null) {
+            String wfPayload = workItem.getWorkflowData().getPayload().toString();
+            String message = "execute: cannot process audio, asset [{" + wfPayload
+                    + "}] in payload doesn't exist for workflow [{" + workItem.getId() + "}].";
+            throw new WorkflowException(message);
+        }
+
+        final String assetMimeType = asset.getMimeType();
+        if (assetMimeType == null || !assetMimeType.startsWith("audio/")) {
+            if (!asset.getName().endsWith(".wav") || !asset.getName().endsWith(".mp3")
+                    || !asset.getName().endsWith(".ogg")) {
+                log.info("execute: asset [{}] is not of a audio mime type, asset ignored.", asset.getPath());
+                return;
+            }
+        }
+
+        try {
+            helper.process(asset, resolver, metaData, this);
+        } catch (AudioException e) {
+            throw new WorkflowException("Unable to transcode audio", e);
+        }
+    }
+
+    @Override
+    public Void processAudio(final Asset asset, final ResourceResolver resourceResolver, final File tempFile,
+                        final ExecutableLocator locator, final File workingDir, final MetaDataMap metaData) throws AudioException {
 
         final long start = System.currentTimeMillis();
 
         log.info("processing asset [{}]...", asset.getPath());
 
-        ResourceResolver resolver = getResourceResolver(wfSession.getSession());
-
-        // create videos from profiles
+        // create audio files from profiles
         String[] videoProfiles = getVideoProfiles(metaData);
         for (String videoProfile : videoProfiles) {
-            VideoProfile profile = VideoProfile.get(resolver, videoProfile);
+            VideoProfile profile = VideoProfile.get(resourceResolver, videoProfile);
             if (profile != null) {
                 log.info("processAudio: creating audio using profile [{}]", videoProfile);
-                // creating temp working directory for ffmpeg
-                File tmpWorkingDir = createTempDir(getWorkingDir());
-                FFMpegWrapper ffmpegWrapper = FFMpegWrapper.fromProfile(tmpFile, profile, tmpWorkingDir);
-                ffmpegWrapper.setExecutableLocator(getLocator());
+                FFMpegWrapper ffmpegWrapper = FFMpegWrapper.fromProfile(tempFile, profile, workingDir);
+                ffmpegWrapper.setExecutableLocator(locator);
                 FileInputStream fis = null;
                 try {
                     final String renditionName = getRenditionName(ffmpegWrapper);
@@ -95,16 +136,6 @@ public final class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
                     log.error(e.getMessage(), e);
                     log.error("processAudio: failed creating audio from profile [{}]: {}",
                             videoProfile, e.getMessage());
-                } finally {
-                    IOUtils.closeQuietly(fis);
-                    try {
-                        // cleaning up ffmpeg's temp working directory
-                        if (tmpWorkingDir != null) {
-                            FileUtils.deleteDirectory(tmpWorkingDir);
-                        }
-                    } catch (IOException e) {
-                        log.warn("Could not delete ffmpeg's temporary working directory: {}", tmpWorkingDir.getPath());
-                    }
                 }
             }
         }
@@ -112,6 +143,29 @@ public final class FFMpegAudioEncodeProcess extends AbstractFFMpegAudioProcess {
             final long time = System.currentTimeMillis() - start;
             log.info("finished processing asset [{}] in [{}ms].", asset.getPath(), time);
         }
+
+        // get information about original audio file (size, video length,
+        // ...)
+        FFMpegWrapper wrapper = new FFMpegWrapper(tempFile, workingDir);
+        wrapper.setExecutableLocator(locator);
+
+        final Resource assetResource = asset.adaptTo(Resource.class);
+        final Resource metadata = resourceResolver.getResource(assetResource, JcrConstants.JCR_CONTENT + "/" + METADATA_FOLDER);
+
+        if (null != metadata) {
+            try {
+                final Node metadataNode = metadata.adaptTo(Node.class);
+                if (metadataNode != null) {
+                    metadataNode.setProperty(DC_EXTENT, wrapper.getInputDuration());
+                }
+            } catch (RepositoryException e) {
+                log.warn("Unable to set metadata for asset [" + asset.getPath() + "]", e);
+            }
+        } else {
+            log.warn("execute: failed setting metdata for asset [{}], no metdata node found.",
+                    asset.getPath());
+        }
+        return null;
     }
 
     public String[] getVideoProfiles(MetaDataMap metaData) {

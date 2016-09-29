@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.images.transformers.impl.composites;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.awt.CompositeContext;

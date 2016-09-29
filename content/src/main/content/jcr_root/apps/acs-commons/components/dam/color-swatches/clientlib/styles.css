@@ -1,0 +1,81 @@
+/*
+ * #%L
+ * ACS AEM Commons Package
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+.acs-dam-color-swatches table{
+    width: 100%;
+}
+
+.acs-dam-color-swatches tr {
+    border-width: 2px;
+    border-style: solid;
+    border-color: #969696;
+}
+
+.acs-dam-color-swatches-column-color,
+.acs-dam-color-swatches-column-type div,
+.acs-dam-color-swatches-column-colorspace div{
+    height: 1em;
+    width: 1em;
+    display: inline-block;
+    background-size: contain;
+}
+
+.acs-dam-color-swatches-column-type--spot {
+    background-image: url(images/spot.svg);
+}
+
+.acs-dam-color-swatches-column-type--process {
+    background-image: url(images/process.svg);
+}
+
+.acs-dam-color-swatches-column-colorspace--cmyk {
+    background-image: url(images/cmyk.svg);
+}
+
+.acs-dam-color-swatches-column-colorspace--rgb {
+    background-image: url(images/rgb.svg);
+}
+
+.acs-dam-color-swatches-column-colorspace--lab {
+    background-image: url(images/lab.svg);
+}
+
+.acs-dam-color-swatches-swatch-group-toggle {
+    cursor: pointer;
+}
+
+.acs-dam-color-swatches table td {
+    padding-top: .25em;
+    padding-bottom: .25em;
+}
+
+.acs-dam-color-swatches table td.acs-dam-color-swatches-column-name,
+.acs-dam-color-swatches table td.acs-dam-color-swatches-plates-column-name {
+    padding-left: .25em;
+}
+
+.acs-dam-color-swatches table td.acs-dam-color-swatches-column-type,
+.acs-dam-color-swatches table td.acs-dam-color-swatches-column-colorspace {
+    width: 1em;
+}
+
+.acs-dam-color-swatches table td.acs-dam-color-swatches-column-colorspace {
+    padding-right: .25em;
+    padding-left: .5em;
+}

@@ -11,6 +11,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.event.jobs.Job;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,10 +94,8 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
         final String[] paths = new String[] { packagePath };
 
-        final Map<String, Object> map = new HashMap<String, Object>();
-        map.put("paths", paths);
-
-        final Event event = new Event("MOCK", map);
+        final Job job = mock(Job.class);
+        when(job.getProperty("paths")).thenReturn(paths);
 
         when(adminResourceResolver.getResource(packagePath)).thenReturn(packageResource);
         when(packageResource.adaptTo(Node.class)).thenReturn(packageNode);
@@ -131,7 +130,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(contentResource3parent.adaptTo(Node.class)).thenReturn(contentNode3parent);
         when(contentNode3parent.isNodeType("sling:OrderedFolder")).thenReturn(true);
 
-        jcrPackageReplicationStatusEventHandler.process(event);
+        jcrPackageReplicationStatusEventHandler.process(job);
 
         verify(replicationStatusManager, times(1)).setReplicationStatus(
                 eq(adminResourceResolver),

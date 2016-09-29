@@ -23,7 +23,7 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.impl.FormImpl;
-import com.adobe.granite.xss.XSSAPI;
+import org.apache.sling.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;

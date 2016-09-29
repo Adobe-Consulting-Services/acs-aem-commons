@@ -47,8 +47,9 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.apache.sling.event.jobs.JobProcessor;
-import org.apache.sling.event.jobs.JobUtil;
+import org.apache.sling.event.jobs.Job;
+import org.apache.sling.event.jobs.JobManager;
+import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -60,6 +61,7 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -84,10 +86,16 @@ import java.util.Map;
                 value = "(" + ReplicationAction.PROPERTY_TYPE + "=ACTIVATE)",
                 name = EventConstants.EVENT_FILTER,
                 propertyPrivate = true
+        ),
+        @Property(
+                name = JobConsumer.PROPERTY_TOPICS,
+                value = JcrPackageReplicationStatusEventHandler.JOB_TOPIC
         )
 })
 @Service
-public class JcrPackageReplicationStatusEventHandler implements JobProcessor, EventHandler, ClusterAware {
+public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, ClusterAware {
+    private static final String PROPERTY_PATHS = "paths";
+
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
     private enum ReplicatedAt {
@@ -119,6 +127,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
             })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
 
+    protected static final String JOB_TOPIC = "acs-commons/replication/package";
+
     @Reference
     private Packaging packaging;
 
@@ -130,6 +140,9 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
 
     @Reference
     private PackageHelper packageHelper;
+
+    @Reference
+    private JobManager jobManager;
 
     private ResourceResolver adminResourceResolver;
 
@@ -163,17 +176,17 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
         if (this.isMaster) {
             // Only run on master
 
-            final String[] paths = (String[]) event.getProperty("paths");
+            final String[] paths = (String[]) event.getProperty(PROPERTY_PATHS);
 
             if (this.containsJcrPackagePath(paths) && !CollectionUtils.isEmpty(this.getJcrPackages(paths))) {
-                JobUtil.processJob(event, this);
+                jobManager.addJob(JOB_TOPIC, Collections.<String, Object>singletonMap(PROPERTY_PATHS, paths));
             }
         }
     }
 
     @Override
-    public final boolean process(final Event event) {
-        final String[] paths = (String[]) event.getProperty("paths");
+    public final JobResult process(final Job job) {
+        final String[] paths = (String[]) job.getProperty(PROPERTY_PATHS);
 
         log.debug("Processing Replication Status Update for JCR Package: {}", paths);
 
@@ -181,7 +194,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
 
         if (CollectionUtils.isEmpty(jcrPackages)) {
             log.warn("JCR Package is unavailable for Replication Status Update at: {}", paths);
-            return true;
+            return JobResult.OK;
         }
 
         for (final JcrPackage jcrPackage : jcrPackages) {
@@ -221,7 +234,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
             }
         }
 
-        return true;
+        return JobResult.OK;
     }
 
     /**

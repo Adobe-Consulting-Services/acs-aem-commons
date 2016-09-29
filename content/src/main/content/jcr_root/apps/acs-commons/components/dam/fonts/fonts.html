@@ -1,0 +1,44 @@
+<!--/*
+ #%L
+ ACS AEM Commons Content Package
+ %%
+ Copyright (C) 2014 Adobe
+ %%
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ #L%
+*/-->
+<div class="foundation-field-editable acs-dam-fonts" data-sly-use.fonts="fonts.js"
+     data-sly-use.clientLib="${'/libs/granite/sightly/templates/clientlib.html'}" data-sly-test="${fonts.hasContent}">
+    <sly data-sly-call="${clientLib.all @ categories='acs-commons.dam.fonts'}"></sly>
+    <span class="coral-Form-fieldwrapper">
+        <label class="coral-Form-fieldlabel acs-dam-label-replacement">${properties.fieldLabel || 'Fonts'}</label>
+        <table>
+            <tbody>
+                <tr data-sly-repeat="${fonts.fonts}">
+                    <td class="acs-dam-fonts-column-family">${item}</td>
+                    <td class="acs-dam-fonts-column-face">
+                        <span data-sly-test="${!fonts.fonts[item].hasMultiple}" data-sly-repeat.face="${fonts.fonts[item].faces}"
+                              class="acs-dam-fonts-face--singular">${face}</span>
+                        <sly data-sly-test="${fonts.fonts[item].hasMultiple}">
+                            <coral-icon class="acs-dam-fonts-toggle" icon="chevronRight" size="XS"></coral-icon>
+                            <span class="acs-dam-fonts-toggle-text">multiple</span>
+                            <ul data-sly-list.face="${fonts.fonts[item].faces}" style="display: none;">
+                                <li>${face}</li>
+                            </ul>
+                        </sly>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </span>
+</div>

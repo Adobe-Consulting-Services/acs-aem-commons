@@ -76,7 +76,7 @@ import java.lang.reflect.Type;
  * pre-configured from the current request.
  */
 @Property(name = Constants.SERVICE_RANKING, intValue = 4500)
-public final class AemObjectsInjector implements Injector {
+public final class AemObjectInjector implements Injector {
 
     private static final String COM_DAY_CQ_WCM_TAGS_DEFINE_OBJECTS_TAG = "com.day.cq.wcm.tags.DefineObjectsTag";
 

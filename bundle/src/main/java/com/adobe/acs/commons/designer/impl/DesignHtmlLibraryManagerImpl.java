@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.designer.DesignHtmlLibraryManager;
 import com.adobe.acs.commons.designer.PageRegion;
 import com.day.cq.wcm.api.designer.Design;
-import com.day.cq.widget.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 
 /**
  * ACS Commons - Design HTML Library Manager

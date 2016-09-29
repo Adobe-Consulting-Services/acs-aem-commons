@@ -4,7 +4,7 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.impl.FormsRouterImpl;
-import com.adobe.granite.xss.XSSAPI;
+import org.apache.sling.xss.XSSAPI;
 import com.day.cq.commons.PathInfo;
 import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.SlingHttpServletResponse;

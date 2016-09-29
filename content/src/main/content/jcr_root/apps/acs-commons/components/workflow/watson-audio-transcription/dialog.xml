@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Dialog"
+    title="Media Extraction - Step Properties"
+    xtype="dialog">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <tabs jcr:primaryType="cq:TabPanel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <processcommon
+                    jcr:primaryType="cq:Widget"
+                    path="/libs/cq/workflow/components/model/external_process/process_head.infinity.json"
+                    xtype="cqinclude"/>
+                <processargs
+                    jcr:primaryType="cq:Widget"
+                    path="/libs/dam/components/workflow/idsjobprocess/processargs.infinity.json"
+                    xtype="cqinclude"/>
+            </items>
+        </tabs>
+    </items>
+</jcr:root>
