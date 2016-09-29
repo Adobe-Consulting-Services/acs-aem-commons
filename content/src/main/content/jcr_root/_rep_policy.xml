@@ -17,4 +17,8 @@
                 jcr:primaryType="rep:Restrictions"
                 rep:glob="*/oak:index/*"/>
     </allow0>
+    <allow1
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-dispatcher-flush-service"
+            rep:privileges="{Name}[jcr:read,crx:replicate]"/>
 </jcr:root>

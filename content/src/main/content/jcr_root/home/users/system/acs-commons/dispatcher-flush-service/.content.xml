@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="0cdb16c9-534e-3f02-b307-55083160bb30"
+    rep:authorizableId="acs-commons-dispatcher-flush-service"
+    rep:principalName="acs-commons-dispatcher-flush-service"/>
