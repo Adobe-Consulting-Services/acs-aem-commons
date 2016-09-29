@@ -74,46 +74,38 @@ public final class PackageHelperImpl implements PackageHelper {
     @Reference
     private Packaging packaging;
 
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
     /**
      * {@inheritDoc}
      */
     public void addThumbnail(final JcrPackage jcrPackage, Resource thumbnailResource) {
-        ResourceResolver resourceResolver = null;
-
         if (jcrPackage == null) {
             log.error("JCR Package is null; no package thumbnail needed for null packages!");
             return;
         }
-
-        boolean useDefault = thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE);
+        Node thumbnailNode = null;
+        if (thumbnailResource != null) {
+            thumbnailNode = thumbnailResource.adaptTo(Node.class);
+        }
 
         try {
+            boolean useDefault = thumbnailNode == null || !thumbnailNode.isNodeType(JcrConstants.NT_FILE);
+            final Node dstParentNode = jcrPackage.getDefinition().getNode();
+            final Session session = dstParentNode.getSession();
             if (useDefault) {
                 log.debug("Using default ACS AEM Commons packager package icon.");
-                resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                thumbnailResource = resourceResolver.getResource(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH);
+                if (session.nodeExists(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH)) {
+                    thumbnailNode = session.getNode(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH);
+                }
             }
 
-            if (thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE)) {
+            if (thumbnailNode == null || !thumbnailNode.isNodeType(JcrConstants.NT_FILE)) {
                 log.warn("Cannot find a specific OR a default package icon; no package icon will be used.");
             } else {
-                final Node srcNode = thumbnailResource.adaptTo(Node.class);
-                final Node dstParentNode = jcrPackage.getDefinition().getNode();
-
-                JcrUtil.copy(srcNode, dstParentNode, NN_THUMBNAIL);
+                JcrUtil.copy(thumbnailNode, dstParentNode, NN_THUMBNAIL);
                 dstParentNode.getSession().save();
             }
         } catch (RepositoryException e) {
             log.error("Could not add package thumbnail: {}", e.getMessage());
-        } catch (LoginException e) {
-            log.error("Could not add a default package thumbnail: {}", e.getMessage());
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 
