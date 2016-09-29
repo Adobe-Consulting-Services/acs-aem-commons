@@ -82,8 +82,6 @@ import org.slf4j.LoggerFactory;
 })
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(SiteMapServlet.class);
-
     private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd");
 
     private static final boolean DEFAULT_INCLUDE_LAST_MODIFIED = false;
@@ -220,8 +218,6 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
-        log.debug("writing page {}", page.getPath());
-
         if (isHidden(page)) {
             return;
         }
