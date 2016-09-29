@@ -9,12 +9,12 @@
             jcr:primaryType="rep:Restrictions"
             rep:glob="*/oak:index"/>
     </allow>
-    <allow
+    <allow0
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-ensure-oak-index-service"
             rep:privileges="{Name}[jcr:read,rep:write,rep:indexDefinitionManagement]">
         <rep:restrictions
                 jcr:primaryType="rep:Restrictions"
                 rep:glob="*/oak:index/*"/>
-    </allow>
+    </allow0>
 </jcr:root>
