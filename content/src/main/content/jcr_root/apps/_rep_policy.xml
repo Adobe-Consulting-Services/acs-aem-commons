@@ -5,4 +5,8 @@
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-ensure-oak-index-service"
             rep:privileges="{Name}[jcr:read]"/>
+    <allow0
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-component-error-handler-service"
+            rep:privileges="{Name}[jcr:read]"/>
 </jcr:root>
