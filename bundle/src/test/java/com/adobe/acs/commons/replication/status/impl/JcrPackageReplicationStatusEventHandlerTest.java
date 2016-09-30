@@ -9,6 +9,7 @@ import com.day.jcr.vault.packaging.Packaging;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.event.jobs.Job;
@@ -28,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -48,6 +50,9 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
     @Mock
     ResourceResolver adminResourceResolver;
+
+    @Mock
+    ResourceResolverFactory resourceResolverFactory;
 
     @InjectMocks
     JcrPackageReplicationStatusEventHandler jcrPackageReplicationStatusEventHandler = new
@@ -97,6 +102,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Job job = mock(Job.class);
         when(job.getProperty("paths")).thenReturn(paths);
 
+        when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(adminResourceResolver);
         when(adminResourceResolver.getResource(packagePath)).thenReturn(packageResource);
         when(packageResource.adaptTo(Node.class)).thenReturn(packageNode);
         when(packaging.open(packageNode, false)).thenReturn(jcrPackage);
