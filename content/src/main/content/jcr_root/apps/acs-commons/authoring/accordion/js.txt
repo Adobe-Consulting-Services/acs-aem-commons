@@ -1,1 +1,1 @@
-rte-accordion.js
+acs-commons-rte-accordion.js

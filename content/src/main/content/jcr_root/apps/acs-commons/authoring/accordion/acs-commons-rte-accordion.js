@@ -20,7 +20,7 @@
 (function($, CUI){
     var RTEAccordion = {
         GROUP: "accordion",
-        FEATURE: "rte-accordion"
+        FEATURE: "acs-commons-rte-accordion"
     };
  
     // Extend toolbar to register accordion icon

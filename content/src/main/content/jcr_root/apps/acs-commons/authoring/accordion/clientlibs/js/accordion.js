@@ -18,7 +18,7 @@
  * #L%
  */
 $(function() {
-    $('.rte-accordion').each(function() {
+    $('.acs-commons-rte-accordion').each(function() {
         var $element = $(this);
 
         // Trigger the show/hide on click of the accordion headline
