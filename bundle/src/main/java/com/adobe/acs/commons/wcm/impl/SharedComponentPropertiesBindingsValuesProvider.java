@@ -57,16 +57,16 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
 
     private void setSharedProperties(Bindings bindings, Resource resource, Component component) {
         // Build the path to the global config for this component
-        // <page root>/jcr:content/sharedcomponentproperties/<component resource type>
+        // <page root>/jcr:content/shared-component-properties/<component resource type>
         Page pageRoot = pageRootProvider.getRootPage(resource);
         if (pageRoot != null) {
-            String sharedPropsPath = pageRoot.getPath() + "/jcr:content/sharedcomponentproperties/";
+            String sharedPropsPath = pageRoot.getPath() + "/jcr:content/shared-component-properties/";
             sharedPropsPath = sharedPropsPath + component.getResourceType();
 
             Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
             if (sharedPropsResource != null) {
-                JcrPropertyMap jpm = new JcrPropertyMap(sharedPropsResource.adaptTo(Node.class));
-                bindings.put("sharedProperties", jpm);
+                JcrPropertyMap sharedPropertyMap = new JcrPropertyMap(sharedPropsResource.adaptTo(Node.class));
+                bindings.put("sharedProperties", sharedPropertyMap);
             }
         } else {
             log.debug("Could not determine shared properties root for resource {}", resource.getPath());

@@ -13,7 +13,7 @@
                 var sharedComponentDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "_cq_dialogsharedcomponent") +
                                         ".html" +
                                         ns.page.info.sharedComponentProperties.root +
-                                        "/jcr:content/sharedcomponentproperties/" +
+                                        "/jcr:content/shared-component-properties/" +
                                         editable.type;
                 
                 editable.config.dialogSrc = sharedComponentDialogSrc;
