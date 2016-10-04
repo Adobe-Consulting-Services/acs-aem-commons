@@ -25,5 +25,28 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 @ProviderType
 public interface ActionManagerFactory extends ActionManagerMBean {
+    /**
+     * Creates an ActionManager instead with the provided name and JCR context provided bu the resourceResolver.
+     * @param name the name of the ActionManager. This method guarantee uniqueness of the action manager name.
+     * @param resourceResolver the resourceResolver used to perform
+     * @param saveInterval the number of changed that must incur on the resourceResolver before commit() is called (in support of batch saves)
+     * @return the created ActionManager
+     * @throws LoginException
+     */
     public ActionManager createTaskManager(String name, ResourceResolver resourceResolver, int saveInterval) throws LoginException;
+
+    /**
+     * Gets the named ActionManager from the ActionManagerFactory.
+     * The name corresponds to the name provided in ActionManagerFactory.createTaskManager(..)
+     * @param name the name of the ActionManager to get
+     * @return the ActionManager
+     */
+    public ActionManager getActionManager(String name);
+
+    /**
+     * Checks if the ActionManagerFactory has a registered ActionManager with the provided name.
+     * @param name the ActionManager name
+     * @return true if an ActionManager is registered w the provided name, false otherwise.
+     */
+    public boolean hasActionManager(String name);
 }

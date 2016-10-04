@@ -50,9 +50,9 @@ $(function() {
     });
     
     function setSessionCookie(name, value) {
-        document.cookie = name + '=' + value + '; expires=0; path=/;';
+        document.cookie = name + '=' + value + '; expires=Tue, 01 Jan 2999 12:00:00 UTC; path=/;';
     }
-    
+
     function getCookieValue(name) {
         var cookies = document.cookie.split(';'),
             i,

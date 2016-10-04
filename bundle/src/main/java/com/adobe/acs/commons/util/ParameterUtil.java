@@ -26,8 +26,11 @@ import org.slf4j.LoggerFactory;
 import aQute.bnd.annotation.ProviderType;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @ProviderType
 public class ParameterUtil {
@@ -149,5 +152,26 @@ public class ParameterUtil {
             result.put(entry.getKey(), StringUtils.split(entry.getValue(), listSeparator));
         }
         return result;
+    }
+
+    /**
+     * Util for converting a String[] into a List of compiled Patterns. Empty/blank strings will be skipped.
+     * @param values the Strings to convert to patterns.
+     * @return a List of Patterns
+     */
+    public static List<Pattern> toPatterns(String[] values) {
+        List<Pattern> patterns = new ArrayList<Pattern>();
+
+        if(values == null) {
+            return patterns;
+        }
+
+        for (String value : values) {
+            if (StringUtils.isNotBlank(value)) {
+                patterns.add(Pattern.compile(value));
+            }
+        }
+
+        return patterns;
     }
 }

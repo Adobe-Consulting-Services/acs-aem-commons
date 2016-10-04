@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(metatype = true, immediate = true, label = "ACS AEM Commons - Throttled Task Runner Service")
-@Service(ThrottledTaskRunner.class)
+@Service({ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class})
 @Properties({
     @Property(name = "jmx.objectname", value = "com.adobe.acs.commons.fam:type=Throttled Task Runner", propertyPrivate = true),
     @Property(name = "max.threads", label = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",value = "4"),
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = "max.heap", label = "Max heap %", description = "Range is 0..1; -1 means disable this check", value = "0.75"),
     @Property(name = "cooldown.wait.time", label = "Cooldown time", description="Time to wait for cpu/mem cooldown between checks", value = "100"),
     @Property(name = "task.timeout", label = "Watchdog time", description="Maximum time allowed (in ms) per action before it is interrupted forcefully.", value = "60000"),})
-public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner {
+public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner, ThrottledTaskRunnerStats {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThrottledTaskRunnerImpl.class);
     private int taskTimeout;
@@ -188,7 +188,8 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         }
     }
 
-    private double getCpuLevel() throws InstanceNotFoundException, ReflectionException {
+    @Override
+    public final double getCpuLevel() throws InstanceNotFoundException, ReflectionException {
         // This method will block until CPU usage is low enough            
         AttributeList list = mbs.getAttributes(osBeanName, new String[]{"ProcessCpuLoad"});
 
@@ -201,7 +202,8 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         return (Double) att.getValue();
     }
 
-    private double getMemoryUsage() {
+    @Override
+    public final double getMemoryUsage() {
         try {
             Object memoryusage = mbs.getAttribute(memBeanName, "HeapMemoryUsage");
             CompositeData cd = (CompositeData) memoryusage;
@@ -212,6 +214,16 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
             LOG.error("No Memory stats found for HeapMemoryUsage", e);
             return -1;
         }
+    }
+
+    @Override
+    public double getMaxCpu() {
+        return maxCpu;
+    }
+
+    @Override
+    public double getMaxHeap() {
+        return maxHeap;
     }
 
     @Override

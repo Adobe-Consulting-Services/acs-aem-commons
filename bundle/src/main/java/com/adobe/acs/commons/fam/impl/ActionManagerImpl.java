@@ -20,10 +20,10 @@ import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.functions.*;
 import java.util.ArrayList;
-import java.util.Deque;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -55,10 +55,13 @@ class ActionManagerImpl implements ActionManager {
     private final AtomicInteger tasksSuccessful = new AtomicInteger();
     private final AtomicInteger tasksError = new AtomicInteger();
     private final String name;
-    private final long started;
+    private final AtomicLong started = new AtomicLong(0);
     private long finished;
+    private int saveInterval;
 
-    private final Deque<ReusableResolver> resolvers = new ConcurrentLinkedDeque<ReusableResolver>();
+    private ResourceResolver baseResolver;
+    private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<ReusableResolver>());
+    private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<ReusableResolver>();
     private final ThrottledTaskRunner taskRunner;
     private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
@@ -66,8 +69,8 @@ class ActionManagerImpl implements ActionManager {
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;
         this.taskRunner = taskRunner;
-        initResolverPool(resolver, saveInterval);
-        started = System.currentTimeMillis();
+        this.saveInterval = saveInterval;
+        baseResolver = resolver.clone(null);
         currentPath = new ThreadLocal<String>();
         failures = new ArrayList<Failure>();
     }
@@ -76,7 +79,33 @@ class ActionManagerImpl implements ActionManager {
     public String getName() {
         return name;
     }
-    
+
+
+    @Override
+    public int getAddedCount() {
+        return tasksAdded.get();
+    }
+
+    @Override
+    public int getSuccessCount() {
+        return tasksSuccessful.get();
+    }
+
+    @Override
+    public int getErrorCount() {
+        return tasksError.get();
+    }
+
+    @Override
+    public int getCompletedCount() {
+        return tasksCompleted.get();
+    }
+
+    @Override
+    public int getRemainingCount() {
+        return getAddedCount() - (getSuccessCount() + getErrorCount());
+    }
+
     @Override
     public List<Failure> getFailureList() {
         return failures;
@@ -89,7 +118,20 @@ class ActionManagerImpl implements ActionManager {
 
     @Override
     public void withResolver(Consumer<ResourceResolver> action) throws Exception {
-        withResolver(action, false);
+        ReusableResolver resolver = getResourceResolver();
+        resolver.setCurrentItem(currentPath.get());
+        try {
+            action.accept(resolver.getResolver());
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            try {
+                resolver.free();
+            } catch (PersistenceException ex) {
+                logPersistenceException(resolver.getPendingItems(), ex);
+                throw ex;
+            }
+        }
     }
     
     @Override
@@ -131,25 +173,26 @@ class ActionManagerImpl implements ActionManager {
                     LOG.error("Repository exception processing query "+queryStatement, ex);
                 }
             }
-        }, false);
+        });
         return tasksAdded.get();
     }
 
     @Override
     public void addCleanupTask() {
-        for (int i = 0; i < resolverCount; i++) {
-            deferredWithResolver(new Consumer<ResourceResolver>() {
-                @Override
-                public void accept(ResourceResolver t) {
-                    try {
-                        t.commit();
-                        t.close();
-                    } catch (PersistenceException ex) {
-                        LOG.error("Persistence exception closing session pool", ex);
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                while (!isComplete()) {
+                    try {                    
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                        logError(ex);
                     }
                 }
-            }, true);
-        }
+                closeAllResolvers();
+            }
+        };
+        taskRunner.scheduleWork(r);        
     }
 
     @Override
@@ -163,8 +206,9 @@ class ActionManagerImpl implements ActionManager {
         Runnable r = new Runnable() {
             @Override
             public void run() {
+                started.compareAndSet(0, System.currentTimeMillis());
                 try {
-                    withResolver(action, closesResolver);
+                    withResolver(action);
                     if (!closesResolver) {
                         logCompletetion();
                     }
@@ -181,45 +225,14 @@ class ActionManagerImpl implements ActionManager {
         }
     }
 
-    private void withResolver(Consumer<ResourceResolver> action, boolean closesResolver) throws Exception {
-        ReusableResolver resolver = null;
-        while (resolver == null || !resolver.getResolver().isLive()) {
-            if (!resolvers.isEmpty()) {
-                resolver = resolvers.remove();
-            }
-            if (resolver == null) {
-                if (!closesResolver) {
-                    logError(new RepositoryException("No available resource resolvers in pool!"));
-                }
-                return;
-            }
+    private ReusableResolver getResourceResolver() throws LoginException {
+        ReusableResolver resolver = currentResolver.get();
+        if (resolver == null || !resolver.getResolver().isLive()) {
+            resolver = new ReusableResolver(baseResolver.clone(null), saveInterval);
+            currentResolver.set(resolver);
+            resolvers.add(resolver);
         }
-        resolver.setCurrentItem(currentPath.get());
-        try {
-            action.accept(resolver.getResolver());
-        } catch (Exception ex) {
-            throw ex;
-        } finally {
-            try {
-                resolver.free();
-            } catch (PersistenceException ex) {
-                logPersistenceException(resolver.getPendingItems(), ex);
-                throw ex;
-            } finally {
-                if (!closesResolver) {
-                    resolvers.push(resolver);
-                }
-            }
-        }
-    }
-
-    private int resolverCount = 0;
-
-    private void initResolverPool(ResourceResolver source, int saveInterval) throws LoginException {
-        resolverCount = Math.max(taskRunner.getMaxThreads(), 32);
-        for (int i = 0; i < resolverCount; i++) {
-            resolvers.push(new ReusableResolver(source.clone(null), saveInterval));
-        }
+        return resolver;
     }
 
     private void logCompletetion() {
@@ -264,9 +277,11 @@ class ActionManagerImpl implements ActionManager {
 
     private long getRuntime() {
         if (isComplete()) {
-            return finished - started;
+            return finished - started.get();
+        } else if (tasksAdded.get() == 0) {
+            return 0;
         } else {
-            return System.currentTimeMillis() - started;
+            return System.currentTimeMillis() - started.get();
         }
     }
 
@@ -298,10 +313,13 @@ class ActionManagerImpl implements ActionManager {
     public void closeAllResolvers() {
         if (!resolvers.isEmpty()) {
             for (ReusableResolver resolver : resolvers) {
-                resolver.getResolver().close();
+                if (resolver.getResolver().isLive()) {
+                    resolver.getResolver().close();
+                }
             }
             resolvers.clear();
         }
+        baseResolver.close();
     }
 
     static public TabularType getFailuresTableType() {

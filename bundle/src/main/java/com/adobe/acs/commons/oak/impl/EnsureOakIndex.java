@@ -37,7 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 //@formatter:off
 @Component(
@@ -57,8 +59,30 @@ import java.util.Map;
 @Service
 //@formatter:on
 public class EnsureOakIndex implements AppliableEnsureOakIndex {
-
     static final Logger log = LoggerFactory.getLogger(EnsureOakIndex.class);
+
+    //@formatter:off
+    private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
+    @Property(label = "Ensure Definitions Path",
+            description = "The absolute path to the resource containing the "
+                    + "ACS AEM Commons ensure definitions",
+            value = DEFAULT_ENSURE_DEFINITIONS_PATH)
+    public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure-definitions.path";
+
+
+    private static final String DEFAULT_OAK_INDEXES_PATH = "/oak:index";
+    @Property(label = "Oak Indexes Path",
+            description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
+            value = DEFAULT_OAK_INDEXES_PATH)
+    public static final String PROP_OAK_INDEXES_PATH = "oak-indexes.path";
+
+    private static final boolean DEFAULT_IMMEDIATE = true;
+    @Property(
+            label = "Immediate",
+            description = "Apply the indexes on startup of service. Defaults to [ true ]",
+            boolValue = DEFAULT_IMMEDIATE
+    )
+    public static final String PROP_IMMEDIATE = "immediate";
 
     @Reference
     private AemCapabilityHelper capabilityHelper;
@@ -72,38 +96,12 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     @Reference
     private Scheduler scheduler;
 
-    private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
-
-
-    @Property(label = "Ensure Definitions Path",
-            description = "The absolute path to the resource containing the "
-                    + "ACS AEM Commons ensure definitions",
-            value = DEFAULT_ENSURE_DEFINITIONS_PATH)
-    public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure-definitions.path";
-
     private String ensureDefinitionsPath;
-
-    private static final String DEFAULT_OAK_INDEXES_PATH = "/oak:index";
-
-    @Property(label = "Oak Indexes Path",
-            description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
-            value = DEFAULT_OAK_INDEXES_PATH)
-    public static final String PROP_OAK_INDEXES_PATH = "oak-indexes.path";
-
     private String oakIndexesPath;
-
-
-    private static final boolean DEFAULT_IMMEDIATE = true;
-    @Property(
-            label = "Immediate",
-            description = "Apply the indexes on startup of service. Defaults to [ true ]",
-            boolValue = DEFAULT_IMMEDIATE
-    )
-    public static final String PROP_IMMEDIATE = "immediate";
-
     private boolean immediate = DEFAULT_IMMEDIATE;
-
     private boolean applied = false;
+    private CopyOnWriteArrayList<String> ignoreProperties = new CopyOnWriteArrayList<String>();
+    //@formatter:on
 
     @Activate
     protected final void activate(Map<String, Object> config) throws RepositoryException {
@@ -130,7 +128,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
 
         if (this.immediate) {
-            apply();
+            apply(false);
         }
     }
 
@@ -139,9 +137,9 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
      * {@inheritDoc}
      **/
     @Override
-    public final void apply() {
+    public final void apply(boolean force) {
 
-        if (this.applied) {
+        if (!force && this.applied) {
             return;
         }
 
@@ -173,6 +171,16 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     }
 
     @Override
+    public List<String> getIgnoreProperties() {
+        return this.ignoreProperties;
+    }
+
+    @Override
+    public void setIgnoreProperties(String[] ignoreProperties) {
+        this.ignoreProperties = new CopyOnWriteArrayList<String>(ignoreProperties);
+    }
+
+    @Override
     public final String getEnsureDefinitionsPath() {
         return StringUtils.trim(this.ensureDefinitionsPath);
     }
@@ -187,7 +195,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
                 new Object[]{ensureDefinitionsPath, oakIndexesPath});
     }
 
-    final ChecksumGenerator getChecksumGenerator() {
+    ChecksumGenerator getChecksumGenerator() {
         return checksumGenerator;
     }
 

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
-import com.adobe.acs.commons.workflow.synthetic.impl.exceptions.SyntheticWorkflowModelException;
+import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticWorkflowModelException;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.model.WorkflowModel;

@@ -20,7 +20,12 @@
 package com.adobe.acs.commons.httpcache.invalidator.event;
 
 import com.adobe.acs.commons.httpcache.invalidator.CacheInvalidationJobConstants;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.event.jobs.JobManager;
 import org.osgi.service.event.Event;
