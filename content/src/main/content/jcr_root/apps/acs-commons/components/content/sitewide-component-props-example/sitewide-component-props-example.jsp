@@ -8,8 +8,8 @@
 <h2>Instance Title: ${properties.text}</h2>
 <h2>Instance Quantity: ${properties.quantity}</h2>
 <br><br>
-<h3>Site-wide Title: ${sharedComponentProperties.text}</h3>
-<h3>Site-wide Page Ref: ${sharedComponentProperties.referencedPage}</h3>
+<h3>Shared Title: ${sharedComponentProperties.text}</h3>
+<h3>Shared Page Ref: ${sharedComponentProperties.referencedPage}</h3>
 <br><br>
 <h4>Merged Title: ${mergedProperties.text}</h4>
 <h4>Merged Quantity: ${mergedProperties.quantity}</h4>

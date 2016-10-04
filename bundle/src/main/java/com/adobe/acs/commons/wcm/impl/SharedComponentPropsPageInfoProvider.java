@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * PageInfoProvider which indicates that site-wide component properties
+ * PageInfoProvider which indicates that shared component properties
  * are enabled.  Note that this provider requires Page Root Provider to
  * be configured.
  */

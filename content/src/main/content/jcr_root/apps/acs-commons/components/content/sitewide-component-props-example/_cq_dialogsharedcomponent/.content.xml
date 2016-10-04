@@ -17,7 +17,7 @@
                     <label
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/foundation/form/textfield"
-                        fieldLabel="Sitewide Title Text"
+                        fieldLabel="Shared Title Text"
                         name="./text"/>
                     <path
                         jcr:primaryType="nt:unstructured"

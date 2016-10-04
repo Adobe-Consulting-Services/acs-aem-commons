@@ -27,12 +27,12 @@ import java.util.Set;
  * but it instead sets sharedComponentProperties and
  * mergedProperties maps.
  *
- * sharedComponentProperties contains the site-wide properties for
+ * sharedComponentProperties contains the shared properties for
  * the current component.
  *
- * mergedProperties is a merge of the instance-level and site-wide
+ * mergedProperties is a merge of the instance-level and shared
  * properties for the current component, giving preference to an
- * instance-level property value when a site-wide property exists
+ * instance-level property value when a shared property exists
  * with the same name.
  */
 @ProviderType
@@ -47,7 +47,7 @@ public class DefineObjects extends BodyTagSupport {
     public int doEndTag() {
         setPageRootProvider();
         if (pageRootProvider != null) {
-            setSitewideProperties();
+            setSharedProperties();
         } else {
             log.debug("Page Root Provider must be configured for shared component properties to be supported");
         }
@@ -63,7 +63,7 @@ public class DefineObjects extends BodyTagSupport {
         }
     }
 
-    private void setSitewideProperties() {
+    private void setSharedProperties() {
         Resource currentResource = (Resource) pageContext.findAttribute("resource");
         ResourceResolver resourceResolver = (ResourceResolver) pageContext.findAttribute("resourceResolver");
 

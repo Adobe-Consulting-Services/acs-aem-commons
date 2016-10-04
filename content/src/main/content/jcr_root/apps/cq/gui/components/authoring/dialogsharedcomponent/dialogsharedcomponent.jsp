@@ -6,12 +6,12 @@
 <sling:defineObjects />
 
 <%
-    String dialogSitewideDataPath = slingRequest.getRequestPathInfo().getSuffix();
-    Session dialogSitewideSession = resourceResolver.adaptTo(Session.class);
+    String dialogSharedDataPath = slingRequest.getRequestPathInfo().getSuffix();
+    Session dialogSharedSession = resourceResolver.adaptTo(Session.class);
 
     // Ensure the path exists in the JCR so that we don't get a NPE
     // when attempting to load the dialog.
-    JcrUtil.createPath(dialogSitewideDataPath, "nt:unstructured", "nt:unstructured", dialogSitewideSession, false);
+    JcrUtil.createPath(dialogSharedDataPath, "nt:unstructured", "nt:unstructured", dialogSharedSession, false);
 %>
 
 <%@include file="/libs/cq/gui/components/authoring/dialog/dialog.jsp" %>
