@@ -19,7 +19,6 @@ import javax.jcr.Node;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This tag is similar to the OOTB cq:defineObjects tag which adds
@@ -94,23 +93,17 @@ public class DefineObjects extends BodyTagSupport {
         pageContext.setAttribute("mergedProperties", mergeProperties(localPropertyMap, sharedComponentPropertyMap));
     }
 
-    private Map<String, Object> mergeProperties(JcrPropertyMap instanceProps, JcrPropertyMap sharedComponentProperties) {
+    private Map<String, Object> mergeProperties(JcrPropertyMap instanceProperties, JcrPropertyMap sharedProperties) {
         Map<String, Object> mergedProperties = new HashMap<String, Object>();
 
         // Add Component Global Configs
-        if (sharedComponentProperties != null) {
-            Set<String> sharedComponentKeys = sharedComponentProperties.keySet();
-            for (String sharedComponentKey : sharedComponentKeys) {
-                mergedProperties.put(sharedComponentKey, sharedComponentProperties.get(sharedComponentKey));
-            }
+        if (sharedProperties != null) {
+            mergedProperties.putAll(sharedProperties);
         }
 
         // Merge in the Component Local Configs
-        if (instanceProps != null) {
-            Set<String> instanceKeys = instanceProps.keySet();
-            for (String instanceKey : instanceKeys) {
-                mergedProperties.put(instanceKey, instanceProps.get(instanceKey));
-            }
+        if (instanceProperties != null) {
+            mergedProperties.putAll(instanceProperties);
         }
 
         return mergedProperties;
