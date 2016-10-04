@@ -22,7 +22,9 @@
                 ns.edit.actions.doConfigure(editable);
             
             } catch(err) {
-                console.error("Error getting the dialogsharedcomponent dialog: " + err);
+                if (console && console.error) {
+                    console.error("Error getting the dialogsharedcomponent dialog: " + err);
+                }
             } finally {
                 //set the dialog and dialogSrc back to the original values so normal edit dialog continues to work
                 editable.config.dialogSrc = originalDialogSrc;
