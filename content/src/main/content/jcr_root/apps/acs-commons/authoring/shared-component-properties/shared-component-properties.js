@@ -10,20 +10,20 @@
             try {
                 var dialogSrcArray = editable.config.dialogSrc.split(".html");
                 
-                var sharedComponentDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "_cq_dialogsharedcomponent") +
+                var sharedComponentDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "dialogshared") +
                                         ".html" +
                                         ns.page.info.sharedComponentProperties.root +
                                         "/jcr:content/shared-component-properties/" +
                                         editable.type;
                 
                 editable.config.dialogSrc = sharedComponentDialogSrc;
-                editable.config.dialog = editable.config.dialog.replace("cq:dialog", "cq:dialogsharedcomponent");
+                editable.config.dialog = editable.config.dialog.replace("cq:dialog", "dialogshared");
                 
                 ns.edit.actions.doConfigure(editable);
             
             } catch(err) {
                 if (console && console.error) {
-                    console.error("Error getting the dialogsharedcomponent dialog: " + err);
+                    console.error("Error getting the dialogshared dialog: " + err);
                 }
             } finally {
                 //set the dialog and dialogSrc back to the original values so normal edit dialog continues to work
