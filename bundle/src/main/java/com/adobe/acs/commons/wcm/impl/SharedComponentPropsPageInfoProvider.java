@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 @Component
 @Service
 public class SharedComponentPropsPageInfoProvider implements PageInfoProvider {
-    private static final Logger log = LoggerFactory.getLogger(SitewideComponentPropsPageInfoProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(SharedComponentPropsPageInfoProvider.class);
 
     @Reference
     private PageRootProvider pageRootProvider;

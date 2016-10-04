@@ -9,12 +9,10 @@
             
             try {
                 var dialogSrcArray = editable.config.dialogSrc.split(".html");
-                var langRootRegexp = /^(\/content\/([^/]+\/)+([a-zA-Z]{2}([_-][a-zA-Z]{2})?))(|\/.*)$/g;
-                var match = langRootRegexp.exec(dialogSrcArray[1]);
                 
                 var sharedComponentDialogSrc = dialogSrcArray[0].replace("_cq_dialog", "_cq_dialogsharedcomponent") +
                                         ".html" +
-                                        match[1] +
+                                        ns.page.info.sharedComponentProperties.root +
                                         "/jcr:content/sharedcomponentproperties/" +
                                         editable.type;
                 
