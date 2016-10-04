@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component
 @Service
-public class SitewideComponentPropsPageInfoProvider implements PageInfoProvider {
+public class SharedComponentPropsPageInfoProvider implements PageInfoProvider {
     private static final Logger log = LoggerFactory.getLogger(SitewideComponentPropsPageInfoProvider.class);
 
     @Reference
@@ -61,7 +61,7 @@ public class SitewideComponentPropsPageInfoProvider implements PageInfoProvider 
         } else {
             log.warn("Page Root Provider must be configured for shared component properties to be supported");
         }
-        info.put("sitewideComponentProps", props);
+        info.put("sharedComponentProperties", props);
     }
 
 }

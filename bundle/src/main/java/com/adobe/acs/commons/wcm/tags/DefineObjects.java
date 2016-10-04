@@ -24,10 +24,11 @@ import java.util.Set;
 /**
  * This tag is similar to the OOTB cq:defineObjects tag which adds
  * component instance-level properties to the pageContext of a JSP,
- * but it instead sets sitewideProperties and mergedProperties maps.
+ * but it instead sets sharedComponentProperties and
+ * mergedProperties maps.
  *
- * sitewideProperties contains the site-wide properties for the
- * current component.
+ * sharedComponentProperties contains the site-wide properties for
+ * the current component.
  *
  * mergedProperties is a merge of the instance-level and site-wide
  * properties for the current component, giving preference to an
@@ -67,10 +68,10 @@ public class DefineObjects extends BodyTagSupport {
         ResourceResolver resourceResolver = (ResourceResolver) pageContext.findAttribute("resourceResolver");
 
         // Build the path to the global config for this component
-        // <page root>/jcr:content/sitewideprops/<component resource type>
+        // <page root>/jcr:content/sharedcomponentproperties/<component resource type>
         Page pageRoot = pageRootProvider.getRootPage(currentResource);
         if (pageRoot != null) {
-            String globalPropsPath = pageRoot.getPath() + "/jcr:content/sitewideprops/";
+            String globalPropsPath = pageRoot.getPath() + "/jcr:content/sharedcomponentproperties/";
             Component component = (Component) pageContext.findAttribute("component");
             globalPropsPath = globalPropsPath + component.getResourceType();
 
@@ -79,7 +80,7 @@ public class DefineObjects extends BodyTagSupport {
             // Send the Node back if it exists
             if (r != null) {
                 JcrPropertyMap jpm = new JcrPropertyMap(r.adaptTo(Node.class));
-                pageContext.setAttribute("sitewideProperties", jpm);
+                pageContext.setAttribute("sharedComponentProperties", jpm);
             }
         } else {
             log.debug("Could not determine shared properties root for resource {}", currentResource.getPath());
@@ -87,20 +88,20 @@ public class DefineObjects extends BodyTagSupport {
     }
 
     private void setMergedProperties() {
-        JcrPropertyMap sitewidePropertyMap = (JcrPropertyMap) pageContext.getAttribute("sitewideProperties");
+        JcrPropertyMap sharedComponentPropertyMap = (JcrPropertyMap) pageContext.getAttribute("sharedComponentProperties");
         JcrPropertyMap localPropertyMap = (JcrPropertyMap) pageContext.getAttribute("properties");
 
-        pageContext.setAttribute("mergedProperties", mergeProperties(localPropertyMap, sitewidePropertyMap));
+        pageContext.setAttribute("mergedProperties", mergeProperties(localPropertyMap, sharedComponentPropertyMap));
     }
 
-    private Map<String, Object> mergeProperties(JcrPropertyMap instanceProps, JcrPropertyMap sitewideProps) {
+    private Map<String, Object> mergeProperties(JcrPropertyMap instanceProps, JcrPropertyMap sharedComponentProperties) {
         Map<String, Object> mergedProperties = new HashMap<String, Object>();
 
         // Add Component Global Configs
-        if (sitewideProps != null) {
-            Set<String> sitewideKeys = sitewideProps.keySet();
-            for (String sitewideKey : sitewideKeys) {
-                mergedProperties.put(sitewideKey, sitewideProps.get(sitewideKey));
+        if (sharedComponentProperties != null) {
+            Set<String> sharedComponentKeys = sharedComponentProperties.keySet();
+            for (String sharedComponentKey : sharedComponentKeys) {
+                mergedProperties.put(sharedComponentKey, sharedComponentProperties.get(sharedComponentKey));
             }
         }
 
