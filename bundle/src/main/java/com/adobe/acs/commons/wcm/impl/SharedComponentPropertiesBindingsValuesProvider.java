@@ -4,16 +4,14 @@ import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.commons.WCMUtils;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.jcr.resource.JcrPropertyMap;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
 import javax.script.Bindings;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,8 +63,7 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
 
             Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
             if (sharedPropsResource != null) {
-                JcrPropertyMap sharedPropertyMap = new JcrPropertyMap(sharedPropsResource.adaptTo(Node.class));
-                bindings.put("sharedProperties", sharedPropertyMap);
+                bindings.put("sharedProperties", sharedPropsResource.getValueMap());
             }
         } else {
             log.debug("Could not determine shared properties root for resource {}", resource.getPath());
@@ -74,13 +71,13 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
     }
 
     private void setMergedProperties(Bindings bindings, Resource resource) {
-        JcrPropertyMap sharedPropertyMap = (JcrPropertyMap) bindings.get("sharedProperties");
-        JcrPropertyMap localPropertyMap = (JcrPropertyMap) resource.getValueMap();
+        ValueMap sharedPropertyMap = (ValueMap) bindings.get("sharedProperties");
+        ValueMap localPropertyMap = resource.getValueMap();
 
         bindings.put("mergedProperties", mergeProperties(localPropertyMap, sharedPropertyMap));
     }
 
-    private Map<String, Object> mergeProperties(JcrPropertyMap instanceProperties, JcrPropertyMap sharedProperties) {
+    private Map<String, Object> mergeProperties(ValueMap instanceProperties, ValueMap sharedProperties) {
         Map<String, Object> mergedProperties = new HashMap<String, Object>();
 
         // Add Component Shared Configs
