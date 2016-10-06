@@ -29,8 +29,14 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.jcr.base.util.AccessControlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.security.AccessControlManager;
+import javax.jcr.security.Privilege;
 
 /**
  * PageInfoProvider which indicates that shared component properties
@@ -55,8 +61,20 @@ public class SharedComponentPropsPageInfoProvider implements PageInfoProvider {
         if (pageRootProvider != null) {
             Page page = pageRootProvider.getRootPage(resource);
             if (page != null) {
-                props.put("enabled", true);
-                props.put("root", page.getPath());
+                Session session = request.getResourceResolver().adaptTo(Session.class);
+                try {
+                    AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
+                    Privilege privilegeAddChild = accessControlManager.privilegeFromName("jcr:addChildNodes");
+                    Privilege privilegeModifyProps = accessControlManager.privilegeFromName("jcr:modifyProperties");
+                    Privilege[] requiredPrivs = new Privilege[] {privilegeAddChild, privilegeModifyProps};
+
+                    if (accessControlManager.hasPrivileges(page.getPath() + "/jcr:content", requiredPrivs)) {
+                        props.put("enabled", true);
+                        props.put("root", page.getPath());
+                    }
+                } catch (RepositoryException re) {
+                    log.error("Unexpected error checking permissions to modify shared component properties", re);
+                }
             }
         } else {
             log.warn("Page Root Provider must be configured for shared component properties to be supported");

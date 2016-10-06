@@ -11,7 +11,10 @@
 
     // Ensure the path exists in the JCR so that we don't get a NPE
     // when attempting to load the dialog.
-    JcrUtil.createPath(dialogSharedDataPath, "nt:unstructured", "nt:unstructured", dialogSharedSession, false);
+    if (!dialogSharedSession.nodeExists(dialogSharedDataPath)) {
+        JcrUtil.createPath(dialogSharedDataPath, "nt:unstructured", "nt:unstructured", dialogSharedSession, false);
+        dialogSharedSession.save();
+    }
 %>
 
 <%@include file="/libs/cq/gui/components/authoring/dialog/dialog.jsp" %>
