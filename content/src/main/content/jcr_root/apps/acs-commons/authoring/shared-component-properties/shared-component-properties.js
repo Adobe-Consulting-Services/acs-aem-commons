@@ -37,7 +37,21 @@
         condition: function(editable) {
             var enabled = ns.page.info.sharedComponentProperties && ns.page.info.sharedComponentProperties.enabled;
             var canModify = ns.page.info.permissions && ns.page.info.permissions.modify;
-            return !!enabled && !!editable.config.dialog && canModify;
+            if (!!enabled && !!editable.config.dialog && canModify) {
+                // Use this timeout to move the shared component configuration icon to the
+                // right of the standard compoennt configuration icon.
+                setTimeout(function() {
+                    var toolbar = $("#EditableToolbar");
+                    var propsButton = toolbar.find("[data-action='CONFIGURE']");
+                    if (propsButton.size() > 0) {
+                        var sharedPropsButton = toolbar.find("[data-action='SHARED-COMPONENT-PROPS']");
+                        sharedPropsButton.remove();
+                        propsButton.after(sharedPropsButton);
+                    }
+                }, 0);
+                return true;
+            }
+            return false;
         },
         isNonMulti: true
     };
