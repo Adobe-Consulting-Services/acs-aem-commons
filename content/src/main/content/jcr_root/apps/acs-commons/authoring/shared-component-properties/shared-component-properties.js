@@ -1,7 +1,7 @@
 (function ($, ns, channel, window, undefined) {
 
     var actionDef = {
-        icon: 'coral-Icon--globe',
+        icon: 'coral-Icon--share',
         text: Granite.I18n.get('Configure Shared Component Properties'),
         handler: function (editable, param, target) { // will be called on click
             var originalDialogSrc = editable.config.dialogSrc;
