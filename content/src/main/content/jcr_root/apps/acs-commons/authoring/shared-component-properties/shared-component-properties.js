@@ -40,7 +40,7 @@
             condition: function (editable) {
                 var enabled = ns.page.info.sharedComponentProperties && ns.page.info.sharedComponentProperties.enabled;
                 var canModify = ns.page.info.permissions && ns.page.info.permissions.modify;
-                if (!!enabled && !!editable.config.dialog && canModify) {
+                if (!!enabled && !!editable.config.dialog && !!canModify) {
                     if (type == "shared") {
                         // Use this timeout to move the shared component configuration icons to the
                         // right of the standard component configuration icon.
