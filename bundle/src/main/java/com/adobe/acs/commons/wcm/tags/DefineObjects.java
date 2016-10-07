@@ -21,6 +21,7 @@ public class DefineObjects extends BodyTagSupport {
     @Override
     public int doEndTag() {
         SlingBindings bindings = (SlingBindings)this.pageContext.getRequest().getAttribute(SlingBindings.class.getName());
+        pageContext.setAttribute("globalProperties", bindings.get("globalProperties"));
         pageContext.setAttribute("sharedProperties", bindings.get("sharedProperties"));
         pageContext.setAttribute("mergedProperties", bindings.get("mergedProperties"));
 

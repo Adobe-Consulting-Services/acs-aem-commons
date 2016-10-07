@@ -54,13 +54,16 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
     }
 
     private void setSharedProperties(Bindings bindings, Resource resource, Component component) {
-        // Build the path to the global config for this component
-        // <page root>/jcr:content/shared-component-properties/<component resource type>
         Page pageRoot = pageRootProvider.getRootPage(resource);
         if (pageRoot != null) {
-            String sharedPropsPath = pageRoot.getPath() + "/jcr:content/shared-component-properties/";
-            sharedPropsPath = sharedPropsPath + component.getResourceType();
+            String globalPropsPath = pageRoot.getPath() + "/jcr:content/global-component-properties";
+            Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
+            if (globalPropsResource != null) {
+                bindings.put("globalProperties", globalPropsResource.getValueMap());
+            }
 
+            String sharedPropsPath = pageRoot.getPath() + "/jcr:content/shared-component-properties/"
+                    + component.getResourceType();
             Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
             if (sharedPropsResource != null) {
                 bindings.put("sharedProperties", sharedPropsResource.getValueMap());
@@ -71,14 +74,20 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
     }
 
     private void setMergedProperties(Bindings bindings, Resource resource) {
+        ValueMap globalPropertyMap = (ValueMap) bindings.get("globalProperties");
         ValueMap sharedPropertyMap = (ValueMap) bindings.get("sharedProperties");
         ValueMap localPropertyMap = resource.getValueMap();
 
-        bindings.put("mergedProperties", mergeProperties(localPropertyMap, sharedPropertyMap));
+        bindings.put("mergedProperties", mergeProperties(localPropertyMap, sharedPropertyMap, globalPropertyMap));
     }
 
-    private Map<String, Object> mergeProperties(ValueMap instanceProperties, ValueMap sharedProperties) {
+    private Map<String, Object> mergeProperties(ValueMap instanceProperties, ValueMap sharedProperties, ValueMap globalProperties) {
         Map<String, Object> mergedProperties = new HashMap<String, Object>();
+
+        // Add Component Global Configs
+        if (globalProperties != null) {
+            mergedProperties.putAll(globalProperties);
+        }
 
         // Add Component Shared Configs
         if (sharedProperties != null) {
