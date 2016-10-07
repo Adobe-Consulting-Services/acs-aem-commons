@@ -32,6 +32,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -71,9 +73,9 @@ public class InitFormServlet extends SlingAllMethodsServlet {
         try {
             json.accumulate("runnerTypes", new JSONObject().put("label", "AEM Workflow").put("value",
                     AEMWorkflowRunnerImpl.class.getName()));
-            json.accumulate("runnerTypes", new JSONObject().put("label", "Synthetic Workflow").put("value",
+            json.accumulate("runnerTypes", new JSONObject().put("label", "Synthetic Workflow (Single-threaded)").put("value",
                     SyntheticWorkflowRunnerImpl.class.getName()));
-            json.accumulate("runnerTypes", new JSONObject().put("label", "Synthetic Workflow w/ FAM").put("value",
+            json.accumulate("runnerTypes", new JSONObject().put("label", "Synthetic Workflow (Multi-threaded)").put("value",
                     FastActionManagerRunnerImpl.class.getName()));
         } catch (JSONException e) {
             log.error("Could not create JSON for Bulk Workflow Runner options");
@@ -102,8 +104,14 @@ public class InitFormServlet extends SlingAllMethodsServlet {
             for (final WorkflowModel workflowModel : workflowModels) {
                 JSONObject jsonWorkflow = new JSONObject();
                 try {
-                    jsonWorkflow.put("label", workflowModel.getTitle());
+                    boolean transientWorkflow = isTransient(request.getResourceResolver(), workflowModel.getId());
+                    String workflowLabel = workflowModel.getTitle();
+                    if (transientWorkflow) {
+                        workflowLabel += " ( Transient )";
+                    }
+                    jsonWorkflow.put("label", workflowLabel);
                     jsonWorkflow.put("value", workflowModel.getId());
+                    jsonWorkflow.put("transient", transientWorkflow);
                     json.accumulate("workflowModels", jsonWorkflow);
                 } catch (JSONException e) {
                     log.error("Could not add workflow [ {} - {} ] to Workflow Models drop-down JSON object",
@@ -121,4 +129,10 @@ public class InitFormServlet extends SlingAllMethodsServlet {
                     e.getMessage());
         }
     }
+
+    protected boolean isTransient(ResourceResolver resourceResolver, String workflowModelId) {
+        Resource resource = resourceResolver.getResource(workflowModelId).getParent();
+        return resource.getValueMap().get("transient", false);
+    }
+
 }

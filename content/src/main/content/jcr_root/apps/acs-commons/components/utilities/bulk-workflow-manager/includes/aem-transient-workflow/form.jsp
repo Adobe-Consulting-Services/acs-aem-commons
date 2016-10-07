@@ -45,20 +45,6 @@
         data-quicktip-content="The minimum number of seconds to wait before trying to process the next batch. If unsure: [ Batch Size ] x [ Seconds for One WF to Complete ] / 2"></span>
 </div>
 
-<div class="coral-Form-fieldwrapper">
-    <label class="coral-Form-fieldlabel">Timeout (in seconds)</label>
-
-    <input name="timeout"
-           type="number"
-           min="0"
-           class="coral-Form-field coral-Textfield"
-           ng-pattern="/\d*/"
-           ng-model="form.timeout"
-           placeholder="Amount of time to wait for each workflow to finish in seconds. 0 to disable. [ Default: 30 ]"/>
-    <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-        data-quicktip-content="Any active workflows that are still active after this amount of time will be marked as 'FORCE TERMINATED'."></span>
-</div>
-
 
 <div class="coral-Form-fieldwrapper">
     <label class="coral-Form-fieldlabel">Auto-Throttle</label>
@@ -69,17 +55,5 @@
                ng-model="form.autoThrottle"
                ng-init="form.autoThrottle=true">
         <span>Enable <a target="_blank" href="/system/console/configMgr/com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl" x-cq-linkchecker="skip">Throttled Task Runner</a> CPU/Memory-based throttling.</span>
-    </label>
-</div>
-
-<div class="coral-Form-fieldwrapper">
-    <label class="coral-Form-fieldlabel">Purge Workflows</label>
-
-    <label acs-coral-checkbox>
-        <input type="checkbox"
-               name="purgeWorkflow"
-               ng-model="form.purgeWorkflow"
-               ng-init="form.purgeWorkflow=true">
-        <span>Delete completed workflow instances after each batch is processed.</span>
     </label>
 </div>

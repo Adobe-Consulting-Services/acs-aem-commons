@@ -51,6 +51,8 @@ angular.module('acs-commons-bulk-workflow-manager-app', ['acsCoral', 'ACS.Common
 
                 $scope.items = {};
 
+                $scope.form.workflowModelId = $scope.form.workflowModel.value;
+
                 $http({
                     method: 'POST',
                     url: $scope.app.uri + '.start.json',
@@ -184,26 +186,37 @@ angular.module('acs-commons-bulk-workflow-manager-app', ['acsCoral', 'ACS.Common
             };
 
             $scope.isSynthetic = function () {
-                if ($scope.showForm()) {
-                    return $scope.form.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.SyntheticWorkflowRunnerImpl';
-                } else if (!$scope.showForm()) {
-                    return $scope.data.status.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.SyntheticWorkflowRunnerImpl';
-                }
+                return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.SyntheticWorkflowRunnerImpl');
             };
 
             $scope.isFAM = function () {
-                if ($scope.showForm()) {
-                    return $scope.form.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl';
-                } else {
-                    return $scope.data.status.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl';
-                }
+                return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl');
             };
 
             $scope.isWorkflow = function () {
                 if ($scope.showForm()) {
-                    return $scope.form.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl';
+                    return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl') &&
+                        (!$scope.form.workflowModel || !$scope.form.workflowModel.transient);
                 } else {
-                    return $scope.data.status.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl';
+                    return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl');
+                }
+            };
+
+            $scope.isTransientWorkflow = function () {
+                if ($scope.showForm()) {
+                    return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl') &&
+                        $scope.form.workflowModel &&
+                        $scope.form.workflowModel.transient;
+                } else {
+                    return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMTransientWorkflowRunnerImpl');
+                }
+            };
+
+            $scope.runnerCheck = function(runnerName) {
+                if ($scope.showForm()) {
+                    return runnerName === $scope.form.runnerType;
+                } else {
+                    return runnerName === $scope.data.status.runnerType;
                 }
             };
 
