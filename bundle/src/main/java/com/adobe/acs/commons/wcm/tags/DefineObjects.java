@@ -10,8 +10,8 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 /**
  * This tag is similar to the OOTB cq:defineObjects tag that adds
  * component instance-level properties to the pageContext of a JSP,
- * but it instead sets sharedProperties and mergedProperties maps
- * which come from
+ * but it instead adds globalProperties, sharedProperties, and
+ * mergedProperties maps that come from
  * com.adobe.acs.commons.wcm.impl.SharedComponentPropertiesBindingsValuesProvider
  */
 @ProviderType

@@ -17,19 +17,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Bindings Values Provider that adds bindings for sharedProperties
- * and mergedProperties maps.
+ * Bindings Values Provider that adds bindings for globalProperties,
+ * sharedProperties, and mergedProperties maps.
  *
- * sharedProperties contains the shared properties for the current
- * component.
+ * globalProperties contains the shared properties accessible by
+ * all components.
  *
- * mergedProperties is a merge of the instance-level and shared properties
- * for the current component, giving preference to an instance-level
- * property value when a shared property exists with the same name.
+ * sharedProperties contains the shared properties specific to the
+ * current component.
+ *
+ * mergedProperties is a merge of the instance-level, shared, and
+ * global properties for the current component, giving preference
+ * to instance-level values, then shared values, and finally global
+ * values when properties exist at multiple levels with the same name.
  */
 @org.apache.felix.scr.annotations.Component(
     label = "ACS AEM Commons - Shared Component Properties Provider",
-    description = "Adds bindings for \"sharedProperties\" and \"mergedProperties\"."
+    description = "Adds bindings for 'globalProperties', 'sharedProperties', and 'mergedProperties'."
 )
 @Service
 public class SharedComponentPropertiesBindingsValuesProvider implements BindingsValuesProvider {
