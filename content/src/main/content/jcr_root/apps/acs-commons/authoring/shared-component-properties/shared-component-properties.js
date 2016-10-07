@@ -25,7 +25,7 @@
 
                     ns.edit.actions.doConfigure(editable);
                 } catch (err) {
-                    if (console && console.error) {
+                    if (typeof console == "object" && console.error) {
                         console.error("Error configuring " + dialogSrc + ": " + err);
                     }
                 } finally {
