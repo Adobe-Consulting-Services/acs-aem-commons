@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:Dialog"
-    title="Shared Component Properties Example - Local Properties"
+    title="Shared Component Properties Example - Global Properties"
     xtype="panel">
     <items jcr:primaryType="cq:WidgetCollection">
         <title
@@ -9,13 +9,5 @@
             fieldLabel="Title"
             name="./titleText"
             xtype="textfield"/>
-        <qty
-            jcr:primaryType="nt:unstructured"
-            fieldLabel="Quantity"
-            maxValue="{Long}10"
-            minValue="{Long}1"
-            name="./quantity"
-            value="{Long}1"
-            xtype="numberfield"/>
     </items>
 </jcr:root>
