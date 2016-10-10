@@ -17,22 +17,56 @@
   ~ limitations under the License.
   ~ #L%
   --%>
-<div class="coral-Form-fieldwrapper">
-    <label class="coral-Form-fieldlabel">Batch Size</label>
 
-    <input name="batchSize"
+
+<div class="coral-Form-fieldwrapper">
+    <label class="coral-Form-fieldlabel">Max # Sling Jobs</label>
+
+    <input name="interval"
            type="number"
-           min="2"
+           min="1"
            class="coral-Form-field coral-Textfield"
-           ng-pattern="/(^[2-9]\d*)|(^[1-9]\d+)/"
+           ng-pattern="/\d+/"
            ng-model="form.batchSize"
-           placeholder="# of payloads to process at once [ Default: 10 ]"/>
-            <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-                  data-quicktip-content="Batch size must be greater than 1"></span>
+           ng-init="form.batchSize=100"
+           placeholder="[ Default: 100 ]"/>
+    <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
+        data-quicktip-content="The maximum number of Sling Jobs to add to the Granite Workflow Job queue at any give time."></span>
+</div>
+
+
+<div class="coral-Form-fieldwrapper">
+    <label class="coral-Form-fieldlabel">Workflow Job Queue Width</label>
+
+    <input name="interval"
+           type="number"
+           min="1"
+           class="coral-Form-field coral-Textfield"
+           ng-pattern="/\d+/"
+           ng-model="calc.queueWidth"
+           ng-init="calc.queueWidth=2"
+           placeholder="[ Default: 2 ]"/>
+    <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
+        data-quicktip-content="The Granite Workflow Job Queue's width."></span>
 </div>
 
 <div class="coral-Form-fieldwrapper">
-    <label class="coral-Form-fieldlabel">Batch Interval</label>
+    <label class="coral-Form-fieldlabel">Avg Time to Process 1 Asset (in seconds)</label>
+
+    <input name="interval"
+           type="number"
+           min="1"
+           class="coral-Form-field coral-Textfield"
+           ng-pattern="/\d+/"
+           ng-model="calc.avgTime"
+           ng-init="calc.avgTime=4"
+           placeholder="[ Default: 4 ]"/>
+    <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
+        data-quicktip-content=""></span>
+</div>
+
+<div class="coral-Form-fieldwrapper">
+    <label class="coral-Form-fieldlabel">Batch Interval (in seconds)</label>
 
     <input name="interval"
            type="number"
@@ -42,7 +76,7 @@
            ng-model="form.interval"
            placeholder="in seconds [ Default: 10 ]"/>
     <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-        data-quicktip-content="The minimum number of seconds to wait before trying to process the next batch. If unsure: [ Batch Size ] x [ Seconds for One WF to Complete ] / 2"></span>
+        data-quicktip-content="Computed based on above fields. ((Max # Sling Jobs) / (Workflow Job Queue Width)) * Avg Time to Process 1 Asset"></span>
 </div>
 
 

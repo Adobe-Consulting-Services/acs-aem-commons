@@ -40,6 +40,26 @@ angular.module('acs-commons-bulk-workflow-manager-app', ['acsCoral', 'ACS.Common
 
             $scope.data = {};
 
+            $scope.calc = {};
+
+
+            $scope.$watch('form.batchSize', function (newValues, oldValues) {
+                $scope._calculateInterval();
+            });
+
+            $scope.$watch('calc.queueWidth', function (newValues, oldValues) {
+                $scope._calculateInterval();
+            });
+
+            $scope.$watch('calc.avgTime', function (newValues, oldValues) {
+                $scope._calculateInterval();
+            });
+
+            $scope._calculateInterval = function () {
+                $scope.form.interval = Math.round(($scope.form.batchSize / ($scope.calc.queueWidth || 1)) * ($scope.calc.avgTime || 2));
+            };
+
+
             $scope.start = function (isValid) {
                 if (!isValid) {
                     NotificationsService.add('error',
