@@ -47,7 +47,7 @@
         }
 
         try {
-            this.dialog = this.dialog + type;
+            this.dialog = this.dialog + "_" + type;
             this.dialogs[CQ.wcm.EditBase.EDIT] = this.dialogs[editBaseType];
             this.path = newPath;
 
