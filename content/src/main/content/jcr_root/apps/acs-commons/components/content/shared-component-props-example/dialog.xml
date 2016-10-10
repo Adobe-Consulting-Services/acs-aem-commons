@@ -6,7 +6,7 @@
     <items jcr:primaryType="cq:WidgetCollection">
         <title
             jcr:primaryType="cq:Widget"
-            fieldLabel="Title"
+            fieldLabel="Title Text"
             name="./titleText"
             xtype="textfield"/>
         <qty
