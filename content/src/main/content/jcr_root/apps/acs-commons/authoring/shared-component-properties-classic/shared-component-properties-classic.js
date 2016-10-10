@@ -51,8 +51,9 @@
             this.dialogs[CQ.wcm.EditBase.EDIT] = this.dialogs[editBaseType];
             this.path = newPath;
 
-            // For global props, need to unregister any previous fetch since it
-            // always has the same data path.
+            // For global props, need to unregister a previously fetched global
+            // props dialog since it always has the same data path but the
+            // dialog itself can be different for different components.
             if (type == "global") {
                 CQ.WCM.unregisterDialog("editdialog-" + this.path);
             }
