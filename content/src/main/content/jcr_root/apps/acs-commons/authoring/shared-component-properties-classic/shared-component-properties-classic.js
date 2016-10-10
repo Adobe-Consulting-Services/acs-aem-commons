@@ -21,7 +21,7 @@
                                     break;
                                 }
                             }
-                            if (editActionIdx != null) {
+                            if (editActionIdx !== null) {
                                 config.actions.splice(editActionIdx + 1, 0, CQ.wcm.EditBase.EDITGLOBAL);
                                 config.actions.splice(editActionIdx + 1, 0, CQ.wcm.EditBase.EDITSHARED);
                             }
