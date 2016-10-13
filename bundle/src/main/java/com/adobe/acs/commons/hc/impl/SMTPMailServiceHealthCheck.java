@@ -20,7 +20,7 @@ import javax.mail.internet.InternetAddress;
 import java.util.*;
 
 @Component(metatype = true,
-        label = "ACS AEM Commons - E-Mail Service (SMTP) Health Check",
+        label = "ACS AEM Commons - Health Check - SMTP E-Mail Service",
         description = "Checks if the AEM E-Mail Service can connect and send mail via the configured SMTP server.")
 @Properties({
         @Property(
@@ -40,6 +40,9 @@ import java.util.*;
 @Service
 public class SMTPMailServiceHealthCheck implements HealthCheck {
     private static final Logger log = LoggerFactory.getLogger(SMTPMailServiceHealthCheck.class);
+
+    // 10 seconds
+    private static final int TIMEOUT = 1000 * 10;
 
     private static String MAIL_TEMPLATE =
             System.getProperty("line.separator") +
@@ -73,7 +76,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
             if (messageGateway == null) {
                 resultLog.critical("The AEM Default Mail Service is INACTIVE, thus e-mails cannot be sent.");
                 resultLog.info("Verify the Default Mail Service is active and configured: http://localhost:4502/system/console/components/com.day.cq.mailer.DefaultMailService");
-                log.error("Could not retrieve a SimpleEmail Message Gateway");
+                log.warn("Could not retrieve a SimpleEmail Message Gateway");
 
             } else {
                 try {
@@ -85,12 +88,14 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
                     email.setSubject("AEM E-mail Service Health Check");
                     email.setTo(emailAddresses);
 
+                    email.setSocketConnectionTimeout(TIMEOUT);
+                    email.setSocketTimeout(TIMEOUT);
                     try {
                         messageGateway.send(email);
                         resultLog.info("The E-mail Service appears to be working properly. Verify the health check e-mail was sent to [ {} ]", this.email);
                     } catch (Exception e) {
                         resultLog.critical("Failed sending e-mail. Unable to send a test email via the configured E-mail server: " + e.getMessage(), e);
-                        log.error("Failed to send E-mail for E-mail Service health check", e);
+                        log.warn("Failed to send E-mail for E-mail Service health check", e);
                     }
 
                     logMailServiceConfig(resultLog, email);
@@ -113,5 +118,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
             resultLog.info("SMTP Port: {}", email.getSmtpPort());
         }
         resultLog.info("SMTP From Address: {}", email.getFromAddress());
+        resultLog.info("Socket Connection Timeout: {} seconds", email.getSocketConnectionTimeout()/ 1000);
+        resultLog.info("Socket IO Timeout: {} seconds", email.getSocketTimeout() / 1000);
     }
 }
