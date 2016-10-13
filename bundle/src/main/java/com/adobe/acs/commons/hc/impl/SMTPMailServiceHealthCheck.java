@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.healthchecks.impl;
+package com.adobe.acs.commons.hc.impl;
 
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
@@ -88,20 +88,12 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
                     try {
                         messageGateway.send(email);
                         resultLog.info("The E-mail Service appears to be working properly. Verify the health check e-mail was sent to [ {} ]", this.email);
-
                     } catch (Exception e) {
                         resultLog.critical("Failed sending e-mail. Unable to send a test email via the configured E-mail server: " + e.getMessage(), e);
                         log.error("Failed to send E-mail for E-mail Service health check", e);
                     }
 
-                    resultLog.info("SMTP Host: {}", email.getHostName());
-                    resultLog.info("SMTP use SSL: {}", email.isSSL());
-                    if (email.isSSL()) {
-                        resultLog.info("SMTP SSL Port: {}", email.getSslSmtpPort());
-                    } else {
-                        resultLog.info("SMTP Port: {}", email.getSmtpPort());
-                    }
-                    resultLog.info("SMTP From Address: {}", email.getFromAddress());
+                    logMailServiceConfig(resultLog, email);
                 } catch (Exception e) {
                     resultLog.healthCheckError("Sling Health check could not formulate a test email: " + e.getMessage(), e);
                     log.error("Unable to execute E-mail health check", e);
@@ -110,5 +102,16 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
         }
 
         return new Result(resultLog);
+    }
+
+    private void logMailServiceConfig(FormattingResultLog resultLog, SimpleEmail email) {
+        resultLog.info("SMTP Host: {}", email.getHostName());
+        resultLog.info("SMTP use SSL: {}", email.isSSL());
+        if (email.isSSL()) {
+            resultLog.info("SMTP SSL Port: {}", email.getSslSmtpPort());
+        } else {
+            resultLog.info("SMTP Port: {}", email.getSmtpPort());
+        }
+        resultLog.info("SMTP From Address: {}", email.getFromAddress());
     }
 }
