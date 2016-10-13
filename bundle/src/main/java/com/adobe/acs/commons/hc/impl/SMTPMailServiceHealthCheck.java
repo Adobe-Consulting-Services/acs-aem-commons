@@ -56,7 +56,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
     private static final String PROP_EMAIL = "email";
     private String email;
 
-    @Reference
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private MessageGatewayService messageGatewayService;
 
     @Activate
@@ -69,7 +69,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
         final FormattingResultLog resultLog = new FormattingResultLog();
 
         if (messageGatewayService == null) {
-            resultLog.warn("MessageGatewayService OSGi service could not be found.");
+            resultLog.critical("MessageGatewayService OSGi service could not be found.");
             resultLog.info("Verify the Default Mail Service is active: http://localhost:4502/system/console/components/com.day.cq.mailer.impl.CqMailingService");
         } else {
             final MessageGateway<SimpleEmail> messageGateway = messageGatewayService.getGateway(SimpleEmail.class);
@@ -83,7 +83,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
                     List<InternetAddress> emailAddresses = new ArrayList<InternetAddress>();
                     emailAddresses.add(new InternetAddress(this.email));
                     MailTemplate mailTemplate = new MailTemplate(IOUtils.toInputStream(MAIL_TEMPLATE), CharEncoding.UTF_8);
-                    SimpleEmail email = mailTemplate.getEmail(StrLookup.mapLookup(new HashMap<String, String>()), SimpleEmail.class);
+                    SimpleEmail email = mailTemplate.getEmail(StrLookup.mapLookup(Collections.emptyMap()), SimpleEmail.class);
 
                     email.setSubject("AEM E-mail Service Health Check");
                     email.setTo(emailAddresses);
