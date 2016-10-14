@@ -28,7 +28,8 @@
                         convertToHex      : true,                    // Whether or not to convert to hexadecimal for attribute value. If true then please pass decimal integer value to the source (or as value="" attribute of the select field)
                         allCategoryText   : 'From all categories',   // The text for the select all category option
                         unCategorizedText : 'Uncategorized',         // The text for the select uncategorized option
-                };
+                        classValuePrefix  : ''                       // Prefix to be added to icon class
+        };
 
         // The actual plugin constructor
         function Plugin(element, options) {
