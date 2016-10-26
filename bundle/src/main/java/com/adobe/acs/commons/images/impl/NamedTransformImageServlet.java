@@ -227,9 +227,13 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final double quality = this.getQuality(mimeType,
                 imageTransformersWithParams.get(TYPE_QUALITY, EMPTY_PARAMS));
 
+        // Check if the image is a JPEG which has to be encoded progressively
+        final boolean progressiveJpeg = isProgressiveJpeg(mimeType,
+                imageTransformersWithParams.get(TYPE_PROGRESSIVE, EMPTY_PARAMS));
+
         response.setContentType(mimeType);
 
-        if (isProgressiveJpeg(mimeType, imageTransformersWithParams)) {
+        if (progressiveJpeg) {
             ProgressiveJPEG.write(layer, quality, response.getOutputStream());
         } else {
             layer.write(mimeType, quality, response.getOutputStream());
@@ -473,9 +477,13 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return quality;
     }
 
-    // TODO document & test
-    private boolean isProgressiveJpeg(String mimeType, ValueMap imageTransformersWithParams) {
-        boolean enabled = imageTransformersWithParams.get(TYPE_PROGRESSIVE, EMPTY_PARAMS).get("enabled", false);
+    /**
+     * @param mimeType mime type string
+     * @param transforms all transformers
+     * @return <code>true</code> for jpeg mime types if progressive encoding is enabled
+     */
+    protected boolean isProgressiveJpeg(final String mimeType, final ValueMap transforms) {
+        boolean enabled = transforms.get("enabled", false);
         if (enabled) {
             if ("image/jpeg".equals(mimeType) || "image/jpg".equals(mimeType)) {
                 return true;

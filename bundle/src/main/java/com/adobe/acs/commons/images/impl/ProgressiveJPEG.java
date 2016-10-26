@@ -32,9 +32,20 @@ import java.awt.image.ColorConvertOp;
 import java.io.IOException;
 import java.io.OutputStream;
 
-// TODO document & test
+/**
+ * Extension for {@link Layer} with progressive JPEG support.
+ */
 public class ProgressiveJPEG {
 
+    /**
+     * For JPEG images, this method behaves similar to {@link Layer#write(String, double, OutputStream)}. The major
+     * difference is that it uses progressive encoding.
+     *
+     * @param layer the layer with the image to write to the output stream
+     * @param quality JPEG compression quality between 0 and 1
+     * @param out target output stream
+     * @throws IOException if anything goes wrong
+     */
     public static void write(Layer layer, double quality, OutputStream out) throws IOException {
         ImageWriter writer = null;
         ImageOutputStream imageOut = null;
@@ -65,6 +76,9 @@ public class ProgressiveJPEG {
         }
     }
 
+    /**
+     * Ensures that the image has the right color mode. Without, the image might be colored wrongly.
+     */
     private static BufferedImage getRgbImage(Layer layer) {
         final BufferedImage image = layer.getImage();
         final BufferedImage rgbImage;
