@@ -144,6 +144,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final String TYPE_QUALITY = "quality";
 
+    private static final String TYPE_PROGRESSIVE = "progressive";
+
     private Pattern lastSuffixPattern = Pattern.compile(DEFAULT_FILENAME_PATTERN);
 
     private Map<String, NamedImageTransformer> namedImageTransformers =
@@ -226,7 +228,13 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 imageTransformersWithParams.get(TYPE_QUALITY, EMPTY_PARAMS));
 
         response.setContentType(mimeType);
-        layer.write(mimeType, quality, response.getOutputStream());
+
+        if (isProgressiveJpeg(mimeType, imageTransformersWithParams)) {
+            ProgressiveJPEG.write(layer, quality, response.getOutputStream());
+        } else {
+            layer.write(mimeType, quality, response.getOutputStream());
+        }
+
         response.flushBuffer();
     }
 
@@ -463,6 +471,21 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
 
         return quality;
+    }
+
+    // TODO document & test
+    private boolean isProgressiveJpeg(String mimeType, ValueMap imageTransformersWithParams) {
+        boolean enabled = imageTransformersWithParams.get(TYPE_PROGRESSIVE, EMPTY_PARAMS).get("enabled", false);
+        if (enabled) {
+            if ("image/jpeg".equals(mimeType) || "image/jpg".equals(mimeType)) {
+                return true;
+            } else {
+                log.debug("Progressive encoding is only supported for JPEGs. Mime type: {}", mimeType);
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     @Activate
