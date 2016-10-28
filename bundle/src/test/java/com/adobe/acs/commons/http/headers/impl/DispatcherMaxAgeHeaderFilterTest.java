@@ -107,44 +107,6 @@ public class DispatcherMaxAgeHeaderFilterTest {
         assertEquals("max-age=" + maxage, filter.getHeaderValue());
     }
 
-    @Test
-    public void testAcceptsHasCacheControlHeader() throws Exception {
-
-        cachecontrol.add("Some Cache Control Header");
-
-        when(request.getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME))
-                .thenReturn(Collections.enumeration(cachecontrol));
-
-        boolean result = filter.accepts(request);
-        assertFalse(result);
-
-        verify(request).getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME);
-    }
-
-    @Test
-    public void testAcceptsNoCacheControlHeader() throws Exception {
-
-        when(request.getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME))
-                .thenReturn(Collections.enumeration(cachecontrol));
-
-        boolean result = filter.accepts(request);
-        assertTrue(result);
-
-        verify(request).getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testAcceptsCalledParent() throws Exception {
-
-        params.put("key", "value");
-
-        boolean result = filter.accepts(request);
-        assertFalse(result);
-
-        verify(request, times(0)).getHeaders(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME);
-    }
-
     @Test(expected = ConfigurationException.class)
     public void testActivateNoMaxAge() throws Exception {
         properties.remove(DispatcherMaxAgeHeaderFilter.PROP_MAX_AGE);
