@@ -72,11 +72,11 @@ public class CropImageTransformerImpl implements ImageTransformer {
         final String[] bounds = StringUtils.split(properties.get(KEY_BOUNDS, ""), ",");
 
         if (bounds.length == NUM_BOUNDS_PARAMS) {
-            int x = Integer.parseInt(bounds[PARAM_INDEX_X]);
-            int y = Integer.parseInt(bounds[PARAM_INDEX_Y]);
+            int x = parseLength(bounds[PARAM_INDEX_X], layer.getWidth());
+            int y = parseLength(bounds[PARAM_INDEX_Y], layer.getHeight());
 
-            int width = Integer.parseInt(bounds[PARAM_INDEX_WIDTH]);
-            int height = Integer.parseInt(bounds[PARAM_INDEX_HEIGHT]);
+            int width = parseLength(bounds[PARAM_INDEX_WIDTH], layer.getWidth());
+            int height = parseLength(bounds[PARAM_INDEX_HEIGHT], layer.getHeight());
 
             Rectangle rectangle = new Rectangle();
 
@@ -162,4 +162,17 @@ public class CropImageTransformerImpl implements ImageTransformer {
 
         return rectangle;
     }
+
+    private static int parseLength(String lengthStr, int totalLength) {
+        int lengthPx;
+        if (lengthStr.endsWith("%")) {
+            String percentageStr = lengthStr.substring(0, lengthStr.length() - 1);
+            double percentage = Double.parseDouble(percentageStr);
+            lengthPx = (int) Math.round((percentage / 100) * totalLength);
+        } else {
+            lengthPx = Integer.parseInt(lengthStr);
+        }
+        return lengthPx;
+    }
+
 }
