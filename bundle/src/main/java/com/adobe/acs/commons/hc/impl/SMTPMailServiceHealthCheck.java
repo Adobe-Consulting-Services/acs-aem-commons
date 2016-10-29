@@ -46,7 +46,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
 
     private static String MAIL_TEMPLATE =
             System.getProperty("line.separator") +
-            "Sling Health Check for AEM E-mail Service connectivity";
+                    "Sling Health Check for AEM E-mail Service connectivity";
 
     private static final String DEFAULT_EMAIL = "healthcheck@example.com";
     @Property(
@@ -118,7 +118,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
             resultLog.info("SMTP Port: {}", email.getSmtpPort());
         }
         resultLog.info("SMTP From Address: {}", email.getFromAddress());
-        resultLog.info("Socket Connection Timeout: {} seconds", email.getSocketConnectionTimeout()/ 1000);
+        resultLog.info("Socket Connection Timeout: {} seconds", email.getSocketConnectionTimeout() / 1000);
         resultLog.info("Socket IO Timeout: {} seconds", email.getSocketTimeout() / 1000);
     }
 }
