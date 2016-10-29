@@ -70,12 +70,12 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
 
         if (messageGatewayService == null) {
             resultLog.critical("MessageGatewayService OSGi service could not be found.");
-            resultLog.info("Verify the Default Mail Service is active: http://localhost:4502/system/console/components/com.day.cq.mailer.impl.CqMailingService");
+            resultLog.info("Verify the Default Mail Service is active: http://<host>:<port>/system/console/components/com.day.cq.mailer.impl.CqMailingService");
         } else {
             final MessageGateway<SimpleEmail> messageGateway = messageGatewayService.getGateway(SimpleEmail.class);
             if (messageGateway == null) {
                 resultLog.critical("The AEM Default Mail Service is INACTIVE, thus e-mails cannot be sent.");
-                resultLog.info("Verify the Default Mail Service is active and configured: http://localhost:4502/system/console/components/com.day.cq.mailer.DefaultMailService");
+                resultLog.info("Verify the Default Mail Service is active and configured: http://<host>:<port>/system/console/components/com.day.cq.mailer.DefaultMailService");
                 log.warn("Could not retrieve a SimpleEmail Message Gateway");
 
             } else {
