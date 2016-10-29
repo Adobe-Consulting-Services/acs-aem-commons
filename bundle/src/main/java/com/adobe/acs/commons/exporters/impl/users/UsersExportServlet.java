@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.exporters.impl.users;
 
 import com.day.cq.commons.jcr.JcrConstants;
@@ -37,9 +56,18 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(UsersExportServlet.class);
 
     private static final String QUERY = "SELECT * FROM [rep:User] WHERE ISDESCENDANTNODE([/home/users])";
+    private static final String GROUP_DELIMITER = "|";
 
+    /**
+     * Generates a CSV file representing the User Data.
+     * @param request the Sling HTTP Request object
+     * @param response the Sling HTTP Response object
+     * @throws IOException
+     * @throws ServletException
+     */
     public void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException {
         response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
 
         final Parameters parameters;
         try {
@@ -106,12 +134,11 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
                     values.add(csvUser.getCustomProperty(customProperty));
                 }
 
-                values.add(StringUtils.join(csvUser.getAllGroups(), "|"));
-                values.add(StringUtils.join(csvUser.getDeclaredGroups(), "|"));
-                values.add(StringUtils.join(csvUser.getTransitiveGroups(), "|"));
+                values.add(StringUtils.join(csvUser.getAllGroups(), GROUP_DELIMITER));
+                values.add(StringUtils.join(csvUser.getDeclaredGroups(), GROUP_DELIMITER));
+                values.add(StringUtils.join(csvUser.getTransitiveGroups(), GROUP_DELIMITER));
 
                 csv.writeRow(values.toArray(new String[values.size()]));
-                log.info("{}", values);
             } catch (RepositoryException e) {
                 log.error("Unable to export user to CSV report", e);
             }
@@ -120,6 +147,13 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
         csv.close();
     }
 
+    /**
+     * Determines if the user should be included based on the specified group filter type, and requested groups.
+     * @param groups the groups
+     * @param groupFilter the groupFilter
+     * @param csvUser the user
+     * @return true if the user should be included.
+     */
     private boolean checkGroups(String[] groups, String groupFilter, CsvUser csvUser) {
         if (groups != null && groups.length > 0) {
             if (GROUP_FILTER_DIRECT.equals(groupFilter) && csvUser.isInDirectGroup(groups)) {
@@ -135,7 +169,10 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
         return true;
     }
 
-    private class CsvUser {
+    /**
+     * Internal class representing a user that will be exported in CSV format.
+     */
+    private static class CsvUser {
         private final ValueMap properties;
         private List<String> declaredGroups = new ArrayList<String>();
         private List<String> transitiveGroups = new ArrayList<String>();

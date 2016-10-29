@@ -25,6 +25,8 @@
     class="coral-Form coral-Form--vertical"
     action="${resourcePath}/users.export.csv" method="get">
 
+    <br/>
+    <br/>
   <section class="coral-Form-fieldset">
     <div class="coral-Form-fieldwrapper">
       <button
@@ -45,7 +47,7 @@
         <table class="coral-Table acs-table">
             <thead>
                 <tr class="coral-Table-row">
-                    <th class="coral-Table-headerCell">Custom User Properties <em>(Relative to the [rep:User] node)</em></th>
+                    <th class="coral-Table-headerCell">Custom User Properties <em>(Relative path from the [rep:User] node)</em></th>
                     <th class="coral-Table-headerCell">&nbsp;</th>
                 </tr>
             </thead>
@@ -92,12 +94,13 @@
     <br/>
 
     <div class="coral-Form-fieldwrapper">
-      <label class="coral-Form-fieldlabel">Filter by Group <em>(Leave blank for all groups)</em></label>
+      <label class="coral-Form-fieldlabel">Filter by Group <em>(Select none for all groups)</em></label>
+
 
         <%-- First Col --%>
        <ul class="coral-List coral-List--minimal acs-column-33-33-33">
             <li class="coral-List-item"
-                ng-repeat="group in options.groups.slice(0, (options.groups.length / 3))">
+                ng-repeat="group in options.groups.slice(getFromIndex(1), getToIndex(1))">
                 <label class="coral-Checkbox">
                     <input class="coral-Checkbox-input"
                            ng-checked="form.groups.indexOf(group) >= 0"
@@ -110,9 +113,8 @@
 
         <%-- Second Col --%>
         <ul class="coral-List coral-List--minimal acs-column-33-33-33">
-
             <li class="coral-List-item"
-                ng-repeat="group in options.groups.slice(((options.groups.length / 3) + 1), ((2 * options.groups.length) / 3))">
+                ng-repeat="group in options.groups.slice(getFromIndex(2), getToIndex(2))">
                 <label class="coral-Checkbox">
                  <input class="coral-Checkbox-input"
                         ng-checked="form.groups.indexOf(group) >= 0"
@@ -126,9 +128,8 @@
 
         <%-- Third Col --%>
         <ul class="coral-List coral-List--minimal acs-column-33-33-33">
-
             <li class="coral-List-item"
-                ng-repeat="group in options.groups.slice(((2 * options.groups.length) / 3 + 1), options.groups.length)">
+                ng-repeat="group in options.groups.slice(getFromIndex(3), getToIndex(3))">
                 <label class="coral-Checkbox">
                     <input class="coral-Checkbox-input"
                            ng-checked="form.groups.indexOf(group) >= 0"

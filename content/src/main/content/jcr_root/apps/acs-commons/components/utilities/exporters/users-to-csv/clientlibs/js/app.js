@@ -18,7 +18,7 @@
  * #L%
  */
 
-/*global angular: false, debugger: false, console: false, JSON: false */
+/*global angular: false */
 
 angular.module('acs-commons-users-to-csv-app', ['acsCoral', 'ACS.Commons.notifications'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
@@ -41,12 +41,10 @@ angular.module('acs-commons-users-to-csv-app', ['acsCoral', 'ACS.Commons.notific
                 $http({
                     method: 'GET',
                     url: encodeURI($scope.app.resource + '.init.json')
-                }).
-                success(function (data, status, headers, config) {
+                }).success(function (data, status, headers, config) {
                     $scope.options = data.options;
                     $scope.form = data.form;
-                }).
-                error(function (data, status, headers, config) {
+                }).error(function (data, status, headers, config) {
                     NotificationsService.add('error',
                         'ERROR', 'Could not save configuration: ' + data);
                 });
@@ -58,28 +56,44 @@ angular.module('acs-commons-users-to-csv-app', ['acsCoral', 'ACS.Commons.notific
                     url: encodeURI($scope.app.resource + '.save.json'),
                     data: 'params=' + JSON.stringify($scope.form),
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-                }).
-                success(function (data, status, headers, config) {
+                }).success(function (data, status, headers, config) {
                     NotificationsService.add('success',
                         'SUCCESS', 'Configuration saved');
-                }).
-                error(function (data, status, headers, config) {
+                }).error(function (data, status, headers, config) {
                     NotificationsService.add('error',
                         'ERROR', 'Could not save configuration: ' + data);
                 });
             };
 
-            $scope.download = function() {
+            $scope.download = function () {
                 window.open($scope.app.resource + '/users.export.csv?params=' + JSON.stringify($scope.form));
             };
 
+            $scope.toggle = function (arr, value) {
+                if (arr.indexOf(value) < 0) {
+                    arr.push(value);
+                } else {
+                    arr.splice(arr.indexOf(value), 1);
+                }
+            };
 
-            $scope.toggle = function(arr, value) {
-              if (arr.indexOf(value) < 0) {
-                  arr.push(value);
-              } else {
-                  arr.splice(arr.indexOf(value), 1);
-              }
+            $scope.getFromIndex = function(column) {
+                if (column === 1) {
+                    return 0;
+                } else {
+                    return ((column - 1) * Math.ceil($scope.options.groups.length / 3));
+                }
+            };
+
+            $scope.getToIndex = function(column) {
+                if (column === 1) {
+                    return Math.ceil($scope.options.groups.length / 3);
+                } else {
+                    if ($scope.getFromIndex(column) + Math.ceil($scope.options.groups.length / 3) > $scope.options.groups.length) {
+                        return $scope.options.groups.length;
+                    } else {
+                        return $scope.getFromIndex(column) + Math.ceil($scope.options.groups.length / 3);
+                    }
+                }
             };
         }]);
-
