@@ -21,6 +21,8 @@
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMTransientWorkflowRunnerImpl;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +31,8 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -70,7 +74,7 @@ public class StartServlet extends SlingAllMethodsServlet {
             properties.put("queryType", params.getString("queryType"));
             properties.put("queryStatement", params.getString("queryStatement"));
             properties.put("relativePath", StringUtils.removeStart(params.optString("relativePath", ""), "/"));
-            properties.put("workflowModel", params.getString("workflowModel"));
+            properties.put("workflowModel", params.getString("workflowModelId"));
             properties.put("interval", params.optInt("interval", 10));
             properties.put("timeout", params.optInt("timeout", 30));
             properties.put("throttle", params.optInt("throttle", 10));
@@ -80,8 +84,15 @@ public class StartServlet extends SlingAllMethodsServlet {
             properties.put("purgeWorkflow", params.optBoolean("purgeWorkflow", false));
             properties.put("autoThrottle", params.optBoolean("autoThrottle", true));
 
+
+            if (AEMWorkflowRunnerImpl.class.getName().equals(properties.get("runnerType", String.class))
+                    && isTransient(request.getResourceResolver(), properties.get("workflowModel", String.class))) {
+                properties.put("runnerType", AEMTransientWorkflowRunnerImpl.class.getName());
+            }
+
             // If FAM retires are enabled, then force BatchSize to be 1
-            if (FastActionManagerRunnerImpl.class.getName().equals(properties.get("runnerType", "")) && properties.get("retryCount", 0) > 0) {
+            if (FastActionManagerRunnerImpl.class.getName().equals(properties.get("runnerType", ""))
+                    && properties.get("retryCount", 0) > 0) {
                 properties.put("batchSize", 1);
             }
 
@@ -122,5 +133,10 @@ public class StartServlet extends SlingAllMethodsServlet {
                     "Could not start Bulk Workflow.",
                     e.getMessage());
         }
+    }
+
+    private boolean isTransient(ResourceResolver resourceResolver, String workflowModelId) {
+        Resource resource = resourceResolver.getResource(workflowModelId).getParent();
+        return resource.getValueMap().get("transient", false);
     }
 }

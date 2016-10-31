@@ -29,11 +29,12 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
 import com.adobe.acs.commons.workflow.bulk.execution.model.PayloadGroup;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.day.cq.commons.jcr.JcrUtil;
-import org.apache.felix.scr.annotations.Component;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -41,10 +42,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.ListIterator;
 
-import static com.day.cq.wcm.foundation.List.log;
-
-@Component
 public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
+    private static final Logger log = LoggerFactory.getLogger(AbstractWorkflowRunner.class);
     private static final int SAVE_THRESHOLD = 1000;
 
     /**

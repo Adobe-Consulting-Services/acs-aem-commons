@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -189,6 +190,9 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
 
             try {
                 resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+
+                resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.bulk-workflow-manager");
+
                 configResource = resourceResolver.getResource(configPath);
 
                 final Config config = configResource.adaptTo(Config.class);

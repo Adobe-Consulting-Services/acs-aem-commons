@@ -153,7 +153,7 @@ public class Workspace {
         this.config = resource.getParent().adaptTo(Config.class);
 
         for (BulkWorkflowRunner candidate : runners) {
-            if (StringUtils.equals(this.config.getRunnerType(), candidate.getClass().getCanonicalName())) {
+            if (StringUtils.equals(this.config.getRunnerType(), candidate.getClass().getName())) {
                 runner = candidate;
                 break;
             }

@@ -30,6 +30,10 @@
         <%@include file="aem-workflow/status.jsp"%>
     </div>
 
+        <div ng-show="isTransientWorkflow()">
+            <%@include file="aem-transient-workflow/status.jsp"%>
+        </div>
+
     <div ng-show="isSynthetic()">
         <%@include file="synthetic-workflow/status.jsp"%>
     </div>
@@ -82,12 +86,22 @@
         <%@include file="synthetic-workflow/status-table.jsp"%>
     </div>
 
+    <div ng-show="isTransientSynthetic()">
+        <%@include file="aem-transient-workflow/status-table.jsp"%>
+    </div>
+
     <div ng-show="isFAM()">
         <%@include file="fast-action-manager/status-table.jsp"%>
     </div>
 </section>
 
 <!-- Failure Table -->
-<section>
+<section
+    style="text-align: center;"
+    ng-show="isTransientWorkflow()">
+    AEM Transient workflow does not track failures. Please review the logs and/or audit the Workflow application.
+</section>
+
+<section ng-hide="isTransientWorkflow()">
     <%@include file="failures-table.jsp"%>
 </section>
