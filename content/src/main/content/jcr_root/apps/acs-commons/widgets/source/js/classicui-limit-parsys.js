@@ -62,20 +62,22 @@
 
             cellSearchPath = cellSearchPath.substring(0, cellSearchPath.indexOf("|"));
             parNames = parentPath.split("jcr:content/");
-   			    parNames = parNames[1].split("/");
+            parNames = parNames[1].split("/");
 
-   			    cellSearchPathInfo = pageInfo.designObject.content[cellSearchPath];
+            cellSearchPathInfo = pageInfo.designObject.content[cellSearchPath];
 
-            for(var i=0; i < parNames.length; i++){
-                   var prop = parNames[i];
-   				         cellSearchPathInfo = cellSearchPathInfo[prop];
-               }
-               currentLimit = cellSearchPathInfo[ACS_COMPONENTS_LIMIT];
+            for(var i = 0; i < parNames.length; i++){
+                var prop = parNames[i];
+                cellSearchPathInfo = cellSearchPathInfo[prop];
+            }
+            currentLimit = cellSearchPathInfo[ACS_COMPONENTS_LIMIT];
             if(currentLimit){
                 isWithin = getSiblings(editComponent).length <= parseInt(currentLimit);
             }
         }catch(err){
-            console.log("ACS Commons - error getting the component limit", err);
+            if(console && console.log) {
+                console.log("ACS Commons - error getting the component limit", err);
+            }
         }
 
         return {
