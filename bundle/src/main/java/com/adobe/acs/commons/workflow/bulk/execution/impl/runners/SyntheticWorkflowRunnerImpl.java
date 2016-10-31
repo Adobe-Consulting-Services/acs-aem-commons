@@ -127,6 +127,7 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
 
             try {
                 resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.bulk-workflow-manager");
                 configResource = resourceResolver.getResource(configPath);
 
                 final Config config = configResource.adaptTo(Config.class);
@@ -208,7 +209,7 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
                 } catch (Exception e) {
                     log.error("Error processing Bulk Synthetic Workflow execution.", e);
                 }
-            } catch (LoginException e) {
+            } catch (Exception e) {
                 log.error("Error processing Bulk Synthetic Workflow execution.", e);
             } finally {
                 if (resourceResolver != null) {
