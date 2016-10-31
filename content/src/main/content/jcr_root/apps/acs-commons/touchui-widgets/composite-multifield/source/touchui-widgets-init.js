@@ -41,7 +41,8 @@
         SELECTOR_FORM_CQ_DIALOG: "form.cq-dialog",
         SELECTOR_FORM_SITES_PROPERTIES: "form#cq-sites-properties-form",
         SELECTOR_FORM_CREATE_PAGE: "form.cq-siteadmin-admin-createpage",
-        SELECTOR_FORM_SITES_PROPERTIES_PAGE: "form.cq-siteadmin-admin-properties",
+        SELECTOR_FORM_PROPERTIES_PAGE: "form#propertiesform",
+
 
         isSelectOne: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "select-one");
@@ -211,8 +212,8 @@
             return $document.find(this.SELECTOR_FORM_SITES_PROPERTIES).length === 1;
         },
 
-        isSitesPropertiesPage: function($document) {
-            return $document.find(this.SELECTOR_FORM_SITES_PROPERTIES_PAGE).length === 1;
+        isPropertiesFormPage: function($document) {
+            return $document.find(this.SELECTOR_FORM_PROPERTIES_PAGE).length === 1;
         },
 
         isCreatePageWizard: function($document) {
@@ -220,8 +221,10 @@
         },
 
         getPropertiesFormSelector: function() {
-            return this.SELECTOR_FORM_CQ_DIALOG + "," + this.SELECTOR_FORM_SITES_PROPERTIES + "," + this.SELECTOR_FORM_CREATE_PAGE + "," + this.SELECTOR_FORM_SITES_PROPERTIES_PAGE;
-        }
+            return this.SELECTOR_FORM_CQ_DIALOG + "," + this.SELECTOR_FORM_SITES_PROPERTIES + "," +
+                this.SELECTOR_FORM_CREATE_PAGE + "," + this.SELECTOR_FORM_PROPERTIES_PAGE;
+        },
+
     });
 
     if (!ACS.TouchUI.extendedMultfield) {
