@@ -61,9 +61,16 @@
             parentPath = editComponent.getParent().path;
 
             cellSearchPath = cellSearchPath.substring(0, cellSearchPath.indexOf("|"));
-            parName = parentPath.substring(parentPath.lastIndexOf("/") + 1);
-            currentLimit = pageInfo.designObject.content[cellSearchPath][parName][ACS_COMPONENTS_LIMIT];
+            parNames = parentPath.split("jcr:content/");
+   			    parNames = parNames[1].split("/");
 
+   			    cellSearchPathInfo = pageInfo.designObject.content[cellSearchPath];
+
+            for(var i=0; i < parNames.length; i++){
+                   var prop = parNames[i];
+   				         cellSearchPathInfo = cellSearchPathInfo[prop];
+               }
+               currentLimit = cellSearchPathInfo[ACS_COMPONENTS_LIMIT];
             if(currentLimit){
                 isWithin = getSiblings(editComponent).length <= parseInt(currentLimit);
             }
