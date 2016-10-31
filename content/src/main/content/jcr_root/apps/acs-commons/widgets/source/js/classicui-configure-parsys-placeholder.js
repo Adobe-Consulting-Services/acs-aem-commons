@@ -57,7 +57,7 @@
 
     function getConfiguration(editComponent) {
         var pageInfo = CQ.utils.WCM.getPageInfo(editComponent.path),
-            designConfig = {}, cellSearchPath, parentPath, parName;
+            designConfig = {}, cellSearchPath, cellSearchPathInfo, parentPath, parNames;
 
         if (!pageInfo || !pageInfo.designObject) {
             return;
@@ -68,9 +68,15 @@
             parentPath = editComponent.getParent().path;
 
             cellSearchPath = cellSearchPath.substring(0, cellSearchPath.indexOf("|"));
-            parName = parentPath.substring(parentPath.lastIndexOf("/") + 1);
+            parNames = parentPath.split("jcr:content/");
+            parNames = parNames[1].split("/");
+            cellSearchPathInfo = pageInfo.designObject.content[cellSearchPath];
+            for(var i=0; i < parNames.length; i++){
+                var prop = parNames[i];
+                cellSearchPathInfo = cellSearchPathInfo[prop];
+            }
 
-            designConfig = pageInfo.designObject.content[cellSearchPath][parName];
+            designConfig = cellSearchPathInfo;
         } catch (err) {
             console.log("ACS AEM Commons - Error getting parsys configuration", err);
         }
