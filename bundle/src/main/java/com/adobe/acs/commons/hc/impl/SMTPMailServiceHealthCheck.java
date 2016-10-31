@@ -40,7 +40,9 @@ import java.util.*;
 
 @Component(metatype = true,
         label = "ACS AEM Commons - Health Check - SMTP E-Mail Service",
-        description = "Checks if the AEM E-Mail Service can connect and send mail via the configured SMTP server.")
+        description = "Checks if the AEM E-Mail Service can connect and send mail via the configured SMTP server.",
+        policy = ConfigurationPolicy.REQUIRE
+)
 @Properties({
         @Property(
                 name = HealthCheck.NAME,
