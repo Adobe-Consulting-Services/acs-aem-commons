@@ -333,6 +333,12 @@
             $document.on("click", "[form=cq-sites-properties-form]", function () {
                 compositeMultiField.collectDataFromFields();
             });
+        } else if(compositeMultiField.isSitesPropertiesPage($document)) {
+            compositeMultiField.addDataInFields();
+            var cmfFormId = $document.find(compositeMultiField.SELECTOR_FORM_SITES_PROPERTIES_PAGE).attr("id");
+            $document.on("click", ":submit[form=" + cmfFormId + "]", function () {
+                compositeMultiField.collectDataFromFields();
+            });
         } else if (compositeMultiField.isCreatePageWizard($document)) {
             $document.on("click", ".foundation-wizard-control[type='submit']", function () {
                 compositeMultiField.collectDataFromFields();
