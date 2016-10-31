@@ -49,8 +49,13 @@
 
         setSelectOne: function ($field, value) {
             var select = $field.closest(".coral-Select").data("select");
-
-            if (select) {
+            if(!select){
+                var dataInit = $field.closest('.coral-Select').data('init');
+                if(dataInit === 'graphiciconselect'){
+                    $field.val(value);
+                    $field.closest('.coral-Form-field').find('.selected-icon i').removeClass().addClass(value);
+                }
+            }else{
                 select.setValue(value);
             }
         },
