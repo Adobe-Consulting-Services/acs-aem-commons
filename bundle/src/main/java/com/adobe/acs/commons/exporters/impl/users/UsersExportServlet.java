@@ -22,6 +22,7 @@ package com.adobe.acs.commons.exporters.impl.users;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.text.csv.Csv;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
@@ -41,7 +42,16 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
 
@@ -55,12 +65,13 @@ import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
 public class UsersExportServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(UsersExportServlet.class);
 
-    private static final String QUERY = "SELECT * FROM [rep:User] WHERE ISDESCENDANTNODE([/home/users])";
+    private static final String QUERY = "SELECT * FROM [rep:User] WHERE ISDESCENDANTNODE([/home/users]) ORDER BY [rep:principalName]";
     private static final String GROUP_DELIMITER = "|";
 
     /**
      * Generates a CSV file representing the User Data.
-     * @param request the Sling HTTP Request object
+     *
+     * @param request  the Sling HTTP Request object
      * @param response the Sling HTTP Response object
      * @throws IOException
      * @throws ServletException
@@ -84,19 +95,21 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
 
         final Iterator<Resource> resources = request.getResourceResolver().findResources(QUERY, Query.JCR_SQL2);
 
-        List<CsvUser> csvUsers = new ArrayList<CsvUser>();
+        // Using a HashMap to satisfy issue with duplicate results in AEM 6.1 GA
+        HashMap<String, CsvUser> csvUsers = new LinkedHashMap<String, CsvUser>();
 
         while (resources.hasNext()) {
             try {
                 Resource resource = resources.next();
                 CsvUser csvUser = new CsvUser(resource);
 
-                if (checkGroups(parameters.getGroups(), parameters.getGroupFilter(), csvUser)) {
-                    csvUsers.add(csvUser);
+                if (!csvUsers.containsKey(csvUser.getPath())
+                        && checkGroups(parameters.getGroups(), parameters.getGroupFilter(), csvUser)) {
+                    csvUsers.put(csvUser.getPath(), csvUser);
                 }
 
             } catch (RepositoryException e) {
-                log.error("Unable to extract a user from [ {} ]", e);
+                log.error("Unable to extract a user from resource.", e);
             }
         }
 
@@ -119,7 +132,7 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
 
         csv.writeRow(columns.toArray(new String[columns.size()]));
 
-        for (final CsvUser csvUser : csvUsers) {
+        for (final CsvUser csvUser : csvUsers.values()) {
             List<String> values = new ArrayList<String>();
             try {
                 values.add(csvUser.getPath());
@@ -149,34 +162,42 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
 
     /**
      * Determines if the user should be included based on the specified group filter type, and requested groups.
-     * @param groups the groups
+     *
+     * @param groups      the groups
      * @param groupFilter the groupFilter
-     * @param csvUser the user
+     * @param csvUser     the user
      * @return true if the user should be included.
      */
-    private boolean checkGroups(String[] groups, String groupFilter, CsvUser csvUser) {
-        if (groups != null && groups.length > 0) {
+    protected boolean checkGroups(String[] groups, String groupFilter, CsvUser csvUser) throws RepositoryException {
+        log.debug("Group Filter: {}", groupFilter);
+        if (!ArrayUtils.isEmpty(groups)) {
             if (GROUP_FILTER_DIRECT.equals(groupFilter) && csvUser.isInDirectGroup(groups)) {
+                log.debug("Adding [ {} ] via [ Direct ] membership", csvUser.getID());
                 return true;
             } else if (GROUP_FILTER_INDIRECT.equals(groupFilter) && csvUser.isInIndirectGroup(groups)) {
+                log.debug("Adding [ {} ] via [ Indirect ] membership", csvUser.getID());
                 return true;
-            } else if (csvUser.isInDirectGroup(groups) || csvUser.isInIndirectGroup(groups)) {
+            } else if (GROUP_FILTER_BOTH.equals(groupFilter)
+                    && (csvUser.isInDirectGroup(groups) || csvUser.isInIndirectGroup(groups))) {
+                log.debug("Adding [ {} ] via [ Direct OR Indirect ] membership", csvUser.getID());
                 return true;
             }
 
             return false;
         }
+
+        log.debug("Adding [ {} ] as no groups were specified to specify membership filtering.", csvUser.getID());
         return true;
     }
 
     /**
      * Internal class representing a user that will be exported in CSV format.
      */
-    private static class CsvUser {
+    protected static class CsvUser {
         private final ValueMap properties;
-        private List<String> declaredGroups = new ArrayList<String>();
-        private List<String> transitiveGroups = new ArrayList<String>();
-        private List<String> allGroups = new ArrayList<String>();
+        private Set<String> declaredGroups = new LinkedHashSet<String>();
+        private Set<String> transitiveGroups = new LinkedHashSet<String>();
+        private Set<String> allGroups = new LinkedHashSet<String>();
         private Authorizable authorizable;
         private String email;
         private String firstName;
@@ -194,9 +215,13 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
             this.properties = resource.getValueMap();
 
             this.authorizable = userManager.getAuthorizableByPath(resource.getPath());
+
             this.declaredGroups = getGroupIds(authorizable.declaredMemberOf());
             this.transitiveGroups = getGroupIds(authorizable.memberOf());
+
             this.allGroups.addAll(this.transitiveGroups);
+            this.allGroups.addAll(this.declaredGroups);
+
             this.transitiveGroups.removeAll(this.declaredGroups);
 
             this.firstName = properties.get("profile/givenName", "");
@@ -207,15 +232,15 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
         }
 
         public List<String> getDeclaredGroups() {
-            return declaredGroups;
+            return new ArrayList<String>(declaredGroups);
         }
 
         public List<String> getTransitiveGroups() {
-            return transitiveGroups;
+            return new ArrayList<String>(transitiveGroups);
         }
 
         public List<String> getAllGroups() {
-            return allGroups;
+            return new ArrayList<String>(allGroups);
         }
 
         public String getPath() throws RepositoryException {
@@ -226,7 +251,7 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
             return authorizable.getID();
         }
 
-        private List<String> getGroupIds(Iterator<Group> groups) throws RepositoryException {
+        private Set<String> getGroupIds(Iterator<Group> groups) throws RepositoryException {
             final List<String> groupIDs = new ArrayList<String>();
 
             while (groups.hasNext()) {
@@ -235,7 +260,7 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
 
             Collections.sort(groupIDs);
 
-            return groupIDs;
+            return new LinkedHashSet<String>(groupIDs);
         }
 
         public String getFirstName() {
