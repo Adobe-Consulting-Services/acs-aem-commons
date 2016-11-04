@@ -79,6 +79,9 @@
         </table>
     </div>
 
+    <br/>
+    <br/>
+
     <div class="coral-Form-fieldwrapper">
         <label class="coral-Form-fieldlabel">Only Include Users by Group Membership</label>
         <select
