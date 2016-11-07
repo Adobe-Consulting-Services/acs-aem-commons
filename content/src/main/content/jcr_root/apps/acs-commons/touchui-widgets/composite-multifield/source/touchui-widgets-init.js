@@ -189,7 +189,7 @@
 
             function show($el, message){
                 /* jshint validthis: true */
-                this.clear($el);
+                clear($el);
 
                 var $multifield = $el.closest(".coral-Multifield"),
                     arrow = $el.closest("form").hasClass("coral-Form--vertical") ? "right" : "top";
