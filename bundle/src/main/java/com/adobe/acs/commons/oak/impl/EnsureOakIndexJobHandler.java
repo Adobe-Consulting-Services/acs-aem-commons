@@ -372,7 +372,6 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
         final ValueMap ensureDefinitionProperties = ensureDefinition.getValueMap();
         final Resource oakIndex = oakIndexes.getChild(ensureDefinition.getName());
-        final ModifiableValueMap oakIndexProperties = oakIndex.adaptTo(ModifiableValueMap.class);
 
         final Node oakIndexNode = oakIndex.adaptTo(Node.class);
         final Node ensureDefinitionNode = ensureDefinition.adaptTo(Node.class);
