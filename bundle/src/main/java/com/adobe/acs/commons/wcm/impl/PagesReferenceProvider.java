@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.day.cq.wcm.api.NameConstants;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -43,6 +44,8 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
 import com.day.cq.wcm.api.reference.ReferenceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ACS AEM Commons - Pages Reference Provider
@@ -51,6 +54,8 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
 @Component(policy = ConfigurationPolicy.REQUIRE)
 @Service
 public final class PagesReferenceProvider implements ReferenceProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PagesReferenceProvider.class);
 
     private static final String TYPE_PAGE = "page";
     private static final String DEFAULT_PAGE_ROOT_PATH = "/content/";
@@ -80,6 +85,11 @@ public final class PagesReferenceProvider implements ReferenceProvider {
     public List<Reference> findReferences(Resource resource) {
         List<Reference> references = new ArrayList<Reference>();
 
+        if (!searchResource(resource)) {
+            LOGGER.warn("Skipping reference check for resource [{}]", resource);
+            return references;
+        }
+
         ResourceResolver resolver = resource.getResourceResolver();
         PageManager pageManager = resolver.adaptTo(PageManager.class);
 
@@ -91,6 +101,17 @@ public final class PagesReferenceProvider implements ReferenceProvider {
         }
 
         return references;
+    }
+
+    private boolean searchResource(Resource resourceToCheck) {
+        if (resourceToCheck == null) {
+            return false;
+        }
+        if (NameConstants.NN_CONTENT.equals(resourceToCheck.getName())) {
+            resourceToCheck = resourceToCheck.getParent();
+        }
+
+        return resourceToCheck.adaptTo(Page.class) != null;
     }
 
     private void search(Resource resource, Set<Page> pages, PageManager pageManager) {

@@ -52,6 +52,10 @@ public class PagesReferenceProviderTest {
 
     @Mock
     private Resource resource;
+    @Mock
+    private Resource parent;
+    @Mock
+    private Page parentPage;
 
     @Mock
     private ResourceResolver resolver;
@@ -94,6 +98,9 @@ public class PagesReferenceProviderTest {
         when(referredpage.getName()).thenReturn("geometrixx");
         Calendar cal = GregorianCalendar.getInstance();
         when(referredpage.getLastModified()).thenReturn(cal);
+        when(resource.getName()).thenReturn("jcr:content");
+        when(resource.getParent()).thenReturn(parent);
+        when(parent.adaptTo(Page.class)).thenReturn(parentPage);
     }
 
     @Test
@@ -233,5 +240,15 @@ public class PagesReferenceProviderTest {
         assertTrue(geometrixxFound);
         assertTrue(geometrixxOneFound);
 
+    }
+
+
+    @Test
+    public void testOnlyPageResourceIsChecked() throws Exception {
+        when(parent.adaptTo(Page.class)).thenReturn(null);
+
+        List<Reference> actual = instance.findReferences(resource);
+        assertNotNull(actual);
+        assertEquals(0, actual.size());
     }
 }
