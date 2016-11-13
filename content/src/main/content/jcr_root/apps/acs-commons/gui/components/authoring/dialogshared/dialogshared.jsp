@@ -1,20 +1,26 @@
-<%@ page import="javax.jcr.Session" %>
-<%@ page import="com.day.cq.commons.jcr.JcrUtil" %>
-<%@page session="false"%>
-<%@taglib prefix="sling" uri="http://sling.apache.org/taglibs/sling" %>
+<%@ page session="false"
+         import="javax.jcr.Session,
+                 org.apache.jackrabbit.JcrConstants,
+                 com.day.cq.commons.jcr.JcrUtil" %><%
+%><%@taglib prefix="sling" uri="http://sling.apache.org/taglibs/sling" %><%
 
-<sling:defineObjects />
+%><sling:defineObjects /><%
 
-<%
     String dialogSharedDataPath = slingRequest.getRequestPathInfo().getSuffix();
     Session dialogSharedSession = resourceResolver.adaptTo(Session.class);
 
-    // Ensure the path exists in the JCR so that we don't get a NPE
-    // when attempting to load the dialog.
+    /**
+     * This is an unusual case where we must write a node on a read (GET) to ensure that the the OOTB dialog
+     * implementation does not NPE.
+     *
+     * SharedComponentPropsPageInfoProvider checks if the current user has permissions to write that node, and if not
+     * then flags the shared component properties feature as disabled, which in turn makes it so the UI does not give
+     * the user the buttons to configure shared/global configs (and thus they will not hit this code).
+     **/
+
     if (!dialogSharedSession.nodeExists(dialogSharedDataPath)) {
-        JcrUtil.createPath(dialogSharedDataPath, "nt:unstructured", "nt:unstructured", dialogSharedSession, false);
+        JcrUtil.createPath(dialogSharedDataPath,  JcrConstants.NT_UNSTRUCTURED, JcrConstants.NT_UNSTRUCTURED, dialogSharedSession, false);
         dialogSharedSession.save();
     }
-%>
 
-<%@include file="/libs/cq/gui/components/authoring/dialog/dialog.jsp" %>
+%><%@include file="/libs/cq/gui/components/authoring/dialog/dialog.jsp" %>

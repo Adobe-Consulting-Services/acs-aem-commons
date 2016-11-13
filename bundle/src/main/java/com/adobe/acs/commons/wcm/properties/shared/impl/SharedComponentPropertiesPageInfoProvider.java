@@ -17,12 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm.impl;
+package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
+import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageInfoProvider;
-import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -43,13 +43,16 @@ import javax.jcr.security.Privilege;
  * are enabled.  Note that this provider requires Page Root Provider to
  * be configured.
  */
-@Component
+@org.apache.felix.scr.annotations.Component
 @Service
-public class SharedComponentPropsPageInfoProvider implements PageInfoProvider {
-    private static final Logger log = LoggerFactory.getLogger(SharedComponentPropsPageInfoProvider.class);
+public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvider {
+    private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesPageInfoProvider.class);
 
     @Reference
     private PageRootProvider pageRootProvider;
+
+    @Reference
+    private SharedComponentProperties sharedComponentProperties;
 
     @Override
     public void updatePageInfo(SlingHttpServletRequest request, JSONObject info, Resource resource)
@@ -72,8 +75,8 @@ public class SharedComponentPropsPageInfoProvider implements PageInfoProvider {
                         props.put("enabled", true);
                         props.put("root", page.getPath());
                     }
-                } catch (RepositoryException re) {
-                    log.error("Unexpected error checking permissions to modify shared component properties", re);
+                } catch (RepositoryException e) {
+                    log.error("Unexpected error checking permissions to modify shared component properties", e);
                 }
             }
         } else {
@@ -81,5 +84,4 @@ public class SharedComponentPropsPageInfoProvider implements PageInfoProvider {
         }
         info.put("sharedComponentProperties", props);
     }
-
 }

@@ -12,7 +12,7 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
  * component instance-level properties to the pageContext of a JSP,
  * but it instead adds globalProperties, sharedProperties, and
  * mergedProperties maps that come from
- * com.adobe.acs.commons.wcm.impl.SharedComponentPropertiesBindingsValuesProvider
+ * com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider
  */
 @ProviderType
 @Tag(bodyContentType = BodyContentType.JSP, value = "defineObjects")
