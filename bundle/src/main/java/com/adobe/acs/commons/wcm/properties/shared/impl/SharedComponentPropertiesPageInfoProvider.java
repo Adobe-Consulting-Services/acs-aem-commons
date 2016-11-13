@@ -42,6 +42,8 @@ import javax.jcr.security.Privilege;
  * PageInfoProvider which indicates that shared component properties
  * are enabled.  Note that this provider requires Page Root Provider to
  * be configured.
+ *
+ * https://docs.adobe.com/docs/en/cq/5-6-1/developing/pageinfo.html#Creating a Page Information Provider
  */
 @org.apache.felix.scr.annotations.Component
 @Service
@@ -61,27 +63,28 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
         JSONObject props = new JSONObject();
         props.put("enabled", false);
 
-        if (pageRootProvider != null) {
-            Page page = pageRootProvider.getRootPage(resource);
-            if (page != null) {
-                Session session = request.getResourceResolver().adaptTo(Session.class);
-                try {
-                    AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
-                    Privilege privilegeAddChild = accessControlManager.privilegeFromName("jcr:addChildNodes");
-                    Privilege privilegeModifyProps = accessControlManager.privilegeFromName("jcr:modifyProperties");
-                    Privilege[] requiredPrivs = new Privilege[] {privilegeAddChild, privilegeModifyProps};
+        Page page = pageRootProvider.getRootPage(resource);
+        if (page != null) {
+            Session session = request.getResourceResolver().adaptTo(Session.class);
+            try {
+                AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
+                Privilege privilegeAddChild = accessControlManager.privilegeFromName("jcr:addChildNodes");
+                Privilege privilegeModifyProps = accessControlManager.privilegeFromName("jcr:modifyProperties");
+                Privilege[] requiredPrivs = new Privilege[] {privilegeAddChild, privilegeModifyProps};
 
-                    if (accessControlManager.hasPrivileges(page.getPath() + "/jcr:content", requiredPrivs)) {
-                        props.put("enabled", true);
-                        props.put("root", page.getPath());
-                    }
-                } catch (RepositoryException e) {
-                    log.error("Unexpected error checking permissions to modify shared component properties", e);
+                if (accessControlManager.hasPrivileges(page.getPath() + "/jcr:content", requiredPrivs)) {
+                    props.put("enabled", true);
+                    props.put("root", page.getPath());
+                } else {
+                    log.debug("User does not have [ {} ] on [ {} ]", requiredPrivs, page.getPath() + "/jcr:content");
                 }
+            } catch (RepositoryException e) {
+                log.error("Unexpected error checking permissions to modify shared component properties", e);
             }
         } else {
-            log.warn("Page Root Provider must be configured for shared component properties to be supported");
+            log.debug("No Page Root could be found for [ {} ]", resource.getPath());
         }
+
         info.put("sharedComponentProperties", props);
     }
 }
