@@ -22,7 +22,6 @@ package com.adobe.acs.commons.wcm.impl;
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -86,9 +85,7 @@ public class PageRootProviderImpl implements PageRootProvider {
             final Matcher matcher = pattern.matcher(resourcePath);
 
             if (matcher.find()) {
-                String tmp = StringUtils.trim(matcher.group(1));
-                tmp = org.apache.commons.lang.StringUtils.removeEnd(tmp, "/");
-                return tmp;
+                return matcher.group(1);
             }
         }
 
@@ -102,7 +99,7 @@ public class PageRootProviderImpl implements PageRootProvider {
 
         for(String regex : regexes) {
             try {
-                Pattern p = Pattern.compile("^(" + regex + ")");
+                Pattern p = Pattern.compile("^(" + regex + ")(|/.*)$");
                 pageRootPatterns.add(p);
                 log.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p.toString());
             } catch (Exception e) {

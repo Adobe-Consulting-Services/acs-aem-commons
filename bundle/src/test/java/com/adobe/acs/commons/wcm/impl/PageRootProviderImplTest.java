@@ -14,15 +14,15 @@ public class PageRootProviderImplTest {
 
     @Test
     public void getRootPagePath() throws Exception {
-        config.put("page.root.path", new String[]{"/content/"});
+        config.put("page.root.path", new String[]{"/content"});
         provider.activate(config);
 
         assertEquals("/content", provider.getRootPagePath("/content/site/en_us/products/product-x"));
         assertEquals("/content", provider.getRootPagePath("/content/site/en_us/products/product-x/jcr:content/my-component"));
         assertEquals("/content", provider.getRootPagePath("/content/site/en_us"));
         assertEquals("/content", provider.getRootPagePath("/content/"));
+        assertEquals("/content", provider.getRootPagePath("/content"));
 
-        assertNull("/content", provider.getRootPagePath("/content"));
         assertNull("/content", provider.getRootPagePath("/etc/site"));
         assertNull("/content", provider.getRootPagePath("/conf/site"));
     }
@@ -39,6 +39,18 @@ public class PageRootProviderImplTest {
         assertNull(provider.getRootPagePath("/content"));
         assertNull(provider.getRootPagePath("/content/en_us/products"));
         assertNull(provider.getRootPagePath("/content/123/site"));
+    }
+
+    @Test
+    public void getRootPagePath_RegexEnd() throws Exception {
+        config.put("page.root.path", new String[]{"/content/site/[a-z]{2}"});
+        provider.activate(config);
+
+        assertEquals("/content/site/en", provider.getRootPagePath("/content/site/en/products/product-x"));
+        assertEquals("/content/site/de", provider.getRootPagePath("/content/site/de"));
+
+        assertNull(provider.getRootPagePath("/content/site/en_us/products"));
+        assertNull(provider.getRootPagePath("/content/site/somewhereelse"));
     }
 
     @Test
