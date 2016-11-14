@@ -1,1 +1,2 @@
+#base=js
 shared-component-properties-classic.js
