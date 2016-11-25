@@ -91,12 +91,10 @@ public final class VersionedClientlibsTransformerFactory implements TransformerF
     }
 
     private boolean isCSS(final String elementName, final Attributes attrs) {
-        final String rel = attrs.getValue("", "rel");
         final String type = attrs.getValue("", "type");
         final String href = attrs.getValue("", "href");
 
         if (StringUtils.equals("link", elementName)
-                && StringUtils.equals(rel, "stylesheet")
                 && StringUtils.equals(type, CSS_TYPE)
                 && StringUtils.startsWith(href, "/")
                 && !StringUtils.startsWith(href, "//")
