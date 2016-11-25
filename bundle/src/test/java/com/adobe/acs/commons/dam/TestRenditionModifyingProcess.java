@@ -25,6 +25,7 @@ import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.image.Layer;
+import org.apache.sling.commons.mime.MimeTypeService;
 
 public class TestRenditionModifyingProcess extends AbstractRenditionModifyingProcess {
 
@@ -41,7 +42,7 @@ public class TestRenditionModifyingProcess extends AbstractRenditionModifyingPro
     }
 
     @Override
-    void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality)
+    void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality, MimeTypeService mimeTypeService)
             throws IOException {
         this.harness.saveImage(asset, toReplace, layer, mimetype, quality);
     }

@@ -28,7 +28,8 @@ import javax.jcr.Session;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.jcr.resource.JcrResourceResolverFactory;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.mime.MimeTypeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +43,6 @@ import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.api.RenditionPicker;
-import com.day.cq.dam.commons.process.AbstractAssetWorkflowProcess;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowData;
@@ -67,7 +67,10 @@ public class RenditionModifyingProcessTest {
     private ResourceResolver resourceResolver;
 
     @Mock
-    private JcrResourceResolverFactory jcrFactory;
+    private ResourceResolverFactory resourceResolverFactory;
+
+    @Mock
+    private MimeTypeService mimeTypeService;
 
     @Mock
     private TestHarness harness;
@@ -76,9 +79,9 @@ public class RenditionModifyingProcessTest {
     private TestRenditionModifyingProcess process;
 
     @Before
-    public void setupSession() {
+    public void setupSession() throws Exception {
         when(workflowSession.getSession()).thenReturn(session);
-        when(jcrFactory.getResourceResolver(session)).thenReturn(resourceResolver);
+        when(resourceResolverFactory.getResourceResolver(anyMap())).thenReturn(resourceResolver);
     }
 
     @Test
@@ -86,7 +89,7 @@ public class RenditionModifyingProcessTest {
         WorkItem workItem = mock(WorkItem.class);
         MetaDataMap metaData = new SimpleMetaDataMap();
 
-        process.execute(workItem, workflowSession, metaData);
+        process.execute(workItem, workflowSession, metaData, resourceResolverFactory, mimeTypeService);
 
         verifyZeroInteractions(harness);
     }
@@ -97,7 +100,7 @@ public class RenditionModifyingProcessTest {
         MetaDataMap metaData = new SimpleMetaDataMap();
         metaData.put("PROCESS_ARGS", "");
 
-        process.execute(workItem, workflowSession, metaData);
+        process.execute(workItem, workflowSession, metaData, resourceResolverFactory, mimeTypeService);
 
         verifyZeroInteractions(harness);
     }
@@ -109,7 +112,7 @@ public class RenditionModifyingProcessTest {
         WorkItem workItem = mock(WorkItem.class);
         WorkflowData data = mock(WorkflowData.class);
         when(workItem.getWorkflowData()).thenReturn(data);
-        when(data.getPayloadType()).thenReturn(AbstractAssetWorkflowProcess.TYPE_JCR_PATH);
+        when(data.getPayloadType()).thenReturn(AssetWorkflowHelper.TYPE_JCR_PATH);
         when(data.getPayload()).thenReturn(path);
 
         Resource resource = mock(Resource.class);
@@ -122,7 +125,7 @@ public class RenditionModifyingProcessTest {
         MetaDataMap metaData = new SimpleMetaDataMap();
         metaData.put("PROCESS_ARGS", "renditionName:test");
 
-        process.execute(workItem, workflowSession, metaData);
+        process.execute(workItem, workflowSession, metaData, resourceResolverFactory, mimeTypeService);
 
         verifyZeroInteractions(harness);
     }
@@ -134,7 +137,7 @@ public class RenditionModifyingProcessTest {
         WorkItem workItem = mock(WorkItem.class);
         WorkflowData data = mock(WorkflowData.class);
         when(workItem.getWorkflowData()).thenReturn(data);
-        when(data.getPayloadType()).thenReturn(AbstractAssetWorkflowProcess.TYPE_JCR_PATH);
+        when(data.getPayloadType()).thenReturn(AssetWorkflowHelper.TYPE_JCR_PATH);
         when(data.getPayload()).thenReturn(path);
 
         Resource resource = mock(Resource.class);
@@ -165,7 +168,7 @@ public class RenditionModifyingProcessTest {
         MetaDataMap metaData = new SimpleMetaDataMap();
         metaData.put("PROCESS_ARGS", "renditionName:test");
 
-        process.execute(workItem, workflowSession, metaData);
+        process.execute(workItem, workflowSession, metaData, resourceResolverFactory, mimeTypeService);
 
         verify(harness, times(1)).processLayer(any(Layer.class), eq(rendition), eq(workflowSession), any(String[].class));
         verify(harness, times(1)).saveImage(eq(asset), eq(rendition), any(Layer.class), eq("image/png"), eq(0.6));

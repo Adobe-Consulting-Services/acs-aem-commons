@@ -22,13 +22,19 @@ package com.adobe.acs.commons.dam.impl;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.jcr.Session;
-
+import com.adobe.acs.commons.dam.AssetWorkflowHelper;
+import com.day.cq.workflow.WorkflowException;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowProcess;
+import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.mime.MimeTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +42,7 @@ import com.adobe.acs.commons.dam.AbstractRenditionModifyingProcess;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.image.Layer;
+import static com.adobe.acs.commons.dam.AssetWorkflowHelper.getValuesFromArgs;
 
 /**
  * Workflow process which adds a watermark to a rendition. Watermarks will always be anchored in the bottom left corner.
@@ -48,9 +55,15 @@ import com.day.image.Layer;
 @Component
 @Service
 @Property(name = "process.label", value = "Add Watermark to Rendition")
-public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess {
+public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 
     private static ConcurrentMap<String, Object> watermarkLogCache = new ConcurrentHashMap<String, Object>();
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
+    @Reference
+    private MimeTypeService mimeTypeService;
 
     private static void logMissingWatermark(final String path) {
         if (watermarkLogCache.putIfAbsent(path, new Object()) == null) {
@@ -74,9 +87,14 @@ public final class AddWatermarkToRenditionProcess extends AbstractRenditionModif
                 watermark.getHeight(), 0, 0);
     }
 
-    private Layer getLayer(String path, Session session) {
+    @Override
+    public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
+        execute(workItem, workflowSession, metaDataMap, resourceResolverFactory, mimeTypeService);
+    }
+
+    private Layer getLayer(String path, WorkflowSession session) {
         if (path != null) {
-            ResourceResolver resolver = getResourceResolver(session);
+            ResourceResolver resolver = AssetWorkflowHelper.getResourceResolver(session, resourceResolverFactory);
             Resource resource = resolver.getResource(path);
             if (resource != null) {
                 Layer layer = resource.adaptTo(Layer.class);
@@ -105,7 +123,7 @@ public final class AddWatermarkToRenditionProcess extends AbstractRenditionModif
         if (watermarkPath != null) {
             Layer watermark = null;
             try {
-                watermark = getLayer(watermarkPath, workflowSession.getSession());
+                watermark = getLayer(watermarkPath, workflowSession);
 
                 if (watermark != null) {
                     addWatermark(layer, watermark);

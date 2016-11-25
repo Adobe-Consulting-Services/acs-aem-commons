@@ -21,9 +21,16 @@ package com.adobe.acs.commons.dam.impl;
 
 import java.awt.Color;
 
+import com.day.cq.workflow.WorkflowException;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowProcess;
+import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.mime.MimeTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +38,7 @@ import com.adobe.acs.commons.dam.AbstractRenditionModifyingProcess;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.image.Layer;
+import static com.adobe.acs.commons.dam.AssetWorkflowHelper.getValuesFromArgs;
 
 /**
  * Workflow process which mattes an image against a solid background to the specified size.
@@ -38,7 +46,7 @@ import com.day.image.Layer;
 @Component(metatype = false)
 @Service
 @Property(name = "process.label", value = "Matte Rendition")
-public final class MatteRenditionProcess extends AbstractRenditionModifyingProcess {
+public final class MatteRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 
     private static final int RADIX_HEX = 16;
     private static final int COLOR_STRING_LENGTH = 6;
@@ -55,6 +63,17 @@ public final class MatteRenditionProcess extends AbstractRenditionModifyingProce
     }
 
     private static final String SPECIFIER = "matte";
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
+    @Reference
+    private MimeTypeService mimeTypeService;
+
+    @Override
+    public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
+        execute(workItem, workflowSession, metaDataMap, resourceResolverFactory, mimeTypeService);
+    }
 
     @Override
     protected String getTempFileSpecifier() {

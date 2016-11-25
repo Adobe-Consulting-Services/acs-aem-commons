@@ -26,8 +26,12 @@ import java.io.OutputStream;
 
 import javax.imageio.IIOException;
 
+import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.workflow.exec.WorkflowProcess;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.mime.MimeTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +39,14 @@ import aQute.bnd.annotation.ConsumerType;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
-import com.day.cq.dam.commons.process.AbstractAssetWorkflowProcess;
 import com.day.cq.dam.commons.util.PrefixRenditionPicker;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.image.Layer;
+
+import static com.adobe.acs.commons.dam.AssetWorkflowHelper.*;
 
 /**
  * Abstract asset workflow which performs some action on a particular rendition
@@ -54,13 +59,11 @@ import com.day.image.Layer;
  *
  */
 @ConsumerType
-public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWorkflowProcess {
+public abstract class AbstractRenditionModifyingProcess {
 
     private static final int MAX_GIF_QUALITY = 255;
 
     private static final String DEFAULT_QUALITY = "60";
-
-    private static final int MAX_GENERIC_QUALITY = 100;
 
     private static final String ARG_QUALITY = "quality";
 
@@ -71,8 +74,8 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
      */
     private static final Logger log = LoggerFactory.getLogger(AbstractRenditionModifyingProcess.class);
 
-    @Override
-    public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaData)
+    public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaData, ResourceResolverFactory resourceResolverFactory,
+                              MimeTypeService mimeTypeService)
             throws WorkflowException {
         String[] args = buildArguments(metaData);
 
@@ -88,11 +91,14 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
             return;
         }
 
-        final Asset asset = getAssetFromPayload(workItem, workflowSession.getSession());
-        final Rendition rendition = asset.getRendition(new PrefixRenditionPicker(renditionName));
+        final AssetResourceResolverPair pair = getAssetFromPayload(workItem, workflowSession, resourceResolverFactory);
+        if (pair == null) {
+            return;
+        }
+        final Rendition rendition = pair.asset.getRendition(new PrefixRenditionPicker(renditionName));
 
         if (rendition == null) {
-            log.warn("Rendition name {} was not available for asset {}. Skipping.", renditionName, asset);
+            log.warn("Rendition name {} was not available for asset {}. Skipping.", renditionName, pair.asset);
             return;
         }
 
@@ -106,7 +112,7 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
             double quality = mimetype.equals("image/gif") ? getQuality(MAX_GIF_QUALITY, qualityStr) : getQuality(1.0,
                     qualityStr);
 
-            saveImage(asset, rendition, layer, mimetype, quality);
+            saveImage(pair.asset, rendition, layer, mimetype, quality, mimeTypeService);
         } catch (IIOException e) {
             log.warn("Unable to load image layer from " + rendition.getPath(), e);
         } catch (IOException e) {
@@ -116,23 +122,14 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
                 layer.dispose();
                 layer = null;
             }
+            pair.resourceResolver.close();
         }
 
     }
 
-    private String[] buildArguments(MetaDataMap metaData) {
-        // the 'old' way, ensures backward compatibility
-        String processArgs = metaData.get("PROCESS_ARGS", String.class);
-        if (processArgs != null && !processArgs.equals("")) {
-            return processArgs.split(",");
-        } else {
-            return new String[0];
-        }
-    }
-
-    void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality)
+    void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality, MimeTypeService mimeTypeService)
             throws IOException {
-        File tmpFile = File.createTempFile(getTempFileSpecifier(), "." + getExtension(mimetype));
+        File tmpFile = File.createTempFile(getTempFileSpecifier(), "." + getExtension(mimetype, mimeTypeService));
         OutputStream out = FileUtils.openOutputStream(tmpFile);
         InputStream is = null;
         try {
@@ -146,31 +143,6 @@ public abstract class AbstractRenditionModifyingProcess extends AbstractAssetWor
         }
     }
 
-    /**
-     * Return the extension corresponding to the mime type.
-     * 
-     * @param mimetype the mimetype
-     * @return the corresponding extension
-     */
-    protected final String getExtension(String mimetype) {
-        return mimeTypeService.getExtension(mimetype);
-    }
-
-    /**
-     * Parse the provided quality string, from 1 to 100, and
-     * apply it to the base. Allows for a constant scale to be used
-     * and applied to different image types which support different
-     * quality scales.
-     * 
-     * @param base the maximal quality value
-     * @param qualityStr the string to parse
-     * @return a usable quality value
-     */
-    protected final double getQuality(double base, String qualityStr) {
-        int q = Integer.parseInt(qualityStr);
-        double res = base * q / MAX_GENERIC_QUALITY;
-        return res;
-    }
 
     /**
      * Create a specifier to be used for temporary file location.

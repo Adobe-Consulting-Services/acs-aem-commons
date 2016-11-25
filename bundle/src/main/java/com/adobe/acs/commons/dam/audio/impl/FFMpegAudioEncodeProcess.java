@@ -27,8 +27,8 @@ import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
+import com.adobe.acs.commons.dam.AssetWorkflowHelper;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.dam.commons.process.AbstractAssetWorkflowProcess;
 import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.exec.WorkItem;
@@ -40,6 +40,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +61,10 @@ import static com.day.cq.dam.api.DamConstants.METADATA_FOLDER;
 @Component
 @Service(WorkflowProcess.class)
 @Properties({ @Property(name = "process.label", value = "Encode Audio") })
-public final class FFMpegAudioEncodeProcess extends AbstractAssetWorkflowProcess implements AudioHelper.AudioProcessor<MetaDataMap, Void> {
+public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHelper.AudioProcessor<MetaDataMap, Void> {
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     private AudioHelper helper;
@@ -77,33 +81,34 @@ public final class FFMpegAudioEncodeProcess extends AbstractAssetWorkflowProcess
     }
 
     @SuppressWarnings("PMD.CollapsibleIfStatements")
+    @Override
     public final void execute(WorkItem workItem, WorkflowSession wfSession, MetaDataMap metaData)
             throws WorkflowException {
 
-        final Asset asset = getAssetFromPayload(workItem, wfSession.getSession());
+        final AssetWorkflowHelper.AssetResourceResolverPair pair = AssetWorkflowHelper.getAssetFromPayload(workItem, wfSession, resourceResolverFactory);
 
-        final ResourceResolver resolver = getResourceResolver(wfSession.getSession());
-
-        if (asset == null) {
+        if (pair == null) {
             String wfPayload = workItem.getWorkflowData().getPayload().toString();
             String message = "execute: cannot process audio, asset [{" + wfPayload
                     + "}] in payload doesn't exist for workflow [{" + workItem.getId() + "}].";
             throw new WorkflowException(message);
         }
 
-        final String assetMimeType = asset.getMimeType();
+        final String assetMimeType = pair.asset.getMimeType();
         if (assetMimeType == null || !assetMimeType.startsWith("audio/")) {
-            if (!asset.getName().endsWith(".wav") || !asset.getName().endsWith(".mp3")
-                    || !asset.getName().endsWith(".ogg")) {
-                log.info("execute: asset [{}] is not of a audio mime type, asset ignored.", asset.getPath());
+            if (!pair.asset.getName().endsWith(".wav") || !pair.asset.getName().endsWith(".mp3")
+                    || !pair.asset.getName().endsWith(".ogg")) {
+                log.info("execute: asset [{}] is not of a audio mime type, asset ignored.", pair.asset.getPath());
                 return;
             }
         }
 
         try {
-            helper.process(asset, resolver, metaData, this);
+            helper.process(pair.asset, pair.resourceResolver, metaData, this);
         } catch (AudioException e) {
             throw new WorkflowException("Unable to transcode audio", e);
+        } finally {
+            pair.resourceResolver.close();
         }
     }
 
@@ -169,7 +174,7 @@ public final class FFMpegAudioEncodeProcess extends AbstractAssetWorkflowProcess
     }
 
     public String[] getVideoProfiles(MetaDataMap metaData) {
-        List<String> profiles = getValuesFromArgs(Arguments.VIDEO_PROFILES.getArgumentName(), buildArguments(metaData));
+        List<String> profiles = AssetWorkflowHelper.getValuesFromArgs(Arguments.VIDEO_PROFILES.getArgumentName(), buildArguments(metaData));
         return profiles.toArray(new String[profiles.size()]);
     }
 

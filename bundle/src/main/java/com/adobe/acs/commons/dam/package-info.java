@@ -20,7 +20,7 @@
 /**
  * This package provides DAM utility classes.
  */
-@Version("1.2.0")
+@Version("2.0.0")
 @tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/dam", descriptorFile = "dam.tld")
 package com.adobe.acs.commons.dam;
 
