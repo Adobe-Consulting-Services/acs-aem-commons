@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Miscellaneous WCM Utilities.
+ * Shared Component Properties.
  */
-@aQute.bnd.annotation.Version("1.3.0")
-package com.adobe.acs.commons.wcm;
+@aQute.bnd.annotation.Version("1.0.0")
+package com.adobe.acs.commons.wcm.properties.shared;
