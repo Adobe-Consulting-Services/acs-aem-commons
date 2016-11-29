@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+          jcr:primaryType="rep:ACL">
+    <allow
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-wcm-inbox-cleanup-service"
+            rep:privileges="{Name}[jcr:read]"/>
+    <allow0
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-wcm-inbox-cleanup-service"
+            rep:privileges="{Name}[jcr:removeChildNodes]">
+        <rep:restrictions
+                jcr:primaryType="rep:Restrictions"
+                rep:glob="*/wcm/notification/inbox"/>
+    </allow0>
+    <allow1
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-wcm-inbox-cleanup-service"
+            rep:privileges="{Name}[jcr:removeNode]">
+        <rep:restrictions
+                jcr:primaryType="rep:Restrictions"
+                rep:glob="*/wcm/notification/inbox/*"/>
+    </allow1>
+</jcr:root>
