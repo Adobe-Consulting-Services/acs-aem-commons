@@ -26,6 +26,7 @@ import java.io.OutputStream;
 
 import javax.imageio.IIOException;
 
+import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import org.apache.commons.io.FileUtils;
@@ -45,8 +46,6 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.image.Layer;
-
-import static com.adobe.acs.commons.dam.AssetWorkflowHelper.*;
 
 /**
  * Abstract asset workflow which performs some action on a particular rendition
@@ -74,16 +73,15 @@ public abstract class AbstractRenditionModifyingProcess {
      */
     private static final Logger log = LoggerFactory.getLogger(AbstractRenditionModifyingProcess.class);
 
-    public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaData, ResourceResolverFactory resourceResolverFactory,
-                              MimeTypeService mimeTypeService)
+    public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaData, WorkflowHelper workflowHelper)
             throws WorkflowException {
-        String[] args = buildArguments(metaData);
+        String[] args = workflowHelper.buildArguments(metaData);
 
-        final String renditionName = getValuesFromArgs(ARG_RENDITION_NAME, args).size() > 0 ? getValuesFromArgs(
+        final String renditionName = workflowHelper.getValuesFromArgs(ARG_RENDITION_NAME, args).size() > 0 ? workflowHelper.getValuesFromArgs(
                 ARG_RENDITION_NAME, args).get(0) : null;
 
         // image quality: from 0 t0 100%
-        final String qualityStr = getValuesFromArgs(ARG_QUALITY, args).size() > 0 ? getValuesFromArgs(ARG_QUALITY, args)
+        final String qualityStr = workflowHelper.getValuesFromArgs(ARG_QUALITY, args).size() > 0 ? workflowHelper.getValuesFromArgs(ARG_QUALITY, args)
                 .get(0) : DEFAULT_QUALITY;
 
         if (renditionName == null) {
@@ -91,7 +89,7 @@ public abstract class AbstractRenditionModifyingProcess {
             return;
         }
 
-        final AssetResourceResolverPair pair = getAssetFromPayload(workItem, workflowSession, resourceResolverFactory);
+        final WorkflowHelper.AssetResourceResolverPair pair = workflowHelper.getAssetFromPayload(workItem, workflowSession);
         if (pair == null) {
             return;
         }
@@ -109,10 +107,10 @@ public abstract class AbstractRenditionModifyingProcess {
             layer = processLayer(layer, rendition, workflowSession, args);
 
             String mimetype = layer.getMimeType();
-            double quality = mimetype.equals("image/gif") ? getQuality(MAX_GIF_QUALITY, qualityStr) : getQuality(1.0,
+            double quality = mimetype.equals("image/gif") ? workflowHelper.getQuality(MAX_GIF_QUALITY, qualityStr) : workflowHelper.getQuality(1.0,
                     qualityStr);
 
-            saveImage(pair.asset, rendition, layer, mimetype, quality, mimeTypeService);
+            saveImage(pair.asset, rendition, layer, mimetype, quality, workflowHelper);
         } catch (IIOException e) {
             log.warn("Unable to load image layer from " + rendition.getPath(), e);
         } catch (IOException e) {
@@ -127,9 +125,9 @@ public abstract class AbstractRenditionModifyingProcess {
 
     }
 
-    void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality, MimeTypeService mimeTypeService)
+    void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality, WorkflowHelper workflowHelper)
             throws IOException {
-        File tmpFile = File.createTempFile(getTempFileSpecifier(), "." + getExtension(mimetype, mimeTypeService));
+        File tmpFile = File.createTempFile(getTempFileSpecifier(), "." + workflowHelper.getExtension(mimetype));
         OutputStream out = FileUtils.openOutputStream(tmpFile);
         InputStream is = null;
         try {

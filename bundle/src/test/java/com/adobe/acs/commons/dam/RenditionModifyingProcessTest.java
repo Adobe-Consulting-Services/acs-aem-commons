@@ -26,6 +26,8 @@ import java.io.InputStream;
 
 import javax.jcr.Session;
 
+import com.adobe.acs.commons.util.WorkflowHelper;
+import com.adobe.acs.commons.util.impl.WorkflowHelperImpl;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -69,8 +71,8 @@ public class RenditionModifyingProcessTest {
     @Mock
     private ResourceResolverFactory resourceResolverFactory;
 
-    @Mock
-    private MimeTypeService mimeTypeService;
+    @InjectMocks
+    private WorkflowHelper workflowHelper = new WorkflowHelperImpl();
 
     @Mock
     private TestHarness harness;
@@ -89,7 +91,7 @@ public class RenditionModifyingProcessTest {
         WorkItem workItem = mock(WorkItem.class);
         MetaDataMap metaData = new SimpleMetaDataMap();
 
-        process.execute(workItem, workflowSession, metaData, resourceResolverFactory, mimeTypeService);
+        process.execute(workItem, workflowSession, metaData, workflowHelper);
 
         verifyZeroInteractions(harness);
     }
@@ -100,7 +102,7 @@ public class RenditionModifyingProcessTest {
         MetaDataMap metaData = new SimpleMetaDataMap();
         metaData.put("PROCESS_ARGS", "");
 
-        process.execute(workItem, workflowSession, metaData, resourceResolverFactory, mimeTypeService);
+        process.execute(workItem, workflowSession, metaData, workflowHelper);
 
         verifyZeroInteractions(harness);
     }
@@ -112,7 +114,7 @@ public class RenditionModifyingProcessTest {
         WorkItem workItem = mock(WorkItem.class);
         WorkflowData data = mock(WorkflowData.class);
         when(workItem.getWorkflowData()).thenReturn(data);
-        when(data.getPayloadType()).thenReturn(AssetWorkflowHelper.TYPE_JCR_PATH);
+        when(data.getPayloadType()).thenReturn(WorkflowHelper.TYPE_JCR_PATH);
         when(data.getPayload()).thenReturn(path);
 
         Resource resource = mock(Resource.class);
@@ -125,7 +127,7 @@ public class RenditionModifyingProcessTest {
         MetaDataMap metaData = new SimpleMetaDataMap();
         metaData.put("PROCESS_ARGS", "renditionName:test");
 
-        process.execute(workItem, workflowSession, metaData, resourceResolverFactory, mimeTypeService);
+        process.execute(workItem, workflowSession, metaData, workflowHelper);
 
         verifyZeroInteractions(harness);
     }
@@ -137,7 +139,7 @@ public class RenditionModifyingProcessTest {
         WorkItem workItem = mock(WorkItem.class);
         WorkflowData data = mock(WorkflowData.class);
         when(workItem.getWorkflowData()).thenReturn(data);
-        when(data.getPayloadType()).thenReturn(AssetWorkflowHelper.TYPE_JCR_PATH);
+        when(data.getPayloadType()).thenReturn(WorkflowHelper.TYPE_JCR_PATH);
         when(data.getPayload()).thenReturn(path);
 
         Resource resource = mock(Resource.class);
@@ -168,7 +170,7 @@ public class RenditionModifyingProcessTest {
         MetaDataMap metaData = new SimpleMetaDataMap();
         metaData.put("PROCESS_ARGS", "renditionName:test");
 
-        process.execute(workItem, workflowSession, metaData, resourceResolverFactory, mimeTypeService);
+        process.execute(workItem, workflowSession, metaData, workflowHelper);
 
         verify(harness, times(1)).processLayer(any(Layer.class), eq(rendition), eq(workflowSession), any(String[].class));
         verify(harness, times(1)).saveImage(eq(asset), eq(rendition), any(Layer.class), eq("image/png"), eq(0.6));

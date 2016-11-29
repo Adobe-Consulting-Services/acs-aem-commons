@@ -27,7 +27,7 @@ import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import com.adobe.acs.commons.dam.AssetWorkflowHelper;
+import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.workflow.WorkflowException;
@@ -64,28 +64,19 @@ import static com.day.cq.dam.api.DamConstants.METADATA_FOLDER;
 public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHelper.AudioProcessor<MetaDataMap, Void> {
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
     private AudioHelper helper;
 
-    private static final Logger log = LoggerFactory.getLogger(FFMpegAudioEncodeProcess.class);
+    @Reference
+    private WorkflowHelper workflowHelper;
 
-    private String[] buildArguments(MetaDataMap metaData) {
-        String processArgs = metaData.get("PROCESS_ARGS", String.class);
-        if (processArgs != null && !processArgs.equals("")) {
-            return processArgs.split(",");
-        } else {
-            return null;
-        }
-    }
+    private static final Logger log = LoggerFactory.getLogger(FFMpegAudioEncodeProcess.class);
 
     @SuppressWarnings("PMD.CollapsibleIfStatements")
     @Override
     public final void execute(WorkItem workItem, WorkflowSession wfSession, MetaDataMap metaData)
             throws WorkflowException {
 
-        final AssetWorkflowHelper.AssetResourceResolverPair pair = AssetWorkflowHelper.getAssetFromPayload(workItem, wfSession, resourceResolverFactory);
+        final WorkflowHelper.AssetResourceResolverPair pair = workflowHelper.getAssetFromPayload(workItem, wfSession);
 
         if (pair == null) {
             String wfPayload = workItem.getWorkflowData().getPayload().toString();
@@ -173,8 +164,8 @@ public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHel
         return null;
     }
 
-    public String[] getVideoProfiles(MetaDataMap metaData) {
-        List<String> profiles = AssetWorkflowHelper.getValuesFromArgs(Arguments.VIDEO_PROFILES.getArgumentName(), buildArguments(metaData));
+    private String[] getVideoProfiles(MetaDataMap metaData) {
+        List<String> profiles = workflowHelper.getValuesFromArgs(Arguments.VIDEO_PROFILES.getArgumentName(), workflowHelper.buildArguments(metaData));
         return profiles.toArray(new String[profiles.size()]);
     }
 

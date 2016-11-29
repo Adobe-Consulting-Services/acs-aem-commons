@@ -21,6 +21,7 @@ package com.adobe.acs.commons.dam.impl;
 
 import java.awt.Color;
 
+import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
@@ -29,8 +30,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.mime.MimeTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,6 @@ import com.adobe.acs.commons.dam.AbstractRenditionModifyingProcess;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.image.Layer;
-import static com.adobe.acs.commons.dam.AssetWorkflowHelper.getValuesFromArgs;
 
 /**
  * Workflow process which mattes an image against a solid background to the specified size.
@@ -65,14 +63,11 @@ public final class MatteRenditionProcess extends AbstractRenditionModifyingProce
     private static final String SPECIFIER = "matte";
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
-    private MimeTypeService mimeTypeService;
+    private WorkflowHelper workflowHelper;
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        execute(workItem, workflowSession, metaDataMap, resourceResolverFactory, mimeTypeService);
+        execute(workItem, workflowSession, metaDataMap, workflowHelper);
     }
 
     @Override
@@ -82,16 +77,16 @@ public final class MatteRenditionProcess extends AbstractRenditionModifyingProce
 
     @Override
     protected Layer processLayer(Layer layer, Rendition rendition, WorkflowSession workflowSession, String[] args) {
-        final String dimensions = getValuesFromArgs("dimension", args).size() > 0 ? getValuesFromArgs("dimension",
+        final String dimensions = workflowHelper.getValuesFromArgs("dimension", args).size() > 0 ? workflowHelper.getValuesFromArgs("dimension",
                 args).get(0) : null;
 
-        final String backgroundColor = getValuesFromArgs("bgcolor", args).size() > 0 ? getValuesFromArgs(
+        final String backgroundColor = workflowHelper.getValuesFromArgs("bgcolor", args).size() > 0 ? workflowHelper.getValuesFromArgs(
                 "bgcolor", args).get(0) : null;
 
-        final String verticalPositionArgument = getValuesFromArgs("vpos", args).size() > 0 ? getValuesFromArgs(
+        final String verticalPositionArgument = workflowHelper.getValuesFromArgs("vpos", args).size() > 0 ? workflowHelper.getValuesFromArgs(
                 "vpos", args).get(0) : null;
 
-        final String horizontalPositionArgument = getValuesFromArgs("hpos", args).size() > 0 ? getValuesFromArgs(
+        final String horizontalPositionArgument = workflowHelper.getValuesFromArgs("hpos", args).size() > 0 ? workflowHelper.getValuesFromArgs(
                 "hpos", args).get(0) : null;
 
         if (dimensions != null && backgroundColor != null) {

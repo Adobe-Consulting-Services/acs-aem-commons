@@ -21,11 +21,11 @@ package com.adobe.acs.commons.dam;
 
 import java.io.IOException;
 
+import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.image.Layer;
-import org.apache.sling.commons.mime.MimeTypeService;
 
 public class TestRenditionModifyingProcess extends AbstractRenditionModifyingProcess {
 
@@ -42,7 +42,7 @@ public class TestRenditionModifyingProcess extends AbstractRenditionModifyingPro
     }
 
     @Override
-    void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality, MimeTypeService mimeTypeService)
+    void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality, WorkflowHelper workflowHelper)
             throws IOException {
         this.harness.saveImage(asset, toReplace, layer, mimetype, quality);
     }
