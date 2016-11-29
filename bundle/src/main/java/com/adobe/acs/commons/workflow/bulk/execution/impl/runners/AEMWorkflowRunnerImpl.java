@@ -191,7 +191,7 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
             Workspace workspace = null;
 
             try {
-                adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
                 configResource = adminResourceResolver.getResource(configPath);
 
                 if (configResource != null) {

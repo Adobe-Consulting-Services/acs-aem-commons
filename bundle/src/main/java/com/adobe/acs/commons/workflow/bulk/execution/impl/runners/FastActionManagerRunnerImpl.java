@@ -189,7 +189,7 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
             Resource configResource;
 
             try {
-                resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
                 resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.bulk-workflow-manager");
 
