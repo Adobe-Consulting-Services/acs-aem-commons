@@ -15,12 +15,15 @@
     <filter root="/etc/dam/video/flacmono"/>
     <filter root="/etc/cloudservices/typekit">
         <include pattern="/etc/cloudservices/typekit/jcr:content"/>
+        <include pattern="/etc/cloudservices/typekit/rep:policy"/>
     </filter>
     <filter root="/etc/cloudservices/dtm">
         <include pattern="/etc/cloudservices/dtm/jcr:content"/>
+        <include pattern="/etc/cloudservices/dtm/rep:policy"/>
     </filter>
     <filter root="/etc/cloudservices/sharethis">
         <include pattern="/etc/cloudservices/sharethis/jcr:content"/>
+        <include pattern="/etc/cloudservices/sharethis/rep:policy"/>
     </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/oak-index-manager(.*)?" />

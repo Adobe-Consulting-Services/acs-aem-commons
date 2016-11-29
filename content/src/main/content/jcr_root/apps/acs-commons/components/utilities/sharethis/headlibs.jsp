@@ -25,7 +25,7 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 
 String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
-ConfigurationManager cfgMgr = (ConfigurationManager)sling.getService(ConfigurationManager.class);
+ConfigurationManager cfgMgr = resourceResolver.adaptTo(ConfigurationManager.class);
 if(cfgMgr != null) {
     String publisherId = null;
     Configuration cfg = cfgMgr.getConfiguration("sharethis", services);
