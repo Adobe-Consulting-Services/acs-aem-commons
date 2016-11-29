@@ -245,6 +245,26 @@ public class VersionedClientlibsTransformerFactoryTest {
         assertEquals(PATH + ".styles", attributesCaptor.getValue().getValue(0));
     }
 
+     @Test
+    public void testCSSClientLibraryWithRelAttributeValueDiffersFromStylesheet() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PATH + ".css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "preload");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
+    }
+    
     @Test
     public void testJavaScriptClientLibraryWithInvalidExtension() throws Exception {
 
