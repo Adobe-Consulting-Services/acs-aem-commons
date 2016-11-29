@@ -61,4 +61,5 @@
     <filter root="/etc/notification/email/rep:policy"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
+    <filter root="/etc/workflow/instances/rep:policy"/>
 </workspaceFilter>

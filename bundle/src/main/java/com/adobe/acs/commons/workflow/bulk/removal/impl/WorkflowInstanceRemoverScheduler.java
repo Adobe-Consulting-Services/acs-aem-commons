@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -85,6 +86,11 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     @Reference
     private WorkflowInstanceRemover workflowInstanceRemover;
 
+    private static final String SERVICE_NAME = "workflow-remover";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     private static final String[] DEFAULT_WORKFLOW_STATUSES = {"COMPLETED", "ABORTED"};
 
@@ -147,7 +153,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
 
         ResourceResolver adminResourceResolver = null;
         try {
-            adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             final long start = System.currentTimeMillis();
 

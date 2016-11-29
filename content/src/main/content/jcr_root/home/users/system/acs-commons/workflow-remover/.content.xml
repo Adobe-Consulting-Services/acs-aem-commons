@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="cf6360a5-f76b-364e-8257-0fc54accfc1f"
+    rep:authorizableId="acs-commons-workflow-remover-service"
+    rep:principalName="acs-commons-workflow-remover-service"/>
