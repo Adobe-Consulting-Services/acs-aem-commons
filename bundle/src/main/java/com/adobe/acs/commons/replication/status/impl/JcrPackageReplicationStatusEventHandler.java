@@ -68,15 +68,15 @@ import java.util.Map;
 @Component(
         label = "ACS AEM Commons - Package Replication Status Updater",
         description = "Event handler that listens for Jcr Package replications and updates the Replication Status of "
-                 + "its content accordingly.",
+                + "its content accordingly.",
         metatype = true,
-        immediate =  true,
+        immediate = true,
         policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
         @Property(
                 label = "Event Topics",
-                value = { ReplicationAction.EVENT_TOPIC },
+                value = {ReplicationAction.EVENT_TOPIC},
                 description = "[Required] Event Topics this event handler will to respond to.",
                 name = EventConstants.EVENT_TOPIC,
                 propertyPrivate = true
@@ -183,7 +183,20 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             final String[] paths = (String[]) event.getProperty(PROPERTY_PATHS);
 
             if (this.containsJcrPackagePath(paths)) {
-                jobManager.addJob(JOB_TOPIC, Collections.<String, Object>singletonMap(PROPERTY_PATHS, paths));
+                ResourceResolver resourceResolver = null;
+                try {
+                    resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+
+                    if (CollectionUtils.isNotEmpty(this.getJcrPackages(resourceResolver, paths))) {
+                        jobManager.addJob(JOB_TOPIC, Collections.<String, Object>singletonMap(PROPERTY_PATHS, paths));
+                    }
+                } catch (LoginException e) {
+                    log.error("Could not obtain a resource resolver.", e);
+                } finally {
+                    if (resourceResolver != null) {
+                        resourceResolver.close();
+                    }
+                }
             }
         }
     }
@@ -194,11 +207,11 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
         log.debug("Processing Replication Status Update for JCR Package: {}", paths);
 
-        ResourceResolver resolver = null;
+        ResourceResolver resourceResolver = null;
         try {
-            resolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
-            final List<JcrPackage> jcrPackages = this.getJcrPackages(resolver, paths);
+            final List<JcrPackage> jcrPackages = this.getJcrPackages(resourceResolver, paths);
 
             if (CollectionUtils.isEmpty(jcrPackages)) {
                 log.warn("JCR Package is unavailable for Replication Status Update at: {}", paths);
@@ -210,16 +223,16 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                     final List<Resource> resources = new ArrayList<Resource>();
 
                     for (final String packagePath : packageHelper.getContents(jcrPackage)) {
-                        final Resource resource = resolver.getResource(packagePath);
-                        if (this.accept(resource)) {
+                        final Resource resource = resourceResolver.getResource(packagePath);
+                        if (this.accept(resource))  {
                             resources.add(resource);
                         }
                     }
 
                     if (resources.size() > 0) {
-                        replicationStatusManager.setReplicationStatus(resolver,
+                        replicationStatusManager.setReplicationStatus(resourceResolver,
                                 this.replicatedBy,
-                                getJcrPackageLastModified(resolver, jcrPackage),
+                                getJcrPackageLastModified(resourceResolver, jcrPackage),
                                 ReplicationStatusManager.Status.ACTIVATED,
                                 resources.toArray(new Resource[resources.size()]));
 
@@ -229,18 +242,24 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                                 jcrPackage.getDefinition().getId());
                     }
                 } catch (RepositoryException e) {
-                    log.error("RepositoryException occurred updating replication status for contents of package", e);
+                    log.error("RepositoryException occurred updating replication status for contents of package");
+                    log.error(e.getMessage());
+
                 } catch (IOException e) {
-                    log.error("IOException occurred updating replication status for contents of package", e);
+                    log.error("IOException occurred updating replication status for contents of package");
+                    log.error(e.getMessage());
+
                 } catch (PackageException e) {
-                    log.error("Could not retrieve the Packages contents.", e);
+                    log.error("Could not retrieve the Packages contents.");
+                    log.error(e.getMessage());
                 }
             }
         } catch (LoginException e) {
-            log.error("Could not retrieve the Packages contents.", e);
+            log.error("Could not obtain a resource resolver for applying replication status updates", e);
+            return JobResult.FAILED;
         } finally {
-            if (resolver != null) {
-                resolver.close();
+            if (resourceResolver != null) {
+                resourceResolver.close();
             }
         }
 
@@ -275,11 +294,11 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
      * @param paths the list of paths to resolve to Jcr Packages
      * @return a list of Jcr Packages that correspond to the provided paths
      */
-    private List<JcrPackage> getJcrPackages(final ResourceResolver resolver, final String[] paths) {
+    private List<JcrPackage> getJcrPackages(final ResourceResolver resourceResolver, final String[] paths) {
         final List<JcrPackage> packages = new ArrayList<JcrPackage>();
 
         for (final String path : paths) {
-            final Resource eventResource = resolver.getResource(path);
+            final Resource eventResource = resourceResolver.getResource(path);
 
             JcrPackage jcrPackage;
 
@@ -314,9 +333,9 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             boolean match = true;
             Resource walkingResource = resource;
 
-            for(int i = (hierarchyNodeTypes.length - 1); i >= 0; i--) {
+            for (int i = (hierarchyNodeTypes.length - 1); i >= 0; i--) {
 
-                if(walkingResource == null) {
+                if (walkingResource == null) {
                     match = false;
                     break;
                 } else {
@@ -331,7 +350,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                 }
             }
 
-            if(match) {
+            if (match) {
                 return true;
             }
         }

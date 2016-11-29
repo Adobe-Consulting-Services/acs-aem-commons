@@ -49,10 +49,10 @@ public class JcrPackageReplicationStatusEventHandlerTest {
     Packaging packaging;
 
     @Mock
-    ResourceResolver adminResourceResolver;
+    ResourceResolverFactory resourceResolverFactory;
 
     @Mock
-    ResourceResolverFactory resourceResolverFactory;
+    ResourceResolver resourceResolver;
 
     @InjectMocks
     JcrPackageReplicationStatusEventHandler jcrPackageReplicationStatusEventHandler = new
@@ -102,8 +102,8 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Job job = mock(Job.class);
         when(job.getProperty("paths")).thenReturn(paths);
 
-        when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(adminResourceResolver);
-        when(adminResourceResolver.getResource(packagePath)).thenReturn(packageResource);
+        when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
+        when(resourceResolver.getResource(packagePath)).thenReturn(packageResource);
         when(packageResource.adaptTo(Node.class)).thenReturn(packageNode);
         when(packaging.open(packageNode, false)).thenReturn(jcrPackage);
         when(packageHelper.getContents(jcrPackage)).thenReturn(contentPaths);
@@ -117,18 +117,18 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         properties.put(JcrConstants.JCR_LASTMODIFIED, calendar);
         when(jcrPackageJcrContent.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(properties));
 
-        when(adminResourceResolver.getResource("/content/foo/jcr:content")).thenReturn(contentResource1);
+        when(resourceResolver.getResource("/content/foo/jcr:content")).thenReturn(contentResource1);
         when(contentResource1.adaptTo(Node.class)).thenReturn(contentNode1);
         when(contentNode1.isNodeType("cq:PageContent")).thenReturn(true);
         when(contentResource1.getParent()).thenReturn(contentResource1parent);
         when(contentResource1parent.adaptTo(Node.class)).thenReturn(contentNode1parent);
         when(contentNode1parent.isNodeType("cq:Page")).thenReturn(true);
 
-        when(adminResourceResolver.getResource("/content/bar")).thenReturn(contentResource2);
+        when(resourceResolver.getResource("/content/bar")).thenReturn(contentResource2);
         when(contentResource2.adaptTo(Node.class)).thenReturn(contentNode2);
         when(contentNode2.isNodeType("dam:AssetContent")).thenReturn(true);
 
-        when(adminResourceResolver.getResource("/content/dam/folder/jcr:content")).thenReturn(contentResource3);
+        when(resourceResolver.getResource("/content/dam/folder/jcr:content")).thenReturn(contentResource3);
         when(contentResource3.adaptTo(Node.class)).thenReturn(contentNode3);
         when(contentNode3.isNodeType("nt:unstructured")).thenReturn(true);
 
@@ -139,7 +139,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         jcrPackageReplicationStatusEventHandler.process(job);
 
         verify(replicationStatusManager, times(1)).setReplicationStatus(
-                eq(adminResourceResolver),
+                eq(resourceResolver),
                 eq("Package Replication"),
                 eq(calendar),
                 eq(ReplicationStatusManager.Status.ACTIVATED),
