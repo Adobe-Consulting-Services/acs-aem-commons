@@ -22,12 +22,11 @@ package com.adobe.acs.commons.packaging;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.day.jcr.vault.fs.api.PathFilterSet;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageManager;
-import com.day.jcr.vault.packaging.PackageException;
-import com.day.jcr.vault.packaging.Version;
-
+import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 
@@ -92,7 +91,7 @@ public interface PackageHelper {
      * @throws RepositoryException
      */
     Version getNextVersion(JcrPackageManager jcrPackageManager, String groupName, String name,
-                          String version) throws RepositoryException;
+                           String version) throws RepositoryException;
 
     /**
      * Deletes the package node from the repository. This does NOT uninstall the package, rather deletes the
@@ -122,9 +121,9 @@ public interface PackageHelper {
      * @throws RepositoryException
      */
     JcrPackage createPackageFromPathFilterSets(final Collection<PathFilterSet> pathFilterSets, final Session session,
-                             final String groupName, final String name, String version,
-                             final ConflictResolution conflictResolution,
-                             final Map<String, String> packageDefinitionProperties)
+                                               final String groupName, final String name, String version,
+                                               final ConflictResolution conflictResolution,
+                                               final Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException;
 
     /**
