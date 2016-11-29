@@ -9,4 +9,8 @@
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-component-error-handler-service"
             rep:privileges="{Name}[jcr:read]"/>
+    <allow1
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-twitter-updater-service"
+            rep:privileges="{Name}[jcr:read,jcr:modifyProperties,crx:replicate]"/>
 </jcr:root>
