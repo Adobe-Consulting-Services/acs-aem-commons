@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="8c1283dc-f7f0-3084-909b-5bc052b01cd0"
+    rep:authorizableId="acs-commons-system-notifications-service"
+    rep:principalName="acs-commons-system-notifications-service"/>
