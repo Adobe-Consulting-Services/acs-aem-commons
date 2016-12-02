@@ -19,6 +19,8 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkItem;
@@ -44,6 +46,7 @@ import com.day.cq.commons.inherit.InheritanceValueMap;
  * Arguments should be provided as this:
  * 
  * workflowModelProperty=<propName>,defaultWorkflowModel=<pathToDefaultWorkflowModel>
+ *  ( eg: /etc/workflow/models/request_for_activation/jcr:content/model)
  * 
  * where <propName> is the name of the property which contains the paths of the workflow
  * models
@@ -62,8 +65,8 @@ import com.day.cq.commons.inherit.InheritanceValueMap;
     @Property(
             label = "Workflow Label",
             name = "process.label",
-            value = "Workflow Delegation step",
-            description = "Calls configurable sub workflows"
+            value = "Workflow Delegation",
+            description = "Invokes a new workflow for this payload based on a content-hierarchy based configuration"
     )
 })
 public class WorkflowDelegationStep implements WorkflowProcess {
@@ -71,8 +74,11 @@ public class WorkflowDelegationStep implements WorkflowProcess {
 	
 	@Reference
 	ResourceResolverFactory rrf;
+	
+	@Reference
+	WorkflowHelper wfHelper;
 
-	private static final Logger LOG = LoggerFactory.getLogger(WorkflowDelegationStep.class);
+	private static final Logger log = LoggerFactory.getLogger(WorkflowDelegationStep.class);
 	
 	// Under this property the workflow model is stored
 	private static final String WORKFLOW_PROPERTY_NAME = "workflowModelProperty";
@@ -88,74 +94,52 @@ public class WorkflowDelegationStep implements WorkflowProcess {
 		
 		String propertyName = args.get(WORKFLOW_PROPERTY_NAME);
 		if (StringUtils.isBlank(propertyName)) {
-			throw new WorkflowException ("propertyname not defined");
+			throw new WorkflowException ("PROCESS_ARG " + WORKFLOW_PROPERTY_NAME + " not defined");
 		}
 		String defaultWorkflowModel = args.get(DEFAULT_WORKFLOW_MODEL);
 		
-		LOG.debug ("propertyName = {}, default workflow model = {}", 
+		log.debug ("propertyName = {}, default workflow model = {}", 
 				new Object[]{propertyName,defaultWorkflowModel});
 		
 		ResourceResolver resolver = null;
 		WorkflowData wfData = item.getWorkflowData();
 		if (wfData.getPayloadType().equals("JCR_PATH")) {
-			String path = wfData.getPayload().toString();
 			
-			Session jcrSession = session.adaptTo(Session.class);
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("user.jcr.session", jcrSession);
-			try {
-				resolver = rrf.getResourceResolver(map);
-			} catch (LoginException e) {
-				throw new WorkflowException (e);
-			}
+			String path = wfData.getPayload().toString();
+			resolver = wfHelper.getResourceResolver(session);
 			
 			if (resolver != null) {
 				Resource wfResource = resolver.getResource(path);
 				InheritanceValueMap inheritance = new HierarchyNodeInheritanceValueMap(wfResource);
-				
 				String foundWorkflowModel = inheritance.getInherited(propertyName, String.class);
+				
 				if (foundWorkflowModel != null) {
-					LOG.debug ("Using workflowmodel {}", foundWorkflowModel);
+					log.debug ("Using workflowmodel {}", foundWorkflowModel);
 				} else {
-					if (defaultWorkflowModel == null) {
+					if (StringUtils.isBlank(defaultWorkflowModel)) {
 						throw new WorkflowException 
 							(String.format("Haven't found property %s on resource %s or higher, also defaultWorkflowModel not defined", 
 								new Object[]{propertyName,defaultWorkflowModel}));
 					} else {
 						foundWorkflowModel = defaultWorkflowModel;
-						LOG.debug("Falling back to workflowmodel {}", foundWorkflowModel);
+						log.debug("Falling back to configured default workflowmodel {}", foundWorkflowModel);
 					}
 				} 
 				
-				
 				WorkflowModel newModel = session.getModel(foundWorkflowModel);
 				session.startWorkflow(newModel, wfData);
-				LOG.debug("Started workflow model {} with current payload", foundWorkflowModel);
+				log.info("Delegating workflow with payload {} to workflow model {}", 
+						new Object[]{wfData.getPayload() ,foundWorkflowModel});
 				
 			}
-				
 		}
-		
 	}
 
     private Map<String, String> getProcessArgsMap(MetaDataMap metaDataMap) {
         final Map<String, String> map = new LinkedHashMap<String, String>();
-        final String processArgs = metaDataMap.get("PROCESS_ARGS", "");
-        final String[] lines = StringUtils.split(processArgs, ",");
+        final String processArgs = metaDataMap.get(WorkflowHelper.PROCESS_ARGS, "");
+        return ParameterUtil.toMap(StringUtils.split(processArgs,","),"=");
 
-        for (final String line : lines) {
-            final String[] entry = StringUtils.split(line, "=");
-
-            if (entry.length == 2) {
-                map.put(entry[0], entry[1]);
-            }
-        }
-
-        return map;
+        
     }
-	
-	
-	
-	
-	
 }
