@@ -19,19 +19,13 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -63,15 +57,12 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
         label = "Stylesheet Inliner Transformer Factory", 
         description = "Sling Rewriter Transformer Factory which inlines CSS references")
 @Properties({ 
-    @Property( name = "pipeline.type", value = StylesheetInlinerTransformerFactory.SELECTOR, propertyPrivate = true) } )
+    @Property( name = "pipeline.type", value = "inline-css", propertyPrivate = true) } )
 @Service(value = { TransformerFactory.class })
 public final class StylesheetInlinerTransformerFactory implements TransformerFactory {
 
-    public static final String SELECTOR = "inline-css";
-    
-    private static final String NEWLINE = "\n";
+    private static final char[] NEWLINE = new char[] {'\n'};
     private static final String STYLE = "style";
-    private static final String BODY = "body";
     private static final String HEAD = "head";
 
     private static final Logger log = LoggerFactory.getLogger(StylesheetInlinerTransformerFactory.class);
@@ -86,8 +77,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
 
     private class CSSInlinerTransformer extends AbstractTransformer {
 
-        protected boolean enabled = false;
-        protected boolean inHead = false;
+        protected boolean afterHeadElement = false;
         protected List<String> stylesheetsInHead = new ArrayList<String>();
         private SlingHttpServletRequest slingRequest;
 
@@ -95,106 +85,70 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
         public void init(ProcessingContext context, ProcessingComponentConfiguration config) throws IOException {
             super.init(context, config);
             slingRequest = context.getRequest();
-
-            String[] selectors = slingRequest.getRequestPathInfo().getSelectors();
-
-            if (selectors.length > 0) {
-                enabled = Arrays.asList(selectors).contains(SELECTOR);
-                if (enabled) {
-                    log.info("Inlining Stylesheet references for {}", slingRequest.getRequestURL().toString());
-                }
-            }
+            log.debug("Inlining Stylesheet references for {}", slingRequest.getRequestURL().toString());
         }
 
         public void startElement(final String namespaceURI, final String localName, final String qName,
                 final Attributes attrs) throws SAXException {
-            if (enabled) {
-                try {
-                    if (isCSS(localName, attrs)) {
-                        String sheet = attrs.getValue("", "href");
-                        if (inHead) {
-                            stylesheetsInHead.add(sheet);
-                        } else {
-                            log.debug("Inlining stylesheet link found in BODY: '{}'", sheet);
-                            inlineSheet(namespaceURI, sheet);
-                        }
+            try {
+                if (SAXElementUtils.isCSS(localName, attrs)) {
+                    String sheet = attrs.getValue("", "href");
+                    if (!afterHeadElement) {
+                        stylesheetsInHead.add(sheet);
                     } else {
-                        getContentHandler().startElement(namespaceURI, localName, qName, attrs);
+                        log.debug("Inlining stylesheet link found in BODY: '{}'", sheet);
+                        inlineSheet(namespaceURI, sheet);
+                    }
+                } else {
+                    getContentHandler().startElement(namespaceURI, localName, qName, attrs);
+                }
+            } catch (Exception e) {
+                log.error("Exception in stylesheet inliner", e);
+                throw new SAXException(e);
+            }
+        }
 
-                        if (localName.equalsIgnoreCase(HEAD)) {
-                            inHead = true;
-                        } else if (localName.equalsIgnoreCase(BODY)) {
-
-                            // add each of the accumulated stylesheet references
-                            for (String sheet : stylesheetsInHead) {
-                                log.debug("Inlining sheet found in HEAD: '{}'", sheet);
-                                inlineSheet(namespaceURI, sheet);
-                            }
-                        }
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            if (localName.equalsIgnoreCase(HEAD)) {
+                afterHeadElement = true;
+                try {
+                    // add each of the accumulated stylesheet references
+                    for (String sheet : stylesheetsInHead) {
+                        log.debug("Inlining sheet found in HEAD: '{}'", sheet);
+                        inlineSheet(uri, sheet);
                     }
                 } catch (Exception e) {
                     log.error("Exception in stylesheet inliner", e);
                     throw new SAXException(e);
                 }
-            } else {
-                getContentHandler().startElement(namespaceURI, localName, qName, attrs);
             }
+            getContentHandler().endElement(uri, localName, qName);
         }
 
         private void inlineSheet(final String namespaceURI, String s) throws Exception {
             InputStream inputStream = null;
-
+            
             String withoutExtension = s.substring(0, s.indexOf(LibraryType.CSS.extension));
             HtmlLibrary library = htmlLibraryManager.getLibrary(LibraryType.CSS, withoutExtension);
             if (library != null) {
                 inputStream = library.getInputStream();
             } else {
                 Resource resource = slingRequest.getResourceResolver().getResource(s);
-
+                
                 if (resource != null) {
                     inputStream = resource.adaptTo(InputStream.class);
                 }
             }
-
+            
             if (inputStream != null) {
-                InputStreamReader isr = new InputStreamReader(inputStream);
-
-                CharArrayWriter caw = new CharArrayWriter(inputStream.available());
-                caw.write(NEWLINE);
-                int read = -1;
-                while ((read = isr.read()) > -1) {
-                    caw.write(read);
-                }
+                char[] chars = IOUtils.toCharArray(inputStream);
+                
                 getContentHandler().startElement(namespaceURI, STYLE, null, new AttributesImpl());
-                getContentHandler().characters(caw.toCharArray(), 0, caw.size());
-                super.endElement(namespaceURI, STYLE, null);
+                getContentHandler().characters(NEWLINE, 0, 1);
+                getContentHandler().characters(chars, 0, chars.length);
+                getContentHandler().endElement(namespaceURI, STYLE, null);
             }
         }
-
-        @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
-            if (inHead && localName.equalsIgnoreCase(HEAD)) {
-                inHead = false;
-            }
-            super.endElement(uri, localName, qName);
-        }
-    }
-
-    private static boolean isCSS(final String elementName, final Attributes attrs) {
-        final String rel = attrs.getValue("", "rel");
-        final String type = attrs.getValue("", "type");
-        final String href = attrs.getValue("", "href");
-
-        return StringUtils.equals("link", elementName) && StringUtils.equals(rel, "stylesheet")
-                && StringUtils.equals(type, LibraryType.CSS.contentType) && StringUtils.startsWith(href, "/")
-                && !StringUtils.startsWith(href, "//") && StringUtils.endsWith(href, LibraryType.CSS.extension);
-    }
-
-    @Activate
-    protected void activate(Map<String, Object> props) {
-    }
-
-    @Deactivate
-    protected void deactivate() {
     }
 }
