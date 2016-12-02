@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="b807037b-10f3-340c-bd11-8a0409975e09"
+    rep:authorizableId="acs-commons-wcm-inbox-cleanup-service"
+    rep:principalName="acs-commons-wcm-inbox-cleanup-service"/>

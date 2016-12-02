@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="006878ae-9772-3f3f-89b3-3a9cbf701988"
+    rep:authorizableId="acs-commons-ensure-oak-index-service"
+    rep:principalName="acs-commons-ensure-oak-index-service"/>

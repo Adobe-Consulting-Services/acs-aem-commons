@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -59,7 +60,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(resourceResolver);
+
     }
 
     @After
@@ -101,6 +102,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Job job = mock(Job.class);
         when(job.getProperty("paths")).thenReturn(paths);
 
+        when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
         when(resourceResolver.getResource(packagePath)).thenReturn(packageResource);
         when(packageResource.adaptTo(Node.class)).thenReturn(packageNode);
         when(packaging.open(packageNode, false)).thenReturn(jcrPackage);

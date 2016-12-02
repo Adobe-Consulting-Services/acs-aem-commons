@@ -169,6 +169,12 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             })
     public static final String PROP_REPLICATED_AT = "replicated-at";
 
+    private static final String SERVICE_NAME = "package-replication-status-event-listener";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
+
     @Override
     public final void handleEvent(final Event event) {
         if (this.isMaster) {
@@ -179,7 +185,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             if (this.containsJcrPackagePath(paths)) {
                 ResourceResolver resourceResolver = null;
                 try {
-                    resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                    resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
                     if (CollectionUtils.isNotEmpty(this.getJcrPackages(resourceResolver, paths))) {
                         jobManager.addJob(JOB_TOPIC, Collections.<String, Object>singletonMap(PROPERTY_PATHS, paths));
@@ -203,7 +209,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
         ResourceResolver resourceResolver = null;
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             final List<JcrPackage> jcrPackages = this.getJcrPackages(resourceResolver, paths);
 

@@ -65,6 +65,7 @@ import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -214,6 +215,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /* Error image extensions to handle */
     private static final String[] DEFAULT_ERROR_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif"};
+
+    private static final String SERVICE_NAME = "error-page-handler";
 
     private String[] errorImageExtensions = DEFAULT_ERROR_IMAGE_EXTENSIONS;
 
@@ -867,10 +870,11 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Absolute path
         if (StringUtils.startsWith(this.errorImagePath, "/")) {
-            ResourceResolver adminResourceResolver = null;
+            ResourceResolver serviceResourceResolver = null;
             try {
-                adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                final Resource resource = adminResourceResolver.resolve(this.errorImagePath);
+                Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+                final Resource resource = serviceResourceResolver.resolve(this.errorImagePath);
 
                 if (resource != null && resource.isResourceType(JcrConstants.NT_FILE)) {
                     final PathInfo pathInfo = new PathInfo(this.errorImagePath);
@@ -885,8 +889,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             } catch (LoginException e) {
                 log.error("Could not get admin resource resolver to inspect validity of absolute errorImagePath");
             } finally {
-                if (adminResourceResolver != null) {
-                    adminResourceResolver.close();
+                if (serviceResourceResolver != null) {
+                    serviceResourceResolver.close();
                 }
             }
         }
