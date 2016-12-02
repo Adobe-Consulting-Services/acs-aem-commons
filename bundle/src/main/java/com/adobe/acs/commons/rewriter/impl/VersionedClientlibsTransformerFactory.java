@@ -96,9 +96,6 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     private static final String ATTR_JS_PATH = "src";
     private static final String ATTR_CSS_PATH = "href";
 
-    private static final String CSS_TYPE = "text/css";
-    private static final String JS_TYPE = "text/javascript";
-
     private static final String MIN_SELECTOR = "min";
     private static final String MIN_SELECTOR_SEGMENT = "." + MIN_SELECTOR;
 
@@ -130,11 +127,11 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private Attributes versionClientLibs(final String elementName, final Attributes attrs) {
-        if (this.isCSS(elementName, attrs)) {
+        if (SAXElementUtils.isCSS(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_CSS_PATH),
                     attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS);
 
-        } else if (this.isJavaScript(elementName, attrs)) {
+        } else if (SAXElementUtils.isJavaScript(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_JS_PATH),
                     attrs.getValue("", ATTR_JS_PATH), LibraryType.JS);
 
@@ -155,36 +152,6 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         }
 
         return newAttributes;
-    }
-
-    private boolean isCSS(final String elementName, final Attributes attrs) {
-        final String type = attrs.getValue("", "type");
-        final String href = attrs.getValue("", "href");
-
-        if (StringUtils.equals("link", elementName)
-                && StringUtils.equals(type, CSS_TYPE)
-                && StringUtils.startsWith(href, "/")
-                && !StringUtils.startsWith(href, "//")
-                && StringUtils.endsWith(href, LibraryType.CSS.extension)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean isJavaScript(final String elementName, final Attributes attrs) {
-        final String type = attrs.getValue("", "type");
-        final String src = attrs.getValue("", "src");
-
-        if (StringUtils.equals("script", elementName)
-                && StringUtils.equals(type, JS_TYPE)
-                && StringUtils.startsWith(src, "/")
-                && !StringUtils.startsWith(src, "//")
-                && StringUtils.endsWith(src, LibraryType.JS.extension)) {
-            return true;
-        }
-
-        return false;
     }
 
     private String getVersionedPath(final String originalPath, final LibraryType libraryType) {
