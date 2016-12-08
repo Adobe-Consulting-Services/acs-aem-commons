@@ -21,11 +21,18 @@
 package com.adobe.acs.commons.util.impl;
 
 import com.adobe.acs.commons.util.WorkflowHelper;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import com.day.cq.workflow.WorkflowSession;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
@@ -58,4 +65,32 @@ public class WorkflowHelperImpl implements WorkflowHelper {
         authInfo.put(JcrResourceConstants.AUTHENTICATION_INFO_SESSION, workflowSession.getSession());
         return resourceResolverFactory.getResourceResolver(authInfo);
     }
+
+    /**
+     * @{inheritDoc}
+     **/
+    @Override
+    public final Resource getPageOrAssetResource(ResourceResolver resourceResolver, String path) {
+        Resource payloadResource = resourceResolver.getResource(path);
+
+        if (payloadResource == null) {
+            return null;
+        }
+
+        Asset asset = DamUtil.resolveToAsset(payloadResource);
+        if (asset != null) {
+            return asset.adaptTo(Resource.class);
+        }
+
+        PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+        Page page = pageManager.getContainingPage(payloadResource);
+
+        if (page != null) {
+            return page.adaptTo(Resource.class);
+        }
+
+        return null;
+    }
+
+
 }
