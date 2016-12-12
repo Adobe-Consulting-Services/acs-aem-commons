@@ -146,7 +146,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private Attributes rebuildAttributes(final AttributesImpl newAttributes, final int index, final String path,
-                                         final LibraryType libraryType, String contextPath) {
+                                         final LibraryType libraryType, final String contextPath) {
         String libraryPath = path;
         if (StringUtils.isNotBlank(contextPath)) {
             libraryPath = path.substring(contextPath.length());
