@@ -36,7 +36,7 @@ import org.apache.felix.scr.annotations.Service;
  */
 @Component
 @Service
-@Property(name = HTLabFunction.OSGI_FN_NAME, value = "htlab:select")
+@Property(name = HTLabFunction.OSGI_FN_NAME, value = "htlab:select", propertyPrivate = true)
 public class SelectFunction implements HTLabFunction {
 
     @Nonnull

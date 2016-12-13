@@ -34,7 +34,7 @@ import org.apache.felix.scr.annotations.Service;
  */
 @Component
 @Service
-@Property(name = HTLabFunction.OSGI_FN_NAME, value = "sling:map")
+@Property(name = HTLabFunction.OSGI_FN_NAME, value = "sling:map", propertyPrivate = true)
 public class SlingMapFunction implements HTLabFunction {
 
     @Nonnull

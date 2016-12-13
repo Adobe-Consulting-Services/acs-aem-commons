@@ -37,7 +37,7 @@ import org.apache.sling.api.resource.ResourceUtil;
  */
 @Component
 @Service
-@Property(name = HTLabFunction.OSGI_FN_NAME, value = "sling:resolve")
+@Property(name = HTLabFunction.OSGI_FN_NAME, value = "sling:resolve", propertyPrivate = true)
 public class SlingResolveFunction implements HTLabFunction {
 
     @Nonnull

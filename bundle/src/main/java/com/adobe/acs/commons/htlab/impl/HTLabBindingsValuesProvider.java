@@ -29,6 +29,7 @@ import com.adobe.acs.commons.htlab.use.MapUse;
 import com.adobe.acs.commons.htlab.use.ToStringUseFn;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
@@ -37,9 +38,9 @@ import org.apache.sling.scripting.api.BindingsValuesProvider;
  * Adds a Bindings key, {@code HTLAB_USE}, which is a map of simple class names to fully-qualified class names for
  * classes under the .htlab.use package.
  */
-@Component
+@Component(policy = ConfigurationPolicy.REQUIRE)
 @Service
-@Property(name = "javax.script.name", value = "sightly")
+@Property(name = "javax.script.name", value = "sightly", propertyPrivate = true)
 public class HTLabBindingsValuesProvider implements BindingsValuesProvider {
     private static final String B_HTLAB_USE = "HTLAB_USE";
 

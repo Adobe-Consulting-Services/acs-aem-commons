@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component
 @Service
-@Property(name = HTLabFunction.OSGI_FN_NAME, value = "jsonDate")
+@Property(name = HTLabFunction.OSGI_FN_NAME, value = "jsonDate", propertyPrivate = true)
 public class JsonDateFunction implements HTLabFunction {
     private static final Logger LOG = LoggerFactory.getLogger(JsonDateFunction.class);
 

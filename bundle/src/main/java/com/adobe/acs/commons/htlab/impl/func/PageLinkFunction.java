@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * Constructs page links by establishing a page path, appending .html, and then mapping the page path using a
  * {@link org.apache.sling.api.resource.ResourceResolver}.
  */
-@Component(metatype = true)
+@Component
 @Service
 @Properties({
         @Property(name = HTLabFunction.OSGI_FN_NAME, value = "pageLink", propertyPrivate = true)
