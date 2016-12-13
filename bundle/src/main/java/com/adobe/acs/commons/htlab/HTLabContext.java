@@ -121,4 +121,22 @@ public final class HTLabContext extends ValueMapDecorator {
                 "bindings=" + bindings.keySet() +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        HTLabContext that = (HTLabContext) o;
+
+        return bindings.equals(that.bindings);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + bindings.hashCode();
+        return result;
+    }
 }

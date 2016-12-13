@@ -43,7 +43,7 @@ public class SlingResolveFunction implements HTLabFunction {
     @Nonnull
     @Override
     public HTLabMapResult apply(@Nonnull HTLabContext context, @Nonnull String key, @CheckForNull Object value) {
-        if (value instanceof String) {
+        if (value instanceof String && context.getResolver() != null && context.getRequest() != null) {
             String uri = (String) value;
             Resource resolved = context.getResolver().resolve(context.getRequest(), uri);
             if (ResourceUtil.isNonExistingResource(resolved)) {

@@ -40,7 +40,7 @@ public class SlingMapFunction implements HTLabFunction {
     @Nonnull
     @Override
     public HTLabMapResult apply(@Nonnull HTLabContext context, @Nonnull String key, @CheckForNull Object value) {
-        if (value instanceof String) {
+        if (value instanceof String && context.getResolver() != null && context.getRequest() != null) {
             String path = (String) value;
             String mapped = context.getResolver().map(context.getRequest(), path);
             return HTLabMapResult.success(mapped);
