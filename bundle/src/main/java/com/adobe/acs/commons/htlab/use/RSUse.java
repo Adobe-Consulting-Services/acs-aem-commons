@@ -44,7 +44,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingScriptHelper;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.scripting.sightly.pojo.Use;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,47 +173,6 @@ public final class RSUse implements Use, Map<String, Object> {
     private HTLabMapService mapService;
     private Map<String, Object> memoized = new HashMap<String, Object>();
 
-    static class FunctionKey {
-        private String normalizedKey;
-        private String property;
-        private String[] functions;
-
-        FunctionKey(String normalizedKey, String property, String[] functions) {
-            this.normalizedKey = normalizedKey;
-            this.property = property;
-            this.functions = functions;
-        }
-
-        String getNormalizedKey() {
-            return normalizedKey;
-        }
-
-        String getProperty() {
-            return property;
-        }
-
-        String[] getFunctions() {
-            return functions;
-        }
-
-        boolean isSelfSelected() {
-            return property.isEmpty();
-        }
-
-        boolean isRelativePath() {
-            return property.startsWith("./") || property.startsWith("../");
-        }
-    }
-
-    /**
-     * Get configured pipe operator.
-     *
-     * @return configured pipe operator
-     */
-    public String getPipe() {
-        return pipe;
-    }
-
     @Override
     public void init(Bindings bindings) {
         this.context = HTLabContext.fromBindings(bindings);
@@ -227,29 +185,11 @@ public final class RSUse implements Use, Map<String, Object> {
         // Establish relativeBase and originalMap from target
         this.establishMap();
 
-        SlingScriptHelper sling = this.context.getSling();
-        if (sling != null) {
-            this.mapService = sling.getService(HTLabMapService.class);
-        } else {
-            getLog().warn("[RSUse.init] Failed to get SlingScriptHelper ('sling') from bindings.");
-        }
+        // Locate the HTLabMapService if available
+        this.bindMapService();
 
-        if (this.mapService == null) {
-            getLog().info("[RSUse.init] No {} service found (not yet configured?). OSGi-based functions will not be available.",
-                    HTLabMapService.class.getSimpleName());
-        }
-
-        HashMap<String, Object> copyOfOriginal = new HashMap<String, Object>();
-        for (Map.Entry<?, ?> entry : originalMap.entrySet()) {
-            copyOfOriginal.put(entry.getKey().toString(), entry.getValue());
-        }
-        this.memoized = new ValueMapDecorator(copyOfOriginal);
-
-        // Memoize the non-null target this at the end of the init method to ensure that this.size() > 0 for
-        // data-sly-test, because RSUse implements Map, and data-sly-test expects Map.size() > 0 for success.
-        if (this.target != null) {
-            this.put(this.pipeLiteral, this.target);
-        }
+        // Initialize the memoized map.
+        this.establishMemoizedMap();
     }
 
     private void configurePipeOperator() {
@@ -330,6 +270,35 @@ public final class RSUse implements Use, Map<String, Object> {
         }
     }
 
+    private void establishMemoizedMap() {
+        this.memoized = new HashMap<String, Object>();
+
+        // The original Map is not checked to be <String, Object>, so putAll won't compile here.
+        for (Map.Entry<?, ?> entry : originalMap.entrySet()) {
+            this.memoized.put(entry.getKey().toString(), entry.getValue());
+        }
+
+        // Memoize the non-null target this at the end of this method to ensure that this.size() > 0 for
+        // data-sly-test, because RSUse implements Map, and data-sly-test expects Map.size() > 0 for success.
+        if (this.target != null) {
+            this.put(this.pipeLiteral, this.target);
+        }
+    }
+
+    private void bindMapService() {
+        SlingScriptHelper sling = this.context.getSling();
+        if (sling != null) {
+            this.mapService = sling.getService(HTLabMapService.class);
+        } else {
+            getLog().warn("[RSUse.bindMapService] Failed to get SlingScriptHelper ('sling') from bindings.");
+        }
+
+        if (this.mapService == null) {
+            getLog().info("[RSUse.bindMapService] No {} service found (not yet configured?). OSGi-based functions will not be available.",
+                    HTLabMapService.class.getSimpleName());
+        }
+    }
+
     private Logger getLog() {
         return LOG;
     }
@@ -407,44 +376,26 @@ public final class RSUse implements Use, Map<String, Object> {
     }
 
     private HTLabMapResult applyFunction(String fnName, FunctionKey functionKey, HTLabMapResult previousResult) {
-        HTLabMapResult nextResult;
-
         HTLabFunction useFunction = this.useFunctions.get(fnName);
         if (useFunction != null) {
-            nextResult = useFunction.apply(this.context,
+            return useFunction.apply(this.context,
                     functionKey.getProperty(), previousResult.getValue()).withFnName(fnName);
         } else if (this.mapService != null) {
-            nextResult = this.mapService.apply(this.context, fnName,
+            return this.mapService.apply(this.context, fnName,
                     functionKey.getProperty(), previousResult.getValue());
         } else {
             if (getLog().isDebugEnabled()) {
                 getLog().debug("[RSUse.applyFunction] No function found with name {}. Forwarding value.",
                         fnName);
             }
-            nextResult = HTLabMapResult.forwardValue().withFnName(fnName);
+            return HTLabMapResult.forwardValue().withFnName(fnName);
         }
-
-        return nextResult;
     }
 
-    void memoizeResult(FunctionKey functionKey, HTLabMapResult result) {
+    private void memoizeResult(FunctionKey functionKey, HTLabMapResult result) {
+        // only store successful results
         if (result.isSuccess()) {
             this.put(functionKey.getNormalizedKey(), result.getValue());
-        }
-    }
-
-    @Override
-    public Object get(Object key) {
-        if (key instanceof String) {
-            String keyString = (String) key;
-            String normalizedKey = this.evaluateIfNecessary(keyString);
-            if (this.getLog().isDebugEnabled()) {
-                this.getLog().debug("[RSUse.get] key={}, normalizedKey={}, result={}",
-                        new Object[]{key, normalizedKey, memoized.get(normalizedKey)});
-            }
-            return memoized.get(normalizedKey);
-        } else {
-            return this.originalMap.get(key);
         }
     }
 
@@ -489,6 +440,51 @@ public final class RSUse implements Use, Map<String, Object> {
 
         return new FunctionKey(normalizedKey, property, functions);
     }
+
+    /**
+     * HTL has a special case for calling .toString on variables, even for {@link Map}. Feel free to use this
+     * representation in HTL to help debug the state of this pojo, ex. "${resource_.toString}".
+     * @return the String representation of the RS state
+     */
+    @Override
+    public String toString() {
+        return "RSUse{" +
+                "context=" + context +
+                ", pipe='" + pipe + '\'' +
+                ", target=" + String.valueOf(target) +
+                ", originalMap=" + originalMap.keySet() +
+                ", memoized=" + memoized.keySet() +
+                ", useFunctions=" + useFunctions.keySet() +
+                '}';
+    }
+
+    /**
+     * The get method is called by the HTL runtime during evaluation of HTL expressions.
+     * {@inheritDoc}
+     */
+    @Override
+    public Object get(Object key) {
+        // only attempt to parse keys that are strings
+        if (key instanceof String) {
+            String keyString = (String) key;
+
+            // normalize, and if necessary evaluate, the key.
+            // a non-null result will be stored in the memoized map.
+            String normalizedKey = this.evaluateIfNecessary(keyString);
+
+            if (this.getLog().isDebugEnabled()) {
+                this.getLog().debug("[RSUse.get] key={}, normalizedKey={}, result={}",
+                        new Object[]{key, normalizedKey, memoized.get(normalizedKey)});
+            }
+
+            // return the memoized value or null based on the normalized key
+            return memoized.get(normalizedKey);
+        } else {
+            // fall back to the original map
+            return this.originalMap.get(key);
+        }
+    }
+
 
     @Override
     public int size() {
@@ -545,15 +541,36 @@ public final class RSUse implements Use, Map<String, Object> {
         return memoized.entrySet();
     }
 
-    @Override
-    public String toString() {
-        return "RSUse{" +
-                "context=" + context +
-                ", pipe='" + pipe + '\'' +
-                ", target=" + String.valueOf(target) +
-                ", originalMap=" + originalMap.keySet() +
-                ", memoized=" + memoized.keySet() +
-                ", useFunctions=" + useFunctions.keySet() +
-                '}';
+    static class FunctionKey {
+        private String normalizedKey;
+        private String property;
+        private String[] functions;
+
+        FunctionKey(String normalizedKey, String property, String[] functions) {
+            this.normalizedKey = normalizedKey;
+            this.property = property;
+            this.functions = functions;
+        }
+
+        String getNormalizedKey() {
+            return normalizedKey;
+        }
+
+        String getProperty() {
+            return property;
+        }
+
+        String[] getFunctions() {
+            return functions;
+        }
+
+        boolean isSelfSelected() {
+            return property.isEmpty();
+        }
+
+        boolean isRelativePath() {
+            return property.startsWith("./") || property.startsWith("../");
+        }
     }
+
 }
