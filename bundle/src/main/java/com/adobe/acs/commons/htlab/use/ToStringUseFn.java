@@ -27,6 +27,7 @@ import aQute.bnd.annotation.ConsumerType;
 import com.adobe.acs.commons.htlab.HTLabContext;
 import com.adobe.acs.commons.htlab.HTLabFunction;
 import com.adobe.acs.commons.htlab.HTLabMapResult;
+import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.scripting.sightly.pojo.Use;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class ToStringUseFn implements Use, HTLabFunction {
     @Nonnull
     @Override
     public HTLabMapResult apply(@Nonnull HTLabContext context, @Nonnull String key, @CheckForNull Object value) {
-        String result = value == null ? this.onNull : String.valueOf(value);
+        String result = value == null ? this.onNull : getString(value);
         getLog().info("[ToStringUseFn.apply] key={} value={}. Isn't there a better function to use here?",
                 key, result);
         return HTLabMapResult.success(result);
@@ -63,5 +64,15 @@ public class ToStringUseFn implements Use, HTLabFunction {
 
     private Logger getLog() {
         return this.context.getLog() != null ? this.context.getLog() : LOG;
+    }
+
+    private String getString(@Nonnull Object value) {
+        if (value instanceof Adaptable) {
+            String result = ((Adaptable) value).adaptTo(String.class);
+            if (result != null) {
+                return result;
+            }
+        }
+        return String.valueOf(value);
     }
 }

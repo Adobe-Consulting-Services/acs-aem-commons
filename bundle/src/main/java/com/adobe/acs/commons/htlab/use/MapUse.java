@@ -166,6 +166,7 @@ public final class MapUse implements Use, Map<String, Object> {
     private Pattern pipePattern;
 
     private Object target;
+    private Resource relativeBase;
     private Map<?, ?> originalMap;
 
     private Map<String, HTLabFunction> useFunctions = new HashMap<String, HTLabFunction>();
@@ -194,6 +195,14 @@ public final class MapUse implements Use, Map<String, Object> {
 
         String[] getFunctions() {
             return functions;
+        }
+
+        boolean isSelfSelected() {
+            return property.isEmpty();
+        }
+
+        boolean isRelativePath() {
+            return property.startsWith("./") || property.startsWith("../");
         }
     }
 
@@ -257,6 +266,11 @@ public final class MapUse implements Use, Map<String, Object> {
             this.originalMap = ValueMap.EMPTY;
         }
 
+        if (this.target instanceof Resource) {
+            this.relativeBase = (Resource) this.target;
+        } else if (this.target instanceof Adaptable) {
+            this.relativeBase = ((Adaptable) this.target).adaptTo(Resource.class);
+        }
 
         SlingScriptHelper sling = this.context.getSling();
         if (sling != null) {
@@ -319,9 +333,17 @@ public final class MapUse implements Use, Map<String, Object> {
             FunctionKey functionKey = parseFunctionKey(key);
             String normalizedKey = functionKey.getNormalizedKey();
             if (!this.memoized.containsKey(normalizedKey)) {
-                Object value = functionKey.getProperty().isEmpty()
+                Object value = functionKey.isSelfSelected()
                         ? this.target
                         : this.originalMap.get(functionKey.getProperty());
+
+                if (value == null && functionKey.isRelativePath()) {
+                    if (relativeBase != null) {
+                        value = context.getResolver().getResource(relativeBase, functionKey.getProperty());
+                    } else {
+                        getLog().debug("[MapUse.applyMapFunctions] target not suitable as base resource. Skipping relative path resource resolution.");
+                    }
+                }
 
                 getLog().trace("[MapUse.applyMapFunctions] begin mapping; property={}, value={}",
                         functionKey.getProperty(), value);
@@ -401,17 +423,16 @@ public final class MapUse implements Use, Map<String, Object> {
     }
 
     FunctionKey parseFunctionKey(@Nonnull String key) {
-        Matcher dFuncMatcher = this.pipePattern.matcher(key);
-        if (!dFuncMatcher.find()) {
+        Matcher pipeMatcher = this.pipePattern.matcher(key);
+        if (!pipeMatcher.find()) {
             // key is not a function expression. return simple property accessor.
             return new FunctionKey(key, key, new String[0]);
         }
 
-        // if the D_FUNC delim is the first
-        final boolean isSelfSelected = dFuncMatcher.start() == 0;
-        dFuncMatcher.reset();
+        // if the pipe delim is the first
+        final boolean isSelfSelected = pipeMatcher.start() == 0;
+        pipeMatcher.reset();
         String[] parts = this.pipePattern.split(key);
-
 
         List<String> filtered = new ArrayList<String>();
         if (isSelfSelected) {
