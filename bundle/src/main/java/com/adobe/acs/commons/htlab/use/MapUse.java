@@ -51,92 +51,94 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * "MapUse" is is the entry point for the HTLab DSL within an HTL script. It provides a more concise means of extending
- * HTL functionality than typing out a fully-qualified class name for every instance of a custom {@link Use} class.
- *
+ * {@link MapUse} is the entry point for the HTLab micro-DSL within an HTL script. It provides a more concise means of
+ * extending HTL functionality than typing out a fully-qualified class name for every instance of a custom {@link Use}
+ * class for every combination of inputs and outputs.
+ * <p>
  * To initialize the DSL for the request resource, create an instance of this class using the data-sly-use attribute:
- *
+ * <p>
  * {@code data-sly-use.resource_="com.adobe.acs.commons.htlab.use.MapUse"}
- *
+ * <p>
  * This allows one to access values from an associated underlying property map and then dollar-pipe them to
  * {@link HTLabFunction}s, which can either be registered as OSGi services, or
  * implemented as {@link Use} classes. For example:
- *
+ * <p>
  * "${resource_['jcr:created $ jsonDate']}" evaluates to an ISO8601-formatted string representing the Calendar value of
  * the jcr:created property.
- *
+ * <p>
  * (see {@link com.adobe.acs.commons.htlab.impl.func.JsonDateFunction})
- *
+ * <p>
  * If a function name is not mapped to an active {@link HTLabFunction}, the input value
  * is passed through and the function name logged, rather than throwing an exception.
- *
- *
+ * <p>
+ * <p>
  * INITIALIZER OPTIONS
  * -------------------
- *
+ * <p>
  * WRAP OBJECT ("wrap=")
- *
+ * <p>
  * To wrap an HTL variable, just specify {@code wrap=varName} in the {@code data-sly-use} options. For example,
- *
+ * <p>
  * {@code data-sly-use.currentPage_="${'com.adobe.acs.commons.htlab.use.MapUse' @ wrap=currentPage}"}
- *
+ * <p>
  * By convention, the MapUse variable should be named "var_" (i.e. "var" followed by underscore), where "var" is the name of
  * the variable that is wrapped.
- *
+ * <p>
  * RESOURCE PATH ("path=")
- *
+ * <p>
  * It is also possible to wrap a resource resolved from a path. Simply specify {@code path='./path/to/resource'}. The
  * path will be resolved relative to the request resource.
- *
+ * <p>
  * PIPE OPERATOR ("pipe=")
- *
+ * <p>
  * If the default dollar ("$") pipe operator conflicts with an existing property name in the wrapped map, you can
  * specify a different operator using {@code pipe='[op]'}.
- *
+ * <p>
  * For example, initializing with
  * {@code data-sly-use.resI18n_="${'com.adobe.acs.commons.htlab.use.MapUse' @ pipe='%', wrap=resI18n}"} allows for property
  * access like so: "${resI18n_['Big Dishwasher Sale $ $ $ Marquee % truncateTo100']}", where "Big Dishwasher Sale $ $ $
  * Marquee" is interpreted as the property name.
- *
- *
+ * <p>
+ * <p>
  * USE FUNCTIONS
  * -------------
- *
- * HTLab functions can also be bound in the {@link MapUse} initializer so long as the assigned function names do not collide
+ * <p>
+ * HTLab functions can be bound in the {@link MapUse} initializer so long as the assigned function names do not collide
  * with the argument names specified above (i.e., Use Functions cannot be bound as "wrap", "path", or "pipe").
- *
+ * <p>
  * Specifically, the Use Function must be initialized before the {@link MapUse} instance, with a valid HTL use variable name:
- *
+ * <p>
  * {@code data-sly-use.myUseFunc="com.adobe.acs.commons.htlab.use.ToStringUseFn"}
- *
+ * <p>
  * Then, the use variable must be bound to the {@link MapUse} initializer as an option name=value pair:
- *
+ * <p>
  * {@code data-sly-use.currentPage_="${'com.adobe.acs.commons.htlab.use.MapUse' @ toString=myUseFunc}"}
- *
+ * <p>
  * The function can then be applied using the option name assigned in the {@link MapUse} initializer:
- *
+ * <p>
  * "${currentPage_['cq:lastModified $ toString']}" evaluates to "java.util.GregorianCalendar[time=..."
- *
+ * <p>
  * An Initializer-bound Use Function will always override an OSGi-registered function of the same name, regardless of
  * the latter's {@code service.ranking} value.
- *
- *
+ * <p>
+ * <p>
  * THE SELF SELECTOR
  * -----------------
- *
+ * <p>
  * The target object of an {@link MapUse} instance can be selected instead of one of its properties by using the
  * pipe operator by itself (the "Self" selector) or followed by a function.
- *
+ * <p>
  * "${resource_[' $ ']}" evaluates to the underlying Resource, whereas "{resource_[' $ pageLink']}" passes the Resource to
  * the {@link com.adobe.acs.commons.htlab.impl.func.PageLinkFunction} service which generates a link to the resourcePage
  * by mapping the containing-Page-path using the resolver and request context objects, and then appending ".html".
- *
+ * <p>
  * HTLAB_USE SHORTCUT
  * ------------------
- *
+ * <p>
  * The {@link com.adobe.acs.commons.htlab.impl.HTLabBindingsValuesProvider} adds the HTLAB_USE binding which is a
- * mapping between simple class names and fully-qualified class names for the classes under the .htlab.use package.
- *
+ * mapping between simple class names and fully-qualified class names for the classes under the .htlab.use package. OSGi
+ * configuration is required to enable the shortcut binding.
+ * <p>
  * For example,
  * 1. {@code data-sly-use.resource_="com.adobe.acs.commons.htlab.use.MapUse"} becomes
  * {@code data-sly-use.resource_="${HTLAB_USE.MapUse}"}
@@ -144,7 +146,6 @@ import org.slf4j.LoggerFactory;
  * {@code data-sly-use.myUseFunc="${HTLAB_USE.ToStringUseFn @ onNull='n/a'}"}
  * 3. {@code data-sly-use.fnAdaptToRepStatus="${'com.adobe.acs.commons.htlab.use.AdaptToUseFn' @ type='com.day.cq.replication.ReplicationStatus'}"} becomes
  * {@code data-sly-use.myUseFunc="${HTLAB_USE.AdaptToUseFn @ type='com.day.cq.replication.ReplicationStatus'}"}
- *
  */
 @ConsumerType
 public final class MapUse implements Use, Map<String, Object> {
@@ -198,6 +199,7 @@ public final class MapUse implements Use, Map<String, Object> {
 
     /**
      * Get configured pipe operator.
+     *
      * @return configured pipe operator
      */
     public String getPipe() {
@@ -264,7 +266,7 @@ public final class MapUse implements Use, Map<String, Object> {
         }
 
         if (this.mapService == null) {
-            getLog().warn("[MapUse.init] Failed to get {} from sling. function names will be ignored.",
+            getLog().info("[MapUse.init] No {} service found (not yet configured?). OSGi-based functions will not be available.",
                     HTLabMapService.class.getSimpleName());
         }
 
@@ -307,6 +309,7 @@ public final class MapUse implements Use, Map<String, Object> {
 
     /**
      * Applies any map functions and returns the appropriate key to access the memoized value.
+     *
      * @param key original key
      * @return normalized key
      */
@@ -320,47 +323,52 @@ public final class MapUse implements Use, Map<String, Object> {
                         ? this.target
                         : this.originalMap.get(functionKey.getProperty());
 
-                if (this.mapService != null) {
-                    getLog().trace("[MapUse.applyMapFunctions] begin mapping; property={}, value={}",
-                            functionKey.getProperty(), value);
+                getLog().trace("[MapUse.applyMapFunctions] begin mapping; property={}, value={}",
+                        functionKey.getProperty(), value);
 
-                    HTLabMapResult result = HTLabMapResult.success(value);
+                HTLabMapResult result = HTLabMapResult.success(value);
 
-                    for (String fnName : functionKey.getFunctions()) {
-                        HTLabMapResult nextResult;
+                for (String fnName : functionKey.getFunctions()) {
+                    HTLabMapResult nextResult;
 
-                        HTLabFunction useFunction = this.useFunctions.get(fnName);
-                        if (useFunction != null) {
-                            nextResult = useFunction.apply(this.context,
-                                    functionKey.getProperty(), result.getValue()).withFnName(fnName);
-                        } else {
-                            nextResult = this.mapService.apply(this.context, fnName,
-                                    functionKey.getProperty(), result.getValue());
-                        }
-
-                        result = result.combine(nextResult);
-
-                        if (getLog().isTraceEnabled()) {
-                            getLog().trace("[MapUse.applyMapFunctions] map result {}", result);
-                        }
-
-                        if (result.isFailure()) {
-                            break;
-                        }
-                    }
-
-                    if (result.isSuccess()) {
-                        value = result.getValue();
+                    HTLabFunction useFunction = this.useFunctions.get(fnName);
+                    if (useFunction != null) {
+                        nextResult = useFunction.apply(this.context,
+                                functionKey.getProperty(), result.getValue()).withFnName(fnName);
+                    } else if (this.mapService != null) {
+                        nextResult = this.mapService.apply(this.context, fnName,
+                                functionKey.getProperty(), result.getValue());
                     } else {
-                        getLog().error("[MapUse.applyMapFunctions] function application failed; map result {}", result);
-                        if (result.getCause() != null) {
-                            getLog().error("[MapUse.applyMapFunctions] cause:", result.getCause());
+                        if (getLog().isDebugEnabled()) {
+                            getLog().debug("[MapUse.applyMapFunctions] No function found with name {}. Forwarding value.",
+                                    fnName);
                         }
-                        value = null;
+                        nextResult = HTLabMapResult.forwardValue().withFnName(fnName);
                     }
-                    getLog().trace("[MapUse.applyMapFunctions] end mapping; property={}, value={}",
-                            functionKey.getProperty(), value);
+
+                    result = result.combine(nextResult);
+
+                    if (getLog().isTraceEnabled()) {
+                        getLog().trace("[MapUse.applyMapFunctions] map result {}", result);
+                    }
+
+                    if (result.isFailure()) {
+                        break;
+                    }
                 }
+
+                if (result.isSuccess()) {
+                    value = result.getValue();
+                } else {
+                    getLog().error("[MapUse.applyMapFunctions] function application failed; map result {}", result);
+                    if (result.getCause() != null) {
+                        getLog().error("[MapUse.applyMapFunctions] cause:", result.getCause());
+                    }
+                    value = null;
+                }
+                getLog().trace("[MapUse.applyMapFunctions] end mapping; property={}, value={}",
+                        functionKey.getProperty(), value);
+
                 this.put(normalizedKey, value);
             }
             getLog().trace("[MapUse.applyMapFunctions] end; normalizedKey={}", key);
@@ -380,7 +388,7 @@ public final class MapUse implements Use, Map<String, Object> {
             String normalizedKey = this.applyMapFunctions(keyString);
             if (this.getLog().isDebugEnabled()) {
                 this.getLog().debug("[MapUse.get] key={}, normalizedKey={}, result={}",
-                        new Object[] {key, normalizedKey, memoized.get(normalizedKey)});
+                        new Object[]{key, normalizedKey, memoized.get(normalizedKey)});
             }
             return memoized.get(normalizedKey);
         } else {
@@ -500,7 +508,7 @@ public final class MapUse implements Use, Map<String, Object> {
         return "MapUse{" +
                 "context=" + context +
                 ", pipe='" + pipe + '\'' +
-                ", target=" + String.valueOf(target)+
+                ", target=" + String.valueOf(target) +
                 ", originalMap=" + originalMap.keySet() +
                 ", useFunctions=" + useFunctions.keySet() +
                 '}';
