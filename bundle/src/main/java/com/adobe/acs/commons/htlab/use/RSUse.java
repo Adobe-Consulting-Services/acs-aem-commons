@@ -34,11 +34,10 @@ import javax.annotation.Nonnull;
 import javax.script.Bindings;
 
 import aQute.bnd.annotation.ConsumerType;
-import com.adobe.acs.commons.htlab.HTLabFunction;
-import com.day.cq.wcm.api.Page;
 import com.adobe.acs.commons.htlab.HTLabContext;
-import com.adobe.acs.commons.htlab.HTLabMapService;
+import com.adobe.acs.commons.htlab.HTLabFunction;
 import com.adobe.acs.commons.htlab.HTLabMapResult;
+import com.adobe.acs.commons.htlab.HTLabMapService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.resource.Resource;
@@ -160,7 +159,8 @@ public final class RSUse implements Use, Map<String, Object> {
 
     public static final String DEFAULT_PIPE = "$";
 
-    @Nonnull private HTLabContext context = HTLabContext.EMPTY;
+    @Nonnull
+    private HTLabContext context = HTLabContext.EMPTY;
     private String pipe;
     private String pipeLiteral;
     private Pattern pipePattern;
@@ -221,56 +221,11 @@ public final class RSUse implements Use, Map<String, Object> {
         this.configurePipeOperator();
         this.collectBoundUseFunctions();
 
-        Object wrap = this.context.get(B_WRAP, Object.class);
-        this.target = wrap;
-        if (wrap instanceof Map) {
-            getLog().debug("[RSUse.init] wrap= object is a Map. using it as '{}' and as map.", this.pipe);
-            this.originalMap = (Map) wrap;
-        } else if (wrap instanceof Page) {
-            getLog().debug("[RSUse.init] wrap= object is Page. using it as '{}' and it.getProperties() as map.",
-                    this.pipe);
-            this.originalMap = ((Page) wrap).getProperties();
-        } else if (wrap instanceof Adaptable) {
-            getLog().debug("[RSUse.init] wrap= object is Adaptable. using it as '{}' and it.adaptTo(ValueMap.class) as map.",
-                    pipe);
-            ValueMap adapted = ((Adaptable) wrap).adaptTo(ValueMap.class);
-            this.originalMap = adapted != null ? adapted : ValueMap.EMPTY;
-        } else if (wrap == null) {
-            getLog().debug("[RSUse.init] wrap= is null. will get Resource from request unless path= is defined.");
-            Resource resource = this.context.getResource();
-            String path = this.context.get(B_PATH, String.class);
-            if (path != null) {
-                getLog().debug("[RSUse.init] path= is defined. resolving resource from {}.", path);
-                ResourceResolver resolver = this.context.getResolver();
-                if (resolver != null) {
-                    resource = resolver.getResource(resource, path);
-                    if (resource == null) {
-                        getLog().warn("[RSUse.init] Failed to get resource at path: {}. '{}' is null and map is empty.",
-                                path, this.pipe);
-                    }
-                } else {
-                    getLog().warn("[RSUse.init] Failed to get resource resolver.");
-                }
-            }
+        // Establish target from wrap= or path=
+        this.establishTarget();
 
-            if (resource != null) {
-                this.target = resource;
-                this.originalMap = resource.getValueMap();
-            } else {
-                getLog().warn("[RSUse.init] Failed to get resource. '{}' is null and map is empty.", this.pipe);
-                this.originalMap = ValueMap.EMPTY;
-            }
-        } else {
-            getLog().debug("[RSUse.init] wrap= object does not adapt to ValueMap. using it as '{}' but map is empty.",
-                    this.pipe);
-            this.originalMap = ValueMap.EMPTY;
-        }
-
-        if (this.target instanceof Resource) {
-            this.relativeBase = (Resource) this.target;
-        } else if (this.target instanceof Adaptable) {
-            this.relativeBase = ((Adaptable) this.target).adaptTo(Resource.class);
-        }
+        // Establish relativeBase and originalMap from target
+        this.establishMap();
 
         SlingScriptHelper sling = this.context.getSling();
         if (sling != null) {
@@ -293,7 +248,7 @@ public final class RSUse implements Use, Map<String, Object> {
         // Memoize the non-null target this at the end of the init method to ensure that this.size() > 0 for
         // data-sly-test, because RSUse implements Map, and data-sly-test expects Map.size() > 0 for success.
         if (this.target != null) {
-            this.memoized.put(this.pipeLiteral, this.target);
+            this.put(this.pipeLiteral, this.target);
         }
     }
 
@@ -317,6 +272,64 @@ public final class RSUse implements Use, Map<String, Object> {
         }
     }
 
+    private void establishTarget() {
+        Object wrap = this.context.get(B_WRAP, Object.class);
+        if (wrap == null) {
+            getLog().debug("[RSUse.establishTarget] wrap= is null. will get Resource from request unless path= is defined.");
+            Resource resource = this.context.getResource();
+            String path = this.context.get(B_PATH, String.class);
+            if (path != null) {
+                getLog().debug("[RSUse.establishTarget] path= is defined. resolving resource from {}.", path);
+                ResourceResolver resolver = this.context.getResolver();
+                if (resolver != null) {
+                    resource = resolver.getResource(resource, path);
+                    if (resource == null) {
+                        getLog().warn("[RSUse.establishTarget] Failed to get resource at path: {}. '{}' is null and map is empty.",
+                                path, this.pipe);
+                    }
+                } else {
+                    getLog().warn("[RSUse.establishTarget] Failed to get resource resolver.");
+                }
+            }
+
+            if (resource != null) {
+                this.target = resource;
+            } else {
+                getLog().warn("[RSUse.establishTarget] Failed to get resource. '{}' is null and map is empty.", this.pipe);
+                this.target = null;
+            }
+        } else {
+            this.target = wrap;
+        }
+    }
+
+    private void establishMap() {
+        if (target instanceof Map) {
+            getLog().debug("[RSUse.establishMap] target is a Map. using it as '{}' and as map.",
+                    this.pipe);
+            this.originalMap = (Map) target;
+        } else if (target instanceof Resource) {
+            getLog().debug("[RSUse.establishMap] target is Resource. using it as '{}' and it.getValueMap() as map.",
+                    pipe);
+            this.relativeBase = (Resource) target;
+            this.originalMap = this.relativeBase.getValueMap();
+        } else if (target instanceof Adaptable) {
+            getLog().debug("[RSUse.establishMap] target is Adaptable. using it as '{}' and it.adaptTo(ValueMap.class) as map.",
+                    pipe);
+            this.originalMap = ((Adaptable) target).adaptTo(ValueMap.class);
+            this.relativeBase = ((Adaptable) target).adaptTo(Resource.class);
+            if (originalMap == null && relativeBase != null) {
+                this.originalMap = relativeBase.getValueMap();
+            }
+        }
+
+        // make sure originalMap is not null.
+        if (this.originalMap == null) {
+            getLog().debug("[RSUse.establishMap] Failed to populate underlying map. Resorting to ValueMap.EMPTY.");
+            this.originalMap = ValueMap.EMPTY;
+        }
+    }
+
     private Logger getLog() {
         return LOG;
     }
@@ -327,87 +340,104 @@ public final class RSUse implements Use, Map<String, Object> {
      * @param key original key
      * @return normalized key
      */
-    private String applyMapFunctions(@Nonnull String key) {
-        getLog().trace("[RSUse.applyMapFunctions] begin; key={}", key);
+    private String evaluateIfNecessary(@Nonnull String key) {
+        getLog().trace("[RSUse.evaluateIfNecessary] begin; key={}", key);
         if (hasFunctions(key)) {
             FunctionKey functionKey = parseFunctionKey(key);
             String normalizedKey = functionKey.getNormalizedKey();
+            // check for memoized result of normalized expression
             if (!this.memoized.containsKey(normalizedKey)) {
-                Object value = functionKey.isSelfSelected()
-                        ? this.target
-                        : this.originalMap.get(functionKey.getProperty());
 
-                if (value == null && functionKey.isRelativePath()) {
-                    if (relativeBase != null) {
-                        value = relativeBase.getResourceResolver().getResource(relativeBase, functionKey.getProperty());
-                    } else {
-                        getLog().debug("[RSUse.applyMapFunctions] target not suitable as base resource. Skipping relative path resource resolution.");
-                    }
-                }
+                HTLabMapResult result = selectInitialValue(functionKey);
 
-                getLog().trace("[RSUse.applyMapFunctions] begin mapping; property={}, value={}",
-                        functionKey.getProperty(), value);
-
-                HTLabMapResult result = HTLabMapResult.success(value);
+                getLog().trace("[RSUse.evaluateIfNecessary] begin mapping; property={}, initial={}",
+                        functionKey.getProperty(), result);
 
                 for (String fnName : functionKey.getFunctions()) {
-                    HTLabMapResult nextResult;
-
-                    HTLabFunction useFunction = this.useFunctions.get(fnName);
-                    if (useFunction != null) {
-                        nextResult = useFunction.apply(this.context,
-                                functionKey.getProperty(), result.getValue()).withFnName(fnName);
-                    } else if (this.mapService != null) {
-                        nextResult = this.mapService.apply(this.context, fnName,
-                                functionKey.getProperty(), result.getValue());
-                    } else {
-                        if (getLog().isDebugEnabled()) {
-                            getLog().debug("[RSUse.applyMapFunctions] No function found with name {}. Forwarding value.",
-                                    fnName);
-                        }
-                        nextResult = HTLabMapResult.forwardValue().withFnName(fnName);
-                    }
-
-                    result = result.combine(nextResult);
+                    // apply this function
+                    result = result.combine(applyFunction(fnName, functionKey, result));
 
                     if (getLog().isTraceEnabled()) {
-                        getLog().trace("[RSUse.applyMapFunctions] map result {}", result);
+                        getLog().trace("[RSUse.evaluateIfNecessary] map result {}", result);
                     }
 
                     if (result.isFailure()) {
+                        getLog().error("[RSUse.evaluateIfNecessary] function application failed; map result {}", result);
+                        if (result.getCause() != null) {
+                            getLog().error("[RSUse.evaluateIfNecessary] cause:", result.getCause());
+                        }
                         break;
                     }
                 }
 
-                if (result.isSuccess()) {
-                    value = result.getValue();
-                } else {
-                    getLog().error("[RSUse.applyMapFunctions] function application failed; map result {}", result);
-                    if (result.getCause() != null) {
-                        getLog().error("[RSUse.applyMapFunctions] cause:", result.getCause());
-                    }
-                    value = null;
-                }
-                getLog().trace("[RSUse.applyMapFunctions] end mapping; property={}, value={}",
-                        functionKey.getProperty(), value);
+                getLog().trace("[RSUse.evaluateIfNecessary] end mapping; property={}, final={}",
+                        functionKey.getProperty(), result);
 
-                this.put(normalizedKey, value);
+                this.memoizeResult(functionKey, result);
             }
-            getLog().trace("[RSUse.applyMapFunctions] end; normalizedKey={}", key);
+            getLog().trace("[RSUse.evaluateIfNecessary] end; normalizedKey={}", key);
             return normalizedKey;
         } else if (!this.memoized.containsKey(key)) {
+            // no pipe delimiter, read value from originalMap and memoize.
             Object value = this.originalMap.get(key);
-            this.memoized.put(key, value);
+            this.put(key, value);
         }
-        getLog().trace("[RSUse.applyMapFunctions] end; key={}", key);
+        getLog().trace("[RSUse.evaluateIfNecessary] end; key={}", key);
         return key;
+    }
+
+    private HTLabMapResult selectInitialValue(FunctionKey functionKey) {
+        // select self or defer to original map using property name selector.
+        Object value = functionKey.isSelfSelected()
+                ? this.target
+                : this.originalMap.get(functionKey.getProperty());
+
+        // if no value is found and is relative path selector,
+        // attempt to resolve resource
+        if (value == null && functionKey.isRelativePath()) {
+            if (relativeBase != null) {
+                value = relativeBase.getResourceResolver().getResource(relativeBase,
+                        functionKey.getProperty());
+            } else {
+                getLog().debug("[RSUse.selectInitialValue] target not suitable as base resource. Skipping relative path resource resolution.");
+            }
+        }
+
+        return HTLabMapResult.success(value);
+    }
+
+    private HTLabMapResult applyFunction(String fnName, FunctionKey functionKey, HTLabMapResult previousResult) {
+        HTLabMapResult nextResult;
+
+        HTLabFunction useFunction = this.useFunctions.get(fnName);
+        if (useFunction != null) {
+            nextResult = useFunction.apply(this.context,
+                    functionKey.getProperty(), previousResult.getValue()).withFnName(fnName);
+        } else if (this.mapService != null) {
+            nextResult = this.mapService.apply(this.context, fnName,
+                    functionKey.getProperty(), previousResult.getValue());
+        } else {
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("[RSUse.applyFunction] No function found with name {}. Forwarding value.",
+                        fnName);
+            }
+            nextResult = HTLabMapResult.forwardValue().withFnName(fnName);
+        }
+
+        return nextResult;
+    }
+
+    void memoizeResult(FunctionKey functionKey, HTLabMapResult result) {
+        if (result.isSuccess()) {
+            this.put(functionKey.getNormalizedKey(), result.getValue());
+        }
     }
 
     @Override
     public Object get(Object key) {
         if (key instanceof String) {
             String keyString = (String) key;
-            String normalizedKey = this.applyMapFunctions(keyString);
+            String normalizedKey = this.evaluateIfNecessary(keyString);
             if (this.getLog().isDebugEnabled()) {
                 this.getLog().debug("[RSUse.get] key={}, normalizedKey={}, result={}",
                         new Object[]{key, normalizedKey, memoized.get(normalizedKey)});
@@ -482,31 +512,22 @@ public final class RSUse implements Use, Map<String, Object> {
 
     @Override
     public Object put(String key, Object value) {
-        Map<String, Object> updated = new HashMap<String, Object>(this.memoized);
-        Object ret = updated.put(key, value);
-        this.memoized = new ValueMapDecorator(updated);
-        return ret;
+        return this.memoized.put(key, value);
     }
 
     @Override
     public Object remove(Object key) {
-        Map<String, Object> updated = new HashMap<String, Object>(this.memoized);
-        Object removed = updated.remove(key);
-        this.memoized = new ValueMapDecorator(updated);
-        return removed;
+        return this.memoized.remove(key);
     }
 
     @Override
     public void putAll(Map<? extends String, ?> map) {
-        Map<String, Object> updated = new HashMap<String, Object>(this.memoized);
-        updated.putAll(map);
-        this.memoized = new ValueMapDecorator(updated);
+        this.memoized.putAll(map);
     }
 
     @Override
     public void clear() {
-        Map<String, Object> updated = new HashMap<String, Object>();
-        this.memoized = new ValueMapDecorator(updated);
+        this.memoized.clear();
     }
 
     @Override
@@ -531,6 +552,7 @@ public final class RSUse implements Use, Map<String, Object> {
                 ", pipe='" + pipe + '\'' +
                 ", target=" + String.valueOf(target) +
                 ", originalMap=" + originalMap.keySet() +
+                ", memoized=" + memoized.keySet() +
                 ", useFunctions=" + useFunctions.keySet() +
                 '}';
     }
