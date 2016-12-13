@@ -35,8 +35,10 @@ import com.adobe.acs.commons.htlab.HTLabFunction;
 import com.adobe.acs.commons.htlab.HTLabMapResult;
 import com.adobe.acs.commons.htlab.HTLabMapService;
 import com.adobe.acs.commons.htlab.use.MapUse;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -52,7 +54,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Central service coordinating map function implementations for the {@link MapUse} class.
  */
-@Component(specVersion = "1.2", policy = ConfigurationPolicy.REQUIRE)
+@Component
 @Service
 public class HTLabMapServiceImpl implements HTLabMapService {
     private static final Logger LOG = LoggerFactory.getLogger(HTLabMapServiceImpl.class);
@@ -89,13 +91,14 @@ public class HTLabMapServiceImpl implements HTLabMapService {
                 return func.apply(context, key, value).withFnName(fnName);
             } catch (Exception e) {
                 LOG.warn("[service.apply] Error thrown by HTLabFunction.apply(). fnName={}, key={}, value={}, message={}",
-                        new Object[] {fnName, key, value, e.getMessage()});
+                        new Object[]{fnName, key, value, e.getMessage()});
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Caused by:", e);
                 }
 
                 return HTLabMapResult.failure(e).withFnName(fnName);
             }
+
         } else {
             LOG.info("[service.apply] No HTLabFunction found with {} of '{}'", HTLabFunction.OSGI_FN_NAME, fnName);
         }
@@ -180,7 +183,7 @@ public class HTLabMapServiceImpl implements HTLabMapService {
                 return new UseFunctionKey(serviceId, fnName, comparable);
             } else {
                 LOG.warn("[getKeyForUseFunction] Failed to bind HTLabFunction {}: illegal value '{}' for {}.",
-                        new Object[] { serviceId, fnName, HTLabFunction.OSGI_FN_NAME});
+                        new Object[]{serviceId, fnName, HTLabFunction.OSGI_FN_NAME});
             }
         } else if (fnName == null) {
             LOG.warn("[getKeyForUseFunction] Failed to bind HTLabFunction {}: missing mandatory property '{}'.",

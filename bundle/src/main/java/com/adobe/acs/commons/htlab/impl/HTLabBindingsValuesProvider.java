@@ -32,17 +32,26 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
 
 /**
- * Adds a Bindings key, {@code HTLAB_USE}, which is a map of simple class names to fully-qualified class names for
+ * Adds a Bindings key referencing a map of simple class names to fully-qualified class names for
  * classes under the .htlab.use package.
  */
-@Component(policy = ConfigurationPolicy.REQUIRE)
+@Component(
+        metatype = true,
+        policy = ConfigurationPolicy.REQUIRE,
+        label = "ACS AEM Commons - HTLab - Shortcut Bindings Value Provider",
+        description = "Bind configuration to enable the binding for the HTLab use function shortcut."
+)
 @Service
 @Property(name = "javax.script.name", value = "sightly", propertyPrivate = true)
 public class HTLabBindingsValuesProvider implements BindingsValuesProvider {
-    private static final String B_HTLAB_USE = "HTLAB_USE";
+    private static final String DEFAULT_BINDING_NAME = "HTLAB_USE";
+
+    @Property(value = DEFAULT_BINDING_NAME, label = "Binding Name", description = "Name of binding for map of shortcuts")
+    private static final String OSGI_BINDING_NAME = "htlab.shortcut.binding";
 
     private static final Class<?>[] USE_CLASS_NAMES = {
             AdaptToUseFn.class,
@@ -51,6 +60,7 @@ public class HTLabBindingsValuesProvider implements BindingsValuesProvider {
     };
 
     private Map<String, Object> useClasses;
+    private String bindingName;
 
     @Activate
     protected void activate(Map<String, Object> props) {
@@ -59,12 +69,14 @@ public class HTLabBindingsValuesProvider implements BindingsValuesProvider {
             _useClasses.put(useClass.getSimpleName(), useClass.getName());
         }
         this.useClasses = Collections.unmodifiableMap(_useClasses);
+
+        this.bindingName = PropertiesUtil.toString(props.get(OSGI_BINDING_NAME), DEFAULT_BINDING_NAME);
     }
 
     @Override
     public void addBindings(Bindings bindings) {
-        if (!bindings.containsKey(B_HTLAB_USE)) {
-            bindings.put(B_HTLAB_USE, this.useClasses);
+        if (!bindings.containsKey(bindingName)) {
+            bindings.put(bindingName, this.useClasses);
         }
     }
 }
