@@ -339,7 +339,7 @@ public final class MapUse implements Use, Map<String, Object> {
 
                 if (value == null && functionKey.isRelativePath()) {
                     if (relativeBase != null) {
-                        value = context.getResolver().getResource(relativeBase, functionKey.getProperty());
+                        value = relativeBase.getResourceResolver().getResource(relativeBase, functionKey.getProperty());
                     } else {
                         getLog().debug("[MapUse.applyMapFunctions] target not suitable as base resource. Skipping relative path resource resolution.");
                     }

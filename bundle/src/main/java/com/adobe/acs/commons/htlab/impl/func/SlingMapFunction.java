@@ -28,6 +28,8 @@ import com.adobe.acs.commons.htlab.HTLabMapResult;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Maps a path input value using the resource resolver and request from context. Forwards non-string input values.
@@ -40,9 +42,11 @@ public class SlingMapFunction implements HTLabFunction {
     @Nonnull
     @Override
     public HTLabMapResult apply(@Nonnull HTLabContext context, @Nonnull String key, @CheckForNull Object value) {
-        if (value instanceof String && context.getResolver() != null && context.getRequest() != null) {
+        ResourceResolver resolver = context.getResolver();
+        SlingHttpServletRequest request = context.getRequest();
+        if (value instanceof String && resolver != null && request != null) {
             String path = (String) value;
-            String mapped = context.getResolver().map(context.getRequest(), path);
+            String mapped = resolver.map(request, path);
             return HTLabMapResult.success(mapped);
         }
         return HTLabMapResult.forwardValue();

@@ -28,7 +28,9 @@ import com.adobe.acs.commons.htlab.HTLabMapResult;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 
 /**
@@ -43,9 +45,11 @@ public class SlingResolveFunction implements HTLabFunction {
     @Nonnull
     @Override
     public HTLabMapResult apply(@Nonnull HTLabContext context, @Nonnull String key, @CheckForNull Object value) {
-        if (value instanceof String && context.getResolver() != null && context.getRequest() != null) {
+        ResourceResolver resolver = context.getResolver();
+        SlingHttpServletRequest request = context.getRequest();
+        if (value instanceof String && resolver != null && request != null) {
             String uri = (String) value;
-            Resource resolved = context.getResolver().resolve(context.getRequest(), uri);
+            Resource resolved = resolver.resolve(request, uri);
             if (ResourceUtil.isNonExistingResource(resolved)) {
                 return HTLabMapResult.failure();
             } else {
