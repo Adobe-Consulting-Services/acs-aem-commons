@@ -51,13 +51,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link MapUse} is the entry point for the HTLab micro-DSL within an HTL script. It provides a more concise means of
- * extending HTL functionality than typing out a fully-qualified class name for every instance of a custom {@link Use}
- * class for every combination of inputs and outputs.
+ * The {@link RSUse} class, or "Resource Selector Use", is the entry point for the HTLab micro-DSL within an HTL script.
+ * It provides a more concise means of extending HTL functionality than typing out a fully-qualified class name for
+ * every instance of a custom {@link Use} class for every combination of inputs and outputs.
  * <p>
  * To initialize the DSL for the request resource, create an instance of this class using the data-sly-use attribute:
  * <p>
- * {@code data-sly-use.resource_="com.adobe.acs.commons.htlab.use.MapUse"}
+ * {@code data-sly-use.resource_="com.adobe.acs.commons.htlab.use.RSUse"}
  * <p>
  * This allows one to access values from an associated underlying property map and then dollar-pipe them to
  * {@link HTLabFunction}s, which can either be registered as OSGi services, or
@@ -79,9 +79,9 @@ import org.slf4j.LoggerFactory;
  * <p>
  * To wrap an HTL variable, just specify {@code wrap=varName} in the {@code data-sly-use} options. For example,
  * <p>
- * {@code data-sly-use.currentPage_="${'com.adobe.acs.commons.htlab.use.MapUse' @ wrap=currentPage}"}
+ * {@code data-sly-use.currentPage_="${'com.adobe.acs.commons.htlab.use.RSUse' @ wrap=currentPage}"}
  * <p>
- * By convention, the MapUse variable should be named "var_" (i.e. "var" followed by underscore), where "var" is the name of
+ * By convention, the RSUse variable should be named "var_" (i.e. "var" followed by underscore), where "var" is the name of
  * the variable that is wrapped.
  * <p>
  * RESOURCE PATH ("path=")
@@ -95,7 +95,7 @@ import org.slf4j.LoggerFactory;
  * specify a different operator using {@code pipe='[op]'}.
  * <p>
  * For example, initializing with
- * {@code data-sly-use.resI18n_="${'com.adobe.acs.commons.htlab.use.MapUse' @ pipe='%', wrap=resI18n}"} allows for property
+ * {@code data-sly-use.resI18n_="${'com.adobe.acs.commons.htlab.use.RSUse' @ pipe='%', wrap=resI18n}"} allows for property
  * access like so: "${resI18n_['Big Dishwasher Sale $ $ $ Marquee % truncateTo100']}", where "Big Dishwasher Sale $ $ $
  * Marquee" is interpreted as the property name.
  * <p>
@@ -103,18 +103,18 @@ import org.slf4j.LoggerFactory;
  * USE FUNCTIONS
  * -------------
  * <p>
- * HTLab functions can be bound in the {@link MapUse} initializer so long as the assigned function names do not collide
+ * HTLab functions can be bound in the {@link RSUse} initializer so long as the assigned function names do not collide
  * with the argument names specified above (i.e., Use Functions cannot be bound as "wrap", "path", or "pipe").
  * <p>
- * Specifically, the Use Function must be initialized before the {@link MapUse} instance, with a valid HTL use variable name:
+ * Specifically, the Use Function must be initialized before the {@link RSUse} instance, with a valid HTL use variable name:
  * <p>
  * {@code data-sly-use.myUseFunc="com.adobe.acs.commons.htlab.use.ToStringUseFn"}
  * <p>
- * Then, the use variable must be bound to the {@link MapUse} initializer as an option name=value pair:
+ * Then, the use variable must be bound to the {@link RSUse} initializer as an option name=value pair:
  * <p>
- * {@code data-sly-use.currentPage_="${'com.adobe.acs.commons.htlab.use.MapUse' @ toString=myUseFunc}"}
+ * {@code data-sly-use.currentPage_="${'com.adobe.acs.commons.htlab.use.RSUse' @ toString=myUseFunc}"}
  * <p>
- * The function can then be applied using the option name assigned in the {@link MapUse} initializer:
+ * The function can then be applied using the option name assigned in the {@link RSUse} initializer:
  * <p>
  * "${currentPage_['cq:lastModified $ toString']}" evaluates to "java.util.GregorianCalendar[time=..."
  * <p>
@@ -125,7 +125,7 @@ import org.slf4j.LoggerFactory;
  * THE SELF SELECTOR
  * -----------------
  * <p>
- * The target object of an {@link MapUse} instance can be selected instead of one of its properties by using the
+ * The target object of an {@link RSUse} instance can be selected instead of one of its properties by using the
  * pipe operator by itself (the "Self" selector) or followed by a function.
  * <p>
  * "${resource_[' $ ']}" evaluates to the underlying Resource, whereas "{resource_[' $ pageLink']}" passes the Resource to
@@ -140,16 +140,16 @@ import org.slf4j.LoggerFactory;
  * configuration is required to enable the shortcut binding.
  * <p>
  * For example,
- * 1. {@code data-sly-use.resource_="com.adobe.acs.commons.htlab.use.MapUse"} becomes
- * {@code data-sly-use.resource_="${HTLAB_USE.MapUse}"}
+ * 1. {@code data-sly-use.resource_="com.adobe.acs.commons.htlab.use.RSUse"} becomes
+ * {@code data-sly-use.resource_="${HTLAB_USE.RSUse}"}
  * 2. {@code data-sly-use.myUseFunc="${'com.adobe.acs.commons.htlab.use.ToStringUseFn' @ onNull='n/a'}"} becomes
  * {@code data-sly-use.myUseFunc="${HTLAB_USE.ToStringUseFn @ onNull='n/a'}"}
  * 3. {@code data-sly-use.fnAdaptToRepStatus="${'com.adobe.acs.commons.htlab.use.AdaptToUseFn' @ type='com.day.cq.replication.ReplicationStatus'}"} becomes
  * {@code data-sly-use.myUseFunc="${HTLAB_USE.AdaptToUseFn @ type='com.day.cq.replication.ReplicationStatus'}"}
  */
 @ConsumerType
-public final class MapUse implements Use, Map<String, Object> {
-    private static final Logger LOG = LoggerFactory.getLogger(MapUse.class);
+public final class RSUse implements Use, Map<String, Object> {
+    private static final Logger LOG = LoggerFactory.getLogger(RSUse.class);
 
     public static final String B_PATH = "path";
     public static final String B_WRAP = "wrap";
@@ -160,7 +160,7 @@ public final class MapUse implements Use, Map<String, Object> {
 
     public static final String DEFAULT_PIPE = "$";
 
-    private HTLabContext context;
+    @Nonnull private HTLabContext context = HTLabContext.EMPTY;
     private String pipe;
     private String pipeLiteral;
     private Pattern pipePattern;
@@ -224,32 +224,32 @@ public final class MapUse implements Use, Map<String, Object> {
         Object wrap = this.context.get(B_WRAP, Object.class);
         this.target = wrap;
         if (wrap instanceof Map) {
-            getLog().debug("[MapUse.init] wrap= object is a Map. using it as '{}' and as map.", this.pipe);
+            getLog().debug("[RSUse.init] wrap= object is a Map. using it as '{}' and as map.", this.pipe);
             this.originalMap = (Map) wrap;
         } else if (wrap instanceof Page) {
-            getLog().debug("[MapUse.init] wrap= object is Page. using it as '{}' and it.getProperties() as map.",
+            getLog().debug("[RSUse.init] wrap= object is Page. using it as '{}' and it.getProperties() as map.",
                     this.pipe);
             this.originalMap = ((Page) wrap).getProperties();
         } else if (wrap instanceof Adaptable) {
-            getLog().debug("[MapUse.init] wrap= object is Adaptable. using it as '{}' and it.adaptTo(ValueMap.class) as map.",
+            getLog().debug("[RSUse.init] wrap= object is Adaptable. using it as '{}' and it.adaptTo(ValueMap.class) as map.",
                     pipe);
             ValueMap adapted = ((Adaptable) wrap).adaptTo(ValueMap.class);
             this.originalMap = adapted != null ? adapted : ValueMap.EMPTY;
         } else if (wrap == null) {
-            getLog().debug("[MapUse.init] wrap= is null. will get Resource from request unless path= is defined.");
+            getLog().debug("[RSUse.init] wrap= is null. will get Resource from request unless path= is defined.");
             Resource resource = this.context.getResource();
             String path = this.context.get(B_PATH, String.class);
             if (path != null) {
-                getLog().debug("[MapUse.init] path= is defined. resolving resource from {}.", path);
+                getLog().debug("[RSUse.init] path= is defined. resolving resource from {}.", path);
                 ResourceResolver resolver = this.context.getResolver();
                 if (resolver != null) {
                     resource = resolver.getResource(resource, path);
                     if (resource == null) {
-                        getLog().warn("[MapUse.init] Failed to get resource at path: {}. '{}' is null and map is empty.",
+                        getLog().warn("[RSUse.init] Failed to get resource at path: {}. '{}' is null and map is empty.",
                                 path, this.pipe);
                     }
                 } else {
-                    getLog().warn("[MapUse.init] Failed to get resource resolver.");
+                    getLog().warn("[RSUse.init] Failed to get resource resolver.");
                 }
             }
 
@@ -257,11 +257,11 @@ public final class MapUse implements Use, Map<String, Object> {
                 this.target = resource;
                 this.originalMap = resource.getValueMap();
             } else {
-                getLog().warn("[MapUse.init] Failed to get resource. '{}' is null and map is empty.", this.pipe);
+                getLog().warn("[RSUse.init] Failed to get resource. '{}' is null and map is empty.", this.pipe);
                 this.originalMap = ValueMap.EMPTY;
             }
         } else {
-            getLog().debug("[MapUse.init] wrap= object does not adapt to ValueMap. using it as '{}' but map is empty.",
+            getLog().debug("[RSUse.init] wrap= object does not adapt to ValueMap. using it as '{}' but map is empty.",
                     this.pipe);
             this.originalMap = ValueMap.EMPTY;
         }
@@ -276,11 +276,11 @@ public final class MapUse implements Use, Map<String, Object> {
         if (sling != null) {
             this.mapService = sling.getService(HTLabMapService.class);
         } else {
-            getLog().warn("[MapUse.init] Failed to get SlingScriptHelper ('sling') from bindings.");
+            getLog().warn("[RSUse.init] Failed to get SlingScriptHelper ('sling') from bindings.");
         }
 
         if (this.mapService == null) {
-            getLog().info("[MapUse.init] No {} service found (not yet configured?). OSGi-based functions will not be available.",
+            getLog().info("[RSUse.init] No {} service found (not yet configured?). OSGi-based functions will not be available.",
                     HTLabMapService.class.getSimpleName());
         }
 
@@ -291,7 +291,7 @@ public final class MapUse implements Use, Map<String, Object> {
         this.memoized = new ValueMapDecorator(copyOfOriginal);
 
         // Memoize the non-null target this at the end of the init method to ensure that this.size() > 0 for
-        // data-sly-test, because MapUse implements Map, and data-sly-test expects Map.size() > 0 for success.
+        // data-sly-test, because RSUse implements Map, and data-sly-test expects Map.size() > 0 for success.
         if (this.target != null) {
             this.memoized.put(this.pipeLiteral, this.target);
         }
@@ -303,14 +303,14 @@ public final class MapUse implements Use, Map<String, Object> {
         this.pipePattern =
                 Pattern.compile(String.format("\\s*%s(\\s*%s)*\\s*",
                         Pattern.quote(this.pipe), Pattern.quote(this.pipe)));
-        getLog().debug("[MapUse.configurePipeOperator] pipe operator: {}", this.pipe);
+        getLog().debug("[RSUse.configurePipeOperator] pipe operator: {}", this.pipe);
     }
 
     private void collectBoundUseFunctions() {
         for (Map.Entry<String, Object> entry : this.context.entrySet()) {
             if (!RESERVED_OPTIONS.contains(entry.getKey())
                     && entry.getValue() instanceof HTLabFunction) {
-                getLog().info("[MapUse.collectBoundUseFunctions] found key {} mapped to function class {} in Bindings.",
+                getLog().info("[RSUse.collectBoundUseFunctions] found key {} mapped to function class {} in Bindings.",
                         entry.getKey(), entry.getValue().getClass().getName());
                 this.useFunctions.put(entry.getKey(), (HTLabFunction) entry.getValue());
             }
@@ -328,7 +328,7 @@ public final class MapUse implements Use, Map<String, Object> {
      * @return normalized key
      */
     private String applyMapFunctions(@Nonnull String key) {
-        getLog().trace("[MapUse.applyMapFunctions] begin; key={}", key);
+        getLog().trace("[RSUse.applyMapFunctions] begin; key={}", key);
         if (hasFunctions(key)) {
             FunctionKey functionKey = parseFunctionKey(key);
             String normalizedKey = functionKey.getNormalizedKey();
@@ -341,11 +341,11 @@ public final class MapUse implements Use, Map<String, Object> {
                     if (relativeBase != null) {
                         value = relativeBase.getResourceResolver().getResource(relativeBase, functionKey.getProperty());
                     } else {
-                        getLog().debug("[MapUse.applyMapFunctions] target not suitable as base resource. Skipping relative path resource resolution.");
+                        getLog().debug("[RSUse.applyMapFunctions] target not suitable as base resource. Skipping relative path resource resolution.");
                     }
                 }
 
-                getLog().trace("[MapUse.applyMapFunctions] begin mapping; property={}, value={}",
+                getLog().trace("[RSUse.applyMapFunctions] begin mapping; property={}, value={}",
                         functionKey.getProperty(), value);
 
                 HTLabMapResult result = HTLabMapResult.success(value);
@@ -362,7 +362,7 @@ public final class MapUse implements Use, Map<String, Object> {
                                 functionKey.getProperty(), result.getValue());
                     } else {
                         if (getLog().isDebugEnabled()) {
-                            getLog().debug("[MapUse.applyMapFunctions] No function found with name {}. Forwarding value.",
+                            getLog().debug("[RSUse.applyMapFunctions] No function found with name {}. Forwarding value.",
                                     fnName);
                         }
                         nextResult = HTLabMapResult.forwardValue().withFnName(fnName);
@@ -371,7 +371,7 @@ public final class MapUse implements Use, Map<String, Object> {
                     result = result.combine(nextResult);
 
                     if (getLog().isTraceEnabled()) {
-                        getLog().trace("[MapUse.applyMapFunctions] map result {}", result);
+                        getLog().trace("[RSUse.applyMapFunctions] map result {}", result);
                     }
 
                     if (result.isFailure()) {
@@ -382,24 +382,24 @@ public final class MapUse implements Use, Map<String, Object> {
                 if (result.isSuccess()) {
                     value = result.getValue();
                 } else {
-                    getLog().error("[MapUse.applyMapFunctions] function application failed; map result {}", result);
+                    getLog().error("[RSUse.applyMapFunctions] function application failed; map result {}", result);
                     if (result.getCause() != null) {
-                        getLog().error("[MapUse.applyMapFunctions] cause:", result.getCause());
+                        getLog().error("[RSUse.applyMapFunctions] cause:", result.getCause());
                     }
                     value = null;
                 }
-                getLog().trace("[MapUse.applyMapFunctions] end mapping; property={}, value={}",
+                getLog().trace("[RSUse.applyMapFunctions] end mapping; property={}, value={}",
                         functionKey.getProperty(), value);
 
                 this.put(normalizedKey, value);
             }
-            getLog().trace("[MapUse.applyMapFunctions] end; normalizedKey={}", key);
+            getLog().trace("[RSUse.applyMapFunctions] end; normalizedKey={}", key);
             return normalizedKey;
         } else if (!this.memoized.containsKey(key)) {
             Object value = this.originalMap.get(key);
             this.memoized.put(key, value);
         }
-        getLog().trace("[MapUse.applyMapFunctions] end; key={}", key);
+        getLog().trace("[RSUse.applyMapFunctions] end; key={}", key);
         return key;
     }
 
@@ -409,7 +409,7 @@ public final class MapUse implements Use, Map<String, Object> {
             String keyString = (String) key;
             String normalizedKey = this.applyMapFunctions(keyString);
             if (this.getLog().isDebugEnabled()) {
-                this.getLog().debug("[MapUse.get] key={}, normalizedKey={}, result={}",
+                this.getLog().debug("[RSUse.get] key={}, normalizedKey={}, result={}",
                         new Object[]{key, normalizedKey, memoized.get(normalizedKey)});
             }
             return memoized.get(normalizedKey);
@@ -453,7 +453,7 @@ public final class MapUse implements Use, Map<String, Object> {
                 + StringUtils.join(functions, this.pipeLiteral);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("[MapUse.parseFunctionKey] key={} isSelfSelected={} filtered={}, normKey={}, property={}, functions={}",
+            LOG.debug("[RSUse.parseFunctionKey] key={} isSelfSelected={} filtered={}, normKey={}, property={}, functions={}",
                     new Object[]{key, isSelfSelected, filtered, normalizedKey, property, Arrays.asList(functions)});
         }
 
@@ -526,7 +526,7 @@ public final class MapUse implements Use, Map<String, Object> {
 
     @Override
     public String toString() {
-        return "MapUse{" +
+        return "RSUse{" +
                 "context=" + context +
                 ", pipe='" + pipe + '\'' +
                 ", target=" + String.valueOf(target) +

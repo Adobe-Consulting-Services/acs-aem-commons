@@ -25,7 +25,7 @@ import java.util.Map;
 import javax.script.Bindings;
 
 import com.adobe.acs.commons.htlab.use.AdaptToUseFn;
-import com.adobe.acs.commons.htlab.use.MapUse;
+import com.adobe.acs.commons.htlab.use.RSUse;
 import com.adobe.acs.commons.htlab.use.ToStringUseFn;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -55,7 +55,7 @@ public class HTLabBindingsValuesProvider implements BindingsValuesProvider {
 
     private static final Class<?>[] USE_CLASS_NAMES = {
             AdaptToUseFn.class,
-            MapUse.class,
+            RSUse.class,
             ToStringUseFn.class
     };
 

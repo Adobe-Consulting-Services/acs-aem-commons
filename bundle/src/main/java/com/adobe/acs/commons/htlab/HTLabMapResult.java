@@ -21,7 +21,7 @@ package com.adobe.acs.commons.htlab;
 
 import javax.annotation.CheckForNull;
 
-import com.adobe.acs.commons.htlab.use.MapUse;
+import com.adobe.acs.commons.htlab.use.RSUse;
 
 /**
  * Result returned by a {@link HTLabFunction}.
@@ -182,7 +182,7 @@ public final class HTLabMapResult {
         if (this.previousResult != null) {
             String fnNameForToString = this.fnName != null ? this.fnName : "<?>";
             return String.format("%s <%s> %s -> %s", this.previousResult.buildExpressionForToString(),
-                    MapUse.DEFAULT_PIPE, fnNameForToString, valueString);
+                    RSUse.DEFAULT_PIPE, fnNameForToString, valueString);
         } else {
             return valueString;
         }

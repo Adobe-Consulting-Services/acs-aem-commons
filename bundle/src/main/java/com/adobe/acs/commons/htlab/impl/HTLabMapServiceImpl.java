@@ -34,11 +34,8 @@ import com.adobe.acs.commons.htlab.HTLabContext;
 import com.adobe.acs.commons.htlab.HTLabFunction;
 import com.adobe.acs.commons.htlab.HTLabMapResult;
 import com.adobe.acs.commons.htlab.HTLabMapService;
-import com.adobe.acs.commons.htlab.use.MapUse;
-import org.apache.felix.scr.annotations.Activate;
+import com.adobe.acs.commons.htlab.use.RSUse;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -52,7 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Central service coordinating map function implementations for the {@link MapUse} class.
+ * Central service coordinating map function implementations for the {@link RSUse} class.
  */
 @Component
 @Service

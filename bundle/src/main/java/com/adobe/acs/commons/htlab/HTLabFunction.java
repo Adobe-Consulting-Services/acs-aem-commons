@@ -22,11 +22,11 @@ package com.adobe.acs.commons.htlab;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
-import com.adobe.acs.commons.htlab.use.MapUse;
+import com.adobe.acs.commons.htlab.use.RSUse;
 import org.osgi.framework.Constants;
 
 /**
- * Implement this interface to provide a map function for the {@link MapUse} use
+ * Implement this interface to provide a map function for the {@link RSUse} use
  * class. The shape of the function used in HTL is essentially one which accepts a single untyped argument, the value
  * of which is evaluated from the left-hand side of the {@code $} operator, and which may be {@code null}.
  *
@@ -40,7 +40,7 @@ import org.osgi.framework.Constants;
  * {@link HTLabMapResult#failure()}.
  *
  * The function is also allowed to incorporate external state into the computation of the result, either via the
- * {@link javax.script.Bindings} provided during the construction of the {@link MapUse}
+ * {@link javax.script.Bindings} provided during the construction of the {@link RSUse}
  * class, or via OSGi configuration specific to the function as a managed service.
  */
 public interface HTLabFunction {

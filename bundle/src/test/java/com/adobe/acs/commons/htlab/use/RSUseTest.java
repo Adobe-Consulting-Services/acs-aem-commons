@@ -30,53 +30,53 @@ import static org.junit.Assert.assertEquals;
 /**
  *
  */
-public class MapUseTest {
+public class RSUseTest {
 
     @Test
     public void testParseFunctionKey() {
         SimpleBindings bindings = new SimpleBindings();
-        bindings.put(MapUse.B_PIPE, "$");
-        bindings.put(MapUse.B_WRAP, ValueMapDecorator.EMPTY);
-        MapUse rs = new MapUse();
+        bindings.put(RSUse.B_PIPE, "$");
+        bindings.put(RSUse.B_WRAP, ValueMapDecorator.EMPTY);
+        RSUse rs = new RSUse();
 
         rs.init(bindings);
-        MapUse.FunctionKey key1 = rs.parseFunctionKey("jcr:title");
+        RSUse.FunctionKey key1 = rs.parseFunctionKey("jcr:title");
         assertEquals("key1.normalizedKey='jcr:title'", "jcr:title", key1.getNormalizedKey());
         assertEquals("key1.property='jcr:title'", "jcr:title", key1.getProperty());
         assertEquals("key1.functions.length=0", 0, key1.getFunctions().length);
 
-        MapUse.FunctionKey key2 = rs.parseFunctionKey("jcr:title $");
+        RSUse.FunctionKey key2 = rs.parseFunctionKey("jcr:title $");
         assertEquals("key2.normalizedKey='jcr:title $ '", "jcr:title $ ", key2.getNormalizedKey());
         assertEquals("key2.property='jcr:title'", "jcr:title", key2.getProperty());
         assertEquals("key2.functions.length=0", 0, key2.getFunctions().length);
 
-        MapUse.FunctionKey key3 = rs.parseFunctionKey("$ pageTitle");
+        RSUse.FunctionKey key3 = rs.parseFunctionKey("$ pageTitle");
         assertEquals("key3.normalizedKey=' $ pageTitle'", " $ pageTitle", key3.getNormalizedKey());
         assertEquals("key3.property=''", "", key3.getProperty());
         assertEquals("key3.functions.length=1", 1, key3.getFunctions().length);
 
-        MapUse.FunctionKey key4 = rs.parseFunctionKey("$");
+        RSUse.FunctionKey key4 = rs.parseFunctionKey("$");
         assertEquals("key4.normalizedKey=' $ '", " $ ", key4.getNormalizedKey());
         assertEquals("key4.property=''", "", key4.getProperty());
         assertEquals("key4.functions.length=0", 0, key4.getFunctions().length);
 
-        MapUse.FunctionKey key5 = rs.parseFunctionKey("$ pageTitle $ ");
+        RSUse.FunctionKey key5 = rs.parseFunctionKey("$ pageTitle $ ");
         assertEquals("key5.normalizedKey=' $ pageTitle'", " $ pageTitle", key5.getNormalizedKey());
         assertEquals("key5.property=''", "", key5.getProperty());
         assertEquals("key5.functions.length=1", 1, key5.getFunctions().length);
 
-        MapUse.FunctionKey key6 = rs.parseFunctionKey("$ pageTitle $ trunc ");
+        RSUse.FunctionKey key6 = rs.parseFunctionKey("$ pageTitle $ trunc ");
         assertEquals("key6.normalizedKey=' $ pageTitle'", " $ pageTitle $ trunc", key6.getNormalizedKey());
         assertEquals("key6.property=''", "", key6.getProperty());
         assertEquals("key6.functions.length=2", 2, key6.getFunctions().length);
         assertArrayEquals("key6.functions=[pageTitle,trunc]", new String[]{"pageTitle", "trunc"}, key6.getFunctions());
 
-        MapUse.FunctionKey key7 = rs.parseFunctionKey("$ $");
+        RSUse.FunctionKey key7 = rs.parseFunctionKey("$ $");
         assertEquals("key7.normalizedKey=' $ '", " $ ", key7.getNormalizedKey());
         assertEquals("key7.property=''", "", key7.getProperty());
         assertEquals("key7.functions.length=0", 0, key7.getFunctions().length);
 
-        MapUse.FunctionKey key8 = rs.parseFunctionKey("jcr:created $ jsonDate");
+        RSUse.FunctionKey key8 = rs.parseFunctionKey("jcr:created $ jsonDate");
         assertEquals("key8.normalizedKey='jcr:created $ jsonDate'", "jcr:created $ jsonDate", key8.getNormalizedKey());
         assertEquals("key8.property='jcr:created'", "jcr:created", key8.getProperty());
         assertEquals("key8.functions.length=1", 1, key8.getFunctions().length);

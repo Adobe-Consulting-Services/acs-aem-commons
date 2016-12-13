@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
@@ -37,16 +38,16 @@ import org.slf4j.Logger;
 
 /**
  * Wraps a {@link Bindings} instance with accessor methods that are analogous to those of
- * {@link SlingBindings}
+ * {@link SlingBindings}.
  */
 public final class HTLabContext extends ValueMapDecorator {
+    public static final HTLabContext EMPTY = new HTLabContext(Collections.<String, Object>emptyMap());
 
-    private final Map<String, Object> bindings;
+    @Nonnull private final Map<String, Object> bindings;
 
-    private HTLabContext(Map<String, Object> base) {
+    private HTLabContext(@Nonnull Map<String, Object> base) {
         super(base);
-        this.bindings = Collections.unmodifiableMap(
-                new HashMap<String, Object>(base));
+        this.bindings = Collections.unmodifiableMap(new HashMap<String, Object>(base));
     }
 
     /**
@@ -63,8 +64,8 @@ public final class HTLabContext extends ValueMapDecorator {
      * @param bindings the input bindings provided to a {@link org.apache.sling.scripting.sightly.pojo.Use} class.
      * @return the new context object
      */
-    public static HTLabContext fromBindings(Bindings bindings) {
-        return new HTLabContext(bindings);
+    @Nonnull public static HTLabContext fromBindings(Bindings bindings) {
+        return new HTLabContext(bindings != null ? bindings : Collections.<String, Object>emptyMap());
     }
 
     /**

@@ -22,11 +22,11 @@ package com.adobe.acs.commons.htlab;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
-import com.adobe.acs.commons.htlab.use.MapUse;
+import com.adobe.acs.commons.htlab.use.RSUse;
 
 /**
  * Interface for the service that coordinates binding of OSGi-registered {@link HTLabFunction} services to fnNames,
- * exposing a single apply method for the {@link MapUse} class.
+ * exposing a single apply method for the {@link RSUse} class.
  */
 public interface HTLabMapService {
 

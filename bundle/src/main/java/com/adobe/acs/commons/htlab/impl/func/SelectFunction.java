@@ -26,13 +26,13 @@ import javax.script.Bindings;
 import com.adobe.acs.commons.htlab.HTLabContext;
 import com.adobe.acs.commons.htlab.HTLabFunction;
 import com.adobe.acs.commons.htlab.HTLabMapResult;
-import com.adobe.acs.commons.htlab.use.MapUse;
+import com.adobe.acs.commons.htlab.use.RSUse;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 
 /**
- * Return a new instance of {@link MapUse} using the context bindings and wrapping the input value.
+ * Return a new instance of {@link RSUse} using the context bindings and wrapping the input value.
  */
 @Component
 @Service
@@ -43,10 +43,10 @@ public class SelectFunction implements HTLabFunction {
     @Override
     public HTLabMapResult apply(@Nonnull HTLabContext context, @Nonnull String key, @CheckForNull Object value) {
         Bindings bindings = context.cloneBindings();
-        bindings.remove(MapUse.B_PATH);
-        bindings.remove(MapUse.B_WRAP);
-        bindings.put(MapUse.B_WRAP, value);
-        MapUse rs = new MapUse();
+        bindings.remove(RSUse.B_PATH);
+        bindings.remove(RSUse.B_WRAP);
+        bindings.put(RSUse.B_WRAP, value);
+        RSUse rs = new RSUse();
         rs.init(bindings);
         return HTLabMapResult.success(rs);
     }
