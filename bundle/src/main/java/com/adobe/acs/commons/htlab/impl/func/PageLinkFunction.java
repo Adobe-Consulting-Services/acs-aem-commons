@@ -22,11 +22,11 @@ package com.adobe.acs.commons.htlab.impl.func;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import com.adobe.acs.commons.htlab.HTLabContext;
 import com.adobe.acs.commons.htlab.HTLabFunction;
+import com.adobe.acs.commons.htlab.HTLabMapResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import com.adobe.acs.commons.htlab.HTLabContext;
-import com.adobe.acs.commons.htlab.HTLabMapResult;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -67,11 +67,9 @@ public class PageLinkFunction implements HTLabFunction {
             path = ((Page) value).getPath();
         } else if (value instanceof Resource) {
             Page page = ((Resource) value).adaptTo(Page.class);
-            if (page == null) {
-                if (pageManager != null) {
-                    page = pageManager.getContainingPage((Resource) value);
-                    path = page.getPath();
-                }
+            if (page == null && pageManager != null) {
+                page = pageManager.getContainingPage((Resource) value);
+                path = page.getPath();
             }
         } else if (value instanceof Adaptable) {
             Page page = ((Adaptable) value).adaptTo(Page.class);
