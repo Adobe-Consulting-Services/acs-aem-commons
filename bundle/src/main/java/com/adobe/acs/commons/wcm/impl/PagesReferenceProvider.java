@@ -102,17 +102,25 @@ public final class PagesReferenceProvider implements ReferenceProvider {
 
     private void findReferencesInResource(Resource resource,
             Set<Page> pages, PageManager pageManager) {
-        ValueMap map = resource.adaptTo(ValueMap.class);
-        for (String key : map.keySet()) {
-            String[] values = map.get(key, new String[0]);
-            for (String value : values) {
-                if (pattern.matcher(value).find()) {
-                    for (String path : getAllPathsInAProperty(value)) {
-                        Page page = pageManager.getContainingPage(path);
-                        if (page != null) {
-                            pages.add(page);
-                        }
-                    }
+        ValueMap map = resource.getValueMap();
+        for (Object value : map.values()) {
+            if (value instanceof String) {
+                String strValue = (String) value;
+                addPagesFromPropertyValue(strValue, pages, pageManager);
+            } else if (value instanceof String[]) {
+                for (String strValue : (String[]) value) {
+                    addPagesFromPropertyValue(strValue, pages, pageManager);
+                }
+            }
+        }
+    }
+
+    private void addPagesFromPropertyValue(String strValue, Set<Page> pages, PageManager pageManager) {
+        if (pattern.matcher(strValue).find()) {
+            for (String path : getAllPathsInAProperty(strValue)) {
+                Page page = pageManager.getContainingPage(path);
+                if (page != null) {
+                    pages.add(page);
                 }
             }
         }

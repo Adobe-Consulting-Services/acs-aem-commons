@@ -19,41 +19,39 @@
  */
 package com.adobe.acs.commons.images.impl;
 
-import java.io.IOException;
-
-import javax.jcr.RepositoryException;
-
-import org.apache.sling.api.resource.Resource;
-
 import com.day.cq.commons.ImageHelper;
 import com.day.cq.wcm.foundation.Image;
 import com.day.image.Layer;
+import org.apache.sling.api.resource.Resource;
+
+import javax.jcr.RepositoryException;
+import java.io.IOException;
 
 public class SocialRemoteImageImpl extends Image {
-
-    private final Resource res;
+    private final Resource resource;
 
     public SocialRemoteImageImpl(Resource resource, String name) {
         super(resource, name);
-        res = resource;
+        this.resource = resource;
     }
 
     public Layer getLayer(boolean cropped, boolean resized, boolean rotated)
             throws IOException, RepositoryException {
-        Layer layer = null;
-        layer = ImageHelper.createLayer(res);
+        final Layer layer = ImageHelper.createLayer(resource);
+
         if (layer != null) {
-            if (layer != null && cropped) {
+            if (cropped) {
                 crop(layer);
             }
-            if (layer != null && resized) {
+
+            if (resized) {
                 resize(layer);
             }
-            if (layer != null && rotated) {
+
+            if (rotated) {
                 rotate(layer);
             }
         }
         return layer;
     }
-
 }

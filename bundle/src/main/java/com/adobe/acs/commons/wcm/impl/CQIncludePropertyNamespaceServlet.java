@@ -54,23 +54,36 @@ import java.util.regex.Pattern;
 /**
  * ACS AEM Commons - CQInclude Property Namespace.
  */
+//@formatter:off
 @SuppressWarnings("serial")
 @SlingServlet(
+        label = "ACS AEM Commons - CQInclude Property Namespace",
+        metatype = true,
         selectors = "overlay.cqinclude.namespace",
         extensions = "json",
         resourceTypes = "sling/servlet/default")
+//@formatter:on
 public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsServlet {
+    //@formatter:off
     private static final Logger log = LoggerFactory.getLogger(CQIncludePropertyNamespaceServlet.class);
 
     private static final String REQ_ATTR = CQIncludePropertyNamespaceServlet.class.getName() + ".processed";
 
     private static final String AEM_CQ_INCLUDE_SELECTORS = "overlay.infinity";
 
+    private static final String CQINCLUDE_NAMESPACE_URL_REGEX = "(.+\\.cqinclude\\.namespace\\.)(.+)(\\.json)";
+
     private static final int NAME_PROPERTY_SELECTOR_INDEX = 3;
 
     private static final String PN_NAME = "name";
 
+    private static final String PN_XTYPE = "xtype";
+
+    private static final String PN_PATH = "path";
+
     private static final String NT_CQ_WIDGET = "cq:Widget";
+
+    private static final String ESCAPED_SLASH = "%252F";
 
     private static final String[] DEFAULT_NAMESPACEABLE_PROPERTY_NAMES = new String[]{
             PN_NAME,
@@ -102,16 +115,22 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
     )
     public static final String PROP_NAMESPACEABLE_PROPERTY_NAMES = "namespace.property-names";
 
-    private static final String[] DEFAULT_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = new String[]{ "^\\./.*" };
-
+    private static final String[] DEFAULT_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = new String[]{"^\\./.*"};
     private List<Pattern> namespaceablePropertyValuePatterns = new ArrayList<Pattern>();
-
     @Property(label = "Property Value Patterns",
             description = "Namespace properties whose values match a regex in this list. "
                     + "Defaults to [ \"^\\\\./.*\" ]",
-            value = { "^\\./.*" })
+            value = {"^\\./.*"})
     public static final String PROP_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = "namespace.property-value-patterns";
 
+
+    private static final boolean DEFAULT_SUPPORT_MULTI_LEVEL = false;
+    private boolean supportMultiLevel = DEFAULT_SUPPORT_MULTI_LEVEL;
+    @Property(label = "Support Multi-level",
+            description = "When set to true, cqinclude servlet will support multi-level path-ing if nested cqinclude namespaces. Defaults to false",
+            boolValue = false)
+    public static final String PROP_SUPPORT_MULTI_LEVEL = "namespace.multi-level";
+    //@formatter:on
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -175,6 +194,8 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
 
     @Activate
     protected void activate(final Map<String, Object> config) {
+        supportMultiLevel = PropertiesUtil.toBoolean(config.get(PROP_SUPPORT_MULTI_LEVEL), DEFAULT_SUPPORT_MULTI_LEVEL);
+
         // Property Names
         namespaceablePropertyNames = PropertiesUtil.toStringArray(config.get(PROP_NAMESPACEABLE_PROPERTY_NAMES),
                 DEFAULT_NAMESPACEABLE_PROPERTY_NAMES);
@@ -229,17 +250,56 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         }
 
 
+        protected boolean isCqincludeNamespaceWidget(JSONObject jsonObject) {
+            if (StringUtils.equals(jsonObject.optString(JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)
+                    && (StringUtils.equals(jsonObject.optString(PN_XTYPE), "cqinclude"))) {
+                String path = jsonObject.optString(PN_PATH);
+                if (StringUtils.isNotBlank(path) &&
+                        path.matches(CQINCLUDE_NAMESPACE_URL_REGEX)) {
+                    return true;
+
+                }
+            }
+
+            return false;
+        }
+
+        protected JSONObject makeMultiLevel(JSONObject jsonObject) {
+            String path = jsonObject.optString(PN_PATH);
+            if (StringUtils.isNotBlank(path)) {
+                Pattern pattern = Pattern.compile(CQINCLUDE_NAMESPACE_URL_REGEX);
+                Matcher m = pattern.matcher(path);
+                if (m.matches()) {
+                    path = m.group(1) + this.namespace + ESCAPED_SLASH + m.group(2) + m.group(3);
+                    try {
+                        jsonObject.put(PN_PATH, path);
+                    } catch (JSONException e) {
+                        log.error("Could not update cqinclude namespace with path [ {} ]", path);
+                    }
+                }
+            }
+
+            return jsonObject;
+        }
+
+        @SuppressWarnings("PMD.CollapsibleIfStatements")
         @Override
         protected void visit(JSONObject jsonObject) {
 
             if (StringUtils.equals(jsonObject.optString(JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)) {
+                if (supportMultiLevel) {
+                    if (isCqincludeNamespaceWidget(jsonObject)) {
+                        jsonObject = makeMultiLevel(jsonObject);
+                    }
+                }
+
                 final Iterator<String> keys = jsonObject.keys();
 
                 while (keys.hasNext()) {
                     final String propertyName = keys.next();
 
                     if (!this.accept(propertyName, jsonObject.optString(propertyName))) {
-                        log.debug("Property [ {} ~> {} ] is not a namespaceable property name/value", propertyName,
+                        log.debug("Property [ {} ~> {} ] is not a namespace-able property name/value", propertyName,
                                 jsonObject.optString(propertyName));
                         continue;
                     }

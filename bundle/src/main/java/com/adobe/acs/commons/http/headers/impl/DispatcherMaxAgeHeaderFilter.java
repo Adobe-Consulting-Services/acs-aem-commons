@@ -77,17 +77,6 @@ public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderF
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    protected boolean accepts(HttpServletRequest request) {
-        
-        if (super.accepts(request)) {
-            Enumeration<String> cacheHeader = request.getHeaders(CACHE_CONTROL_NAME);
-            return cacheHeader == null || !cacheHeader.hasMoreElements();
-        }
-        return false;
-    }
-
-    @Override
     protected void doActivate(ComponentContext context) throws Exception {
         Dictionary<?, ?> properties = context.getProperties();
         maxage = PropertiesUtil.toLong(properties.get(PROP_MAX_AGE), -1);

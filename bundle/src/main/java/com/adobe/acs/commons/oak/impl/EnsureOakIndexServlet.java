@@ -17,27 +17,30 @@ import java.io.IOException;
 /**
  * HTTP POST /system/console/ensure-oak-index
  * Parameters
- *    force = true | false (optional; when blank defaults to false)
- *    path = /abs/path/to/ensure/definition (optional; when blank indicates all)
+ * force = true | false (optional; when blank defaults to false)
+ * path = /abs/path/to/ensure/definition (optional; when blank indicates all)
  */
+//@formatter:off
 @Component(immediate = true)
 @Properties({
         @Property(
-                name="felix.webconsole.label",
-                value="ensure-oak-index"
+                name = "felix.webconsole.label",
+                value = "Ensure Oak Index"
         )
 })
 @Service(Servlet.class)
+//@formatter:on
 public class EnsureOakIndexServlet extends HttpServlet {
-
+    //@formatter:off
     private static final String PARAM_FORCE = "force";
     private static final String PARAM_PATH = "path";
 
     @Reference
     private EnsureOakIndexManager ensureOakIndexManager;
+    //@formatter:on
 
     protected void doGet(HttpServletRequest request,
-                          HttpServletResponse response) throws IOException {
+                         HttpServletResponse response) throws IOException {
 
         response.getWriter().println("<pre>");
         response.getWriter().println();
@@ -72,7 +75,7 @@ public class EnsureOakIndexServlet extends HttpServlet {
         }
 
         response.setContentType("text/plain; charset=utf-8");
-        response.getWriter().println("Initiated the ensuring of " + count +  " oak indexes");
+        response.getWriter().println("Initiated the ensuring of " + count + " oak indexes");
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }

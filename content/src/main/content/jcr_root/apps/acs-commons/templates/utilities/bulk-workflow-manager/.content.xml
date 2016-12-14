@@ -9,6 +9,10 @@
         cq:designPath="/etc/designs/acs-commons"
         jcr:primaryType="cq:PageContent"
         sling:resourceType="acs-commons/components/utilities/bulk-workflow-manager">
-        <batches/>
+        <workspace
+                jcr:primaryType="oak:Unstructured">
+            <failures
+                jcr:primaryType="oak:Unstructured"/>
+        </workspace>
     </jcr:content>
 </jcr:root>

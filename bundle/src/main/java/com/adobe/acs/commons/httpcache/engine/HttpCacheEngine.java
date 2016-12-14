@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,11 @@
 package com.adobe.acs.commons.httpcache.engine;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.exception.*;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
+import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
@@ -44,6 +48,8 @@ public interface HttpCacheEngine {
     /**
      * Get the first, based on cache config order, cache config applicable for the given request.
      *
+     * Defaults to the Request scope.
+     *
      * @param request
      * @return Applicable CacheConfig
      * @throws HttpCacheConfigConflictException When more than one cache config matches.
@@ -51,6 +57,19 @@ public interface HttpCacheEngine {
      */
     HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheConfigConflictException,
             HttpCacheRepositoryAccessException;
+
+    /**
+     * Get the first, based on cache config order, cache config applicable for the given request.
+     *
+     * @param request
+     * @param slingFilterScope
+     * @return Applicable CacheConfig
+     * @throws HttpCacheConfigConflictException When more than one cache config matches.
+     * @throws HttpCacheRepositoryAccessException
+     */
+    HttpCacheConfig getCacheConfig(SlingHttpServletRequest request, HttpCacheConfig.FilterScope filterScope) throws HttpCacheConfigConflictException,
+            HttpCacheRepositoryAccessException;
+
 
     /**
      * Check if the given request can be served from available cache.
@@ -112,7 +131,7 @@ public interface HttpCacheEngine {
 
     /**
      * Check if the supplied JCR repository path has the potential to invalidate cache. This can be identified based on
-     * the {@link com.adobe.acs.commons.httpcache.config.HttpCacheConfig}.
+     * the {@link HttpCacheConfig}.
      *
      * @param path JCR repository path.
      * @return
@@ -120,7 +139,7 @@ public interface HttpCacheEngine {
     boolean isPathPotentialToInvalidate(String path);
 
     /**
-     * Invalidate the cache for the {@linkplain com.adobe.acs.commons.httpcache.config.HttpCacheConfig} which is
+     * Invalidate the cache for the {@linkplain HttpCacheConfig} which is
      * interested in the given path. Custom cache handling rule hook {@link com.adobe.acs.commons.httpcache.rule
      * .HttpCacheHandlingRule#onCacheInvalidate(String)} exposed.
      *

@@ -33,7 +33,9 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.DamConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.felix.scr.annotations.Activate;
@@ -53,18 +55,19 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import com.day.cq.commons.Externalizer;
+import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
 @Component(metatype = true,
         label = "ACS AEM Commons - Site Map Servlet",
-        description = "Site Map Servlet",
+        description = "Page and Asset Site Map Servlet",
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
 @Service
 @SuppressWarnings("serial")
-@Properties({ @Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY,
+@Properties({@Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY,
         label = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components."),
         @Property(name = "sling.servlet.selectors", value = "sitemap", propertyPrivate = true),
         @Property(name = "sling.servlet.extensions", value = "xml", propertyPrivate = true),
@@ -105,6 +108,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             description = "MIME types allowed for DAM assets.")
     private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
 
+    @Property(label = "Exclude from Sitemap Property",
+            description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
+    private static final String PROP_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.property";
+
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
     @Reference
@@ -122,6 +129,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private List<String> damAssetTypes;
 
+    private String excludeFromSiteMapProperty;
+
     @Activate
     protected void activate(Map<String, Object> properties) {
         this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
@@ -131,6 +140,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.priorityProperties = PropertiesUtil.toStringArray(properties.get(PROP_PRIORITY_PROPERTIES), new String[0]);
         this.damAssetProperty = PropertiesUtil.toString(properties.get(PROP_DAM_ASSETS_PROPERTY), "");
         this.damAssetTypes = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
+        this.excludeFromSiteMapProperty = PropertiesUtil.toString(properties.get(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY), NameConstants.PN_HIDE_IN_NAV);
     }
 
     @Override
@@ -152,7 +162,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             // first do the current page
             write(page, stream, resourceResolver);
 
-            for (Iterator<Page> children = page.listChildren(new PageFilter(), true); children.hasNext();) {
+            for (Iterator<Page> children = page.listChildren(new PageFilter(false, true), true); children.hasNext(); ) {
                 write(children.next(), stream, resourceResolver);
             }
 
@@ -197,8 +207,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
+        if (isHidden(page)) {
+            return;
+        }
         stream.writeStartElement(NS, "url");
-
 
         String loc = externalizer.externalLink(resolver, externalizerDomain,
                 String.format("%s.html", page.getPath()));
@@ -218,6 +230,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         stream.writeEndElement();
     }
 
+    private boolean isHidden(final Page page) {
+        return page.getProperties().get(this.excludeFromSiteMapProperty, false);
+    }
+
     private void writeAsset(Asset asset, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
         stream.writeStartElement(NS, "url");
 
@@ -232,7 +248,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             }
         }
 
-        Resource contentResource = asset.adaptTo(Resource.class).getChild("jcr:content");
+        Resource contentResource = asset.adaptTo(Resource.class).getChild(JcrConstants.JCR_CONTENT);
         if (contentResource != null) {
             final ValueMap properties = contentResource.getValueMap();
             writeFirstPropertyValue(stream, "changefreq", changefreqProperties, properties);
@@ -244,9 +260,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private void writeAssets(final XMLStreamWriter stream, final Resource assetFolder, final ResourceResolver resolver)
             throws XMLStreamException {
-        for (Iterator<Resource> children = assetFolder.listChildren(); children.hasNext();) {
+        for (Iterator<Resource> children = assetFolder.listChildren(); children.hasNext(); ) {
             Resource assetFolderChild = children.next();
-            if (assetFolderChild.isResourceType("dam:Asset")) {
+            if (assetFolderChild.isResourceType(DamConstants.NT_DAM_ASSET)) {
                 Asset asset = assetFolderChild.adaptTo(Asset.class);
 
                 if (damAssetTypes.contains(asset.getMimeType())) {
@@ -259,7 +275,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     private void writeFirstPropertyValue(final XMLStreamWriter stream, final String elementName, final String[] propertyNames,
-            final ValueMap properties) throws XMLStreamException {
+                                         final ValueMap properties) throws XMLStreamException {
         for (String prop : propertyNames) {
             String value = properties.get(prop, String.class);
             if (value != null) {

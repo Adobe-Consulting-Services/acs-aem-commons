@@ -58,7 +58,7 @@ public class RunningStatistic {
         max.set(Math.max(max.get(), l));
     }
 
-    public void reset() {
+    public synchronized void reset() {
         rollingSeries = Collections.synchronizedList(new LinkedList<Long>());
         for (int i = 0; i < rollingAverageWidth; i++) {
             rollingSeries.add(0L);
@@ -78,11 +78,11 @@ public class RunningStatistic {
         return max.get();
     }
 
-    public double getMean() {
+    public synchronized double getMean() {
         return total / counter.get();
     }
 
-    public double getRollingMean() {
+    public synchronized double getRollingMean() {
         return rollingCounter / rollingAverageWidth;
     }
 

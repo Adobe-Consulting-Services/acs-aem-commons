@@ -28,7 +28,8 @@
                         convertToHex      : true,                    // Whether or not to convert to hexadecimal for attribute value. If true then please pass decimal integer value to the source (or as value="" attribute of the select field)
                         allCategoryText   : 'From all categories',   // The text for the select all category option
                         unCategorizedText : 'Uncategorized',         // The text for the select uncategorized option
-                };
+                        classValuePrefix  : ''                       // Prefix to be added to icon class
+        };
 
         // The actual plugin constructor
         function Plugin(element, options) {
@@ -50,11 +51,11 @@
                                                  '</div>' +
                                                  '<div class="selector-popup" style="display: none;">' + ((this.settings.hasSearch) ?
                                                          '<div class="selector-search">' +
-                                                                 '<input type="text" name="" value="" placeholder="Search icon" class="icons-search-input"/>' +
+                                                                 '<input type="text" value="" placeholder="Search icon" class="icons-search-input"/>' +
                                                                  '<i class="fip-icon-search"></i>' +
                                                          '</div>' : '') +
                                                          '<div class="selector-category">' +
-                                                                 '<select name="" class="icon-category-select" style="display: none">' +
+                                                                 '<select class="icon-category-select" style="display: none">' +
                                                                  '</select>' +
                                                          '</div>' +
                                                          '<div class="fip-icons-container"></div>' +

@@ -18,6 +18,6 @@
  * #L%
  */
 
-@aQute.bnd.annotation.Version("2.0.0")
+@aQute.bnd.annotation.Version("3.0.0")
 package com.adobe.acs.commons.httpcache.engine;
 

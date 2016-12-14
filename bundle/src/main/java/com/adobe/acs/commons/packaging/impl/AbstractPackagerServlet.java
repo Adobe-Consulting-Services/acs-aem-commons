@@ -44,6 +44,7 @@ import java.util.Map;
 
 public abstract class AbstractPackagerServlet extends SlingAllMethodsServlet {
 
+    @SuppressWarnings("PMD")
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final String PACKAGE_NAME = "packageName";
