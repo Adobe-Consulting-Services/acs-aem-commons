@@ -16,6 +16,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
+ * 
+ * Accordion TouchUI RTE plugin
+ *
+ * Steps:
+ *
+ * 1) Create ACS Commons plugin nt:unstructured node "acs-commons"
+ *      eg. /apps/<project>/components/text/dialog/items/tab1/items/text/rtePlugins/acs-commons
+ * 2) Add property "features" of type String[] and single value "rte-accordion"
+ * 3) Add to the fullscreen uiSettings "toolbar" property. Include "acs-commons#rte-accordion" in the desired location
+ *      e.g. /apps/<project>/components/text/dialog/items/tab1/items/text/uiSettings/cui/fullscreen
+ * 4) To use the provided minimal generic styling, add "acs-commons.rte-accordion" to the embed property of your Client Library Folder
+ *
  */
 (function($, CUI){
     var RTEAccordion = {
