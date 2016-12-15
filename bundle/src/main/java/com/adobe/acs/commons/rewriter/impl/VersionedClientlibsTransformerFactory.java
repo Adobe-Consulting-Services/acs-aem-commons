@@ -131,7 +131,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         return new VersionableClientlibsTransformer();
     }
 
-    private Attributes versionClientLibs(final String elementName, final Attributes attrs, String contextPath) {
+    private Attributes versionClientLibs(final String elementName, final Attributes attrs, final String contextPath) {
         if (this.isCSS(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_CSS_PATH),
                     attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS, contextPath);
