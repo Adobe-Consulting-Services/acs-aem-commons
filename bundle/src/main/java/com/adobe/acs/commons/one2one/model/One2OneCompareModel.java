@@ -6,7 +6,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -33,61 +32,57 @@ public class One2OneCompareModel {
     @Inject
     private EvolutionAnalyser analyser;
 
-    private final String path;
+    private final String pathA;
+    private final Optional<String> versionA;
     private final Optional<String> pathB;
-    private final Optional<String> a;
-    private final Optional<String> b;
+    private final Optional<String> versionB;
 
-    private FluentIterable<Evolution> evolutions;
+    private FluentIterable<Evolution> evolutionsA;
     private Optional<FluentIterable<Evolution>> evolutionsB;
 
     public One2OneCompareModel(SlingHttpServletRequest request) {
-        this.path = request.getParameter("path");
+        this.pathA = request.getParameter("path");
         this.pathB = Optional.fromNullable(request.getParameter("pathB"));
-        this.a = Optional.fromNullable(request.getParameter("a"));
-        this.b = Optional.fromNullable(request.getParameter("b"));
+        this.versionA = Optional.fromNullable(request.getParameter("a"));
+        this.versionB = Optional.fromNullable(request.getParameter("b"));
     }
 
     @PostConstruct
     protected void activate() {
-        this.evolutions = FluentIterable.from(evolutions(path));
+        this.evolutionsA = FluentIterable.from(evolutions(pathA));
         this.evolutionsB = pathB.isPresent() ? Optional.of(FluentIterable.from(evolutions(pathB.get()))) : Optional.<FluentIterable<Evolution>>absent();
     }
 
-    public String getResourcePath() {
-        return path;
+    public String getResourcePathA() {
+        return pathA;
     }
 
-    public String getResourceB() {
+    public String getResourcePathB() {
         return pathB.or("");
     }
 
-    public List<VersionSelection> getNames() {
-        return evolutions.transform(TO_VERSION_SELECTION).toList();
+    public List<VersionSelection> getVersionSelectionsA() {
+        return evolutionsA.transform(TO_VERSION_SELECTION).toList();
     }
 
-    public List<VersionSelection> getNamesB() {
-        return evolutionsB.or(evolutions).transform(TO_VERSION_SELECTION).toList();
-    }
-
-    public List<Evolution> getEvolutions() {
-        return Lists.newArrayList(getEvolutionA(), getEvolutionB());
+    public List<VersionSelection> getVersionSelectionsB() {
+        return evolutionsB.or(evolutionsA).transform(TO_VERSION_SELECTION).toList();
     }
 
     public Evolution getEvolutionA() {
-        return version(evolutions, getA()).orNull();
+        return version(evolutionsA, getVersionA()).orNull();
     }
 
     public Evolution getEvolutionB() {
-        return version(evolutionsB.or(evolutions), getB()).orNull();
+        return version(evolutionsB.or(evolutionsA), getVersionB()).orNull();
     }
 
-    public String getA() {
-        return a.or(evolutions.transform(TO_NAME).first().or(""));
+    public String getVersionA() {
+        return versionA.or(evolutionsA.transform(TO_NAME).first().or(""));
     }
 
-    public String getB() {
-        return b.or(evolutionsB.or(evolutions).transform(TO_NAME).last().or(""));
+    public String getVersionB() {
+        return versionB.or(evolutionsB.or(evolutionsA).transform(TO_NAME).last().or(""));
     }
 
 

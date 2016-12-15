@@ -13,14 +13,14 @@
                 <div class="date"><fmt:formatDate type="both" value="${evolutionItem.versionDate}" /></div>
             </div>
             <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}" varStatus="entryCounter">
-                <a href="#popover-${versionEntry.uniqueName}-${evoCounter}" data-toggle="popover" data-point-from="right" data-align-from="left">
+                <div>
                     <div class="version-entry type-${versionEntry.resource} status status-${versionEntry.status}"
                          id="${versionEntry.uniqueName}-${evoCounter}"
                          ${versionEntry.status == "" ? "ng-show='!app.hideUnchanged'" : ""}
                          ng-init="addConnection({'source':'${versionEntry.uniqueName}-${evoCounter}', 'target':'${versionEntry.uniqueName}-${evoCounter + 1}', 'isCurrent':${evolutionItem.current}})">
                         <div class="inner-version-entry depth-${versionEntry.depth}">
                             <span class="key"><c:out value="${versionEntry.name}"/>:</span>
-                            <span class="value"><c:out value="${versionEntry.valueStringShort}"/></span>
+                            <span class="value" data-target="#popover-${versionEntry.uniqueName}-${evoCounter}" data-toggle="popover" data-point-from="bottom" data-align-from="top"><c:out value="${versionEntry.valueStringShort}"/></span>
                             <div id="popover-${versionEntry.uniqueName}-${evoCounter}" class="coral-Popover">
                                 <div class="coral-Popover-content u-coral-padding">
                                     <c:out value="${versionEntry.valueString}"/>
@@ -28,7 +28,7 @@
                             </div>
                         </div>
                     </div>
-                </a>
+                </div>
             </c:forEach>
         </div>
         <div class="clearer"></div>

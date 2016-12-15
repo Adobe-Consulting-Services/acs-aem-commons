@@ -36,8 +36,8 @@ angular.module('One2OneCompare', ['acsCoral'])
         };
 
         $scope.app.compareDifferentResources = function() {
-            return $scope.app.resourceB !== '' && $scope.app.resourceB !== $scope.app.resource
-        }
+            return $scope.app.resourceB !== '' && $scope.app.resourceB !== $scope.app.resource;
+        };
 
         $scope.notifications = [];
         $scope.connections = [];
@@ -120,13 +120,13 @@ angular.module('One2OneCompare', ['acsCoral'])
 
         $scope.dirty = function() {
             $scope.app.dirty = true;
-        }
+        };
 
         $scope.blur = function() {
             if ($scope.app.dirty) {
                 $scope.analyse();
             }
-        }
+        };
 
         $scope.analyse = function() {
             var url = $scope.app.home;
