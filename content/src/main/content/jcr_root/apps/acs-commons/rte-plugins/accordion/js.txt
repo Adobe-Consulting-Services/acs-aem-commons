@@ -1,1 +1,3 @@
-acs-commons-rte-accordion.js
+#base=source
+
+rte-accordion.js
