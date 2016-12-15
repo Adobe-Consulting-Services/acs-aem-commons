@@ -19,7 +19,7 @@
  */
 (function($, CUI){
     var RTEAccordion = {
-        GROUP: "accordion",
+        GROUP: "acs-commons",
         FEATURE: "acs-commons-rte-accordion"
     };
  
