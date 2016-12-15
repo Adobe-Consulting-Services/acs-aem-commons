@@ -18,20 +18,17 @@
  * #L%
  */
 $(function() {
-    $('.acs-commons-rte-accordion').each(function() {
-        var $element = $(this);
+    // Trigger the show/hide on click of the accordion headline
+    $( document ).on('click', '.acs-commons-rte-accordion .accordion-header', function(){
+        var selected = $(this),
+            parent = selected.parents('.acs-commons-rte-accordion');
 
-        // Trigger the show/hide on click of the accordion headline
-        $( '.accordion-header', $element ).click(function(){
-            var selected = $(this);
+        //Expand or collapse this panel
+        selected.next().slideToggle('fast');
+        selected.parent().toggleClass('active');
 
-            //Expand or collapse this panel
-            selected.next().slideToggle('fast');
-            selected.parent().toggleClass('active');
-
-            //Hide the other panels
-            $( 'li', $element ).not(selected.parent()).removeClass('active');
-            $( '.accordion-content', $element ).not(selected.next()).slideUp('fast');
-        });
+        //Hide the other panels
+        $( 'li', parent ).not(selected.parent()).removeClass('active');
+        $( '.accordion-content', parent ).not(selected.next()).slideUp('fast');
     });
 });
