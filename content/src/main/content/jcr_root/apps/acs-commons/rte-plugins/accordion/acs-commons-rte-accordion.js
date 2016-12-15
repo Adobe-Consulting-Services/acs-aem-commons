@@ -22,34 +22,6 @@
         GROUP: "acs-commons",
         FEATURE: "acs-commons-rte-accordion"
     };
- 
-    // Extend toolbar to register accordion icon
-    CUI.rte.ui.cui.CuiToolbarBuilder = new Class({
-        extend: CUI.rte.ui.cui.CuiToolbarBuilder,
-  
-        // Add Accordion icon to the existing set
-        _getUISettings: function(options) {
-            var uiSettings = this.inherited(arguments),
-                items = uiSettings.fullscreen.toolbar,
-                accordionFeature = RTEAccordion.GROUP + "#" + RTEAccordion.FEATURE;
- 
-            // Check that this icon doesn't yet exist, if not then add before the table icon
-            if ( items.indexOf(accordionFeature) == -1 ){
-                if ( items.indexOf("table#table") !== -1 ){
-                    items.splice(items.indexOf("table#table"), 0, accordionFeature);
-                } else {
-                    items.splice(3, 0, accordionFeature);
-                }
-            }
-
-            // If no classes have been added yet, add them now
-            if ( !this._getClassesForCommand(accordionFeature) ){
-                this.registerAdditionalClasses(accordionFeature, "coral-Icon coral-Icon--feed");
-            }
- 
-            return uiSettings;
-        }
-    });
   
     // Initialize the Accordion RTE Plugin
     RTEAccordion.TouchUIAccordionPlugin = new Class({
@@ -65,6 +37,7 @@
   
             this.accordionUI = tbGenerator.createElement(RTEAccordion.FEATURE, this, true, "Accordion");
             tbGenerator.addElement(RTEAccordion.GROUP, plg.Plugin.SORT_FORMAT, this.accordionUI, 120);
+            tbGenerator.registerIcon(RTEAccordion.GROUP + "#" + RTEAccordion.FEATURE, "coral-Icon coral-Icon--feed");
         },
   
         // Triggers on click of the RTE button
