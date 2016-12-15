@@ -20,7 +20,8 @@
 (function($, CUI){
     var RTEAccordion = {
         GROUP: "acs-commons",
-        FEATURE: "acs-commons-rte-accordion"
+        FEATURE: "rte-accordion",
+        CLASS: "acs-commons-rte-accordion"
     };
   
     // Initialize the Accordion RTE Plugin
@@ -84,7 +85,7 @@
             return {
                 "tag": "div",
                 "attributes": {
-                    "class" : RTEAccordion.FEATURE
+                    "class" : RTEAccordion.CLASS
                 }
             };
         },
@@ -96,7 +97,7 @@
             var parent = common.getParentNode(context, node);
 
             // If the returned parent has an accordion class, this is the higest parent for this accordion so return it
-            if ( parent.className == RTEAccordion.FEATURE ) {
+            if ( parent.className == RTEAccordion.CLASS ) {
                 return parent;
             } 
             // We don't want to go too far up the dom, if the next parent after this is null return this node
@@ -137,7 +138,7 @@
             var parent = this._getHighestParent(context, startNode);
 
             // If the nearest parent is the .accordion container div, we want to only add an accordionItem to the end
-            if ( parent.className == RTEAccordion.FEATURE ) {
+            if ( parent.className == RTEAccordion.CLASS ) {
                 parent.firstChild.appendChild(accordionItem);
             } 
             // Otherwise we want to add a new .accordion container with a new list and item inside
