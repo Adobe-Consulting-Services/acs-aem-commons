@@ -67,7 +67,7 @@
                                     <c:if test="${!empty model.resourcePathA && !empty model.versionSelectionsB}">
                                         <select class="select" name="b" ng-model="app.b" ng-change="analyse()">
                                             <c:forEach var="versionSelection" items="${model.versionSelectionsB}">
-                                                <option value="${versionSelection.name}">${versionSelection.name}, ${versionSelection.date}</option>
+                                                <option value="${versionSelection.name}"><c:out value="${versionSelection.name}" />, <fmt:formatDate type="both" value="${versionSelection.date}" /></option>
                                             </c:forEach>
                                         </select>
                                     </c:if>
