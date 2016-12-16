@@ -22,6 +22,8 @@ package com.adobe.acs.commons.one2one.model;
 import com.adobe.acs.commons.version.Evolution;
 import com.adobe.acs.commons.version.EvolutionAnalyser;
 import com.adobe.acs.commons.version.EvolutionContext;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -35,7 +37,10 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -217,16 +222,16 @@ public class One2OneCompareModelTest {
     }
 
     @Test
-    public void getEvolutionsA_evolutionsNoVersion_returnFirst() throws Exception {
+    public void getEvolutionsA_evolutionsNoVersion_returnSecondToLast() throws Exception {
         construct("/path/a", null, null, null);
-        List<Evolution> evolutionsA = mockEvolutions("1.0", "2.0");
+        List<Evolution> evolutionsA = mockEvolutions("1.0", "1.5", "2.0");
         prepareAnalyzer("/path/a", evolutionsA);
         underTest.activate();
 
         final Evolution evolutionA = underTest.getEvolutionA();
 
         assertNotNull(evolutionA);
-        assertThat(evolutionA.getVersionName(), is("1.0"));
+        assertThat(evolutionA.getVersionName(), is("1.5"));
     }
 
     @Test
@@ -312,11 +317,13 @@ public class One2OneCompareModelTest {
         assertThat(versionB, is("1.0"));
     }
 
-    private List<Evolution> mockEvolutions(String versionName1, String versionName2) {
-        final Evolution evolution1 = mockEvolution(versionName1);
-        final Evolution evolution2 = mockEvolution(versionName2);
-
-        return Lists.newArrayList(evolution1, evolution2);
+    private List<Evolution> mockEvolutions(String... versionName) {
+        return FluentIterable.from(Lists.newArrayList(versionName)).transform(new Function<String, Evolution>() {
+            @Override
+            public Evolution apply(String name) {
+                return mockEvolution(name);
+            }
+        }).toList();
     }
 
     private Evolution mockEvolution(String versionName) {

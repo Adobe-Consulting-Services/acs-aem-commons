@@ -35,7 +35,6 @@ import org.apache.sling.models.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.Collections;
@@ -103,17 +102,21 @@ public class One2OneCompareModel {
     }
 
     public String getVersionA() {
+        if (versionA == null && evolutionsA.size() >= 2) {
+            return evolutionsA.get(evolutionsA.size() - 2).getVersionName();
+        }
         if (versionA == null) {
-            return evolutionsA.transform(TO_NAME).first()
-                    .or("");
+            return "";
         }
         return versionA;
     }
 
     public String getVersionB() {
+        if (versionB == null && !evolutionsB.isEmpty()) {
+            return evolutionsB.last().get().getVersionName();
+        }
         if (versionB == null) {
-            return evolutionsB.transform(TO_NAME).last()
-                    .or("");
+            return "";
         }
         return versionB;
     }
