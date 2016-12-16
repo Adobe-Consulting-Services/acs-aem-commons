@@ -52,8 +52,6 @@ public class MultiFieldPanelWCMUse extends WCMUse {
             return;
         }
 
-        getCurrentPage().getParent().getContentResource()
-
         // assume current resource as default
         Resource resource = get("location", Resource.class);
         if (resource == null) {
