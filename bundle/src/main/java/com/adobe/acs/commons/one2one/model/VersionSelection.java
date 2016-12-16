@@ -31,7 +31,7 @@ public class VersionSelection {
     }
 
     public Date getDate() {
-        return date;
+        return (Date) date.clone();
     }
 
     public String getName() {

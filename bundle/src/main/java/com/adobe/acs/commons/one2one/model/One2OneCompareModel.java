@@ -122,7 +122,7 @@ public class One2OneCompareModel {
     private Optional<Evolution> version(FluentIterable<Evolution> evolutions, final String name) {
         return evolutions.firstMatch(new Predicate<Evolution>() {
             @Override
-            public boolean apply(@Nullable Evolution evolution) {
+            public boolean apply(Evolution evolution) {
                 return evolution.getVersionName().equalsIgnoreCase(name);
             }
         });
@@ -141,17 +141,21 @@ public class One2OneCompareModel {
     }
 
     private static final Function<Evolution, String> TO_NAME = new Function<Evolution, String>() {
-        @Nullable
         @Override
-        public String apply(@Nullable Evolution evolution) {
+        public String apply(Evolution evolution) {
+            if (evolution == null) {
+                return null;
+            }
             return evolution.getVersionName();
         }
     };
 
     private static final Function<Evolution, VersionSelection> TO_VERSION_SELECTION = new Function<Evolution, VersionSelection>() {
-        @Nullable
         @Override
-        public VersionSelection apply(@Nullable Evolution evolution) {
+        public VersionSelection apply(Evolution evolution) {
+            if (evolution == null) {
+                return null;
+            }
             return new VersionSelection(evolution.getVersionName(), evolution.getVersionDate());
         }
     };
