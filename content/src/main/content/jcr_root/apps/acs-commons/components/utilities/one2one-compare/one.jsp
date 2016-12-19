@@ -12,7 +12,7 @@
                 <div class="v"><c:out value="${evolutionItem.versionName}"/></div>
                 <div class="date"><fmt:formatDate type="both" value="${evolutionItem.versionDate}" /></div>
             </div>
-            <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}" varStatus="entryCounter">
+            <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}">
                 <div>
                     <div class="version-entry type-${versionEntry.resource} status status-${versionEntry.status}"
                          id="${versionEntry.uniqueName}-${evoCounter}"

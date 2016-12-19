@@ -71,6 +71,7 @@ public class EvolutionContextImpl implements EvolutionContext {
                 versions.add(new EvolutionImpl(next, versionResource, config));
                 log.debug("Version={} added to EvolutionItem", next.getName());
             }
+            versions.add(new CurrentEvolutionImpl(this.resource, this.config));
         } catch (UnsupportedRepositoryOperationException e1) {
             log.warn("Could not find version for resource={}", resource.getPath());
         } catch (Exception e) {
