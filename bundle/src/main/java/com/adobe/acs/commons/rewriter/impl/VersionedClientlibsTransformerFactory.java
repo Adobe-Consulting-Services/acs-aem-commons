@@ -43,6 +43,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.rewriter.ProcessingComponentConfiguration;
+import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
 import org.osgi.service.event.Event;
@@ -129,14 +131,14 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         return new VersionableClientlibsTransformer();
     }
 
-    private Attributes versionClientLibs(final String elementName, final Attributes attrs) {
+    private Attributes versionClientLibs(final String elementName, final Attributes attrs, final String contextPath) {
         if (this.isCSS(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_CSS_PATH),
-                    attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS);
+                    attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS, contextPath);
 
         } else if (this.isJavaScript(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_JS_PATH),
-                    attrs.getValue("", ATTR_JS_PATH), LibraryType.JS);
+                    attrs.getValue("", ATTR_JS_PATH), LibraryType.JS, contextPath);
 
         } else {
             return attrs;
@@ -144,10 +146,18 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private Attributes rebuildAttributes(final AttributesImpl newAttributes, final int index, final String path,
-                                         final LibraryType libraryType) {
-        final String versionedPath = this.getVersionedPath(path, libraryType);
+                                         final LibraryType libraryType, final String contextPath) {
+        String libraryPath = path;
+        if (StringUtils.isNotBlank(contextPath)) {
+            libraryPath = path.substring(contextPath.length());
+        }
+
+        String versionedPath = this.getVersionedPath(libraryPath, libraryType);
 
         if (StringUtils.isNotBlank(versionedPath)) {
+            if(StringUtils.isNotBlank(contextPath)) {
+                versionedPath = contextPath + versionedPath;
+            }
             log.debug("Rewriting to: {}", versionedPath);
             newAttributes.setValue(index, versionedPath);
         } else {
@@ -233,6 +243,15 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private class VersionableClientlibsTransformer extends AbstractTransformer {
+
+        private String contextPath;
+
+        @Override
+        public void init(ProcessingContext context, ProcessingComponentConfiguration config) throws IOException {
+            super.init(context, config);
+            this.contextPath = context.getRequest().getContextPath();
+        }
+
         public void startElement(final String namespaceURI, final String localName, final String qName,
                                  final Attributes attrs)
                 throws SAXException {
@@ -240,7 +259,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
             if (disableVersioning) {
                 nextAttributes = attrs;
             } else {
-                nextAttributes = versionClientLibs(localName, attrs);
+                nextAttributes = versionClientLibs(localName, attrs, contextPath);
             }
             getContentHandler().startElement(namespaceURI, localName, qName, nextAttributes);
         }
