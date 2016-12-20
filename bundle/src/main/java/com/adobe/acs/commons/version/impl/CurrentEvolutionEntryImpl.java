@@ -18,41 +18,31 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
     private static final Logger log = LoggerFactory.getLogger(CurrentEvolutionEntryImpl.class);
 
     private static int MAX_CHARS = 200;
-    private static String V_ADDED = "added";
-    private static String V_CHANGED = "changed";
-    private static String V_REMOVED = "removed";
-    private static String V_ADDED_REMOVED = "added-removed";
-    private static String V_CHANGED_REMOVED = "changed-removed";
 
     private EvolutionEntryType type;
     private String name;
     private Object value;
     private int depth;
     private String path;
-    private String relativePath;
-    private Property property;
     private EvolutionConfig config;
 
     public CurrentEvolutionEntryImpl(Resource resource, EvolutionConfig config) {
         this.config = config;
         this.type = EvolutionEntryType.RESOURCE;
         this.name = resource.getName();
-        this.depth = config.getDepthForPath(resource.getPath());
+        this.depth = EvolutionPathUtil.getLastDepthForPath(resource.getPath());
         this.path = resource.getParent().getName();
         this.value = null;
-        this.relativePath = config.getRelativeResourceName(resource.getPath());
     }
 
     public CurrentEvolutionEntryImpl(Property property, EvolutionConfig config) {
         try {
             this.config = config;
-            this.property = property;
             this.type = EvolutionEntryType.PROPERTY;
             this.name = property.getName();
-            this.depth = config.getDepthForPath(property.getPath());
+            this.depth = EvolutionPathUtil.getLastDepthForPath(property.getPath());
             this.path = property.getParent().getName();
             this.value = config.printProperty(property);
-            this.relativePath = config.getRelativePropertyName(property.getPath());
         } catch (Exception e) {
             log.error("Could not inititalize VersionEntry", e);
         }
@@ -105,15 +95,15 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
     @Override
     public String getStatus() {
         if (isChanged() && isWillBeRemoved()) {
-            return V_CHANGED_REMOVED;
+            return EvolutionEntryImpl.V_CHANGED_REMOVED;
         } else if (isAdded() && isWillBeRemoved()) {
-            return V_ADDED_REMOVED;
+            return EvolutionEntryImpl.V_ADDED_REMOVED;
         } else if (isAdded()) {
-            return V_ADDED;
+            return EvolutionEntryImpl.V_ADDED;
         } else if (isWillBeRemoved()) {
-            return V_REMOVED;
+            return EvolutionEntryImpl.V_REMOVED;
         } else if (isChanged()) {
-            return V_CHANGED;
+            return EvolutionEntryImpl.V_CHANGED;
         } else {
             return "";
         }
@@ -132,7 +122,6 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public boolean isChanged() {
-
         return false;
     }
 }
