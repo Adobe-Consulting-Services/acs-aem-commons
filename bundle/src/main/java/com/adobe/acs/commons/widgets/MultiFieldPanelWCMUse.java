@@ -19,12 +19,14 @@
  */
 package com.adobe.acs.commons.widgets;
 
-import com.adobe.cq.sightly.WCMUse;
+import io.sightly.java.api.Use;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.scripting.SlingBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.script.Bindings;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,31 +39,36 @@ import java.util.Map;
  * Usage iteration
  *  - data-sly-list.value="${ multiField.values }"
  */
-public class MultiFieldPanelWCMUse extends WCMUse {
+public class MultiFieldPanelWCMUse implements Use {
     private static final Logger log = LoggerFactory.getLogger(MultiFieldPanelWCMUse.class);
 
     private List<Map<String, String>> values = Collections.emptyList();
 
-    @Override
-    public void activate() throws Exception {
+    public List<Map<String, String>> getValues() {
+        return values;
+    }
 
-        // handle name as a mandatory parameter
-        String name = get("name", String.class);
+    @Override
+    public void init(Bindings bindings) {
+        Resource resource = (Resource) bindings.get(SlingBindings.RESOURCE);
+
+        Object location = bindings.get("location");
+        if (location != null) {
+            if (location instanceof Resource) {
+                resource = (Resource) location;
+            } else {
+                if (location instanceof String) {
+                    resource = resource.getResourceResolver().getResource((String) location);
+                }
+            }
+        }
+
+        String name = (String) bindings.get("name");
         if (StringUtils.isBlank(name)) {
             log.info("Invalid property name");
             return;
         }
 
-        // assume current resource as default
-        Resource resource = get("location", Resource.class);
-        if (resource == null) {
-            resource = getResource();
-        }
-
         values = MultiFieldPanelFunctions.getMultiFieldPanelValues(resource, name);
-    }
-
-    public List<Map<String, String>> getValues() {
-        return values;
     }
 }
