@@ -26,7 +26,7 @@ import java.util.Map;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ChildrenAsPropertyResourceWrapperTest {
+public class ChildrenAsPropertyResourceTest {
 
     @Mock
     private ResourceResolver resourceResolver;
@@ -48,12 +48,13 @@ public class ChildrenAsPropertyResourceWrapperTest {
 
     Map<String, Object> entry100 = new HashMap<String, Object>();
 
-    ChildrenAsPropertyResourceWrapper childrenAsPropertyResource;
+    ChildrenAsPropertyResource childrenAsPropertyResource;
 
     @Before
     public void setUp() throws Exception {
         valueMap = new ModifiableValueMapDecorator(new HashMap<String, Object>());
 
+        when(resource.getPath()).thenReturn("/content/test");
         when(resource.getValueMap()).thenReturn(valueMap);
         when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(valueMap);
@@ -77,13 +78,17 @@ public class ChildrenAsPropertyResourceWrapperTest {
         entry100.put("long", 2000L);
         entry100.put("bigdecimal", "10000.000001");
         entry100.put("bigdecimal2", "20000.000002");
-
+        entry100.put("integer", 100);
+        entry100.put("integerAsLong", 100L);
+        entry100.put("integerAsDouble", 100D);
 
         Calendar cal = Calendar.getInstance();
         cal.set(2001, 1, 1, 1, 1, 1);
         entry100.put("date", cal.getTime());
         entry100.put("calendar", cal);
         entry100.put("boolean", true);
+        entry100.put("booleanAsString", "true");
+
         entry100.put("strArray", new String[]{"one", "two"});
         entry1.put("jcr:primaryType", "nt:unstructured");
 
@@ -99,7 +104,7 @@ public class ChildrenAsPropertyResourceWrapperTest {
     @Test
     public void testSerialization() throws Exception {
         childrenAsPropertyResource =
-            new ChildrenAsPropertyResourceWrapper(resource, "animals");
+            new ChildrenAsPropertyResource(resource, "animals");
 
         childrenAsPropertyResource.create("entry-100", "nt:unstructured", entry100);
 
@@ -111,11 +116,17 @@ public class ChildrenAsPropertyResourceWrapperTest {
         Assert.assertEquals(expected.get("name", String.class), actual.get("name", String.class));
         Assert.assertEquals(expected.get("double", String.class), actual.get("double", String.class));
         Assert.assertEquals(expected.get("long", Double.class), actual.get("long", Double.class));
+        Assert.assertEquals(expected.get("integer", Integer.class), actual.get("integer", Integer.class));
+        Assert.assertEquals(expected.get("integerAsLong", Integer.class), actual.get("integerAsLong", Integer.class));
         Assert.assertEquals(expected.get("boolean", Boolean.class), actual.get("boolean", Boolean.class));
+        Assert.assertEquals(expected.get("booleanAsString", Boolean.class), actual.get("booleanAsString", Boolean.class));
         Assert.assertEquals(expected.get("date", Date.class), actual.get("date", Date.class));
         Assert.assertEquals(expected.get("calendar", Calendar.class), actual.get("calendar", Calendar.class));
-        Assert.assertEquals(expected.get("bigdecimal", BigDecimal.class), actual.get("bigdecimal", BigDecimal.class));
-        Assert.assertEquals(expected.get("bigdecimal2", BigDecimal.class), actual.get("bigdecimal2", BigDecimal.class));
+
+        // Special expectation setting as ValueMaps do not handle these types are expected by the implementation
+        Assert.assertEquals((Integer)expected.get("integerAsDouble", Double.class).intValue(), actual.get("integerAsDouble", Integer.class));
+        Assert.assertEquals(new BigDecimal(expected.get("bigdecimal", String.class)), actual.get("bigdecimal", BigDecimal.class));
+        Assert.assertEquals(new BigDecimal(expected.get("bigdecimal2", String.class)), actual.get("bigdecimal2", BigDecimal.class));
 
         Assert.assertNotNull(actual.get("date", Calendar.class));
         Assert.assertEquals(expected.get("calendar", Calendar.class), actual.get("date", Calendar.class));
@@ -133,7 +144,7 @@ public class ChildrenAsPropertyResourceWrapperTest {
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-3", entry3));
 
         childrenAsPropertyResource =
-                new ChildrenAsPropertyResourceWrapper(resource, "animals");
+                new ChildrenAsPropertyResource(resource, "animals");
 
         List<Resource> actuals = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
         Assert.assertEquals(expected.size() + 1, actuals.size());
@@ -161,7 +172,7 @@ public class ChildrenAsPropertyResourceWrapperTest {
         expectedJSON.put("entry-4", new JSONObject(properties));
 
         childrenAsPropertyResource =
-                new ChildrenAsPropertyResourceWrapper(resource, "animals");
+                new ChildrenAsPropertyResource(resource, "animals");
 
         childrenAsPropertyResource.create("entry-4", "nt:unstructured", properties);
         childrenAsPropertyResource.persist();
@@ -185,8 +196,8 @@ public class ChildrenAsPropertyResourceWrapperTest {
         expectedJSON.put("entry-4", new JSONObject(properties));
 
         childrenAsPropertyResource =
-                new ChildrenAsPropertyResourceWrapper(resource, "animals",
-                        ChildrenAsPropertyResourceWrapper.RESOURCE_NAME_COMPARATOR);
+                new ChildrenAsPropertyResource(resource, "animals",
+                        ChildrenAsPropertyResource.RESOURCE_NAME_COMPARATOR);
 
         childrenAsPropertyResource.create("entry-4", "nt:unstructured", properties);
         childrenAsPropertyResource.persist();
@@ -207,8 +218,8 @@ public class ChildrenAsPropertyResourceWrapperTest {
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-2", new ValueMapDecorator(entry2)));
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-3", new ValueMapDecorator(entry3)));
 
-        ChildrenAsPropertyResourceWrapper childrenAsPropertyResource =
-                new ChildrenAsPropertyResourceWrapper(resource, "animals");
+        ChildrenAsPropertyResource childrenAsPropertyResource =
+                new ChildrenAsPropertyResource(resource, "animals");
 
         List<Resource> actual = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
 
@@ -228,8 +239,8 @@ public class ChildrenAsPropertyResourceWrapperTest {
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-3", new ValueMapDecorator(entry3)));
 
         childrenAsPropertyResource =
-                new ChildrenAsPropertyResourceWrapper(resource, "animals",
-                        ChildrenAsPropertyResourceWrapper.RESOURCE_NAME_COMPARATOR);;
+                new ChildrenAsPropertyResource(resource, "animals",
+                        ChildrenAsPropertyResource.RESOURCE_NAME_COMPARATOR);;
 
         List<Resource> actual = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
 

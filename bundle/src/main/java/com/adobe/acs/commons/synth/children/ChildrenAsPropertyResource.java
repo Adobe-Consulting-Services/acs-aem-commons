@@ -39,7 +39,7 @@ import java.util.TreeSet;
  * To write data:
  *
  * Resource real = resolve.getResource("/content/real");
- * ChildrenAsPropertyResourceWrapper wrapper = new ChildrenAsPropertyResourceWrapper(real);
+ * ChildrenAsPropertyResource wrapper = new ChildrenAsPropertyResource(real);
  * Resource child = wrapper.create("child-1", "nt:unstructured");
  * ModifiableValueMap mvm = child.adaptTo(ModifiableValueMap.class);
  * mvm.put("prop-1", "some data");
@@ -50,14 +50,14 @@ import java.util.TreeSet;
  * To read data:
  *
  * Resource real = resolve.getResource("/content/real");
- * ChildrenAsPropertyResourceWrapper wrapper = new ChildrenAsPropertyResourceWrapper(real);
+ * ChildrenAsPropertyResource wrapper = new ChildrenAsPropertyResource(real);
  * for(Resource child : wrapper.getChildren()) {
  *     child.getValueMap().get("prop-1", String.class);
  * }
  *
  */
-public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
-    private static final Logger log = LoggerFactory.getLogger(ChildrenAsPropertyResourceWrapper.class);
+public class ChildrenAsPropertyResource extends ResourceWrapper {
+    private static final Logger log = LoggerFactory.getLogger(ChildrenAsPropertyResource.class);
 
     private static final String EMPTY_JSON = "{}";
 
@@ -82,7 +82,7 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
      * @param resource     the resource to store the children as properties on
      * @throws InvalidDataFormatException
      */
-    public ChildrenAsPropertyResourceWrapper(Resource resource) throws InvalidDataFormatException {
+    public ChildrenAsPropertyResource(Resource resource) throws InvalidDataFormatException {
         this(resource, DEFAULT_PROPERTY_NAME, null);
     }
 
@@ -92,7 +92,7 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
      * @param resource     the resource to store the children as properties on
      * @param propertyName the property name to store the children as properties in
      */
-    public ChildrenAsPropertyResourceWrapper(Resource resource, String propertyName) throws InvalidDataFormatException {
+    public ChildrenAsPropertyResource(Resource resource, String propertyName) throws InvalidDataFormatException {
         this(resource, propertyName, null);
     }
 
@@ -104,7 +104,7 @@ public class ChildrenAsPropertyResourceWrapper extends ResourceWrapper {
      * @param comparator   the comparator used to order the serialized children
      * @throws InvalidDataFormatException
      */
-    public ChildrenAsPropertyResourceWrapper(Resource resource, String propertyName, Comparator<Resource> comparator)
+    public ChildrenAsPropertyResource(Resource resource, String propertyName, Comparator<Resource> comparator)
             throws InvalidDataFormatException {
         super(resource);
 
