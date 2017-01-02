@@ -22,12 +22,11 @@ package com.adobe.acs.commons.util.impl;
 
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.workflow.WorkflowSession;
-import org.apache.commons.lang.StringUtils;
+import com.day.cq.workflow.exec.WorkflowData;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -37,7 +36,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 
-import javax.jcr.Session;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,5 +90,19 @@ public class WorkflowHelperImpl implements WorkflowHelper {
         return null;
     }
 
+    /**
+     * @{inheritDoc}
+     **/
+    @Override
+    public boolean isPathTypedPayload(WorkflowData workflowData) {
+        return PAYLOAD_TYPE_JCR_PATH.equals(workflowData.getPayloadType());
+    }
 
+    /**
+     * @{inheritDoc}
+     **/
+    @Override
+    public boolean isPathTypedPayload(com.adobe.granite.workflow.exec.WorkflowData workflowData) {
+        return PAYLOAD_TYPE_JCR_PATH.equals(workflowData.getPayloadType());
+    }
 }

@@ -21,7 +21,9 @@
 package com.adobe.acs.commons.util;
 
 import aQute.bnd.annotation.ProviderType;
+import com.adobe.granite.workflow.exec.Workflow;
 import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkflowData;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -29,6 +31,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 @ProviderType
 public interface WorkflowHelper {
     String PROCESS_ARGS = "PROCESS_ARGS";
+    String PAYLOAD_TYPE_JCR_PATH = "JCR_PATH";
 
     /**
      * Convenience method for getting a ResourceResolver object from a Granite based Workflow Process.
@@ -55,4 +58,18 @@ public interface WorkflowHelper {
      * @return the resource representing the resolver dam:Asset or cq:Page, if neither can be resolved, null is returned.
      */
     Resource getPageOrAssetResource(ResourceResolver resourceResolver, String path);
+
+    /**
+     * Method for CQ Workflow APIs.
+     * @param workflowData the Workflow data
+     * @return true of the WorkflowData payload is of type JCR_PATH
+     */
+    boolean isPathTypedPayload(WorkflowData workflowData);
+
+    /**
+     * Method for Granite Workflow APIs.
+     * @param workflowData the Workflow data
+     * @return true of the WorkflowData payload is of type JCR_PATH
+     */
+    boolean isPathTypedPayload(com.adobe.granite.workflow.exec.WorkflowData workflowData);
 }

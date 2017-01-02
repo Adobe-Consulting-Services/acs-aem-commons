@@ -26,31 +26,31 @@ import com.adobe.granite.workflow.model.WorkflowModel;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 
-
 /**
- * This workflow steps just calls another workflow as subworkflow.
+ * This workflow steps invokes another workflow on the current workflow's payload.
  * <p>
- * The subworkflow is determined by looking up the correct workflow on the
- * resource (or its ascendents). Works on pages and assets.
+ * The delegate workflow is determined by looking up Workflow Id on the
+ * resource (or its ascendants). Works on cq:Page's and dam:Asset's.
  * <p>
  * In order to support multiple instances of this behaviour, the name of the property,
- * which determines the model of the subworkflow, can be be configured as arguments on
+ * which determines the model of the delegate workflow, can be be configured as arguments on
  * the workflow step.
  * <p>
  * Arguments should be provided as this:
  * <p>
- * workflowModelProperty=<propName>,defaultWorkflowModel=<pathToDefaultWorkflowModel>
- * ( eg: /etc/workflow/models/request_for_activation/jcr:content/model)
+ * workflowModelProperty=<propName>,defaultWorkflowModel=<pathToDefaultWorkflowModel>,terminateWorkflowOnDelegation=true|false
+ * (eg: /etc/workflow/models/request_for_activation/jcr:content/model)
  * <p>
- * where <propName> is the name of the property which contains the paths of the workflow
- * models
+ * <propName> is the name of the property which contains the paths of the workflow models
  * <p>
- * and <pathToDefaultWorkflowModel> the path to the default Workflow Model, which is used
- * as fallback.
+ * and <pathToDefaultWorkflowModel> the path to the default Workflow Model, which is used as fallback
  * <p>
- * If no workflow model can be resolved (directly and as fallback), a workflow exception is thrown.
+ * <terminateWorkflowOnDelegation> is `true` or `false` and dictates if the current workflow will continue executing after delegation.
+ * This can be useful to avoid having a single workflow under multiple workflows (depending on how the workflows are setup).
+ * <p>
+ * If a Workflow Model Id can be resolved, via the content hierarchy (directly) or the the default workflow id param (fallback) but that Workflow Model cannot be resolved, then a WorkflowException is thrown.
+ * If no Workflow Model Id can be resolved the workflow process will complete w/ WARNings.
  */
-
 @Component
 @Properties({
         @Property(
@@ -73,7 +73,7 @@ public class WorkflowDelegationStep implements WorkflowProcess {
     // A default workflow model can be provided as fallback
     private static final String DEFAULT_WORKFLOW_MODEL = "defaultWorkflowModel";
 
-    // when set to true, this Workflow will terminate after successful delegation. This is useful if there is a use-case when this step has WF steps behind it.
+    // When set to true, this Workflow will terminate after successful delegation. This is useful if there is a use-case when this step has WF steps behind it.
     private String TERMINATE_ON_DELEGATION = "terminateWorkflowOnDelegation";
 
     @Override
@@ -84,7 +84,7 @@ public class WorkflowDelegationStep implements WorkflowProcess {
 
         String propertyName = args.get(WORKFLOW_PROPERTY_NAME);
         String defaultWorkflowModelId = args.get(DEFAULT_WORKFLOW_MODEL);
-        boolean terminateOnDelegation = Boolean.parseBoolean(args.get(TERMINATE_ON_DELEGATION));
+        boolean terminateOnDelegation = Boolean.parseBoolean(StringUtils.lowerCase(args.get(TERMINATE_ON_DELEGATION)));
 
 
         if (StringUtils.isBlank(propertyName)) {
@@ -96,7 +96,7 @@ public class WorkflowDelegationStep implements WorkflowProcess {
         ResourceResolver resolver = null;
         WorkflowData wfData = workItem.getWorkflowData();
 
-        if (!"JCR_PATH".equals(wfData.getPayloadType())) {
+        if (!workflowHelper.isPathTypedPayload(wfData)) {
             log.warn("Could not locate a JCR_PATH payload for this workflow. Skipping delegation.");
             return;
         }
@@ -131,7 +131,6 @@ public class WorkflowDelegationStep implements WorkflowProcess {
         final String foundWorkflowModelId = StringUtils.trim(inheritance.getInherited(propertyName, String.class));
         final WorkflowModel delegateWorkflowModel = getDelegateWorkflowModel(workflowSession, foundWorkflowModelId, defaultWorkflowModelId);
 
-
         if (delegateWorkflowModel != null) {
             workflowSession.startWorkflow(delegateWorkflowModel, wfData);
             log.info("Delegating payload [ {} ] to Workflow Model [ {} ]", wfData.getPayload(), foundWorkflowModelId);
@@ -148,19 +147,23 @@ public class WorkflowDelegationStep implements WorkflowProcess {
 
     private WorkflowModel getDelegateWorkflowModel(WorkflowSession workflowSession,
                                                    String foundWorkflowModelId,
-                                                   String defaultWorkflowModelId) {
+                                                   String defaultWorkflowModelId) throws WorkflowException {
         WorkflowModel workflowModel = null;
         if (StringUtils.isNotBlank(foundWorkflowModelId)) {
             workflowModel = getWorkflowModel(workflowSession, foundWorkflowModelId);
 
             if (workflowModel != null) {
                 log.debug("Using configured delegate Workflow Model [ {} ]", workflowModel.getId());
+            } else {
+                throw new WorkflowException(String.format("Could not find configured Workflow Model at [ %s ]", foundWorkflowModelId));
             }
         } else if (StringUtils.isNotBlank(defaultWorkflowModelId)) {
             workflowModel = getWorkflowModel(workflowSession, defaultWorkflowModelId);
 
             if (workflowModel != null) {
                 log.debug("Using default delegate Workflow Model [ {} ]", workflowModel.getId());
+            } else {
+                throw new WorkflowException(String.format("Could not find default Workflow Model at [ %s ]", defaultWorkflowModelId));
             }
         }
 
