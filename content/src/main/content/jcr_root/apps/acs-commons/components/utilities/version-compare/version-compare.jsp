@@ -28,7 +28,7 @@
 
         <div class="page" role="main"
                  ng-controller="MainCtrl"
-                 ng-init="app.resource = '${model.resourcePath}'; app.home = '${currentPage.path}.html'; init();">
+                 ng-init="app.resource = '${model.resourcePath}'; app.home = '${request.contextPath}${currentPage.path}.html'; init();">
 
             <div ng-show="notifications.length > 0"
                  class="notifications">
@@ -73,6 +73,8 @@
                                 <div class="status-added">added</div>
                                 <div class="status-changed">changed</div>
                                 <div class="status-removed">removed in next version</div>
+                                <div class="status-added-removed"><div class="inner-version-entry">added and removed in next version</div></div>
+                                <div class="status-changed-removed"><div class="inner-version-entry">changed and removed in next version</div></div>
                             </div>
                         </section>
 
@@ -87,15 +89,17 @@
                                             </div>
                                             <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}" varStatus="entryCounter">
                                                 <a href="#popover-${versionEntry.uniqueName}-${evoCounter.index}" data-toggle="popover" data-point-from="right" data-align-from="left">
-                                                    <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status} depth-${versionEntry.depth}"
+                                                    <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status}"
                                                          id="${versionEntry.uniqueName}-${evoCounter.index}" 
                                                          ${versionEntry.status == "" ? "ng-show='!app.hideUnchanged'" : ""} 
-                                                         ng-init="addConnection({'source':'${versionEntry.uniqueName}-${evoCounter.index}', 'target':'${versionEntry.uniqueName}-${evoCounter.index + 1}', 'isCurrent':${evolutionItem.current}})">    
-                                                        <span class="key"><c:out value="${versionEntry.name}"/>:</span>
-                                                        <span class="value"><c:out value="${versionEntry.valueStringShort}"/></span>
-                                                        <div id="popover-${versionEntry.uniqueName}-${evoCounter.index}" class="coral-Popover">
-                                                            <div class="coral-Popover-content u-coral-padding">
-                                                                <c:out value="${versionEntry.valueString}"/>
+                                                         ng-init="addConnection({'source':'${versionEntry.uniqueName}-${evoCounter.index}', 'target':'${versionEntry.uniqueName}-${evoCounter.index + 1}', 'isCurrent':${evolutionItem.current}})">
+                                                        <div class="inner-version-entry depth-${versionEntry.depth}">
+                                                            <span class="key"><c:out value="${versionEntry.name}"/>:</span>
+                                                            <span class="value"><c:out value="${versionEntry.valueStringShort}"/></span>
+                                                            <div id="popover-${versionEntry.uniqueName}-${evoCounter.index}" class="coral-Popover">
+                                                                <div class="coral-Popover-content u-coral-padding">
+                                                                    <c:out value="${versionEntry.valueString}"/>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>

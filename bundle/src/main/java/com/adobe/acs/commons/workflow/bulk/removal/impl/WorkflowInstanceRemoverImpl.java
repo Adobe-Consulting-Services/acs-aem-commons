@@ -21,9 +21,11 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalException;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalForceQuitException;
-import com.adobe.acs.commons.workflow.bulk.removal.impl.exceptions.WorkflowRemovalMaxDurationExceededException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalMaxDurationExceededException;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -82,6 +84,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     private static final int BATCH_SIZE = 1000;
 
     private static final int MAX_SAVE_RETRIES = 5;
+
+    private static final long MS_IN_ONE_MINUTE = 60000;
+
     
     private final AtomicReference<WorkflowRemovalStatus> status
             = new AtomicReference<WorkflowRemovalStatus>();
@@ -143,7 +148,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
         final long start = System.currentTimeMillis();
         long end = -1;
-        
+
         int count = 0;
         int checkedCount = 0;
         int workflowRemovedCount = 0;
@@ -152,7 +157,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
             // Max duration has been requested (greater than 0)
 
             // Convert minutes to milliseconds
-            long maxDurationInMs = maxDurationInMins * 60 * 1000;
+            long maxDurationInMs = maxDurationInMins * MS_IN_ONE_MINUTE;
 
             // Compute the end time
             end = start + maxDurationInMs;
@@ -258,7 +263,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                     }
 
                     if (remaining == 0
-                            && NN_DATE_FOLDER_PATTERN.matcher(folder.getName()).matches()
+                            && isWorkflowDatedFolder(folder)
                             && !StringUtils.startsWith(folder.getName(), new SimpleDateFormat(WORKFLOW_FOLDER_FORMAT).format(new Date()))) {
                         // Dont remove folders w items and dont remove any of "today's" folders
                         // MUST match the YYYY-MM-DD(.*) pattern; do not try to remove root folders
@@ -316,15 +321,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private Collection<Resource> getSortedAndFilteredFolders(Resource folderResource) {
         final Collection<Resource> sortedCollection = new TreeSet(new WorkflowInstanceFolderComparator());
-        final Iterator<Resource> folders = folderResource.listChildren();
-
-        while (folders.hasNext()) {
-            final Resource folder = folders.next();
-
-            if (!folder.isResourceType(NT_SLING_FOLDER)) {
-                // Only process sling:Folders; eg. skip rep:Policy
-                continue;
-            } else {
+        for (Resource folder : folderResource.getChildren()) {
+            // Only process sling:Folders; eg. skip rep:Policy, serverN folders
+            if (folder.isResourceType(NT_SLING_FOLDER) && !isWorkflowServerFolder(folder)) {
                 sortedCollection.add(folder);
             }
         }
@@ -444,9 +443,9 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         while (itr.hasNext()) {
             Resource resource = itr.next();
 
-            if (NN_SERVER_FOLDER_PATTERN.matcher(resource.getName()).matches()) {
+            if (isWorkflowServerFolder(resource)) {
                 folders.add(resource);
-            } else if (!addedRoot && NN_DATE_FOLDER_PATTERN.matcher(resource.getName()).matches()) {
+            } else if (!addedRoot && isWorkflowDatedFolder(resource)) {
                 folders.add(root);
                 addedRoot = true;
             }
@@ -459,6 +458,13 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         return folders;
     }
 
+    private boolean isWorkflowDatedFolder(final Resource resource) {
+        return NN_DATE_FOLDER_PATTERN.matcher(resource.getName()).matches();
+    }
+
+    private boolean isWorkflowServerFolder(final Resource folder) {
+        return NN_SERVER_FOLDER_PATTERN.matcher(folder.getName()).matches();
+    }
 
     @Activate
     @Deactivate

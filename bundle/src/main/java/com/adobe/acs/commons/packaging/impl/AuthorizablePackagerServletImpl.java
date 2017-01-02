@@ -62,31 +62,16 @@ import com.day.jcr.vault.packaging.Packaging;
         selectors = { "package" },
         extensions = { "json" }
 )
-public class AuthorizablePackagerServletImpl extends SlingAllMethodsServlet {
-    private static final Logger log = LoggerFactory.getLogger(AuthorizablePackagerServletImpl.class);
-
-    private static final String PACKAGE_NAME = "packageName";
-
-    private static final String PACKAGE_GROUP_NAME = "packageGroupName";
-
-    private static final String PACKAGE_VERSION = "packageVersion";
-
-    private static final String PACKAGE_DESCRIPTION = "packageDescription";
-
-    private static final String PACKAGE_ACL_HANDLING = "packageACLHandling";
-
-    private static final String CONFLICT_RESOLUTION = "conflictResolution";
+public class AuthorizablePackagerServletImpl extends AbstractPackagerServlet {
 
     private static final String DEFAULT_PACKAGE_NAME = "authorizables";
 
     private static final String DEFAULT_PACKAGE_GROUP_NAME = "Authorizables";
 
-    private static final String DEFAULT_PACKAGE_VERSION = "1.0.0";
-
     private static final String DEFAULT_PACKAGE_DESCRIPTION = "Authorizable Package initially defined by a ACS AEM Commons - "
             + "Authorizable Packager configuration.";
 
-    private static final String QUERY_PACKAGE_THUMBNAIL_RESOURCE_PATH =
+    private static final String PACKAGE_THUMBNAIL_RESOURCE_PATH =
             "/apps/acs-commons/components/utilities/packager/authorizable-packager/definition/package-thumbnail.png";
 
     @Reference
@@ -110,44 +95,7 @@ public class AuthorizablePackagerServletImpl extends SlingAllMethodsServlet {
             final List<PathFilterSet> paths = this.findPaths(resourceResolver,
                     properties.get("authorizableIds", new String[0]));
 
-            final Map<String, String> packageDefinitionProperties = new HashMap<String, String>();
-
-            // ACL Handling
-            packageDefinitionProperties.put(JcrPackageDefinition.PN_AC_HANDLING,
-                    properties.get(PACKAGE_ACL_HANDLING, AccessControlHandling.OVERWRITE.toString()));
-
-            // Package Description
-            packageDefinitionProperties.put(
-                    JcrPackageDefinition.PN_DESCRIPTION,
-                    properties.get(PACKAGE_DESCRIPTION, DEFAULT_PACKAGE_DESCRIPTION));
-
-            if (preview) {
-                // Handle preview mode
-                response.getWriter().print(packageHelper.getPathFilterSetPreviewJSON(paths));
-            } else if (paths == null || paths.isEmpty()) {
-                // Do not create empty packages; This will only clutter up CRX Package Manager
-                response.getWriter().print(packageHelper.getErrorJSON("Refusing to create a package with no filter "
-                        + "set rules."));
-            } else {
-                // Create JCR Package; Defaults should always be passed in via Request Parameters, but just in case
-                final JcrPackage jcrPackage = packageHelper.createPackageFromPathFilterSets(paths,
-                        request.getResourceResolver().adaptTo(Session.class),
-                        properties.get(PACKAGE_GROUP_NAME, DEFAULT_PACKAGE_GROUP_NAME),
-                        properties.get(PACKAGE_NAME, DEFAULT_PACKAGE_NAME),
-                        properties.get(PACKAGE_VERSION, DEFAULT_PACKAGE_VERSION),
-                        PackageHelper.ConflictResolution.valueOf(properties.get(CONFLICT_RESOLUTION,
-                                PackageHelper.ConflictResolution.IncrementVersion.toString())),
-                        packageDefinitionProperties
-                );
-
-                // Add thumbnail to the package definition
-                packageHelper.addThumbnail(jcrPackage,
-                        request.getResourceResolver().getResource(QUERY_PACKAGE_THUMBNAIL_RESOURCE_PATH));
-
-                log.debug("Successfully created JCR package");
-                response.getWriter().print(
-                        packageHelper.getSuccessJSON(jcrPackage));
-            }
+            doPackaging(request, response, preview, properties, paths);
         } catch (RepositoryException ex) {
             log.error("Repository error while creating Query Package", ex);
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
@@ -198,5 +146,30 @@ public class AuthorizablePackagerServletImpl extends SlingAllMethodsServlet {
         }
 
         return pathFilterSets;
+    }
+
+    @Override
+    protected String getDefaultPackageDescription() {
+        return DEFAULT_PACKAGE_DESCRIPTION;
+    }
+
+    @Override
+    protected String getDefaultPackageGroupName() {
+        return DEFAULT_PACKAGE_GROUP_NAME;
+    }
+
+    @Override
+    protected String getDefaultPackageName() {
+        return DEFAULT_PACKAGE_NAME;
+    }
+
+    @Override
+    protected String getPackageThumbnailPath() {
+        return PACKAGE_THUMBNAIL_RESOURCE_PATH;
+    }
+
+    @Override
+    protected PackageHelper getPackageHelper() {
+        return packageHelper;
     }
 }

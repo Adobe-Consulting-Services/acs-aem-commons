@@ -20,6 +20,8 @@
 
 package com.adobe.acs.commons.synth.impl;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -166,7 +168,11 @@ public class SynthesizedSlingHttpServletRequest extends SlingHttpServletRequestW
      * @return
      */
     public SynthesizedSlingHttpServletRequest setSelectors(String[] selectors) {
-        this.selectors = selectors;
+        if (selectors == null) {
+            this.selectors = null;
+        } else {
+            this.selectors = Arrays.copyOf(selectors, selectors.length);
+        }
         this.isSelectorOverridden = true;
 
         return this;

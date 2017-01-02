@@ -122,13 +122,20 @@ import java.util.regex.Pattern;
 })
 @Service(Servlet.class)
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
-	private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
-	public static final String NAMED_IMAGE_FILENAME_PATTERN = "acs.commons.namedimage.filename.pattern";
+    private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
-	public static final String DEFAULT_FILENAME_PATTERN = "(image|img)\\.(.+)";
+    public static final String NAME_IMAGE = "image";
 
-	@Reference
+    public static final String NAMED_IMAGE_FILENAME_PATTERN = "acs.commons.namedimage.filename.pattern";
+
+    public static final String DEFAULT_FILENAME_PATTERN = "(image|img)\\.(.+)";
+
+    public static final String RT_LOCAL_SOCIAL_IMAGE = "social:asiFile";
+
+    public static final String RT_REMOTE_SOCIAL_IMAGE = "nt:adobesocialtype";
+
+    @Reference
     private MimeTypeService mimeTypeService;
 
     private static final ValueMap EMPTY_PARAMS = new ValueMapDecorator(new LinkedHashMap<String, Object>());
@@ -136,6 +143,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     private static final String MIME_TYPE_PNG = "image/png";
 
     private static final String TYPE_QUALITY = "quality";
+
+    private static final String TYPE_PROGRESSIVE = "progressive";
 
     private Pattern lastSuffixPattern = Pattern.compile(DEFAULT_FILENAME_PATTERN);
 
@@ -218,8 +227,18 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final double quality = this.getQuality(mimeType,
                 imageTransformersWithParams.get(TYPE_QUALITY, EMPTY_PARAMS));
 
+        // Check if the image is a JPEG which has to be encoded progressively
+        final boolean progressiveJpeg = isProgressiveJpeg(mimeType,
+                imageTransformersWithParams.get(TYPE_PROGRESSIVE, EMPTY_PARAMS));
+
         response.setContentType(mimeType);
-        layer.write(mimeType, quality, response.getOutputStream());
+
+        if (progressiveJpeg) {
+            ProgressiveJPEG.write(layer, quality, response.getOutputStream());
+        } else {
+            layer.write(mimeType, quality, response.getOutputStream());
+        }
+
         response.flushBuffer();
     }
 
@@ -348,9 +367,18 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             if (resourceResolver.isResourceType(resource, NameConstants.NT_PAGE)
                     || StringUtils.equals(resource.getPath(), page.getContentResource().getPath())) {
                 // Is a Page or Page's Content Resource; use the Page's image resource
-                return new Image(page.getContentResource(), "image");
+                return new Image(page.getContentResource(), NAME_IMAGE);
             } else {
                 return new Image(resource);
+            }
+        } else {
+        	if (resourceResolver.isResourceType(resource, RT_LOCAL_SOCIAL_IMAGE)
+                    && resource.getValueMap().get("mimetype", StringUtils.EMPTY).startsWith("image/")) {
+                // Is a UGC image
+                return new SocialImageImpl(resource, NAME_IMAGE);
+            } else if (resourceResolver.isResourceType(resource, RT_REMOTE_SOCIAL_IMAGE)) {
+                // Is a UGC image
+                return new SocialRemoteImageImpl(resource, NAME_IMAGE);
             }
         }
 
@@ -447,6 +475,25 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
 
         return quality;
+    }
+
+    /**
+     * @param mimeType mime type string
+     * @param transforms all transformers
+     * @return <code>true</code> for jpeg mime types if progressive encoding is enabled
+     */
+    protected boolean isProgressiveJpeg(final String mimeType, final ValueMap transforms) {
+        boolean enabled = transforms.get("enabled", false);
+        if (enabled) {
+            if ("image/jpeg".equals(mimeType) || "image/jpg".equals(mimeType)) {
+                return true;
+            } else {
+                log.debug("Progressive encoding is only supported for JPEGs. Mime type: {}", mimeType);
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     @Activate

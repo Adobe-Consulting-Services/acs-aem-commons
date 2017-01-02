@@ -22,6 +22,7 @@ package com.adobe.acs.commons.oak.impl;
 import com.adobe.acs.commons.util.AemCapabilityHelper;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
@@ -40,8 +41,11 @@ import javax.jcr.ValueFactory;
 import java.util.Map;
 
 @Deprecated
-@Component(configurationFactory = true, metatype = true, label = "ACS AEM Commons - Ensure Oak Property Index",
-        description = "Component Factory to create Oak property indexes.")
+@Component(configurationFactory = true,
+        metatype = true,
+        label = "ACS AEM Commons - Ensure Oak Property Index",
+        description = "Component Factory to create Oak property indexes.",
+        policy = ConfigurationPolicy.REQUIRE)
 @Properties({
     @Property(
             name = "webconsole.configurationFactory.nameHint",

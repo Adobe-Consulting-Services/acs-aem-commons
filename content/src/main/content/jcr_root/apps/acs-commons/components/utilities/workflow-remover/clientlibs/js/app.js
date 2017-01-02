@@ -42,7 +42,7 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
             $scope.status = {};
 
             $scope.formOptions = {};
-            
+
             /* Methods */
 
             $scope.init = function () {
@@ -81,12 +81,12 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                             $scope.app.refresh = $timeout(function () {
                                 $scope.getStatus();
                             }, 2000);
-                            
+
                         } else if ($scope.status.erredAt) {
 
                             NotificationsService.add('error',
                                 'ERROR', 'Workflow removal resulted in an error. Please check the AEM logs.');
-                            
+
                         }
                      }).
                     error(function (data, status, headers, config) {

@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
@@ -8,7 +27,12 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Value for cache item in mem store.
@@ -22,6 +46,7 @@ class MemCachePersistenceObject {
     Multimap<String, String> headers;
     /** Byte array to hold the data from the stream */
     private byte[] bytes;
+    AtomicInteger count = new AtomicInteger(0);
 
     /**
      * Create <code>MemCachePersistenceObject</code>. Use <code>buildForCaching</code> method to initialize parameters.
@@ -42,16 +67,14 @@ class MemCachePersistenceObject {
     public MemCachePersistenceObject buildForCaching(String charEncoding, String contentType, Map<String,
             List<String>> headers, InputStream dataInputStream) throws HttpCacheDataStreamException {
 
-        // Taken copy of arguments before caching them to avoid chances of memory leak.
-        // Take copy of originals
-        this.charEncoding = new String(charEncoding);
-        this.contentType = new String(contentType);
+        this.charEncoding = charEncoding;
+        this.contentType = contentType;
 
         // Iterate headers and take a copy.
         this.headers = HashMultimap.create();
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             for (String value : entry.getValue()) {
-                this.headers.put(new String(entry.getKey()), new String(value));
+                this.headers.put(entry.getKey(), value);
             }
         }
 
@@ -61,6 +84,7 @@ class MemCachePersistenceObject {
         } catch (IOException e) {
             throw new HttpCacheDataStreamException("Unable to get byte array out of stream", e);
         }
+
         return this;
     }
 
@@ -108,4 +132,17 @@ class MemCachePersistenceObject {
     public byte[] getBytes() {
         return bytes;
     }
+
+
+    /**
+     * Increments the hit for this cache entry.
+     */
+    public void incrementHitCount() {
+        count.incrementAndGet();
+    }
+
+    /**
+     * @return the number of times this cache entry has been requested
+     */
+    public int getHitCount() { return count.get(); }
 }

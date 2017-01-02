@@ -62,4 +62,10 @@ public final class SendTemplatedEmailConstants {
      * as: <code>${wfStepTitle}</code>
      */
     public static final String WF_STEP_TITLE = "wfStepTitle";
+
+    /**
+     * name of the workflow initiator To be used in the template
+     * as: <code>${wfInitiator}</code>
+     */
+    public static final String WF_INITIATOR = "wfInitiator";
 }

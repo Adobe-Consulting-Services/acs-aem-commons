@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.engine.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
@@ -5,15 +24,29 @@ import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigComparator;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
-import com.adobe.acs.commons.httpcache.exception.*;
+import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
+import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -23,9 +56,22 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.*;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -71,7 +117,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
     /** Thread safe list to contain the registered HttpCacheConfig references. */
-    private static final CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<HttpCacheConfig>();
+    private CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<HttpCacheConfig>();
 
     /** Method name that binds cache store */
     static final String METHOD_NAME_TO_BIND_CACHE_STORE = "httpCacheStore";
@@ -98,7 +144,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     private List<String> globalCacheHandlingRulesPid;
 
     /** Thread safe list containing the OSGi configurations for the registered httpCacheConfigs. Used only for mbean.*/
-    private static final ConcurrentHashMap<HttpCacheConfig, Map<String, Object>> cacheConfigConfigs = new
+    private final ConcurrentHashMap<HttpCacheConfig, Map<String, Object>> cacheConfigConfigs = new
             ConcurrentHashMap<HttpCacheConfig, Map<String, Object>>();
 
     //-------------------<OSGi specific methods>---------------//
@@ -123,15 +169,12 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             return;
         }
 
-        // Sort cacheConfigs by order; Synchronized since this bind/un-bind is a rare/limited event
-        synchronized (this.cacheConfigs) {
-            final List<HttpCacheConfig> tmp = new ArrayList<HttpCacheConfig>(this.cacheConfigs);
-            tmp.add(cacheConfig);
+        // Sort cacheConfigs by order
+        final CopyOnWriteArrayList<HttpCacheConfig> tmp = new CopyOnWriteArrayList<HttpCacheConfig>(this.cacheConfigs);
+        tmp.add(cacheConfig);
 
-            Collections.sort(tmp, new HttpCacheConfigComparator());
-            this.cacheConfigs.clear();
-            this.cacheConfigs.addAll(tmp);
-        }
+        Collections.sort(tmp, new HttpCacheConfigComparator());
+        this.cacheConfigs = tmp;
 
         this.cacheConfigConfigs.put(cacheConfig, configs);
 
@@ -168,15 +211,13 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * Binds cache store implementation
      *
      * @param cacheStore
-     * @param configs
+     * @param properties
      */
-    protected void bindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> configs) {
+    protected void bindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> properties) {
+        final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
+        if (cacheStoreType != null && cacheStoresMap.putIfAbsent(cacheStoreType, cacheStore) == null) {
 
-        if (configs.containsKey(HttpCacheStore.KEY_CACHE_STORE_TYPE) && !cacheStoresMap.containsKey((String) configs
-                .get(HttpCacheStore.KEY_CACHE_STORE_TYPE))) {
-            cacheStoresMap.put(PropertiesUtil.toString(configs.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null),
-                    cacheStore);
-            log.debug("Cache store implementation {} has been added", (String) configs.get(HttpCacheStore
+            log.debug("Cache store implementation {} has been added", (String) properties.get(HttpCacheStore
                     .KEY_CACHE_STORE_TYPE));
             log.debug("Total number of cache stores in the map: {}", cacheStoresMap.size());
         }
@@ -186,14 +227,12 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * Unbinds cache store.
      *
      * @param cacheStore
-     * @param config
+     * @param properties
      */
-    protected void unbindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> config) {
-
-        if (config.containsKey(HttpCacheStore.KEY_CACHE_STORE_TYPE) && cacheStoresMap.containsKey((String) config.get
-                (HttpCacheStore.KEY_CACHE_STORE_TYPE))) {
-            cacheStoresMap.remove((String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
-            log.debug("Cache store removed - {}.", (String) config.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
+    protected void unbindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> properties) {
+        final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
+        if (cacheStoreType != null && cacheStoresMap.remove(cacheStoreType) != null) {
+            log.debug("Cache store removed - {}.", (String) properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
             log.debug("Total number of cache stores after removal: {}", cacheStoresMap.size());
         }
     }
@@ -202,15 +241,14 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * Binds cache handling rule
      *
      * @param cacheHandlingRule
-     * @param configs
+     * @param properties
      */
     protected void bindHttpCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String, Object>
-            configs) {
+            properties) {
 
         // Get the service pid and make it as key.
-        String servicePid = PropertiesUtil.toString(configs.get("service.pid"), StringUtils.EMPTY);
-        if (!cacheHandlingRules.containsKey(servicePid)) {
-            cacheHandlingRules.put(servicePid, cacheHandlingRule);
+        String servicePid = PropertiesUtil.toString(properties.get("service.pid"), StringUtils.EMPTY);
+        if (cacheHandlingRules.putIfAbsent(servicePid, cacheHandlingRule) == null) {
             log.debug("Cache handling rule implementation {} has been added", cacheHandlingRule.getClass().getName());
             log.debug("Total number of cache handling rule available after addition: {}", cacheHandlingRules.size());
         }
@@ -226,8 +264,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             Object> configs) {
 
         String servicePid = PropertiesUtil.toString(configs.get("service.pid"), StringUtils.EMPTY);
-        if (cacheHandlingRules.contains(servicePid)) {
-            cacheHandlingRules.remove(cacheHandlingRule);
+        if (cacheHandlingRules.remove(servicePid) != null) {
             log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
             log.debug("Total number of cache handling rules available after removal: {}", cacheHandlingRules.size());
         }
@@ -237,7 +274,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     protected void activate(Map<String, Object> configs) {
 
         // PIDs of global cache handling rules.
-        globalCacheHandlingRulesPid = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get
+        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get
                 (PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
@@ -282,6 +319,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     @Override
     public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request) throws HttpCacheRepositoryAccessException,
             HttpCacheConfigConflictException {
+        return getCacheConfig(request, HttpCacheConfig.FilterScope.REQUEST);
+    }
+
+    @Override
+    public HttpCacheConfig getCacheConfig(SlingHttpServletRequest request, HttpCacheConfig.FilterScope filterScope) throws HttpCacheConfigConflictException, HttpCacheRepositoryAccessException {
 
         // Get the first accepting cache config based on the cache config order.
         HttpCacheConfig bestCacheConfig = null;
@@ -298,7 +340,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                     // Since cacheConfigs is sorted by order, this means all other orders will not match
                     break;
                 }
-            } else if (cacheConfig.accepts(request)) {
+            } else if (filterScope.equals(cacheConfig.getFilterScope()) && cacheConfig.accepts(request)) {
                 bestCacheConfig = cacheConfig;
             }
         }
@@ -354,7 +396,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Copy the cached data into the servlet output stream.
         try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
             if (log.isDebugEnabled()) {
                 log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
             }
@@ -369,15 +411,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse
             response, HttpCacheConfig cacheConfig) throws HttpCacheDataStreamException,
             HttpCacheKeyCreationException, HttpCachePersistenceException {
-
-        // Create cache key.
-        CacheKey cacheKey = cacheConfig.buildCacheKey(request);
-
         // Wrap the response to get the copy of the stream.
         // Temp sink for the duplicate stream is chosen based on the cache store configured at cache config.
         try {
             return new HttpCacheServletResponseWrapper(response, getCacheStore(cacheConfig).createTempSink());
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             throw new HttpCacheDataStreamException(e);
         }
     }
@@ -387,7 +425,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             cacheConfig) throws HttpCacheKeyCreationException, HttpCacheDataStreamException,
             HttpCachePersistenceException {
 
-        // TODO - This can be made asynchronous to avoid performance penality on response cache.
+        // TODO - This can be made asynchronous to avoid performance penalty on response cache.
 
         CacheContent cacheContent = null;
         try {

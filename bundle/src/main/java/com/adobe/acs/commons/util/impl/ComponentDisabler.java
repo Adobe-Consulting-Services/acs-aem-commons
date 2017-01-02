@@ -22,12 +22,11 @@ package com.adobe.acs.commons.util.impl;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.event.Event;
@@ -64,8 +63,8 @@ public class ComponentDisabler implements EventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ComponentDisabler.class);
 
-    @Reference
-    private ScrService scrService;
+    @Reference(policyOption = ReferencePolicyOption.GREEDY)
+    private ComponentDisablerDriver componentDisabler;
 
     @Property(label = "Disabled components", description = "The names of the components/services you want to disable",
             cardinality = Integer.MAX_VALUE)
@@ -75,8 +74,7 @@ public class ComponentDisabler implements EventHandler {
 
     @Activate
     protected void activate(Map<String, Object> properties) {
-        disabledComponents = PropertiesUtil
-                .toStringArray(properties.get(DISABLED_COMPONENTS), new String[0]);
+        disabledComponents = PropertiesUtil.toStringArray(properties.get(DISABLED_COMPONENTS), new String[0]);
         handleEvent(null);
     }
 
@@ -87,21 +85,7 @@ public class ComponentDisabler implements EventHandler {
         log.trace("Disabling components and services {}", Arrays.toString(disabledComponents));
 
         for (String component : disabledComponents) {
-            disableComponent(component);
+            componentDisabler.disable(component);
         }
-    }
-
-    private boolean disableComponent(String componentName) {
-        Component[] comps = (Component[]) scrService.getComponents(componentName);
-        if (comps != null) {
-            for (Component comp : comps) {
-                if (comp.getState() != Component.STATE_DISABLED) {
-                    log.info("Component {} disabled by configuration (pid={}) ",
-                            new Object[] { comp.getClassName(), comp.getConfigurationPid() });
-                    comp.disable();
-                }
-            }
-        }
-        return true;
     }
 }

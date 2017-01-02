@@ -65,10 +65,9 @@ public class SynthesizedResource extends SyntheticResource {
     public ValueMap getValueMap() {
         ValueMap superMap = super.getValueMap();
 
-        Set<String> superKeySet = superMap.keySet();
-        for (String superKey : superKeySet) {
-            if (!synthProperties.containsKey(superKey)) {
-                synthProperties.put(superKey, superMap.get(superKey));
+        for (Map.Entry<String, Object> entry : superMap.entrySet()) {
+            if (!synthProperties.containsKey(entry.getKey())) {
+                synthProperties.put(entry.getKey(), entry.getValue());
             }
         }
 

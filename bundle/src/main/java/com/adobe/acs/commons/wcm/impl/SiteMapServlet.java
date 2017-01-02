@@ -20,8 +20,12 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -29,9 +33,14 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.DamConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
@@ -39,21 +48,26 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import com.day.cq.commons.Externalizer;
+import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(metatype = true, label = "ACS AEM Commons - Site Map Servlet", description = "Site Map Servlet",
-        configurationFactory = true)
+@Component(metatype = true,
+        label = "ACS AEM Commons - Site Map Servlet",
+        description = "Page and Asset Site Map Servlet",
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE)
 @Service
 @SuppressWarnings("serial")
-@Properties({ @Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY,
+@Properties({@Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY,
         label = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components."),
         @Property(name = "sling.servlet.selectors", value = "sitemap", propertyPrivate = true),
         @Property(name = "sling.servlet.extensions", value = "xml", propertyPrivate = true),
@@ -63,7 +77,7 @@ import com.day.cq.wcm.api.PageManager;
                 value = "Site Map for: {externalizer.domain}, on resource types: [{sling.servlet.resourceTypes}]")
 })
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
-    
+
     private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd");
 
     private static final boolean DEFAULT_INCLUDE_LAST_MODIFIED = false;
@@ -78,13 +92,25 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             description = "If true, the last modified value will be included in the sitemap.")
     private static final String PROP_INCLUDE_LAST_MODIFIED = "include.lastmod";
 
-    @Property(label = "Change Frequency Properties",
+    @Property(label = "Change Frequency Properties", unbounded = PropertyUnbounded.ARRAY,
             description = "The set of JCR property names which will contain the change frequency value.")
     private static final String PROP_CHANGE_FREQUENCY_PROPERTIES = "changefreq.properties";
 
-    @Property(label = "Priority Properties",
+    @Property(label = "Priority Properties", unbounded = PropertyUnbounded.ARRAY,
             description = "The set of JCR property names which will contain the priority value.")
     private static final String PROP_PRIORITY_PROPERTIES = "priority.properties";
+
+    @Property(label = "DAM Folder Property",
+            description = "The JCR property name which will contain DAM folders to include in the sitemap.")
+    private static final String PROP_DAM_ASSETS_PROPERTY = "damassets.property";
+
+    @Property(label = "DAM Asset MIME Types", unbounded = PropertyUnbounded.ARRAY,
+            description = "MIME types allowed for DAM assets.")
+    private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
+
+    @Property(label = "Exclude from Sitemap Property",
+            description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
+    private static final String PROP_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.property";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
@@ -99,6 +125,12 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private String[] priorityProperties;
 
+    private String damAssetProperty;
+
+    private List<String> damAssetTypes;
+
+    private String excludeFromSiteMapProperty;
+
     @Activate
     protected void activate(Map<String, Object> properties) {
         this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
@@ -106,6 +138,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.includeLastModified = PropertiesUtil.toBoolean(properties.get(PROP_INCLUDE_LAST_MODIFIED), DEFAULT_INCLUDE_LAST_MODIFIED);
         this.changefreqProperties = PropertiesUtil.toStringArray(properties.get(PROP_CHANGE_FREQUENCY_PROPERTIES), new String[0]);
         this.priorityProperties = PropertiesUtil.toStringArray(properties.get(PROP_PRIORITY_PROPERTIES), new String[0]);
+        this.damAssetProperty = PropertiesUtil.toString(properties.get(PROP_DAM_ASSETS_PROPERTY), "");
+        this.damAssetTypes = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
+        this.excludeFromSiteMapProperty = PropertiesUtil.toString(properties.get(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY), NameConstants.PN_HIDE_IN_NAV);
     }
 
     @Override
@@ -127,8 +162,14 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             // first do the current page
             write(page, stream, resourceResolver);
 
-            for (Iterator<Page> children = page.listChildren(new PageFilter(), true); children.hasNext();) {
+            for (Iterator<Page> children = page.listChildren(new PageFilter(false, true), true); children.hasNext(); ) {
                 write(children.next(), stream, resourceResolver);
+            }
+
+            if (damAssetTypes.size() > 0 && damAssetProperty.length() > 0) {
+                for (Resource assetFolder : getAssetFolders(page, resourceResolver)) {
+                    writeAssets(stream, assetFolder, resourceResolver);
+                }
             }
 
             stream.writeEndElement();
@@ -139,9 +180,37 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         }
     }
 
-    private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
-        stream.writeStartElement(NS, "url");
+    private Collection<Resource> getAssetFolders(Page page, ResourceResolver resolver) {
+        List<Resource> allAssetFolders = new ArrayList<Resource>();
+        ValueMap properties = page.getProperties();
+        String[] configuredAssetFolderPaths = properties.get(damAssetProperty, String[].class);
+        if (configuredAssetFolderPaths != null) {
+            // Sort to aid in removal of duplicate paths.
+            Arrays.sort(configuredAssetFolderPaths);
+            String prevPath = "#";
+            for (String configuredAssetFolderPath : configuredAssetFolderPaths) {
+                // Ensure that this folder is not a child folder of another
+                // configured folder, since it will already be included when
+                // the parent folder is traversed.
+                if (StringUtils.isNotBlank(configuredAssetFolderPath) &&
+                        !configuredAssetFolderPath.equals(prevPath) &&
+                        !StringUtils.startsWith(configuredAssetFolderPath, prevPath + "/")) {
+                    Resource assetFolder = resolver.getResource(configuredAssetFolderPath);
+                    if (assetFolder != null) {
+                        prevPath = configuredAssetFolderPath;
+                        allAssetFolders.add(assetFolder);
+                    }
+                }
+            }
+        }
+        return allAssetFolders;
+    }
 
+    private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
+        if (isHidden(page)) {
+            return;
+        }
+        stream.writeStartElement(NS, "url");
 
         String loc = externalizer.externalLink(resolver, externalizerDomain,
                 String.format("%s.html", page.getPath()));
@@ -161,8 +230,52 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         stream.writeEndElement();
     }
 
+    private boolean isHidden(final Page page) {
+        return page.getProperties().get(this.excludeFromSiteMapProperty, false);
+    }
+
+    private void writeAsset(Asset asset, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
+        stream.writeStartElement(NS, "url");
+
+
+        String loc = externalizer.externalLink(resolver, externalizerDomain, asset.getPath());
+        writeElement(stream, "loc", loc);
+
+        if (includeLastModified) {
+            long lastModified = asset.getLastModified();
+            if (lastModified > 0) {
+                writeElement(stream, "lastmod", DATE_FORMAT.format(lastModified));
+            }
+        }
+
+        Resource contentResource = asset.adaptTo(Resource.class).getChild(JcrConstants.JCR_CONTENT);
+        if (contentResource != null) {
+            final ValueMap properties = contentResource.getValueMap();
+            writeFirstPropertyValue(stream, "changefreq", changefreqProperties, properties);
+            writeFirstPropertyValue(stream, "priority", priorityProperties, properties);
+        }
+
+        stream.writeEndElement();
+    }
+
+    private void writeAssets(final XMLStreamWriter stream, final Resource assetFolder, final ResourceResolver resolver)
+            throws XMLStreamException {
+        for (Iterator<Resource> children = assetFolder.listChildren(); children.hasNext(); ) {
+            Resource assetFolderChild = children.next();
+            if (assetFolderChild.isResourceType(DamConstants.NT_DAM_ASSET)) {
+                Asset asset = assetFolderChild.adaptTo(Asset.class);
+
+                if (damAssetTypes.contains(asset.getMimeType())) {
+                    writeAsset(asset, stream, resolver);
+                }
+            } else {
+                writeAssets(stream, assetFolderChild, resolver);
+            }
+        }
+    }
+
     private void writeFirstPropertyValue(final XMLStreamWriter stream, final String elementName, final String[] propertyNames,
-            final ValueMap properties) throws XMLStreamException {
+                                         final ValueMap properties) throws XMLStreamException {
         for (String prop : propertyNames) {
             String value = properties.get(prop, String.class);
             if (value != null) {

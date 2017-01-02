@@ -61,11 +61,16 @@ public final class TwitterAdapterFactory implements AdapterFactory {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterAdapterFactory.class);
 
+    private static final boolean DEFAULT_USE_SSL = true;
+
     @Property(label = "HTTP Proxy Host", description = "HTTP Proxy Host, leave blank for none")
     private static final String PROP_HTTP_PROXY_HOST = "http.proxy.host";
 
     @Property(label = "HTTP Proxy Port", description = "HTTP Proxy Port, leave 0 for none", intValue = 0)
     private static final String PROP_HTTP_PROXY_PORT = "http.proxy.port";
+
+    @Property(label = "Use SSL", description = "Use SSL Connections", boolValue = DEFAULT_USE_SSL)
+    private static final String PROP_USE_SSL = "use.ssl";
 
     @Reference
     private ConfigurationManager configurationManager;
@@ -75,6 +80,8 @@ public final class TwitterAdapterFactory implements AdapterFactory {
     private String httpProxyHost;
 
     private int httpProxyPort;
+
+    private boolean useSsl;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -99,7 +106,8 @@ public final class TwitterAdapterFactory implements AdapterFactory {
 
     private Configuration buildConfiguration() {
         final ConfigurationBuilder builder = new ConfigurationBuilder();
-        builder.setUseSSL(true);
+        builder.setUseSSL(useSsl);
+        builder.setJSONStoreEnabled(true);
         builder.setApplicationOnlyAuthEnabled(true);
         if (StringUtils.isNotBlank(httpProxyHost) && httpProxyPort > 0) {
             builder.setHttpProxyHost(httpProxyHost);
@@ -154,6 +162,7 @@ public final class TwitterAdapterFactory implements AdapterFactory {
     protected void activate(Map<String, Object> properties) {
         this.httpProxyHost = PropertiesUtil.toString(properties.get(PROP_HTTP_PROXY_HOST), null);
         this.httpProxyPort = PropertiesUtil.toInteger(properties.get(PROP_HTTP_PROXY_PORT), 0);
+        this.useSsl = PropertiesUtil.toBoolean(properties.get(PROP_USE_SSL), DEFAULT_USE_SSL);
         this.factory = new TwitterFactory(buildConfiguration());
     }
 

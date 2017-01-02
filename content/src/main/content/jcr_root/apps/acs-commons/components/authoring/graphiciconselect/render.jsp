@@ -194,6 +194,7 @@ Select
 
     attrs.add("id", cfg.get("id", String.class));
     attrs.addClass(cfg.get("class", String.class));
+    attrs.addClass("coral-Select");
     attrs.addRel(cfg.get("rel", String.class));
     attrs.add("title", i18n.getVar(cfg.get("title", String.class)));
     attrs.addOther("collision", "none");
@@ -232,7 +233,11 @@ Select
         opAttrs.addClass(optionCfg.get("class", String.class));
         opAttrs.addRel(optionCfg.get("rel", String.class));
         opAttrs.add("title", i18n.getVar(optionCfg.get("title", String.class)));
-        opAttrs.add("value", value);
+        if(value.trim().startsWith("fa") || value.equalsIgnoreCase("")){
+          opAttrs.add("value", value);
+        }else{
+            opAttrs.add("value", "fa " +value);
+        }
         opAttrs.addDisabled(optionCfg.get("disabled", false));
         opAttrs.addOthers(optionCfg.getProperties(), "id", "class", "rel", "title", "value", "text", "disabled", "selected", "group");
 

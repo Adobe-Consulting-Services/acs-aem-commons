@@ -38,6 +38,8 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
     private static String V_ADDED = "added";
     private static String V_CHANGED = "changed";
     private static String V_REMOVED = "removed";
+    private static String V_ADDED_REMOVED = "added-removed";
+    private static String V_CHANGED_REMOVED = "changed-removed";
 
     private EvolutionEntryType type;
     private String name;
@@ -129,7 +131,11 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public String getStatus() {
-        if (isAdded()) {
+        if (isChanged() && isWillBeRemoved()) {
+            return V_CHANGED_REMOVED;
+        } else if (isAdded() && isWillBeRemoved()) {
+            return V_ADDED_REMOVED;
+        } else if (isAdded()) {
             return V_ADDED;
         } else if (isWillBeRemoved()) {
             return V_REMOVED;
@@ -162,7 +168,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
                 return false;
             }
             if (isResource()) {
-                Node node = version.getLinearPredecessor().getFrozenNode().getNode(relativePath);
+                Node node = version.getLinearSuccessor().getFrozenNode().getNode(relativePath);
                 return node == null;
             } else {
                 Property prop = version.getLinearSuccessor().getFrozenNode().getProperty(relativePath);

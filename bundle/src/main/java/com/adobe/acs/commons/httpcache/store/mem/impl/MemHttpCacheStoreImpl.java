@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
@@ -7,22 +26,31 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
-import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import com.google.common.cache.*;
+import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.*;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +74,7 @@ import java.util.concurrent.TimeUnit;
                     propertyPrivate = true)
 })
 @Service(value = {DynamicMBean.class, HttpCacheStore.class})
-public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements HttpCacheStore, MemCacheMBean {
+public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
     /** Megabyte to byte */
@@ -85,12 +113,21 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         }
         if (ttl != DEFAULT_TTL) {
             // If ttl is present, attach it to guava cache configuration.
-            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).expireAfterWrite(ttl, TimeUnit
-                    .SECONDS).removalListener(new MemCacheEntryRemovalListener()).recordStats().build();
+            cache = CacheBuilder.newBuilder()
+                    .maximumWeight(maxSizeInMb * MEGABYTE)
+                    .weigher(new MemCacheEntryWeigher())
+                    .expireAfterWrite(ttl, TimeUnit.SECONDS)
+                    .removalListener(new MemCacheEntryRemovalListener())
+                    .recordStats()
+                    .build();
         } else {
             // If ttl is absent, go only with the maximum weight condition.
-            cache = CacheBuilder.newBuilder().maximumWeight(maxSizeInMb * MEGABYTE).weigher(new MemCacheEntryWeigher
-                    ()).removalListener(new MemCacheEntryRemovalListener()).recordStats().build();
+            cache = CacheBuilder.newBuilder()
+                    .maximumWeight(maxSizeInMb * MEGABYTE)
+                    .weigher(new MemCacheEntryWeigher())
+                    .removalListener(new MemCacheEntryRemovalListener())
+                    .recordStats()
+                    .build();
         }
 
         log.info("MemHttpCacheStoreImpl activated / modified.");
@@ -137,7 +174,7 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
 
     @Override
     public boolean contains(CacheKey key) {
-        if (null == this.getIfPresent(key)) {
+        if (null == cache.getIfPresent(key)) {
             return false;
         }
         return true;
@@ -149,6 +186,10 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         if (null == value) {
             return null;
         }
+
+        // Increment hit count
+        value.incrementHitCount();
+
         return new CacheContent(value.getCharEncoding(), value.getContentType(), value.getHeaders(), new
                 ByteArrayInputStream(value.getBytes()));
     }
@@ -196,28 +237,6 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
         super(MemCacheMBean.class);
     }
 
-    @Override
-    public void clearCache() {
-        cache.invalidateAll();
-    }
-
-    @Override
-    public long getCacheEntriesCount() {
-        return this.size();
-    }
-
-    @Override
-    public String getCacheSize() {
-        // Iterate through the cache entries and compute the total size of byte array.
-        long size = 0L;
-        ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
-        for (final CacheKey key : cacheAsMap.keySet()) {
-            size += cacheAsMap.get(key).getBytes().length;
-        }
-
-        // Convert bytes to human-friendly format
-        return FileUtils.byteCountToDisplaySize(size);
-    }
 
     @Override
     public long getTtl() {
@@ -225,128 +244,41 @@ public class MemHttpCacheStoreImpl extends AnnotatedStandardMBean implements Htt
     }
 
     @Override
-    public String getCacheEntry(String cacheKeyStr) throws IOException {
-        CacheKey cacheKey = null;
-
-        for (CacheKey cacheKeyTmp : cache.asMap().keySet()) {
-            if (StringUtils.equals(cacheKeyStr, cacheKeyTmp.toString())) {
-                cacheKey = cacheKeyTmp;
-                break;
-            }
-        }
-
-        if (cacheKey != null) {
-            MemCachePersistenceObject persistenceObject = cache.getIfPresent(cacheKey);
-            if(persistenceObject != null) {
-                return IOUtils.toString(
-                        new ByteArrayInputStream(persistenceObject.getBytes()),
-                        persistenceObject.getCharEncoding());
-            }
-        }
-
-        return "Invalid cache key parameter.";
+    protected Cache<CacheKey, MemCachePersistenceObject> getCache() {
+        return cache;
     }
 
     @Override
-    public TabularData getCacheStats() throws OpenDataException {
-        // Exposing all google guava stats.
-        final CompositeType cacheEntryType = new CompositeType(
-                "Cache Stats",
-                "Cache Stats",
-                new String[]{"Stat", "Value"},
-                new String[]{"Stat", "Value"},
-                new OpenType[]{SimpleType.STRING, SimpleType.STRING});
-
-        final TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType("Cache Stats", "Cache Stats", cacheEntryType, new String[]{"Stat"}));
-
-        CacheStats cacheStats = this.cache.stats();
-
-        final Map<String, Object> row = new HashMap<String, Object>();
-
-        row.put("Stat", "Request Count");
-        row.put("Value", String.valueOf(cacheStats.requestCount()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Hit Count");
-        row.put("Value", String.valueOf(cacheStats.hitCount()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Hit Rate");
-        row.put("Value", String.format("%.0f%%", cacheStats.hitRate() * 100));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Miss Count");
-        row.put("Value", String.valueOf(cacheStats.missCount()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Miss Rate");
-        row.put("Value", String.format("%.0f%%", cacheStats.missRate() * 100));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Eviction Count");
-        row.put("Value", String.valueOf(cacheStats.evictionCount()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Load Count");
-        row.put("Value", String.valueOf(cacheStats.loadCount()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Load Exception Count");
-        row.put("Value", String.valueOf(cacheStats.loadExceptionCount()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Load Exception Rate");
-        row.put("Value", String.format("%.0f%%", cacheStats.loadExceptionRate() * 100));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Load Success Count");
-        row.put("Value", String.valueOf(cacheStats.loadSuccessCount()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Average Load Penalty");
-        row.put("Value", String.valueOf(cacheStats.averageLoadPenalty()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put("Stat", "Total Load Time");
-        row.put("Value", String.valueOf(cacheStats.totalLoadTime()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        return tabularData;
+    protected long getBytesLength(MemCachePersistenceObject cacheObj) {
+        return cacheObj.getBytes().length;
     }
-
 
     @Override
-    public TabularData getCacheKeys() throws OpenDataException {
+    protected void addCacheData(Map<String, Object> data, MemCachePersistenceObject cacheObj) {
+        int hitCount = cacheObj.getHitCount();
+        long size = cacheObj.getBytes().length;
+        data.put("Size", FileUtils.byteCountToDisplaySize(size));
+        data.put("Content Type", cacheObj.getContentType());
+        data.put("Character Encoding", cacheObj.getCharEncoding());
+        data.put("Hits", hitCount);
+        data.put("Total Size Served from Cache", FileUtils.byteCountToDisplaySize(hitCount * size));
 
-        final CompositeType cacheEntryType = new CompositeType(
-                "Cache Entry",
-                "Cache Entry",
-                new String[]{ "Cache Key", "Size", "Content Type", "Character Encoding" },
-                new String[]{ "Cache Key", "Size", "Content Type", "Character Encoding" },
-                new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
-
-        final TabularDataSupport tabularData = new TabularDataSupport(new TabularType(
-                "Cache Entries",
-                "Cache Entries",
-                cacheEntryType,
-                new String[]{ "Cache Key" }));
-
-        ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
-        for (final CacheKey key : cacheAsMap.keySet()) {
-            final Map<String, Object> data = new HashMap<String, Object>();
-            data.put("Cache Key", key.toString());
-
-            MemCachePersistenceObject cacheObj = cache.getIfPresent(key);
-            if (cacheObj != null) {
-                data.put("Size", FileUtils.byteCountToDisplaySize(cacheObj.getBytes().length));
-                data.put("Content Type", cacheObj.getContentType());
-                data.put("Character Encoding", cacheObj.getCharEncoding());
-            }
-
-            tabularData.put(new CompositeDataSupport(cacheEntryType, data));
-        }
-
-        return tabularData;
     }
+
+    @Override
+    protected String toString(MemCachePersistenceObject cacheObj) throws Exception{
+        return IOUtils.toString(
+                new ByteArrayInputStream(cacheObj.getBytes()),
+                cacheObj.getCharEncoding());
+    }
+
+    @Override
+    protected CompositeType getCacheEntryType() throws OpenDataException {
+       return new CompositeType("Cache Entry", "Cache Entry",
+                new String[] { "Cache Key", "Size", "Content Type", "Character Encoding", "Hits", "Total Size Served from Cache" },
+                new String[] { "Cache Key", "Size", "Content Type", "Character Encoding", "Hits", "Total Size Served from Cache" },
+                new OpenType[] { SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING });
+
+    }
+
 }

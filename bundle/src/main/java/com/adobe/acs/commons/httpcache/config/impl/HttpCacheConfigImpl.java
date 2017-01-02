@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.AuthenticationStatusConfigConstants;
@@ -11,14 +30,28 @@ import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.UserUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +77,8 @@ import java.util.regex.Pattern;
 @Service
 public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
+    private static final String FILTER_SCOPE_REQUEST = "REQUEST";
+    private static final String FILTER_SCOPE_INCLUDE = "INCLUDE";
 
     // Order
     public static final int DEFAULT_ORDER = 1000;
@@ -123,6 +158,24 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final String DEFAULT_CACHE_STORE = "MEM"; // Defaults to memory cache store
     private String cacheStore;
 
+
+    // Cache store
+    // @formatter:off
+    private static final String DEFAULT_FILTER_SCOPE = FILTER_SCOPE_REQUEST; // Defaults to REQUEST scope
+    @Property(label = "Filter scope",
+            description = "Specify the scope of this HttpCacheConfig in the scope of the Sling Servlet Filter processing chain.",
+            options = {
+                    @PropertyOption(name = FILTER_SCOPE_REQUEST,
+                            value = FILTER_SCOPE_REQUEST),
+                    @PropertyOption(name = FILTER_SCOPE_INCLUDE,
+                            value = FILTER_SCOPE_INCLUDE)
+            },
+            value = DEFAULT_FILTER_SCOPE)
+    // @formatter:on
+    private static final String PROP_FILTER_SCOPE = "httpcache.config.filter-scope";
+    private FilterScope filterScope;
+
+
     // Making the cache config extension configurable.
     @Property(name = "cacheConfigExtension.target",
               label = "HttpCacheConfigExtension service pid",
@@ -183,8 +236,10 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
         order = PropertiesUtil.toInteger(configs.get(PROP_ORDER), DEFAULT_ORDER);
 
+        filterScope = FilterScope.valueOf(PropertiesUtil.toString(configs.get(PROP_FILTER_SCOPE), DEFAULT_FILTER_SCOPE).toUpperCase());
+
         // PIDs of cache handling rules.
-        cacheHandlingRulesPid = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get
+        cacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get
                 (PROP_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = cacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
@@ -333,5 +388,10 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public boolean acceptsRule(String servicePid) {
         return cacheHandlingRulesPid.contains(servicePid);
+    }
+
+    @Override
+    public FilterScope getFilterScope() {
+        return this.filterScope;
     }
 }

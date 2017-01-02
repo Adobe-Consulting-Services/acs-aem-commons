@@ -82,7 +82,7 @@ public class PagesReferenceProviderTest {
         String path = "/content/geometrixx/en";
         map.put("path", path);
         ValueMap vm = new ValueMapDecorator(map);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
+        when(resource.getValueMap()).thenReturn(vm);
         when(resource.getResourceResolver()).thenReturn(resolver);
         when(resolver.adaptTo(PageManager.class)).thenReturn(manager);
         when(manager.getContainingPage(path)).thenReturn(referredpage);
@@ -111,7 +111,7 @@ public class PagesReferenceProviderTest {
         String path = "/content/ge1ometrixx/en";
         map.put("path", path);
         ValueMap vm = new ValueMapDecorator(map);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
+        when(resource.getValueMap()).thenReturn(vm);
         when(resource.getResourceResolver()).thenReturn(resolver);
         when(resolver.getResource(path)).thenReturn(res);
         when(res.adaptTo(Page.class)).thenReturn(null);
@@ -132,7 +132,7 @@ public class PagesReferenceProviderTest {
         map.put("path", path);
         map.put("path1", path1);
         ValueMap vm = new ValueMapDecorator(map);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
+        when(resource.getValueMap()).thenReturn(vm);
         when(resource.getResourceResolver()).thenReturn(resolver);
         when(resolver.getResource(path)).thenReturn(res);
         when(resolver.getResource(path1)).thenReturn(res1);
@@ -173,7 +173,7 @@ public class PagesReferenceProviderTest {
         map.put("path", path);
         map.put("path1", path1);
         ValueMap vm = new ValueMapDecorator(map);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
+        when(resource.getValueMap()).thenReturn(vm);
         when(resource.getResourceResolver()).thenReturn(resolver);
         when(resolver.getResource(path)).thenReturn(res);
         when(resolver.getResource(path1)).thenReturn(res1);
@@ -202,7 +202,7 @@ public class PagesReferenceProviderTest {
         map.put("path", path);
         // map.put("path1", path1);
         ValueMap vm = new ValueMapDecorator(map);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
+        when(resource.getValueMap()).thenReturn(vm);
         when(resource.getResourceResolver()).thenReturn(resolver);
         when(resolver.getResource(path)).thenReturn(res);
         when(resolver.getResource(path1)).thenReturn(res1);

@@ -23,6 +23,9 @@ package com.adobe.acs.commons.rewriter.impl;
 import com.day.cq.widget.HtmlLibrary;
 import com.day.cq.widget.HtmlLibraryManager;
 import com.day.cq.widget.LibraryType;
+
+import junitx.util.PrivateAccessor;
+
 import org.apache.sling.rewriter.Transformer;
 import org.junit.After;
 import org.junit.Before;
@@ -31,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.configuration.InjectingAnnotationEngine;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -44,6 +48,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
 @RunWith(MockitoJUnitRunner.class)
 public class VersionedClientlibsTransformerFactoryTest {
     @Mock
@@ -55,8 +61,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Mock
     private ContentHandler handler;
 
-    @InjectMocks
-    private VersionedClientlibsTransformerFactory factory = new VersionedClientlibsTransformerFactory();
+    private VersionedClientlibsTransformerFactory factory;
 
     private Transformer transformer;
 
@@ -65,6 +70,10 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Before
     public void setUp() throws Exception {
+        factory = new VersionedClientlibsTransformerFactory();
+        PrivateAccessor.setField(factory, "htmlLibraryManager", htmlLibraryManager);
+        factory.activate(Collections.<String, Object>emptyMap());
+
         when(htmlLibrary.getLibraryPath()).thenReturn(PATH);
         when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings".getBytes()));
         //when(htmlLibrary.getLastModified()).thenReturn(123L);
@@ -97,7 +106,6 @@ public class VersionedClientlibsTransformerFactoryTest {
         assertEquals(PATH + ".css", attributesCaptor.getValue().getValue(0));
     }
 
-
     @Test
     public void testCSSClientLibrary() throws Exception {
 
@@ -116,6 +124,28 @@ public class VersionedClientlibsTransformerFactoryTest {
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testCSSClientLibraryWithDot() throws Exception {
+        final String path = PATH + ".foo";
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(path))).thenReturn(htmlLibrary);
+        when(htmlLibrary.getLibraryPath()).thenReturn(path);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", path + ".css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(path + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
     }
 
     @Test
@@ -158,6 +188,27 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
+    public void testJavaScriptClientLibraryWithDot() throws Exception {
+        final String path = PATH + ".foo";
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(path))).thenReturn(htmlLibrary);
+        when(htmlLibrary.getLibraryPath()).thenReturn(path);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", path + ".js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(path + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
     public void testMinifiedJavaScriptClientLibrary() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
@@ -196,6 +247,26 @@ public class VersionedClientlibsTransformerFactoryTest {
         assertEquals(PATH + ".styles", attributesCaptor.getValue().getValue(0));
     }
 
+     @Test
+    public void testCSSClientLibraryWithRelAttributeValueDiffersFromStylesheet() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PATH + ".css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "preload");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
+    }
+    
     @Test
     public void testJavaScriptClientLibraryWithInvalidExtension() throws Exception {
 

@@ -151,4 +151,57 @@ public class CropImageTransformerImplTest {
 
         verifyZeroInteractions(layer);
     }
+
+    @Test
+    public void testTransform_percentage_full() throws Exception {
+        Rectangle expected = new Rectangle();
+        expected.setBounds(0, 0, 1600, 900);
+
+        map.put("bounds", "0%,0%,100%,100%");
+        ValueMap properties = new ValueMapDecorator(map);
+
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).crop(expected);
+    }
+
+    @Test
+    public void testTransform_percentage_part() throws Exception {
+        Rectangle expected = new Rectangle();
+        expected.setBounds(160, 180, 480, 360);
+
+        map.put("bounds", "10%,20%,30%,40%");
+        ValueMap properties = new ValueMapDecorator(map);
+
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).crop(expected);
+    }
+
+    @Test
+    public void testTransform_percentage_mixed1() throws Exception {
+        Rectangle expected = new Rectangle();
+        expected.setBounds(10, 180, 30, 360);
+
+        map.put("bounds", "10,20%,30,40%");
+        ValueMap properties = new ValueMapDecorator(map);
+
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).crop(expected);
+    }
+
+    @Test
+    public void testTransform_percentage_mixed2() throws Exception {
+        Rectangle expected = new Rectangle();
+        expected.setBounds(160, 20, 480, 40);
+
+        map.put("bounds", "10%,20,30%,40");
+        ValueMap properties = new ValueMapDecorator(map);
+
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).crop(expected);
+    }
+
 }
