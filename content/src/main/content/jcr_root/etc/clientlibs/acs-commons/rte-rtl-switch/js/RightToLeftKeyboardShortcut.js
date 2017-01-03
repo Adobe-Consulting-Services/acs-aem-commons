@@ -16,11 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-/*
- * implements a keyboard shortcut ctrl-shift-x to switch both the inline and full screen rich text exitor to
+ *
+ *
+ * implements a keyboard shortcut ctrl-shift-x to switch both the inline and full screen rich text editor to
  * right-to-left mode and back.
- * Author: Ben Zahler, www.codeflair.ch
  */
 (function ($) {
 
@@ -29,10 +28,10 @@
 
     function rtekeyUp(e) {
         // if control or shift key is released, reset the values
-        if (e.which == 17) {
+        if (e.which === 17) {
             isCtrl = false;
         }
-        if (e.which == 16) {
+        if (e.which === 16) {
             isShift = false;
         }
     }
@@ -42,22 +41,23 @@
         if (!target.hasClass('coral-RichText-editor') && !target.hasClass('is-edited')) {
             return;
         }
-        //check if one of the required keys is pressed.
-        if (key == 17) {
+        //check if one of the required keys is pressed
+		//key event 17 is the ctrl key
+        if (key === 17) {
             isCtrl = true;
         }
-        if (key == 16) {
+		//key event 16 is the shift key
+        if (key === 16) {
             isShift = true;
         }
-        if (key == 88 && isCtrl && isShift) {
-            if (target.attr("dir") == "rtl") {
+		//key event 88 is the 'x' key
+        if (key === 88 && isCtrl && isShift) {
+            if (target.attr("dir") === "rtl") {
 				//current direction is right-to-left, so change direction back to left-to-right
                 target.attr("dir", "ltr");
-                console.log("------- rte deactivated");
             } else {
 				//current direction is left-to-right, so change direction to right-to-left
                 target.attr("dir", "rtl");
-                console.log("------- rte activated");
             }
         }
     }
@@ -88,16 +88,13 @@
             eventsRegistered = [];
         }
         //ensure that we do not register the events twice on the same body node
-        if (eventsRegistered.indexOf(body) == -1) {
+        if (eventsRegistered.indexOf(body) === -1) {
             $(body).on('keydown', function (e) {
                 rtekeyDown(e.which, getInlineEditorTarget(e));
             });
             $(body).on('keyup', rtekeyUp);
             eventsRegistered.push(body);
         }
-
     });
-
-
 })
 (window.jQuery);
