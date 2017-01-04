@@ -59,6 +59,11 @@ public class AudioHelperImpl implements AudioHelper {
     protected final void activate(ComponentContext ctx) {
         String slingHome = ctx.getBundleContext().getProperty("sling.home");
         workingDir = FFMpegAudioUtils.resolveWorkingDir(slingHome, (String) ctx.getProperties().get(PROP_WORKING_DIR));
+        if (!workingDir.exists()) {
+            if (!workingDir.mkdirs()) {
+                throw new IllegalStateException("Could not create " + workingDir.getPath());
+            }
+        }
     }
 
     @Override
