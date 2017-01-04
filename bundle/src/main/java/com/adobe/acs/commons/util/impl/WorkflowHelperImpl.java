@@ -121,7 +121,7 @@ public class WorkflowHelperImpl implements WorkflowHelper {
     @Override
     public List<String> getValuesFromArgs(String name, String[] args) {
         final String prefix = name + ":";
-        final int prefixLength = name.length();
+        final int prefixLength = prefix.length();
         final List<String> values = new ArrayList<String>();
         for (String arg : args) {
             if (arg.startsWith(prefix)) {
