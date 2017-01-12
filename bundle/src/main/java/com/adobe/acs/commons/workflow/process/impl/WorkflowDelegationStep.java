@@ -38,7 +38,9 @@ import com.day.cq.commons.inherit.InheritanceValueMap;
  * <p>
  * Arguments should be provided as this:
  * <p>
- * workflowModelProperty=<propName>,defaultWorkflowModel=<pathToDefaultWorkflowModel>,terminateWorkflowOnDelegation=true|false
+ *     workflowModelProperty=<propName>
+ *     defaultWorkflowModel=<pathToDefaultWorkflowModel>
+ *     terminateWorkflowOnDelegation=true|false
  * (eg: /etc/workflow/models/request_for_activation/jcr:content/model)
  * <p>
  * <propName> is the name of the property which contains the paths of the workflow models
@@ -133,7 +135,7 @@ public class WorkflowDelegationStep implements WorkflowProcess {
 
         if (delegateWorkflowModel != null) {
             workflowSession.startWorkflow(delegateWorkflowModel, wfData);
-            log.info("Delegating payload [ {} ] to Workflow Model [ {} ]", wfData.getPayload(), foundWorkflowModelId);
+            log.info("Delegating payload [ {} ] to Workflow Model [ {} ]", wfData.getPayload(), delegateWorkflowModel.getId());
 
             if (terminateOnDelegation) {
                 log.info("Terminating current workflow due to PROCESS_ARGS[ {} ] = [ {} ]", TERMINATE_ON_DELEGATION, terminateOnDelegation);
@@ -171,13 +173,23 @@ public class WorkflowDelegationStep implements WorkflowProcess {
     }
 
     private WorkflowModel getWorkflowModel(WorkflowSession workflowSession, String workflowModelId) {
+        workflowModelId = StringUtils.stripToEmpty(workflowModelId);
         WorkflowModel workflowModel = null;
 
         if (StringUtils.isNotBlank(workflowModelId)) {
+            if (!workflowModelId.endsWith("/jcr:content/model")) {
+                ResourceResolver resourceResolver = workflowHelper.getResourceResolver(workflowSession);
+                Resource resource = resourceResolver.getResource(workflowModelId + "/jcr:content/model");
+                if (resource != null &&
+                        StringUtils.equals(resource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class),"cq:WorkflowModel")) {
+                    workflowModelId = resource.getPath();
+                }
+            }
+
             try {
                 workflowModel = workflowSession.getModel(workflowModelId);
             } catch (WorkflowException e) {
-                log.error("Could not find Workflow Model for [ {} ]", workflowModelId);
+                log.warn("Could not find Workflow Model for [ {} ]", workflowModelId);
             }
         }
 
@@ -186,6 +198,6 @@ public class WorkflowDelegationStep implements WorkflowProcess {
 
     private Map<String, String> getProcessArgsMap(MetaDataMap metaDataMap) {
         final String processArgs = metaDataMap.get(WorkflowHelper.PROCESS_ARGS, "");
-        return ParameterUtil.toMap(StringUtils.split(processArgs, ","), "=");
+        return ParameterUtil.toMap(StringUtils.split(processArgs, System.getProperty("line.separator")), "=");
     }
 }
