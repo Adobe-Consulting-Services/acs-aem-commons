@@ -51,7 +51,6 @@ import com.day.cq.commons.inherit.InheritanceValueMap;
  * This can be useful to avoid having a single workflow under multiple workflows (depending on how the workflows are setup).
  * <p>
  * If a Workflow Model Id can be resolved, via the content hierarchy (directly) or the the default workflow id param (fallback) but that Workflow Model cannot be resolved, then a WorkflowException is thrown.
- * If no Workflow Model Id can be resolved the workflow process will complete w/ WARNings.
  */
 @Component
 @Properties({
