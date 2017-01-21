@@ -36,14 +36,14 @@
         	value =  $(element).prop('checked');
             
             if (target) {
-            	hideUnselectedElements(target, value);
+            	hideUnselectedElements(target);
             	showTarget(target, value);
             }
         });
     }
 
     // make sure all unselected target elements are hidden.
-    function hideUnselectedElements(target, value){
+    function hideUnselectedElements(target){
         $(target).not(".hide").each(function() {
             $(this).addClass('hide'); //If target is a container, hides the container
             $(this).closest('.coral-Form-fieldwrapper').addClass('hide'); // Hides the target field wrapper. Thus, hiding label, quicktip etc.
