@@ -71,24 +71,26 @@ public class PageRootProviderImpl implements PageRootProvider {
             } else if (!rootPage.isValid()) {
                 log.debug("Page Root invalid at [ {} ]", pagePath);
             } else {
-                log.debug("Page Root found at [ {} ]", pagePath);
                 return rootPage;
             }
         }
 
-        log.debug("Resource path does not include the configured page root path.");
         return null;
     }
 
-    protected String getRootPagePath(String resourcePath) {
+    @Override
+    public String getRootPagePath(String resourcePath) {
         for (Pattern pattern : pageRootPatterns) {
             final Matcher matcher = pattern.matcher(resourcePath);
 
             if (matcher.find()) {
-                return matcher.group(1);
+                String rootPath = matcher.group(1);
+                log.debug("Page Root found at [ {} ]", rootPath);
+                return rootPath;
             }
         }
 
+        log.debug("Resource path does not include the configured page root path.");
         return null;
     }
 
