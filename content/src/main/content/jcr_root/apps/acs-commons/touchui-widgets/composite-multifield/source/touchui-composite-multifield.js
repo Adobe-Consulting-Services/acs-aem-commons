@@ -361,7 +361,7 @@
 
             if (target) {
                 var parentMultifieldInput= $(element).closest("li.coral-Multifield-input");
-                hideUnselectedElements(parentMultifieldInput, target, value);
+                hideUnselectedElements(parentMultifieldInput, target);
                 showTarget(parentMultifieldInput, target, value);
             }
             
@@ -380,7 +380,7 @@
             }
             
             // make sure all unselected target elements are hidden.
-            function hideUnselectedElements(parentMultifieldInput, target, value){
+            function hideUnselectedElements(parentMultifieldInput, target){
                 parentMultifieldInput.find(target).not(".hide").each(function() {
                     $(this).addClass('hide'); //If target is a container, it hides the container
                     $(this).closest('.coral-Form-fieldwrapper').addClass('hide'); // Hides the target field wrapper. Thus, hiding label, quicktip etc.
