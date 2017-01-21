@@ -21,13 +21,17 @@
 package com.adobe.acs.commons.util;
 
 import aQute.bnd.annotation.ProviderType;
+import com.adobe.granite.workflow.exec.Workflow;
 import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkflowData;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 @ProviderType
 public interface WorkflowHelper {
     String PROCESS_ARGS = "PROCESS_ARGS";
+    String PAYLOAD_TYPE_JCR_PATH = "JCR_PATH";
 
     /**
      * Convenience method for getting a ResourceResolver object from a Granite based Workflow Process.
@@ -44,4 +48,28 @@ public interface WorkflowHelper {
      * @return the associated ResourceResolver object
      */
     ResourceResolver getResourceResolver(WorkflowSession workflowSession) throws LoginException;
+
+    /**
+     * Derives either an Asset or Page resource (dam:Asset or cq:Page) that the provided path belongs to.
+     * Example: When path = /content/dam/foo.png/jcr:content/renditions/original, this method will return the resource at /content/dam/foo.png
+     * Example: When path = /content/site/bar/jcr:content/root/text, this method will return the resource at /content/site/bar
+     * @param resourceResolver the resourceResolver to resolve the path to the appropriate resource
+     * @param path the path to resolve to an Asset or Page
+     * @return the resource representing the resolver dam:Asset or cq:Page, if neither can be resolved, null is returned.
+     */
+    Resource getPageOrAssetResource(ResourceResolver resourceResolver, String path);
+
+    /**
+     * Method for CQ Workflow APIs.
+     * @param workflowData the Workflow data
+     * @return true of the WorkflowData payload is of type JCR_PATH
+     */
+    boolean isPathTypedPayload(WorkflowData workflowData);
+
+    /**
+     * Method for Granite Workflow APIs.
+     * @param workflowData the Workflow data
+     * @return true of the WorkflowData payload is of type JCR_PATH
+     */
+    boolean isPathTypedPayload(com.adobe.granite.workflow.exec.WorkflowData workflowData);
 }
