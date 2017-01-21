@@ -205,6 +205,7 @@
                 $document.trigger("touchui-composite-multifield-ready", mNames);
 
                 cmf.addCompositeMultifieldValidator();
+                cmf.showHideFields();
             }
 
             $.ajax(actionUrl).done(postProcess);
@@ -321,7 +322,79 @@
                     .attr('value', JSON.stringify(record))
                     .appendTo($form);
             });
-        }
+        },
+        
+        //Show-Hide widgets on dialog load
+        showHideFields: function () {
+            var cmf = this, $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']");
+
+            $fieldSets.find(".cq-dialog-multifield-dropdown-showhide, .cq-dialog-multifield-checkbox-showhide").each(function(i, element) {
+                // if there is already an inital value make sure the according target element becomes visible
+                cmf.showHide(element);
+            });
+        },
+        
+        //Show-Hide widgets on toggling checkbox/select
+        showHide: function(element){
+            
+            var target, value=false;
+            var type = getFieldType(element);
+            
+            //Get widget value
+            switch (type) {
+                case "select":
+                    var widget = $(element).data("select");
+                    if (widget) {
+                        // get the selector to find the target elements. its stored as data-.. attribute
+                        target = $(element).data("cqDialogMultifieldDropdownShowhideTarget");
+                        // get the selected value
+                        value =  widget.getValue();
+                    }
+                    break;
+                case "checkbox":
+                    // get the selector to find the target elements. its stored as data-.. attribute
+                    target = $(element).data("cqDialogMultifieldCheckboxShowhideTarget");
+                    // get the selected value
+                    value = $(element).prop('checked');
+                    
+            }
+
+            if (target) {
+                var parentMultifieldInput= $(element).closest("li.coral-Multifield-input");
+                hideUnselectedElements(parentMultifieldInput, target, value);
+                showTarget(parentMultifieldInput, target, value);
+            }
+            
+            //Get type of field
+            function getFieldType(element){
+                //Check if field is a checkbox
+                var type = $(element).prop("type");
+                if(type==="checkbox"){
+                    return "checkbox";
+                }
+                //Check if field is a dropdown
+                var select = $(element).hasClass("coral-Select");
+                if(select){
+                    return "select";
+                }
+            }
+            
+            // make sure all unselected target elements are hidden.
+            function hideUnselectedElements(parentMultifieldInput, target, value){
+                parentMultifieldInput.find(target).not(".hide").each(function() {
+                    $(this).addClass('hide'); //If target is a container, it hides the container
+                    $(this).closest('.coral-Form-fieldwrapper').addClass('hide'); // Hides the target field wrapper. Thus, hiding label, quicktip etc.
+                });
+            }
+            
+            // unhide the target element that contains the selected value as data-showhidetargetvalue attribute
+            function showTarget(parentMultifieldInput, target, value){
+                parentMultifieldInput.find(target).filter("[data-showhidetargetvalue='" + value + "']").each(function() {
+                    $(this).removeClass('hide'); //If target is a container, it unhides the container
+                    $(this).closest('.coral-Form-fieldwrapper').removeClass('hide'); // Unhides the target field wrapper. Thus, hiding label, quicktip etc.
+                });
+            }
+        } 
     });
 
     $document.ready(function () {
@@ -351,5 +424,15 @@
                 compositeMultiField.collectDataFromFields();
             });
         }
+        
+        //Dropdown selection changed. Show Hide target widgets 
+        $(document).on("selected", ".cq-dialog-multifield-dropdown-showhide", function(e) {
+            compositeMultiField.showHide($(this));
+        });
+
+        //Checkbox state changed. Show Hide target widgets 
+        $(document).on("change", ".cq-dialog-multifield-checkbox-showhide", function(e) {
+            compositeMultiField.showHide($(this));
+        });
     });
 }(jQuery, jQuery(document)));
