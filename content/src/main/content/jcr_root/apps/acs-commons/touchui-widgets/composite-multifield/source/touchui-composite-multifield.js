@@ -328,7 +328,7 @@
         showHideFields: function () {
             var cmf = this, $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']");
 
-            $fieldSets.find(".cq-dialog-multifield-dropdown-showhide, .cq-dialog-multifield-checkbox-showhide").each(function(i, element) {
+            $fieldSets.find("[data-cq-dialog-multifield-dropdown-showhide], [data-cq-dialog-multifield-checkbox-showhide]").each(function(i, element) {
                 // if there is already an inital value make sure the according target element becomes visible
                 cmf.showHide(element);
             });
@@ -345,20 +345,19 @@
                 case "select":
                     var widget = $(element).data("select");
                     if (widget) {
-                        // get the selector to find the target elements. its stored as data-.. attribute
-                        target = $(element).data("cqDialogMultifieldDropdownShowhideTarget");
                         // get the selected value
                         value =  widget.getValue();
                     }
                     break;
                 case "checkbox":
-                    // get the selector to find the target elements. its stored as data-.. attribute
-                    target = $(element).data("cqDialogMultifieldCheckboxShowhideTarget");
                     // get the selected value
                     value = $(element).prop('checked');
                     
             }
 
+            // get the selector to find the target elements. its stored as data-.. attribute
+        	target = $(element).data("cq-dialog-showhide-target");
+            
             if (target) {
                 var parentMultifieldInput= $(element).closest("li.coral-Multifield-input");
                 hideUnselectedElements(parentMultifieldInput, target);
@@ -426,12 +425,12 @@
         }
         
         //Dropdown selection changed. Show Hide target widgets 
-        $(document).on("selected", ".cq-dialog-multifield-dropdown-showhide", function(e) {
+        $(document).on("selected", "[data-cq-dialog-multifield-dropdown-showhide]", function(e) {
             compositeMultiField.showHide($(this));
         });
 
         //Checkbox state changed. Show Hide target widgets 
-        $(document).on("change", ".cq-dialog-multifield-checkbox-showhide", function(e) {
+        $(document).on("change", "[data-cq-dialog-multifield-checkbox-showhide]", function(e) {
             compositeMultiField.showHide($(this));
         });
     });
