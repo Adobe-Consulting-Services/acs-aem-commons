@@ -5,7 +5,7 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <cq:defineObjects />
-<sling:adaptTo adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.one2one.model.One2OneCompareModel" var="model"/>
+<sling:adaptTo adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.wcm.comparisons.PageVersionCompareModel" var="model"/>
 
 <!doctype html>
 <html class="coral-App">

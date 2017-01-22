@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.one2one.model;
+package com.adobe.acs.commons.wcm.comparisons;
 
 import com.adobe.acs.commons.version.Evolution;
 import com.adobe.acs.commons.version.EvolutionAnalyser;
@@ -38,12 +38,21 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
+/**
+ * This Sling Model exposes Page Version differences, primarily used by the ACS AEM Commons One-to-One Comparison util.
+ */
 @Model(adaptables = SlingHttpServletRequest.class)
-public class One2OneCompareModel {
+public class PageVersionCompareModel {
+    private static final Logger log = LoggerFactory.getLogger(PageVersionCompareModel.class);
 
-    private static final Logger log = LoggerFactory.getLogger(One2OneCompareModel.class);
+    /** Request parameter names **/
+    private static final String REQUEST_PARAM_PATH_A = "path";
+    private static final String REQUEST_PARAM_PATH_B= "pathB";
+    private static final String REQUEST_PARAM_VERSION_A = "a";
+    private static final String REQUEST_PARAM_VERSION_B = "b";
 
     @VisibleForTesting
     @Inject
@@ -64,11 +73,11 @@ public class One2OneCompareModel {
     @VisibleForTesting
     FluentIterable<Evolution> evolutionsB;
 
-    public One2OneCompareModel(SlingHttpServletRequest request) {
-        this.pathA = request.getParameter("path");
-        this.pathB = request.getParameter("pathB");
-        this.versionA = request.getParameter("a");
-        this.versionB = request.getParameter("b");
+    public PageVersionCompareModel(SlingHttpServletRequest request) {
+        this.pathA = request.getParameter(REQUEST_PARAM_PATH_A);
+        this.pathB = request.getParameter(REQUEST_PARAM_PATH_B);
+        this.versionA = request.getParameter(REQUEST_PARAM_VERSION_A);
+        this.versionB = request.getParameter(REQUEST_PARAM_VERSION_B);
     }
 
     @PostConstruct
@@ -77,12 +86,18 @@ public class One2OneCompareModel {
         this.evolutionsB = pathB != null ? FluentIterable.from(evolutions(pathB)) : this.evolutionsA;
     }
 
+    /**
+     * @return The resource path for comparison Page A
+     */
     public String getResourcePathA() {
         return pathA;
     }
 
+    /**
+     * @return The resource path for comparison Page B
+     */
     public String getResourcePathB() {
-        return Optional.fromNullable(pathB).or("");
+        return Optional.fromNullable(pathB).or(StringUtils.EMPTY);
     }
 
     public List<VersionSelection> getVersionSelectionsA() {
@@ -104,9 +119,8 @@ public class One2OneCompareModel {
     public String getVersionA() {
         if (versionA == null && evolutionsA.size() >= 2) {
             return evolutionsA.get(evolutionsA.size() - 2).getVersionName();
-        }
-        if (versionA == null) {
-            return "";
+        } else if (versionA == null) {
+            return StringUtils.EMPTY;
         }
         return versionA;
     }
@@ -114,13 +128,13 @@ public class One2OneCompareModel {
     public String getVersionB() {
         if (versionB == null && !evolutionsB.isEmpty()) {
             return evolutionsB.last().get().getVersionName();
-        }
-        if (versionB == null) {
-            return "";
+        } else if (versionB == null) {
+            return StringUtils.EMPTY;
         }
         return versionB;
     }
 
+    /** Private methods **/
 
     private Optional<Evolution> version(FluentIterable<Evolution> evolutions, final String name) {
         return evolutions.firstMatch(new Predicate<Evolution>() {
@@ -159,8 +173,30 @@ public class One2OneCompareModel {
             if (evolution == null) {
                 return null;
             }
-            return new VersionSelection(evolution.getVersionName(), evolution.getVersionDate());
+            return new VersionSelectionImpl(evolution.getVersionName(), evolution.getVersionDate());
         }
     };
 
+    /**
+     * Private class used to track Version Selection in this Model
+     */
+    static class VersionSelectionImpl implements VersionSelection {
+        private final String name;
+        private final Date date;
+
+        public VersionSelectionImpl(String name, Date date) {
+            this.name = name;
+            this.date = date;
+        }
+
+        @Override
+        public Date getDate() {
+            return (Date) date.clone();
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
 }

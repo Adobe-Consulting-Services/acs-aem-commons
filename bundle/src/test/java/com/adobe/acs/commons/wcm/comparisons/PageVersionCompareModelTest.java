@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.one2one.model;
+package com.adobe.acs.commons.wcm.comparisons;
 
 import com.adobe.acs.commons.version.Evolution;
 import com.adobe.acs.commons.version.EvolutionAnalyser;
@@ -45,7 +45,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class One2OneCompareModelTest {
+public class PageVersionCompareModelTest {
 
     @Mock
     private ResourceResolver resolver;
@@ -53,7 +53,7 @@ public class One2OneCompareModelTest {
     @Mock
     private EvolutionAnalyser analyser;
 
-    One2OneCompareModel underTest;
+    PageVersionCompareModel underTest;
 
     @Test
     public void constructor_shouldInitializeWithParams() throws Exception {
@@ -339,7 +339,7 @@ public class One2OneCompareModelTest {
         when(request.getParameter("pathB")).thenReturn(pathB);
         when(request.getParameter("a")).thenReturn(versionA);
         when(request.getParameter("b")).thenReturn(versionB);
-        underTest = new One2OneCompareModel(request);
+        underTest = new PageVersionCompareModel(request);
         underTest.resolver = resolver;
         underTest.analyser = analyser;
     }
