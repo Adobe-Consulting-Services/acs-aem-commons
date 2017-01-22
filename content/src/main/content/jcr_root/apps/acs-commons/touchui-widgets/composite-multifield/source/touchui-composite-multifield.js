@@ -116,6 +116,7 @@
                 setTimeout(function(){
                     cmf.addCompositeMultifieldRemoveListener($multifield);
                     cmf.addCompositeMultifieldValidator();
+                    cmf.showHideNewRowFields($multifield);
                 }, 500);
             });
 
@@ -329,6 +330,15 @@
             var cmf = this, $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']");
 
             $fieldSets.find("[data-cq-dialog-multifield-dropdown-showhide], [data-cq-dialog-multifield-checkbox-showhide]").each(function(i, element) {
+                // if there is already an inital value make sure the according target element becomes visible
+                cmf.showHide(element);
+            });
+        },
+        
+        //Show-Hide widgets when a new row is added to multifield
+        showHideNewRowFields: function ($multifield) {
+        	var cmf = this;
+            $multifield.find("[data-cq-dialog-multifield-dropdown-showhide], [data-cq-dialog-multifield-checkbox-showhide]").each(function(i, element) {
                 // if there is already an inital value make sure the according target element becomes visible
                 cmf.showHide(element);
             });
