@@ -398,7 +398,7 @@
             
             // unhide the target element that contains the selected value as data-showhidetargetvalue attribute
             function showTarget(parentMultifieldInput, target, value){
-                parentMultifieldInput.find(target).filter("[data-showhidetargetvalue='" + value + "']").each(function() {
+                parentMultifieldInput.find(target).filter("[data-showhidetargetvalue*='" + value + "']").each(function() {
                     $(this).removeClass('hide'); //If target is a container, it unhides the container
                     $(this).closest('.coral-Form-fieldwrapper').removeClass('hide'); // Unhides the target field wrapper. Thus, displaying label, quicktip etc.
                 });
