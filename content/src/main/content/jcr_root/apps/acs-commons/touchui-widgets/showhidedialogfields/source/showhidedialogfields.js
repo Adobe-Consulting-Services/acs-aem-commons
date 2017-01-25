@@ -94,7 +94,7 @@
     
     // unhide the target element that contains the selected value as data-showhidetargetvalue attribute
     function showTarget(target, value){
-    	$(target).filter("[data-showhidetargetvalue='" + value + "']").each(function() {
+    	$(target).filter("[data-showhidetargetvalue*='" + value + "']").each(function() {
             $(this).removeClass('hide');  //If target is a container, unhides the container
             $(this).closest('.coral-Form-fieldwrapper').removeClass('hide'); // Unhides the target field wrapper. Thus, displaying label, quicktip etc.
         });
