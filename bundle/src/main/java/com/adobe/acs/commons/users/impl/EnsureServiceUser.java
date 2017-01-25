@@ -1,6 +1,9 @@
 package com.adobe.acs.commons.users.impl;
 
 import com.adobe.acs.commons.util.ParameterUtil;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -9,7 +12,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlList;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlManager;
-import org.apache.jackrabbit.api.security.JackrabbitAccessControlPolicy;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
@@ -17,13 +19,12 @@ import org.apache.jackrabbit.commons.jackrabbit.authorization.AccessControlUtils
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.sling.api.resource.*;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.apache.sling.jcr.base.util.AccessControlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.*;
-import javax.jcr.security.AccessControlEntry;
 import javax.jcr.security.AccessControlManager;
+import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.Privilege;
 import java.util.*;
 
@@ -53,6 +54,9 @@ public class EnsureServiceUser {
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+
+    @Reference
+    private QueryBuilder queryBuilder;
 
     protected void ensure(ServiceUser user) throws RepositoryException {
 
@@ -94,7 +98,7 @@ public class EnsureServiceUser {
         User systemUser = ensureSystemUser(resourceResolver, serviceUser);
         if (systemUser != null) {
             log.info("Removing ACEs for [ {} ]", serviceUser.getPrincipalName());
-            removeAces(resourceResolver, systemUser, serviceUser);
+            removeACEs(resourceResolver, systemUser, serviceUser);
             log.info("Removing system user [ {} ]", systemUser.getPath());
             systemUser.remove();
         } else {
@@ -109,7 +113,7 @@ public class EnsureServiceUser {
         User systemUser = ensureSystemUser(resourceResolver, serviceUser);
         if (systemUser != null) {
             log.debug("Ensuring ACEs for system user [ {} ]", serviceUser.getPrincipalName());
-            ensureAces(resourceResolver, systemUser, serviceUser);
+            ensureACEs(resourceResolver, systemUser, serviceUser);
         } else {
             log.error("Could not create or locate value system user. [ {} ]", serviceUser.getPrincipalName());
         }
@@ -145,23 +149,17 @@ public class EnsureServiceUser {
         return user;
     }
 
-    private void ensureAces(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
+    private void ensureACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager = (JackrabbitAccessControlManager) session.getAccessControlManager();
-        // or getApplicablePolicies()
-        final JackrabbitAccessControlPolicy[] policies = accessControlManager.getPolicies(systemUser.getPrincipal());
+        final List<JackrabbitAccessControlList> acls = findACLs(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
 
-
-        log.debug("Policies: {}", policies.length);
-
-        for (JackrabbitAccessControlPolicy policy : policies) {
-            final JackrabbitAccessControlList acl = (JackrabbitAccessControlList) policy;
-
+        for (JackrabbitAccessControlList acl : acls) {
             log.debug("ACL Path: {}", acl.getPath());
 
             final JackrabbitAccessControlEntry[] aces = (JackrabbitAccessControlEntry[]) acl.getAccessControlEntries();
-            final boolean serviceUserCoversThisPath = serviceUser.hasAceAt(policy.getPath());
+            final boolean serviceUserCoversThisPath = serviceUser.hasAceAt(acl.getPath());
 
             log.debug("Aces: {}", aces.length);
 
@@ -222,21 +220,16 @@ public class EnsureServiceUser {
             log.debug("Added the ACL to [ {} ]", ace.getPath());
             accessControlManager.setPolicy(ace.getPath(), acl);
         }
-
     }
 
 
-    private void removeAces(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
+    private void removeACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager = (JackrabbitAccessControlManager) session.getAccessControlManager();
-        // or getApplicablePolicies()
-        final JackrabbitAccessControlPolicy[] policies = accessControlManager.getPolicies(systemUser.getPrincipal());
+        final List<JackrabbitAccessControlList> acls = findACLs(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
 
-        log.debug("Policies: {}", policies.length);
-
-        for (JackrabbitAccessControlPolicy policy : policies) {
-            final JackrabbitAccessControlList acl = (JackrabbitAccessControlList) policy;
+        for (JackrabbitAccessControlList acl : acls) {
             final JackrabbitAccessControlEntry[] aces = (JackrabbitAccessControlEntry[]) acl.getAccessControlEntries();
 
             log.debug("Processing ACE removal from ACL at [ {} ] for [ {} ]", acl.getPath(), serviceUser.getPrincipalName());
@@ -255,6 +248,39 @@ public class EnsureServiceUser {
             log.debug("Removing ACE from [ {} ]", acl.getPath());
             accessControlManager.setPolicy(acl.getPath(), acl);
         }
+    }
+
+
+    private List<JackrabbitAccessControlList> findACLs(ResourceResolver resourceResolver, String principalName, JackrabbitAccessControlManager accessControlManager) throws RepositoryException {
+        final Set<String> paths = new HashSet<String>();
+        final List<JackrabbitAccessControlList> acls = new ArrayList<JackrabbitAccessControlList>();
+
+        final Map<String, String> params = new HashMap<String, String>();
+
+        params.put("type", AccessControlConstants.NT_REP_ACE);
+        params.put("property", AccessControlConstants.REP_PRINCIPAL_NAME);
+        params.put("property.value", principalName);
+        params.put("p.limit", "-1");
+
+        Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+
+        Iterator<Resource> resources = query.getResult().getResources();
+
+        while(resources.hasNext()) {
+            // Get the content resource as this is what the AccessControlManager API will use to find the ACLs under it
+            Resource contentResource = resources.next().getParent().getParent();
+
+            if (!paths.contains(contentResource.getPath())) {
+                for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
+                    if (policy instanceof JackrabbitAccessControlList) {
+                        acls.add((JackrabbitAccessControlList) policy);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return acls;
     }
 
 
