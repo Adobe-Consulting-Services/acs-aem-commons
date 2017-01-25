@@ -19,7 +19,7 @@ public class ServiceUserTest {
         aces[0] = "type=allow;privileges=jcr:read,rep:write;path=/content/dam;rep:glob=/jcr:content/*";
 
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put(EnsureServiceUser.PROP_PRINCIPAL, "test-service-user");
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
         config.put(EnsureServiceUser.PROP_ACES, aces);
 
         EnsureServiceUser.ServiceUser serviceUser = new EnsureServiceUser.ServiceUser(config);

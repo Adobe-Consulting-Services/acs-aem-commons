@@ -8,6 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlList;
@@ -29,27 +30,41 @@ import javax.jcr.security.Privilege;
 import java.util.*;
 
 @Component(
-        label = "ACS AEM Commons - Ensure Service User",
+        label = "ACS AEM Commons - Ensure Service User Factory",
         configurationFactory = true,
         metatype = true,
         immediate = true
 )
+@Properties({
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "{operation} for {principalName}",
+                propertyPrivate = true
+        )
+})
 @Service(value = EnsureServiceUser.class)
 public class EnsureServiceUser {
     private static final Logger log = LoggerFactory.getLogger(EnsureServiceUser.class);
 
     public static final String DEFAULT_OPERATION = "add";
-    @Property(label = "Operation", options = {
-            @PropertyOption(name = "add", value = "Ensure existence"),
-            @PropertyOption(name = "remove", value = "Ensure extinction")
-    })
+    @Property(label = "Operation",
+            description = "Defines if the service user (principal name) should be adjusted to align with this config or removed completely",
+            options = {
+                @PropertyOption(name = "add", value = "Ensure existence"),
+                @PropertyOption(name = "remove", value = "Ensure extinction")
+        }
+    )
     public static final String PROP_OPERATION = "operation";
 
+    @Property(label = "Principal Name",
+                description = "The service user's principal name"
+    )
+    public static final String PROP_PRINCIPAL_NAME = "principalName";
 
-    @Property(label = "Principal Name")
-    public static final String PROP_PRINCIPAL = "principal";
-
-    @Property(label = "ACEs", cardinality = Integer.MAX_VALUE)
+    @Property(label = "ACEs",
+            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
+            cardinality = Integer.MAX_VALUE
+    )
     public static final String PROP_ACES = "aces";
 
     @Reference
@@ -58,12 +73,11 @@ public class EnsureServiceUser {
     @Reference
     private QueryBuilder queryBuilder;
 
-    protected void ensure(ServiceUser user) throws RepositoryException {
+    protected void ensure(ServiceUser user) throws RepositoryException, EnsureServiceUserException {
 
         ResourceResolver resourceResolver = null;
 
         try {
-
             resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
             if (user.isRemovalOperation()) {
@@ -93,9 +107,9 @@ public class EnsureServiceUser {
         }
     }
 
-    private void remove(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException {
-
+    private void remove(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
         User systemUser = ensureSystemUser(resourceResolver, serviceUser);
+        
         if (systemUser != null) {
             log.info("Removing ACEs for [ {} ]", serviceUser.getPrincipalName());
             removeACEs(resourceResolver, systemUser, serviceUser);
@@ -104,10 +118,9 @@ public class EnsureServiceUser {
         } else {
             log.error("Could not create or locate value system user. [ {} ]", serviceUser.getPrincipalName());
         }
-
     }
 
-    protected void exists(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException {
+    protected void exists(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
         // Handle the ACE's
         log.debug("Ensuring system user [ {}  ]", serviceUser.getPrincipalName());
         User systemUser = ensureSystemUser(resourceResolver, serviceUser);
@@ -120,30 +133,15 @@ public class EnsureServiceUser {
     }
 
 
-    private User ensureSystemUser(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException {
-        UserManager userManager = resourceResolver.adaptTo(UserManager.class);
-        User user = null;
+    private User ensureSystemUser(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
+        User user = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
 
-        // Handle the actual user creation
+        if (user == null) {
+            final UserManager userManager = resourceResolver.adaptTo(UserManager.class);
 
-        Authorizable authorizable = userManager.getAuthorizable(serviceUser.getPrincipalName());
-
-        if (authorizable == null) {
             // No principal found with this name; create the system user
             user = userManager.createSystemUser(serviceUser.getPrincipalName(), serviceUser.getIntermediatePath());
             log.info("Created system user at [ {} ]", user.getPath());
-        } else {
-            // Am authorizable was found with this name; check if this is a system user
-            if (authorizable instanceof User) {
-                user = (User) authorizable;
-                if (user.isSystemUser()) {
-                    log.info("System user [ {} ] exists at [ {} ]", user.getPrincipal().getName(), user.getPath());
-                } else {
-                    log.warn("User [ {} ] exists at [ {} ] but is NOT a system user", user.getPrincipal().getName(), user.getPath());
-                }
-            } else {
-                log.error("Authorizable [ {} ] at [ {} ] is not a user", authorizable.getPrincipal().getName(), authorizable.getPath());
-            }
         }
 
         return user;
@@ -156,17 +154,12 @@ public class EnsureServiceUser {
         final List<JackrabbitAccessControlList> acls = findACLs(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
 
         for (JackrabbitAccessControlList acl : acls) {
-            log.debug("ACL Path: {}", acl.getPath());
 
             final JackrabbitAccessControlEntry[] aces = (JackrabbitAccessControlEntry[]) acl.getAccessControlEntries();
             final boolean serviceUserCoversThisPath = serviceUser.hasAceAt(acl.getPath());
 
-            log.debug("Aces: {}", aces.length);
-
             // Check all the existing ACEs in the ACL
             for (JackrabbitAccessControlEntry ace : aces) {
-                log.debug("ace: {}", ace.toString());
-
                 if (StringUtils.equals(serviceUser.getPrincipalName(), ace.getPrincipal().getName())) {
                     // Pertains to this service user
                     if (StringUtils.startsWith(acl.getPath(), systemUser.getPath())) {
@@ -180,7 +173,7 @@ public class EnsureServiceUser {
                         if (serviceUserAce == null) {
                             // Remove this ace if there isn't a configuration for it.
                             acl.removeAccessControlEntry(ace);
-                            log.debug("ACE doesnt exist for service user def so remove! {}", ace.toString());
+                            log.debug("ACE doesn't exist for service user configuration so remove! {}", ace.toString());
 
                         } else {
                             serviceUserAce.setExists(true);
@@ -211,7 +204,7 @@ public class EnsureServiceUser {
                 restrictions.put(AccessControlConstants.REP_NT_NAMES, valueFactory.createValue(ace.getRepNtNames()));
             }
 
-            log.info("Adding ACE @ [ {} ] for [ {} ]", ace.getPath(), systemUser.getPrincipal().getName());
+            log.info("Adding ACE to [ {} ] for [ {} ]", ace.getPath(), systemUser.getPrincipal().getName());
             acl.addEntry(systemUser.getPrincipal(),
                     ace.getPrivileges(accessControlManager).toArray(new Privilege[]{}),
                     ace.isAllow(),
@@ -250,6 +243,32 @@ public class EnsureServiceUser {
         }
     }
 
+
+
+    private User findSystemUser(ResourceResolver resourceResolver, String principalName) throws RepositoryException, EnsureServiceUserException {
+        UserManager userManager = resourceResolver.adaptTo(UserManager.class);
+        User user = null;
+
+        // Handle the actual user creation
+
+        Authorizable authorizable = userManager.getAuthorizable(principalName);
+
+        if (authorizable != null) {
+            // Am authorizable was found with this name; check if this is a system user
+            if (authorizable instanceof User) {
+                user = (User) authorizable;
+                if (user.isSystemUser()) {
+                    log.info("System user [ {} ] exists at [ {} ]", user.getPrincipal().getName(), user.getPath());
+                } else {
+                    throw new EnsureServiceUserException(String.format("User [ %s ] exists at [ %s ] but is NOT a system user", principalName, user.getPath()));
+                }
+            } else {
+                throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a user", principalName, user.getPath()));
+            }
+        }
+
+        return user;
+    }
 
     private List<JackrabbitAccessControlList> findACLs(ResourceResolver resourceResolver, String principalName, JackrabbitAccessControlManager accessControlManager) throws RepositoryException {
         final Set<String> paths = new HashSet<String>();
@@ -291,7 +310,9 @@ public class EnsureServiceUser {
         try {
             ensure(serviceUser);
         } catch (RepositoryException e) {
-            log.error("Massive failure when ensuring service user [ {} ]", serviceUser.getPrincipalName(), e);
+            log.error("Repository based failure when ensuring service user [ {} ]", serviceUser.getPrincipalName(), e);
+        } catch (EnsureServiceUserException e) {
+            log.error("Unable to ensure service user [ {} ]", serviceUser.getPrincipalName(), e);
         }
     }
 
@@ -303,7 +324,7 @@ public class EnsureServiceUser {
         private final List<Ace> aces = new ArrayList<Ace>();
 
         public ServiceUser(Map<String, Object> config) {
-            String tmp = PropertiesUtil.toString(config.get(PROP_PRINCIPAL), null);
+            String tmp = PropertiesUtil.toString(config.get(PROP_PRINCIPAL_NAME), null);
 
             if (StringUtils.contains(tmp, "/")) {
                 this.principalName = StringUtils.substringAfterLast(tmp, "/");
@@ -506,4 +527,9 @@ public class EnsureServiceUser {
         }
     }
 
+    private class EnsureServiceUserException extends Exception {
+        public EnsureServiceUserException(String message) {
+            super(message);
+        }
+    }
 }
