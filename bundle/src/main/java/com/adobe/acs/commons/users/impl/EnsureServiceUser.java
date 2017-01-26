@@ -1,11 +1,8 @@
 package com.adobe.acs.commons.users.impl;
 
-import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
@@ -24,13 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.*;
-import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.Privilege;
 import java.util.*;
 
 @Component(
-        label = "ACS AEM Commons - Ensure Service User Factory",
+        label = "ACS AEM Commons - Ensure Service User",
         configurationFactory = true,
         metatype = true,
         immediate = true
@@ -43,26 +39,42 @@ import java.util.*;
         )
 })
 @Service(value = EnsureServiceUser.class)
-public class EnsureServiceUser {
+public final class EnsureServiceUser {
     private static final Logger log = LoggerFactory.getLogger(EnsureServiceUser.class);
+
+    private ServiceUser serviceUser = null;
+    private Operation operation = null;
+
+    public enum Operation {
+        ADD,
+        REMOVE
+    }
+
+    public static boolean DEFAULT_ENSURE_IMMEDIATELY = true;
+    @Property(label = "Ensure immediately",
+            boolValue = true,
+            description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean."
+    )
+    public static final String PROP_ENSURE_IMMEDIATELY = "ensure-immediately";
+
 
     public static final String DEFAULT_OPERATION = "add";
     @Property(label = "Operation",
             description = "Defines if the service user (principal name) should be adjusted to align with this config or removed completely",
             options = {
-                @PropertyOption(name = "add", value = "Ensure existence"),
-                @PropertyOption(name = "remove", value = "Ensure extinction")
-        }
+                    @PropertyOption(name = "add", value = "Ensure existence (add)"),
+                    @PropertyOption(name = "remove", value = "Ensure extinction (remove)")
+            }
     )
     public static final String PROP_OPERATION = "operation";
 
     @Property(label = "Principal Name",
-                description = "The service user's principal name"
+            description = "The service user's principal name"
     )
     public static final String PROP_PRINCIPAL_NAME = "principalName";
 
     @Property(label = "ACEs",
-            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
+            description = "This field is ignored if the Operation is set to 'Ensure extinction' (ensureRemoval)",
             cardinality = Integer.MAX_VALUE
     )
     public static final String PROP_ACES = "aces";
@@ -73,66 +85,105 @@ public class EnsureServiceUser {
     @Reference
     private QueryBuilder queryBuilder;
 
-    protected void ensure(ServiceUser user) throws RepositoryException, EnsureServiceUserException {
+    /**
+     * @return the Service User this OSGi Config represents
+     */
+    public ServiceUser getServiceUser() {
+        return serviceUser;
+    }
+
+    /**
+     * @return the Operation this OSGi Config represents
+     */
+    public Operation getOperation() {
+        return operation;
+    }
+
+    /**
+     * Entry point for Ensuring a System User.
+     *
+     * @param operation   the ensure operation to execute (ADD or REMOVE)
+     * @param serviceUser the service user configuration to ensure
+     * @throws EnsureServiceUserException
+     */
+    public void ensure(Operation operation, ServiceUser serviceUser) throws EnsureServiceUserException {
+        final long start = System.currentTimeMillis();
 
         ResourceResolver resourceResolver = null;
 
         try {
             resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
-            if (user.isRemovalOperation()) {
-                log.info("Removing service user [ {} ]", user.getPrincipalName());
-                remove(resourceResolver, user);
+            if (Operation.ADD.equals(operation)) {
+                ensureExistance(resourceResolver, serviceUser);
+            } else if (Operation.REMOVE.equals(operation)) {
+                ensureRemoval(resourceResolver, serviceUser);
             } else {
-                log.info("Ensuring existance of properly configured service user [ {} ]", user.getPrincipalName());
-                exists(resourceResolver, user);
+                throw new EnsureServiceUserException("Unable to determine Ensure Service User operation Could not create or locate value system user (it is null).");
             }
 
             if (resourceResolver.hasChanges()) {
-                try {
-                    resourceResolver.commit();
-                    log.info("Saved all changes for managing service user [ {} ]", user.getPrincipalName());
-                } catch (PersistenceException e) {
-                    log.error("Could not save changed to ensuring service user [ {} ]", user.getPrincipalName());
-                }
+                resourceResolver.commit();
+                log.info("Persisted change to Service User [ {} ]", serviceUser.getPrincipalName());
             } else {
-                log.debug("No changes were made when managing service user [ {} ]", user.getPrincipalName());
+                log.info("No changes required for Service User [ {} ]. Skipping...", serviceUser.getPrincipalName());
+
             }
-        } catch (org.apache.sling.api.resource.LoginException e) {
-            log.error("Could not login to repository to ensure service users", e);
+        } catch (Exception e) {
+            throw new EnsureServiceUserException("Unable to ensure service user [ " + serviceUser.getPrincipalName() + " ]", e);
         } finally {
             if (resourceResolver != null) {
                 resourceResolver.close();
             }
+            log.debug("Ensure of Service User [ {} ] took [ {} ms ]", getServiceUser().getPrincipalName(), System.currentTimeMillis() - start);
         }
     }
 
-    private void remove(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
-        User systemUser = ensureSystemUser(resourceResolver, serviceUser);
-        
-        if (systemUser != null) {
-            log.info("Removing ACEs for [ {} ]", serviceUser.getPrincipalName());
-            removeACEs(resourceResolver, systemUser, serviceUser);
-            log.info("Removing system user [ {} ]", systemUser.getPath());
-            systemUser.remove();
-        } else {
-            log.error("Could not create or locate value system user. [ {} ]", serviceUser.getPrincipalName());
-        }
-    }
+    /**
+     * Ensures that the provided ServiceUser and configured ACEs exist. Any extra ACEs will be removed, and any missing ACEs added.
+     *
+     * @param resourceResolver the resource resolver to perform the user and ACE management
+     * @param serviceUser      the service user to ensure
+     * @throws RepositoryException
+     * @throws EnsureServiceUserException
+     */
+    protected void ensureExistance(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
+        final User systemUser = ensureSystemUser(resourceResolver, serviceUser);
 
-    protected void exists(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
-        // Handle the ACE's
-        log.debug("Ensuring system user [ {}  ]", serviceUser.getPrincipalName());
-        User systemUser = ensureSystemUser(resourceResolver, serviceUser);
         if (systemUser != null) {
-            log.debug("Ensuring ACEs for system user [ {} ]", serviceUser.getPrincipalName());
             ensureACEs(resourceResolver, systemUser, serviceUser);
         } else {
-            log.error("Could not create or locate value system user. [ {} ]", serviceUser.getPrincipalName());
+            log.error("Could not create or locate System User with principal name [ {} ]", serviceUser.getPrincipalName());
         }
     }
 
+    /**
+     * Ensures that the provided ServiceUser and any of its ACEs are removed.
+     *
+     * @param resourceResolver the resource resolver to perform the user and ACE management
+     * @param serviceUser      the service user to ensure
+     * @throws RepositoryException
+     * @throws EnsureServiceUserException
+     */
+    private void ensureRemoval(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
+        final User systemUser = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
 
+        removeACEs(resourceResolver, systemUser, serviceUser);
+
+        if (systemUser != null) {
+            systemUser.remove();
+        }
+    }
+
+    /**
+     * Ensures a System User exists with the principal name provided by the Service User configuration.
+     *
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param serviceUser      the service user to ensure
+     * @return the System User; this should never return null
+     * @throws RepositoryException
+     * @throws EnsureServiceUserException
+     */
     private User ensureSystemUser(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
         User user = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
 
@@ -147,39 +198,50 @@ public class EnsureServiceUser {
         return user;
     }
 
+    /**
+     * Ensures the ACEs for the Service User exists. Any extra ACEs for the Service User will be removed.
+     *
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param systemUser       the System User the Service User represents
+     * @param serviceUser      the Service User
+     * @throws RepositoryException
+     */
     private void ensureACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager = (JackrabbitAccessControlManager) session.getAccessControlManager();
         final List<JackrabbitAccessControlList> acls = findACLs(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
 
-        for (JackrabbitAccessControlList acl : acls) {
-
+        // For each rep:policy (ACL) this service user participates in ...
+        for (final JackrabbitAccessControlList acl : acls) {
             final JackrabbitAccessControlEntry[] aces = (JackrabbitAccessControlEntry[]) acl.getAccessControlEntries();
             final boolean serviceUserCoversThisPath = serviceUser.hasAceAt(acl.getPath());
 
-            // Check all the existing ACEs in the ACL
-            for (JackrabbitAccessControlEntry ace : aces) {
-                if (StringUtils.equals(serviceUser.getPrincipalName(), ace.getPrincipal().getName())) {
-                    // Pertains to this service user
-                    if (StringUtils.startsWith(acl.getPath(), systemUser.getPath())) {
-                        // Skip the corner case of ACL's under the system user itself; Do nothing to these.
-                    } else if (!serviceUserCoversThisPath) {
-                        // Remove all ACE's for this user from this ACL since this Service User is not configured to cover this path
-                        log.debug("Service user does NOT cover the path yet has an ACE; remove the ace! {}", ace.toString());
+            for (final JackrabbitAccessControlEntry ace : aces) {
+
+                if (!StringUtils.equals(serviceUser.getPrincipalName(), ace.getPrincipal().getName())) {
+                    // Only care about ACEs that this service user participates in
+                    continue;
+                }
+
+                // Pertains to this service user
+                if (StringUtils.startsWith(acl.getPath(), systemUser.getPath())) {
+                    // Skip the corner case of ACL's under the system user itself; Do nothing to these.
+
+                } else if (!serviceUserCoversThisPath) {
+                    // Remove all ACE's for this user from this ACL since this Service User is not configured to cover this path
+                    log.debug("Service user does NOT cover the path yet has an ACE; ensureRemoval the ace! {}", ace.toString());
+                    acl.removeAccessControlEntry(ace);
+
+                } else {
+                    final Ace serviceUserAce = serviceUser.getAce(ace);
+                    if (serviceUserAce == null) {
                         acl.removeAccessControlEntry(ace);
+                        log.debug("Removed System ACE as it doesn't exist in Service User [ {} ] configuration", serviceUser.getPrincipalName());
                     } else {
-                        Ace serviceUserAce = serviceUser.getAce(ace);
-                        if (serviceUserAce == null) {
-                            // Remove this ace if there isn't a configuration for it.
-                            acl.removeAccessControlEntry(ace);
-                            log.debug("ACE doesn't exist for service user configuration so remove! {}", ace.toString());
+                        serviceUserAce.setExists(true);
+                        log.debug("No-op on System ACE as it already matches Service User [ {} ] configuration", serviceUser.getPrincipalName());
 
-                        } else {
-                            serviceUserAce.setExists(true);
-                            log.debug("ACE is already defined! {}", ace.toString());
-
-                        }
                     }
                 }
             }
@@ -187,64 +249,82 @@ public class EnsureServiceUser {
             accessControlManager.setPolicy(acl.getPath(), acl);
         }
 
-        // Add any configured ACE's that don't already exist
+        // Create an ACEs that do not yet ensureExistance
         for (Ace ace : serviceUser.getMissingAces()) {
+            if (resourceResolver.getResource(ace.getContentPath()) == null) {
+                log.warn("Unable to apply Service User [ {} ] privileges due to missing path at [ {} ]. Please create the path and re-ensure this service user.");
+                continue;
+            }
 
-            final JackrabbitAccessControlList acl = AccessControlUtils.getAccessControlList(session, ace.getPath());
+            final JackrabbitAccessControlList acl = AccessControlUtils.getAccessControlList(session, ace.getContentPath());
             final Map<String, Value> restrictions = new HashMap<String, Value>();
             final ValueFactory valueFactory = session.getValueFactory();
 
-            //restrictions.put(AccessControlConstants.REP_NODE_PATH, valueFactory.createValue(ace.getPath(), PropertyType.PATH));
-
+            // Add rep:glob restriction
             if (ace.hasRepGlob()) {
                 restrictions.put(AccessControlConstants.REP_GLOB, valueFactory.createValue(ace.getRepGlob()));
             }
 
+            // Add rep:ntNames restriction
             if (ace.hasRepNtNames()) {
                 restrictions.put(AccessControlConstants.REP_NT_NAMES, valueFactory.createValue(ace.getRepNtNames()));
             }
 
-            log.info("Adding ACE to [ {} ] for [ {} ]", ace.getPath(), systemUser.getPrincipal().getName());
+            // Add ACE to the ACL
             acl.addEntry(systemUser.getPrincipal(),
                     ace.getPrivileges(accessControlManager).toArray(new Privilege[]{}),
                     ace.isAllow(),
                     restrictions);
 
-            log.debug("Added the ACL to [ {} ]", ace.getPath());
-            accessControlManager.setPolicy(ace.getPath(), acl);
+            // Update the ACL on the content
+            accessControlManager.setPolicy(ace.getContentPath(), acl);
+
+            log.info("Added Service User ACE for [ {} ] to [ {} ]", serviceUser.getPrincipalName(), ace.getContentPath());
         }
     }
 
-
+    /**
+     * Removes all ACEs for the Service User principal (except those that live beneath the System User's rep:User node)
+     *
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param systemUser       the System User the Service User represents
+     * @param serviceUser      the Service User
+     * @throws RepositoryException
+     */
     private void removeACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager = (JackrabbitAccessControlManager) session.getAccessControlManager();
         final List<JackrabbitAccessControlList> acls = findACLs(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
 
-        for (JackrabbitAccessControlList acl : acls) {
+        for (final JackrabbitAccessControlList acl : acls) {
             final JackrabbitAccessControlEntry[] aces = (JackrabbitAccessControlEntry[]) acl.getAccessControlEntries();
-
-            log.debug("Processing ACE removal from ACL at [ {} ] for [ {} ]", acl.getPath(), serviceUser.getPrincipalName());
 
             // Check all the existing ACEs in the ACL
             for (JackrabbitAccessControlEntry ace : aces) {
                 if (StringUtils.equals(serviceUser.getPrincipalName(), ace.getPrincipal().getName())) {
-                    if (StringUtils.startsWith(acl.getPath(), systemUser.getPath())) {
-                        // Skip! Don't remove ACE's from the system user itself!
+                    if (systemUser != null && StringUtils.startsWith(acl.getPath(), systemUser.getPath())) {
+                        // Skip! Don't ensureRemoval ACE's from the system user itself!
                     } else {
                         acl.removeAccessControlEntry(ace);
                     }
                 }
             }
 
-            log.debug("Removing ACE from [ {} ]", acl.getPath());
             accessControlManager.setPolicy(acl.getPath(), acl);
+            log.debug("Removed ACE from ACL at [ {} ] for [ {} ]", acl.getPath(), serviceUser.getPrincipalName());
         }
     }
 
-
-
+    /**
+     * Locates a System User by principal name, or null. Note, if a rep:User can be found but it is NOT a system user, this method will throw an exception.
+     *
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param principalName    the principal name
+     * @return the System User or null
+     * @throws RepositoryException
+     * @throws EnsureServiceUserException
+     */
     private User findSystemUser(ResourceResolver resourceResolver, String principalName) throws RepositoryException, EnsureServiceUserException {
         UserManager userManager = resourceResolver.adaptTo(UserManager.class);
         User user = null;
@@ -257,10 +337,8 @@ public class EnsureServiceUser {
             // Am authorizable was found with this name; check if this is a system user
             if (authorizable instanceof User) {
                 user = (User) authorizable;
-                if (user.isSystemUser()) {
-                    log.info("System user [ {} ] exists at [ {} ]", user.getPrincipal().getName(), user.getPath());
-                } else {
-                    throw new EnsureServiceUserException(String.format("User [ %s ] exists at [ %s ] but is NOT a system user", principalName, user.getPath()));
+                if (!user.isSystemUser()) {
+                    throw new EnsureServiceUserException(String.format("User [ %s ] ensureExistance at [ %s ] but is NOT a system user", principalName, user.getPath()));
                 }
             } else {
                 throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a user", principalName, user.getPath()));
@@ -270,6 +348,15 @@ public class EnsureServiceUser {
         return user;
     }
 
+    /**
+     * Locates by query all the ACLs that the principal participates in.
+     *
+     * @param resourceResolver     the resource resolver to perform the user management
+     * @param principalName        the principal name
+     * @param accessControlManager Jackrabbit access control manager
+     * @return a list of ACLs that principal participates in.
+     * @throws RepositoryException
+     */
     private List<JackrabbitAccessControlList> findACLs(ResourceResolver resourceResolver, String principalName, JackrabbitAccessControlManager accessControlManager) throws RepositoryException {
         final Set<String> paths = new HashSet<String>();
         final List<JackrabbitAccessControlList> acls = new ArrayList<JackrabbitAccessControlList>();
@@ -281,11 +368,10 @@ public class EnsureServiceUser {
         params.put("property.value", principalName);
         params.put("p.limit", "-1");
 
-        Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        final Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        final Iterator<Resource> resources = query.getResult().getResources();
 
-        Iterator<Resource> resources = query.getResult().getResources();
-
-        while(resources.hasNext()) {
+        while (resources.hasNext()) {
             // Get the content resource as this is what the AccessControlManager API will use to find the ACLs under it
             Resource contentResource = resources.next().getParent().getParent();
 
@@ -304,232 +390,33 @@ public class EnsureServiceUser {
 
 
     @Activate
-    protected void activate(Map<String, Object> config) {
-        ServiceUser serviceUser = new ServiceUser(config);
+    protected void activate(final Map<String, Object> config) {
+        boolean ensureImmediately = PropertiesUtil.toBoolean(config.get(PROP_ENSURE_IMMEDIATELY), DEFAULT_ENSURE_IMMEDIATELY);
 
+        String operationStr = StringUtils.upperCase(PropertiesUtil.toString(config.get(PROP_OPERATION), DEFAULT_OPERATION));
         try {
-            ensure(serviceUser);
-        } catch (RepositoryException e) {
-            log.error("Repository based failure when ensuring service user [ {} ]", serviceUser.getPrincipalName(), e);
+            this.operation = Operation.valueOf(operationStr);
+            // Parse OSGi Configuration into Service User object
+            this.serviceUser = new ServiceUser(config);
+
+            log.debug("Operation: [ {} ]", operation);
+
+            if (ensureImmediately) {
+                // Ensure
+                ensure(operation, getServiceUser());
+            } else {
+                log.info("This Service User is configured to NOT ensure immediately. Please ensure this Service User via the JMX MBean.");
+            }
+
+
         } catch (EnsureServiceUserException e) {
-            log.error("Unable to ensure service user [ {} ]", serviceUser.getPrincipalName(), e);
+            log.error("Unable to ensure Service User [ {} ]", PropertiesUtil.toString(config.get(PROP_ENSURE_IMMEDIATELY), "Undefined Service User Principal Name"), e);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown Ensure Service User operation [ " +  operationStr + " ]", e);
         }
     }
 
 
-    protected static class ServiceUser {
-        private final String principalName;
-        private final String intermediatePath;
-        private final String operation;
-        private final List<Ace> aces = new ArrayList<Ace>();
-
-        public ServiceUser(Map<String, Object> config) {
-            String tmp = PropertiesUtil.toString(config.get(PROP_PRINCIPAL_NAME), null);
-
-            if (StringUtils.contains(tmp, "/")) {
-                this.principalName = StringUtils.substringAfterLast(tmp, "/");
-                this.intermediatePath = StringUtils.substringBeforeLast(tmp, "/");
-            } else {
-                this.principalName = tmp;
-                this.intermediatePath = "/home/users/system";
-            }
-
-            this.operation = PropertiesUtil.toString(config.get(PROP_OPERATION), DEFAULT_OPERATION);
-
-            for (String entry : PropertiesUtil.toStringArray(config.get(PROP_ACES), new String[0])) {
-                getAces().add(new Ace(entry));
-            }
-        }
-
-        public boolean isRemovalOperation() {
-            return StringUtils.equals(operation, "remove");
-        }
-
-        public boolean hasAceAt(String path) {
-            for (Ace ace : getAces()) {
-                if (StringUtils.equals(path, ace.getPath())) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public String getIntermediatePath() {
-            return intermediatePath;
-        }
-
-        public String getPrincipalName() {
-            return principalName;
-        }
-
-        public List<Ace> getAces() {
-            return aces;
-        }
-
-        public Ace getAce(JackrabbitAccessControlEntry actual) throws RepositoryException {
-            for (Ace ace : getAces()) {
-                if (ace.isSameAs(actual)) {
-                    return ace;
-                }
-            }
-
-            return null;
-        }
-
-        public List<Ace> getMissingAces() {
-            final List<Ace> result = new ArrayList<Ace>();
-            for (final Ace ace : getAces()) {
-                if (!ace.isExists()) {
-                    result.add(ace);
-                }
-            }
-
-            return result;
-        }
-    }
-
-    // type=allow;privileges=jcr:read,rep:write;path=/content/foo;rep:glob=/jcr:content/*
-
-    protected static class Ace {
-
-        private static final String PARAM_DELIMITER = ";";
-        private static final String KEY_VALUE_SEPARATOR = "=";
-        private static final String LIST_SEPARATOR = ",";
-
-        public static final String TYPE = "type";
-        public static final String PATH = "path";
-        public static final String PRIVILEGES = "privileges";
-        public static final String REP_GLOB = AccessControlConstants.REP_GLOB;
-        public static final String REP_NT_NAMES = AccessControlConstants.REP_NT_NAMES;
 
 
-        private String type;
-        private String path;
-        private String repGlob;
-        private String repNtNames;
-        private final List<String> permissions = new ArrayList<String>();
-        private boolean exists = false;
-
-        public Ace(String raw) {
-            String[] segments = StringUtils.split(raw, PARAM_DELIMITER);
-
-            for (String segment : segments) {
-                AbstractMap.SimpleEntry<String, String> entry = ParameterUtil.toSimpleEntry(segment, KEY_VALUE_SEPARATOR);
-
-                if (StringUtils.equals(TYPE, entry.getKey())) {
-                    this.type = StringUtils.stripToNull(entry.getValue());
-                } else if (StringUtils.equals(PATH, entry.getKey())) {
-                    this.path = StringUtils.stripToNull(entry.getValue());
-                } else if (StringUtils.equals(REP_GLOB, entry.getKey())) {
-                    this.repGlob = StringUtils.stripToNull(entry.getValue());
-                } else if (StringUtils.equals(REP_NT_NAMES, entry.getKey())) {
-                    this.repNtNames = StringUtils.stripToNull(entry.getValue());
-                } else if (StringUtils.equals(PRIVILEGES, entry.getKey())) {
-                    String[] permissionList = StringUtils.split(entry.getValue(), LIST_SEPARATOR);
-                    for (String permission : permissionList) {
-                        permission = StringUtils.stripToNull(permission);
-                        if (permission != null) {
-                            getPrivilegeNames().add(permission);
-                        }
-                    }
-
-                }
-            }
-        }
-
-        public boolean isAllow() {
-            return StringUtils.equals("allow", this.type);
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        public String getRepGlob() {
-            return repGlob;
-        }
-
-        public List<String> getPrivilegeNames() {
-            return permissions;
-        }
-
-        public List<Privilege> getPrivileges(AccessControlManager accessControlManager) {
-            final List<Privilege> privileges = new ArrayList<Privilege>();
-
-            for (String privilegeName : getPrivilegeNames()) {
-                try {
-                    privileges.add(accessControlManager.privilegeFromName(privilegeName));
-                } catch (RepositoryException e) {
-                    log.error("Unable to convert provided privilege name [ {} ] to a JCR Privilege. Skipping...", privilegeName);
-                }
-            }
-
-            return privileges;
-        }
-
-
-        public void setExists(boolean exists) {
-            this.exists = exists;
-        }
-
-        public boolean isExists() {
-            return exists;
-        }
-
-        public boolean hasRepGlob() {
-            return StringUtils.isNotBlank(getRepGlob());
-        }
-
-        public boolean hasRepNtNames() {
-            return StringUtils.isNotBlank(getRepNtNames());
-        }
-
-        public String getRepNtNames() {
-            return repNtNames;
-        }
-
-        public boolean isSameAs(JackrabbitAccessControlEntry actual) throws RepositoryException {
-            // Allow vs Deny
-            if (actual.isAllow() != this.isAllow()) {
-                return false;
-            }
-
-            // Privileges
-            final List<String> actualPrivileges = Arrays.asList(AccessControlUtils.namesFromPrivileges(actual.getPrivileges()));
-            if (!CollectionUtils.isEqualCollection(actualPrivileges, getPrivilegeNames())) {
-                return false;
-            }
-
-            // rep:glob
-            if (this.hasRepGlob() != ArrayUtils.contains(actual.getRestrictionNames(), AccessControlConstants.REP_GLOB)) {
-                // configuration has rep:glob, but the actual does not
-                return false;
-            } else {
-                Value actualRepGlob = actual.getRestriction(AccessControlConstants.REP_GLOB);
-                if (!StringUtils.equals(actualRepGlob.toString(), this.getRepGlob())) {
-                    return false;
-                }
-            }
-
-            // rep:ntNames
-            if (this.hasRepNtNames() != ArrayUtils.contains(actual.getRestrictionNames(), AccessControlConstants.REP_NT_NAMES)) {
-                // configuration has rep:ntNames, but the actual does not
-                return false;
-            } else {
-                Value actualRepNtNames = actual.getRestriction(AccessControlConstants.REP_NT_NAMES);
-                if (!StringUtils.equals(actualRepNtNames.toString(), this.getRepNtNames())) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    private class EnsureServiceUserException extends Exception {
-        public EnsureServiceUserException(String message) {
-            super(message);
-        }
-    }
 }
