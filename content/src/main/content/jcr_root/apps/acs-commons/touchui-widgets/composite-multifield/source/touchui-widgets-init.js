@@ -130,7 +130,7 @@
                 	var tagPath = "/etc/tags/" + item.replace(":", "/");
                     $.get(tagPath + ".tag.json").done(function(data){
                         cuiTagList._appendItem( { value: data.tagID, display: data.titlePath} );
-                    })
+                    });
                 });
             }
         },
