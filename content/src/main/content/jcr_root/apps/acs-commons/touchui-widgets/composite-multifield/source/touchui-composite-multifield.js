@@ -228,7 +228,7 @@
                 value = $field.prop("checked") ? $field.val() : "";
             }
 
-            if (this.isAutocomplete($field)) {
+            if (this.isAutocomplete($field) || this.isTagsField($field)) {
                 var tags = [];
                 var $tagItems = $field.closest("ul").find("li.coral-TagList-tag");
                 $tagItems.each(function (k, tagItem) {
@@ -239,7 +239,7 @@
 
                 value = tags.toString();
             }
-
+            
             record[name] = value;
 
             //remove the field, so that individual values are not POSTed
