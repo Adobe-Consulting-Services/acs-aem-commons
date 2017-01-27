@@ -34,13 +34,19 @@ import java.util.*;
 @Properties({
         @Property(
                 name = "webconsole.configurationFactory.nameHint",
-                value = "{operation} for {principalName}",
-                propertyPrivate = true
+                value = "Ensure Service User: {operation} {principalName}"
         )
 })
 @Service(value = EnsureServiceUser.class)
 public final class EnsureServiceUser {
     private static final Logger log = LoggerFactory.getLogger(EnsureServiceUser.class);
+
+
+    private static final String SERVICE_NAME = "ensure-service-user";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     private ServiceUser serviceUser = null;
     private Operation operation = null;
@@ -74,7 +80,7 @@ public final class EnsureServiceUser {
     public static final String PROP_PRINCIPAL_NAME = "principalName";
 
     @Property(label = "ACEs",
-            description = "This field is ignored if the Operation is set to 'Ensure extinction' (ensureRemoval)",
+            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
             cardinality = Integer.MAX_VALUE
     )
     public static final String PROP_ACES = "aces";
@@ -112,7 +118,7 @@ public final class EnsureServiceUser {
         ResourceResolver resourceResolver = null;
 
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             if (Operation.ADD.equals(operation)) {
                 ensureExistance(resourceResolver, serviceUser);
@@ -124,18 +130,18 @@ public final class EnsureServiceUser {
 
             if (resourceResolver.hasChanges()) {
                 resourceResolver.commit();
-                log.info("Persisted change to Service User [ {} ]", serviceUser.getPrincipalName());
+                log.debug("Persisted change to Service User [ {} ]", serviceUser.getPrincipalName());
             } else {
-                log.info("No changes required for Service User [ {} ]. Skipping...", serviceUser.getPrincipalName());
-
+                log.debug("No changes required for Service User [ {} ]. Skipping...", serviceUser.getPrincipalName());
             }
+
+            log.info("Successfully ensured [ {} ] of Service User [ {} ] in [ {} ms ]", new String[] { operation.toString(), getServiceUser().getPrincipalName(), String.valueOf(System.currentTimeMillis() - start) });
         } catch (Exception e) {
-            throw new EnsureServiceUserException("Unable to ensure service user [ " + serviceUser.getPrincipalName() + " ]", e);
+            throw new EnsureServiceUserException(String.format("Failed to ensure [ %s ] of Service User [ %s ]", operation.toString(), serviceUser.getPrincipalName()), e);
         } finally {
             if (resourceResolver != null) {
                 resourceResolver.close();
             }
-            log.debug("Ensure of Service User [ {} ] took [ {} ms ]", getServiceUser().getPrincipalName(), System.currentTimeMillis() - start);
         }
     }
 
@@ -192,7 +198,7 @@ public final class EnsureServiceUser {
 
             // No principal found with this name; create the system user
             user = userManager.createSystemUser(serviceUser.getPrincipalName(), serviceUser.getIntermediatePath());
-            log.info("Created system user at [ {} ]", user.getPath());
+            log.debug("Created system user at [ {} ]", user.getPath());
         }
 
         return user;
@@ -258,30 +264,44 @@ public final class EnsureServiceUser {
 
             final JackrabbitAccessControlList acl = AccessControlUtils.getAccessControlList(session, ace.getContentPath());
             final Map<String, Value> restrictions = new HashMap<String, Value>();
+            final Map<String, Value[]> multiRestrictions = new HashMap<String, Value[]>();
+
             final ValueFactory valueFactory = session.getValueFactory();
 
             // Add rep:glob restriction
             if (ace.hasRepGlob()) {
-                restrictions.put(AccessControlConstants.REP_GLOB, valueFactory.createValue(ace.getRepGlob()));
+                restrictions.put(AccessControlConstants.REP_GLOB, valueFactory.createValue(ace.getRepGlob(), PropertyType.STRING));
             }
 
             // Add rep:ntNames restriction
             if (ace.hasRepNtNames()) {
-                restrictions.put(AccessControlConstants.REP_NT_NAMES, valueFactory.createValue(ace.getRepNtNames()));
+                multiRestrictions.put(AccessControlConstants.REP_NT_NAMES, getMultiValues(valueFactory, ace.getRepNtNames(), PropertyType.NAME));
+            }
+
+            // Add rep:itemNames
+            if (ace.hasRepItemNames()) {
+                multiRestrictions.put(AccessControlConstants.REP_ITEM_NAMES, getMultiValues(valueFactory, ace.getRepItemNames(), PropertyType.NAME));
+            }
+
+            // Add rep:prefixes
+            if (ace.hasRepPrefixes()) {
+                multiRestrictions.put(AccessControlConstants.REP_PREFIXES, getMultiValues(valueFactory, ace.getRepPrefixes(), PropertyType.STRING));
             }
 
             // Add ACE to the ACL
             acl.addEntry(systemUser.getPrincipal(),
                     ace.getPrivileges(accessControlManager).toArray(new Privilege[]{}),
                     ace.isAllow(),
-                    restrictions);
+                    restrictions,
+                    multiRestrictions);
 
             // Update the ACL on the content
             accessControlManager.setPolicy(ace.getContentPath(), acl);
 
-            log.info("Added Service User ACE for [ {} ] to [ {} ]", serviceUser.getPrincipalName(), ace.getContentPath());
+            log.debug("Added Service User ACE for [ {} ] to [ {} ]", serviceUser.getPrincipalName(), ace.getContentPath());
         }
     }
+
 
     /**
      * Removes all ACEs for the Service User principal (except those that live beneath the System User's rep:User node)
@@ -388,6 +408,21 @@ public final class EnsureServiceUser {
         return acls;
     }
 
+    /**
+     * Helper function that returns a list of Strings into an Array of Value's
+     * @param valueFactory the valueFactory to create the Value
+     * @param valueStrs the string values to convert
+     * @return the array of Values derives from the valueStrs
+     */
+    private Value[] getMultiValues(ValueFactory valueFactory, List<String> valueStrs, int propertyType) throws ValueFormatException {
+        final List<Value> result = new ArrayList<Value>();
+
+        for (final String valueStr : valueStrs) {
+            result.add(valueFactory.createValue(valueStr, propertyType));
+        }
+
+        return result.toArray(new Value[result.size()]);
+    }
 
     @Activate
     protected void activate(final Map<String, Object> config) {
@@ -398,8 +433,6 @@ public final class EnsureServiceUser {
             this.operation = Operation.valueOf(operationStr);
             // Parse OSGi Configuration into Service User object
             this.serviceUser = new ServiceUser(config);
-
-            log.debug("Operation: [ {} ]", operation);
 
             if (ensureImmediately) {
                 // Ensure

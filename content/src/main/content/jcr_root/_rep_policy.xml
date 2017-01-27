@@ -25,14 +25,18 @@
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-package-replication-status-event-service"
             rep:privileges="{Name}[jcr:read,rep:write]"/>
-    <!--
     <allow3
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-ensure-service-user-service"
+            rep:privileges="{Name}[rep:userManagement]"/>
+    <!--
+    <allow4
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-package-replication-status-event-service"
             rep:privileges="{Name}[jcr:modifyProperties]">
         <rep:restrictions
                 jcr:primaryType="rep:Restrictions"
                 rep:itemNames="{Name}[cq:lastReplicated,cq:lastReplicatedBy,cq:lastReplicatedAction]"/>
-    </allow3>
+    </allow4>
     -->
 </jcr:root>

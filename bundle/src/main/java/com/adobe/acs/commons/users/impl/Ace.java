@@ -45,11 +45,16 @@ public final class Ace {
     public static final String PRIVILEGES = "privileges";
     public static final String REP_GLOB = AccessControlConstants.REP_GLOB;
     public static final String REP_NT_NAMES = AccessControlConstants.REP_NT_NAMES;
+    public static final String REP_ITEM_NAMES = AccessControlConstants.REP_ITEM_NAMES;
+    public static final String REP_PREFIXES = AccessControlConstants.REP_PREFIXES;
+
 
     private String type;
     private String path;
-    private String repGlob;
-    private String repNtNames;
+    private String repGlob = null;
+    private List<String> repNtNames = new ArrayList<String>();
+    private List<String> repItemNames = new ArrayList<String>();;
+    private List<String> repPrefixes = new ArrayList<String>();;
     private final List<String> privilegeNames = new ArrayList<String>();
     private boolean exists = false;
 
@@ -66,7 +71,11 @@ public final class Ace {
             } else if (StringUtils.equals(REP_GLOB, entry.getKey())) {
                 this.repGlob = StringUtils.stripToNull(entry.getValue());
             } else if (StringUtils.equals(REP_NT_NAMES, entry.getKey())) {
-                this.repNtNames = StringUtils.stripToNull(entry.getValue());
+                this.repNtNames.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
+            } else if (StringUtils.equals(REP_ITEM_NAMES, entry.getKey())) {
+                this.repItemNames.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
+            } else if (StringUtils.equals(REP_PREFIXES, entry.getKey())) {
+                this.repPrefixes.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
             } else if (StringUtils.equals(PRIVILEGES, entry.getKey())) {
                 for (String privilege : StringUtils.split(entry.getValue(), LIST_SEPARATOR)) {
                     privilege = StringUtils.stripToNull(privilege);
@@ -98,9 +107,6 @@ public final class Ace {
         return path;
     }
 
-    public String getRepGlob() {
-        return repGlob;
-    }
 
     public List<String> getPrivilegeNames() {
         return privilegeNames;
@@ -120,7 +126,6 @@ public final class Ace {
         return privileges;
     }
 
-
     public void setExists(boolean exists) {
         this.exists = exists;
     }
@@ -129,18 +134,53 @@ public final class Ace {
         return exists;
     }
 
+    /** rep:glob **/
+
+    public String getRepGlob() {
+        return repGlob;
+    }
+
     public boolean hasRepGlob() {
         return StringUtils.isNotBlank(getRepGlob());
     }
 
-    public boolean hasRepNtNames() {
-        return StringUtils.isNotBlank(getRepNtNames());
-    }
+    /** rep:ntNames **/
 
-    public String getRepNtNames() {
+    public List<String> getRepNtNames() {
         return repNtNames;
     }
 
+    public boolean hasRepNtNames() {
+        return !getRepNtNames().isEmpty();
+    }
+
+
+    /** rep:itemNames **/
+
+    public List<String> getRepItemNames() {
+        return repItemNames;
+    }
+
+    public boolean hasRepItemNames() {
+        return !getRepItemNames().isEmpty();
+    }
+
+    /** rep:prefixes **/
+
+    public List<String> getRepPrefixes() {
+        return repPrefixes;
+    }
+
+    public boolean hasRepPrefixes() {
+        return !getRepPrefixes().isEmpty();
+    }
+
+    /**
+     * Determines if the configured ACE is the same as the actual ACE in the JCR.
+     * @param actual the actual ACE in the JCR
+     * @return true if both ACEs are logically the same, false if not.
+     * @throws RepositoryException
+     */
     public boolean isSameAs(JackrabbitAccessControlEntry actual) throws RepositoryException {
         // Allow vs Deny
         if (actual.isAllow() != this.isAllow()) {
@@ -154,38 +194,51 @@ public final class Ace {
         }
 
         // rep:glob
-        final Value actualRepGlob = actual.getRestriction(AccessControlConstants.REP_GLOB);
-        if (this.hasRepGlob() && actualRepGlob == null) {
-            // configuration has rep:glob, but the actual does not
-            return false;
-        } else if (!this.hasRepGlob() && actualRepGlob != null) {
-            // configuration does NOT have rep:glob, but actual does
-            return false;
-        } else if (this.hasRepGlob() && actualRepGlob != null) {
-            // configuration has rep:glob and actual does too
-            if (!StringUtils.equals(actualRepGlob.toString(), this.getRepGlob())) {
-                return false;
-            }
-        } else {
-            // neither has rep:glob so they match
 
+        // We are converting the single value RepGlob into a List for convenience
+        if(!isRestrictionValid(this.hasRepGlob(), actual.getRestrictions(AccessControlConstants.REP_GLOB), Arrays.asList(new String[]{this.getRepGlob()}))) {
+            return false;
         }
 
         // rep:ntNames
-        final Value actualRepNtNames =  actual.getRestriction(AccessControlConstants.REP_NT_NAMES);
-        if (this.hasRepNtNames() && actualRepNtNames == null) {
+        if(!isRestrictionValid(this.hasRepNtNames(), actual.getRestrictions(AccessControlConstants.REP_NT_NAMES), this.getRepNtNames())) {
+            return false;
+        }
+
+        // rep:itemNames
+        if(!isRestrictionValid(this.hasRepItemNames(), actual.getRestrictions(AccessControlConstants.REP_ITEM_NAMES), this.getRepItemNames())) {
+            return false;
+        }
+
+        // rep:prefixes
+        if(!isRestrictionValid(this.hasRepPrefixes(), actual.getRestrictions(AccessControlConstants.REP_PREFIXES), this.getRepPrefixes())) {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    private boolean isRestrictionValid(boolean configExists, Value[] actualValues, List<String> configValues) {
+        final ArrayList<String> actualRestrictions = new ArrayList<String>();
+
+        if (configExists && actualValues == null) {
             // configuration has rep:glob, but the actual does not
             return false;
-        } else if (!this.hasRepNtNames() && actualRepNtNames != null) {
-            // configuration does NOT have rep:glob, but actual does
+        } else if (!configExists && actualValues != null) {
+            // configuration does NOT have rep:XXX, but actual does
             return false;
-        } else if (this.hasRepNtNames() && actualRepNtNames != null) {
-            // configuration has rep:ntNames and actual does too
-            if (!StringUtils.equals(actualRepNtNames.toString(), this.getRepNtNames())) {
+        } else if (configExists && actualValues != null) {
+            // configuration has rep:XXX and actual does too
+            for (final Value value : actualValues) {
+                actualRestrictions.add(value.toString());
+            }
+
+            if (!CollectionUtils.isEqualCollection(actualRestrictions, configValues)) {
                 return false;
             }
         } else {
-            // neither has rep:ntNames so they match
+            // neither has this rep:XXX so they match
         }
 
         return true;
