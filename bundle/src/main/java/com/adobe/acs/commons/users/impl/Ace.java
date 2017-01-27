@@ -69,7 +69,7 @@ public final class Ace {
             } else if (StringUtils.equals(PATH, entry.getKey())) {
                 this.path = StringUtils.stripToNull(entry.getValue());
             } else if (StringUtils.equals(REP_GLOB, entry.getKey())) {
-                this.repGlob = StringUtils.stripToNull(entry.getValue());
+                this.repGlob = StringUtils.stripToEmpty(entry.getValue());
             } else if (StringUtils.equals(REP_NT_NAMES, entry.getKey())) {
                 this.repNtNames.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
             } else if (StringUtils.equals(REP_ITEM_NAMES, entry.getKey())) {
@@ -141,7 +141,7 @@ public final class Ace {
     }
 
     public boolean hasRepGlob() {
-        return StringUtils.isNotBlank(getRepGlob());
+        return getRepGlob() != null;
     }
 
     /** rep:ntNames **/
