@@ -20,16 +20,7 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalMaxDurationExceededException;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
-
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.WorkflowService;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.Workflow;
+import com.adobe.acs.commons.workflow.bulk.removal.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
@@ -44,16 +35,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
