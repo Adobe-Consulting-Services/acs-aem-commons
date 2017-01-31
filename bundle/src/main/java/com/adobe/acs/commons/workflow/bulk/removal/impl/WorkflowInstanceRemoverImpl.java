@@ -205,31 +205,6 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                         checkedCount++;
 
-                        /*
-                        Workflow workflow = null;
-                        try {
-                            workflow = workflowSession.getWorkflow(instance.getPath());
-                            if (workflow == null) {
-                                throw new WorkflowException(String.format("Workflow instance object is null for [ %s]", instance.getPath()));
-                            }
-                        } catch (WorkflowException e) {
-                            log.warn("Unable to locate Workflow Instance for [ {} ]. Skipping... ", instance.getPath(), e);
-                            continue;
-                        }
-
-                        final String status = getStatus(workflow, instance);
-                        final String model = workflow.getWorkflowModel().getId();
-
-                        final Calendar startTime = Calendar.getInstance();
-                        startTime.setTime(workflow.getTimeStarted());
-
-                        String payload = null;
-                        if ("JCR_PATH".equals(workflow.getWorkflowData().getPayloadType())) {
-                            payload = (String) workflow.getWorkflowData().getPayload();
-                            log.debug("Checking Workflow instance [ {} ] with payload [ {} ]", workflow.getId(), payload);
-                        }
-                        */
-
                         final String status = getStatus(instance);
                         final String model = properties.get(PN_MODEL_ID, String.class);
                         final Calendar startTime = properties.get(PN_STARTED_AT, Calendar.class);
