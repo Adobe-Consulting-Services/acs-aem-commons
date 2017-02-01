@@ -21,6 +21,12 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.*;
+import com.adobe.granite.workflow.WorkflowException;
+import com.adobe.granite.workflow.WorkflowSession;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.Workflow;
+import com.adobe.granite.workflow.exec.filter.WorkItemFilter;
+import com.day.cq.workflow.WorkflowService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
@@ -83,6 +89,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     @Reference
     private JobManager jobManager;
 
+    @Reference
+    private WorkflowService workflowService;
 
     /**
      * {@inheritDoc}
@@ -358,8 +366,34 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                 return "RUNNING";
             }
         }
+        log.debug("JobManager could not find any jobs for jobIds [ {} ] so  workflow instance [ {} ] is potentially STALE", StringUtils.join(jobIds, ", "), workflowInstanceResource.getPath());
 
-        log.debug("JobManager could not find any jobs for jobIds [ {} ] so marking workflow instances [ {} ] as STALE", StringUtils.join(jobIds, ", "), workflowInstanceResource.getPath());
+        final WorkflowSession workflowSession = workflowInstanceResource.getResourceResolver().adaptTo(WorkflowSession.class);
+        Workflow workflow = null;
+        try {
+            workflow = workflowSession.getWorkflow(workflowInstanceResource.getPath());
+            if (workflow == null) {
+                throw new WorkflowException(String.format("Workflow instance object is null for [ %s]", workflowInstanceResource.getPath()));
+            }
+        } catch (WorkflowException e) {
+            log.warn("Unable to locate Workflow Instance for [ {} ] So it cannot be RUNNING and must be STALE. ", workflowInstanceResource.getPath(), e);
+            return "STALE";
+        }
+
+        if (workflow != null) {
+            final List<WorkItem> workItems = workflow.getWorkItems(new WorkItemFilter() {
+                public boolean doInclude(WorkItem workItem) {
+                    // Only include active Workflow instances (ones without an End Time) in this list
+                    return workItem.getTimeEnded() == null;
+                }
+            });
+
+            if (!workItems.isEmpty()) {
+                // If at least 1 work item exists that does not have an end time (meaning its still active), then its RUNNING
+               return "RUNNING";
+            }
+        }
+
         return "STALE";
     }
 
