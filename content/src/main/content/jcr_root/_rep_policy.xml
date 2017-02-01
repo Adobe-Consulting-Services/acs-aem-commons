@@ -20,7 +20,7 @@
     <allow1
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-dispatcher-flush-service"
-            rep:privileges="{Name}[jcr:read,crx:replicate]"/>
+            rep:privileges="{Name}[jcr:read,crx:replicate,jcr:removeNode]"/>
     <allow2
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-package-replication-status-event-service"
