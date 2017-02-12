@@ -54,7 +54,7 @@ import java.util.Map;
  * nodeExists.2_notexists=jcr:content/renditions/cq5dam.web.600.400.png
  */
 @Component(
-        factory="com.day.cq.search.eval.PredicateEvaluator/nodeExists"
+        factory = "com.day.cq.search.eval.PredicateEvaluator/nodeExists"
 )
 public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator implements PredicateEvaluator {
     private static final Logger log = LoggerFactory.getLogger(NodeExistsPredicateEvaluator.class);
@@ -64,27 +64,31 @@ public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator imp
     public static final String NOT_EXISTS_REL_PATH = "notexists";
 
     @Override
-    public boolean canXpath(Predicate predicate, EvaluationContext context) {
+    public final boolean canXpath(final Predicate predicate, final EvaluationContext context) {
         return false;
     }
 
     @Override
-    public boolean canFilter(Predicate predicate, EvaluationContext context) {
+    public final boolean canFilter(final Predicate predicate, final EvaluationContext context) {
         return !predicate.getParameters().isEmpty();
     }
 
     @Override
-    public boolean isFiltering(final Predicate predicate, final EvaluationContext context) {
+    public final boolean isFiltering(final Predicate predicate, final EvaluationContext context) {
         // .canFilter(..) has replaced isFiltering(..)
         return this.canFilter(predicate, context);
     }
 
     @Override
-    public final boolean includes(Predicate predicate, Row row, EvaluationContext context) {
+    public final boolean includes(final Predicate predicate, final Row row, final EvaluationContext context) {
         boolean or = predicate.getBool(OR);
 
         if (log.isDebugEnabled()) {
-            log.debug("NodeExistsPredicatorEvaluator evaluating as [ {} ]", or ? "OR" : "AND");
+            if (or) {
+                log.debug("NodeExistsPredicatorEvaluator evaluating as [ OR ]");
+            } else {
+                log.debug("NodeExistsPredicatorEvaluator evaluating as [ AND ]");
+            }
         }
 
         for (final Map.Entry<String, String> entry : predicate.getParameters().entrySet()) {
@@ -98,9 +102,9 @@ public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator imp
             try {
                 if (EXISTS_REL_PATH.equals(operation)) {
                     ruleIncludes = row.getNode().hasNode(entry.getValue());
-                } else if (NOT_EXISTS_REL_PATH.equals(operation)){
+                } else if (NOT_EXISTS_REL_PATH.equals(operation)) {
                     ruleIncludes = !row.getNode().hasNode(entry.getValue());
-                } else if (!OR.equals(operation)){
+                } else if (!OR.equals(operation)) {
                     log.debug("Invalid operation [ {} ]", operation);
                 }
 
@@ -109,20 +113,20 @@ public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator imp
                     // If OR condition; return true on the first condition match
                     if (log.isDebugEnabled()) {
                         log.debug("Including [ {} ] based on [ {}  -> {} ] as part of [ OR ]",
-                                new String[] { row.getPath(), operation, entry.getValue() });
+                                new String[] {row.getPath(), operation, entry.getValue()});
                     }
                     return true;
                 } else if (!or && !ruleIncludes) {
                     // If AND condition; return true on the first condition failure
                     if (log.isDebugEnabled()) {
                         log.debug("Excluding [ {} ] based on [ {}  -> {} ] as part of [ AND ]",
-                                new String[] { row.getPath(), operation, entry.getValue() });
+                                new String[] {row.getPath(), operation, entry.getValue()});
                     }
 
                     return false;
                 }
             } catch (RepositoryException e) {
-                log.error("Unable to check if Node [ {} : {} ] via the nodeExists QueryBuilder predicate", new String[]{ entry.getKey(), entry.getValue() }, e);
+                log.error("Unable to check if Node [ {} : {} ] via the nodeExists QueryBuilder predicate", new String[]{entry.getKey(), entry.getValue()}, e);
             }
         }
 
