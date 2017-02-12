@@ -7,6 +7,10 @@
         <exclude pattern="/apps/acs-commons/components/utilities/page/clientlibs/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/oak-index-manager/clientlibs/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/bulk-workflow-manager/clientlibs/css/generated"/>
+        <include pattern="/apps/acs-commons/components/utilities/one2one-compare(.*)?" />
+        <exclude pattern="/apps/acs-commons/components/utilities/one2one-compare/clientlibs/css/generated"/>
+        <include pattern="/apps/acs-commons/components/utilities/version-compare(.*)?" />
+        <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
     </filter>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
@@ -29,6 +33,7 @@
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?" />
         <include pattern="/etc/acs-commons/version-replicator(.*)?" />
         <include pattern="/etc/acs-commons/version-compare(.*)?" />
+        <include pattern="/etc/acs-commons/one2one-compare(.*)?" />
         <include pattern="/etc/acs-commons/dispatcher-flush"/>
         <include pattern="/etc/acs-commons/dispatcher-flush/jcr:content"/>
         <include pattern="/etc/acs-commons/lists"/>
