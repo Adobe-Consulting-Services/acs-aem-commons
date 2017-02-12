@@ -19,7 +19,7 @@
  */
 /*global angular: false */
 
-angular.module('One2OneCompare', ['acsCoral'])
+angular.module('PageCompare', ['acsCoral'])
 .controller('MainCtrl', ['$scope', '$http', '$timeout', '$location',
     function($scope, $http, $timeout, $location) {
 

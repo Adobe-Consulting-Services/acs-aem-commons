@@ -3,6 +3,6 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="cq:PageContent"
-        jcr:title="One-to-one Compare"
-        sling:resourceType="acs-commons/components/utilities/one2one-compare"/>
+        jcr:title="Page Compare"
+        sling:resourceType="acs-commons/components/utilities/page-compare"/>
 </jcr:root>

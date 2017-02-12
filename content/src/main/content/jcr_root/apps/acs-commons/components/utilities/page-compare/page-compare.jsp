@@ -13,19 +13,19 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <title>One-to-one Version Compare | ACS AEM Commons</title>
+    <title>Page Compare | ACS AEM Commons</title>
 
     <link rel="shortcut icon" href="${favicon}"/>
 
-    <cq:includeClientLib css="acs-commons.one2one-compare"/>
-    <cq:includeClientLib js="acs-commons.one2one-compare"/>
+    <cq:includeClientLib css="acs-commons.page-compare"/>
+    <cq:includeClientLib js="acs-commons.page-compare"/>
 
 </head>
 
 <body class="coral--light">
 
-    <div id="acs-commons-one2one-compare">
-        <header acs-coral-tools-header data-context-path="${request.contextPath}" data-page-path="${currentPage.path}.html" data-title="One-to-one Compare"></header>
+    <div id="acs-commons-page-compare">
+        <header acs-coral-tools-header data-context-path="${request.contextPath}" data-page-path="${currentPage.path}.html" data-title="Page Compare"></header>
 
         <div class="page" role="main"
                  ng-controller="MainCtrl"
@@ -44,7 +44,7 @@
                 <div class="content-container">
                     <div class="content-container-inner">
 
-                        <h1 acs-coral-heading>One-to-one Compare</h1>
+                        <h1 acs-coral-heading>Page Compare</h1>
                         
                         <div class="search">
                             <div class="half">
@@ -73,10 +73,6 @@
                                     </c:if>
                                 </div>
                             </div>
-                            <!--<div class="clearer"></div>
-                            <div class="button-row">
-                                <button class="update coral-Button coral-Button--primary" ng-click="analyse()">Update</button>
-                            </div>-->
                         </div>
 
                         <section class="differentResources-{{app.compareDifferentResources()}}">
@@ -144,8 +140,8 @@
 
             <%-- Register angular app; Decreases chances of collisions w other angular apps on the page (ex. via injection) --%>
             <script type="text/javascript">
-                angular.bootstrap(document.getElementById('acs-commons-one2one-compare'),
-                        ['One2OneCompare']);
+                angular.bootstrap(document.getElementById('acs-commons-page-compare'),
+                        ['PageCompare']);
             </script>
         </div>
 
