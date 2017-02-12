@@ -19,7 +19,6 @@
 
     <cq:includeClientLib css="acs-commons.page-compare"/>
     <cq:includeClientLib js="acs-commons.page-compare"/>
-
 </head>
 
 <body class="coral--light">
@@ -140,12 +139,9 @@
 
             <%-- Register angular app; Decreases chances of collisions w other angular apps on the page (ex. via injection) --%>
             <script type="text/javascript">
-                angular.bootstrap(document.getElementById('acs-commons-page-compare'),
-                        ['PageCompare']);
+                angular.bootstrap(document.getElementById('acs-commons-page-compare'), ['PageCompare']);
             </script>
         </div>
-
     </div>
-    
 </body>
 </html>
