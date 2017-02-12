@@ -70,7 +70,12 @@ public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator imp
 
     @Override
     public final boolean canFilter(final Predicate predicate, final EvaluationContext context) {
-        return !predicate.getParameters().isEmpty();
+        if (predicate.getParameters().isEmpty()
+                || (predicate.getParameters().size() == 1 && predicate.getParameters().get(OR) != null)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override
