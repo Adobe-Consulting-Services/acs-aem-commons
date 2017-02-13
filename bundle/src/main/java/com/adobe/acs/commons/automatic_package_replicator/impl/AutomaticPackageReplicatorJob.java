@@ -1,0 +1,123 @@
+/*
+ * #%L
+ * ACS AEM Tools Bundle - Automatic Package Replicator
+ * %%
+ * Copyright (C) 2017 - Dan Klco
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package com.adobe.acs.commons.automatic_package_replicator.impl;
+
+import java.io.IOException;
+import java.util.HashMap;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.packaging.PackagingService;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationException;
+import com.day.cq.replication.Replicator;
+
+/**
+ * Simple Job Runnable for automatically replicating a package.
+ */
+public class AutomaticPackageReplicatorJob implements Runnable {
+	private static final Logger log = LoggerFactory.getLogger(AutomaticPackageReplicatorJob.class);
+	public static final String SERVICE_USER_NAME = "acs-tools-automatic-package-replication-service";
+	public static final String OSGI_EVENT_REPLICATED_TOPIC = "com/adobe/acs/tools/automatic_page_replicator/REPLICATED";
+	public static final String OSGI_EVENT_FAILED_TOPIC = "com/adobe/acs/tools/automatic_page_replicator/REPLICATION_FAILED";
+	public static final String OSGI_EVENT_PACKAGE_PATH_PARAM = "packagePath";
+
+	private final Replicator replicator;
+	private final String packagePath;
+	private final ResourceResolverFactory resolverFactory;
+	private final EventAdmin eventAdmin;
+
+	public AutomaticPackageReplicatorJob(final ResourceResolverFactory resolverFactory, final Replicator replicator,
+			final EventAdmin eventAdmin, final String packagePath) {
+		this.replicator = replicator;
+		this.packagePath = packagePath;
+		this.resolverFactory = resolverFactory;
+		this.eventAdmin = eventAdmin;
+	}
+
+	private void excute() throws RepositoryException, PackageException, IOException, ReplicationException, LoginException {
+
+		ResourceResolver resolver = null;
+		try {
+			resolver = resolverFactory.getAdministrativeResourceResolver(null);
+
+			Session session = resolver.adaptTo(Session.class);
+
+			JcrPackageManager pkgMgr = PackagingService.getPackageManager(session);
+			PackageId packageId = new PackageId(packagePath);
+
+			// check if the package exists
+			JcrPackage jcrPackage = pkgMgr.open(packageId);
+			if (jcrPackage == null || jcrPackage.getNode() != null) {
+				log.warn("Package at path " + packagePath + " does not exist");
+				throw new IllegalArgumentException("Package at path " + packagePath + " does not exist");
+			}
+
+			log.debug("Assembling package {}", packagePath);
+			pkgMgr.assemble(jcrPackage, null);
+
+			log.debug("Replicating package {}", packagePath);
+			replicator.replicate(session, ReplicationActionType.ACTIVATE, jcrPackage.getNode().getPath());
+
+			log.debug("Package {} replicated successfully!", packagePath);
+		} finally {
+			if(resolver != null){
+				resolver.close();
+			}
+		}
+	}
+
+	private void fireEvent(String topic) {
+		final Event event = new Event(topic, new HashMap<String, String>() {
+			private static final long serialVersionUID = 1L;
+			{
+				put(OSGI_EVENT_PACKAGE_PATH_PARAM, packagePath);
+			}
+		});
+		eventAdmin.postEvent(event);
+	}
+
+	@Override
+	public void run() {
+		log.info("Starting Automatic Package Replication task");
+		try {
+			excute();
+			fireEvent(OSGI_EVENT_REPLICATED_TOPIC);
+			log.info("Finished Automatic Package Replication task");
+		} catch (Exception e) {
+			fireEvent(OSGI_EVENT_FAILED_TOPIC);
+			log.error("Excepting running Automatic Package Replication task", e);
+		}
+	}
+
+}
