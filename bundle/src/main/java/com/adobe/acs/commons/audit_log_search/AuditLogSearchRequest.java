@@ -61,7 +61,7 @@ public class AuditLogSearchRequest {
 	}
 
 	private final String contentRoot;
-	private final boolean children;
+	private final boolean includeChildren;
 	private final String type;
 	private final String user;
 	private final Date startDate;
@@ -81,7 +81,7 @@ public class AuditLogSearchRequest {
 	 */
 	public AuditLogSearchRequest(SlingHttpServletRequest request) throws ParseException {
 		contentRoot = request.getParameter("contentRoot");
-		children = "true".equals(request.getParameter("children"));
+		includeChildren = "true".equals(request.getParameter("includeChildren"));
 		type = request.getParameter("type");
 		user = request.getParameter("user");
 		startDate = loadDate(request.getParameter("startDate"));
@@ -110,7 +110,7 @@ public class AuditLogSearchRequest {
 		if (!StringUtils.isEmpty(user)) {
 			expressions.add("[cq:userid]='" + StringEscapeUtils.escapeSql(user) + "'");
 		}
-		if (children) {
+		if (includeChildren) {
 			expressions.add("[cq:path] LIKE '" + StringEscapeUtils.escapeSql(contentRoot) + "%'");
 		} else {
 			expressions.add("[cq:path]='" + StringEscapeUtils.escapeSql(contentRoot) + "'");
@@ -165,8 +165,8 @@ public class AuditLogSearchRequest {
 		return userPaths.get(userId);
 	}
 
-	public boolean isChildren() {
-		return children;
+	public boolean isIncludehildren() {
+		return includeChildren;
 	}
 
 	private Date loadDate(String dateStr) throws ParseException {
@@ -179,8 +179,8 @@ public class AuditLogSearchRequest {
 
 	@Override
 	public String toString() {
-		return "AuditLogSearchRequest [contentRoot=" + contentRoot + ", children=" + children + ", type=" + type
-				+ ", user=" + user + ", startDate=" + startDate + ", endDate=" + endDate + ", order=" + order
+		return "AuditLogSearchRequest [contentRoot=" + contentRoot + ", includeChildren=" + includeChildren + ", type="
+				+ type + ", user=" + user + ", startDate=" + startDate + ", endDate=" + endDate + ", order=" + order
 				+ ", userNames=" + userNames + ", userPaths=" + userPaths + "]";
 	}
 
