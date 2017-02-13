@@ -1,7 +1,0 @@
-.audit-log-search-results{
-	overflow: auto;
-	max-height:500px;
-}
-.audit-log-search-results .coral-Table-row {
-	background-color: #ccc;
-}
