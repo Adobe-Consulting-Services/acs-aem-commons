@@ -6,5 +6,5 @@
         cq:lastModifiedBy="admin"
         jcr:primaryType="cq:PageContent"
         jcr:title="Audit Log Search"
-        sling:resourceType="acs-commons/components/audit-log-search"/>
+        sling:resourceType="acs-commons/components/utilities/audit-log-search"/>
 </jcr:root>

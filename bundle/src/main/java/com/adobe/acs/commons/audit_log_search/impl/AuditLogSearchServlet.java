@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.audit_log_search.AuditLogSearchRequest;
 
 @SlingServlet(label = "ACS AEM Commons - Audit Log Search Servlet", methods = { "GET" }, resourceTypes = {
-		"acs-commons/components/audit-log-search" }, selectors = { "auditlogsearch" }, extensions = { "json" })
+		"acs-commons/components/utilities/audit-log-search" }, selectors = { "auditlogsearch" }, extensions = { "json" })
 public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 
 	private static final long serialVersionUID = 7661105540626580845L;
