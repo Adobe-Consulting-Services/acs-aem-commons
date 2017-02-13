@@ -5,5 +5,4 @@
     jcr:primaryType="cq:Component"
     jcr:title="ACS Commons Audit Log Search"
     sling:resourceSuperType="acs-commons/components/utilities/app-page"
-    favicon="/apps/acs-commons/components/utilities/oak-index-manager/clientlibs/images/favicon.ico"
     componentGroup=".hidden"/>
