@@ -63,4 +63,5 @@
     <filter root="/content/rep:policy"/>
     <filter root="/etc/workflow/instances/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
+    <filter root="/oak:index/cqAuditEvent" mode="merge"/>
 </workspaceFilter>
