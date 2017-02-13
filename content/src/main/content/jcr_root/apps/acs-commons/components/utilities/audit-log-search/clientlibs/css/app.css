@@ -2,8 +2,12 @@
 	overflow: auto;
 	max-height:500px;
 }
-.audit-log-search-results .coral-Table-row {
+.audit-log-search-results thead .coral-Table-row {
 	background-color: #ccc;
+}
+
+.audit-log-search-results  .coral-Table-row {
+    background-color: #fff;
 }
 
 .form-row{
