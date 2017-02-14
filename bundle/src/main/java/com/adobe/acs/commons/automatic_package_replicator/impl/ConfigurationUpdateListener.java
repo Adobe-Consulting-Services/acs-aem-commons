@@ -19,13 +19,16 @@
  */
 package com.adobe.acs.commons.automatic_package_replicator.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import javax.management.NotCompliantMBeanException;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -55,11 +58,10 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.automatic_package_replicator.AutomaticPackageReplicatorMBean;
 import com.adobe.acs.commons.automatic_package_replicator.model.AutomaticPackageReplicatorModel;
+import com.adobe.acs.commons.automatic_package_replicator.model.AutomaticPackageReplicatorModel.TRIGGER;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.replication.Replicator;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
 
 /**
  * Listens to changes under /etc/acs-commons/automatic-package-replication and
@@ -80,6 +82,10 @@ public class ConfigurationUpdateListener extends AnnotatedStandardMBean
 	private static final String ROOT_PATH = "/etc/acs-commons/automatic-package-replication";
 
 	public static final String SERVICE_OWNER_KEY = "service.owner";
+
+	public static final String CONFIGURATION_ID_KEY = "configuration.id";
+
+	private static final String TRIGGER_KEY = "trigger.name";
 
 	/**
 	 * Creating this as a separate method to make migrating to service users
@@ -153,72 +159,54 @@ public class ConfigurationUpdateListener extends AnnotatedStandardMBean
 	}
 
 	@Override
-	public String[] getRegisteredConfigurations() {
-		return automaticPackageReplicatorJobs.keySet().toArray(new String[0]);
+	public List<String> getRegisteredConfigurations() {
+		List<String> configurations = new ArrayList<String>();
+		configurations.addAll(automaticPackageReplicatorJobs.keySet());
+		return configurations;
 	}
 
 	public void handleEvent(Event event) {
 		log.trace("handleEvent");
-		String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
-
-		ResourceResolver resolver = null;
-
-		try {
-			resolver = getResourceResolver(resourceResolverFactory);
-			PageManager pm = resolver.adaptTo(PageManager.class);
-			Page configPage = pm.getContainingPage(path);
-
-			unregisterJobConfiguration(configPage.getPath());
-
-			if (SlingConstants.TOPIC_RESOURCE_ADDED.equals(event.getTopic())
-					|| SlingConstants.TOPIC_RESOURCE_CHANGED.equals(event.getTopic())) {
-				registerJobConfiguration(configPage.getPath(), configPage.getContentResource());
-			}
-		} finally {
-			if (resolver != null) {
-				resolver.close();
-			}
-		}
+		refreshCache();
 	}
 
 	@Override
-	public void refreshCache() {
+	public synchronized void refreshCache() {
 		log.debug("refreshCache");
-		for (String id : automaticPackageReplicatorJobs.keySet()) {
-			this.unregisterJobConfiguration(id);
-		}
-		
-		try {
-			String filter = "(" + SERVICE_OWNER_KEY + "=" + getClass().getCanonicalName() + ")";
-			ServiceReference[] serviceReferences = (ServiceReference[]) ArrayUtils.addAll(
-					bctx.getServiceReferences(Runnable.class.getCanonicalName(), filter),
-					bctx.getServiceReferences(EventHandler.class.getCanonicalName(), filter));
-			if (serviceReferences != null && serviceReferences.length > 0) {
-				log.warn("Found {} registered services after unregistering known jobs", serviceReferences.length);
-				for (ServiceReference reference : serviceReferences) {
-					try {
-						if (reference != null) {
-							bctx.ungetService(reference);
-						}
-					} catch (Exception e) {
-						log.warn("Exception unregistering reference " + reference, e);
-					}
-				}
-			}
-		} catch (InvalidSyntaxException e) {
-			log.warn("Unable to search for invalid references due to invalid filter format", e);
-		}
 
 		ResourceResolver resolver = null;
 
 		try {
+			automaticPackageReplicatorJobs.clear();
+
 			resolver = getResourceResolver(resourceResolverFactory);
 			Resource aprRoot = resolver.getResource(ROOT_PATH);
 			for (Resource child : aprRoot.getChildren()) {
 				if (!JcrConstants.JCR_CONTENT.equals(child.getName())) {
-					registerJobConfiguration(child.getPath(), child.getChild(JcrConstants.JCR_CONTENT));
+					updateJobService(child.getPath(), child.getChild(JcrConstants.JCR_CONTENT));
 				}
 			}
+
+			String filter = "(" + SERVICE_OWNER_KEY + "=" + getClass().getCanonicalName() + ")";
+			ServiceReference[] serviceReferences = (ServiceReference[]) ArrayUtils.addAll(
+					bctx.getServiceReferences(Runnable.class.getCanonicalName(), filter),
+					bctx.getServiceReferences(EventHandler.class.getCanonicalName(), filter));
+
+			log.warn("Found {} registered services", serviceReferences.length);
+			for (ServiceReference reference : serviceReferences) {
+				try {
+					String configurationId = (String) reference.getProperty(CONFIGURATION_ID_KEY);
+					if (!automaticPackageReplicatorJobs.containsKey(configurationId)) {
+						log.debug("Unregistering service for configuration {}", configurationId);
+						bctx.ungetService(reference);
+					}
+				} catch (Exception e) {
+					log.warn("Exception unregistering reference " + reference, e);
+				}
+			}
+
+		} catch (InvalidSyntaxException e) {
+			log.warn("Unable to search for invalid references due to invalid filter format", e);
 		} finally {
 			if (resolver != null) {
 				resolver.close();
@@ -226,37 +214,77 @@ public class ConfigurationUpdateListener extends AnnotatedStandardMBean
 		}
 	}
 
-	private void registerJobConfiguration(String id, Resource resource) {
+	private void updateJobService(String id, Resource resource) {
 		AutomaticPackageReplicatorModel model = new AutomaticPackageReplicatorModel(resource);
 
 		log.debug("Registering job: {}", id);
 		try {
-			AutomaticPackageReplicatorJob job = new AutomaticPackageReplicatorJob(resourceResolverFactory, replicator,
-					eventAdmin, model.getPackagePath());
-			ServiceRegistration serviceRegistration = null;
-			Hashtable<String, Object> props = new Hashtable<String, Object>();
-			props.put(SERVICE_OWNER_KEY, getClass().getCanonicalName());
-			if (AutomaticPackageReplicatorModel.TRIGGER.cron == model.getTrigger()) {
-				props.put(Scheduler.PROPERTY_SCHEDULER_EXPRESSION, model.getCronTrigger());
-				log.debug("Registering cron runner with: {}", props);
-				serviceRegistration = bctx.registerService(Runnable.class.getName(), job, props);
-			} else {
-				props.put(EventConstants.EVENT_TOPIC, new String[] { model.getEventTopic() });
-				if (StringUtils.isNotEmpty(model.getEventFilter())) {
-					props.put(EventConstants.EVENT_FILTER, model.getEventFilter());
+
+			String filter = "(&(" + SERVICE_OWNER_KEY + "=" + getClass().getCanonicalName() + ")" + "("
+					+ CONFIGURATION_ID_KEY + "=" + id + "))";
+			ServiceReference[] serviceReferences = (ServiceReference[]) ArrayUtils.addAll(
+					bctx.getServiceReferences(Runnable.class.getCanonicalName(), filter),
+					bctx.getServiceReferences(EventHandler.class.getCanonicalName(), filter));
+			ServiceReference r = null;
+			if (serviceReferences != null && serviceReferences.length > 1) {
+				log.warn("Multiple services bound for filter {}, unregistering all", filter);
+				for (ServiceReference reference : serviceReferences) {
+					bctx.ungetService(reference);
 				}
-				log.debug("Registering event handler runner with: {}", props);
-				serviceRegistration = bctx.registerService(EventHandler.class.getName(), job, props);
+				r = registerJobService(id, model).getReference();
+			} else if (serviceReferences != null && serviceReferences.length == 1) {
+				ServiceReference sr = serviceReferences[0];
+				String triggerStr = (String) sr.getProperty(TRIGGER_KEY);
+				if (model.getTrigger() == TRIGGER.cron && model.getTrigger() == TRIGGER.valueOf(triggerStr) && ObjectUtils.equals(sr.getProperty(Scheduler.PROPERTY_SCHEDULER_EXPRESSION),
+						model.getCronTrigger())) {
+					log.debug("Cron job registered correctly, no changes required");
+					r = sr;
+				}else if (model.getTrigger() == TRIGGER.event && model.getTrigger() == TRIGGER.valueOf(triggerStr) 
+							&& ObjectUtils.equals(sr.getProperty(EventConstants.EVENT_TOPIC), model.getEventTopic())
+							&& ObjectUtils.equals(sr.getProperty(EventConstants.EVENT_FILTER),
+									model.getEventFilter())) {
+					log.debug("Event handler registered correctly, no changes required");
+					r = sr;
+				} else {
+					log.warn("Unbinding ServiceReference for {}", id);
+					bctx.ungetService(sr);
+					r = registerJobService(id, model).getReference();
+				}
+			} else {
+				r = registerJobService(id, model).getReference();
 			}
 
-			automaticPackageReplicatorJobs.put(id, serviceRegistration.getReference());
+			automaticPackageReplicatorJobs.put(id, r);
 
-			log.debug("Automatic Package Replication job {} registered successfully as service {}",
-					new Object[] { id, serviceRegistration.getReference().getProperty(Constants.SERVICE_ID) });
+			log.debug("Automatic Package Replication job {} successfully updated with service {}",
+					new Object[] { id, r.getProperty(Constants.SERVICE_ID) });
 
 		} catch (Exception e) {
 			log.error("Failed to register job " + id, e);
 		}
+	}
+
+	private ServiceRegistration registerJobService(String id, AutomaticPackageReplicatorModel model) {
+		AutomaticPackageReplicatorJob job = new AutomaticPackageReplicatorJob(resourceResolverFactory, replicator,
+				eventAdmin, model.getPackagePath());
+		ServiceRegistration serviceRegistration = null;
+		Hashtable<String, Object> props = new Hashtable<String, Object>();
+		props.put(SERVICE_OWNER_KEY, getClass().getCanonicalName());
+		props.put(CONFIGURATION_ID_KEY, id);
+		props.put(TRIGGER_KEY, model.getTrigger().name());
+		if (AutomaticPackageReplicatorModel.TRIGGER.cron == model.getTrigger()) {
+			props.put(Scheduler.PROPERTY_SCHEDULER_EXPRESSION, model.getCronTrigger());
+			log.debug("Registering cron runner with: {}", props);
+			serviceRegistration = bctx.registerService(Runnable.class.getCanonicalName(), job, props);
+		} else {
+			props.put(EventConstants.EVENT_TOPIC, new String[] { model.getEventTopic() });
+			if (StringUtils.isNotEmpty(model.getEventFilter())) {
+				props.put(EventConstants.EVENT_FILTER, model.getEventFilter());
+			}
+			log.debug("Registering event handler runner with: {}", props);
+			serviceRegistration = bctx.registerService(EventHandler.class.getCanonicalName(), job, props);
+		}
+		return serviceRegistration;
 	}
 
 	private void unregisterJobConfiguration(String id) {

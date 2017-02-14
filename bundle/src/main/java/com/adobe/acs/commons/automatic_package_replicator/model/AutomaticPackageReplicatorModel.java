@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.automatic_package_replicator.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 
@@ -52,7 +53,12 @@ public class AutomaticPackageReplicatorModel {
 	}
 
 	public String getEventTopic() {
-		return properties.get("eventTopic", String.class);
+		String topic = properties.get("eventTopic", String.class);
+		if (StringUtils.isEmpty(topic)) {
+			return null;
+		} else {
+			return topic;
+		}
 	}
 
 	public String getEventFilter() {

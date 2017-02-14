@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.automatic_package_replicator;
 
+import java.util.List;
+
 import org.apache.sling.api.resource.LoginException;
 
 import com.adobe.granite.jmx.annotation.Description;
@@ -33,7 +35,7 @@ public interface AutomaticPackageReplicatorMBean {
 	void execute(String id);
 
 	@Description("Gets the automatic package replication configurations currently registered")
-	String[] getRegisteredConfigurations();
+	List<String> getRegisteredConfigurations();
 
 	@Description("Refreshes the cache of registered automatic package replication configurations")
 	void refreshCache() throws LoginException;
