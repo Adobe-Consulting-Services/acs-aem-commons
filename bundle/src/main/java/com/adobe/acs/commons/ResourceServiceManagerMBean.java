@@ -1,6 +1,6 @@
 /*
  * #%L
- * ACS AEM Commons Bundle
+ * ACS AEM Tools Bundle
  * %%
  * Copyright (C) 2017 - Adobe
  * %%
@@ -17,17 +17,24 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.automatic_package_replicator;
+package com.adobe.acs.commons;
 
-import com.adobe.acs.commons.ResourceServiceManagerMBean;
+import java.util.List;
+
+import org.apache.sling.api.resource.LoginException;
+
 import com.adobe.granite.jmx.annotation.Description;
 
 /**
- * MBean interface for interacting with the Automatic Package Replicator
+ * Base methods for the JMX Interface for a ResourceServiceManager
+ * 
+ * @author danklco
  */
-@Description("MBean for managing the Automatic Package Replicator.")
-public interface AutomaticPackageReplicatorMBean extends ResourceServiceManagerMBean {
+public interface ResourceServiceManagerMBean {
 
-	@Description("Executes the automatic package replication configuration with the specified id")
-	void execute(String id);
+	@Description("Gets the configurations currently registered")
+	List<String> getRegisteredConfigurations();
+
+	@Description("Refreshes the cache of registered configurations")
+	void refreshCache() throws LoginException;
 }
