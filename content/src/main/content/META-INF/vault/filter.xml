@@ -23,6 +23,8 @@
     </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/oak-index-manager(.*)?" />
+        <include pattern="/etc/acs-commons/automatic-package-replication"/>
+        <include pattern="/etc/acs-commons/automatic-package-replication/jcr:content"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager" />
         <include pattern="/etc/acs-commons/bulk-workflow-manager/jcr:content" />
         <include pattern="/etc/acs-commons/jcr-compare(.*)?" />

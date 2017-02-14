@@ -30,11 +30,11 @@ import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.packaging.PackagingService;
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ import com.day.cq.replication.Replicator;
 /**
  * Simple Job Runnable for automatically replicating a package.
  */
-public class AutomaticPackageReplicatorJob implements Runnable {
+public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
 	private static final Logger log = LoggerFactory.getLogger(AutomaticPackageReplicatorJob.class);
 	public static final String SERVICE_USER_NAME = "acs-tools-automatic-package-replication-service";
 	public static final String OSGI_EVENT_REPLICATED_TOPIC = "com/adobe/acs/tools/automatic_page_replicator/REPLICATED";
@@ -65,11 +65,11 @@ public class AutomaticPackageReplicatorJob implements Runnable {
 		this.eventAdmin = eventAdmin;
 	}
 
-	private void excute() throws RepositoryException, PackageException, IOException, ReplicationException, LoginException {
+	private void excute() throws RepositoryException, PackageException, IOException, ReplicationException {
 
 		ResourceResolver resolver = null;
 		try {
-			resolver = resolverFactory.getAdministrativeResourceResolver(null);
+			resolver = ConfigurationUpdateListener.getResourceResolver(resolverFactory);
 
 			Session session = resolver.adaptTo(Session.class);
 
@@ -78,7 +78,7 @@ public class AutomaticPackageReplicatorJob implements Runnable {
 
 			// check if the package exists
 			JcrPackage jcrPackage = pkgMgr.open(packageId);
-			if (jcrPackage == null || jcrPackage.getNode() != null) {
+			if (jcrPackage == null || jcrPackage.getNode() == null) {
 				log.warn("Package at path " + packagePath + " does not exist");
 				throw new IllegalArgumentException("Package at path " + packagePath + " does not exist");
 			}
@@ -118,6 +118,11 @@ public class AutomaticPackageReplicatorJob implements Runnable {
 			fireEvent(OSGI_EVENT_FAILED_TOPIC);
 			log.error("Excepting running Automatic Package Replication task", e);
 		}
+	}
+
+	@Override
+	public void handleEvent(Event event) {
+		run();
 	}
 
 }
