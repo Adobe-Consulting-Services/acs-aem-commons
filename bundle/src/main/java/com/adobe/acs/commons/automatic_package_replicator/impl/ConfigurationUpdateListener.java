@@ -124,7 +124,7 @@ public class ConfigurationUpdateListener extends AnnotatedStandardMBean
 
 	private BundleContext bctx;
 
-	private Map<String, ServiceReference> automaticPackageReplicatorJobs = new HashMap<String, ServiceReference>();
+	private Map<String, ServiceRegistration> automaticPackageReplicatorJobs = new HashMap<String, ServiceRegistration>();
 
 	public ConfigurationUpdateListener() throws NotCompliantMBeanException {
 		super(AutomaticPackageReplicatorMBean.class);
@@ -154,7 +154,7 @@ public class ConfigurationUpdateListener extends AnnotatedStandardMBean
 	@Override
 	public void execute(String id) {
 		AutomaticPackageReplicatorJob job = (AutomaticPackageReplicatorJob) bctx
-				.getService(automaticPackageReplicatorJobs.get(id));
+				.getService(automaticPackageReplicatorJobs.get(id).getReference());
 		job.run();
 	}
 
@@ -177,13 +177,14 @@ public class ConfigurationUpdateListener extends AnnotatedStandardMBean
 		ResourceResolver resolver = null;
 
 		try {
-			automaticPackageReplicatorJobs.clear();
 
 			resolver = getResourceResolver(resourceResolverFactory);
 			Resource aprRoot = resolver.getResource(ROOT_PATH);
+			List<String> configuredIds = new ArrayList<String>();
 			for (Resource child : aprRoot.getChildren()) {
 				if (!JcrConstants.JCR_CONTENT.equals(child.getName())) {
 					updateJobService(child.getPath(), child.getChild(JcrConstants.JCR_CONTENT));
+					configuredIds.add(child.getPath());
 				}
 			}
 
@@ -196,9 +197,9 @@ public class ConfigurationUpdateListener extends AnnotatedStandardMBean
 			for (ServiceReference reference : serviceReferences) {
 				try {
 					String configurationId = (String) reference.getProperty(CONFIGURATION_ID_KEY);
-					if (!automaticPackageReplicatorJobs.containsKey(configurationId)) {
+					if (!configuredIds.contains(configurationId)) {
 						log.debug("Unregistering service for configuration {}", configurationId);
-						bctx.ungetService(reference);
+						this.unregisterJobConfiguration(configurationId);
 					}
 				} catch (Exception e) {
 					log.warn("Exception unregistering reference " + reference, e);
@@ -225,39 +226,27 @@ public class ConfigurationUpdateListener extends AnnotatedStandardMBean
 			ServiceReference[] serviceReferences = (ServiceReference[]) ArrayUtils.addAll(
 					bctx.getServiceReferences(Runnable.class.getCanonicalName(), filter),
 					bctx.getServiceReferences(EventHandler.class.getCanonicalName(), filter));
-			ServiceReference r = null;
-			if (serviceReferences != null && serviceReferences.length > 1) {
-				log.warn("Multiple services bound for filter {}, unregistering all", filter);
-				for (ServiceReference reference : serviceReferences) {
-					bctx.ungetService(reference);
-				}
-				r = registerJobService(id, model).getReference();
-			} else if (serviceReferences != null && serviceReferences.length == 1) {
+			
+			if (serviceReferences != null && serviceReferences.length > 0) {
 				ServiceReference sr = serviceReferences[0];
 				String triggerStr = (String) sr.getProperty(TRIGGER_KEY);
-				if (model.getTrigger() == TRIGGER.cron && model.getTrigger() == TRIGGER.valueOf(triggerStr) && ObjectUtils.equals(sr.getProperty(Scheduler.PROPERTY_SCHEDULER_EXPRESSION),
-						model.getCronTrigger())) {
+				if (model.getTrigger() == TRIGGER.cron && model.getTrigger() == TRIGGER.valueOf(triggerStr)
+						&& ObjectUtils.equals(sr.getProperty(Scheduler.PROPERTY_SCHEDULER_EXPRESSION),
+								model.getCronTrigger())) {
 					log.debug("Cron job registered correctly, no changes required");
-					r = sr;
-				}else if (model.getTrigger() == TRIGGER.event && model.getTrigger() == TRIGGER.valueOf(triggerStr) 
-							&& ObjectUtils.equals(sr.getProperty(EventConstants.EVENT_TOPIC), model.getEventTopic())
-							&& ObjectUtils.equals(sr.getProperty(EventConstants.EVENT_FILTER),
-									model.getEventFilter())) {
+				} else if (model.getTrigger() == TRIGGER.event && model.getTrigger() == TRIGGER.valueOf(triggerStr)
+						&& ObjectUtils.equals(sr.getProperty(EventConstants.EVENT_TOPIC), model.getEventTopic())
+						&& ObjectUtils.equals(sr.getProperty(EventConstants.EVENT_FILTER), model.getEventFilter())) {
 					log.debug("Event handler registered correctly, no changes required");
-					r = sr;
+
 				} else {
 					log.warn("Unbinding ServiceReference for {}", id);
-					bctx.ungetService(sr);
-					r = registerJobService(id, model).getReference();
+					unregisterJobConfiguration(id);
+					registerJobService(id, model);
 				}
 			} else {
-				r = registerJobService(id, model).getReference();
+				registerJobService(id, model);
 			}
-
-			automaticPackageReplicatorJobs.put(id, r);
-
-			log.debug("Automatic Package Replication job {} successfully updated with service {}",
-					new Object[] { id, r.getProperty(Constants.SERVICE_ID) });
 
 		} catch (Exception e) {
 			log.error("Failed to register job " + id, e);
@@ -284,15 +273,20 @@ public class ConfigurationUpdateListener extends AnnotatedStandardMBean
 			log.debug("Registering event handler runner with: {}", props);
 			serviceRegistration = bctx.registerService(EventHandler.class.getCanonicalName(), job, props);
 		}
+
+		automaticPackageReplicatorJobs.put(id, serviceRegistration);
+		log.debug("Automatic Package Replication job {} successfully updated with service {}",
+				new Object[] { id, serviceRegistration.getReference().getProperty(Constants.SERVICE_ID) });
+
 		return serviceRegistration;
 	}
 
 	private void unregisterJobConfiguration(String id) {
 		log.debug("Unregistering job: {}", id);
 		try {
-			ServiceReference reference = automaticPackageReplicatorJobs.remove(id);
-			if (reference != null) {
-				bctx.ungetService(reference);
+			ServiceRegistration registration = automaticPackageReplicatorJobs.remove(id);
+			if (registration != null) {
+				registration.unregister();
 			}
 			log.debug("Job {} registered successfully!", id);
 		} catch (Exception e) {
