@@ -91,4 +91,13 @@ public class ServiceUserTest {
             assertEquals(null, ace.getRepGlob());
         }
     }
+
+    @Test(expected=EnsureServiceUserException.class)
+    public void testServiceUser_ProtectedSystemUser() throws EnsureServiceUserException {
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "cryptoservice");
+
+        new ServiceUser(config);
+    }
+
 }

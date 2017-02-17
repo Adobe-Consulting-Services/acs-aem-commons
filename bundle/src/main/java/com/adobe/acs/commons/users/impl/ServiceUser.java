@@ -30,16 +30,19 @@ public final class ServiceUser {
             this.intermediatePath = "/home/users/system";
         }
 
+        // Check the principal name for validity
+        if (StringUtils.isBlank(this.principalName)) {
+            throw new EnsureServiceUserException("No Principal Name provided to Ensure Service User");
+        } else if (ProtectedSystemUsers.isProtected(this.principalName)) {
+            throw new EnsureServiceUserException(String.format("[ %s ] is an System User provided by AEM. You cannot ensure this user.", this.principalName));
+        }
+
         for (String entry : PropertiesUtil.toStringArray(config.get(EnsureServiceUser.PROP_ACES), new String[0])) {
             try {
                 getAces().add(new Ace(entry));
             } catch (EnsureServiceUserException e) {
                 log.warn("Malformed ACE config [ {} ] for Service User [ {} ]", new String[] { entry, this.principalName }, e);
             }
-        }
-
-        if (StringUtils.isBlank(this.principalName)) {
-            throw new EnsureServiceUserException("No Principal Name provided to Ensure Service User");
         }
     }
 
