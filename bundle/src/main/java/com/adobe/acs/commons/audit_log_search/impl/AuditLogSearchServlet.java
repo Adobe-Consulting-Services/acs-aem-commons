@@ -136,9 +136,19 @@ public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 		auditEvent.put("userName", request.getUserName(auditEventResource.getResourceResolver(), userId));
 		auditEvent.put("userPath", request.getUserPath(auditEventResource.getResourceResolver(), userId));
 		auditEvent.put("time", properties.get("cq:time", new Date()).getTime());
-		JSONArray modifiedProperties = getModifiedProperties(properties);
-		if (modifiedProperties != null && modifiedProperties.length() != 0) {
-			auditEvent.put("modifiedProperties", modifiedProperties);
+		
+		JSONArray modified = getModifiedProperties(properties);
+		if(properties.get("above", String.class) != null){
+			modified.put("above="+properties.get("above", String.class));
+		}
+		if(properties.get("destination", String.class) != null){
+			modified.put("destination="+properties.get("destination", String.class));
+		}
+		if (modified.length() != 0) {
+			auditEvent.put("modified", modified);
+		}
+		if(properties.get("versionId", String.class) != null){
+			modified.put("versionId="+properties.get("versionId", String.class));
 		}
 
 		return auditEvent;
