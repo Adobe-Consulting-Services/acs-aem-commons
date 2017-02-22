@@ -33,7 +33,7 @@ com.day.cq.rewriter.linkchecker.LinkCheckerSettings.fromRequest(slingRequest).se
 				<th class="coral-Table-headerCell">Type</th>
 				<th class="coral-Table-headerCell">User</th>
 				<th class="coral-Table-headerCell">Time</th>
-				<th class="coral-Table-headerCell">Modified Properties</th>
+				<th class="coral-Table-headerCell">Modifications</th>
 				<th class="coral-Table-headerCell">CRXDE</th>
 			</tr>
 		</thead>
@@ -55,8 +55,8 @@ com.day.cq.rewriter.linkchecker.LinkCheckerSettings.fromRequest(slingRequest).se
 				{{event.time | date:'yyyy-MM-dd'}}&nbsp;{{event.time | date:'HH:mm:ss'}}&nbsp;{{event.time | date:'Z'}}
 			</td>
 			<td class="coral-Table-cell">
-				<div ng-repeat="modifiedProperty in event.modifiedProperties">
-						{{modifiedProperty}}
+				<div ng-repeat="modified in event.modified">
+						{{modified}}
 				</div>
 			</td>
 			<td class="coral-Table-cell">
