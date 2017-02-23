@@ -144,11 +144,11 @@ public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 		if(properties.get("destination", String.class) != null){
 			modified.put("destination="+properties.get("destination", String.class));
 		}
-		if (modified.length() != 0) {
-			auditEvent.put("modified", modified);
-		}
 		if(properties.get("versionId", String.class) != null){
 			modified.put("versionId="+properties.get("versionId", String.class));
+		}
+		if (modified.length() != 0) {
+			auditEvent.put("modified", modified);
 		}
 
 		return auditEvent;
