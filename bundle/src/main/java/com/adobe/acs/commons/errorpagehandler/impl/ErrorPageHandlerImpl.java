@@ -260,31 +260,19 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         final ResourceResolver resourceResolver = errorResource.getResourceResolver();
         final String errorResourcePath = errorResource.getPath();
 
-        // Get error page name to look for based on the error code/name
-        String errorsPath = null;
+        final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(errorResource);
+        String errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
 
-        // Try to find the closest real parent for the requested resource
-        final Resource parent = findFirstRealParentOrSelf(request, errorResource);
-        if (parent != null) {
-            // Get content resource of the page
-            final Resource parentContentResource = parent.getChild(JcrConstants.JCR_CONTENT);
-
-            if (parentContentResource != null) {
-                final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(parentContentResource);
-                errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
-
-                // could not find inherited property
-                if (errorsPath == null) {
-                    for (final Map.Entry<String, String> mapPage : pathMap.entrySet()) {
-                        if (errorResourcePath.startsWith(mapPage.getKey())) {
-                            errorsPath = mapPage.getValue();
-                            break;
-                        }
-                    }
+        // could not find inherited property
+        if (errorsPath == null) {
+            for (final Map.Entry<String, String> mapPage : pathMap.entrySet()) {
+                if (errorResourcePath.startsWith(mapPage.getKey())) {
+                    errorsPath = mapPage.getValue();
+                    break;
                 }
             }
         }
-
+        
         if (StringUtils.isNotBlank(errorsPath)) {
             log.debug("Best matching errors path for request is: {}", errorsPath);
 
@@ -483,67 +471,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 request.getRequestPathInfo().getExtension()));
 
         return ArrayUtils.contains(errorImageExtensions, extension);
-    }
-
-    /**
-     * Given the Request path, find the first Real Parent of the Request (even if the resource doesnt exist).
-     *
-     * @param request the request object
-     * @param errorResource the error resource
-     * @return
-     */
-    private Resource findFirstRealParentOrSelf(SlingHttpServletRequest request, Resource errorResource) {
-        if (errorResource == null) {
-            log.debug("Error resource is null");
-            return null;
-        }
-
-        log.trace("Finding first real parent for [ {} ]", errorResource.getPath());
-
-        final ResourceResolver resourceResolver = errorResource.getResourceResolver();
-
-        // Get the lowest aggregate node ancestor for the errorResource
-        String path = StringUtils.substringBefore(errorResource.getPath(), JcrConstants.JCR_CONTENT);
-
-        Resource resource = errorResource;
-
-        if (!StringUtils.equals(path, errorResource.getPath())) {
-            // Only resolve the resource if the path of the errorResource is different from the cleaned up path; else
-            // we know the errorResource and what the path resolves to is the same
-            resource = resourceResolver.resolve(request, path);
-        }
-
-        // If the resource exists, then use it!
-        if (!ResourceUtil.isNonExistingResource(resource)) {
-            log.debug("Found real aggregate resource at [ {} }", resource.getPath());
-            return resource;
-        }
-
-        // Quick check for the Parent; Handles common case of deactivated pages
-        final Resource parent = resource.getParent();
-        if (parent != null) {
-            log.debug("Found real aggregate resource via getParent() at [ {} ]", parent.getPath());
-            return parent;
-        }
-
-        // Start checking the path until the first real ancestor is found
-        final PathInfo pathInfo = new PathInfo(resource.getPath());
-        String[] parts = StringUtils.split(pathInfo.getResourcePath(), '/');
-
-        for (int i = parts.length - 1; i >= 0; i--) {
-            String[] tmpArray = (String[]) ArrayUtils.subarray(parts, 0, i);
-            String candidatePath = "/".concat(StringUtils.join(tmpArray, '/'));
-
-            final Resource candidateResource = resourceResolver.resolve(request, candidatePath);
-
-            if (candidateResource != null && !ResourceUtil.isNonExistingResource(candidateResource)) {
-                log.debug("Found first real aggregate parent via path look-up at [ {} ]", candidateResource.getPath());
-                return candidateResource;
-            }
-        }
-
-        log.debug("Could not find real parent for [ {} ]", errorResource.getPath());
-        return null;
     }
 
     /**
