@@ -38,10 +38,6 @@ angular.module('PageCompare', ['acsCoral'])
             return $scope.app.resourceB !== '' && $scope.app.resourceB !== $scope.app.resource;
         };
 
-        $scope.notifications = [];
-        $scope.connections = [];
-        $scope.changeStatus = [];
-
         $scope.dirty = function() {
             $scope.app.dirty = true;
         };
