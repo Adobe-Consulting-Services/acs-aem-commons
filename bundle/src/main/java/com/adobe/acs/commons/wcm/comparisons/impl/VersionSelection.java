@@ -17,25 +17,24 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm.comparisons;
-
-import org.junit.Test;
+package com.adobe.acs.commons.one2one.impl;
 
 import java.util.Date;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+public class VersionSelection {
+    private final String name;
+    private final Date date;
 
-public class VersionSelectionImplTest {
+    VersionSelection(String name, Date date) {
+        this.name = name;
+        this.date = date;
+    }
 
-    @Test
-    public void shouldWork() throws Exception {
+    public Date getDate() {
+        return (Date) date.clone();
+    }
 
-        final String name= "A";
-        final Date date = new Date();
-        VersionSelection underTest = new PageVersionCompareModel.VersionSelectionImpl(name, date);
-
-        assertThat(underTest.getName(), is(name));
-        assertThat(underTest.getDate(), is(date));
+    public String getName() {
+        return name;
     }
 }

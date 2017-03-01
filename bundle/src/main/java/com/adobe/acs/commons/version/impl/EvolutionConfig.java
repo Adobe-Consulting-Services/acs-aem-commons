@@ -30,7 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.jcr.resource.JcrResourceUtil;
 
-public final class EvolutionConfig {
+public class EvolutionConfig {
 
     private String[] ignoreProperties;
     private String[] ignoreResources;
@@ -40,17 +40,6 @@ public final class EvolutionConfig {
         this.ignoreResources = ArrayUtils.clone(ignoreResources);
     }
 
-    public int getDepthForPath(String path) {
-        return StringUtils.countMatches(StringUtils.substringAfterLast(path, "jcr:frozenNode"), "/");
-    }
-
-    public String getRelativePropertyName(String path) {
-        return StringUtils.substringAfterLast(path, "jcr:frozenNode").replaceFirst("/", "");
-    }
-
-    public String getRelativeResourceName(String path) {
-        return StringUtils.substringAfterLast(path, "jcr:frozenNode/");
-    }
 
     public boolean handleProperty(String name) {
         for (String entry : ignoreProperties) {
@@ -70,7 +59,7 @@ public final class EvolutionConfig {
         return true;
     }
 
-    public String printProperty(javax.jcr.Property property) {
+    public static String printProperty(javax.jcr.Property property) {
         try {
             return printObject(JcrResourceUtil.toJavaObject(property));
         } catch (RepositoryException e1) {
@@ -78,7 +67,7 @@ public final class EvolutionConfig {
         }
     }
 
-    public String printObject(Object obj) {
+    public static String printObject(Object obj) {
         if (obj == null) {
             return "";
         }

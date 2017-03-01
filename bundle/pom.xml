@@ -58,6 +58,7 @@
                         <Embed-Dependency>guava</Embed-Dependency>
                         <Sling-Model-Packages>
                             com.adobe.acs.commons.version.model,
+                            com.adobe.acs.commons.one2one.model,
                             com.adobe.acs.commons.wcm.comparisons,
                             com.adobe.acs.commons.workflow.bulk.execution.model
                         </Sling-Model-Packages>

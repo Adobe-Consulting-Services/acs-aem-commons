@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2017 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,25 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wcm.comparisons;
+package com.adobe.acs.commons.one2one.impl;
 
-import aQute.bnd.annotation.ProviderType;
+import org.junit.Test;
 
 import java.util.Date;
 
-@ProviderType
-public interface VersionSelection {
-    /**
-     * @return the Date of the Version Selection
-     */
-    Date getDate();
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-    /**
-     * @return the Name of the Version Selection
-     */
-    String getName();
+public class VersionSelectionTest {
+
+    @Test
+    public void shouldWork() throws Exception {
+
+        final String name= "A";
+        final Date date = new Date();
+        VersionSelection underTest = new VersionSelection(name, date);
+
+        assertThat(underTest.getName(), is(name));
+        assertThat(underTest.getDate(), is(date));
+    }
 }
