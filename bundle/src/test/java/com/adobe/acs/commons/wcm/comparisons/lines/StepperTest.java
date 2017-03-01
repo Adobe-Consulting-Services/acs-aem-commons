@@ -19,7 +19,7 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.one2one.lines;
+package com.adobe.acs.commons.wcm.comparisons.lines;
 
 import com.google.common.base.Function;
 import org.junit.Test;
@@ -27,11 +27,14 @@ import org.junit.Test;
 import java.io.Serializable;
 import java.util.List;
 
-import static com.adobe.acs.commons.one2one.lines.StepperTest.Step.step;
-import static com.adobe.acs.commons.one2one.lines.StepperTest.Step.toId;
+import static com.adobe.acs.commons.wcm.comparisons.lines.StepperTest.Step.step;
+import static com.adobe.acs.commons.wcm.comparisons.lines.StepperTest.Step.toId;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class StepperTest {
 

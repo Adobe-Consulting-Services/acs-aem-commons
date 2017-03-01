@@ -19,15 +19,19 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.one2one.lines;
+package com.adobe.acs.commons.wcm.comparisons.lines;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static com.adobe.acs.commons.one2one.lines.Line.State.*;
+import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.*;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LineImplTest {

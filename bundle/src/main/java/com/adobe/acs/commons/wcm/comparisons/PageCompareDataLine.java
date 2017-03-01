@@ -21,7 +21,7 @@
  */
 package com.adobe.acs.commons.wcm.comparisons;
 
-public interface One2OneDataLine {
+public interface PageCompareDataLine {
 
     String getPath();
 

@@ -22,7 +22,7 @@
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import com.adobe.acs.commons.version.impl.EvolutionConfig;
-import com.adobe.acs.commons.wcm.comparisons.One2OneDataLine;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +31,7 @@ import org.apache.sling.api.resource.Resource;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 
-public class One2OneDataLineImpl implements One2OneDataLine {
+public class PageCompareDataLineImpl implements PageCompareDataLine {
 
     private static final int LEN = 40;
     private final String path;
@@ -39,14 +39,14 @@ public class One2OneDataLineImpl implements One2OneDataLine {
     private final String value;
     private final int depth;
 
-    public One2OneDataLineImpl(Property property, String basePath, int depth) throws RepositoryException {
+    public PageCompareDataLineImpl(Property property, String basePath, int depth) throws RepositoryException {
         this.path = property.getPath().replace(basePath, "");
         this.name = property.getName();
         this.value = EvolutionConfig.printProperty(property);
         this.depth = depth;
     }
 
-    public One2OneDataLineImpl(Resource resource, String basePath, int depth) {
+    public PageCompareDataLineImpl(Resource resource, String basePath, int depth) {
         this.path = resource.getPath().replace(basePath, "");
         this.name = resource.getName();
         this.value = null;
@@ -55,11 +55,11 @@ public class One2OneDataLineImpl implements One2OneDataLine {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof One2OneDataLineImpl))
+        if (!(obj instanceof PageCompareDataLineImpl))
             return false;
         if (obj == this)
             return true;
-        One2OneDataLineImpl other = (One2OneDataLineImpl) obj;
+        PageCompareDataLineImpl other = (PageCompareDataLineImpl) obj;
         return new EqualsBuilder()
                 .append(path, other.getPath())
                 .append(name, other.getName())

@@ -21,8 +21,8 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.adobe.acs.commons.wcm.comparisons.One2OneData;
-import com.adobe.acs.commons.wcm.comparisons.One2OneDataLoader;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,11 +30,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Date;
 
-import static com.adobe.acs.commons.wcm.comparisons.impl.One2OneDataImplTest.mockResource;
+import static com.adobe.acs.commons.wcm.comparisons.impl.PageCompareDataImplTest.mockResource;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
-public class One2OneDataLoaderImplTest {
+public class PageCompareDataLoaderImplTest {
 
     @Test
     public void shouldInitialize() throws Exception {
@@ -42,8 +42,8 @@ public class One2OneDataLoaderImplTest {
         Resource resource = mockResource("/my/path", "latest", new Date());
 
         // when
-        One2OneDataLoader one2OneData = new One2OneDataLoaderImpl();
-        final One2OneData data = one2OneData.load(resource, "latest");
+        PageCompareDataLoader one2OneData = new PageCompareDataLoaderImpl();
+        final PageCompareData data = one2OneData.load(resource, "latest");
 
         // then
         assertNotNull(data);

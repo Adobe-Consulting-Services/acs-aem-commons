@@ -21,9 +21,9 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.model;
 
-import com.adobe.acs.commons.wcm.comparisons.One2OneData;
-import com.adobe.acs.commons.wcm.comparisons.One2OneDataLine;
-import com.adobe.acs.commons.wcm.comparisons.One2OneDataLoader;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
 import com.adobe.acs.commons.wcm.comparisons.impl.VersionSelection;
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import com.google.common.collect.Lists;
@@ -56,15 +56,15 @@ import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class One2OneCompareModelTest {
+public class PageCompareModelTest {
 
     @Mock
     private ResourceResolver resolver;
 
     @Mock
-    private One2OneDataLoader loader;
+    private PageCompareDataLoader loader;
 
-    One2OneCompareModel underTest;
+    PageCompareModel underTest;
 
     @Captor
     ArgumentCaptor<Resource> resourceArgumentCaptor;
@@ -122,7 +122,7 @@ public class One2OneCompareModelTest {
         underTest.activate();
 
         // when
-        final List<Line<One2OneDataLine>> data = underTest.getData();
+        final List<Line<PageCompareDataLine>> data = underTest.getData();
 
         // then
         assertThat(data.isEmpty(), is(true));
@@ -135,7 +135,7 @@ public class One2OneCompareModelTest {
         underTest.activate();
 
         // when
-        final List<Line<One2OneDataLine>> data = underTest.getData();
+        final List<Line<PageCompareDataLine>> data = underTest.getData();
 
         // then
         assertThat(data.size(), is(2));
@@ -152,7 +152,7 @@ public class One2OneCompareModelTest {
         underTest.activate();
 
         // when
-        final List<Line<One2OneDataLine>> data = underTest.getData();
+        final List<Line<PageCompareDataLine>> data = underTest.getData();
 
         // then
         assertThat(data.size(), is(2));
@@ -186,7 +186,7 @@ public class One2OneCompareModelTest {
         underTest.activate();
 
         // when
-        final List<Line<One2OneDataLine>> data = underTest.getData();
+        final List<Line<PageCompareDataLine>> data = underTest.getData();
 
         // then
         assertThat(data.size(), is(0));
@@ -203,31 +203,31 @@ public class One2OneCompareModelTest {
         mockOne2OneData(pathA, versionA);
         mockOne2OneData(pathB, versionB);
 
-        underTest = new One2OneCompareModel(request);
+        underTest = new PageCompareModel(request);
         underTest.resolver = resolver;
         underTest.loader = loader;
     }
 
-    private One2OneData mockOne2OneData(String pathA, String version) throws RepositoryException {
+    private PageCompareData mockOne2OneData(String pathA, String version) throws RepositoryException {
         Resource resource = mock(Resource.class);
         when(resolver.resolve(pathA)).thenReturn(resource);
-        One2OneData one2OneData = mock(One2OneData.class);
-        final ArrayList<One2OneDataLine> lines = Lists.newArrayList(
+        PageCompareData pageCompareData = mock(PageCompareData.class);
+        final ArrayList<PageCompareDataLine> lines = Lists.newArrayList(
                 mockOne2OneDataLine("a"),
                 mockOne2OneDataLine("b"));
-        when(one2OneData.getLines()).thenReturn(lines);
+        when(pageCompareData.getLines()).thenReturn(lines);
         final ArrayList<VersionSelection> versionSelections = Lists.newArrayList(
                 mock(VersionSelection.class),
                 mock(VersionSelection.class));
-        when(one2OneData.getVersions()).thenReturn(versionSelections);
-        when(loader.load(resource, version != null ? version : "latest")).thenReturn(one2OneData);
-        return one2OneData;
+        when(pageCompareData.getVersions()).thenReturn(versionSelections);
+        when(loader.load(resource, version != null ? version : "latest")).thenReturn(pageCompareData);
+        return pageCompareData;
     }
 
-    private One2OneDataLine mockOne2OneDataLine(String uniqueName) {
-        One2OneDataLine one2OneDataLine = mock(One2OneDataLine.class);
-        when(one2OneDataLine.getUniqueName()).thenReturn(uniqueName);
-        return one2OneDataLine;
+    private PageCompareDataLine mockOne2OneDataLine(String uniqueName) {
+        PageCompareDataLine pageCompareDataLine = mock(PageCompareDataLine.class);
+        when(pageCompareDataLine.getUniqueName()).thenReturn(uniqueName);
+        return pageCompareDataLine;
     }
 
 

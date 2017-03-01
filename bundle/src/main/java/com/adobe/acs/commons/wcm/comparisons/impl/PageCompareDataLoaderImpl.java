@@ -21,8 +21,8 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.adobe.acs.commons.wcm.comparisons.One2OneData;
-import com.adobe.acs.commons.wcm.comparisons.One2OneDataLoader;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Service;
@@ -35,10 +35,10 @@ import javax.jcr.RepositoryException;
         description = "Compare two nodes on property level one by one", metatype = true)
 @Service
 @Properties({})
-public class One2OneDataLoaderImpl implements One2OneDataLoader {
+public class PageCompareDataLoaderImpl implements PageCompareDataLoader {
 
     @Override
-    public One2OneData load(Resource resource, String versionName) throws RepositoryException {
-        return new One2OneDataImpl(resource, versionName);
+    public PageCompareData load(Resource resource, String versionName) throws RepositoryException {
+        return new PageCompareDataImpl(resource, versionName);
     }
 }

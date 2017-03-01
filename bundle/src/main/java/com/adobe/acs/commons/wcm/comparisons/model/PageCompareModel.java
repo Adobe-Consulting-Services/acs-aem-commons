@@ -21,9 +21,9 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.model;
 
-import com.adobe.acs.commons.wcm.comparisons.One2OneData;
-import com.adobe.acs.commons.wcm.comparisons.One2OneDataLine;
-import com.adobe.acs.commons.wcm.comparisons.One2OneDataLoader;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import com.adobe.acs.commons.wcm.comparisons.lines.Lines;
 import com.google.common.annotations.VisibleForTesting;
@@ -47,9 +47,9 @@ import java.util.List;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Model(adaptables = SlingHttpServletRequest.class)
-public class One2OneCompareModel {
+public class PageCompareModel {
 
-    private static final Logger log = LoggerFactory.getLogger(One2OneCompareModel.class);
+    private static final Logger log = LoggerFactory.getLogger(PageCompareModel.class);
 
     private final String pathA;
     private final String versionA;
@@ -62,12 +62,12 @@ public class One2OneCompareModel {
 
     @VisibleForTesting
     @Inject
-    One2OneDataLoader loader;
+    PageCompareDataLoader loader;
 
-    private One2OneData a;
-    private One2OneData b;
+    private PageCompareData a;
+    private PageCompareData b;
 
-    public One2OneCompareModel(SlingHttpServletRequest request) {
+    public PageCompareModel(SlingHttpServletRequest request) {
         this.pathA = request.getParameter("path");
         String versionA = request.getParameter("a");
         this.pathB = request.getParameter("pathB");
@@ -89,11 +89,11 @@ public class One2OneCompareModel {
         this.b = load(resourceB, getVersionB());
     }
 
-    public List<Line<One2OneDataLine>> getData() {
-        Lines<One2OneDataLine> lines = new Lines<One2OneDataLine>(new Function<One2OneDataLine, Serializable>() {
+    public List<Line<PageCompareDataLine>> getData() {
+        Lines<PageCompareDataLine> lines = new Lines<PageCompareDataLine>(new Function<PageCompareDataLine, Serializable>() {
             @Nullable
             @Override
-            public Serializable apply(@Nullable One2OneDataLine input) {
+            public Serializable apply(@Nullable PageCompareDataLine input) {
                 return input.getUniqueName();
             }
         });
@@ -103,11 +103,11 @@ public class One2OneCompareModel {
         return Lists.newArrayList();
     }
 
-    public One2OneData getA() {
+    public PageCompareData getA() {
         return a;
     }
 
-    public One2OneData getB() {
+    public PageCompareData getB() {
         return b;
     }
 
@@ -127,7 +127,7 @@ public class One2OneCompareModel {
         return versionB;
     }
 
-    private One2OneData load(Resource resource, String version) {
+    private PageCompareData load(Resource resource, String version) {
         if (resource != null && !ResourceUtil.isNonExistingResource(resource)) {
             try {
                 return loader.load(resource, version);

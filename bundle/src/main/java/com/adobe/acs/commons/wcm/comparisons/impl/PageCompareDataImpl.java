@@ -21,8 +21,8 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.adobe.acs.commons.wcm.comparisons.One2OneData;
-import com.adobe.acs.commons.wcm.comparisons.One2OneDataLine;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
@@ -42,20 +42,20 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-public class One2OneDataImpl implements One2OneData {
+public class PageCompareDataImpl implements PageCompareData {
 
-    private static final Logger log = LoggerFactory.getLogger(One2OneDataImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PageCompareDataImpl.class);
 
     private final Resource resource;
     private final String versionName;
 
     private Date versionDate;
 
-    private final List<One2OneDataLine> lines = new ArrayList<One2OneDataLine>();
+    private final List<PageCompareDataLine> lines = new ArrayList<PageCompareDataLine>();
 
     private final List<VersionSelection> versionSelection = new ArrayList<VersionSelection>();
 
-    public One2OneDataImpl(Resource resource, String versionName) throws RepositoryException {
+    public PageCompareDataImpl(Resource resource, String versionName) throws RepositoryException {
         this.resource = resource.isResourceType("cq:Page") ? resource.getChild("jcr:content") : resource;
         this.versionName = versionName;
 
@@ -115,7 +115,7 @@ public class One2OneDataImpl implements One2OneData {
     }
 
     @Override
-    public List<One2OneDataLine> getLines() {
+    public List<PageCompareDataLine> getLines() {
         return lines;
     }
 
@@ -125,12 +125,12 @@ public class One2OneDataImpl implements One2OneData {
         Collections.sort(keys);
         for (String key : keys) {
             Property property = resource.adaptTo(Node.class).getProperty(key);
-            lines.add(new One2OneDataLineImpl(property, basePath, depth + 1));
+            lines.add(new PageCompareDataLineImpl(property, basePath, depth + 1));
         }
         Iterator<Resource> iter = resource.getChildren().iterator();
         while (iter.hasNext()) {
             Resource child = iter.next();
-            lines.add(new One2OneDataLineImpl(child, basePath, depth + 1));
+            lines.add(new PageCompareDataLineImpl(child, basePath, depth + 1));
             populate(child, basePath, depth + 1);
         }
     }

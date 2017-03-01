@@ -19,7 +19,7 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.one2one.impl;
+package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
@@ -32,7 +32,9 @@ import java.util.Date;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class PropertiesTest {
 

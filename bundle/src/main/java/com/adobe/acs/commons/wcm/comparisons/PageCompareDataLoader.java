@@ -25,8 +25,8 @@ import org.apache.sling.api.resource.Resource;
 
 import javax.jcr.RepositoryException;
 
-public interface One2OneDataLoader {
+public interface PageCompareDataLoader {
 
-    One2OneData load(Resource resource, String versionName) throws RepositoryException;
+    PageCompareData load(Resource resource, String versionName) throws RepositoryException;
 
 }

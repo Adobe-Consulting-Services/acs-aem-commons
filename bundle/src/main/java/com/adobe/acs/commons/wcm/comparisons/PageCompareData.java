@@ -27,7 +27,7 @@ import org.apache.sling.api.resource.Resource;
 import java.util.Date;
 import java.util.List;
 
-public interface One2OneData {
+public interface PageCompareData {
 
     Resource getResource();
 
@@ -39,7 +39,7 @@ public interface One2OneData {
 
     List<VersionSelection> getVersions();
 
-    List<One2OneDataLine> getLines();
+    List<PageCompareDataLine> getLines();
 
 
 }

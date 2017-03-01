@@ -19,7 +19,7 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.one2one.impl;
+package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import org.apache.sling.api.resource.Resource;
 

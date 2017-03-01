@@ -30,7 +30,6 @@ angular.module('PageCompare', ['acsCoral'])
             resourceB : '',
             a: '',
             b: '',
-            paintConnections : false,
             hideVersions : {},
             hideUnchanged : false
         };
@@ -43,28 +42,6 @@ angular.module('PageCompare', ['acsCoral'])
         $scope.connections = [];
         $scope.changeStatus = [];
 
-        $scope.$watch('app.paintConnections', function(newValue, oldValue) {
-            $scope.paintConnections(newValue);
-        });
-
-        $scope.addNotification = function(type, title, message) {
-            var timeout = 10000;
-
-            if (type === 'success') {
-                timeout = timeout / 2;
-            }
-
-            $scope.notifications.push({
-                type : type,
-                title : title,
-                message : message
-            });
-
-            $timeout(function() {
-                $scope.notifications.shift();
-            }, timeout);
-        };
-
         $scope.addConnection = function(params) {
             $scope.connections.push(params);
         };
@@ -73,49 +50,39 @@ angular.module('PageCompare', ['acsCoral'])
             $scope.changeStatus.push(params);
         };
 
-        $scope.paintConnections = function(doPrint) {
-            var i;
-            if (doPrint) {
-                for (i = 0; i < $scope.connections.length; i++) {
-                    jsPlumb.connect({
-                        source : $scope.connections[i].source,
-                        target : $scope.connections[i].target,
-                        anchors : [ "Right", "Left" ],
-                        paintStyle : {
-                            lineWidth : 1,
-                            strokeStyle : 'grey'
-                        },
-                        hoverPaintStyle : {
-                            strokeStyle : "rgb(0, 0, 135)"
-                        },
-                        endpointStyle : {
-                            width : 1,
-                            height : 1
-                        },
-                        endpoint : "Rectangle",
-                        connector : "Straight"
-                    });
-                }
-            } else {
-                // $timeout(jsPlumb.reset, 100);
-                $('*[class^="_jsPlumb"]').remove();
-            }
-            jsPlumb.repaintEverything();
-        };
+        $scope.$watch('connections', function(newValue, oldValue) {
+            $scope.correctHeight();
+        });
 
-        $scope.showVersion = function(version) {
-            var property, value;
-            for (property in $scope.app.hideVersions) {
-                if ($scope.app.hideVersions
-                        .hasOwnProperty(property)) {
-                    value = $scope.app.hideVersions[property];
-                    if (version === property && value === true) {
-                        jsPlumb.repaintEverything();
-                        return false;
+        $scope.correctHeight = function() {
+            for (var i = 0; i < $scope.connections.length; i++) {
+                var connection = $scope.connections[i];
+                var source = $('#' + connection.source);
+                var target = $('#' + connection.target);
+                if (source.length && target.length) {
+                    var dif = Math.floor(target.position().top) - Math.floor(source.position().top);
+                    var insert = $('<div></div>');
+                    insert.css({
+                        'height': (Math.abs(dif)-1) + 'px',
+                        'background-color': '#eee',
+                        'border-top': '1px solid grey'
+                    });
+                    console.log(dif);
+                    if (dif > 0) {
+                        //source.parent().prepend(insert);
+                    } else if (dif < 0) {
+                        //target.parent().prepend(insert);
                     }
+                    var sourceTxt = $.trim($('.coral-Popover', source).text());
+                    var targetTxt = $.trim($('.coral-Popover', target).text());
+                    var bg = {'background-color': '#FFCCCC'};
+                    if (sourceTxt === targetTxt) {
+                        bg = {'background-color': '#CBF6CB'};
+                    }
+                    source.css(bg);
+                    target.css(bg);
                 }
             }
-            return true;
         };
 
         $scope.dirty = function() {
@@ -139,5 +106,6 @@ angular.module('PageCompare', ['acsCoral'])
             window.location = url;
         };
 
-        $scope.init = function() { };
+        $scope.init = function() {
+        };
     } ]);

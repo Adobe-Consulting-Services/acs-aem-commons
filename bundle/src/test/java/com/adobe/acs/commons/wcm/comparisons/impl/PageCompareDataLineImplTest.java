@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class One2OneDataLineImplTest {
+public class PageCompareDataLineImplTest {
 
     @Test
     public void constructWithResource() throws Exception {
@@ -47,7 +47,7 @@ public class One2OneDataLineImplTest {
         Resource resource = mockResource("/base/path/relative/path", "resourceName");
 
         // when
-        One2OneDataLineImpl underTest = new One2OneDataLineImpl(resource, "/base/path", 1);
+        PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(resource, "/base/path", 1);
 
         // then
         assertNotNull(underTest);
@@ -64,7 +64,7 @@ public class One2OneDataLineImplTest {
         Property property = mockProperty("myValue", "/base/path/relative/path", "propertyName");
 
         // when
-        One2OneDataLineImpl underTest = new One2OneDataLineImpl(property, "/base/path", 1);
+        PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(property, "/base/path", 1);
 
         // then
         assertNotNull(underTest);
@@ -81,7 +81,7 @@ public class One2OneDataLineImplTest {
         Property property = mockProperty("0123456789012345678901234567890123456_40_toLong", "/base/path/relative/path", "propertyName");
 
         // when
-        One2OneDataLineImpl underTest = new One2OneDataLineImpl(property, "/base/path", 1);
+        PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(property, "/base/path", 1);
 
         // then
         assertThat(underTest.getValueString(), is("0123456789012345678901234567890123456_40_toLong"));
@@ -94,7 +94,7 @@ public class One2OneDataLineImplTest {
         Property property = mockProperty("myValue", "/base/path/relative/path/jcr:content", "propertyName");
 
         // when
-        One2OneDataLineImpl underTest = new One2OneDataLineImpl(property, "/base/path", 1);
+        PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(property, "/base/path", 1);
 
         // then
         assertThat(underTest.getUniqueName(), is("/relative/path"));
@@ -106,7 +106,7 @@ public class One2OneDataLineImplTest {
         Property property = mockProperty("myValue", "/base/path/relative/path/jcr:content", "propertyName");
 
         // when
-        One2OneDataLineImpl underTest = new One2OneDataLineImpl(property, "/base/path", 1);
+        PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(property, "/base/path", 1);
         Object other = "test";
 
         // then
@@ -119,8 +119,8 @@ public class One2OneDataLineImplTest {
         Property property = mockProperty("myValue", "/base/path/relative/path/jcr:content", "propertyName");
 
         // when
-        One2OneDataLineImpl underTest = new One2OneDataLineImpl(property, "/base/path", 1);
-        One2OneDataLineImpl underTest2 = new One2OneDataLineImpl(property, "/base/path", 1);
+        PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(property, "/base/path", 1);
+        PageCompareDataLineImpl underTest2 = new PageCompareDataLineImpl(property, "/base/path", 1);
 
         // then
         assertTrue(underTest.equals(underTest2));
@@ -133,8 +133,8 @@ public class One2OneDataLineImplTest {
         Property property2 = mockProperty("myValue2", "/base/path/relative/path/jcr:content", "propertyName");
 
         // when
-        One2OneDataLineImpl underTest = new One2OneDataLineImpl(property, "/base/path", 1);
-        One2OneDataLineImpl underTest2 = new One2OneDataLineImpl(property2, "/base/path", 1);
+        PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(property, "/base/path", 1);
+        PageCompareDataLineImpl underTest2 = new PageCompareDataLineImpl(property2, "/base/path", 1);
 
         // then
         assertFalse(underTest.equals(underTest2));
@@ -147,8 +147,8 @@ public class One2OneDataLineImplTest {
         Property property2 = mockProperty("myValue", "/base/path/relative/path/jcr:content", "propertyName");
 
         // when
-        One2OneDataLineImpl underTest = new One2OneDataLineImpl(property, "/base/path", 1);
-        One2OneDataLineImpl underTest2 = new One2OneDataLineImpl(property2, "/base/path", 1);
+        PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(property, "/base/path", 1);
+        PageCompareDataLineImpl underTest2 = new PageCompareDataLineImpl(property2, "/base/path", 1);
 
         // then
         assertEquals(underTest.hashCode(), underTest2.hashCode());
@@ -160,7 +160,7 @@ public class One2OneDataLineImplTest {
         Property property = mockProperty("myValue", "/base/path/relative/path/jcr:content", "propertyName");
 
         // when
-        One2OneDataLineImpl underTest = new One2OneDataLineImpl(property, "/base/path", 1);
+        PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(property, "/base/path", 1);
 
         // then
         assertTrue(underTest.equals(underTest));

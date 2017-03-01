@@ -21,8 +21,8 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.adobe.acs.commons.wcm.comparisons.One2OneData;
-import com.adobe.acs.commons.wcm.comparisons.One2OneDataLine;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
 import com.google.common.collect.Sets;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -54,7 +54,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class One2OneDataImplTest {
+public class PageCompareDataImplTest {
 
     @Test
     public void shouldInitialize() throws Exception {
@@ -65,10 +65,10 @@ public class One2OneDataImplTest {
         Resource resource = mockResource(path, versionName, new Date());
 
         // when
-        One2OneData one2OneData = new One2OneDataImpl(resource, versionName);
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
 
         // then
-        assertThat(one2OneData.getVersions(), not(Collections.<VersionSelection>emptyList()));
+        assertThat(pageCompareData.getVersions(), not(Collections.<VersionSelection>emptyList()));
     }
 
     @Test
@@ -77,10 +77,10 @@ public class One2OneDataImplTest {
         Resource resource = mockResource("/my/path", "latest", new Date());
 
         // when
-        One2OneData one2OneData = new One2OneDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
 
         // then
-        assertThat(one2OneData.getResource(), is(resource));
+        assertThat(pageCompareData.getResource(), is(resource));
     }
 
     @Test
@@ -91,10 +91,10 @@ public class One2OneDataImplTest {
         Resource resource = mockResource("/my/path", versionName, new Date());
 
         // when
-        One2OneData one2OneData = new One2OneDataImpl(resource, versionName);
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
 
         // then
-        assertThat(one2OneData.getVersion(), is(versionName));
+        assertThat(pageCompareData.getVersion(), is(versionName));
     }
 
     @Test
@@ -104,10 +104,10 @@ public class One2OneDataImplTest {
         Resource resource = mockResource("/my/path", "latest", date);
 
         // when
-        One2OneData one2OneData = new One2OneDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
 
         // then
-        assertThat(one2OneData.getVersionDate(), is(date));
+        assertThat(pageCompareData.getVersionDate(), is(date));
     }
 
     @Test
@@ -117,10 +117,10 @@ public class One2OneDataImplTest {
         Resource resource = mockResource(path, "latest", new Date());
 
         // when
-        One2OneData one2OneData = new One2OneDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
 
         // then
-        assertThat(one2OneData.getPath(), is(path));
+        assertThat(pageCompareData.getPath(), is(path));
     }
 
     @Test
@@ -129,11 +129,11 @@ public class One2OneDataImplTest {
         Resource resource = mockResource("/my/path", "latest", new Date());
 
         // when
-        One2OneData one2OneData = new One2OneDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
 
         // then
-        assertThat(one2OneData.getVersions(), not(Collections.<VersionSelection>emptyList()));
-        assertThat(one2OneData.getVersions().get(1).getName(), is("latest"));
+        assertThat(pageCompareData.getVersions(), not(Collections.<VersionSelection>emptyList()));
+        assertThat(pageCompareData.getVersions().get(1).getName(), is("latest"));
     }
 
     @Test
@@ -149,12 +149,12 @@ public class One2OneDataImplTest {
         when(resource.getValueMap().keySet()).thenReturn(valueMapKeys);
 
         // when
-        One2OneData one2OneData = new One2OneDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
 
         // then
-        assertThat(one2OneData.getLines(), not(Collections.<One2OneDataLine>emptyList()));
-        assertThat(one2OneData.getLines().get(0).getName(), is("a"));
-        assertThat(one2OneData.getLines().get(1).getName(), is("b"));
+        assertThat(pageCompareData.getLines(), not(Collections.<PageCompareDataLine>emptyList()));
+        assertThat(pageCompareData.getLines().get(0).getName(), is("a"));
+        assertThat(pageCompareData.getLines().get(1).getName(), is("b"));
     }
 
     private Property mockProperty(String name, String path, String value) throws RepositoryException {

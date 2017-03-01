@@ -19,7 +19,7 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.one2one.lines;
+package com.adobe.acs.commons.wcm.comparisons.lines;
 
 import com.google.common.base.Optional;
 
