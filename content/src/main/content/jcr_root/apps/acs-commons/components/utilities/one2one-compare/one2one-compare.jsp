@@ -19,26 +19,40 @@
 
     <cq:includeClientLib css="acs-commons.one2one-compare"/>
     <cq:includeClientLib js="acs-commons.one2one-compare"/>
+    <cq:includeClientLib categories="cq.widgets" />
 
 </head>
 
 <body class="coral--light">
+
+<%--
+    <div>
+        <h1>Table</h1>
+        <table>
+            <c:forEach var="line" items="${model.evolution}">
+                <tr>
+                    <td>
+                        <c:if test="${!empty line.left}">
+                            ${line.left.id}: ${line.left.name}: ${line.left.valueString}
+                        </c:if>
+                    </td>
+                    <td>
+                        <c:if test="${!empty line.right}">
+                            ${line.right.id}: ${line.right.name}: ${line.right.valueString}
+                        </c:if>
+                    </td>
+                </tr>
+            </c:forEach>
+        </table>
+    </div>
+    --%>
 
     <div id="acs-commons-one2one-compare">
         <header acs-coral-tools-header data-context-path="${request.contextPath}" data-page-path="${currentPage.path}.html" data-title="One-to-one Compare"></header>
 
         <div class="page" role="main"
                  ng-controller="MainCtrl"
-                 ng-init="app.resource = '${model.resourcePathA}'; app.resourceB = '${model.resourcePathB}'; app.home = '${request.contextPath}${currentPage.path}.html'; app.a = '${model.versionA}'; app.b = '${model.versionB}'; init();">
-
-            <div ng-show="notifications.length > 0"
-                 class="notifications">
-                <div ng-repeat="notification in notifications">
-                    <div acs-coral-alert data-alert-type="{{ notification.type }}"
-                        data-alert-title="{{ notification.title }}"
-                        data-alert-message="{{ notification.message }}"></div>
-                </div>
-            </div>
+                 ng-init="app.resource = '${model.pathA}'; app.resourceB = '${model.pathB}'; app.home = '${request.contextPath}${currentPage.path}.html'; app.a = '${model.versionA}'; app.b = '${model.versionB}'; init();">
 
             <div class="content">
                 <div class="content-container">
@@ -47,52 +61,82 @@
                         <h1 acs-coral-heading>One-to-one Compare</h1>
                         
                         <div class="search">
+
                             <div class="half">
                                 <div class="half-inner border">
                                     <h2 acs-coral-heading>A</h2>
-                                    <input type="text" class="coral-Textfield" placeholder="Enter path to resource" ng-model="app.resource" ng-change="dirty()" ng-blur="blur()">
-                                    <c:if test="${!empty model.resourcePathA && !empty model.versionSelectionsA}">
+
+                                    <span data-init="pathbrowser" data-root-path="/" data-option-loader="" data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/?predicate=hierarchyNotFile" data-crumb-root="">
+                                        <input class="coral-InputGroup-input coral-Textfield js-coral-pathbrowser-input" placeholder="Enter path to resource" type="text" value="" autocomplete="off" aria-owns="coral-1" ng-model="app.resource" ng-change="dirty()" ng-blur="blur()">
+                                        <button class="coral-Button coral-Button--secondary coral-Button--square js-coral-pathbrowser-button" type="button" title="Browse">
+                                            <i class="coral-Icon coral-Icon--sizeS coral-Icon--folderSearch"></i>
+                                        </button>
+                                    </span>
+
+                                    <c:if test="${!empty model.a && !empty model.a.versions}">
                                         <select class="select" ng-model="app.a" ng-change="analyse()">
-                                            <c:forEach var="versionSelection" items="${model.versionSelectionsA}">
+                                            <c:forEach var="versionSelection" items="${model.a.versions}">
                                                 <option value="${versionSelection.name}"><c:out value="${versionSelection.name}" />, <fmt:formatDate type="both" value="${versionSelection.date}" /></option>
                                             </c:forEach>
                                         </select>
                                     </c:if>
+
+
                                 </div>
                             </div>
                             <div class="half">
                                 <div class="half-inner border">
                                     <h2 acs-coral-heading>B</h2>
-                                    <input type="text" class="coral-Textfield" placeholder="Enter optional path to second resource" ng-model="app.resourceB" ng-change="dirty()" ng-blur="blur()">
-                                    <c:if test="${!empty model.resourcePathA && !empty model.versionSelectionsB}">
+
+
+                                    <span data-init="pathbrowser" data-root-path="/" data-option-loader="" data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/?predicate=hierarchyNotFile" data-crumb-root="">
+                                        <input class="coral-InputGroup-input coral-Textfield js-coral-pathbrowser-input" placeholder="Enter optional path to second resource" type="text" value="" autocomplete="off" aria-owns="coral-1" ng-model="app.resourceB" ng-change="dirty()" ng-blur="blur()">
+                                        <button class="coral-Button coral-Button--secondary coral-Button--square js-coral-pathbrowser-button" type="button" title="Browse">
+                                            <i class="coral-Icon coral-Icon--sizeS coral-Icon--folderSearch"></i>
+                                        </button>
+                                    </span>
+
+                                    <c:if test="${!empty model.b && !empty model.b.versions}">
                                         <select class="select" name="b" ng-model="app.b" ng-change="analyse()">
-                                            <c:forEach var="versionSelection" items="${model.versionSelectionsB}">
+                                            <c:forEach var="versionSelection" items="${model.b.versions}">
                                                 <option value="${versionSelection.name}"><c:out value="${versionSelection.name}" />, <fmt:formatDate type="both" value="${versionSelection.date}" /></option>
                                             </c:forEach>
                                         </select>
                                     </c:if>
                                 </div>
                             </div>
-                            <!--<div class="clearer"></div>
-                            <div class="button-row">
-                                <button class="update coral-Button coral-Button--primary" ng-click="analyse()">Update</button>
-                            </div>-->
                         </div>
 
                         <section class="differentResources-{{app.compareDifferentResources()}}">
                             <div class="content">
                                 <div>
-
-
-                                    <c:set var="path" value="${model.resourcePathA}" />
-                                    <c:set var="evolutionItem" value="${model.evolutionA}" />
-                                    <c:set var="evoCounter" value="1" />
-
-                                    <c:if test="${!empty evolutionItem}">
-                                        <%@include file="one.jsp" %>
+                                    <c:if test="${!empty model.data}">
+                                        <div class="half">
+                                            <div class="half-inner">
+                                                <div class="version" id="version-${model.a.version}">
+                                                    <div class="version-header">
+                                                        <div class="name"><c:out value="${path}"/></div>
+                                                        <div class="v"><c:out value="${model.a.version}"/></div>
+                                                        <div class="date"><fmt:formatDate type="both" value="${model.a.versionDate}" /></div>
+                                                    </div>
+                                                    <table>
+                                                        <c:forEach var="line" items="${model.data}" varStatus="forStatus">
+                                                            <c:set var="versionEntry" value="${line.left}" />
+                                                            <c:if test="${!empty versionEntry}">
+                                                                <%@include file="one.jsp" %>
+                                                            </c:if>
+                                                            <c:if test="${empty versionEntry}">
+                                                                <div class="version-entry"><div class="inner-version-entry">&nbsp;</div></div>
+                                                            </c:if>
+                                                        </c:forEach>
+                                                    </table>
+                                                </div>
+                                                <div class="clearer"></div>
+                                            </div>
+                                        </div>
                                     </c:if>
 
-                                    <c:if test="${empty model.evolutionA}">
+                                    <c:if test="${empty model.data}">
                                         <div class="half">
                                             <div class="half-inner">
                                                 <h1 acs-coral-heading>No versions could be found for this item.</h1>
@@ -100,42 +144,45 @@
                                         </div>
                                     </c:if>
 
-                                    <c:if test="${not empty model.resourcePathB}">
-                                        <c:set var="path" value="${model.resourcePathB}" />
-                                    </c:if>
-                                    <c:set var="evolutionItem" value="${model.evolutionB}" />
-                                    <c:set var="evoCounter" value="2" />
-                                    <c:if test="${!empty evolutionItem}">
-                                        <%@include file="one.jsp" %>
+
+                                    <c:if test="${!empty model.data}">
+                                        <div class="half">
+                                            <div class="half-inner">
+                                                <div class="version" id="version-${model.b.version}">
+                                                    <div class="version-header">
+                                                        <div class="name"><c:out value="${path}"/></div>
+                                                        <div class="v"><c:out value="${model.b.version}"/></div>
+                                                        <div class="date"><fmt:formatDate type="both" value="${model.b.versionDate}" /></div>
+                                                    </div>
+                                                    <table>
+                                                        <c:forEach var="line" items="${model.data}" varStatus="forStatus">
+                                                            <c:set var="versionEntry" value="${line.right}" />
+                                                            <c:if test="${!empty versionEntry}">
+                                                                <%@include file="one.jsp" %>
+                                                            </c:if>
+                                                            <c:if test="${empty versionEntry}">
+                                                                <div class="version-entry"><div class="inner-version-entry">&nbsp;</div></div>
+                                                            </c:if>
+                                                        </c:forEach>
+                                                    </table>
+                                                </div>
+                                                <div class="clearer"></div>
+                                            </div>
+                                        </div>
                                     </c:if>
 
-                                    <c:if test="${empty model.evolutionB}">
+                                    <c:if test="${empty model.data}">
                                         <div class="half">
                                             <div class="half-inner">
                                                 <h1 acs-coral-heading>No versions could be found for this item.</h1>
                                             </div>
                                         </div>
                                     </c:if>
+
                                 </div>
                             </div>
 
                             <div class="clearer"></div>
-                        </section>
-
-                        <section class="coral-Well differentResources-{{app.compareDifferentResources()}}">
-                            <div class="options">
-                                <h2 acs-coral-heading>Configuration</h2>
-                                <label acs-coral-checkbox><input type="checkbox" ng-model="app.paintConnections"><span>Paint Connections</span></label>
-                                <label acs-coral-checkbox class="hideUnchanged"><input type="checkbox" ng-model="app.hideUnchanged"><span>Hide Unchanged</span></label>
-                            </div>
-                            <div class="legend">
-                                <h2 acs-coral-heading>Legend</h2>
-                                <div class="status-added">added</div>
-                                <div class="status-changed">changed</div>
-                                <div class="status-removed">removed in next version</div>
-                                <div class="status-added-removed"><div class="inner-version-entry">added and removed in next version</div></div>
-                                <div class="status-changed-removed"><div class="inner-version-entry">changed and removed in next version</div></div>
-                            </div>
                         </section>
 
                     </div>

@@ -19,14 +19,14 @@
  */
 package com.adobe.acs.commons.one2one.model;
 
-import com.adobe.acs.commons.version.Evolution;
-import com.adobe.acs.commons.version.EvolutionAnalyser;
+import com.adobe.acs.commons.one2one.One2OneData;
+import com.adobe.acs.commons.one2one.One2OneDataLine;
+import com.adobe.acs.commons.one2one.One2OneDataLoader;
+import com.adobe.acs.commons.one2one.lines.Line;
+import com.adobe.acs.commons.one2one.lines.Lines;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import org.apache.commons.lang.StringUtils;
+import com.google.common.collect.Lists;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -35,23 +35,19 @@ import org.apache.sling.models.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import java.util.Collections;
+import javax.jcr.RepositoryException;
+import java.io.Serializable;
 import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class One2OneCompareModel {
 
     private static final Logger log = LoggerFactory.getLogger(One2OneCompareModel.class);
-
-    @VisibleForTesting
-    @Inject
-    ResourceResolver resolver;
-
-    @VisibleForTesting
-    @Inject
-    EvolutionAnalyser analyser;
 
     private final String pathA;
     private final String versionA;
@@ -59,108 +55,84 @@ public class One2OneCompareModel {
     private final String versionB;
 
     @VisibleForTesting
-    FluentIterable<Evolution> evolutionsA;
+    @Inject
+    ResourceResolver resolver;
 
     @VisibleForTesting
-    FluentIterable<Evolution> evolutionsB;
+    @Inject
+    One2OneDataLoader loader;
+
+    private One2OneData a;
+    private One2OneData b;
 
     public One2OneCompareModel(SlingHttpServletRequest request) {
         this.pathA = request.getParameter("path");
+        String versionA = request.getParameter("a");
         this.pathB = request.getParameter("pathB");
-        this.versionA = request.getParameter("a");
-        this.versionB = request.getParameter("b");
+        String versionB = request.getParameter("b");
+
+        this.versionA = isNullOrEmpty(versionA) ? "latest" : versionA;
+        this.versionB = isNullOrEmpty(versionB) ? "latest" : versionB;
     }
 
     @PostConstruct
-    protected void activate() {
-        this.evolutionsA = FluentIterable.from(evolutions(pathA));
-        this.evolutionsB = pathB != null ? FluentIterable.from(evolutions(pathB)) : this.evolutionsA;
+    public void activate() {
+        if (pathA == null) {
+            return;
+        }
+        Resource resource = resolver.resolve(pathA);
+        this.a = load(resource, getVersionA());
+
+        Resource resourceB = pathB != null ? resolver.resolve(pathB) : resource;
+        this.b = load(resourceB, getVersionB());
     }
 
-    public String getResourcePathA() {
+    public List<Line<One2OneDataLine>> getData() {
+        Lines<One2OneDataLine> lines = new Lines<One2OneDataLine>(new Function<One2OneDataLine, Serializable>() {
+            @Nullable
+            @Override
+            public Serializable apply(@Nullable One2OneDataLine input) {
+                return input.getUniqueName();
+            }
+        });
+        if (a != null && b != null) {
+            return lines.generate(a.getLines(), b.getLines());
+        }
+        return Lists.newArrayList();
+    }
+
+    public One2OneData getA() {
+        return a;
+    }
+
+    public One2OneData getB() {
+        return b;
+    }
+
+    public String getPathA() {
         return pathA;
     }
 
-    public String getResourcePathB() {
-        return Optional.fromNullable(pathB).or("");
-    }
-
-    public List<VersionSelection> getVersionSelectionsA() {
-        return evolutionsA.transform(TO_VERSION_SELECTION).toList();
-    }
-
-    public List<VersionSelection> getVersionSelectionsB() {
-        return evolutionsB.transform(TO_VERSION_SELECTION).toList();
-    }
-
-    public Evolution getEvolutionA() {
-        return version(evolutionsA, getVersionA()).orNull();
-    }
-
-    public Evolution getEvolutionB() {
-        return version(evolutionsB, getVersionB()).orNull();
-    }
-
     public String getVersionA() {
-        if (versionA == null && evolutionsA.size() >= 2) {
-            return evolutionsA.get(evolutionsA.size() - 2).getVersionName();
-        }
-        if (versionA == null) {
-            return "";
-        }
         return versionA;
     }
 
+    public String getPathB() {
+        return pathB;
+    }
+
     public String getVersionB() {
-        if (versionB == null && !evolutionsB.isEmpty()) {
-            return evolutionsB.last().get().getVersionName();
-        }
-        if (versionB == null) {
-            return "";
-        }
         return versionB;
     }
 
-
-    private Optional<Evolution> version(FluentIterable<Evolution> evolutions, final String name) {
-        return evolutions.firstMatch(new Predicate<Evolution>() {
-            @Override
-            public boolean apply(Evolution evolution) {
-                return evolution.getVersionName().equalsIgnoreCase(name);
+    private One2OneData load(Resource resource, String version) {
+        if (resource != null && !ResourceUtil.isNonExistingResource(resource)) {
+            try {
+                return loader.load(resource, version);
+            } catch (RepositoryException e) {
+                log.error("Error loading data", e);
             }
-        });
+        }
+        return null;
     }
-
-    private List<Evolution> evolutions(String path) {
-        if (StringUtils.isNotEmpty(path)) {
-            Resource resource = resolver.resolve(path);
-            if (resource != null && !ResourceUtil.isNonExistingResource(resource)) {
-                return analyser.getEvolutionContext(resource).getEvolutionItems();
-            }
-            log.warn("Could not resolve resource at path={}", path);
-        }
-        log.warn("No path provided");
-        return Collections.emptyList();
-    }
-
-    private static final Function<Evolution, String> TO_NAME = new Function<Evolution, String>() {
-        @Override
-        public String apply(Evolution evolution) {
-            if (evolution == null) {
-                return null;
-            }
-            return evolution.getVersionName();
-        }
-    };
-
-    private static final Function<Evolution, VersionSelection> TO_VERSION_SELECTION = new Function<Evolution, VersionSelection>() {
-        @Override
-        public VersionSelection apply(Evolution evolution) {
-            if (evolution == null) {
-                return null;
-            }
-            return new VersionSelection(evolution.getVersionName(), evolution.getVersionDate());
-        }
-    };
-
 }

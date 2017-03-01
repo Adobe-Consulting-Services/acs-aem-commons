@@ -60,7 +60,7 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public String getUniqueName() {
-        return (name + path).replace(":", "_").replace("/", "_").replace("@", "_");
+        return (name + path).replace(":", "_").replace("/", "_").replace("@", "_").replace("content", "node");
     }
 
     @Override

@@ -59,7 +59,7 @@ public class EvolutionConfig {
         return true;
     }
 
-    public String printProperty(javax.jcr.Property property) {
+    public static String printProperty(javax.jcr.Property property) {
         try {
             return printObject(JcrResourceUtil.toJavaObject(property));
         } catch (RepositoryException e1) {
@@ -67,7 +67,7 @@ public class EvolutionConfig {
         }
     }
 
-    public String printObject(Object obj) {
+    public static String printObject(Object obj) {
         if (obj == null) {
             return "";
         }

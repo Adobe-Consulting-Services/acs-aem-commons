@@ -90,7 +90,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public String getUniqueName() {
-        return (name + path).replace(":", "_").replace("/", "_").replace("@", "_");
+        return (name + path).replace(":", "_").replace("/", "_").replace("@", "_").replace("frozenNode", "node");
     }
 
     @Override

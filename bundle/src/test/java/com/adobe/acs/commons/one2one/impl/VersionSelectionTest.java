@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.one2one.model;
+package com.adobe.acs.commons.one2one.impl;
 
 import org.junit.Test;
 

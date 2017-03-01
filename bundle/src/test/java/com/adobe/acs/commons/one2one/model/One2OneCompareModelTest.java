@@ -19,30 +19,36 @@
  */
 package com.adobe.acs.commons.one2one.model;
 
-import com.adobe.acs.commons.version.Evolution;
-import com.adobe.acs.commons.version.EvolutionAnalyser;
-import com.adobe.acs.commons.version.EvolutionContext;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
+import com.adobe.acs.commons.one2one.One2OneData;
+import com.adobe.acs.commons.one2one.One2OneDataLine;
+import com.adobe.acs.commons.one2one.One2OneDataLoader;
+import com.adobe.acs.commons.one2one.impl.VersionSelection;
+import com.adobe.acs.commons.one2one.lines.Line;
 import com.google.common.collect.Lists;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Date;
+import javax.jcr.RepositoryException;
+import java.util.ArrayList;
 import java.util.List;
 
+import static com.adobe.acs.commons.one2one.lines.Line.State.EQUAL;
+import static com.adobe.acs.commons.one2one.lines.Line.State.NOT_EQUAL;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class One2OneCompareModelTest {
@@ -51,9 +57,12 @@ public class One2OneCompareModelTest {
     private ResourceResolver resolver;
 
     @Mock
-    private EvolutionAnalyser analyser;
+    private One2OneDataLoader loader;
 
     One2OneCompareModel underTest;
+
+    @Captor
+    ArgumentCaptor<Resource> resourceArgumentCaptor;
 
     @Test
     public void constructor_shouldInitializeWithParams() throws Exception {
@@ -63,17 +72,18 @@ public class One2OneCompareModelTest {
         final String pathB = "/path/b";
         final String versionB = "2.0";
 
+        // when
         construct(pathA, versionA, pathB, versionB);
 
         // then
-        assertThat(underTest.getResourcePathA(), is(pathA));
-        assertThat(underTest.getResourcePathB(), is(pathB));
+        assertThat(underTest.getPathA(), is(pathA));
         assertThat(underTest.getVersionA(), is(versionA));
+        assertThat(underTest.getPathB(), is(pathB));
         assertThat(underTest.getVersionB(), is(versionB));
     }
 
     @Test
-    public void activate_noPath_shouldNotInitializeLists() throws Exception {
+    public void activate_noPath_shouldNotInitializeData() throws Exception {
         // given
         construct(null, null, null, null);
 
@@ -81,274 +91,139 @@ public class One2OneCompareModelTest {
         underTest.activate();
 
         // then
-        assertTrue(underTest.evolutionsA.isEmpty());
-        assertThat(underTest.evolutionsB, is(underTest.evolutionsA));
+        assertNull(underTest.getA());
+        assertNull(underTest.getB());
     }
 
     @Test
-    public void activate_pathA_shouldNotInitializeSecontList() throws Exception {
+    public void activate_pathAOnly_copyDataToB() throws Exception {
         // given
         construct("/path/a", "", null, "");
 
-        final Evolution evolutionA = mock(Evolution.class);
-        List<Evolution> evolutionsA = Lists.newArrayList(evolutionA);
-        prepareAnalyzer("/path/a", evolutionsA);
-
         // when
         underTest.activate();
 
         // then
-        assertThat(underTest.evolutionsA.first().get(), is(evolutionA));
-        assertThat(underTest.evolutionsB, is(underTest.evolutionsA));
+        verify(underTest.loader, times(2)).load(resourceArgumentCaptor.capture(), anyString());
+        final List<Resource> resources = resourceArgumentCaptor.getAllValues();
+        assertThat(resources.size(), is(2));
+        assertThat(resources.get(0), is(resources.get(1)));
     }
 
     @Test
-    public void activate_pathA_pathB_shouldInitializeLists() throws Exception {
+    public void getData_noA_emptyList() throws Exception {
         // given
-        construct("/path/a", "", "/path/b", "");
-
-        final Evolution evolutionA = mock(Evolution.class);
-        List<Evolution> evolutionsA = Lists.newArrayList(evolutionA);
-        prepareAnalyzer("/path/a", evolutionsA);
-
-        final Evolution evolutionB = mock(Evolution.class);
-        List<Evolution> evolutionsB = Lists.newArrayList(evolutionB);
-        prepareAnalyzer("/path/b", evolutionsB);
+        construct(null, null, null, null);
+        underTest.activate();
 
         // when
-        underTest.activate();
+        final List<Line<One2OneDataLine>> data = underTest.getData();
 
         // then
-        assertThat(underTest.evolutionsA.first().get(), is(evolutionA));
-        assertThat(underTest.evolutionsB.first().get(), is(evolutionB));
+        assertThat(data.isEmpty(), is(true));
     }
 
     @Test
-    public void getResourcePathA_null_shouldReturnNull() throws Exception {
-        construct(null, null, null, null);
-        assertNull(underTest.getResourcePathA());
-    }
-
-    @Test
-    public void getResourcePathA_validPath_shoulReturnPath() throws Exception {
-        final String pathA = "/path/a";
-        construct(pathA, null, null, null);
-        assertThat(underTest.getResourcePathA(), is(pathA));
-    }
-
-    @Test
-    public void getResourcePathB_null_shouldReturnEmptyString() throws Exception {
-        construct(null, null, null, null);
-        assertThat(underTest.getResourcePathB(), is(""));
-    }
-
-    @Test
-    public void getResourcePathB_validPath_shoulReturnPath() throws Exception {
-        final String pathB = "/path/b";
-        construct(null, null, pathB, null);
-        assertThat(underTest.getResourcePathB(), is(pathB));
-    }
-
-    @Test
-    public void getVersionSelectionsA_noVersions_shouldReturnEmptyList() throws Exception {
+    public void getData_A_generateLines_useAAsB() throws Exception {
+        // given
         construct("/path/a", null, null, null);
         underTest.activate();
 
-        List<VersionSelection> versionSelections = underTest.getVersionSelectionsA();
-        assertTrue(versionSelections.isEmpty());
+        // when
+        final List<Line<One2OneDataLine>> data = underTest.getData();
+
+        // then
+        assertThat(data.size(), is(2));
+        assertThat(data.get(0).getLeft(), is(data.get(0).getRight()));
+        assertThat(data.get(1).getLeft(), is(data.get(1).getRight()));
+        assertThat(data.get(0).getState(), is(EQUAL));
+        assertThat(data.get(1).getState(), is(EQUAL));
     }
 
     @Test
-    public void getVersionSelectionsA_versions_shouldReturnList() throws Exception {
-        construct("/path/a", null, null, null);
-
-        List<Evolution> evolutionsA = mockEvolutions("1.0", "2.0");
-        prepareAnalyzer("/path/a", evolutionsA);
-
-        underTest.activate();
-
-        List<VersionSelection> versionSelections = underTest.getVersionSelectionsA();
-        assertThat(versionSelections.size(), is(2));
-        assertThat(versionSelections.get(0).getName(), is("1.0"));
-        assertThat(versionSelections.get(1).getName(), is("2.0"));
-    }
-
-    @Test
-    public void getVersionSelectionsB_noVersions_shouldReturnEmptyList() throws Exception {
+    public void getData_aAndB_generateLines() throws Exception {
+        // given
         construct("/path/a", null, "/path/b", null);
         underTest.activate();
 
-        List<VersionSelection> versionSelections = underTest.getVersionSelectionsB();
+        // when
+        final List<Line<One2OneDataLine>> data = underTest.getData();
 
-        assertTrue(versionSelections.isEmpty());
+        // then
+        assertThat(data.size(), is(2));
+        assertThat(data.get(0).getLeft(), is(not(data.get(0).getRight())));
+        assertThat(data.get(1).getLeft(), is(not(data.get(1).getRight())));
+        assertThat(data.get(0).getState(), is(NOT_EQUAL));
+        assertThat(data.get(1).getState(), is(NOT_EQUAL));
     }
 
     @Test
-    public void getVersionSelectionsB_versions_shouldReturnList() throws Exception {
+    public void getData_A_generateVersionLists() throws Exception {
+        // given
         construct("/path/a", null, "/path/b", null);
-        List<Evolution> evolutionsB = mockEvolutions("1.0", "2.0");
-        prepareAnalyzer("/path/b", evolutionsB);
         underTest.activate();
 
-        List<VersionSelection> versionSelections = underTest.getVersionSelectionsB();
+        // when
+        final List<VersionSelection> versionsA = underTest.getA().getVersions();
+        final List<VersionSelection> versionsB = underTest.getB().getVersions();
 
-        assertThat(versionSelections.size(), is(2));
-        assertThat(versionSelections.get(0).getName(), is("1.0"));
-        assertThat(versionSelections.get(1).getName(), is("2.0"));
+        // then
+        assertThat(versionsA.size(), is(2));
+        assertThat(versionsB.size(), is(2));
     }
 
     @Test
-    public void getVersionSelectionsB_noPathB_shouldReturnListFromA() throws Exception {
+    public void getData_A_repositoryError_getEmptyList() throws Exception {
+        // given
         construct("/path/a", null, null, null);
-        List<Evolution> evolutionsA = mockEvolutions("1.0", "2.0");
-        prepareAnalyzer("/path/a", evolutionsA);
+
+        when(loader.load(any(Resource.class), anyString())).thenThrow(new RepositoryException());
         underTest.activate();
 
-        List<VersionSelection> versionSelections = underTest.getVersionSelectionsB();
+        // when
+        final List<Line<One2OneDataLine>> data = underTest.getData();
 
-        assertThat(versionSelections.size(), is(2));
-        assertThat(versionSelections.get(0).getName(), is("1.0"));
-        assertThat(versionSelections.get(1).getName(), is("2.0"));
+        // then
+        assertThat(data.size(), is(0));
     }
 
-    @Test
-    public void getEvolutionsA_noEvolutions_returnNull() throws Exception {
-        construct("/path/a", null, null, null);
-        underTest.activate();
 
-        final Evolution evolutionA = underTest.getEvolutionA();
-
-        assertNull(evolutionA);
-    }
-
-    @Test
-    public void getEvolutionsA_evolutionsNoVersion_returnSecondToLast() throws Exception {
-        construct("/path/a", null, null, null);
-        List<Evolution> evolutionsA = mockEvolutions("1.0", "1.5", "2.0");
-        prepareAnalyzer("/path/a", evolutionsA);
-        underTest.activate();
-
-        final Evolution evolutionA = underTest.getEvolutionA();
-
-        assertNotNull(evolutionA);
-        assertThat(evolutionA.getVersionName(), is("1.5"));
-    }
-
-    @Test
-    public void getEvolutionsA_wrongVersion_returnNull() throws Exception {
-        construct("/path/a", "3.0", null, null);
-        List<Evolution> evolutionsA = mockEvolutions("1.0", "2.0");
-        prepareAnalyzer("/path/a", evolutionsA);
-        underTest.activate();
-
-        final Evolution evolutionA = underTest.getEvolutionA();
-
-        assertNull(evolutionA);
-    }
-
-    @Test
-    public void getEvolutionsA_evolutionsAndVersion_returnVersion() throws Exception {
-        construct("/path/a", "2.0", null, null);
-        List<Evolution> evolutionsA = mockEvolutions("1.0", "2.0");
-        prepareAnalyzer("/path/a", evolutionsA);
-        underTest.activate();
-
-        final Evolution evolutionA = underTest.getEvolutionA();
-
-        assertNotNull(evolutionA);
-        assertThat(evolutionA.getVersionName(), is("2.0"));
-    }
-
-    @Test
-    public void geEvolutionB_noVersion_returnLast() throws Exception {
-        construct("/path/a", "2.0", "/path/b", null);
-        List<Evolution> evolutionsA = mockEvolutions("1.0", "2.0");
-        prepareAnalyzer("/path/b", evolutionsA);
-        underTest.activate();
-
-        final Evolution evolutionB = underTest.getEvolutionB();
-
-        assertNotNull(evolutionB);
-        assertThat(evolutionB.getVersionName(), is("2.0"));
-    }
-
-    @Test
-    public void geEvolutionB_wrongVersion_returnNull() throws Exception {
-        construct("/path/a", "2.0", "/path/b", "3.0");
-        List<Evolution> evolutionsA = mockEvolutions("1.0", "2.0");
-        prepareAnalyzer("/path/b", evolutionsA);
-        underTest.activate();
-
-        final Evolution evolutionB = underTest.getEvolutionB();
-
-        assertNull(evolutionB);
-    }
-
-    @Test
-    public void geEvolutionB_version_returnVersion() throws Exception {
-        construct("/path/a", "2.0", "/path/b", "1.0");
-        List<Evolution> evolutionsA = mockEvolutions("1.0", "2.0");
-        prepareAnalyzer("/path/b", evolutionsA);
-        underTest.activate();
-
-        final Evolution evolutionB = underTest.getEvolutionB();
-
-        assertNotNull(evolutionB);
-        assertThat(evolutionB.getVersionName(), is("1.0"));
-    }
-
-    @Test
-    public void getVersionA() throws Exception {
-        construct("/path/a", "2.0", "/path/b", "1.0");
-        underTest.activate();
-
-        String versionA = underTest.getVersionA();
-
-        assertThat(versionA, is("2.0"));
-    }
-
-    @Test
-    public void getVersionB() throws Exception {
-        construct("/path/a", "2.0", "/path/b", "1.0");
-        underTest.activate();
-
-        String versionB = underTest.getVersionB();
-
-        assertThat(versionB, is("1.0"));
-    }
-
-    private List<Evolution> mockEvolutions(String... versionName) {
-        return FluentIterable.from(Lists.newArrayList(versionName)).transform(new Function<String, Evolution>() {
-            @Override
-            public Evolution apply(String name) {
-                return mockEvolution(name);
-            }
-        }).toList();
-    }
-
-    private Evolution mockEvolution(String versionName) {
-        final Evolution evolution = mock(Evolution.class);
-        when(evolution.getVersionName()).thenReturn(versionName);
-        when(evolution.getVersionDate()).thenReturn(new Date());
-        return evolution;
-    }
-
-    private void construct(String pathA, String versionA, String pathB, String versionB) {
+    private void construct(String pathA, String versionA, String pathB, String versionB) throws RepositoryException {
         SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
         when(request.getParameter("path")).thenReturn(pathA);
         when(request.getParameter("pathB")).thenReturn(pathB);
         when(request.getParameter("a")).thenReturn(versionA);
         when(request.getParameter("b")).thenReturn(versionB);
+
+        mockOne2OneData(pathA, versionA);
+        mockOne2OneData(pathB, versionB);
+
         underTest = new One2OneCompareModel(request);
         underTest.resolver = resolver;
-        underTest.analyser = analyser;
+        underTest.loader = loader;
     }
 
-    private void prepareAnalyzer(String path, List<Evolution> evolutionsA) {
+    private One2OneData mockOne2OneData(String pathA, String version) throws RepositoryException {
         Resource resource = mock(Resource.class);
-        when(resolver.resolve(path)).thenReturn(resource);
-        EvolutionContext evolutionContext = mock(EvolutionContext.class);
-        when(evolutionContext.getEvolutionItems()).thenReturn(evolutionsA);
-        when(analyser.getEvolutionContext(resource)).thenReturn(evolutionContext);
+        when(resolver.resolve(pathA)).thenReturn(resource);
+        One2OneData one2OneData = mock(One2OneData.class);
+        final ArrayList<One2OneDataLine> lines = Lists.newArrayList(
+                mockOne2OneDataLine("a"),
+                mockOne2OneDataLine("b"));
+        when(one2OneData.getLines()).thenReturn(lines);
+        final ArrayList<VersionSelection> versionSelections = Lists.newArrayList(
+                mock(VersionSelection.class),
+                mock(VersionSelection.class));
+        when(one2OneData.getVersions()).thenReturn(versionSelections);
+        when(loader.load(resource, version != null ? version : "latest")).thenReturn(one2OneData);
+        return one2OneData;
     }
+
+    private One2OneDataLine mockOne2OneDataLine(String uniqueName) {
+        One2OneDataLine one2OneDataLine = mock(One2OneDataLine.class);
+        when(one2OneDataLine.getUniqueName()).thenReturn(uniqueName);
+        return one2OneDataLine;
+    }
+
+
 }

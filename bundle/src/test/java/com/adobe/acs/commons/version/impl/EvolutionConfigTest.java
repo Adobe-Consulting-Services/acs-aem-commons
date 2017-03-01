@@ -1,14 +1,12 @@
 package com.adobe.acs.commons.version.impl;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.adobe.acs.commons.version.impl.EvolutionConfig;
+import static org.junit.Assert.assertEquals;
 
 public class EvolutionConfigTest {
 
