@@ -42,7 +42,7 @@
 
                             <div class="half">
                                 <div class="half-inner border">
-                                    <h2 acs-coral-heading ng-model="app.a"></h2>
+                                    <h2 acs-coral-heading ng-bind="app.resource"></h2>
 
                                     <span data-init="pathbrowser" data-root-path="/" data-option-loader="" data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/?predicate=hierarchyNotFile" data-crumb-root="">
                                         <input class="coral-InputGroup-input coral-Textfield js-coral-pathbrowser-input" placeholder="Enter path to resource" type="text" value="" autocomplete="off" aria-owns="coral-1" ng-model="app.resource" ng-change="dirty()" ng-blur="blur()">
@@ -64,18 +64,7 @@
                             </div>
                             <div class="half">
                                 <div class="half-inner border">
-                                    <h2 acs-coral-heading>
-                                        <c:if test="${empty model.pathB}">
-                                            <c:out value="${model.pathB}" />
-                                        </c:if>
-                                        <c:if test="${empty model.pathB && !empty model.pathA}">
-                                            <c:out value="${model.pathA}" />
-                                        </c:if>
-                                        <c:if test="${empty model.pathB && empty model.pathA}">
-                                            &nbsp;
-                                        </c:if>
-                                    </h2>
-
+                                    <h2 acs-coral-heading ng-bind="app.resourceB ? app.resourceB : app.resource"></h2>
 
                                     <span data-init="pathbrowser" data-root-path="/" data-option-loader="" data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/?predicate=hierarchyNotFile" data-crumb-root="">
                                         <input class="coral-InputGroup-input coral-Textfield js-coral-pathbrowser-input" placeholder="Enter optional path to second resource" type="text" value="" autocomplete="off" aria-owns="coral-1" ng-model="app.resourceB" ng-change="dirty()" ng-blur="blur()">

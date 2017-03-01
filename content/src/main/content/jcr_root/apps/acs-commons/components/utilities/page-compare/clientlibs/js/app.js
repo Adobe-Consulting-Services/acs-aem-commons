@@ -42,49 +42,6 @@ angular.module('PageCompare', ['acsCoral'])
         $scope.connections = [];
         $scope.changeStatus = [];
 
-        $scope.addConnection = function(params) {
-            $scope.connections.push(params);
-        };
-
-        $scope.addChangeStatus = function(params) {
-            $scope.changeStatus.push(params);
-        };
-
-        $scope.$watch('connections', function(newValue, oldValue) {
-            $scope.correctHeight();
-        });
-
-        $scope.correctHeight = function() {
-            for (var i = 0; i < $scope.connections.length; i++) {
-                var connection = $scope.connections[i];
-                var source = $('#' + connection.source);
-                var target = $('#' + connection.target);
-                if (source.length && target.length) {
-                    var dif = Math.floor(target.position().top) - Math.floor(source.position().top);
-                    var insert = $('<div></div>');
-                    insert.css({
-                        'height': (Math.abs(dif)-1) + 'px',
-                        'background-color': '#eee',
-                        'border-top': '1px solid grey'
-                    });
-                    console.log(dif);
-                    if (dif > 0) {
-                        //source.parent().prepend(insert);
-                    } else if (dif < 0) {
-                        //target.parent().prepend(insert);
-                    }
-                    var sourceTxt = $.trim($('.coral-Popover', source).text());
-                    var targetTxt = $.trim($('.coral-Popover', target).text());
-                    var bg = {'background-color': '#FFCCCC'};
-                    if (sourceTxt === targetTxt) {
-                        bg = {'background-color': '#CBF6CB'};
-                    }
-                    source.css(bg);
-                    target.css(bg);
-                }
-            }
-        };
-
         $scope.dirty = function() {
             $scope.app.dirty = true;
         };
