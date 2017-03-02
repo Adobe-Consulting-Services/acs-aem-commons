@@ -23,17 +23,15 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
+import org.mockito.Answers;
 
-import javax.jcr.Node;
-import javax.jcr.Property;
-import javax.jcr.RepositoryException;
 import java.util.Date;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class PropertiesTest {
@@ -45,35 +43,17 @@ public class PropertiesTest {
     }
 
     @Test
-    public void lastModified_repositoryExcepton_returnNewDate() throws Exception {
-        // given
-        Resource resource = mock(Resource.class);
-        Node node = mock(Node.class);
-        when(resource.adaptTo(Node.class)).thenReturn(node);
-        when(node.getProperty(anyString())).thenThrow(new RepositoryException());
-
-        // when
-        Date result = Properties.lastModified(resource);
-
-        // then
-        assertNotNull(result);
-    }
-
-    @Test
     public void lastModified_hasProperty_Date() throws Exception {
         // given
-        Resource resource = mock(Resource.class);
-        Node node = mock(Node.class);
-        when(resource.adaptTo(Node.class)).thenReturn(node);
-        Property property = mock(Property.class, RETURNS_DEEP_STUBS.get());
-        when(node.getProperty("cq:lastModified")).thenReturn(property);
+        Resource resource = mock(Resource.class, Answers.RETURNS_DEEP_STUBS.get());
+        Date d = new Date();
+        when(resource.getValueMap().get(anyString(), any(Date.class))).thenReturn(d);
 
         // when
         Date result = Properties.lastModified(resource);
 
         // then
         assertNotNull(result);
-        verify(property.getValue().getDate()).getTime();
-
+        assertEquals(result, d);
     }
 }

@@ -21,23 +21,16 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
+import com.day.cq.wcm.api.NameConstants;
 import org.apache.sling.api.resource.Resource;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Value;
 import java.util.Date;
 
 public class Properties {
 
     public static Date lastModified(Resource resource) {
         if (resource != null) {
-            try {
-                Value value = resource.adaptTo(Node.class).getProperty("cq:lastModified").getValue();
-                return value.getDate().getTime();
-            } catch (RepositoryException e) {
-                e.printStackTrace();
-            }
+            return resource.getValueMap().get(NameConstants.PN_LAST_MOD, new Date());
         }
         return new Date();
     }
