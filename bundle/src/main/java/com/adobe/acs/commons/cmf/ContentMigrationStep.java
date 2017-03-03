@@ -2,6 +2,7 @@ package com.adobe.acs.commons.cmf;
 
 import java.util.List;
 
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -25,6 +26,6 @@ public interface ContentMigrationStep {
 	public List<Resource> identifyResources (Resource resource);
 	
 	
-	public void migrate (Resource resource);
+	public void migrate (Resource resource) throws PersistenceException;
 	
 }

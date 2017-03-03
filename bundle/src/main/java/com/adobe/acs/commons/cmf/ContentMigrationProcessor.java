@@ -2,6 +2,7 @@ package com.adobe.acs.commons.cmf;
 
 import java.util.Set;
 
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 public interface ContentMigrationProcessor {
@@ -23,6 +24,6 @@ public interface ContentMigrationProcessor {
 	
 	
 	
-	public void migrateResources (IdentifiedResources resources, ResourceResolver resolver) throws NoSuchContentMigrationStepException;
+	public void migrateResources (IdentifiedResources resources, ResourceResolver resolver) throws NoSuchContentMigrationStepException, PersistenceException;
 	
 }
