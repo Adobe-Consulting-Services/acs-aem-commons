@@ -39,6 +39,24 @@ angular.module('acs-commons-audit-log-search-app', ['acsCoral', 'ACS.Commons.not
 
 		$scope.result = {};
 
+		$scope.createIndex = function () {
+			NotificationsService.running(true);
+			
+			$http({
+				method: 'POST',
+				url: '/oak:index/cqAuditEvent?'+ $('#create-index-form').serialize()
+			}).success(function (data, status, headers, config) {
+				NotificationsService.running(false);
+				NotificationsService.add('success', 'SUCCESS', 'Index Created!');
+				$('.index-warning').hide();
+				return false;
+			}).error(function (data, status, headers, config) {
+				NotificationsService.running(false);
+				NotificationsService.add('error', 'ERROR', 'Failed to create index!');
+			});
+			return false;
+		};
+
 		$scope.search = function () {
 			var start = new Date().getTime();
 			NotificationsService.running(true);
@@ -62,7 +80,6 @@ angular.module('acs-commons-audit-log-search-app', ['acsCoral', 'ACS.Commons.not
 		};
 
         $scope.init = function () {
-            $scope.list();
         };
     }]);
 

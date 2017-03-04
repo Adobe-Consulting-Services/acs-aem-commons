@@ -51,7 +51,8 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.audit_log_search.AuditLogSearchRequest;
 
 @SlingServlet(label = "ACS AEM Commons - Audit Log Search Servlet", methods = { "GET" }, resourceTypes = {
-		"acs-commons/components/utilities/audit-log-search" }, selectors = { "auditlogsearch" }, extensions = { "json" })
+		"acs-commons/components/utilities/audit-log-search" }, selectors = {
+				"auditlogsearch" }, extensions = { "json" }, metatype = true)
 public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 
 	private static final long serialVersionUID = 7661105540626580845L;
@@ -136,16 +137,16 @@ public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 		auditEvent.put("userName", request.getUserName(auditEventResource.getResourceResolver(), userId));
 		auditEvent.put("userPath", request.getUserPath(auditEventResource.getResourceResolver(), userId));
 		auditEvent.put("time", properties.get("cq:time", new Date()).getTime());
-		
+
 		JSONArray modified = getModifiedProperties(properties);
-		if(properties.get("above", String.class) != null){
-			modified.put("above="+properties.get("above", String.class));
+		if (properties.get("above", String.class) != null) {
+			modified.put("above=" + properties.get("above", String.class));
 		}
-		if(properties.get("destination", String.class) != null){
-			modified.put("destination="+properties.get("destination", String.class));
+		if (properties.get("destination", String.class) != null) {
+			modified.put("destination=" + properties.get("destination", String.class));
 		}
-		if(properties.get("versionId", String.class) != null){
-			modified.put("versionId="+properties.get("versionId", String.class));
+		if (properties.get("versionId", String.class) != null) {
+			modified.put("versionId=" + properties.get("versionId", String.class));
 		}
 		if (modified.length() != 0) {
 			auditEvent.put("modified", modified);

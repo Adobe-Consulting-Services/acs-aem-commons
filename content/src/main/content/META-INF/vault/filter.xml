@@ -56,5 +56,4 @@
         <include pattern="/etc/acs-commons/audit-log-search(.*)?" />
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
-    <filter root="/oak:index/cqAuditEvent" mode="merge"/>
 </workspaceFilter>
