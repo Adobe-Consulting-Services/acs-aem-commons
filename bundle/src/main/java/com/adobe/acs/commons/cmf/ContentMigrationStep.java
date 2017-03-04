@@ -26,6 +26,13 @@ public interface ContentMigrationStep {
 	public List<Resource> identifyResources (Resource resource);
 	
 	
-	public void migrate (Resource resource) throws PersistenceException;
+	/**
+	 * Migrate the resource.
+	 * 
+	 * Performs all relevant operations on the resource. An implementation should not persist
+	 * the changes, that means it should not call <code>resource.getResourceResolver().commit();</code>
+	 * @param resource the resource which should be migrated
+	 */
+	public void migrate (Resource resource);
 	
 }

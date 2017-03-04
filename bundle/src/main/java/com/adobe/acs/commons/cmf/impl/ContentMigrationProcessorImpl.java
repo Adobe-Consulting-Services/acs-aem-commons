@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -54,6 +55,9 @@ public class ContentMigrationProcessorImpl extends HttpServlet implements Conten
 	protected void bindContentMigrationStep (ContentMigrationStep step, Map properties) {
 		synchronized (registeredSteps) {
 			String name = (String) properties.get(ContentMigrationStep.STEP_NAME);
+			if (StringUtils.isEmpty(name)) {
+				name = step.getClass().getName();
+			}
 			registeredSteps.put (name, step);
 			log.info("registered content migration step '{}'", name);
 		}
@@ -62,11 +66,15 @@ public class ContentMigrationProcessorImpl extends HttpServlet implements Conten
 	protected void unbindContentMigrationStep (ContentMigrationStep step, Map properties) {
 		synchronized (registeredSteps) {
 			String name = (String) properties.get(ContentMigrationStep.STEP_NAME);
+			if (StringUtils.isEmpty(name)) {
+				name = step.getClass().getName();
+			}
 			registeredSteps.remove(name);
 			log.info("unregistered content migration step '{}'", name);
 		}
 	}
 	
+	/** Webconsole **/
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
 		PrintWriter pw = res.getWriter();
 		pw.println("<div class='statline'>Registered Content Migration Steps:</div>");
@@ -128,6 +136,7 @@ public class ContentMigrationProcessorImpl extends HttpServlet implements Conten
 			String path = iter.next();
 			Resource toMigrate = resolver.getResource(path);
 			cms.migrate(toMigrate);
+			toMigrate.getResourceResolver().commit();
 		}
 		
 		
