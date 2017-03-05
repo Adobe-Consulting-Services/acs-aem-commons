@@ -65,8 +65,9 @@ public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
 		this.eventAdmin = eventAdmin;
 	}
 
-	private void excute() throws RepositoryException, PackageException, IOException, ReplicationException {
+	public void excute() throws RepositoryException, PackageException, IOException, ReplicationException {
 
+		boolean succeeded = false;
 		ResourceResolver resolver = null;
 		try {
 			resolver = ConfigurationUpdateListener.getResourceResolver(resolverFactory);
@@ -90,9 +91,14 @@ public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
 			replicator.replicate(session, ReplicationActionType.ACTIVATE, jcrPackage.getNode().getPath());
 
 			log.debug("Package {} replicated successfully!", packagePath);
+			fireEvent(OSGI_EVENT_REPLICATED_TOPIC);
+			succeeded = true;
 		} finally {
 			if(resolver != null){
 				resolver.close();
+			}
+			if(!succeeded){
+				fireEvent(OSGI_EVENT_FAILED_TOPIC);
 			}
 		}
 	}
@@ -112,10 +118,8 @@ public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
 		log.info("Starting Automatic Package Replication task");
 		try {
 			excute();
-			fireEvent(OSGI_EVENT_REPLICATED_TOPIC);
 			log.info("Finished Automatic Package Replication task");
 		} catch (Exception e) {
-			fireEvent(OSGI_EVENT_FAILED_TOPIC);
 			log.error("Excepting running Automatic Package Replication task", e);
 		}
 	}
