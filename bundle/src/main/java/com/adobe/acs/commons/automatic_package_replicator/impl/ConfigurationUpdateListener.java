@@ -154,11 +154,17 @@ public class ConfigurationUpdateListener extends ResourceServiceManager
 		ServiceRegistration serviceRegistration = null;
 		props.put(TRIGGER_KEY, model.getTrigger().name());
 		if (AutomaticPackageReplicatorModel.TRIGGER.cron == model.getTrigger()) {
+			if(StringUtils.isEmpty(model.getCronTrigger())){
+				throw new IllegalArgumentException("No cron trigger specified");
+			}
 			props.put(Scheduler.PROPERTY_SCHEDULER_EXPRESSION, model.getCronTrigger());
 			log.debug("Registering cron runner with: {}", props);
 			serviceRegistration = super.getBundleContext().registerService(Runnable.class.getCanonicalName(), job,
 					props);
 		} else {
+			if(StringUtils.isEmpty(model.getEventTopic())){
+				throw new IllegalArgumentException("No event topic specified");
+			}
 			props.put(EventConstants.EVENT_TOPIC, new String[] { model.getEventTopic() });
 			if (StringUtils.isNotEmpty(model.getEventFilter())) {
 				props.put(EventConstants.EVENT_FILTER, model.getEventFilter());
