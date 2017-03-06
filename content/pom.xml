@@ -86,7 +86,6 @@
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/components/content/base/ajax/loading-indicator-clientlibs/js/vendor/spin.min.js</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/extensions/contentfinder/audio.js</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/jquery.fonticonpicker/jquery.fonticonpicker.js</exclude>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor</exclude>
                     </excludes>
                 </configuration>
