@@ -19,8 +19,10 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.wcm.comparisons.lines;
+package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
+import com.adobe.acs.commons.wcm.comparisons.lines.Line;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
 class LineImpl<T> implements Line<T> {
@@ -45,22 +47,12 @@ class LineImpl<T> implements Line<T> {
         this.right = Optional.fromNullable(right);
     }
 
-    @Override
-    public Optional<T> left() {
-        return left;
-    }
-
-    @Override
-    public Optional<T> right() {
-        return right;
-    }
-
     public T getLeft() {
-        return left().orNull();
+        return left.orNull();
     }
 
     public T getRight() {
-        return right().orNull();
+        return right.orNull();
     }
 
     @Override
@@ -75,5 +67,13 @@ class LineImpl<T> implements Line<T> {
             return State.EQUAL;
         }
         return State.NOT_EQUAL;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("left", left)
+                .add("right", right)
+                .toString();
     }
 }

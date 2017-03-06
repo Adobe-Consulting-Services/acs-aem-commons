@@ -23,8 +23,10 @@ package com.adobe.acs.commons.wcm.comparisons.model;
 
 import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLines;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
-import com.adobe.acs.commons.wcm.comparisons.impl.VersionSelection;
+import com.adobe.acs.commons.wcm.comparisons.VersionSelection;
+import com.adobe.acs.commons.wcm.comparisons.VersionService;
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import com.google.common.collect.Lists;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -41,12 +43,12 @@ import javax.jcr.RepositoryException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.EQUAL;
 import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.NOT_EQUAL;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyCollectionOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -63,6 +65,12 @@ public class PageCompareModelTest {
 
     @Mock
     private PageCompareDataLoader loader;
+
+    @Mock
+    private PageCompareDataLines lines;
+
+    @Mock
+    private VersionService versionService;
 
     PageCompareModel underTest;
 
@@ -129,23 +137,6 @@ public class PageCompareModelTest {
     }
 
     @Test
-    public void getData_A_generateLines_useAAsB() throws Exception {
-        // given
-        construct("/path/a", null, null, null);
-        underTest.activate();
-
-        // when
-        final List<Line<PageCompareDataLine>> data = underTest.getData();
-
-        // then
-        assertThat(data.size(), is(2));
-        assertThat(data.get(0).getLeft(), is(data.get(0).getRight()));
-        assertThat(data.get(1).getLeft(), is(data.get(1).getRight()));
-        assertThat(data.get(0).getState(), is(EQUAL));
-        assertThat(data.get(1).getState(), is(EQUAL));
-    }
-
-    @Test
     public void getData_aAndB_generateLines() throws Exception {
         // given
         construct("/path/a", null, "/path/b", null);
@@ -155,11 +146,9 @@ public class PageCompareModelTest {
         final List<Line<PageCompareDataLine>> data = underTest.getData();
 
         // then
-        assertThat(data.size(), is(2));
+        assertThat(data.size(), is(1));
         assertThat(data.get(0).getLeft(), is(not(data.get(0).getRight())));
-        assertThat(data.get(1).getLeft(), is(not(data.get(1).getRight())));
         assertThat(data.get(0).getState(), is(NOT_EQUAL));
-        assertThat(data.get(1).getState(), is(NOT_EQUAL));
     }
 
     @Test
@@ -206,16 +195,19 @@ public class PageCompareModelTest {
         underTest = new PageCompareModel(request);
         underTest.resolver = resolver;
         underTest.loader = loader;
+        underTest.lines = lines;
+        underTest.versionService = versionService;
     }
 
     private PageCompareData mockOne2OneData(String pathA, String version) throws RepositoryException {
         Resource resource = mock(Resource.class);
         when(resolver.resolve(pathA)).thenReturn(resource);
+        when(resource.getResourceResolver()).thenReturn(resolver);
+
         PageCompareData pageCompareData = mock(PageCompareData.class);
-        final ArrayList<PageCompareDataLine> lines = Lists.newArrayList(
-                mockOne2OneDataLine("a"),
-                mockOne2OneDataLine("b"));
-        when(pageCompareData.getLines()).thenReturn(lines);
+        final List<Line<PageCompareDataLine>> lineResult = Lists.newArrayList(
+                mockOne2OneDataLine("a", "b"));
+        when(lines.generate(anyCollectionOf(PageCompareDataLine.class), anyCollectionOf(PageCompareDataLine.class))).thenReturn(lineResult);
         final ArrayList<VersionSelection> versionSelections = Lists.newArrayList(
                 mock(VersionSelection.class),
                 mock(VersionSelection.class));
@@ -224,10 +216,17 @@ public class PageCompareModelTest {
         return pageCompareData;
     }
 
-    private PageCompareDataLine mockOne2OneDataLine(String uniqueName) {
-        PageCompareDataLine pageCompareDataLine = mock(PageCompareDataLine.class);
-        when(pageCompareDataLine.getUniqueName()).thenReturn(uniqueName);
-        return pageCompareDataLine;
+    private Line<PageCompareDataLine> mockOne2OneDataLine(String left, String right) {
+        PageCompareDataLine leftLine = mock(PageCompareDataLine.class);
+        when(leftLine.getUniqueName()).thenReturn(left);
+        PageCompareDataLine rightLine = mock(PageCompareDataLine.class);
+        when(rightLine.getUniqueName()).thenReturn(right);
+
+        Line<PageCompareDataLine> line = mock(Line.class);
+        when(line.getLeft()).thenReturn(leftLine);
+        when(line.getRight()).thenReturn(rightLine);
+        when(line.getState()).thenReturn(Line.State.NOT_EQUAL);
+        return line;
     }
 
 

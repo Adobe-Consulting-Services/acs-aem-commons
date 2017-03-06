@@ -35,7 +35,7 @@ public class VersionSelectionTest {
 
         final String name= "A";
         final Date date = new Date();
-        VersionSelection underTest = new VersionSelection(name, date);
+        VersionSelectionImpl underTest = new VersionSelectionImpl(name, date);
 
         assertThat(underTest.getName(), is(name));
         assertThat(underTest.getDate(), is(date));

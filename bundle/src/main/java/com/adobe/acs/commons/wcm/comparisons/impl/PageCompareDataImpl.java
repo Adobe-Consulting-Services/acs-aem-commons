@@ -23,6 +23,8 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
+import com.adobe.acs.commons.wcm.comparisons.VersionSelection;
+import com.day.cq.wcm.api.NameConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
@@ -42,7 +44,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-public class PageCompareDataImpl implements PageCompareData {
+class PageCompareDataImpl implements PageCompareData {
 
     private static final Logger log = LoggerFactory.getLogger(PageCompareDataImpl.class);
 
@@ -55,8 +57,8 @@ public class PageCompareDataImpl implements PageCompareData {
 
     private final List<VersionSelection> versionSelection = new ArrayList<VersionSelection>();
 
-    public PageCompareDataImpl(Resource resource, String versionName) throws RepositoryException {
-        this.resource = resource.isResourceType("cq:Page") ? resource.getChild("jcr:content") : resource;
+    PageCompareDataImpl(Resource resource, String versionName) throws RepositoryException {
+        this.resource = resource.isResourceType(NameConstants.NT_PAGE) ? resource.getChild(NameConstants.NN_CONTENT) : resource;
         this.versionName = versionName;
 
         initialize();
@@ -74,7 +76,7 @@ public class PageCompareDataImpl implements PageCompareData {
             VersionIterator versionIterator = history.getAllVersions();
             while (versionIterator.hasNext()) {
                 Version next = versionIterator.nextVersion();
-                versionSelection.add(new VersionSelection(next.getName(), next.getCreated().getTime()));
+                versionSelection.add(new VersionSelectionImpl(next.getName(), next.getCreated().getTime()));
                 if (next.getName().equalsIgnoreCase(versionName)) {
                     String versionPath = next.getFrozenNode().getPath();
                     Resource versionResource = resource.getResourceResolver().resolve(versionPath);
@@ -85,7 +87,7 @@ public class PageCompareDataImpl implements PageCompareData {
         } catch (javax.jcr.UnsupportedRepositoryOperationException e) {
             log.debug(String.format("node %s not versionable", this.resource.getPath()));
         }
-        versionSelection.add(new VersionSelection("latest", Properties.lastModified(resource)));
+        versionSelection.add(new VersionSelectionImpl("latest", Properties.lastModified(resource)));
     }
 
 

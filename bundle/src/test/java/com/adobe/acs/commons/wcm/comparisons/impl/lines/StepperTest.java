@@ -19,7 +19,7 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.wcm.comparisons.lines;
+package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
 import com.google.common.base.Function;
 import org.junit.Test;
@@ -27,8 +27,8 @@ import org.junit.Test;
 import java.io.Serializable;
 import java.util.List;
 
-import static com.adobe.acs.commons.wcm.comparisons.lines.StepperTest.Step.step;
-import static com.adobe.acs.commons.wcm.comparisons.lines.StepperTest.Step.toId;
+import static com.adobe.acs.commons.wcm.comparisons.impl.lines.StepperTest.Step.step;
+import static com.adobe.acs.commons.wcm.comparisons.impl.lines.StepperTest.Step.toId;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;

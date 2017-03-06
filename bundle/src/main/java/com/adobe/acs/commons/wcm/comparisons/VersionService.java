@@ -19,19 +19,15 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.day.cq.wcm.api.NameConstants;
+package com.adobe.acs.commons.wcm.comparisons;
+
 import org.apache.sling.api.resource.Resource;
 
-import java.util.Date;
+import javax.jcr.version.Version;
 
-class Properties {
+public interface VersionService {
 
-    static Date lastModified(Resource resource) {
-        if (resource != null) {
-            return resource.getValueMap().get(NameConstants.PN_LAST_MOD, new Date());
-        }
-        return new Date();
-    }
+    Version lastVersion(Resource resource);
+
 }

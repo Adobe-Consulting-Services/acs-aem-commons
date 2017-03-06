@@ -19,8 +19,9 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.wcm.comparisons.lines;
+package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
+import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -41,7 +42,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(MockitoJUnitRunner.class)
 public class LinesTest {
 
-    Lines<String> one2OneLines = new Lines<String>(TO_ID);
+    LinesGenerator<String> one2OneLines = new LinesGenerator<String>(TO_ID);
 
     @Test
     public void generate_singleLine() throws Exception {
@@ -204,8 +205,8 @@ public class LinesTest {
         return new TypeSafeMatcher<Line<String>>() {
             @Override
             protected boolean matchesSafely(Line<String> stringLine) {
-                return left.equals(stringLine.left()) &&
-                        right.equals(stringLine.right());
+                return left.equals(Optional.fromNullable(stringLine.getLeft())) &&
+                        right.equals(Optional.fromNullable(stringLine.getRight()));
             }
 
             @Override

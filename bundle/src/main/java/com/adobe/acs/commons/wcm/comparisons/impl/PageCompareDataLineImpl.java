@@ -31,7 +31,7 @@ import org.apache.sling.api.resource.Resource;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 
-public class PageCompareDataLineImpl implements PageCompareDataLine {
+class PageCompareDataLineImpl implements PageCompareDataLine {
 
     private static final int LEN = 40;
     private final String path;
@@ -39,14 +39,14 @@ public class PageCompareDataLineImpl implements PageCompareDataLine {
     private final String value;
     private final int depth;
 
-    public PageCompareDataLineImpl(Property property, String basePath, int depth) throws RepositoryException {
+    PageCompareDataLineImpl(Property property, String basePath, int depth) throws RepositoryException {
         this.path = property.getPath().replace(basePath, "");
         this.name = property.getName();
         this.value = EvolutionConfig.printProperty(property);
         this.depth = depth;
     }
 
-    public PageCompareDataLineImpl(Resource resource, String basePath, int depth) {
+    PageCompareDataLineImpl(Resource resource, String basePath, int depth) {
         this.path = resource.getPath().replace(basePath, "");
         this.name = resource.getName();
         this.value = null;

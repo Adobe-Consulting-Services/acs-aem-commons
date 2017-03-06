@@ -19,19 +19,21 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.wcm.comparisons.lines;
+package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
+import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.*;
+import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.EQUAL;
+import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.NOT_EQUAL;
+import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.ONLY_LEFT;
+import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.ONLY_RIGHT;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LineImplTest {
@@ -42,13 +44,10 @@ public class LineImplTest {
         Line<String> underTest = LineImpl.right("test");
 
         // then
-        assertTrue("right should be initialized", underTest.right().isPresent());
-        assertNotNull(underTest.getRight());
+        assertNotNull("right should be initialized", underTest.getRight());
         assertThat(underTest.getRight(), is("test"));
-        assertThat(underTest.right().get(), is(underTest.getRight()));
 
-        assertFalse("left should not be initialized", underTest.left().isPresent());
-        assertNull(underTest.getLeft());
+        assertNull("left should not be initialized", underTest.getLeft());
 
         assertThat(underTest.getState(), is(ONLY_RIGHT));
     }
@@ -59,13 +58,10 @@ public class LineImplTest {
         Line<String> underTest = LineImpl.left("test");
 
         // then
-        assertFalse("right should not be initialized", underTest.right().isPresent());
-        assertNull(underTest.getRight());
+        assertNull("right should not be initialized", underTest.getRight());
 
-        assertTrue("left should be initialized", underTest.left().isPresent());
-        assertNotNull(underTest.getLeft());
+        assertNotNull("left should be initialized", underTest.getLeft());
         assertThat(underTest.getLeft(), is("test"));
-        assertThat(underTest.left().get(), is(underTest.getLeft()));
 
         assertThat(underTest.getState(), is(ONLY_LEFT));
     }
@@ -76,15 +72,11 @@ public class LineImplTest {
         Line<String> underTest = LineImpl.both("left", "right");
 
         // then
-        assertTrue("right should be initialized", underTest.right().isPresent());
-        assertNotNull(underTest.getRight());
+        assertNotNull("right should be initialized", underTest.getRight());
         assertThat(underTest.getRight(), is("right"));
-        assertThat(underTest.right().get(), is(underTest.getRight()));
 
-        assertTrue("left should be initialized", underTest.left().isPresent());
-        assertNotNull(underTest.getLeft());
+        assertNotNull("left should be initialized", underTest.getLeft());
         assertThat(underTest.getLeft(), is("left"));
-        assertThat(underTest.left().get(), is(underTest.getLeft()));
 
         assertThat(underTest.getState(), is(NOT_EQUAL));
     }
@@ -95,15 +87,11 @@ public class LineImplTest {
         Line<String> underTest = LineImpl.both("same", "same");
 
         // then
-        assertTrue("right should be initialized", underTest.right().isPresent());
-        assertNotNull(underTest.getRight());
+        assertNotNull("right should be initialized", underTest.getRight());
         assertThat(underTest.getRight(), is("same"));
-        assertThat(underTest.right().get(), is(underTest.getRight()));
 
-        assertTrue("left should be initialized", underTest.left().isPresent());
-        assertNotNull(underTest.getLeft());
+        assertNotNull("left should be initialized", underTest.getLeft());
         assertThat(underTest.getLeft(), is("same"));
-        assertThat(underTest.left().get(), is(underTest.getLeft()));
 
         assertThat(underTest.getState(), is(EQUAL));
     }

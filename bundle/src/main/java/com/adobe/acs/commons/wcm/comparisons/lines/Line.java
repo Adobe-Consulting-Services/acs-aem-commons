@@ -21,13 +21,7 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.lines;
 
-import com.google.common.base.Optional;
-
 public interface Line<T> {
-
-    Optional<T> left();
-
-    Optional<T> right();
 
     T getLeft();
 
@@ -35,7 +29,7 @@ public interface Line<T> {
 
     State getState();
 
-    public enum State {
+    enum State {
         EQUAL, NOT_EQUAL, ONLY_LEFT, ONLY_RIGHT
     }
 }

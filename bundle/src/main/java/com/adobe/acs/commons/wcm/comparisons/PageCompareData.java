@@ -21,7 +21,6 @@
  */
 package com.adobe.acs.commons.wcm.comparisons;
 
-import com.adobe.acs.commons.wcm.comparisons.impl.VersionSelection;
 import org.apache.sling.api.resource.Resource;
 
 import java.util.Date;

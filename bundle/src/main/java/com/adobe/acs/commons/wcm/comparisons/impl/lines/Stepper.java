@@ -19,7 +19,7 @@
  *  * #L%
  *
  */
-package com.adobe.acs.commons.wcm.comparisons.lines;
+package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;

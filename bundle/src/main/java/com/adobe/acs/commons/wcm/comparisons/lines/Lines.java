@@ -19,108 +19,16 @@
  *  * #L%
  *
  */
+
 package com.adobe.acs.commons.wcm.comparisons.lines;
 
-import com.google.common.base.Function;
-
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Lines&lt;T&gt; combines two list of values (left and right) to a comparing map. Values with same id are in one line, with different ids in different lines. Example:
- * left:   A, B, C
- * right:  B, C, E
- * result:
- * A  |  -
- * B  |  B
- * C  |  C
- * -  |  E
- * IDs are created with Function<T, Serializable>
- *
- * @param <T>
+ * Created by Dominik Foerderreuther <df@adobe.com> on 02/03/17.
  */
-public class Lines<T> {
+public interface Lines<T> {
 
-    private final Function<T, Serializable> toId;
-
-    private Stepper<T> left;
-    private Stepper<T> right;
-
-    private T leftValue;
-    private int leftSpacer;
-
-    private T rightValue;
-    private int rightSpacer;
-
-    public Lines(Function<T, Serializable> toId) {
-        this.toId = toId;
-    }
-
-    public List<Line<T>> generate(final Iterable<T> left, Iterable<T> right) {
-        this.left = new Stepper<T>(left, toId);
-        this.right = new Stepper<T>(right, toId);
-
-        List<Line<T>> lines = new ArrayList<Line<T>>();
-
-        this.leftValue = this.left.next();
-        this.rightValue = this.right.next();
-
-        do {
-            this.leftSpacer = this.right.positionOfIdAfterCurrent(leftValue);
-            this.rightSpacer = this.left.positionOfIdAfterCurrent(rightValue);
-
-            if (leftValue != null && rightValue != null && toId.apply(leftValue).equals(toId.apply(rightValue))) {
-                addPair(lines);
-
-            } else if (leftSpacer < rightSpacer && leftSpacer > 0) {
-                addWithLeftSpacers(lines);
-
-            } else if (rightSpacer > 0) {
-                addWithRightSpacers(lines);
-
-            } else if (leftSpacer > 0) {
-                addWithLeftSpacers(lines);
-
-            } else {
-                addSeperated(lines);
-
-            }
-        } while (leftValue != null || rightValue != null);
-
-        return lines;
-    }
-
-    private void addSeperated(List<Line<T>> lines) {
-        if (leftValue != null) {
-            lines.add(LineImpl.left(leftValue));
-            leftValue = this.left.next();
-        }
-        if (rightValue != null) {
-            lines.add(LineImpl.right(rightValue));
-            rightValue = this.right.next();
-        }
-    }
-
-    private void addWithLeftSpacers(List<Line<T>> lines) {
-        for (int i = 0; i < leftSpacer; i++) {
-            lines.add(LineImpl.right(rightValue));
-            rightValue = this.right.next();
-        }
-    }
-
-    private void addWithRightSpacers(List<Line<T>> lines) {
-        for (int i = 0; i < rightSpacer; i++) {
-            lines.add(LineImpl.left(leftValue));
-            leftValue = this.left.next();
-        }
-    }
-
-    private void addPair(List<Line<T>> lines) {
-        lines.add(LineImpl.both(leftValue, rightValue));
-        this.leftValue = this.left.next();
-        this.rightValue = this.right.next();
-    }
-
+    List<Line<T>> generate(final Iterable<T> left, Iterable<T> right);
 
 }

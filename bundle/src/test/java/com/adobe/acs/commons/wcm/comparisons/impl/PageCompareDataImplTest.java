@@ -23,6 +23,8 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
+import com.adobe.acs.commons.wcm.comparisons.VersionSelection;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -45,6 +47,7 @@ import javax.jcr.version.VersionManager;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.is;
@@ -155,6 +158,43 @@ public class PageCompareDataImplTest {
         assertThat(pageCompareData.getLines(), not(Collections.<PageCompareDataLine>emptyList()));
         assertThat(pageCompareData.getLines().get(0).getName(), is("a"));
         assertThat(pageCompareData.getLines().get(1).getName(), is("b"));
+    }
+
+    @Test
+    public void getRecursiveLines() throws Exception {
+        // given
+        Resource resource = mockResource("/my/path", "latest", new Date());
+
+        Set<String> valueMapKeys = Sets.newHashSet("a", "b");
+        Property a = mockProperty("a", "/my/path/a", "value a");
+        when(resource.adaptTo(Node.class).getProperty("a")).thenReturn(a);
+        Property b = mockProperty("b", "/my/path/b", "value b");
+        when(resource.adaptTo(Node.class).getProperty("b")).thenReturn(b);
+        when(resource.getValueMap().keySet()).thenReturn(valueMapKeys);
+
+        Resource childC = mockResource("/my/path/c", "latest", new Date());
+        when(childC.getName()).thenReturn("c");
+        Resource childD = mockResource("/my/path/d", "latest", new Date());
+        when(childD.getName()).thenReturn("d");
+
+        Property e = mockProperty("e", "/my/path/d/e", "value e");
+        when(childD.adaptTo(Node.class).getProperty("e")).thenReturn(e);
+        when(childD.getValueMap().keySet()).thenReturn(Sets.newHashSet("e"));
+
+
+        List<Resource> children = Lists.newArrayList(childC, childD);
+        when(resource.getChildren()).thenReturn(children);
+
+        // when
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+
+        // then
+        assertThat(pageCompareData.getLines(), not(Collections.<PageCompareDataLine>emptyList()));
+        assertThat(pageCompareData.getLines().get(0).getName(), is("a"));
+        assertThat(pageCompareData.getLines().get(1).getName(), is("b"));
+        assertThat(pageCompareData.getLines().get(2).getName(), is("c"));
+        assertThat(pageCompareData.getLines().get(3).getName(), is("d"));
+        assertThat(pageCompareData.getLines().get(4).getName(), is("e"));
     }
 
     private Property mockProperty(String name, String path, String value) throws RepositoryException {

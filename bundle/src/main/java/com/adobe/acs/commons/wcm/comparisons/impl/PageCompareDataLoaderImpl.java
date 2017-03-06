@@ -30,7 +30,7 @@ import org.apache.sling.api.resource.Resource;
 import javax.jcr.RepositoryException;
 
 
-@Component
+@Component(metatype = false)
 @Service
 public class PageCompareDataLoaderImpl implements PageCompareDataLoader {
 
