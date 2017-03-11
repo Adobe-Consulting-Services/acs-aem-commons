@@ -86,11 +86,6 @@ public class ContentMigrationProcessorImpl extends HttpServlet implements Conten
 	}
 
 
-	@Override
-	public Set<String> listAvailableMigrationSteps() {
-		return registeredSteps.keySet();
-	}
-
 
 	@Override
 	public IdentifiedResources identifyAffectedResources(String name, String path,

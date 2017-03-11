@@ -6,8 +6,6 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 public interface ContentMigrationProcessor {
-
-	public Set<String> listAvailableMigrationSteps();
 	
 	
 	/**
