@@ -62,11 +62,7 @@ public class CacheContent {
     public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
             dataInputStream) {
 
-        this.status = HttpServletResponse.SC_OK;
-        this.charEncoding = charEncoding;
-        this.contentType = contentType;
-        this.headers = headers;
-        this.dataInputStream = dataInputStream;
+        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream);
     }
 
     /**
