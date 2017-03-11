@@ -8,19 +8,24 @@ import org.apache.sling.api.resource.Resource;
 
 public class IdentifiedResources {
 	
-	List <String> resources; // the paths only
+	List <String> paths; // the paths only
 	String contentMigrationStep;
 	
-	public IdentifiedResources (List<String> resources, String name) {
-		this.resources = resources;
+	public IdentifiedResources (List<String> paths, String name) {
+		this.paths = paths;
 		this.contentMigrationStep = name;
 	}
 	
 	
-	public List <String> getResources () {
-		return resources;
+	public List <String> getPaths () {
+		return paths;
 	}
 	
+	
+	/**
+	 * identifies the step which created this IdentifiedResource
+	 * @return the label of the CM Step
+	 */
 	public String getContentMigrationStep () {
 		return contentMigrationStep;
 	}

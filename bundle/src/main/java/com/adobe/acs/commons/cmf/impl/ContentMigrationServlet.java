@@ -43,6 +43,8 @@ public class ContentMigrationServlet extends SlingAllMethodsServlet {
 	protected void doGet (SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
 		
 		ServletOutputStream out = response.getOutputStream();
+
+
 		
 		String usedMigrationStep = request.getParameter(MIGRATION_STEP);
 		String path = request.getParameter(PATH);
@@ -51,7 +53,7 @@ public class ContentMigrationServlet extends SlingAllMethodsServlet {
 		
 		try {
 			IdentifiedResources id = cmp.identifyAffectedResources(usedMigrationStep, path, request.getResourceResolver());
-			Iterator<String> resources = id.getResources().iterator();
+			Iterator<String> resources = id.getPaths().iterator();
 			out.print("Found resources:<ul>");
 			while (resources.hasNext()) {
 				out.print (String.format("<li>%s</li>", resources.next()));
