@@ -126,7 +126,7 @@ public class ContentMigrationProcessorImpl extends HttpServlet implements Conten
 			throw new NoSuchContentMigrationStepException(msg);
 		}
 		
-		Iterator<String> iter = resources.getResources().iterator();
+		Iterator<String> iter = resources.getPaths().iterator();
 		while (iter.hasNext()) {
 			String path = iter.next();
 			Resource toMigrate = resolver.getResource(path);
