@@ -43,17 +43,6 @@ public class ContentMigrationServlet extends SlingAllMethodsServlet {
 	protected void doGet (SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
 		
 		ServletOutputStream out = response.getOutputStream();
-		Set<String> registeredProcessors = cmp.listAvailableMigrationSteps();
-		
-		out.print("List of registered processors (" + registeredProcessors.size() + ")");
-		Iterator<String> iter = registeredProcessors.iterator();
-		
-		out.print("<ul>");
-		while (iter.hasNext()) {
-			String s = iter.next();
-			out.println("<li>" + s + "</li>");
-		}
-		out.print("</ul>");
 		
 		String usedMigrationStep = request.getParameter(MIGRATION_STEP);
 		String path = request.getParameter(PATH);
