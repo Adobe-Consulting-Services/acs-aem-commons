@@ -19,13 +19,11 @@
  */
 package com.adobe.acs.commons.xss;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import tldgen.Function;
 import aQute.bnd.annotation.ProviderType;
+import org.apache.sling.xss.XSSAPI;
+import tldgen.Function;
 
-import com.adobe.granite.xss.XSSAPI;
+import java.util.regex.Pattern;
 
 /**
  * XSSAPI JSP Function wrappers.

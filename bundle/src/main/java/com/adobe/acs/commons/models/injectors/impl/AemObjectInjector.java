@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
-import com.adobe.granite.xss.XSSAPI;
+import org.apache.sling.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.ComponentContext;

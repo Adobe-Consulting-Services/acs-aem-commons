@@ -19,18 +19,16 @@
  */
 package com.adobe.acs.commons.xss;
 
-import java.util.Random;
-
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.sling.xss.XSSAPI;
 import org.junit.Test;
-
-import static org.mockito.Mockito.*;
-
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.granite.xss.XSSAPI;
+import java.util.Random;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Note - these do not test the actual XSS functionality. They only test that
