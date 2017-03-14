@@ -1,6 +1,6 @@
 /*
  * #%L
- * ACS AEM Tools Package
+ * ACS AEM Commons Package
  * %%
  * Copyright (C) 2013 Adobe
  * %%
