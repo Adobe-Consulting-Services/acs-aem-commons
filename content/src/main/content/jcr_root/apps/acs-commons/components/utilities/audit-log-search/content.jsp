@@ -17,13 +17,15 @@
   limitations under the License.
   #L%
   --%>
-<%@include file="/libs/foundation/global.jsp" %><%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
-<c:set var="hasIndex" value="false" /><sling2:findResources var="indexes" query="SELECT * FROM [oak:QueryIndexDefinition] AS s WHERE [declaringNodeTypes]='cq:AuditEvent' AND ISCHILDNODE([/oak:index])" language="JCR-SQL2" />
-<c:forEach var="i" items="${indexes}"><c:set var="hasIndex" value="true" /></c:forEach>
+<%@include file="/libs/foundation/global.jsp" %><%
+%><%@page session="false" import="com.adobe.acs.commons.util.QueryHelper, javax.jcr.query.Query"%><%
 
-<div class="acs-section"> 
+	QueryHelper queryHelper = sling.getService(QueryHelper.class);
+	pageContext.setAttribute("missingIndex", queryHelper.isTraversal(resourceResolver, Query.JCR_SQL2, "SELECT * FROM [cq:AuditEvent]"));
+
+%><div class="acs-section">
 	<div ng-controller="MainCtrl" ng-init="app.uri = '${resourcePath}.auditlogsearch.json'; init();">
-		<c:if test="${hasIndex != 'true'}"> 
+		<c:if test="${missingIndex}">
 			<div class="coral-Alert coral-Alert--notice index-warning">
 				<button type="button" class="coral-MinimalButton coral-Alert-closeButton" title="Close" data-dismiss="alert">
 					<i class="coral-Icon coral-Icon--sizeXS coral-Icon--close coral-MinimalButton-icon"></i>
@@ -31,23 +33,12 @@
 				<i class="coral-Alert-typeIcon coral-Icon coral-Icon--sizeS coral-Icon--alert"></i>
 				<strong class="coral-Alert-title">Index Missing</strong>
 				<div class="coral-Alert-message">
+					<p>
 					No index found for the type <code>cq:AuditEvent</code>, this will result in very slow performance.
-					<form id="create-index-form">
-						<input type="hidden" name="jcr:primaryType" value="oak:QueryIndexDefinition" />
-						<input type="hidden" name="reindex" value="true" />
-						<input type="hidden" name="reindex@TypeHint" value="Boolean" />
-						<input type="hidden" name="type" value="lucene" />
-						<input type="hidden" name="async" value="async" />
-						<input type="hidden" name="declaringNodeTypes" value="cq:AuditEvent" />
-						<input type="hidden" name="declaringNodeTypes@TypeHint" value="Name[]" />
-						<input type="hidden" name="propertyNames" value="cq:userid" />
-						<input type="hidden" name="propertyNames" value="cq:path" />
-						<input type="hidden" name="propertyNames" value="cq:time" />
-						<input type="hidden" name="propertyNames" value="cq:type" />
-						<input type="hidden" name="propertyNames@TypeHint" value="String[]" />
-						<br/>
-						<button class="coral-Button" ng-click="createIndex()">Create Index</button>
-					</form>
+					</p>
+					<p>
+					For more information on creating the necessary index, please see the <a target="_blank" href="https://adobe-consulting-services.github.io/acs-aem-commons/features/audit-log-search.html">ACS AEM Commons Audit Log Search feature doc page</a>.
+					</p>
 				</div>
 			</div>
 		</c:if>

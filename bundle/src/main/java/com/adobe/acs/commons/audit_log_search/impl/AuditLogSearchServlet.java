@@ -1,3 +1,4 @@
+
 /*
  * #%L
  * ACS AEM Commons Bundle
@@ -19,21 +20,7 @@
  */
 package com.adobe.acs.commons.audit_log_search.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.jcr.NodeIterator;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.query.Query;
-import javax.jcr.query.QueryManager;
-import javax.servlet.ServletException;
-
+import com.adobe.acs.commons.audit_log_search.AuditLogSearchRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -48,7 +35,19 @@ import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.audit_log_search.AuditLogSearchRequest;
+import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.query.Query;
+import javax.jcr.query.QueryManager;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @SlingServlet(label = "ACS AEM Commons - Audit Log Search Servlet", methods = { "GET" }, resourceTypes = {
 		"acs-commons/components/utilities/audit-log-search" }, selectors = {
