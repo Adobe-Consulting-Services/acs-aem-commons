@@ -19,14 +19,20 @@
  *  * #L%
  *
  */
-
 package com.adobe.acs.commons.wcm.comparisons;
 
-import java.util.Date;
+public interface PageCompareDataLine {
 
-public interface VersionSelection {
+    String getPath();
 
-    Date getDate();
+    String getUniqueName();
 
     String getName();
+
+    String getValueString();
+
+    String getValueStringShort();
+
+    int getDepth();
+
 }

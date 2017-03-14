@@ -19,14 +19,14 @@
  *  * #L%
  *
  */
-
 package com.adobe.acs.commons.wcm.comparisons;
 
-import java.util.Date;
+import org.apache.sling.api.resource.Resource;
 
-public interface VersionSelection {
+import javax.jcr.RepositoryException;
 
-    Date getDate();
+public interface PageCompareDataLoader {
 
-    String getName();
+    PageCompareData load(Resource resource, String versionName) throws RepositoryException;
+
 }

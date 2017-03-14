@@ -19,14 +19,23 @@
  *  * #L%
  *
  */
+package com.adobe.acs.commons.wcm.comparisons.impl;
 
-package com.adobe.acs.commons.wcm.comparisons;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.Resource;
 
-import java.util.Date;
+import javax.jcr.RepositoryException;
 
-public interface VersionSelection {
 
-    Date getDate();
+@Component(metatype = false)
+@Service
+public class PageCompareDataLoaderImpl implements PageCompareDataLoader {
 
-    String getName();
+    @Override
+    public PageCompareData load(Resource resource, String versionName) throws RepositoryException {
+        return new PageCompareDataImpl(resource, versionName);
+    }
 }

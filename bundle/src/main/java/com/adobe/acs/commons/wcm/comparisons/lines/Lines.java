@@ -20,13 +20,15 @@
  *
  */
 
-package com.adobe.acs.commons.wcm.comparisons;
+package com.adobe.acs.commons.wcm.comparisons.lines;
 
-import java.util.Date;
+import java.util.List;
 
-public interface VersionSelection {
+/**
+ * Created by Dominik Foerderreuther <df@adobe.com> on 02/03/17.
+ */
+public interface Lines<T> {
 
-    Date getDate();
+    List<Line<T>> generate(final Iterable<T> left, Iterable<T> right);
 
-    String getName();
 }

@@ -19,14 +19,10 @@
  *  * #L%
  *
  */
+/**
+ * Version model classes.
+ */
+@Version("1.0.0")
+package com.adobe.acs.commons.wcm.comparisons.model;
 
-package com.adobe.acs.commons.wcm.comparisons;
-
-import java.util.Date;
-
-public interface VersionSelection {
-
-    Date getDate();
-
-    String getName();
-}
+import aQute.bnd.annotation.Version;

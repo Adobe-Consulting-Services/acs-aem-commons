@@ -19,14 +19,25 @@
  *  * #L%
  *
  */
+package com.adobe.acs.commons.wcm.comparisons.impl;
 
-package com.adobe.acs.commons.wcm.comparisons;
+import org.junit.Test;
 
 import java.util.Date;
 
-public interface VersionSelection {
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-    Date getDate();
+public class VersionSelectionTest {
 
-    String getName();
+    @Test
+    public void shouldWork() throws Exception {
+
+        final String name= "A";
+        final Date date = new Date();
+        VersionSelectionImpl underTest = new VersionSelectionImpl(name, date);
+
+        assertThat(underTest.getName(), is(name));
+        assertThat(underTest.getDate(), is(date));
+    }
 }

@@ -22,11 +22,7 @@
 
 package com.adobe.acs.commons.wcm.comparisons;
 
-import java.util.Date;
+import com.adobe.acs.commons.wcm.comparisons.lines.Lines;
 
-public interface VersionSelection {
-
-    Date getDate();
-
-    String getName();
+public interface PageCompareDataLines extends Lines<PageCompareDataLine> {
 }
