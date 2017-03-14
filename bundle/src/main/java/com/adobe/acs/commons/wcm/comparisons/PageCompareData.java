@@ -19,14 +19,26 @@
  *  * #L%
  *
  */
-
 package com.adobe.acs.commons.wcm.comparisons;
 
+import org.apache.sling.api.resource.Resource;
+
 import java.util.Date;
+import java.util.List;
 
-public interface VersionSelection {
+public interface PageCompareData {
 
-    Date getDate();
+    Resource getResource();
 
-    String getName();
+    String getPath();
+
+    String getVersion();
+
+    Date getVersionDate();
+
+    List<VersionSelection> getVersions();
+
+    List<PageCompareDataLine> getLines();
+
+
 }

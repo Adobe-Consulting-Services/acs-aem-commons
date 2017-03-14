@@ -76,6 +76,7 @@ public class EvolutionContextImpl implements EvolutionContext {
         } catch (Exception e) {
             log.error("Could not find versions", e);
         }
+        versions.add(new CurrentEvolutionImpl(this.resource, this.config));
     }
 
 }

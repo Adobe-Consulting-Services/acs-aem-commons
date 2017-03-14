@@ -7,8 +7,8 @@
         <exclude pattern="/apps/acs-commons/components/utilities/page/clientlibs/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/oak-index-manager/clientlibs/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/bulk-workflow-manager/clientlibs/css/generated"/>
-        <include pattern="/apps/acs-commons/components/utilities/one2one-compare(.*)?" />
-        <exclude pattern="/apps/acs-commons/components/utilities/one2one-compare/clientlibs/css/generated"/>
+        <include pattern="/apps/acs-commons/components/utilities/page-compare(.*)?" />
+        <exclude pattern="/apps/acs-commons/components/utilities/page-compare/clientlibs/css/generated"/>
         <include pattern="/apps/acs-commons/components/utilities/version-compare(.*)?" />
         <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
     </filter>

@@ -19,14 +19,17 @@
  *  * #L%
  *
  */
+package com.adobe.acs.commons.wcm.comparisons.lines;
 
-package com.adobe.acs.commons.wcm.comparisons;
+public interface Line<T> {
 
-import java.util.Date;
+    T getLeft();
 
-public interface VersionSelection {
+    T getRight();
 
-    Date getDate();
+    State getState();
 
-    String getName();
+    enum State {
+        EQUAL, NOT_EQUAL, ONLY_LEFT, ONLY_RIGHT
+    }
 }

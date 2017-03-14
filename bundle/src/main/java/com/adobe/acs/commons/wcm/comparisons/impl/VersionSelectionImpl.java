@@ -20,13 +20,26 @@
  *
  */
 
-package com.adobe.acs.commons.wcm.comparisons;
+package com.adobe.acs.commons.wcm.comparisons.impl;
+
+import com.adobe.acs.commons.wcm.comparisons.VersionSelection;
 
 import java.util.Date;
 
-public interface VersionSelection {
+class VersionSelectionImpl implements VersionSelection {
+    private final String name;
+    private final Date date;
 
-    Date getDate();
+    VersionSelectionImpl(String name, Date date) {
+        this.name = name;
+        this.date = date;
+    }
 
-    String getName();
+    public Date getDate() {
+        return (Date) date.clone();
+    }
+
+    public String getName() {
+        return name;
+    }
 }

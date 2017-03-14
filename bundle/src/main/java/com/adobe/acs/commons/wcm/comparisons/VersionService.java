@@ -22,11 +22,12 @@
 
 package com.adobe.acs.commons.wcm.comparisons;
 
-import java.util.Date;
+import org.apache.sling.api.resource.Resource;
 
-public interface VersionSelection {
+import javax.jcr.version.Version;
 
-    Date getDate();
+public interface VersionService {
 
-    String getName();
+    Version lastVersion(Resource resource);
+
 }

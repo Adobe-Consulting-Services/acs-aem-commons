@@ -39,7 +39,7 @@ import com.adobe.acs.commons.version.EvolutionContext;
 @Properties({
         @Property(label = "Ignored property names",
                 description = "Property names (regex possible) listed here will be excluded from the version compare feature.",
-                name = EvolutionAnalyserImpl.PROPERTY_IGNORES, value = { "(.*/)?jcr:uuid", "(.*/)?(cq|jcr):lastModified", "(.*/)?(cq|jcr):lastModifiedBy", "(.*/)?jcr:frozenUuid", "(.*/)?jcr:primaryType" }, cardinality = Integer.MAX_VALUE),
+                name = EvolutionAnalyserImpl.PROPERTY_IGNORES, value = { "(.*/)?jcr:uuid", "(.*/)?(cq|jcr):lastModified", "(.*/)?(cq|jcr):lastModifiedBy", "(.*/)?jcr:frozenUuid", "(.*/)?jcr:primaryType", "(.*/)?jcr:frozenPrimaryType" }, cardinality = Integer.MAX_VALUE),
         @Property(label = "Ignored resource names",
                 description = "Resource names (regex possible) listed here will be excluded from the version compare feature.",
                 name = EvolutionAnalyserImpl.RESOURCE_IGNORES, value = { "" }, cardinality = Integer.MAX_VALUE) })
