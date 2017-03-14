@@ -255,15 +255,8 @@
             </dependency>
             <dependency>
                 <groupId>com.adobe.aem</groupId>
-                <artifactId>uber-jar</artifactId>
-                <version>6.2.0</version>
-                <classifier>apis</classifier>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient-osgi</artifactId>
-                <version>4.3.4</version>
+                <artifactId>aem-api</artifactId>
+                <version>6.0.0.1</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>

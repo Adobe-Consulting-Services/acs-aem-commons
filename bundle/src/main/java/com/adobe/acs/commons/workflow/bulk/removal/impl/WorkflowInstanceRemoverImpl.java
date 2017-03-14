@@ -20,37 +20,29 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalMaxDurationExceededException;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
-
+import com.adobe.acs.commons.workflow.bulk.removal.*;
+import com.adobe.granite.workflow.WorkflowException;
+import com.adobe.granite.workflow.WorkflowSession;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.Workflow;
+import com.adobe.granite.workflow.exec.filter.WorkItemFilter;
+import com.day.cq.workflow.WorkflowService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.event.jobs.JobManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -77,6 +69,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final String NT_CQ_WORKFLOW = "cq:Workflow";
 
+    private static final String JOB_SEPARATOR = "_,_";
+
     private static final Pattern NN_SERVER_FOLDER_PATTERN = Pattern.compile("server\\d+");
 
     private static final Pattern NN_DATE_FOLDER_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}.*");
@@ -87,11 +81,16 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final long MS_IN_ONE_MINUTE = 60000;
 
-    
     private final AtomicReference<WorkflowRemovalStatus> status
             = new AtomicReference<WorkflowRemovalStatus>();
 
     private final AtomicBoolean forceQuit = new AtomicBoolean(false);
+
+    @Reference
+    private JobManager jobManager;
+
+    @Reference
+    private WorkflowService workflowService;
 
     /**
      * {@inheritDoc}
@@ -181,7 +180,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                         if (this.forceQuit.get()) {
                             throw new WorkflowRemovalForceQuitException();
-                        }  else if (end > 0 && System.currentTimeMillis() >= end) {
+                        } else if (end > 0 && System.currentTimeMillis() >= end) {
                             throw new WorkflowRemovalMaxDurationExceededException();
                         }
 
@@ -197,12 +196,16 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                         checkedCount++;
 
-                        final String status = properties.get(PN_STATUS, String.class);
+                        final String status = getStatus(instance);
                         final String model = properties.get(PN_MODEL_ID, String.class);
                         final Calendar startTime = properties.get(PN_STARTED_AT, Calendar.class);
                         final String payload = properties.get(PAYLOAD_PATH, String.class);
 
-                        if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(status)) {
+                        if (StringUtils.isBlank(payload)) {
+                            log.warn("Unable to find payload for Workflow instance [ {} ]", instance.getPath());
+                            remaining++;
+                            continue;
+                        } else if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(status)) {
                             log.trace("Workflow instance [ {} ] has non-matching status of [ {} ]", instance.getPath(), status);
                             remaining++;
                             continue;
@@ -329,6 +332,69 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         }
 
         return sortedCollection;
+    }
+
+    private String getStatus(Resource workflowInstanceResource) {
+        String status = workflowInstanceResource.getValueMap().get(PN_STATUS, "UNKNOWN");
+
+        if (!"RUNNING".equalsIgnoreCase(status)) {
+            log.debug("Status of [ {} ] is not RUNNING, so we can take it at face value", status);
+            return status;
+        }
+
+        // Else check if its RUNNING or STALE
+        log.debug("Status is [ {} ] so we have to determine if its RUNNING or STALE", status);
+
+        Resource metadataResource = workflowInstanceResource.getChild("data/metaData");
+        if (metadataResource == null) {
+            log.debug("Workflow instance data/metaData does not exist for [ {} ]", workflowInstanceResource.getPath());
+            return status;
+        }
+
+        final ValueMap properties = metadataResource.getValueMap();
+        final String[] jobIds = StringUtils.splitByWholeSeparator(properties.get("currentJobs", ""), JOB_SEPARATOR);
+
+        if (jobIds.length == 0) {
+            log.debug("No jobs found for [ {} ] so assuming status as [ {} ]", workflowInstanceResource.getPath(), status);
+        }
+
+        // Make sure there are no JOBS that match to this jobs name
+        for (final String jobId : jobIds) {
+            if (jobManager.getJobById(jobId) != null) {
+                // Found a job for this jobID; so this is a RUNNING job
+                log.debug("JobManager found a job for jobId [ {} ] so marking workflow instances [ {} ] as RUNNING", jobId, workflowInstanceResource.getPath());
+                return "RUNNING";
+            }
+        }
+        log.debug("JobManager could not find any jobs for jobIds [ {} ] so  workflow instance [ {} ] is potentially STALE", StringUtils.join(jobIds, ", "), workflowInstanceResource.getPath());
+
+        final WorkflowSession workflowSession = workflowInstanceResource.getResourceResolver().adaptTo(WorkflowSession.class);
+        Workflow workflow = null;
+        try {
+            workflow = workflowSession.getWorkflow(workflowInstanceResource.getPath());
+            if (workflow == null) {
+                throw new WorkflowException(String.format("Workflow instance object is null for [ %s]", workflowInstanceResource.getPath()));
+            }
+        } catch (WorkflowException e) {
+            log.warn("Unable to locate Workflow Instance for [ {} ] So it cannot be RUNNING and must be STALE. ", workflowInstanceResource.getPath(), e);
+            return "STALE";
+        }
+
+        if (workflow != null) {
+            final List<WorkItem> workItems = workflow.getWorkItems(new WorkItemFilter() {
+                public boolean doInclude(WorkItem workItem) {
+                    // Only include active Workflow instances (ones without an End Time) in this list
+                    return workItem.getTimeEnded() == null;
+                }
+            });
+
+            if (!workItems.isEmpty()) {
+                // If at least 1 work item exists that does not have an end time (meaning its still active), then its RUNNING
+               return "RUNNING";
+            }
+        }
+
+        return "STALE";
     }
 
     private void save(ResourceResolver resourceResolver) throws PersistenceException, InterruptedException {
