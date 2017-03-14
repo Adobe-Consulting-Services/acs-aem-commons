@@ -26,6 +26,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.RepositoryException;
 import java.util.List;
+import java.util.Map;
 
 @ProviderType
 public interface QueryHelper {
@@ -43,4 +44,23 @@ public interface QueryHelper {
                                  String statement,
                                  String relPath) throws RepositoryException;
 
+    /**
+     * Determines if the provided query will traverse.
+     * @param resourceResolver the resourceResolver providing access into the JCR
+     * @param language the query language (xpath, JCR-SQL, JCR-SQL2)
+     * @param statement the query statement
+     * @return true if the query will traverse, false if it will not
+     */
+    boolean isTraversal(ResourceResolver resourceResolver,
+                       String language,
+                       String statement) throws RepositoryException;
+
+    /**
+     * Determines if the provided query will traverse.
+     * @param resourceResolver the resourceResolver providing access into the JCR
+     * @param queryBuilderParams map of query builder params
+     * @return true if the query will traverse, false if it will not
+     */
+    boolean isTraversal(ResourceResolver resourceResolver,
+                       Map<String, String> queryBuilderParams) throws RepositoryException;
 }
