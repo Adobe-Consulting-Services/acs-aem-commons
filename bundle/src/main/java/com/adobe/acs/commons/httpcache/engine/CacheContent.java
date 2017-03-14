@@ -24,6 +24,7 @@ import com.adobe.acs.commons.httpcache.store.TempSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +37,8 @@ import java.util.Map;
 public class CacheContent {
     private static final Logger log = LoggerFactory.getLogger(CacheContent.class);
 
+    /** Response status **/
+    private int status;
     /** Response character encoding */
     private String charEncoding;
     /** Response content type */
@@ -59,6 +62,23 @@ public class CacheContent {
     public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
             dataInputStream) {
 
+        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream);
+    }
+
+    /**
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * method.
+     *
+     * @param status
+     * @param charEncoding
+     * @param contentType
+     * @param headers
+     * @param dataInputStream
+     */
+    public CacheContent(int status, String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
+            dataInputStream) {
+
+        this.status = status;
         this.charEncoding = charEncoding;
         this.contentType = contentType;
         this.headers = headers;
@@ -78,6 +98,8 @@ public class CacheContent {
      * @return
      */
     public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
+        this.status = responseWrapper.getStatus();
+
         // Extract information from response and populate state of the instance.
         this.charEncoding = responseWrapper.getCharacterEncoding();
         this.contentType = responseWrapper.getContentType();
@@ -98,6 +120,13 @@ public class CacheContent {
         this.dataInputStream = responseWrapper.getTempSink().createInputStream();
 
         return this;
+    }
+
+    /**
+     * Get status code.
+     */
+    public int getStatus() {
+        return status;
     }
 
     /**
@@ -143,4 +172,5 @@ public class CacheContent {
     public TempSink getTempSink(){
         return this.tempSink;
     }
+
 }
