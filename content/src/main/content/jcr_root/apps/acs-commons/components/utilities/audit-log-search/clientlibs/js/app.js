@@ -39,6 +39,7 @@ angular.module('acs-commons-audit-log-search-app', ['acsCoral', 'ACS.Commons.not
 
 		$scope.result = {};
 
+		/*
 		$scope.createIndex = function () {
 			NotificationsService.running(true);
 			
@@ -56,6 +57,7 @@ angular.module('acs-commons-audit-log-search-app', ['acsCoral', 'ACS.Commons.not
 			});
 			return false;
 		};
+		*/
 
 		$scope.search = function () {
 			var start = new Date().getTime();
