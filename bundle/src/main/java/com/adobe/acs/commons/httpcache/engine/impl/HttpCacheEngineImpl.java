@@ -383,6 +383,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             }
         }
 
+        response.setStatus(cacheContent.getStatus());
         // Spool header info into the servlet response.
         for (String headerName : cacheContent.getHeaders().keySet()) {
             for (String headerValue : cacheContent.getHeaders().get(headerName)) {
