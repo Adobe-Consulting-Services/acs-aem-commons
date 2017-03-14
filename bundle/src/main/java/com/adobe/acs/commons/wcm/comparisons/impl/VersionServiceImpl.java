@@ -37,7 +37,7 @@ import javax.jcr.version.Version;
 import javax.jcr.version.VersionManager;
 import java.util.Iterator;
 
-@Component(metatype = false)
+@Component
 @Service
 public class VersionServiceImpl implements VersionService {
 
@@ -51,7 +51,7 @@ public class VersionServiceImpl implements VersionService {
             final Iterator<Version> allVersions = versionManager.getVersionHistory(versionableResource.getPath()).getAllVersions();
             return Iterators.getLast(allVersions);
         } catch (RepositoryException e) {
-            log.error("error receiving last version of resource ", resource.getName());
+            log.error("Error receiving last version of resource [ {} ]", resource.getName());
         }
         return null;
     }

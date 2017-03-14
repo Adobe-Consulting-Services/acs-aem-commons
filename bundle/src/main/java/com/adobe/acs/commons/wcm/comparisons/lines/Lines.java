@@ -24,11 +24,6 @@ package com.adobe.acs.commons.wcm.comparisons.lines;
 
 import java.util.List;
 
-/**
- * Created by Dominik Foerderreuther <df@adobe.com> on 02/03/17.
- */
 public interface Lines<T> {
-
     List<Line<T>> generate(final Iterable<T> left, Iterable<T> right);
-
 }
