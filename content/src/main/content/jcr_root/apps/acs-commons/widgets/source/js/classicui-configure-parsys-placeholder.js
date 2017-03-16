@@ -31,8 +31,7 @@
         ACS_PARSYS_BG_COLOR = "acsParsysBackgroundColor",
         ACS_PARSYS_BORDER_COLOR = "acsParsysBorderColor";
 
-
-    if( ( pathName !== "/cf" ) && ( pathName.indexOf("/content") !== 0)){
+    if (( pathName !== "/cf" ) && ( pathName.indexOf("/content") !== 0)) {
         return;
     }
 
@@ -70,14 +69,31 @@
 
             cellSearchPath = cellSearchPath.substring(0, cellSearchPath.indexOf("|"));
             parNames = parentPath.split("jcr:content/");
+            
+            if (!parNames || parNames.length < 2) {
+                // The parent path is something very unexpected.
+                // As this is an "always on" feature, return the empty designConfig rather than cluttering the console.
+                return designConfig;
+            }
+            
             parNames = parNames[1].split("/");
 
+            if (!pageInfo 
+                || !pageInfo,designObject 
+                || !pageInfo.designObject.content
+                || !_.has(pageInfo.designObject.content, cellSearchPath)) {
+                // As this is an "always on" feature, return the empty designConfig rather than cluttering the console.
+                return designConfig;
+            }
+          
             cellSearchPathInfo = pageInfo.designObject.content[cellSearchPath];
-
+g
             if (cellSearchPathInfo) {
-                for(var i=0; i < parNames.length; i++){
+                for(var i = 0; i < parNames.length; i++) {
                     var prop = parNames[i];
-                    cellSearchPathInfo = cellSearchPathInfo[prop];
+                    if (_.has(cellSearchPathInfo, prop)) { 
+                        cellSearchPathInfo = cellSearchPathInfo[prop];
+                    } 
                 }
             } else {
                 // This is not an unusual condition and as this is feature is "on by default" we should not clutter the Console w/ messages.
@@ -85,7 +101,7 @@
             }
             designConfig = cellSearchPathInfo;
         } catch (err) {
-            console.log("ACS AEM Commons - Error getting parsys configuration", err);
+           // This is an always on feature so do not log issues to the Console as this typically effects consumers that are not even using this feature.
         }
 
         return designConfig;
@@ -95,7 +111,7 @@
         var parsyses = {};
 
         _.each(CQ.WCM.getEditables(), function(e){
-            if (isParsysNew(e)) {
+            if (isParsysNew(e) && _.has(this, e.path)) {
                 this[e.path] = e;
             }
         }, parsyses);
@@ -159,6 +175,3 @@
         }
     });
 }());
-
-
-
