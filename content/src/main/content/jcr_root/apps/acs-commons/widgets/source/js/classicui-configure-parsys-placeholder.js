@@ -78,16 +78,16 @@
             
             parNames = parNames[1].split("/");
 
-            if (!pageInfo 
-                || !pageInfo,designObject 
-                || !pageInfo.designObject.content
-                || !_.has(pageInfo.designObject.content, cellSearchPath)) {
+            if (!pageInfo || 
+                !pageInfo.designObject || 
+                !pageInfo.designObject.content || 
+                !_.has(pageInfo.designObject.content, cellSearchPath)) {
                 // As this is an "always on" feature, return the empty designConfig rather than cluttering the console.
                 return designConfig;
             }
           
             cellSearchPathInfo = pageInfo.designObject.content[cellSearchPath];
-g
+
             if (cellSearchPathInfo) {
                 for(var i = 0; i < parNames.length; i++) {
                     var prop = parNames[i];
