@@ -23,7 +23,7 @@
     function activate(encodedItemPath, propertyName, path) {
         var selector = "input[name='./jcr:content/metadata/" + propertyName + "'][disabled]",
             $placeholder = $(selector),
-            $container = $placeholder.parents(".foundation-field-editable").first(),
+            $container = $placeholder.parents(".foundation-field-editable, .coral-Form-fieldwrapper").first(),
             currentFieldLabel = $container.find(".coral-Form-fieldlabel").html();
 
         $container.load(path + ".html?item=" + encodedItemPath, function() {
