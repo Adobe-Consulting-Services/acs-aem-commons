@@ -225,7 +225,7 @@
                     value = $field.prop("checked") ? $field.val() : "";
                 }
 
-                if (cmf.isAutocomplete($field)) {
+                if (cmf.isAutocomplete($field) || cmf.isTagsField($field)) {
                     var tags = [];
                     var $tagItems = $field.closest("ul").find("li.coral-TagList-tag");
                     $tagItems.each(function (k, tagItem) {

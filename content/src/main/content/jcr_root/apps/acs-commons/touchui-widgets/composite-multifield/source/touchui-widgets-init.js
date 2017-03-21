@@ -108,6 +108,32 @@
                 });
             }
         },
+        
+        isTagsField: function ($field) {
+            return !_.isEmpty($field) && ($field.hasClass("js-TagsPickerField-tagList") || $field.closest("ul").hasClass("js-TagsPickerField-tagList"));
+        },
+        
+        getTagsFieldName: function ($fieldWrapper) {
+            return $fieldWrapper.children(".js-cq-TagsPickerField").data("property-path").substr(2);
+        },
+
+        setTagsField: function($field, value) {
+        	var cmf = this;
+
+            var tagsArray = value.split(',');
+
+            var $tagList = CUI.Widget.fromElement(CUI.TagList,$field);
+
+            var cuiTagList = $field.data("tagList");
+            if ($tagList) {
+                $(tagsArray).each(function (i, item) {
+                	var tagPath = "/etc/tags/" + item.replace(":", "/");
+                    $.get(tagPath + ".tag.json").done(function(data){
+                        cuiTagList._appendItem( { value: data.tagID, display: data.titlePath} );
+                    });
+                });
+            }
+        },
 
         setWidgetValue: function ($field, value) {
             if (_.isEmpty($field)) {
@@ -124,6 +150,8 @@
                 this.setDateField($field, value);
             } else if (this.isAutocomplete($field)) {
                 this.setAutocomplete($field,value);
+            } else if (this.isTagsField($field)) {
+                this.setTagsField($field,value);
             } else {
                 $field.val(value);
             }

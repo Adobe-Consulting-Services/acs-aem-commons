@@ -23,7 +23,10 @@ package com.adobe.acs.commons.util.impl;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.felix.scr.annotations.Component;
@@ -38,7 +41,6 @@ import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -137,5 +139,47 @@ public class WorkflowHelperImpl implements WorkflowHelper {
         int q = Integer.parseInt(qualityStr);
         double res = base * q / MAX_GENERIC_QUALITY;
         return res;
+    }
+
+    /**
+     * @{inheritDoc}
+     **/
+    @Override
+    public final Resource getPageOrAssetResource(ResourceResolver resourceResolver, String path) {
+        Resource payloadResource = resourceResolver.getResource(path);
+
+        if (payloadResource == null) {
+            return null;
+        }
+
+        Asset asset = DamUtil.resolveToAsset(payloadResource);
+        if (asset != null) {
+            return asset.adaptTo(Resource.class);
+        }
+
+        PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+        Page page = pageManager.getContainingPage(payloadResource);
+
+        if (page != null) {
+            return page.adaptTo(Resource.class);
+        }
+
+        return null;
+    }
+
+    /**
+     * @{inheritDoc}
+     **/
+    @Override
+    public boolean isPathTypedPayload(WorkflowData workflowData) {
+        return PAYLOAD_TYPE_JCR_PATH.equals(workflowData.getPayloadType());
+    }
+
+    /**
+     * @{inheritDoc}
+     **/
+    @Override
+    public boolean isPathTypedPayload(com.adobe.granite.workflow.exec.WorkflowData workflowData) {
+        return PAYLOAD_TYPE_JCR_PATH.equals(workflowData.getPayloadType());
     }
 }

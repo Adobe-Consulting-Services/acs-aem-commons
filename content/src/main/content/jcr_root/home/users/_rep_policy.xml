@@ -21,4 +21,8 @@
                 jcr:primaryType="rep:Restrictions"
                 rep:glob="*/wcm/notification/inbox/*"/>
     </allow1>
+    <allow2
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-ensure-service-user-service"
+            rep:privileges="{Name}[rep:userManagement]"/>
 </jcr:root>

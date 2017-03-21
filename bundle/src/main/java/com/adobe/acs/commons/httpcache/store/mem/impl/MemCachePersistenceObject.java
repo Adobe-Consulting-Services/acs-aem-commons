@@ -38,6 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Value for cache item in mem store.
  */
 class MemCachePersistenceObject {
+    /** Response status **/
+    private int status;
     /** Response character encoding */
     private String charEncoding;
     /** Response content type */
@@ -64,9 +66,10 @@ class MemCachePersistenceObject {
      * @param dataInputStream
      * @throws HttpCacheDataStreamException
      */
-    public MemCachePersistenceObject buildForCaching(String charEncoding, String contentType, Map<String,
+    public MemCachePersistenceObject buildForCaching(int status, String charEncoding, String contentType, Map<String,
             List<String>> headers, InputStream dataInputStream) throws HttpCacheDataStreamException {
 
+        this.status = status;
         this.charEncoding = charEncoding;
         this.contentType = contentType;
 
@@ -88,6 +91,13 @@ class MemCachePersistenceObject {
         return this;
     }
 
+    /**
+     * Get response status
+     * @return the status code
+     */
+    public int getStatus() {
+        return status;
+    }
     /**
      * Get char encoding.
      *

@@ -53,7 +53,7 @@ public class MemTempSinkImpl implements TempSink {
         if (null != sink) {
             return new ByteArrayInputStream(sink);
         } else {
-            throw new HttpCacheDataStreamException("Nothing available in sink.");
+            return new ByteArrayInputStream(new byte[0]);
         }
     }
 

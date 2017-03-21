@@ -27,6 +27,7 @@ import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.util.ParameterUtil;
+import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.felix.scr.annotations.Activate;
@@ -37,6 +38,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +49,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Implementation for custom cache config extension and associated cache key creation based on aem groups. This cache
- * config extension accepts the http request only if at least one of the configured groups is present in the request
- * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
+ * Implementation for custom cache config extension and associated cache key creation based on resource type. This cache
+ * config extension accepts the http request only if at least one of the configured patterns matches the resource type
+ * of the request's resource.
  */
 @Component(label = "ACS AEM Commons - HTTP Cache - ResourceType based extension for HttpCacheConfig and CacheKeyFactory.",
         metatype = true,
@@ -78,6 +80,12 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     private static final String PROP_RESOURCE_TYPES = "httpcache.config.extension.resource-types.allowed";
     private List<Pattern> resourceTypePatterns;
 
+    @Property(label = "Check RT of ./jcr:content?",
+            description = "Should the resourceType check be applied to ./jcr:content ?",
+            boolValue = false)
+    public static final String PROP_CHECK_CONTENT_RESOURCE_TYPE = "httpcache.config.extension.resource-types.page-content";
+    private boolean checkContentResourceType;
+
     //-------------------------<HttpCacheConfigExtension methods>
 
     @Override
@@ -96,14 +104,21 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         }
         // Passed the content path test..
 
+        Resource candidateResource = request.getResource();
+        if (checkContentResourceType) {
+            candidateResource = candidateResource.getChild(JcrConstants.JCR_CONTENT);
+            if (candidateResource == null) {
+                return false;
+            }
+        }
         log.debug("ResourceHttpCacheConfigExtension checking for resource type matches");
         // Match resource types.
         for (Pattern pattern : resourceTypePatterns) {
-            Matcher m = pattern.matcher(request.getResource().getResourceType());
+            Matcher m = pattern.matcher(candidateResource.getResourceType());
 
             if (m.matches()) {
                 if (log.isTraceEnabled()) {
-                    log.trace("ResourceHttpCacheConfigExtension accepts request [ {} ]", request.getResource());
+                    log.trace("ResourceHttpCacheConfigExtension accepts request [ {} ]", candidateResource);
                 }
                 return true;
             }
@@ -183,6 +198,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     protected void activate(Map<String, Object> configs) {
         resourceTypePatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_RESOURCE_TYPES), new String[]{}));
         pathPatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_PATHS), new String[]{}));
+        checkContentResourceType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_CONTENT_RESOURCE_TYPE),false);
 
         log.info("ResourceHttpCacheConfigExtension activated/modified.");
     }

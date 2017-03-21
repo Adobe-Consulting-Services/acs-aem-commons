@@ -10,9 +10,18 @@ import org.apache.sling.api.resource.Resource;
 @ConsumerType
 public interface PageRootProvider {
     /**
-     * Returns the root page for the provided resource. The root page is selected via the regex provided in the PageRootProviderImpl's OSGi configuration.
-     * @param resource
-     * @return
+     * Returns the root page for the provided resource. The root page is selected
+     * via the regex(es) provided in the PageRootProviderImpl's OSGi configuration.
+     * @param resource The Resource for which to return the root page
+     * @return Root page
      */
     Page getRootPage(Resource resource);
+
+    /**
+     * Returns the root path for the provided resource path. The root path is selected
+     * via the regex(es) provided in the PageRootProviderImpl's OSGi configuration.
+     * @param resourcePath The path for which to return the root path
+     * @return Root path
+     */
+    String getRootPagePath(String resourcePath);
 }

@@ -22,7 +22,7 @@
           import="com.adobe.acs.commons.util.PathInfoUtil,
                 com.day.cq.replication.Agent,
     			com.day.cq.replication.AgentManager,
-                com.adobe.granite.xss.XSSAPI,
+                org.apache.sling.xss.XSSAPI,
     			org.apache.commons.lang.StringUtils,
                 com.adobe.acs.commons.util.TextUtil,
     			java.util.Map"%><%
