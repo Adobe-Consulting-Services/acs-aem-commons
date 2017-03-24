@@ -3,6 +3,6 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="cq:PageContent"
-        jcr:title="Oak Index Manager"
-        sling:resourceType="acs-commons/components/utilities/oak-index-manager"/>
+        jcr:title="Manage Controlled Processes"
+        sling:resourceType="acs-commons/components/utilities/manage-controlled-processes"/>
 </jcr:root>
