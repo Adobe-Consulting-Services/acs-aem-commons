@@ -3,7 +3,7 @@
           xmlns:jcr="http://www.jcp.org/jcr/1.0"
     cq:defaultView="html"
     jcr:primaryType="cq:Component"
-    jcr:title="ACS Commons Oak Index Manager"
+    jcr:title="ACS Commons Manage Controlled Processes"
     sling:resourceSuperType="acs-commons/components/utilities/app-page"
-    favicon="/apps/acs-commons/components/utilities/oak-index-manager/clientlibs/images/favicon.ico"
+    favicon="/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/images/favicon.ico"
     componentGroup=".hidden"/>
