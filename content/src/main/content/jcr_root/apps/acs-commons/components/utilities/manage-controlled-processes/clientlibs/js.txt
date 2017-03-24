@@ -1,0 +1,7 @@
+#base=js
+
+vendor/blockly_compressed.js
+vendor/blocks_compressed.js
+vendor/messages.js
+vendor/en.js
+mcp.js

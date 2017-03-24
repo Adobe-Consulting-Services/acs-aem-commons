@@ -50,6 +50,7 @@
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list/item_\d+"/>
+        <include pattern="/etc/acs-commons/manage-controlled-processes"/>
         <include pattern="/etc/acs-commons/notifications"/>
         <include pattern="/etc/acs-commons/notifications/jcr:content"/>
         <include pattern="/etc/acs-commons/packagers"/>
