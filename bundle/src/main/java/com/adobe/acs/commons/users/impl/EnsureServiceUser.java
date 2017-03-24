@@ -29,7 +29,8 @@ import java.util.*;
         label = "ACS AEM Commons - Ensure Service User",
         configurationFactory = true,
         metatype = true,
-        immediate = true
+        immediate = true,
+        policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
         @Property(
