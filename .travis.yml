@@ -1,4 +1,6 @@
 language: java
+env:
+- MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=512m"
 script: mvn verify -B
 sudo: false
 notifications:
