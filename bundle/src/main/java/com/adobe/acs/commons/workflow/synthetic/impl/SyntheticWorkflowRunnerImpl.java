@@ -32,6 +32,7 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkflowProcess;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
@@ -44,6 +45,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +63,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * ACS AEM Commons - Synthetic Workflow Runner
  * Facilitates the execution of synthetic workflow.
  */
-@Component
+@Component(immediate = true)
 @References({
         @Reference(
                 referenceInterface = WorkflowProcess.class,
@@ -98,6 +101,8 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+
+    private ServiceRegistration accessorReg;
 
     /**
      * {@inheritDoc}
@@ -441,12 +446,25 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         return new Hashtable<String, Object>();
     }
 
+    @Activate
+    protected final void activate(BundleContext bundleContext) {
+        this.accessorReg = bundleContext.registerService(SyntheticWorkflowRunnerAccessor.class.getName(), new SyntheticWorkflowRunnerAccessor() {
+            @Override
+            public SyntheticWorkflowRunner getSyntheticWorkflowRunner() {
+                return SyntheticWorkflowRunnerImpl.this;
+            }
+        }, new Hashtable());
+    }
 
     @Deactivate
     protected final void deactivate(final Map<String, Object> config) {
         log.trace("Deactivating Synthetic Workflow Runner");
         this.workflowProcessesByLabel = new ConcurrentHashMap<String, SyntheticWorkflowProcess>();
         this.workflowProcessesByProcessName = new ConcurrentHashMap<String, SyntheticWorkflowProcess>();
+        if (accessorReg != null) {
+            accessorReg.unregister();
+            accessorReg = null;
+        }
     }
 
 
