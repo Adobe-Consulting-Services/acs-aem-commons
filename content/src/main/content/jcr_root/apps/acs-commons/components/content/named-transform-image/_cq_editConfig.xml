@@ -6,12 +6,13 @@
             jcr:primaryType="cq:DropTargetConfig"
             accept="[image/.*]"
             groups="[media]"
-            propertyName="./fileReference"/>
-        <parameters
-                jcr:primaryType="nt:unstructured"
-                imageCrop=""
-                imageRotate=""
-                sling:resourceType="acs-commons/components/content/named-transform-image"/>
+            propertyName="./fileReference">
+            <parameters
+                    jcr:primaryType="nt:unstructured"
+                    imageCrop=""
+                    imageRotate=""
+                    sling:resourceType="acs-commons/components/content/named-transform-image"/>
+        </image>
     </cq:dropTargets>
     <cq:inplaceEditing
             active="{Boolean}true"
