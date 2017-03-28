@@ -76,17 +76,29 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
         ResourceResolver resourceResolver = request.getResourceResolver();
         response.setContentType("application/json");
         JsonWriter writer = new JsonWriter(response.getWriter());
-        writer.beginArray();
+        writer.beginObject();
 
+        writer.name("js");
+        writer.beginArray();
         if (!excludeAll) {
             Collection<ClientLibrary> libraries = htmlLibraryManager.getLibraries(categories, LibraryType.JS, true, true);
             for (ClientLibrary library : libraries) {
                 writer.value(resourceResolver.map(library.getIncludePath(LibraryType.JS, htmlLibraryManager.isMinifyEnabled())));
             }
         }
-
         writer.endArray();
 
+        writer.name("css");
+        writer.beginArray();
+        if (!excludeAll) {
+            Collection<ClientLibrary> libraries = htmlLibraryManager.getLibraries(categories, LibraryType.CSS, true, true);
+            for (ClientLibrary library : libraries) {
+                writer.value(resourceResolver.map(library.getIncludePath(LibraryType.CSS, htmlLibraryManager.isMinifyEnabled())));
+            }
+        }
+        writer.endArray();
+
+        writer.endObject();
     }
 
     @Activate

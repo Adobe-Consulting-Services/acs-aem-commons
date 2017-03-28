@@ -20,11 +20,26 @@
 /*global CQ: false */
 (function() {
     CQ.HTTP.get("/bin/acs-commons/dynamic-classicui-clientlibs.json", function(options, success, response) {
-        var paths, i;
+        var data, i, el,
+            head = document.getElementsByTagName("head")[0];
         if (success) {
-            paths = JSON.parse(response.responseText);
-            for (i = 0; i < paths.length; i++) {
-                $.getScript(paths[i]);
+            data = JSON.parse(response.responseText);
+            if (data.js) {
+                for (i = 0; i < data.js.length; i++) {
+                    el = document.createElement("script");
+                    el.type = "text/javascript";
+                    el.src = data.js[i];
+                    head.appendChild(el);
+                }
+            }
+            if (data.css) {
+                for (i = 0; i < data.css.length; i++) {
+                    el = document.createElement("link");
+                    el.rel = "stylesheet";
+                    el.type = "text/css";
+                    el.href = data.css[i];
+                    head.appendChild(el);
+                }
             }
         }
     });
