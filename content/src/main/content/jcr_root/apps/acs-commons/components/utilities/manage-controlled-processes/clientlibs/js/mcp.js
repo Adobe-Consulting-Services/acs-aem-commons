@@ -26,6 +26,7 @@ var MCP = {
     initEditor : function() {
         MCP.editorContainer = document.getElementById('blocklyArea');
         MCP.editor = document.getElementById('blocklyDiv');
+        MCP.handleResize();
         MCP.workspace = Blockly.inject(MCP.editor, {
                 path: '/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/blockly/',
                 toolbox: document.getElementById('toolbox'), 
@@ -86,7 +87,6 @@ var MCP = {
 MCP.script.path="/etc/acs-commons/manage-controlled-processes/jcr:content/models/test-model";
 jQuery(window).load(function() {
     MCP.initEditor();
-    window.setTimeout(MCP.handleResize,500);
     MCP.load();
     MCP.workspace.addChangeListener(MCP.save);
 });
