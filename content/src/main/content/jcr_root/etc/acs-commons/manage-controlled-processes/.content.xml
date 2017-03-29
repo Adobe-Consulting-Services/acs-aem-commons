@@ -4,5 +4,9 @@
     <jcr:content
         jcr:primaryType="cq:PageContent"
         jcr:title="Manage Controlled Processes"
-        sling:resourceType="acs-commons/components/utilities/manage-controlled-processes"/>
+        sling:resourceType="acs-commons/components/utilities/manage-controlled-processes">
+        <blocks jcr:primaryType="sling:Folder"/>
+        <models jcr:primaryType="sling:Folder"/>
+        <instances jcr:primaryType="sling:Folder"/>        
+    </jcr:content>
 </jcr:root>

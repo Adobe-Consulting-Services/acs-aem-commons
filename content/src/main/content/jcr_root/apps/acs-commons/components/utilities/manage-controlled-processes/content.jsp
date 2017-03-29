@@ -19,7 +19,7 @@
 --%>
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@page session="false" %>
-
+<cq:includeClientLib css="acs-commons.manage-controlled-processes.app"/>
 <div id="blocklyArea" style="height:90%; min-height: 500px; width:100%">
     <div id="blocklyDiv" style="height:100%; width:100%"></div>
 </div>
@@ -75,3 +75,4 @@
         <block type="text_getSubstring"></block>
     </category>
 </xml>
+<cq:includeClientLib js="acs-commons.manage-controlled-processes.app"/>
