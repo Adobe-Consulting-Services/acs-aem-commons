@@ -4,6 +4,6 @@
     cq:defaultView="html"
     jcr:primaryType="cq:Component"
     jcr:title="ACS Commons Manage Controlled Processes"
-    sling:resourceSuperType="acs-commons/components/utilities/app-page"
+    sling:resourceSuperType="granite/ui/components/shell/page"
     favicon="/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/images/favicon.ico"
     componentGroup=".hidden"/>
