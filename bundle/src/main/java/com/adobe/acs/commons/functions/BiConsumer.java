@@ -30,15 +30,17 @@ import aQute.bnd.annotation.ConsumerType;
  * @see Consumer
  */
 @ConsumerType
-public abstract class BiConsumer<T, U> {
+@FunctionalInterface
+public interface BiConsumer<T, U> {
 
     /**
      * Performs this operation on the given arguments.
      *
      * @param t the first input argument
      * @param u the second input argument
+     * @throws java.lang.Exception
      */
-    abstract public void accept(T t, U u) throws Exception;
+    void accept(T t, U u) throws Exception;
 
     /**
      * Returns a composed {@code BiConsumer} that performs, in sequence, this
@@ -52,17 +54,14 @@ public abstract class BiConsumer<T, U> {
      * operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */
-    public BiConsumer<T, U> andThen(final BiConsumer<? super T, ? super U> after) {
+    default public BiConsumer<T, U> andThen(final BiConsumer<? super T, ? super U> after) {
         if (after == null) {
             throw new NullPointerException();
         }
         final BiConsumer<T, U> thiss = this;
-        return new BiConsumer<T, U>() {
-            @Override
-            public void accept(T t, U u) throws Exception {
-                thiss.accept(t, u);
-                after.accept(t, u);
-            }
+        return (T t, U u) -> {
+            thiss.accept(t, u);
+            after.accept(t, u);
         };
     }
 }

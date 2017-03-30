@@ -26,14 +26,16 @@ import aQute.bnd.annotation.ConsumerType;
  * @param <T> the type of the input to the operation
  */
 @ConsumerType
-public abstract class Consumer<T> {
+@FunctionalInterface
+public interface Consumer<T> {
 
     /**
      * Performs this operation on the given argument.
      *
      * @param t the input argument
+     * @throws java.lang.Exception
      */
-    abstract public void accept(T t) throws Exception;
+    void accept(T t) throws Exception;
 
     /**
      * Returns a composed {@code Consumer} that performs, in sequence, this
@@ -47,17 +49,14 @@ public abstract class Consumer<T> {
      * operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */
-    public Consumer<T> andThen(final Consumer<? super T> after) {
+    default public Consumer<T> andThen(final Consumer<? super T> after) {
         if (after == null) {
             throw new NullPointerException();
         }
         final Consumer<T> thiss = this;
-        return new Consumer<T>() {
-            @Override
-            public void accept(T t) throws Exception {
-                thiss.accept(t);
-                after.accept(t);
-            }
+        return (T t) -> {
+            thiss.accept(t);
+            after.accept(t);
         };
     }
 }

@@ -52,18 +52,15 @@ public class TimedRunnable implements Runnable {
         final Thread thisThread = Thread.currentThread();
         final Semaphore timerSemaphore = new Semaphore(0);
 
-        Thread watchDog = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                boolean finished = false;
-                try {
-                    finished = timerSemaphore.tryAcquire(timeout, timeoutUnit);
-                } catch (InterruptedException ex) {
-                    LOG.error("Watchdog thread interrupted", ex);
-                }
-                if (!finished) {
-                    thisThread.interrupt();
-                }
+        Thread watchDog = new Thread(() -> {
+            boolean finished1 = false;
+            try {
+                finished1 = timerSemaphore.tryAcquire(timeout, timeoutUnit);
+            }catch (InterruptedException ex) {
+                LOG.error("Watchdog thread interrupted", ex);
+            }
+            if (!finished1) {
+                thisThread.interrupt();
             }
         });
 

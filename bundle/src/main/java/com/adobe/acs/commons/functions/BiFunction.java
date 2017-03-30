@@ -29,7 +29,8 @@ import aQute.bnd.annotation.ConsumerType;
  * @see Function
  */
 @ConsumerType
-public abstract class BiFunction<T, U, R> {
+@FunctionalInterface
+public interface BiFunction<T, U, R> {
 
     /**
      * Applies this function to the given arguments.
@@ -37,8 +38,9 @@ public abstract class BiFunction<T, U, R> {
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result
+     * @throws java.lang.Exception
      */
-    public abstract R apply(T t, U u) throws Exception;
+    R apply(T t, U u) throws Exception;
 
     /**
      * Returns a composed function that first applies this function to
@@ -53,16 +55,11 @@ public abstract class BiFunction<T, U, R> {
      * applies the {@code after} function
      * @throws NullPointerException if after is null
      */
-    public <V> BiFunction<T, U, V> andThen(final Function<? super R, ? extends V> after) {
+    default public <V> BiFunction<T, U, V> andThen(final Function<? super R, ? extends V> after) {
         if (after == null) {
             throw new NullPointerException();
         }
         final BiFunction<T, U, R> thiss = this;
-        return new BiFunction<T, U, V>() {
-            @Override
-            public V apply(T t, U u) throws Exception {
-                return after.apply(thiss.apply(t, u));
-            }
-        };
+        return (T t, U u) -> after.apply(thiss.apply(t, u));
     }
 }

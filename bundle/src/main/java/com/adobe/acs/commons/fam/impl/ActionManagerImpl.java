@@ -59,9 +59,9 @@ class ActionManagerImpl implements ActionManager {
     private long finished;
     private int saveInterval;
 
-    private ResourceResolver baseResolver;
-    private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<ReusableResolver>());
-    private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<ReusableResolver>();
+    private final ResourceResolver baseResolver;
+    private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
+    private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
     private final ThrottledTaskRunner taskRunner;
     private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
@@ -71,8 +71,8 @@ class ActionManagerImpl implements ActionManager {
         this.taskRunner = taskRunner;
         this.saveInterval = saveInterval;
         baseResolver = resolver.clone(null);
-        currentPath = new ThreadLocal<String>();
-        failures = new ArrayList<Failure>();
+        currentPath = new ThreadLocal<>();
+        failures = new ArrayList<>();
     }
 
     @Override
@@ -142,36 +142,30 @@ class ActionManagerImpl implements ActionManager {
             final BiFunction<ResourceResolver, String, Boolean>... filters
     )
             throws RepositoryException, PersistenceException, Exception {
-        withResolver(new Consumer<ResourceResolver>() {
-            @Override
-            public void accept(ResourceResolver resolver) {
-                try {
-                    Session session = resolver.adaptTo(Session.class);
-                    QueryManager queryManager = session.getWorkspace().getQueryManager();
-                    Query query = queryManager.createQuery(queryStatement, language);
-                    QueryResult results = query.execute();
-                    for (NodeIterator nodeIterator = results.getNodes(); nodeIterator.hasNext();) {
-                        final String nodePath = nodeIterator.nextNode().getPath();
-                        LOG.info("Processing found result " + nodePath);
-                        deferredWithResolver(new Consumer<ResourceResolver>() {
-                            @Override
-                            public void accept(ResourceResolver r) throws Exception {
-                                currentPath.set(nodePath);
-                                if (filters != null) {
-                                    for (BiFunction<ResourceResolver, String, Boolean> filter : filters) {
-                                        if (!filter.apply(r, nodePath)) {
-                                            logFilteredOutItem(nodePath);
-                                            return;
-                                        }
-                                    }
+        withResolver((ResourceResolver resolver) -> {
+            try {
+                Session session = resolver.adaptTo(Session.class);
+                QueryManager queryManager = session.getWorkspace().getQueryManager();
+                Query query = queryManager.createQuery(queryStatement, language);
+                QueryResult results = query.execute();
+                for (NodeIterator nodeIterator = results.getNodes(); nodeIterator.hasNext();) {
+                    final String nodePath = nodeIterator.nextNode().getPath();
+                    LOG.info("Processing found result " + nodePath);
+                    deferredWithResolver((ResourceResolver r) -> {
+                        currentPath.set(nodePath);
+                        if (filters != null) {
+                            for (BiFunction<ResourceResolver, String, Boolean> filter : filters) {
+                                if (!filter.apply(r, nodePath)) {
+                                    logFilteredOutItem(nodePath);
+                                    return;
                                 }
-                                callback.accept(r, nodePath);
                             }
-                        });
-                    }
-                } catch (RepositoryException ex) {
-                    LOG.error("Repository exception processing query "+queryStatement, ex);
+                        }
+                        callback.accept(r, nodePath);
+                    });
                 }
+            } catch (RepositoryException ex) {
+                LOG.error("Repository exception processing query "+queryStatement, ex);
             }
         });
         return tasksAdded.get();
@@ -179,18 +173,15 @@ class ActionManagerImpl implements ActionManager {
 
     @Override
     public void addCleanupTask() {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                while (!isComplete()) {
-                    try {                    
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                        logError(ex);
-                    }
+        Runnable r = () -> {
+            while (!isComplete()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    logError(ex);
                 }
-                closeAllResolvers();
             }
+            closeAllResolvers();
         };
         taskRunner.scheduleWork(r);        
     }
@@ -203,19 +194,16 @@ class ActionManagerImpl implements ActionManager {
     private void deferredWithResolver(
             final Consumer<ResourceResolver> action,
             final boolean closesResolver) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                started.compareAndSet(0, System.currentTimeMillis());
-                try {
-                    withResolver(action);
-                    if (!closesResolver) {
-                        logCompletetion();
-                    }
-                } catch (Exception ex) {
-                    if (!closesResolver) {
-                        logError(ex);
-                    }
+        Runnable r = () -> {
+            started.compareAndSet(0, System.currentTimeMillis());
+            try {
+                withResolver(action);
+                if (!closesResolver) {
+                    logCompletetion();
+                }
+            } catch (Exception ex) {
+                if (!closesResolver) {
+                    logError(ex);
                 }
             }
         };
@@ -312,11 +300,10 @@ class ActionManagerImpl implements ActionManager {
     @Override
     public void closeAllResolvers() {
         if (!resolvers.isEmpty()) {
-            for (ReusableResolver resolver : resolvers) {
-                if (resolver.getResolver().isLive()) {
-                    resolver.getResolver().close();
-                }
-            }
+            resolvers.stream()
+                    .map(ReusableResolver::getResolver)
+                    .filter(ResourceResolver::isLive)
+                    .forEachOrdered(ResourceResolver::close);
             resolvers.clear();
         }
         baseResolver.close();
@@ -328,7 +315,7 @@ class ActionManagerImpl implements ActionManager {
 
     @Override
     public List<CompositeData> getFailures() throws OpenDataException {
-        ArrayList<CompositeData> failureData = new ArrayList<CompositeData>();
+        ArrayList<CompositeData> failureData = new ArrayList<>();
         int count = 0;
         for (Failure fail : failures) {
             if (count > 5000) break;
