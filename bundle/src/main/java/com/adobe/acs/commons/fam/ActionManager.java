@@ -62,11 +62,23 @@ public interface ActionManager {
     void withResolver(Consumer<ResourceResolver> action) throws Exception;
     
     /**
-     * After scheduling actions withQueryResults or deferredWithResolver, schedule
-     * a cleanup task to close all remaining resource resolvers.
-     * NOTE: This is mandatory!
+     * Register a handler to be fired when the work has completed with no errors.
+     * @param successTask 
      */
-    void addCleanupTask();
+    void onSuccess(Consumer<ResourceResolver> successTask);
+
+    /**
+     * Register a handler to be fired when the work has completed and there was at least one error.
+     * @param failureTask 
+     */
+    void onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask);
+    
+    /**
+     * Register a handler to be fired when the work is completed, successfully or not.  
+     * Note: These handlers are called after the success/fail handlers.
+     * @param finishHandler 
+     */
+    void onFinish(Runnable finishHandler);
 
     /**
      * Have all actions completed?
