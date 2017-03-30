@@ -386,6 +386,12 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                 String uri = slingRequest.getRequestURI();
                 if (uri.endsWith(".js") || uri.endsWith(".css")) {
                     UriInfo uriInfo = getUriInfo(uri);
+                    if ("".equals(uriInfo.md5)) {
+                        log.debug("MD5 is blank for '{}' in Versioned ClientLibs cache, allowing {} to pass", uriInfo.cleanedUri, uri);
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+
                     String md5FromCache = null;
                     try {
                         md5FromCache = getCacheEntry(uriInfo.cleanedUri);
@@ -409,7 +415,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                             log.debug("MD5 equals for '{}' in Versioned ClientLibs cache, allowing {} to pass", uriInfo.cleanedUri, uri);
                             filterChain.doFilter(request, response);
                         } else {
-                            log.info("MD5 differs for '{}' in Versioned ClientLibs cache. Sending 404 for '{}'", uriInfo.cleanedUri, uri);
+                            log.info("MD5 differs for '{}' in Versioned ClientLibs cache. Expected {}. Sending 404 for '{}'",
+                                    new Object[] { uriInfo.cleanedUri, uriInfo.md5, uri });
                             slingResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
                         }
                     }
