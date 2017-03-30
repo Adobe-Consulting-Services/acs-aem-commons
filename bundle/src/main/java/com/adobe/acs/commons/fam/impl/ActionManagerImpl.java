@@ -22,8 +22,10 @@ import com.adobe.acs.commons.functions.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -49,6 +51,11 @@ import org.slf4j.LoggerFactory;
 class ActionManagerImpl implements ActionManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
+    // This is a delay of how long an action manager should wait before it can safely assume it really is done and no more work is being added
+    // This helps prevent an action manager from closing itself down while the queue is warming up.
+    public static final int HESITATION_DELAY = 50;
+    // The cleanup task will wait this many milliseconds between its polling to see if the queue has been completely processed
+    public static final int COMPLETION_CHECK_INTERVAL = 100;
     private final AtomicInteger tasksAdded = new AtomicInteger();
     private final AtomicInteger tasksCompleted = new AtomicInteger();
     private final AtomicInteger tasksFilteredOut = new AtomicInteger();
@@ -65,6 +72,11 @@ class ActionManagerImpl implements ActionManager {
     private final ThrottledTaskRunner taskRunner;
     private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
+    private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
+    private final List<Consumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final List<BiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
+
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;
@@ -168,22 +180,60 @@ class ActionManagerImpl implements ActionManager {
                 LOG.error("Repository exception processing query "+queryStatement, ex);
             }
         });
+        
         return tasksAdded.get();
+    }
+    
+    @Override
+    public void onSuccess(Consumer<ResourceResolver> successTask) {
+        successHandlers.add(successTask);
     }
 
     @Override
-    public void addCleanupTask() {
-        Runnable r = () -> {
-            while (!isComplete()) {
+    public void onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask) {
+        errorHandlers.add(failureTask);
+    }
+    
+    @Override
+    public void onFinish(Runnable finishHandler) {
+        finishHandlers.add(finishHandler);
+    }
+   
+    private void runCompletionTasks() {
+        if (getErrorCount() == 0) {
+            successHandlers.forEach(handler -> {
                 try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    logError(ex);
+                    this.withResolver(handler);
+                } catch (Exception ex) {
+                    LOG.error("Error in success handler for action "+getName(), ex);
                 }
-            }
-            closeAllResolvers();
-        };
-        taskRunner.scheduleWork(r);        
+            });
+        } else {
+            errorHandlers.forEach(handler -> {
+                try {
+                    this.withResolver(res -> handler.accept(getFailureList(), res));
+                } catch (Exception ex) {
+                    LOG.error("Error in error handler for action "+getName(), ex);
+                }
+            });            
+        }
+        finishHandlers.forEach(Runnable::run);
+    }
+    
+    private void addCleanupTask() {
+        if (!cleanupHandlerRegistered.getAndSet(true)) {
+            taskRunner.scheduleWork(() -> {
+                while (!isComplete()) {
+                    try {
+                        Thread.sleep(COMPLETION_CHECK_INTERVAL);
+                    } catch (InterruptedException ex) {
+                        logError(ex);
+                    }
+                }
+                runCompletionTasks();
+                closeAllResolvers();
+            });        
+        }
     }
 
     @Override
@@ -194,7 +244,7 @@ class ActionManagerImpl implements ActionManager {
     private void deferredWithResolver(
             final Consumer<ResourceResolver> action,
             final boolean closesResolver) {
-        Runnable r = () -> {
+        taskRunner.scheduleWork(() -> {
             started.compareAndSet(0, System.currentTimeMillis());
             try {
                 withResolver(action);
@@ -206,8 +256,7 @@ class ActionManagerImpl implements ActionManager {
                     logError(ex);
                 }
             }
-        };
-        taskRunner.scheduleWork(r);
+        });
         if (!closesResolver) {
             tasksAdded.incrementAndGet();
         }
@@ -228,6 +277,7 @@ class ActionManagerImpl implements ActionManager {
         tasksSuccessful.incrementAndGet();
         if (isComplete()) {
             finished = System.currentTimeMillis();
+            addCleanupTask();
         }
     }
 
@@ -241,6 +291,7 @@ class ActionManagerImpl implements ActionManager {
         tasksError.incrementAndGet();
         if (isComplete()) {
             finished = System.currentTimeMillis();
+            addCleanupTask();
         }
     }
 
@@ -279,7 +330,15 @@ class ActionManagerImpl implements ActionManager {
 
     @Override
     public boolean isComplete() {
-        return tasksCompleted.get() == tasksAdded.get();
+        if (tasksCompleted.get() == tasksAdded.get()) {
+            try {
+                Thread.sleep(HESITATION_DELAY);
+            } catch (InterruptedException ex) {
+            }
+            return tasksCompleted.get() == tasksAdded.get();
+        } else {
+            return false;
+        }
     }
 
     @Override
