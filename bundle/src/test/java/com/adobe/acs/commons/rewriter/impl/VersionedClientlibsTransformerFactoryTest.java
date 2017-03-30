@@ -497,6 +497,14 @@ public class VersionedClientlibsTransformerFactoryTest {
         verify404();
     }
 
+    @Test
+    public void doFilter_noMd5() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.js");
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verifyNo404();
+    }
+
     private void verifyNothingHappened() throws IOException, ServletException {
         verifyZeroInteractions(htmlLibraryManager);
         verifyNo404();
