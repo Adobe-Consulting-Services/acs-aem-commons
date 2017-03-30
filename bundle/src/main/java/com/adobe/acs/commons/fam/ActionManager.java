@@ -57,6 +57,7 @@ public interface ActionManager {
     /**
      * Perform action right now using a provided pooled resolver
      * @param action Action to perform
+     * @throws java.lang.Exception
      */
     void withResolver(Consumer<ResourceResolver> action) throws Exception;
     

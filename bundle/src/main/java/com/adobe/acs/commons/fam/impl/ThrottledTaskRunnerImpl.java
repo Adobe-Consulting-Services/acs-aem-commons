@@ -145,9 +145,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         if (!isRunning()) {
             initThreadPool();
             if (isPaused && resumeList != null) {
-                for (Runnable task : resumeList) {
-                    workerPool.execute(task);
-                }
+                resumeList.forEach(workerPool::execute);
                 resumeList.clear();
             }
             isPaused = false;
@@ -255,7 +253,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
     private void initThreadPool() {
         if (workQueue == null) {
-            workQueue = new LinkedBlockingDeque<Runnable>();
+            workQueue = new LinkedBlockingDeque<>();
         }
 
         // Terminate pool if the thread size has changed
@@ -284,9 +282,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         try {
             memBeanName = ObjectName.getInstance("java.lang:type=Memory");
             osBeanName = ObjectName.getInstance("java.lang:type=OperatingSystem");
-        } catch (MalformedObjectNameException ex) {
-            LOG.error("Error getting OS MBean (shouldn't ever happen)", ex);
-        } catch (NullPointerException ex) {
+        } catch (MalformedObjectNameException | NullPointerException ex) {
             LOG.error("Error getting OS MBean (shouldn't ever happen)", ex);
         }
 

@@ -21,7 +21,7 @@ public class RoundRobin<T> implements Iterable<T> {
     public Iterator<T> iterator() {
         return new Iterator<T>() {
 
-            private AtomicInteger index = new AtomicInteger(0);
+            private final AtomicInteger index = new AtomicInteger(0);
 
             @Override
             public boolean hasNext() {

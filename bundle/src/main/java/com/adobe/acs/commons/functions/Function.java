@@ -25,15 +25,17 @@ import aQute.bnd.annotation.ConsumerType;
  * @param <R> the type of the result of the function
  */
 @ConsumerType
-public abstract class Function<T, R> {
+@FunctionalInterface
+public interface Function<T, R> {
 
     /**
      * Applies this function to the given argument.
      *
      * @param t the function argument
      * @return the function result
+     * @throws java.lang.Exception
      */
-    abstract public R apply(T t) throws Exception;
+    public R apply(T t) throws Exception;
 
     /**
      * Returns a composed function that first applies the {@code before}
@@ -50,17 +52,12 @@ public abstract class Function<T, R> {
      *
      * @see #andThen(Function)
      */
-    public <V> Function<V, R> compose(final Function<? super V, ? extends T> before) {
+    default public <V> Function<V, R> compose(final Function<? super V, ? extends T> before) {
         if (before == null) {
             throw new NullPointerException();
         }
         final Function<T,R> thiss = this;
-        return new Function<V, R>() {
-            @Override
-            public R apply(V t) throws Exception {
-                return thiss.apply(before.apply(t));
-            }
-        }; 
+        return (V t) -> thiss.apply(before.apply(t)); 
     }
 
     /**
@@ -78,17 +75,12 @@ public abstract class Function<T, R> {
      *
      * @see #compose(Function)
      */
-    public <V> Function<T, V> andThen(final Function<? super R, ? extends V> after) {
+    default public <V> Function<T, V> andThen(final Function<? super R, ? extends V> after) {
         if (after == null) {
             throw new NullPointerException();
         }
         final Function<T,R> thiss = this;
-        return new Function<T, V>() {
-            @Override
-            public V apply(T t) throws Exception {
-                return after.apply(thiss.apply(t));
-            }
-        }; 
+        return (T t) -> after.apply(thiss.apply(t)); 
     }
 
     /**
@@ -98,11 +90,6 @@ public abstract class Function<T, R> {
      * @return a function that always returns its input argument
      */
     public static <T> Function<T, T> identity() {
-        return new Function<T, T>() {
-            @Override
-            public T apply(T t) {
-                return t;
-            }
-        };
+        return (T t) -> t;
     }
 }

@@ -27,7 +27,7 @@ public final class Failure {
     
     private String nodePath;
     private Exception exception;
-    private Calendar failedAt;
+    private final Calendar failedAt;
 
     public Failure() {
         this.failedAt = Calendar.getInstance();

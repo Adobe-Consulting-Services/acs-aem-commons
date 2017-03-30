@@ -59,7 +59,7 @@ public class RunningStatistic {
     }
 
     public synchronized void reset() {
-        rollingSeries = Collections.synchronizedList(new LinkedList<Long>());
+        rollingSeries = Collections.synchronizedList(new LinkedList<>());
         for (int i = 0; i < rollingAverageWidth; i++) {
             rollingSeries.add(0L);
         }
