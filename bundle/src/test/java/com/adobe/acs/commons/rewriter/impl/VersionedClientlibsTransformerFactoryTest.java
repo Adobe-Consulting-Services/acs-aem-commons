@@ -26,6 +26,9 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
 
 import junitx.util.PrivateAccessor;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.rewriter.Transformer;
 import org.junit.After;
 import org.junit.Before;
@@ -34,19 +37,25 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.only;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
-import java.util.Collections;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VersionedClientlibsTransformerFactoryTest {
@@ -59,18 +68,47 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Mock
     private ContentHandler handler;
 
+    @Mock
+    private SlingHttpServletRequest slingRequest;
+
+    @Mock
+    private SlingHttpServletResponse slingResponse;
+
+    @Mock
+    private FilterChain filterChain;
+
     private VersionedClientlibsTransformerFactory factory;
+
+    private Filter filter;
 
     private Transformer transformer;
 
+    @Mock
+    private ComponentContext componentContext;
+
+    @Mock
+    private BundleContext bundleContext;
+
     private final String PATH = "/etc/clientlibs/test";
     private final String FAKE_STREAM_CHECKSUM="fcadcfb01c1367e9e5b7f2e6d455ba8f";
+    private final byte[] BYTES;
+    private final java.io.InputStream INPUTSTREAM;
+    private final String INPUTSTREAM_MD5;
+
+    public VersionedClientlibsTransformerFactoryTest() throws Exception {
+        BYTES = "test".getBytes("UTF-8");
+        INPUTSTREAM = new ByteArrayInputStream(BYTES);
+        INPUTSTREAM_MD5 = DigestUtils.md5Hex(BYTES);
+    }
 
     @Before
     public void setUp() throws Exception {
+        when(componentContext.getBundleContext()).thenReturn(bundleContext);
+        when(componentContext.getProperties()).thenReturn(new Hashtable<Object, Object>());
         factory = new VersionedClientlibsTransformerFactory();
+        filter = factory.new BadMd5VersionedClientLibsFilter();
         PrivateAccessor.setField(factory, "htmlLibraryManager", htmlLibraryManager);
-        factory.activate(Collections.<String, Object>emptyMap());
+        factory.activate(componentContext);
 
         when(htmlLibrary.getLibraryPath()).thenReturn(PATH);
         when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings".getBytes()));
@@ -78,12 +116,23 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         transformer = factory.createTransformer();
         transformer.setContentHandler(handler);
+
+        verifyNoMoreInteractions(bundleContext);
     }
 
     @After
     public void tearDown() throws Exception {
         reset(htmlLibraryManager, htmlLibrary, handler);
         transformer = null;
+    }
+
+    @Test
+    public void testRegisterFilter() throws Exception {
+        Hashtable<Object, Object> props = new Hashtable<Object, Object>();
+        props.put("enforce.md5", Boolean.TRUE);
+        when(componentContext.getProperties()).thenReturn(props);
+        factory.activate(componentContext);
+        verify(bundleContext).registerService(eq(Filter.class.getName()), any(Object.class), any(Dictionary.class));
     }
 
     @Test
@@ -380,5 +429,94 @@ public class VersionedClientlibsTransformerFactoryTest {
                 attributesCaptor.capture());
 
         assertEquals("https://example.com/same/scheme/styles.css", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void doFilter_nonJSCSS() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/some_other/uri.html");
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+        verifyNothingHappened();
+    }
+
+    @Test
+    public void doFilter_notFoundInCache_md5Match() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
+
+        HtmlLibrary library = mock(HtmlLibrary.class);
+        when(library.getInputStream()).thenReturn(INPUTSTREAM);
+        when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.js");
+        when(htmlLibraryManager.getLibrary(slingRequest)).thenReturn(library);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verifyNo404();
+    }
+
+    @Test
+    public void doFilter_notFoundInCache_md5MisMatch() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
+
+        HtmlLibrary library = mock(HtmlLibrary.class);
+        when(library.getInputStream()).thenReturn(INPUTSTREAM );
+        when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.js");
+        when(htmlLibraryManager.getLibrary(slingRequest)).thenReturn(library);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verify404();
+    }
+
+    @Test
+    public void doFilter_notFoundInCache_NoClientLib() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
+        when(htmlLibraryManager.getLibrary(slingRequest)).thenReturn(null);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verifyNo404();
+    }
+
+    @Test
+    public void doFilter_foundInCache_md5Match() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
+        factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verifyZeroInteractions(htmlLibraryManager);
+        verifyNo404();
+    }
+
+    @Test
+    public void doFilter_foundInCache_md5MisMatch() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
+        factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verify404();
+    }
+
+    @Test
+    public void doFilter_noMd5() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.js");
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verifyNo404();
+    }
+
+    private void verifyNothingHappened() throws IOException, ServletException {
+        verifyZeroInteractions(htmlLibraryManager);
+        verifyNo404();
+    }
+
+    private void verifyNo404() throws IOException, ServletException {
+        verify(filterChain).doFilter(slingRequest, slingResponse);
+        verify(slingResponse, never()).sendError(anyInt());
+    }
+
+    private void verify404() throws IOException, ServletException {
+        verify(filterChain, never()).doFilter(slingRequest, slingResponse);
+        verify(slingResponse).sendError(HttpServletResponse.SC_NOT_FOUND);
     }
 }
