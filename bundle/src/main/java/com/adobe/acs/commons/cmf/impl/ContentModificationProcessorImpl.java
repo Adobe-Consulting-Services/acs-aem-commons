@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,56 +26,61 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.cmf.ContentMigrationProcessor;
-import com.adobe.acs.commons.cmf.ContentMigrationStep;
+import com.adobe.acs.commons.cmf.ContentModificationProcessor;
+import com.adobe.acs.commons.cmf.ContentModificationStep;
 import com.adobe.acs.commons.cmf.IdentifiedResources;
-import com.adobe.acs.commons.cmf.NoSuchContentMigrationStepException;
+import com.adobe.acs.commons.cmf.NoSuchContentModificationStepException;
 
 @Component
 @Service
 @Properties({
     @Property(name="felix.webconsole.label", value="cmf"),
-    @Property(name="felix.webconsole.title", value="Content Migration Framework"),
+    @Property(name="felix.webconsole.title", value="Content Modification Framework"),
 })
-public class ContentMigrationProcessorImpl extends HttpServlet implements ContentMigrationProcessor {
+public class ContentModificationProcessorImpl extends HttpServlet implements ContentModificationProcessor {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Reference(cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
 			policy=ReferencePolicy.DYNAMIC, 
-			referenceInterface=com.adobe.acs.commons.cmf.ContentMigrationStep.class)
-	HashMap<String, ContentMigrationStep> registeredSteps = new HashMap<String,ContentMigrationStep>();
+			referenceInterface=com.adobe.acs.commons.cmf.ContentModificationStep.class)
+	HashMap<String, ContentModificationStep> registeredSteps = new HashMap<String,ContentModificationStep>();
 	
-	private static final Logger log = LoggerFactory.getLogger(ContentMigrationProcessorImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(ContentModificationProcessorImpl.class);
 	
 	
 
 	
-	protected void bindContentMigrationStep (ContentMigrationStep step, Map properties) {
+	protected void bindContentModificationStep (ContentModificationStep step, Map properties) {
 		synchronized (registeredSteps) {
-			String name = (String) properties.get(ContentMigrationStep.STEP_NAME);
+			String name = (String) properties.get(ContentModificationStep.STEP_NAME);
 			if (StringUtils.isEmpty(name)) {
 				name = step.getClass().getName();
 			}
 			registeredSteps.put (name, step);
-			log.info("registered content migration step '{}'", name);
+			log.info("registered content modification step '{}'", name);
 		}
 	}
 	
-	protected void unbindContentMigrationStep (ContentMigrationStep step, Map properties) {
+	protected void unbindContentModificationStep (ContentModificationStep step, Map properties) {
 		synchronized (registeredSteps) {
-			String name = (String) properties.get(ContentMigrationStep.STEP_NAME);
+			String name = (String) properties.get(ContentModificationStep.STEP_NAME);
 			if (StringUtils.isEmpty(name)) {
 				name = step.getClass().getName();
 			}
 			registeredSteps.remove(name);
-			log.info("unregistered content migration step '{}'", name);
+			log.info("unregistered content modification step '{}'", name);
 		}
 	}
 	
 	/** Webconsole **/
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
 		PrintWriter pw = res.getWriter();
-		pw.println("<div class='statline'>Registered Content Migration Steps:</div>");
+		pw.println("<div class='statline'>Registered Content Modification Steps:</div>");
 		pw.println("<ul>");
 		for (String step: registeredSteps.keySet()) {
 			pw.println("<li>" + step + "</li>");
@@ -89,12 +92,12 @@ public class ContentMigrationProcessorImpl extends HttpServlet implements Conten
 
 	@Override
 	public IdentifiedResources identifyAffectedResources(String name, String path,
-			ResourceResolver resolver) throws NoSuchContentMigrationStepException {
+			ResourceResolver resolver) throws NoSuchContentModificationStepException {
 		
-		ContentMigrationStep cms = registeredSteps.get(name);
+		ContentModificationStep cms = registeredSteps.get(name);
 		if (cms == null) {
-			String msg = String.format("ContentMigrationStep %s not found", name);
-			throw new NoSuchContentMigrationStepException(msg);
+			String msg = String.format("ContentModificationStep %s not found", name);
+			throw new NoSuchContentModificationStepException(msg);
 		}
 		
 		Resource rootResource = resolver.getResource(path);
@@ -108,7 +111,7 @@ public class ContentMigrationProcessorImpl extends HttpServlet implements Conten
 			result.add(res.getPath());
 		}
 		
-		log.info("ContentMigrationStep {} identified {} resources below {} for migration", new Object[]{name,result.size(), path});
+		log.info("ContentModificationStep {} identified {} resources below {} for modification", new Object[]{name,result.size(), path});
 		
 		return new IdentifiedResources (result, name);
 		
@@ -116,22 +119,22 @@ public class ContentMigrationProcessorImpl extends HttpServlet implements Conten
 	}
 
 	@Override
-	public void migrateResources(IdentifiedResources resources,
+	public void modifyResources(IdentifiedResources resources,
 			ResourceResolver resolver)
-			throws NoSuchContentMigrationStepException, PersistenceException {
+			throws NoSuchContentModificationStepException, PersistenceException {
 		
-		ContentMigrationStep cms = registeredSteps.get(resources.getContentMigrationStep());
+		ContentModificationStep cms = registeredSteps.get(resources.getContentModificationStep());
 		if (cms == null) {
-			String msg = String.format("ContentMigrationStep %s not found", resources.getContentMigrationStep());
-			throw new NoSuchContentMigrationStepException(msg);
+			String msg = String.format("ContentModificationStep %s not found", resources.getContentModificationStep());
+			throw new NoSuchContentModificationStepException(msg);
 		}
 		
 		Iterator<String> iter = resources.getPaths().iterator();
 		while (iter.hasNext()) {
 			String path = iter.next();
-			Resource toMigrate = resolver.getResource(path);
-			cms.migrate(toMigrate);
-			toMigrate.getResourceResolver().commit();
+			Resource toModify = resolver.getResource(path);
+			cms.performModification(toModify);
+			toModify.getResourceResolver().commit();
 		}
 		
 		

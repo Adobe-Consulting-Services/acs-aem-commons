@@ -12,7 +12,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  * This class implements the Visitor pattern for the identifyResources() method.
  *
  */
-public abstract class TraversingContentMigrationStep implements ContentMigrationStep {
+public abstract class TraversingContentModificationStep implements ContentModificationStep {
 
 	@Override
 	public List<Resource> identifyResources(Resource rootResource) {

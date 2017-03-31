@@ -13,26 +13,26 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 
 
-public interface ContentMigrationStep {
+public interface ContentModificationStep {
 	
-	public static final String STEP_NAME = "contentMigration.name";
+	public static final String STEP_NAME = "contentModification.name";
 
 	
 	/**
-	 * Identify the resources which should be considered for migration
+	 * Identify the resources which should be considered for modification
 	 * @param path the root resource of the subtree which should be considered
-	 * @return the resources which are going to be migrated
+	 * @return the resources which are going to be modified
 	 */
 	public List<Resource> identifyResources (Resource resource);
 	
 	
 	/**
-	 * Migrate the resource.
+	 * Modify the resource.
 	 * 
 	 * Performs all relevant operations on the resource. An implementation should not persist
 	 * the changes, that means it should not call <code>resource.getResourceResolver().commit();</code>
-	 * @param resource the resource which should be migrated
+	 * @param resource the resource which should be modified
 	 */
-	public void migrate (Resource resource);
+	public void performModification (Resource resource);
 	
 }
