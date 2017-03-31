@@ -32,15 +32,16 @@ public abstract class TraversingContentMigrationStep implements ContentMigration
 		 * This implementation tries to avoid the list.addAll method
 		 */
 		
-		Resource foundResource = visitResource (r);
+		Resource foundResource = accept (r);
 		if (foundResource != null) {
 			list.add(foundResource);
 		}
 		Iterator<Resource> iter =  r.listChildren();
 		while (iter.hasNext()) {
 			Resource innerResource = iter.next();
-			list = (visit (list, innerResource));
-			
+			if (shouldVisitAndDescend(innerResource)) {
+				list = (visit (list, innerResource));
+			}
 		}
 		return list;
 		
@@ -48,12 +49,24 @@ public abstract class TraversingContentMigrationStep implements ContentMigration
 
 	
 	/**
-	 * <code>visitResource</code> implements the visitor pattern and is called for every resource.
-	 * @param res the resource to inspect
+	 * <code>accept</code> is called for every resource being visited.
 	 * @return the resource if the resource should considered be for the inclusion in the result 
 	 *   delivered by identifyResources; null otherwise
 	 */
-	protected abstract Resource visitResource (Resource res);
+	public abstract Resource accept (Resource resource);
+	
+	
+	/**
+	 * <codeshouldVisitAndDescend</code> is used to determine if this resource (and all sub-resources)
+	 * should be visited.
+	 * @param resource the resource
+	 * @return true if the resource should be visited.
+	 */
+	
+	public boolean shouldVisitAndDescend (Resource resource) {
+		return true;
+	}
+	
 	
 	
 	
