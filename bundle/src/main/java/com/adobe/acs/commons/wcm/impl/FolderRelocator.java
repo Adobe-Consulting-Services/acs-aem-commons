@@ -19,15 +19,21 @@ import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.security.AccessControlManager;
+import javax.jcr.security.Privilege;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * This utility takes an alternate approach to moving folders using a four-step process.
- * Step 1: Evaluate the requirements, check for possible authorization issues.
- * Step 2: Prepare destination folder structure
+ * Step 1: Evaluate the requirements, check for possible authorization issues; Abort sequence halts other work
+ * Step 2: Prepare destination folder structure; Abort sequence is to remove any folders created already
  * Step 3: Relocate the contents of the folders
  * Step 4: Remove the old folder structures
  */
@@ -39,31 +45,44 @@ public class FolderRelocator {
     private ActionManager step2;
     private ActionManager step3;
     private ActionManager step4;
-    private final SimpleFilteringItemVisitor folderVisitor;
+    private final TreeFilteringItemVisitor folderVisitor;
     
     public FolderRelocator(String sourcePath, String destinationPath, String processName) {
         this.sourcePath = sourcePath;
         this.destinationPath = destinationPath;
         this.processName = processName;
         
-        folderVisitor = new SimpleFilteringItemVisitor();
+        folderVisitor = new TreeFilteringItemVisitor();
         folderVisitor.setBreadthFirst(true);
-        folderVisitor.searchForMatchingNodes(this::isFolderOrChild);
     }
     
-    public boolean isFolderOrChild(Node n) {
-        //TODO: Return true if node is nt:folder, sling:folder, sling:orderedfolder
-        return true;
-    }
+    String[] requiredFolderPrivilegeNames = {
+        Privilege.JCR_READ,
+        Privilege.JCR_WRITE,
+        Privilege.JCR_REMOVE_CHILD_NODES,
+        Privilege.JCR_REMOVE_NODE
+    };
+    
+    String[] requiredNodePrivilegeNames = {
+        Privilege.JCR_ALL
+    };
+    
+    Privilege[] requiredFolderPrivileges;
+    Privilege[] requiredNodePrivileges;
+    ActionManagerFactory managerFactory;
     
     public void startWork(ActionManagerFactory amf, ResourceResolver res) throws LoginException, RepositoryException {
-        validateInputs();
+        managerFactory = amf;
+        validateInputs(res);
         
         step1 = amf.createTaskManager(processName + "- Step 1", res, 1);
         step2 = amf.createTaskManager(processName + "- Step 2", res, 1);
         step3 = amf.createTaskManager(processName + "- Step 3", res, 1);
         step4 = amf.createTaskManager(processName + "- Step 4", res, 1);
-                
+
+        requiredFolderPrivileges = getPrivilegesFromNames(res.adaptTo(Session.class), requiredFolderPrivilegeNames);
+        requiredNodePrivileges = getPrivilegesFromNames(res.adaptTo(Session.class), requiredNodePrivilegeNames);
+        
         step1.onFailure(this::abortStep1);
         step1.onSuccess(this::startStep2);
 
@@ -79,48 +98,116 @@ public class FolderRelocator {
         startStep1();
     }
     
-    private void validateInputs() throws RepositoryException {
-        
+    private void validateInputs(ResourceResolver res) throws RepositoryException {
+        if (sourcePath == null) {
+            throw new RepositoryException("Source path should not be null");
+        }
+        if (destinationPath == null) {
+            throw new RepositoryException("Destination path should not be null");
+        }
+        if (destinationPath.contains(sourcePath)) {
+            throw new RepositoryException("Destination must be outside of source folder");
+        }
+        if (!resourceExists(res, sourcePath)) {
+            throw new RepositoryException("Unable to find source "+sourcePath);            
+        }
+        if (!resourceExists(res, destinationPath)) {
+            throw new RepositoryException("Unable to find destination "+destinationPath);            
+        }
+    }
+    
+    private boolean resourceExists(ResourceResolver rr, String path) {
+        Resource res = rr.resolve(path);
+        return !Resource.RESOURCE_TYPE_NON_EXISTING.equals(res.getResourceType());
     }
 
     private void startStep1() {
-        folderVisitor.onEnterNode((node, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, node)));
-        step1.deferredWithResolver(rr -> {
-            Node source = rr.getResource(sourcePath).adaptTo(Node.class);
-            source.accept(folderVisitor);
-        });
+        folderVisitor.onEnterNode((node, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, node.getPath(), requiredFolderPrivileges)));
+        folderVisitor.onVisitChild((node, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, node.getPath(), requiredNodePrivileges)));
+        beginStep(step1, sourcePath);
     }
 
-    private void checkNodeAcls(ResourceResolver res, Node node) throws RepositoryException {
-        
+    private Privilege[] getPrivilegesFromNames(Session session, String[] names) throws RepositoryException {
+        AccessControlManager acm = session.getAccessControlManager();
+        Privilege[] prvlgs = new Privilege[names.length];
+        for (int i=0; i < names.length; i++) {
+            prvlgs[i] = acm.privilegeFromName(names[i]);
+        }
+        return prvlgs;
+    }
+            
+    private void checkNodeAcls(ResourceResolver res, String path, Privilege[] prvlgs) throws RepositoryException {
+        Session session = res.adaptTo(Session.class);
+        if (!session.getAccessControlManager().hasPrivileges(path, prvlgs)) {
+            throw new RepositoryException("Insufficient permissions to permit move operation");
+        }
     }
 
-    private void abortStep1(List<Failure> errors, ResourceResolver res) {
-        
-        recordError(errors, res);
+    private void abortStep1(List<Failure> errors, ResourceResolver res) {        
+        recordError(errors, res);        
     }
     
     private void startStep2(ResourceResolver res) {
-        
+        folderVisitor.onEnterNode((node, level) -> step2.deferredWithResolver(rr -> buildDestinationFolder(rr, node.getPath())));
+        folderVisitor.onVisitChild(null);
+        beginStep(step2, sourcePath);
     }
     
     private void abortStep2(List<Failure> errors, ResourceResolver res) {
-        
         recordError(errors, res);
+        try {
+            ActionManager step2cleanup = managerFactory.createTaskManager(processName + "- Step 2 Cleanup", res, 1);
+            folderVisitor.onEnterNode((node, level) -> step2cleanup.deferredWithResolver(rr -> rr.delete(rr.resolve(node.getPath()))));
+            folderVisitor.onVisitChild(null);
+            beginStep(step2cleanup, convertSourceToDestination(sourcePath));
+        } catch (LoginException ex) {
+            Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
+    
+    private void buildDestinationFolder(ResourceResolver rr, String sourceFolder) {
+        
+    }
+    
+    private String convertSourceToDestination(String source) {
+        return "";
+    }
+    
     private void startStep3(ResourceResolver res) {
-        
+        folderVisitor.onEnterNode(null);
+        folderVisitor.onVisitChild((node, level) -> step3.deferredWithResolver(rr -> moveItem(rr, node)));
+        beginStep(step3, sourcePath);
     }
+    
+    private void moveItem(ResourceResolver rr, Node node) {
+
+    }
+
     private void startStep4(ResourceResolver res) {
-        
+        folderVisitor.onEnterNode((node, level) -> step4.deferredWithResolver(rr -> rr.delete(rr.resolve(node.getPath()))));
+        folderVisitor.onVisitChild(null);
+        beginStep(step4, sourcePath);        
     }
     
     private void recordError(List<Failure> errors, ResourceResolver res) {
-        
+        haltWork();
+    }
+    
+    private void beginStep(ActionManager step, String startingNode) {
+        step.deferredWithResolver(rr -> {
+            Node source = rr.getResource(startingNode).adaptTo(Node.class);
+            source.accept(folderVisitor);
+        });                
     }
 
     private void success() {
-        
+        haltWork();
     }
     
+    private void haltWork() {
+        step1.closeAllResolvers();
+        step2.closeAllResolvers();
+        step3.closeAllResolvers();
+        step4.closeAllResolvers();
+    }
 }

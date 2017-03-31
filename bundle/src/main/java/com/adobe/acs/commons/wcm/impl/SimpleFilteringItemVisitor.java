@@ -37,7 +37,7 @@ public class SimpleFilteringItemVisitor extends FilteringItemVisitor {
         setTraversalPredicate(this::evaluatePredicates);
     }
     
-    private boolean evaluatePredicates(Object o) {
+    protected boolean evaluatePredicates(Object o) {
         if (o instanceof Node) {
             return nodePredicate.evaluate(o);
         } else if (o instanceof Property) {
@@ -48,6 +48,10 @@ public class SimpleFilteringItemVisitor extends FilteringItemVisitor {
 
     public void searchForMatchingNodes(Predicate filter) {
         nodePredicate = filter;
+    }
+
+    public void searchForMatchingProperties(Predicate filter) {
+        propertyPredicate = filter;
     }
     
     public void onEnterProperty(BiConsumer<Property, Integer> handler) {
