@@ -14,6 +14,7 @@ public class IdentifiedResources {
 	public IdentifiedResources (List<String> paths, String name) {
 		this.paths = paths;
 		this.contentModificationStep = name;
+
 	}
 	
 	
@@ -26,10 +27,10 @@ public class IdentifiedResources {
 	 * identifies the step which created this IdentifiedResource
 	 * @return the label of the CM Step
 	 */
+
 	public String getContentModificationStep () {
 		return contentModificationStep;
 	}
-	
 	
 
 }
