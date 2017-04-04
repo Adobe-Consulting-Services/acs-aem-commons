@@ -174,6 +174,27 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
+    public void testCSSClientLibraryWithMd5Enforce() throws Exception {
+        PrivateAccessor.setField(factory, "enforceMd5", true);
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PATH + ".css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(PATH + ".ACSHASH"+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
     public void testCSSClientLibraryWithDot() throws Exception {
         final String path = PATH + ".foo";
 
@@ -213,6 +234,27 @@ public class VersionedClientlibsTransformerFactoryTest {
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".min."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testMinifiedCSSClientLibraryWithEnforceMd5() throws Exception {
+        PrivateAccessor.setField(factory, "enforceMd5", true);
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PATH + ".min.css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(PATH + ".min.ACSHASH"+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
     }
 
     @Test
@@ -440,7 +482,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCache_md5Match() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream()).thenReturn(INPUTSTREAM);
@@ -454,11 +496,25 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCache_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream()).thenReturn(INPUTSTREAM );
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.js");
+        when(htmlLibraryManager.getLibrary(slingRequest)).thenReturn(library);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verify404();
+    }
+
+    @Test
+    public void doFilter_notFoundInCacheWithDot_md5MisMatch() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
+
+        HtmlLibrary library = mock(HtmlLibrary.class);
+        when(library.getInputStream()).thenReturn(INPUTSTREAM );
+        when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.path.js");
         when(htmlLibraryManager.getLibrary(slingRequest)).thenReturn(library);
 
         filter.doFilter(slingRequest, slingResponse, filterChain);
@@ -478,7 +534,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCache_md5Match() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
 
         filter.doFilter(slingRequest, slingResponse, filterChain);
@@ -488,9 +544,30 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
+    public void doFilter_foundInCacheWithDot_md5Match() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
+        factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verifyZeroInteractions(htmlLibraryManager);
+        verifyNo404();
+    }
+
+    @Test
     public void doFilter_foundInCache_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verify404();
+    }
+
+    @Test
+    public void doFilter_foundInCacheWithDot_md5MisMatch() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
+        factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
 
         filter.doFilter(slingRequest, slingResponse, filterChain);
 

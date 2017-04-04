@@ -26,6 +26,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -83,7 +85,8 @@ import com.google.common.cache.CacheBuilder;
 /**
  * ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter
  * Re-writes paths to CSS and JS clientlibs to include the md5 checksum as a "
- * selector; in the form: /path/to/clientlib.123456789.css
+ * selector; in the form: /path/to/clientlib.123456789.css or /path/to/clientlib.min.1234589.css (if minification is enabled)
+ * If the Enforce MD5 filter is enabled, the paths will be like /path/to/clientlib.ACSHASH123456789.css or /path/to/clientlib.min.ACSHASH1234589.css (if minification is enabled)
  */
 @Component(metatype = true, label = "ACS AEM Commons - Versioned Clientlibs Transformer Factory",
     description = "Sling Rewriter Transformer Factory to add auto-generated checksums to client library references")
@@ -121,10 +124,16 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private static final String MIN_SELECTOR = "min";
     private static final String MIN_SELECTOR_SEGMENT = "." + MIN_SELECTOR;
+    private static final String MD5_PREFIX = "ACSHASH";
+
+    // pattern used to parse paths in the filter - group 1 = path; group 2 = md5; group 3 = extension
+    private static final Pattern FILTER_PATTERN = Pattern.compile("(.*?)\\.(?:min.)?" + MD5_PREFIX + "([a-zA-Z0-9]+)\\.(js|css)");
 
     private Cache<VersionedClientLibraryMd5CacheKey, String> md5Cache;
 
     private boolean disableVersioning;
+
+    private boolean enforceMd5;
 
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
@@ -141,7 +150,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         final int size = PropertiesUtil.toInteger(props.get(PROP_MD5_CACHE_SIZE), DEFAULT_MD5_CACHE_SIZE);
         this.md5Cache = CacheBuilder.newBuilder().recordStats().maximumSize(size).build();
         this.disableVersioning = PropertiesUtil.toBoolean(props.get(PROP_DISABLE_VERSIONING), DEFAULT_DISABLE_VERSIONING);
-        boolean enforceMd5 = PropertiesUtil.toBoolean(props.get(PROP_ENFORCE_MD5), DEFAULT_ENFORCE_MD5);
+        this.enforceMd5 = PropertiesUtil.toBoolean(props.get(PROP_ENFORCE_MD5), DEFAULT_ENFORCE_MD5);
         if (enforceMd5) {
             Dictionary<Object, Object> filterProps = new Hashtable<Object, Object>();
             filterProps.put("sling.filter.scope", "REQUEST");
@@ -219,6 +228,9 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
                 if (appendMinSelector) {
                     builder.append(MIN_SELECTOR).append(".");
+                }
+                if (enforceMd5) {
+                    builder.append(MD5_PREFIX);
                 }
                 builder.append(getMd5(htmlLibrary));
                 builder.append(libraryType.extension);
@@ -321,24 +333,15 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     @Nonnull
     static UriInfo getUriInfo(@Nullable final String uri) {
         if (uri != null) {
-            String[] parts = uri.split("\\.");
-            if (parts.length > 2) {
-                StringBuilder result = new StringBuilder();
-                result.append(parts[0]);
-                result.append('.');
-                result.append(parts[parts.length - 1]);
-
-                String md5 = parts[parts.length - 2];
-                if (MIN_SELECTOR.equals(md5)) {
-                    md5 = "";
-                }
-                return new UriInfo(result.toString(), md5);
+            Matcher matcher = FILTER_PATTERN.matcher(uri);
+            if (matcher.matches()) {
+                return new UriInfo(matcher.group(1) + "." + matcher.group(3), matcher.group(2));
             } else {
-                // too little parts, just return what came in
                 return new UriInfo(uri, "");
             }
+        } else {
+            return new UriInfo("", "");
         }
-        return new UriInfo("", "");
     }
 
     class BadMd5VersionedClientLibsFilter implements Filter {
