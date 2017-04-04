@@ -135,7 +135,7 @@ public final class GenericListImpl implements GenericList {
     public String lookupTitle(String value, Locale locale) {
         Item item = valueMapping.get(value);
         if (item != null) {
-            return item.getTitle();
+            return item.getTitle(locale);
         } else {
             return null;
         }

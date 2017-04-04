@@ -1,0 +1,24 @@
+{
+  "jcr:primaryType": "cq:Page",
+  "jcr:content": {
+    "jcr:primaryType": "cq:PageContent",
+    "jcr:title": "Application",
+    "errorPages": "/content/project/test/error-pages"
+  },
+  "test": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:title": "Test"
+    },
+    "page-without-content": {
+      "jcr:primaryType": "cq:Page"
+    },
+    "page-with-config": {
+      "jcr:primaryType": "cq:Page",
+      "errorPages": "/content/project/test/error-pages2"
+    },
+    "error-pages": {},
+    "error-pages2": {}
+  }
+}

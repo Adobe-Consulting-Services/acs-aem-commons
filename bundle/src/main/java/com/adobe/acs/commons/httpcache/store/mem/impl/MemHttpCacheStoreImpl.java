@@ -167,8 +167,8 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     //-------------------------<CacheStore interface specific implementation>
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
-        cache.put(key, new MemCachePersistenceObject().buildForCaching(content.getCharEncoding(), content
-                .getContentType(), content.getHeaders(), content.getInputDataStream()));
+        cache.put(key, new MemCachePersistenceObject().buildForCaching(content.getStatus(), content.getCharEncoding(),
+                content.getContentType(), content.getHeaders(), content.getInputDataStream()));
 
     }
 
@@ -190,7 +190,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         // Increment hit count
         value.incrementHitCount();
 
-        return new CacheContent(value.getCharEncoding(), value.getContentType(), value.getHeaders(), new
+        return new CacheContent(value.getStatus(), value.getCharEncoding(), value.getContentType(), value.getHeaders(), new
                 ByteArrayInputStream(value.getBytes()));
     }
 
@@ -257,6 +257,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     protected void addCacheData(Map<String, Object> data, MemCachePersistenceObject cacheObj) {
         int hitCount = cacheObj.getHitCount();
         long size = cacheObj.getBytes().length;
+        data.put("Status", cacheObj.getStatus());
         data.put("Size", FileUtils.byteCountToDisplaySize(size));
         data.put("Content Type", cacheObj.getContentType());
         data.put("Character Encoding", cacheObj.getCharEncoding());
@@ -275,9 +276,9 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     @Override
     protected CompositeType getCacheEntryType() throws OpenDataException {
        return new CompositeType("Cache Entry", "Cache Entry",
-                new String[] { "Cache Key", "Size", "Content Type", "Character Encoding", "Hits", "Total Size Served from Cache" },
-                new String[] { "Cache Key", "Size", "Content Type", "Character Encoding", "Hits", "Total Size Served from Cache" },
-                new OpenType[] { SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING });
+                new String[] { "Cache Key", "Status", "Size", "Content Type", "Character Encoding", "Hits", "Total Size Served from Cache" },
+                new String[] { "Cache Key", "Status", "Size", "Content Type", "Character Encoding", "Hits", "Total Size Served from Cache" },
+                new OpenType[] { SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING });
 
     }
 

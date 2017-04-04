@@ -1,3 +1,4 @@
+.repo
 .vlt
 .classpath
 .project
@@ -8,6 +9,7 @@ target/
 #Intellij
 .idea/
 *.iml
+generated/
 
 #vlt directories
 content/src/main/content/jcr_root/.content.xml

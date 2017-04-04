@@ -27,6 +27,24 @@
     <section class="coral-Form-fieldset">
         <h3 class="coral-Form-fieldset-legend">Bulk workflow setup</h3>
 
+
+        <div ng-show="isWorkflow()">
+            <%@include file="aem-workflow/form-info.jsp"%>
+        </div>
+
+        <div ng-show="isTransientWorkflow()">
+            <%@include file="aem-transient-workflow/form-info.jsp"%>
+        </div>
+
+        <div ng-show="isSynthetic()">
+            <%@include file="synthetic-workflow/form-info.jsp"%>
+        </div>
+
+        <div ng-show="isFAM()">
+            <%@include file="fast-action-manager/form-info.jsp"%>
+        </div>
+
+
         <div class="coral-Form-fieldwrapper">
             <label class="coral-Form-fieldlabel">Bulk Workflow Runner</label>
 
@@ -86,12 +104,16 @@
                     name="workflowModel"
                     ng-required="true"
                     ng-model="form.workflowModel"
-                    ng-options="workflowModel.value as workflowModel.label for workflowModel in formOptions.workflowModels">
+                    ng-options="workflowModel as workflowModel.label for workflowModel in formOptions.workflowModels">
             </select>
         </div>
 
         <div ng-show="isWorkflow()">
             <%@include file="aem-workflow/form.jsp"%>
+        </div>
+
+        <div ng-show="isTransientWorkflow()">
+            <%@include file="aem-transient-workflow/form.jsp"%>
         </div>
 
         <div ng-show="isSynthetic()">

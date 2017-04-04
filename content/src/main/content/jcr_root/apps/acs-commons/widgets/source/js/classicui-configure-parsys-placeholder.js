@@ -31,6 +31,7 @@
         ACS_PARSYS_BG_COLOR = "acsParsysBackgroundColor",
         ACS_PARSYS_BORDER_COLOR = "acsParsysBorderColor";
 
+
     if( ( pathName !== "/cf" ) && ( pathName.indexOf("/content") !== 0)){
         return;
     }
@@ -57,7 +58,7 @@
 
     function getConfiguration(editComponent) {
         var pageInfo = CQ.utils.WCM.getPageInfo(editComponent.path),
-            designConfig = {}, cellSearchPath, parentPath, parName;
+            designConfig = {}, cellSearchPath, cellSearchPathInfo, parentPath, parNames;
 
         if (!pageInfo || !pageInfo.designObject) {
             return;
@@ -68,9 +69,21 @@
             parentPath = editComponent.getParent().path;
 
             cellSearchPath = cellSearchPath.substring(0, cellSearchPath.indexOf("|"));
-            parName = parentPath.substring(parentPath.lastIndexOf("/") + 1);
+            parNames = parentPath.split("jcr:content/");
+            parNames = parNames[1].split("/");
 
-            designConfig = pageInfo.designObject.content[cellSearchPath][parName];
+            cellSearchPathInfo = pageInfo.designObject.content[cellSearchPath];
+
+            if (cellSearchPathInfo) {
+                for(var i=0; i < parNames.length; i++){
+                    var prop = parNames[i];
+                    cellSearchPathInfo = cellSearchPathInfo[prop];
+                }
+            } else {
+                // This is not an unusual condition and as this is feature is "on by default" we should not clutter the Console w/ messages.
+                // console.log('No cellSearchPath of [ ' + cellSearchPath + ' ] could be found for this Path's design');
+            }
+            designConfig = cellSearchPathInfo;
         } catch (err) {
             console.log("ACS AEM Commons - Error getting parsys configuration", err);
         }
@@ -82,28 +95,30 @@
         var parsyses = {};
 
         _.each(CQ.WCM.getEditables(), function(e){
-            if(!isParsysNew(e)){
-                return;
+            if (isParsysNew(e)) {
+                this[e.path] = e;
             }
-
-            parsyses[e.path] = e;
-        });
+        }, parsyses);
 
         return parsyses;
     }
 
     function configureParsys(){
-        var parsyses = getParsyses(), placeholder,
-            $placeholder, $pContainer, designConfig;
+        var placeholder,
+            $placeholder,
+            $pContainer,
+            designConfig,
+            parsyses = getParsyses();
 
-        _.each(parsyses, function(parsys){
+        _.each(parsyses, function(parsys) {
             if(!parsys.emptyComponent) {
                 return;
             }
 
             designConfig = getConfiguration(parsys);
+
             if (!designConfig) {
-              return;
+                return;
             }
 
             placeholder = parsys.emptyComponent.findByType("static")[0];
@@ -144,3 +159,6 @@
         }
     });
 }());
+
+
+

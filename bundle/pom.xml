@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>2.7.3-SNAPSHOT</version>
+        <version>2.10.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -58,6 +58,7 @@
                         <Embed-Dependency>guava</Embed-Dependency>
                         <Sling-Model-Packages>
                             com.adobe.acs.commons.version.model,
+                            com.adobe.acs.commons.wcm.comparisons.model,
                             com.adobe.acs.commons.workflow.bulk.execution.model
                         </Sling-Model-Packages>
                     </instructions>

@@ -40,6 +40,26 @@ angular.module('acs-commons-bulk-workflow-manager-app', ['acsCoral', 'ACS.Common
 
             $scope.data = {};
 
+            $scope.calc = {};
+
+
+            $scope.$watch('form.batchSize', function (newValues, oldValues) {
+                $scope._calculateInterval();
+            });
+
+            $scope.$watch('calc.queueWidth', function (newValues, oldValues) {
+                $scope._calculateInterval();
+            });
+
+            $scope.$watch('calc.avgTime', function (newValues, oldValues) {
+                $scope._calculateInterval();
+            });
+
+            $scope._calculateInterval = function () {
+                $scope.form.interval = Math.round(($scope.form.batchSize / ($scope.calc.queueWidth || 1)) * ($scope.calc.avgTime || 2));
+            };
+
+
             $scope.start = function (isValid) {
                 if (!isValid) {
                     NotificationsService.add('error',
@@ -50,6 +70,8 @@ angular.module('acs-commons-bulk-workflow-manager-app', ['acsCoral', 'ACS.Common
                 }
 
                 $scope.items = {};
+
+                $scope.form.workflowModelId = $scope.form.workflowModel.value;
 
                 $http({
                     method: 'POST',
@@ -184,26 +206,37 @@ angular.module('acs-commons-bulk-workflow-manager-app', ['acsCoral', 'ACS.Common
             };
 
             $scope.isSynthetic = function () {
-                if ($scope.showForm()) {
-                    return $scope.form.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.SyntheticWorkflowRunnerImpl';
-                } else if (!$scope.showForm()) {
-                    return $scope.data.status.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.SyntheticWorkflowRunnerImpl';
-                }
+                return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.SyntheticWorkflowRunnerImpl');
             };
 
             $scope.isFAM = function () {
-                if ($scope.showForm()) {
-                    return $scope.form.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl';
-                } else {
-                    return $scope.data.status.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl';
-                }
+                return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl');
             };
 
             $scope.isWorkflow = function () {
                 if ($scope.showForm()) {
-                    return $scope.form.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl';
+                    return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl') &&
+                        (!$scope.form.workflowModel || !$scope.form.workflowModel.transient);
                 } else {
-                    return $scope.data.status.runnerType === 'com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl';
+                    return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl');
+                }
+            };
+
+            $scope.isTransientWorkflow = function () {
+                if ($scope.showForm()) {
+                    return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl') &&
+                        $scope.form.workflowModel &&
+                        $scope.form.workflowModel.transient;
+                } else {
+                    return $scope.runnerCheck('com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMTransientWorkflowRunnerImpl');
+                }
+            };
+
+            $scope.runnerCheck = function(runnerName) {
+                if ($scope.showForm()) {
+                    return runnerName === $scope.form.runnerType;
+                } else {
+                    return runnerName === $scope.data.status.runnerType;
                 }
             };
 

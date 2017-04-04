@@ -31,7 +31,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import javax.jcr.Session;
+
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
@@ -40,7 +43,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * Various deferred actions to be used with the ActionManager
  */
-@Component(metatype = true, immediate = true, label = "Deferred Actions")
+@Component
 @Service(DeferredActions.class)
 @ProviderType
 public final class DeferredActions {
@@ -426,4 +429,10 @@ public final class DeferredActions {
             }
         };
     }
+
+    @Activate
+    private void dsActivate() {}
+
+    @Deactivate
+    private void dsDeactivate() {}
 }

@@ -41,6 +41,8 @@
         SELECTOR_FORM_CQ_DIALOG: "form.cq-dialog",
         SELECTOR_FORM_SITES_PROPERTIES: "form#cq-sites-properties-form",
         SELECTOR_FORM_CREATE_PAGE: "form.cq-siteadmin-admin-createpage",
+        SELECTOR_FORM_PROPERTIES_PAGE: "form#propertiesform",
+
 
         isSelectOne: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "select-one");
@@ -48,8 +50,13 @@
 
         setSelectOne: function ($field, value) {
             var select = $field.closest(".coral-Select").data("select");
-
-            if (select) {
+            if(!select){
+                var dataInit = $field.closest('.coral-Select').data('init');
+                if(dataInit === 'graphiciconselect'){
+                    $field.val(value);
+                    $field.closest('.coral-Form-field').find('.selected-icon i').removeClass().addClass(value);
+                }
+            }else{
                 select.setValue(value);
             }
         },
@@ -101,6 +108,32 @@
                 });
             }
         },
+        
+        isTagsField: function ($field) {
+            return !_.isEmpty($field) && ($field.hasClass("js-TagsPickerField-tagList") || $field.closest("ul").hasClass("js-TagsPickerField-tagList"));
+        },
+        
+        getTagsFieldName: function ($fieldWrapper) {
+            return $fieldWrapper.children(".js-cq-TagsPickerField").data("property-path").substr(2);
+        },
+
+        setTagsField: function($field, value) {
+        	var cmf = this;
+
+            var tagsArray = value.split(',');
+
+            var $tagList = CUI.Widget.fromElement(CUI.TagList,$field);
+
+            var cuiTagList = $field.data("tagList");
+            if ($tagList) {
+                $(tagsArray).each(function (i, item) {
+                	var tagPath = "/etc/tags/" + item.replace(":", "/");
+                    $.get(tagPath + ".tag.json").done(function(data){
+                        cuiTagList._appendItem( { value: data.tagID, display: data.titlePath} );
+                    });
+                });
+            }
+        },
 
         setWidgetValue: function ($field, value) {
             if (_.isEmpty($field)) {
@@ -117,6 +150,8 @@
                 this.setDateField($field, value);
             } else if (this.isAutocomplete($field)) {
                 this.setAutocomplete($field,value);
+            } else if (this.isTagsField($field)) {
+                this.setTagsField($field,value);
             } else {
                 $field.val(value);
             }
@@ -182,7 +217,7 @@
 
             function show($el, message){
                 /* jshint validthis: true */
-                this.clear($el);
+                clear($el);
 
                 var $multifield = $el.closest(".coral-Multifield"),
                     arrow = $el.closest("form").hasClass("coral-Form--vertical") ? "right" : "top";
@@ -205,13 +240,19 @@
             return $document.find(this.SELECTOR_FORM_SITES_PROPERTIES).length === 1;
         },
 
+        isPropertiesFormPage: function($document) {
+            return $document.find(this.SELECTOR_FORM_PROPERTIES_PAGE).length === 1;
+        },
+
         isCreatePageWizard: function($document) {
             return $document.find(this.SELECTOR_FORM_CREATE_PAGE).length == 1;
         },
 
         getPropertiesFormSelector: function() {
-            return this.SELECTOR_FORM_CQ_DIALOG + "," + this.SELECTOR_FORM_SITES_PROPERTIES + "," + this.SELECTOR_FORM_CREATE_PAGE;
-        }
+            return this.SELECTOR_FORM_CQ_DIALOG + "," + this.SELECTOR_FORM_SITES_PROPERTIES + "," +
+                this.SELECTOR_FORM_CREATE_PAGE + "," + this.SELECTOR_FORM_PROPERTIES_PAGE;
+        },
+
     });
 
     if (!ACS.TouchUI.extendedMultfield) {
