@@ -68,6 +68,7 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
     private static final String ARG_SAVE_INTERVAL = "saveInterval";
     private static final String ARG_WORKFLOW_MODEL_ID = "workflowModelId";
     private static final String ARG_THROTTLE = "throttle";
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Reference
     private SyntheticWorkflowRunner syntheticWorkflowRunner;
@@ -140,7 +141,7 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
         int saveInterval;
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), LINE_SEPARATOR);
             Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));
