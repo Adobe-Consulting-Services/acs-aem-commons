@@ -58,14 +58,14 @@ public final class DeferredActions {
     /**
      * Returns opposite of its input, e.g. filterMatching(glob).andThen(not)
      */
-    public Function<Boolean, Boolean> not = (Boolean t) -> !t;
+    public static Function<Boolean, Boolean> not = (Boolean t) -> !t;
 
     /**
      * Returns true of glob matches provided path
      * @param glob Regex expression
      * @return True for matches
      */
-    public BiFunction<ResourceResolver, String, Boolean> filterMatching(final String glob) {
+    public static BiFunction<ResourceResolver, String, Boolean> filterMatching(final String glob) {
         return (ResourceResolver r, String path) -> path.matches(glob);
     }
 
@@ -75,7 +75,7 @@ public final class DeferredActions {
      * @param glob Regex expression
      * @return False for matches
      */
-    public BiFunction<ResourceResolver, String, Boolean> filterNotMatching(final String glob) {
+    public static BiFunction<ResourceResolver, String, Boolean> filterNotMatching(final String glob) {
         return filterMatching(glob).andThen(not);
     }
 
@@ -83,7 +83,7 @@ public final class DeferredActions {
      * Exclude subassets from processing
      * @return true if node is not a subasset
      */
-    public BiFunction<ResourceResolver, String, Boolean> filterOutSubassets() {
+    public static BiFunction<ResourceResolver, String, Boolean> filterOutSubassets() {
         return filterNotMatching(".*?/subassets/.*");
     }
 
@@ -92,7 +92,7 @@ public final class DeferredActions {
      * It's better to filter via query if possible to avoid having to use this
      * @return True if asset
      */
-    public BiFunction<ResourceResolver, String, Boolean> filterNonAssets() {
+    public static BiFunction<ResourceResolver, String, Boolean> filterNonAssets() {
         return (ResourceResolver r, String path) -> {
             nameThread("filterNonAssets-" + path);
             Resource res = r.getResource(path);
@@ -105,7 +105,7 @@ public final class DeferredActions {
      * This is an especially useful function for updating assets with missing or outdated thumbnails.
      * @return True if asset has no thumbnails or outdated thumbnails
      */
-    public BiFunction<ResourceResolver, String, Boolean> filterAssetsWithOutdatedRenditions() {
+    public static BiFunction<ResourceResolver, String, Boolean> filterAssetsWithOutdatedRenditions() {
         return (ResourceResolver r, String path) -> {
             nameThread("filterAssetsWithOutdatedRenditions-" + path);
             Resource res = r.getResource(path);
@@ -139,7 +139,7 @@ public final class DeferredActions {
      * @param action Action to attempt
      * @return New retry wrapper around provided action
      */
-    public BiConsumer<ResourceResolver, String> retryAll(final int retries, final long pausePerRetry, final BiConsumer<ResourceResolver, String> action) {
+    public static BiConsumer<ResourceResolver, String> retryAll(final int retries, final long pausePerRetry, final BiConsumer<ResourceResolver, String> action) {
         return (ResourceResolver r, String s) -> {
             int remaining = retries;
             while (remaining > 0) {
@@ -175,7 +175,7 @@ public final class DeferredActions {
         };
     }
 
-    public BiConsumer<ResourceResolver, String> withAllRenditions(
+    public static BiConsumer<ResourceResolver, String> withAllRenditions(
             final BiConsumer<ResourceResolver, String> action, 
             final BiFunction<ResourceResolver, String, Boolean>... filters) {
         return (ResourceResolver r, String path) -> {
@@ -203,7 +203,7 @@ public final class DeferredActions {
      * Remove all renditions except for the original rendition for assets
      * @return 
      */
-    public BiConsumer<ResourceResolver, String> removeAllRenditions() {
+    public static BiConsumer<ResourceResolver, String> removeAllRenditions() {
         return (ResourceResolver r, String path) -> {
             nameThread("removeRenditions-" + path);
             AssetManager assetManager = r.adaptTo(AssetManager.class);
@@ -222,7 +222,7 @@ public final class DeferredActions {
      * @param name
      * @return 
      */
-    public BiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
+    public static BiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
         return (ResourceResolver r, String path) -> {
             nameThread("removeRenditions-" + path);
             AssetManager assetManager = r.adaptTo(AssetManager.class);
@@ -307,7 +307,7 @@ public final class DeferredActions {
      * @param action Action to attempt
      * @return New retry wrapper around provided action
      */
-    public Consumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final Consumer<ResourceResolver> action) {
+    public static Consumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final Consumer<ResourceResolver> action) {
         return (ResourceResolver r) -> {
             int remaining = retries;
             while (remaining > 0) {
@@ -342,7 +342,7 @@ public final class DeferredActions {
      * @param path
      * @return 
      */
-    final public Consumer<ResourceResolver> removeRenditions(String path) {
+    final static public Consumer<ResourceResolver> removeRenditions(String path) {
         return res -> removeAllRenditions().accept(res, path);
     }
     
@@ -352,7 +352,7 @@ public final class DeferredActions {
      * @param name
      * @return 
      */
-    final public Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
+    final static public Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
         return res -> removeAllRenditionsNamed(name).accept(res, path);
     }
     
@@ -394,7 +394,7 @@ public final class DeferredActions {
         return res -> deactivateAllWithOptions(options).accept(res, path);
     }
 
-    private void nameThread(String string) {
+    private static void nameThread(String string) {
         Thread.currentThread().setName(string);
     }
 
