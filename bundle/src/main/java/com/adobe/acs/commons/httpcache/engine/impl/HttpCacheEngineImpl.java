@@ -68,6 +68,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -614,7 +615,9 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                         new String[]{ "HTTP Cache Store" }));
         // @formatter:on
 
-        for (String storeName : this.cacheStoresMap.keySet()) {
+        Enumeration<String> storeNames = cacheStoresMap.keys();
+        while (storeNames.hasMoreElements()) {
+            final String storeName = storeNames.nextElement();
             final Map<String, Object> row = new HashMap<String, Object>();
 
             row.put("HTTP Cache Store", storeName);
