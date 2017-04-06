@@ -503,7 +503,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
         @Override
         public FilterReply decide(Marker marker, ch.qos.logback.classic.Logger logger, Level level, String s, Object[] objects, Throwable throwable) {
-            if (logbackMarker.get() != null && logger.getName().contains("HtmlLibraryManager")) {
+            if (logbackMarker.get() != null && logger.getName().indexOf("HtmlLibraryManager") > -1) {
                 if (level.isGreaterOrEqual(Level.ERROR)) {
                     return FilterReply.NEUTRAL;
                 } else {
