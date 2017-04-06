@@ -45,6 +45,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.turbo.TurboFilter;
+import ch.qos.logback.core.spi.FilterReply;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -57,11 +60,13 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -69,6 +74,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -129,6 +135,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     // pattern used to parse paths in the filter - group 1 = path; group 2 = md5; group 3 = extension
     private static final Pattern FILTER_PATTERN = Pattern.compile("(.*?)\\.(?:min.)?" + MD5_PREFIX + "([a-zA-Z0-9]+)\\.(js|css)");
 
+    private static final String PROXY_PREFIX = "/etc.clientlibs/";
+
     private Cache<VersionedClientLibraryMd5CacheKey, String> md5Cache;
 
     private boolean disableVersioning;
@@ -140,13 +148,18 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private ServiceRegistration filterReg;
 
+    private ServiceRegistration logbackFilterReg;
+
+    private ThreadLocal<Object> logbackMarker = new ThreadLocal<Object>();
+
     public VersionedClientlibsTransformerFactory() throws NotCompliantMBeanException {
         super(GenericCacheMBean.class);
     }
 
     @Activate
     protected void activate(ComponentContext componentContext) {
-        Dictionary<?, ?> props = componentContext.getProperties();
+        final BundleContext bundleContext = componentContext.getBundleContext();
+        final Dictionary<?, ?> props = componentContext.getProperties();
         final int size = PropertiesUtil.toInteger(props.get(PROP_MD5_CACHE_SIZE), DEFAULT_MD5_CACHE_SIZE);
         this.md5Cache = CacheBuilder.newBuilder().recordStats().maximumSize(size).build();
         this.disableVersioning = PropertiesUtil.toBoolean(props.get(PROP_DISABLE_VERSIONING), DEFAULT_DISABLE_VERSIONING);
@@ -156,9 +169,10 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
             filterProps.put("sling.filter.scope", "REQUEST");
             filterProps.put("service.ranking", Integer.valueOf(0));
 
-            filterReg = componentContext.getBundleContext().registerService(Filter.class.getName(),
+            filterReg = bundleContext.registerService(Filter.class.getName(),
                     new BadMd5VersionedClientLibsFilter(), filterProps);
         }
+        logbackFilterReg = bundleContext.registerService(TurboFilter.class.getName(), new HtmlLibraryManagerLogFilter(), null);
     }
 
     @Deactivate
@@ -168,20 +182,24 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
             filterReg.unregister();;
             filterReg = null;
         }
+        if (logbackFilterReg != null) {
+            logbackFilterReg.unregister();;
+            logbackFilterReg = null;
+        }
     }
 
     public Transformer createTransformer() {
         return new VersionableClientlibsTransformer();
     }
 
-    private Attributes versionClientLibs(final String elementName, final Attributes attrs, final String contextPath) {
+    private Attributes versionClientLibs(final String elementName, final Attributes attrs, final SlingHttpServletRequest request) {
         if (SAXElementUtils.isCSS(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_CSS_PATH),
-                    attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS, contextPath);
+                    attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS, request);
 
         } else if (SAXElementUtils.isJavaScript(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_JS_PATH),
-                    attrs.getValue("", ATTR_JS_PATH), LibraryType.JS, contextPath);
+                    attrs.getValue("", ATTR_JS_PATH), LibraryType.JS, request);
 
         } else {
             return attrs;
@@ -189,13 +207,14 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private Attributes rebuildAttributes(final AttributesImpl newAttributes, final int index, final String path,
-                                         final LibraryType libraryType, final String contextPath) {
+                                         final LibraryType libraryType, final SlingHttpServletRequest request) {
+        final String contextPath = request.getContextPath();
         String libraryPath = path;
         if (StringUtils.isNotBlank(contextPath)) {
             libraryPath = path.substring(contextPath.length());
         }
 
-        String versionedPath = this.getVersionedPath(libraryPath, libraryType);
+        String versionedPath = this.getVersionedPath(libraryPath, libraryType, request.getResourceResolver());
 
         if (StringUtils.isNotBlank(versionedPath)) {
             if(StringUtils.isNotBlank(contextPath)) {
@@ -210,7 +229,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         return newAttributes;
     }
 
-    private String getVersionedPath(final String originalPath, final LibraryType libraryType) {
+    private String getVersionedPath(final String originalPath, final LibraryType libraryType, final ResourceResolver resourceResolver) {
         try {
             boolean appendMinSelector = false;
             String libraryPath = StringUtils.substringBeforeLast(originalPath, ".");
@@ -219,11 +238,11 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                 libraryPath = StringUtils.substringBeforeLast(libraryPath, ".");
             }
 
-            final HtmlLibrary htmlLibrary = htmlLibraryManager.getLibrary(libraryType, libraryPath);
+            final HtmlLibrary htmlLibrary = getLibrary(libraryType, libraryPath, resourceResolver);
 
             if (htmlLibrary != null) {
                 StringBuilder builder = new StringBuilder();
-                builder.append(htmlLibrary.getLibraryPath());
+                builder.append(libraryPath);
                 builder.append(".");
 
                 if (appendMinSelector) {
@@ -248,6 +267,29 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         }
     }
 
+    private HtmlLibrary getLibrary(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
+        HtmlLibrary htmlLibrary = null;
+        if (libraryPath.startsWith(PROXY_PREFIX)) {
+            final String relativePath = libraryPath.substring(PROXY_PREFIX.length());
+
+            logbackMarker.set(new Object());
+
+            for (final String prefix : resourceResolver.getSearchPath()) {
+                final String absolutePath = prefix + relativePath;
+                htmlLibrary = htmlLibraryManager.getLibrary(libraryType, absolutePath);
+                if (htmlLibrary != null) {
+                    break;
+                }
+            }
+
+            logbackMarker.remove();;
+
+        } else {
+            htmlLibrary = htmlLibraryManager.getLibrary(libraryType, libraryPath);
+        }
+        return htmlLibrary;
+    }
+
     @Nonnull private String getMd5(@Nonnull final HtmlLibrary htmlLibrary) throws IOException, ExecutionException {
         return md5Cache.get(new VersionedClientLibraryMd5CacheKey(htmlLibrary), new Callable<String>() {
 
@@ -262,24 +304,14 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         return DigestUtils.md5Hex(htmlLibrary.getInputStream());
     }
 
-    @Nullable private String calculateMd5(SlingHttpServletRequest slingRequest) throws IOException {
-        HtmlLibrary library = htmlLibraryManager.getLibrary(slingRequest);
-        if (library == null) {
-            log.debug("No Client Library found for {}", slingRequest.getRequestURI());
-            return null;
-        } else {
-            return calculateMd5(library);
-        }
-    }
-
     private class VersionableClientlibsTransformer extends AbstractTransformer {
 
-        private String contextPath;
+        private SlingHttpServletRequest request;
 
         @Override
         public void init(ProcessingContext context, ProcessingComponentConfiguration config) throws IOException {
             super.init(context, config);
-            this.contextPath = context.getRequest().getContextPath();
+            this.request = context.getRequest();
         }
 
         public void startElement(final String namespaceURI, final String localName, final String qName,
@@ -289,7 +321,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
             if (disableVersioning) {
                 nextAttributes = attrs;
             } else {
-                nextAttributes = versionClientLibs(localName, attrs, contextPath);
+                nextAttributes = versionClientLibs(localName, attrs, request);
             }
             getContentHandler().startElement(namespaceURI, localName, qName, nextAttributes);
         }
@@ -331,17 +363,26 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     @Nonnull
-    static UriInfo getUriInfo(@Nullable final String uri) {
+    UriInfo getUriInfo(@Nullable final String uri, @Nonnull ResourceResolver resourceResolver) {
         if (uri != null) {
             Matcher matcher = FILTER_PATTERN.matcher(uri);
             if (matcher.matches()) {
-                return new UriInfo(matcher.group(1) + "." + matcher.group(3), matcher.group(2));
-            } else {
-                return new UriInfo(uri, "");
+                final String libraryPath = matcher.group(1);
+                final String md5 = matcher.group(2);
+                final String extension = matcher.group(3);
+
+                LibraryType libraryType;
+                if (LibraryType.CSS.extension.substring(1).equals(extension)) {
+                    libraryType = LibraryType.CSS;
+                } else {
+                    libraryType = LibraryType.JS;
+                }
+                final HtmlLibrary htmlLibrary = getLibrary(libraryType, libraryPath, resourceResolver);
+                return new UriInfo(libraryPath + "." + extension, md5, libraryType, htmlLibrary);
             }
-        } else {
-            return new UriInfo("", "");
         }
+
+        return new UriInfo("", "", null, null);
     }
 
     class BadMd5VersionedClientLibsFilter implements Filter {
@@ -354,8 +395,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                 final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
                 final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
                 String uri = slingRequest.getRequestURI();
-                if (uri.endsWith(".js") || uri.endsWith(".css")) {
-                    UriInfo uriInfo = getUriInfo(uri);
+                UriInfo uriInfo = getUriInfo(uri, slingRequest.getResourceResolver());
+                if (uriInfo.cacheKey != null) {
                     if ("".equals(uriInfo.md5)) {
                         log.debug("MD5 is blank for '{}' in Versioned ClientLibs cache, allowing {} to pass", uriInfo.cleanedUri, uri);
                         filterChain.doFilter(request, response);
@@ -364,7 +405,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
                     String md5FromCache = null;
                     try {
-                        md5FromCache = getCacheEntry(uriInfo.cleanedUri);
+                        md5FromCache = getCacheEntry(uriInfo.cacheKey);
                     } catch (Exception e) {
                         md5FromCache = null;
                     }
@@ -372,7 +413,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                     // this static value "Invalid cache key parameter." happens when the cache key can't be
                     // found in the cache
                     if ("Invalid cache key parameter.".equals(md5FromCache)) {
-                        md5FromCache = calculateMd5(slingRequest);
+                        md5FromCache = calculateMd5(uriInfo.htmlLibrary);
                     }
 
                     if (md5FromCache == null) {
@@ -386,7 +427,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                             filterChain.doFilter(request, response);
                         } else {
                             log.info("MD5 differs for '{}' in Versioned ClientLibs cache. Expected {}. Sending 404 for '{}'",
-                                    new Object[] { uriInfo.cleanedUri, uriInfo.md5, uri });
+                                    new Object[] { uriInfo.cleanedUri, md5FromCache, uri });
                             slingResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
                         }
                     }
@@ -408,10 +449,36 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     static class UriInfo {
         private final String cleanedUri;
         private final String md5;
+        private final LibraryType libraryType;
+        private final HtmlLibrary htmlLibrary;
+        private final String cacheKey;
 
-        UriInfo(String cleanedUri, String md5) {
+        UriInfo(String cleanedUri, String md5, LibraryType libraryType, HtmlLibrary htmlLibrary) {
             this.cleanedUri = cleanedUri;
             this.md5 = md5;
+            this.libraryType = libraryType;
+            this.htmlLibrary = htmlLibrary;
+            if (libraryType != null && htmlLibrary != null) {
+                cacheKey = htmlLibrary.getLibraryPath() + libraryType.extension;
+            } else {
+                cacheKey = null;
+            }
+        }
+    }
+
+    class HtmlLibraryManagerLogFilter extends TurboFilter {
+
+        @Override
+        public FilterReply decide(Marker marker, ch.qos.logback.classic.Logger logger, Level level, String s, Object[] objects, Throwable throwable) {
+            if (logbackMarker.get() != null && logger.getName().contains("HtmlLibraryManager")) {
+                if (level.isGreaterOrEqual(Level.ERROR)) {
+                    return FilterReply.NEUTRAL;
+                } else {
+                    return FilterReply.DENY;
+                }
+            } else {
+                return FilterReply.NEUTRAL;
+            }
         }
     }
 }
