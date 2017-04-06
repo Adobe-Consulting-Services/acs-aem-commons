@@ -55,6 +55,12 @@ public interface ActionManager {
     void deferredWithResolver(final Consumer<ResourceResolver> action);
 
     /**
+     * Set the current node being worked on, used for reporting errors.  (Note: Thread-safe)
+     * @param path Path to report in case of error
+     */
+    void setCurrentPath(String path);
+    
+    /**
      * Perform action right now using a provided pooled resolver
      * @param action Action to perform
      * @throws java.lang.Exception

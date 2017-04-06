@@ -147,6 +147,11 @@ class ActionManagerImpl implements ActionManager {
     }
     
     @Override
+    public void setCurrentPath(String nodePath) {
+        currentPath.set(nodePath);        
+    }
+    
+    @Override
     public int withQueryResults(
             final String queryStatement,
             final String language,
@@ -164,7 +169,7 @@ class ActionManagerImpl implements ActionManager {
                     final String nodePath = nodeIterator.nextNode().getPath();
                     LOG.info("Processing found result " + nodePath);
                     deferredWithResolver((ResourceResolver r) -> {
-                        currentPath.set(nodePath);
+                        setCurrentPath(nodePath);
                         if (filters != null) {
                             for (BiFunction<ResourceResolver, String, Boolean> filter : filters) {
                                 if (!filter.apply(r, nodePath)) {
