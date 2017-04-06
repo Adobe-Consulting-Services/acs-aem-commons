@@ -141,7 +141,6 @@ public class VersionedClientlibsTransformerFactoryTest {
         transformer.init(processingContext, null);
         transformer.setContentHandler(handler);
 
-        verify(bundleContext).registerService(eq(TurboFilter.class.getName()), any(), any(Dictionary.class));
         verifyNoMoreInteractions(bundleContext);
     }
 

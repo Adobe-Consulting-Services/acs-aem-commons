@@ -151,10 +151,6 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private ServiceRegistration filterReg;
 
-    private ServiceRegistration logbackFilterReg;
-
-    private ThreadLocal<Object> logbackMarker = new ThreadLocal<Object>();
-
     public VersionedClientlibsTransformerFactory() throws NotCompliantMBeanException {
         super(GenericCacheMBean.class);
     }
@@ -175,7 +171,6 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
             filterReg = bundleContext.registerService(Filter.class.getName(),
                     new BadMd5VersionedClientLibsFilter(), filterProps);
         }
-        logbackFilterReg = bundleContext.registerService(TurboFilter.class.getName(), new HtmlLibraryManagerLogFilter(), null);
     }
 
     @Deactivate
@@ -184,10 +179,6 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         if (filterReg != null) {
             filterReg.unregister();;
             filterReg = null;
-        }
-        if (logbackFilterReg != null) {
-            logbackFilterReg.unregister();;
-            logbackFilterReg = null;
         }
     }
 
@@ -305,8 +296,6 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         if (libraryPath.startsWith(PROXY_PREFIX)) {
             final String relativePath = libraryPath.substring(PROXY_PREFIX.length());
 
-            logbackMarker.set(new Object());
-
             for (final String prefix : resourceResolver.getSearchPath()) {
                 final String absolutePath = prefix + relativePath;
                 htmlLibrary = htmlLibraryManager.getLibrary(libraryType, absolutePath);
@@ -314,8 +303,6 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                     break;
                 }
             }
-
-            logbackMarker.remove();;
 
         } else {
             htmlLibrary = htmlLibraryManager.getLibrary(libraryType, libraryPath);
@@ -495,22 +482,6 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                 cacheKey = htmlLibrary.getLibraryPath() + libraryType.extension;
             } else {
                 cacheKey = null;
-            }
-        }
-    }
-
-    class HtmlLibraryManagerLogFilter extends TurboFilter {
-
-        @Override
-        public FilterReply decide(Marker marker, ch.qos.logback.classic.Logger logger, Level level, String s, Object[] objects, Throwable throwable) {
-            if (logbackMarker.get() != null && logger.getName().contains("HtmlLibraryManager")) {
-                if (level.isGreaterOrEqual(Level.ERROR)) {
-                    return FilterReply.NEUTRAL;
-                } else {
-                    return FilterReply.DENY;
-                }
-            } else {
-                return FilterReply.NEUTRAL;
             }
         }
     }
