@@ -126,13 +126,13 @@ public class FolderRelocator {
         if (destinationPath == null) {
             throw new RepositoryException("Destination path should not be null");
         }
-        if (destinationPath.contains(sourcePath)) {
+        if (destinationPath.contains(sourcePath + "/")) {
             throw new RepositoryException("Destination must be outside of source folder");
         }
         if (!resourceExists(res, sourcePath)) {
             throw new RepositoryException("Unable to find source " + sourcePath);
         }
-        if (!resourceExists(res, destinationPath)) {
+        if (!resourceExists(res, destinationPath.substring(0, destinationPath.lastIndexOf('/')))) {
             throw new RepositoryException("Unable to find destination " + destinationPath);
         }
     }
