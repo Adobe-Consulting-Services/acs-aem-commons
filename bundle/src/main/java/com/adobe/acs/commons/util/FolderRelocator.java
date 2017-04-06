@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.wcm.impl;
+package com.adobe.acs.commons.util;
 
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.DeferredActions;
+import com.adobe.acs.commons.util.impl.TreeFilteringItemVisitor;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,10 +36,15 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * This utility takes an alternate approach to moving folders using a four-step
- * process. Step 1: Evaluate the requirements, check for possible authorization
- * issues; Abort sequence halts other work Step 2: Prepare destination folder
- * structure; Abort sequence is to remove any folders created already Step 3:
- * Relocate the contents of the folders Step 4: Remove the old folder structures
+ * process.
+ * <ul>
+ * <li>Step 1: Evaluate the requirements, check for possible authorization
+ * issues; Abort sequence halts other work</li>
+ * <li>Step 2: Prepare destination folder structure; Abort sequence is to remove
+ * any folders created already</li>
+ * <li>Step 3: Relocate the contents of the folders</li>
+ * <li>Step 4: Remove the old folder structures</li>
+ * </ul>
  */
 public class FolderRelocator {
 
