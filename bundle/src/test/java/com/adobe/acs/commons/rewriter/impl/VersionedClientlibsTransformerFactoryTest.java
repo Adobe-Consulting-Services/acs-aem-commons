@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.rewriter.impl;
 
+import ch.qos.logback.classic.turbo.TurboFilter;
 import com.day.cq.widget.HtmlLibrary;
 import com.day.cq.widget.HtmlLibraryManager;
 import com.day.cq.widget.LibraryType;
@@ -29,6 +30,8 @@ import junitx.util.PrivateAccessor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.junit.After;
 import org.junit.Before;
@@ -66,6 +69,9 @@ public class VersionedClientlibsTransformerFactoryTest {
     private HtmlLibrary htmlLibrary;
 
     @Mock
+    private HtmlLibrary proxiedHtmlLibrary;
+
+    @Mock
     private ContentHandler handler;
 
     @Mock
@@ -89,11 +95,21 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Mock
     private BundleContext bundleContext;
 
+    @Mock
+    private ProcessingContext processingContext;
+
+    @Mock
+    private ResourceResolver resourceResolver;
+
     private final String PATH = "/etc/clientlibs/test";
-    private final String FAKE_STREAM_CHECKSUM="fcadcfb01c1367e9e5b7f2e6d455ba8f";
+    private final String FAKE_STREAM_CHECKSUM="fcadcfb01c1367e9e5b7f2e6d455ba8f"; // md5 of "I love strings"
+    private final String PROXIED_FAKE_STREAM_CHECKSUM="669a712c318596cd7e7520e3e2000cfb"; // md5 of "I love strings when they are proxied"
     private final byte[] BYTES;
     private final java.io.InputStream INPUTSTREAM;
     private final String INPUTSTREAM_MD5;
+    private final String PROXIED_PATH = "/apps/myco/test";
+    private final String PROXY_PATH = "/etc.clientlibs/myco/test";
+
 
     public VersionedClientlibsTransformerFactoryTest() throws Exception {
         BYTES = "test".getBytes("UTF-8");
@@ -112,11 +128,20 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         when(htmlLibrary.getLibraryPath()).thenReturn(PATH);
         when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings".getBytes()));
-        //when(htmlLibrary.getLastModified()).thenReturn(123L);
+
+        when(proxiedHtmlLibrary.getLibraryPath()).thenReturn(PROXIED_PATH);
+        when(proxiedHtmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are proxied".getBytes()));
+
+        when(processingContext.getRequest()).thenReturn(slingRequest);
+        when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
+        when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/libs/", "/apps/" });
+
 
         transformer = factory.createTransformer();
+        transformer.init(processingContext, null);
         transformer.setContentHandler(handler);
 
+        verify(bundleContext).registerService(eq(TurboFilter.class.getName()), any(), any(Dictionary.class));
         verifyNoMoreInteractions(bundleContext);
     }
 
@@ -296,6 +321,27 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         assertEquals(path + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
     }
+
+    @Test
+    public void testProxiedJavaScriptClientLibrary() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PROXIED_PATH))).thenReturn(proxiedHtmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", PROXY_PATH + ".js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+                attributesCaptor.capture());
+
+        assertEquals(PROXY_PATH + "."+ PROXIED_FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+
 
     @Test
     public void testMinifiedJavaScriptClientLibrary() throws Exception {
@@ -487,7 +533,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream()).thenReturn(INPUTSTREAM);
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.js");
-        when(htmlLibraryManager.getLibrary(slingRequest)).thenReturn(library);
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(library);
 
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
@@ -501,7 +547,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream()).thenReturn(INPUTSTREAM );
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.js");
-        when(htmlLibraryManager.getLibrary(slingRequest)).thenReturn(library);
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(library);
 
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
@@ -515,7 +561,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream()).thenReturn(INPUTSTREAM );
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.path.js");
-        when(htmlLibraryManager.getLibrary(slingRequest)).thenReturn(library);
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some.path")).thenReturn(library);
 
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
@@ -525,7 +571,6 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Test
     public void doFilter_notFoundInCache_NoClientLib() throws Exception {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
-        when(htmlLibraryManager.getLibrary(slingRequest)).thenReturn(null);
 
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
@@ -537,9 +582,12 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
 
+        HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
+        when(htmlLibrary.getLibraryPath()).thenReturn("/etc/clientlibs/some");
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(htmlLibrary);
+
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
-        verifyZeroInteractions(htmlLibraryManager);
         verifyNo404();
     }
 
@@ -548,9 +596,12 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
 
+        HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
+        when(htmlLibrary.getLibraryPath()).thenReturn("/etc/clientlibs/some.path");
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some.path")).thenReturn(htmlLibrary);
+
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
-        verifyZeroInteractions(htmlLibraryManager);
         verifyNo404();
     }
 
@@ -558,6 +609,10 @@ public class VersionedClientlibsTransformerFactoryTest {
     public void doFilter_foundInCache_md5MisMatch() throws Exception {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
+
+        HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
+        when(htmlLibrary.getLibraryPath()).thenReturn("/etc/clientlibs/some");
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(htmlLibrary);
 
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
@@ -568,6 +623,11 @@ public class VersionedClientlibsTransformerFactoryTest {
     public void doFilter_foundInCacheWithDot_md5MisMatch() throws Exception {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
+
+        HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
+        when(htmlLibrary.getLibraryPath()).thenReturn("/etc/clientlibs/some.path");
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some.path")).thenReturn(htmlLibrary);
+
 
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
