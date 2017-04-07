@@ -96,10 +96,10 @@ public class FolderRelocator {
         managerFactory = amf;
         validateInputs(res);
 
-        step1 = amf.createTaskManager(processName + "- Step 1", res, 1);
-        step2 = amf.createTaskManager(processName + "- Step 2", res, 1);
-        step3 = amf.createTaskManager(processName + "- Step 3", res, 1);
-        step4 = amf.createTaskManager(processName + "- Step 4", res, 1);
+        step1 = amf.createTaskManager(processName + " - Step 1", res, 1);
+        step2 = amf.createTaskManager(processName + " - Step 2", res, 1);
+        step3 = amf.createTaskManager(processName + " - Step 3", res, 1);
+        step4 = amf.createTaskManager(processName + " - Step 4", res, 1);
 
         requiredFolderPrivileges = getPrivilegesFromNames(res.adaptTo(Session.class), requiredFolderPrivilegeNames);
         requiredNodePrivileges = getPrivilegesFromNames(res.adaptTo(Session.class), requiredNodePrivilegeNames);
@@ -158,6 +158,7 @@ public class FolderRelocator {
     }
 
     private void checkNodeAcls(ResourceResolver res, String path, Privilege[] prvlgs) throws RepositoryException {
+        step1.setCurrentPath(path);
         Session session = res.adaptTo(Session.class);
         if (!session.getAccessControlManager().hasPrivileges(path, prvlgs)) {
             throw new RepositoryException("Insufficient permissions to permit move operation");
@@ -179,7 +180,7 @@ public class FolderRelocator {
     private void abortStep2(List<Failure> errors, ResourceResolver res) {
         recordError(errors, res);
         try {
-            ActionManager step2cleanup = managerFactory.createTaskManager(processName + "- Step 2 Cleanup", res, 1);
+            ActionManager step2cleanup = managerFactory.createTaskManager(processName + " - Step 2 Cleanup", res, 1);
             folderVisitor.onEnterNode((node, level) -> step2cleanup.deferredWithResolver(rr -> rr.delete(rr.resolve(node.getPath()))));
             folderVisitor.onVisitChild(null);
             beginStep(step2cleanup, convertSourceToDestination(sourcePath));
@@ -191,6 +192,7 @@ public class FolderRelocator {
     private void buildDestinationFolder(ResourceResolver rr, String sourceFolder) throws PersistenceException, RepositoryException {
         Resource source = rr.getResource(sourceFolder);
         String targetPath = convertSourceToDestination(sourceFolder);
+        step2.setCurrentPath(sourceFolder + "->" + targetPath);
         String targetParentPath = targetPath.substring(0, targetPath.lastIndexOf('/'));
         String targetName = targetPath.substring(targetPath.lastIndexOf('/') + 1);
         Resource destParent = rr.getResource(targetParentPath);
@@ -207,22 +209,27 @@ public class FolderRelocator {
     private void startStep3(ResourceResolver res) {
         folderVisitor.onEnterNode(null);
         folderVisitor.onVisitChild((node, level) -> step3.deferredWithResolver(
-                DeferredActions.retry(5, 100, rr -> moveItem(rr, node.getPath()))
+                DeferredActions.retry(15, 250, rr -> moveItem(rr, node.getPath()))
         ));
         beginStep(step3, sourcePath);
     }
 
     private void moveItem(ResourceResolver rr, String path) throws RepositoryException {
+        step3.setCurrentPath(path);
         Session session = rr.adaptTo(Session.class);
+        session.getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
+        if (path.endsWith("jcr:content")) {
+            session.removeItem(convertSourceToDestination(path));
+        }
         session.move(path, convertSourceToDestination(path));
+        if (path.endsWith("jcr:content")) {
+            session.refresh(true);
+            session.save();
+        }
     }
 
     private void startStep4(ResourceResolver res) {
-        folderVisitor.onEnterNode((node, level) -> step4.deferredWithResolver(
-                DeferredActions.retry(5, 100, rr -> rr.delete(rr.resolve(node.getPath())))
-        ));
-        folderVisitor.onVisitChild(null);
-        beginStep(step4, sourcePath);
+        step4.deferredWithResolver(rr -> rr.delete(rr.getResource(sourcePath)));
     }
 
     private void recordError(List<Failure> errors, ResourceResolver res) {
