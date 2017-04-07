@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.wcm.impl;
+package com.adobe.acs.commons.util.visitors;
 
 import com.adobe.acs.commons.functions.BiConsumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;

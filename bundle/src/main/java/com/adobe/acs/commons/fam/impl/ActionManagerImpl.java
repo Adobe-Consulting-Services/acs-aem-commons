@@ -70,7 +70,6 @@ class ActionManagerImpl implements ActionManager {
     private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
     private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
     private final ThrottledTaskRunner taskRunner;
-    private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
     private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
     private final List<Consumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
@@ -83,7 +82,6 @@ class ActionManagerImpl implements ActionManager {
         this.taskRunner = taskRunner;
         this.saveInterval = saveInterval;
         baseResolver = resolver.clone(null);
-        currentPath = new ThreadLocal<>();
         failures = new ArrayList<>();
     }
 
@@ -131,7 +129,7 @@ class ActionManagerImpl implements ActionManager {
     @Override
     public void withResolver(Consumer<ResourceResolver> action) throws Exception {
         ReusableResolver resolver = getResourceResolver();
-        resolver.setCurrentItem(currentPath.get());
+        resolver.setCurrentItem(ActionManager.getCurrentItem());
         try {
             action.accept(resolver.getResolver());
         } catch (Exception ex) {
@@ -144,11 +142,6 @@ class ActionManagerImpl implements ActionManager {
                 throw ex;
             }
         }
-    }
-    
-    @Override
-    public void setCurrentPath(String nodePath) {
-        currentPath.set(nodePath);        
     }
     
     @Override
@@ -169,7 +162,7 @@ class ActionManagerImpl implements ActionManager {
                     final String nodePath = nodeIterator.nextNode().getPath();
                     LOG.info("Processing found result " + nodePath);
                     deferredWithResolver((ResourceResolver r) -> {
-                        setCurrentPath(nodePath);
+                        ActionManager.setCurrentItem(nodePath);
                         if (filters != null) {
                             for (BiFunction<ResourceResolver, String, Boolean> filter : filters) {
                                 if (!filter.apply(r, nodePath)) {
@@ -190,18 +183,21 @@ class ActionManagerImpl implements ActionManager {
     }
     
     @Override
-    public void onSuccess(Consumer<ResourceResolver> successTask) {
+    public ActionManager onSuccess(Consumer<ResourceResolver> successTask) {        
         successHandlers.add(successTask);
+        return this;
     }
 
     @Override
-    public void onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask) {
+    public ActionManager onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask) {
         errorHandlers.add(failureTask);
+        return this;
     }
     
     @Override
-    public void onFinish(Runnable finishHandler) {
+    public ActionManager onFinish(Runnable finishHandler) {
         finishHandlers.add(finishHandler);
+        return this;
     }
    
     private void runCompletionTasks() {
@@ -239,11 +235,6 @@ class ActionManagerImpl implements ActionManager {
                 closeAllResolvers();
             });        
         }
-    }
-
-    @Override
-    public void setCurrentItem(String item) {
-        currentPath.set(item);
     }
 
     private void deferredWithResolver(
@@ -289,7 +280,7 @@ class ActionManagerImpl implements ActionManager {
     private void logError(Exception ex) {
         LOG.error("Caught exception in task: "+ex.getMessage(), ex);
         Failure fail = new Failure();
-        fail.setNodePath(currentPath.get());
+        fail.setNodePath(ActionManager.getCurrentItem());
         fail.setException(ex);
         failures.add(fail);
         tasksCompleted.incrementAndGet();

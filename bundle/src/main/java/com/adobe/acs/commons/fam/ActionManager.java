@@ -55,12 +55,6 @@ public interface ActionManager {
     void deferredWithResolver(final Consumer<ResourceResolver> action);
 
     /**
-     * Set the current node being worked on, used for reporting errors.  (Note: Thread-safe)
-     * @param path Path to report in case of error
-     */
-    void setCurrentPath(String path);
-    
-    /**
      * Perform action right now using a provided pooled resolver
      * @param action Action to perform
      * @throws java.lang.Exception
@@ -70,21 +64,24 @@ public interface ActionManager {
     /**
      * Register a handler to be fired when the work has completed with no errors.
      * @param successTask 
+     * @return the current action manager
      */
-    void onSuccess(Consumer<ResourceResolver> successTask);
+    ActionManager onSuccess(Consumer<ResourceResolver> successTask);
 
     /**
      * Register a handler to be fired when the work has completed and there was at least one error.
      * @param failureTask 
+     * @return the current action manager
      */
-    void onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask);
+    ActionManager onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask);
     
     /**
      * Register a handler to be fired when the work is completed, successfully or not.  
      * Note: These handlers are called after the success/fail handlers.
      * @param finishHandler 
+     * @return the current action manager
      */
-    void onFinish(Runnable finishHandler);
+    ActionManager onFinish(Runnable finishHandler);
 
     /**
      * Have all actions completed?
@@ -118,12 +115,19 @@ public interface ActionManager {
      */
     CompositeData getStatistics() throws OpenDataException;
 
+    static final ThreadLocal<String> currentItem = new ThreadLocal<>();
     /**
      * Note the name or path of the item currently being processed
      * This is particularly useful for error reporting
      * @param item Item name or path being processed currently
      */
-    void setCurrentItem(String item);
+    static void setCurrentItem(String item) {
+        currentItem.set(item);
+    }
+
+    static String getCurrentItem() {
+        return currentItem.get();
+    }
     
     /**
      * @return The name set on this action manager at the time of its creation

@@ -20,7 +20,9 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +49,7 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
     
     public ActionManagerFactoryImpl() throws NotCompliantMBeanException {
         super(ActionManagerMBean.class);
-        tasks = new ConcurrentHashMap<>();
+        tasks = Collections.synchronizedMap(new LinkedHashMap<>());
     }
     
     @Override

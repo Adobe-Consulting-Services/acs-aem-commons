@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.util.impl;
+package com.adobe.acs.commons.util.visitors;
 
 import com.adobe.acs.commons.functions.BiConsumer;
-import com.adobe.acs.commons.wcm.impl.SimpleFilteringItemVisitor;
+import com.adobe.acs.commons.util.visitors.SimpleFilteringItemVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
 import java.util.LinkedList;
 import java.util.logging.Level;
