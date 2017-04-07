@@ -27,7 +27,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  * Abstraction of a Process which runs using FAM and consists of one or more
  * actions.
  */
-public abstract class ManagedProcess {
+public abstract class ControlledProcess {
 
     private final String name;
     private final ActionManagerFactory amf;
@@ -40,7 +40,7 @@ public abstract class ManagedProcess {
         boolean critical = false;
     }
 
-    public ManagedProcess(ActionManagerFactory amf, String name) {
+    public ControlledProcess(ActionManagerFactory amf, String name) {
         this.amf = amf;
         this.name = name;
         this.actions = new ArrayList<>();

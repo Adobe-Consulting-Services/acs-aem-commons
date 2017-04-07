@@ -19,7 +19,7 @@ import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.DeferredActions;
-import com.adobe.acs.commons.fam.ManagedProcess;
+import com.adobe.acs.commons.fam.ControlledProcess;
 import com.adobe.acs.commons.util.visitors.TreeFilteringItemVisitor;
 import java.util.List;
 import java.util.logging.Level;
@@ -48,7 +48,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  * <li>Step 4: Remove the old folder structures</li>
  * </ul>
  */
-public class FolderRelocator extends ManagedProcess {
+public class FolderRelocator extends ControlledProcess {
 
     public static enum Mode {
         RENAME, MOVE

@@ -17,7 +17,7 @@ package com.adobe.acs.commons.util;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
-import com.adobe.acs.commons.fam.ManagedProcess;
+import com.adobe.acs.commons.fam.ControlledProcess;
 import com.adobe.acs.commons.util.visitors.TreeFilteringItemVisitor;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import org.apache.sling.event.jobs.Queue;
 /**
  * Stops all running sling jobs and empties the queue entirely.
  */
-public class JobQueueCleaner extends ManagedProcess {
+public class JobQueueCleaner extends ControlledProcess {
 
     public static final String JOB_TYPE = "slingevent:Job";
     public static final String EVENT_QUEUE_LOCATION = "/var/eventing";
