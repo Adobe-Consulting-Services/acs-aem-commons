@@ -15,7 +15,6 @@
  */
 package com.adobe.acs.commons.fam;
 
-import com.adobe.acs.commons.functions.BiConsumer;
 import com.adobe.acs.commons.functions.Consumer;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +66,8 @@ public abstract class ControlledProcess {
     private ActionManager defineAction(String name, ResourceResolver rr, Consumer<ActionManager> builder, boolean isCritical) throws LoginException {
         ActivityDefinition definition = new ActivityDefinition();
         definition.builder = builder;
-        definition.manager = amf.createTaskManager(name, rr, 1);
         definition.name = name;
+        definition.manager = amf.createTaskManager(getName() + ": " + name, rr, 1);
         definition.critical = isCritical;
         actions.add(definition);
         return definition.manager;

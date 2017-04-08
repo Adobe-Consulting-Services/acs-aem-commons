@@ -35,6 +35,7 @@ import org.apache.sling.event.jobs.Queue;
 public class JobQueueCleaner extends ControlledProcess {
 
     public static final String JOB_TYPE = "slingevent:Job";
+    public static final String POLICY_NODE_NAME = "rep:policy";
     public static final String EVENT_QUEUE_LOCATION = "/var/eventing";
     public static final int MIN_PURGE_FOLDER_LEVEL = 6;
     private final List<String> suspendedQueues = new ArrayList<>();
@@ -54,7 +55,7 @@ public class JobQueueCleaner extends ControlledProcess {
     
     private void stopJobQueues(ActionManager manager) {
         for (Queue q : jobManager.getQueues()) {
-            if (q.isSuspended()) {
+            if (!q.isSuspended() || q.getStatistics().getNumberOfQueuedJobs() > 0) {
                 suspendedQueues.add(q.getName());
                 manager.deferredWithResolver(rr -> q.suspend());
             }
@@ -63,14 +64,17 @@ public class JobQueueCleaner extends ControlledProcess {
     
     private void purgeJobs(ActionManager manager) {
         TreeFilteringItemVisitor visitor = new TreeFilteringItemVisitor();
+        visitor.setBreadthFirst(false);
         visitor.onLeaveNode((node, level) -> {
             if (level >= MIN_PURGE_FOLDER_LEVEL) {
                 manager.deferredWithResolver(rr -> deleteResource(rr, node.getPath()));
             }
         });
-        visitor.onVisitChild((node, level) ->
-            manager.deferredWithResolver(rr -> deleteResource(rr, node.getPath()))
-        );
+        visitor.onVisitChild((node, level) -> {
+            if (!node.getName().equals(POLICY_NODE_NAME)) {
+                manager.deferredWithResolver(rr -> deleteResource(rr, node.getPath()));
+            }
+        });
         manager.deferredWithResolver(rr -> {
             Session session = rr.adaptTo(Session.class);
             Node queue = session.getNode(EVENT_QUEUE_LOCATION);
