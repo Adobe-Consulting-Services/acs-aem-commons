@@ -18,6 +18,7 @@ package com.adobe.acs.commons.util;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.ControlledProcess;
+import com.adobe.acs.commons.fam.DeferredActions;
 import com.adobe.acs.commons.util.visitors.TreeFilteringItemVisitor;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import javax.jcr.Node;
 import javax.jcr.Session;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.event.jobs.Queue;
@@ -37,7 +39,7 @@ public class JobQueueCleaner extends ControlledProcess {
     public static final String JOB_TYPE = "slingevent:Job";
     public static final String POLICY_NODE_NAME = "rep:policy";
     public static final String EVENT_QUEUE_LOCATION = "/var/eventing";
-    public static final int MIN_PURGE_FOLDER_LEVEL = 6;
+    public static final int MIN_PURGE_FOLDER_LEVEL = 3;
     private final List<String> suspendedQueues = new ArrayList<>();
     private final JobManager jobManager;
 
@@ -52,7 +54,7 @@ public class JobQueueCleaner extends ControlledProcess {
         defineAction("Purge jobs", rr, this::purgeJobs);
         defineCriticalAction("Resume job queues", rr, this::resumeJobQueues);
     }
-    
+
     private void stopJobQueues(ActionManager manager) {
         for (Queue q : jobManager.getQueues()) {
             if (!q.isSuspended() || q.getStatistics().getNumberOfQueuedJobs() > 0) {
@@ -61,13 +63,13 @@ public class JobQueueCleaner extends ControlledProcess {
             }
         }
     }
-    
+
     private void purgeJobs(ActionManager manager) {
         TreeFilteringItemVisitor visitor = new TreeFilteringItemVisitor();
         visitor.setBreadthFirst(false);
         visitor.onLeaveNode((node, level) -> {
             if (level >= MIN_PURGE_FOLDER_LEVEL) {
-                manager.deferredWithResolver(rr -> deleteResource(rr, node.getPath()));
+                manager.deferredWithResolver(DeferredActions.retry(10, 100, rr -> deleteResource(rr, node.getPath())));
             }
         });
         visitor.onVisitChild((node, level) -> {
@@ -81,10 +83,13 @@ public class JobQueueCleaner extends ControlledProcess {
             queue.accept(visitor);
         });
     }
-    
+
     private void deleteResource(ResourceResolver rr, String path) throws PersistenceException {
         ActionManager.setCurrentItem(path);
-        rr.delete(rr.resolve(path));        
+        Resource r = rr.resolve(path);
+        if (!r.isResourceType(Resource.RESOURCE_TYPE_NON_EXISTING)) {
+            rr.delete(r);
+        }
     }
 
     private void resumeJobQueues(ActionManager manager) {
