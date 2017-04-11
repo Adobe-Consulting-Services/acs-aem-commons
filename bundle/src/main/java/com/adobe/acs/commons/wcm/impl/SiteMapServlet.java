@@ -105,8 +105,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(boolValue = DEFAULT_INCLUDE_INHERITANCE_VALUE, label = "Include Inherit Value", description = "If true searches for the frequency and priority attribute in the current page if null looks in the parent.")
     private static final String PROP_INCLUDE_INHERITANCE_VALUE = "include.inherit";
     
-    @Property(label = "Character Encoding Property", description = "If not set, defaults to ISO-8859-1")
-    private static final String PROP_CHARACTER_ENCODING_PROPERTY = "charcterencoding.property";
+    @Property(label = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
+    private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
@@ -129,7 +129,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private String excludeFromSiteMapProperty;
     
-    private String characterEncodingProperty; 
+    private String characterEncoding;
 
     @Activate
     protected void activate(Map<String, Object> properties) {
@@ -147,7 +147,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
                 .asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
         this.excludeFromSiteMapProperty = PropertiesUtil.toString(properties.get(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY),
                 NameConstants.PN_HIDE_IN_NAV);
-        this.characterEncodingProperty = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY),
+        this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY),
                 null);
     }
 
@@ -155,7 +155,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType(request.getResponseContentType());
-        response.setCharacterEncoding(characterEncodingProperty);        
+        if (characterEncoding != null) {
+            response.setCharacterEncoding(characterEncoding);
+        }
         ResourceResolver resourceResolver = request.getResourceResolver();
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         Page page = pageManager.getContainingPage(request.getResource());
