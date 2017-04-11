@@ -21,9 +21,9 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import ch.qos.logback.classic.turbo.TurboFilter;
-import com.day.cq.widget.HtmlLibrary;
-import com.day.cq.widget.HtmlLibraryManager;
-import com.day.cq.widget.LibraryType;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
 
 import junitx.util.PrivateAccessor;
 

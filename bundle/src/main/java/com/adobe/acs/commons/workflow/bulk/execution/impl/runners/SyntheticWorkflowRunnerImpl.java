@@ -126,7 +126,7 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
             boolean stopped = false;
 
             try {
-                resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
                 resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.bulk-workflow-manager");
                 configResource = resourceResolver.getResource(configPath);
 

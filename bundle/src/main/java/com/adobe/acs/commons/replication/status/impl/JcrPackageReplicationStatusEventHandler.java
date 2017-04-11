@@ -25,9 +25,6 @@ import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.day.cq.jcrclustersupport.ClusterAware;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationStatus;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.PackageException;
-import com.day.jcr.vault.packaging.Packaging;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -40,6 +37,9 @@ import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -47,8 +47,9 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.apache.sling.event.jobs.JobProcessor;
-import org.apache.sling.event.jobs.JobUtil;
+import org.apache.sling.event.jobs.Job;
+import org.apache.sling.event.jobs.JobManager;
+import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -60,6 +61,7 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -84,10 +86,16 @@ import java.util.Map;
                 value = "(" + ReplicationAction.PROPERTY_TYPE + "=ACTIVATE)",
                 name = EventConstants.EVENT_FILTER,
                 propertyPrivate = true
+        ),
+        @Property(
+                name = JobConsumer.PROPERTY_TOPICS,
+                value = JcrPackageReplicationStatusEventHandler.JOB_TOPIC
         )
 })
 @Service
-public class JcrPackageReplicationStatusEventHandler implements JobProcessor, EventHandler, ClusterAware {
+public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, ClusterAware {
+    private static final String PROPERTY_PATHS = "paths";
+
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
     private enum ReplicatedAt {
@@ -119,6 +127,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
             })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
 
+    protected static final String JOB_TOPIC = "acs-commons/replication/package";
+
     @Reference
     private Packaging packaging;
 
@@ -130,6 +140,9 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
 
     @Reference
     private PackageHelper packageHelper;
+
+    @Reference
+    private JobManager jobManager;
 
     private boolean isMaster = false;
 
@@ -146,30 +159,36 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
             description = "The 'value' used to set the 'replicated at' property. [ Default: Package Last Modified ]",
             options = {
                     @PropertyOption(
-                            name = "PACKAGE_LAST_MODIFIED",
-                            value = "Package Last Modified"
+                        name = "PACKAGE_LAST_MODIFIED",
+                        value = "Package Last Modified"
                     ),
                     @PropertyOption(
-                            name = "CURRENT_TIME",
-                            value = "Current Time"
+                        name = "CURRENT_TIME",
+                        value = "Current Time"
                     )
             })
     public static final String PROP_REPLICATED_AT = "replicated-at";
+
+    private static final String SERVICE_NAME = "package-replication-status-event-listener";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     @Override
     public final void handleEvent(final Event event) {
         if (this.isMaster) {
             // Only run on master
 
-            final String[] paths = (String[]) event.getProperty("paths");
+            final String[] paths = (String[]) event.getProperty(PROPERTY_PATHS);
 
             if (this.containsJcrPackagePath(paths)) {
                 ResourceResolver resourceResolver = null;
                 try {
-                    resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                    resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
                     if (CollectionUtils.isNotEmpty(this.getJcrPackages(resourceResolver, paths))) {
-                        JobUtil.processJob(event, this);
+                        jobManager.addJob(JOB_TOPIC, Collections.<String, Object>singletonMap(PROPERTY_PATHS, paths));
                     }
                 } catch (LoginException e) {
                     log.error("Could not obtain a resource resolver.", e);
@@ -183,20 +202,20 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
     }
 
     @Override
-    public final boolean process(final Event event) {
-        final String[] paths = (String[]) event.getProperty("paths");
+    public final JobResult process(final Job job) {
+        final String[] paths = (String[]) job.getProperty(PROPERTY_PATHS);
 
         log.debug("Processing Replication Status Update for JCR Package: {}", paths);
 
         ResourceResolver resourceResolver = null;
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             final List<JcrPackage> jcrPackages = this.getJcrPackages(resourceResolver, paths);
 
             if (CollectionUtils.isEmpty(jcrPackages)) {
                 log.warn("JCR Package is unavailable for Replication Status Update at: {}", paths);
-                return true;
+                return JobResult.OK;
             }
 
             for (final JcrPackage jcrPackage : jcrPackages) {
@@ -205,7 +224,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
 
                     for (final String packagePath : packageHelper.getContents(jcrPackage)) {
                         final Resource resource = resourceResolver.getResource(packagePath);
-                        if (this.accept(resource)) {
+                        if (this.accept(resource))  {
                             resources.add(resource);
                         }
                     }
@@ -223,31 +242,33 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
                                 jcrPackage.getDefinition().getId());
                     }
                 } catch (RepositoryException e) {
-                    log.error("RepositoryException occurred updating replication status for contents of package", e);
-                    return false;
+                    log.error("RepositoryException occurred updating replication status for contents of package");
+                    log.error(e.getMessage());
+
                 } catch (IOException e) {
-                    log.error("IOException occurred updating replication status for contents of package", e);
-                    return false;
+                    log.error("IOException occurred updating replication status for contents of package");
+                    log.error(e.getMessage());
+
                 } catch (PackageException e) {
-                    log.error("Could not retrieve the Packages contents.", e);
-                    return false;
+                    log.error("Could not retrieve the Packages contents.");
+                    log.error(e.getMessage());
                 }
             }
         } catch (LoginException e) {
             log.error("Could not obtain a resource resolver for applying replication status updates", e);
-            return false;
+            return JobResult.FAILED;
         } finally {
             if (resourceResolver != null) {
                 resourceResolver.close();
             }
         }
 
-        return true;
+        return JobResult.OK;
     }
 
     /**
      * Checks if any path in the array of paths looks like a Jcr Package path.
-     * <p>
+     *
      * Provides a very fast, String-based, in-memory check to weed out most false positives and avoid
      * resolving the path to a Jcr Package and ensure it is valid.
      *
@@ -341,7 +362,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
      * Gets the last build time of the package.
      *
      * @param resourceResolver the resource resolver to access the package properties
-     * @param jcrPackage       the package obj
+     * @param jcrPackage the package obj
      * @return the package's last build time or null if none can be found
      * @throws RepositoryException
      */

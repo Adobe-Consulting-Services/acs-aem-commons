@@ -72,9 +72,6 @@ public final class TwitterAdapterFactory implements AdapterFactory {
     @Property(label = "Use SSL", description = "Use SSL Connections", boolValue = DEFAULT_USE_SSL)
     private static final String PROP_USE_SSL = "use.ssl";
 
-    @Reference
-    private ConfigurationManager configurationManager;
-
     private TwitterFactory factory;
 
     private String httpProxyHost;
@@ -149,6 +146,8 @@ public final class TwitterAdapterFactory implements AdapterFactory {
     }
 
     private com.day.cq.wcm.webservicesupport.Configuration findTwitterConfiguration(Page page) {
+        ConfigurationManager configurationManager = page.getContentResource().getResourceResolver().adaptTo(ConfigurationManager.class);
+
         final HierarchyNodeInheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(
                 page.getContentResource());
         final String[] services = pageProperties.getInherited(ConfigurationConstants.PN_CONFIGURATIONS,

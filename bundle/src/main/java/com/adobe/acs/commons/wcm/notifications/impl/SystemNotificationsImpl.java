@@ -58,9 +58,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component(immediate = true)
@@ -78,6 +80,8 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private static final String PN_ENABLED = "enabled";
 
+    private static final String REP_POLICY = "rep:policy";
+
     private static final String INJECT_TEXT =
             "<script>"
                     + "if(window === top) {"
@@ -85,6 +89,12 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
                     + "   document.write('<script src=\"%s\"><\\/script>');"
                     + "}"
                     + "</script>";
+
+    private static final String SERVICE_NAME = "system-notifications";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     private AtomicBoolean isFilter = new AtomicBoolean(false);
 
@@ -194,7 +204,8 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private boolean isActiveNotification(final SlingHttpServletRequest request,
                                          final Resource resource) {
-        if (JcrConstants.JCR_CONTENT.equals(resource.getName())) {
+        if (JcrConstants.JCR_CONTENT.equals(resource.getName()) ||
+                REP_POLICY.equals(resource.getName())) {
             return false;
         }
 
@@ -255,19 +266,20 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
         ResourceResolver resourceResolver = null;
 
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             final Resource notificationsFolder = resourceResolver.getResource(PATH_NOTIFICATIONS);
             final Iterator<Resource> resources = notificationsFolder.listChildren();
 
             while (resources.hasNext()) {
                 final Resource resource = resources.next();
-                if (!JcrConstants.JCR_CONTENT.equals(resource.getName())) {
+                if (!JcrConstants.JCR_CONTENT.equals(resource.getName()) &&
+                        !REP_POLICY.equals(resource.getName())) {
                     return true;
                 }
             }
         } catch (LoginException e) {
-            log.error("Could not get an admin ResourceResolver", e);
+            log.error("Could not get an service ResourceResolver", e);
         } finally {
             if (resourceResolver != null) {
                 resourceResolver.close();
@@ -320,25 +332,14 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             return;
         }
 
-        ResourceResolver resourceResolver = null;
-        try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-
-            if (this.hasNotifications()) {
-                if (!this.isFilter.getAndSet(true)) {
-                    this.registerAsFilter();
-                }
-            } else {
-                if (this.isFilter.getAndSet(false)) {
-                    this.unregisterFilter();
-                    log.debug("Unregistered System Notifications Sling Filter");
-                }
+        if (this.hasNotifications()) {
+            if (!this.isFilter.getAndSet(true)) {
+                this.registerAsFilter();
             }
-        } catch (LoginException e) {
-            log.error("Could not get an admin ResourceResolver", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
+        } else {
+            if (this.isFilter.getAndSet(false)) {
+                this.unregisterFilter();
+                log.debug("Unregistered System Notifications Sling Filter");
             }
         }
 

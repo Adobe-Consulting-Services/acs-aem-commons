@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>2.11.1-SNAPSHOT</version>
+        <version>3.8.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -31,6 +31,10 @@
                 <directory>src/main/content/META-INF/vault/definition</directory>
                 <targetPath>../vault-work/META-INF/vault/definition</targetPath>
             </resource>
+            <resource>
+                <directory>src/main/resources/META-INF</directory>
+                <targetPath>../vault-work/META-INF</targetPath>
+            </resource>
         </resources>
 
         <plugins>
@@ -49,6 +53,9 @@
                 <configuration>
                     <group>adobe/consulting</group>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+                    <properties>
+                        <acHandling>merge_preserve</acHandling>
+                    </properties>
                     <embeddeds>
                         <embedded>
                             <groupId>${project.groupId}</groupId>
@@ -88,6 +95,7 @@
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/jquery.fonticonpicker/jquery.fonticonpicker.js</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/leaflet/js/leaflet.js</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -184,7 +192,8 @@
         </dependency>
         <dependency>
             <groupId>com.adobe.aem</groupId>
-            <artifactId>aem-api</artifactId>
+            <artifactId>uber-jar</artifactId>
+            <classifier>apis</classifier>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>

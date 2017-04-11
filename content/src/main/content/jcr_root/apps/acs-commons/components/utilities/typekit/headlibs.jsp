@@ -25,7 +25,7 @@
                   com.day.cq.wcm.webservicesupport.ConfigurationManager" %><%
 
 String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
-ConfigurationManager cfgMgr = (ConfigurationManager)sling.getService(ConfigurationManager.class);
+ConfigurationManager cfgMgr = resourceResolver.adaptTo(ConfigurationManager.class);
 if (cfgMgr != null) {
     String kitID = null;
     Configuration cfg = cfgMgr.getConfiguration("typekit", services);

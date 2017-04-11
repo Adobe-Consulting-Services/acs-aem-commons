@@ -33,6 +33,10 @@
             designSrc = parsys.config.designDialogSrc,
             result = {}, param;
 
+        if (designSrc === undefined) {
+            return undefined;
+        }
+
         designSrc = designSrc.substring(designSrc.indexOf("?") + 1);
 
         designSrc.split(/&/).forEach( function(it) {

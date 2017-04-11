@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="fe2f3e40-e46f-3af2-9668-62072d41dff5"
+    rep:authorizableId="acs-commons-review-task-asset-mover-service"
+    rep:principalName="acs-commons-review-task-asset-mover-service"/>

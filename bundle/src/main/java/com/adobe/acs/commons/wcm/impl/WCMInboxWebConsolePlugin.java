@@ -22,8 +22,10 @@ package com.adobe.acs.commons.wcm.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -57,6 +59,12 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
     @Reference
     private ResourceResolverFactory rrFactory;
 
+    private static final String SERVICE_NAME = "wcm-inbox-cleanup";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Calendar cal = Calendar.getInstance();
@@ -67,7 +75,7 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
 
         ResourceResolver resolver = null;
         try {
-            resolver = rrFactory.getAdministrativeResourceResolver(null);
+            resolver = rrFactory.getServiceResourceResolver(AUTH_INFO);
 
             pw.println("<p class='statline ui-state-highlight'>Inbox Notification Configurations</p>");
             pw.println("<ul>");
@@ -120,7 +128,7 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
             ResourceResolver resolver = null;
             try {
                 int counter = 0;
-                resolver = rrFactory.getAdministrativeResourceResolver(null);
+                resolver = rrFactory.getServiceResourceResolver(AUTH_INFO);
                 Session session = resolver.adaptTo(Session.class);
                 Node node = session.getNode(path);
                 NodeIterator it = node.getNodes();

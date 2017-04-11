@@ -72,7 +72,6 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
     private static final String ARG_REPLICATION_SYNCHRONOUS = "synchronous";
     private static final String ARG_REPLICATION_SUPPRESS_VERSIONS = "suppressVersions";
     private static final String ARG_THROTTLE = "throttle";
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Reference
     private WorkflowPackageManager workflowPackageManager;
@@ -144,7 +143,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
 
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), LINE_SEPARATOR);
+            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));

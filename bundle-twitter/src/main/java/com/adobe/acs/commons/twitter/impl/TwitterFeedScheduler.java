@@ -32,6 +32,9 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.util.RunnableOnMaster;
 
+import java.util.Collections;
+import java.util.Map;
+
 @Component(immediate = true, metatype = true,
     label = "ACS AEM Commons - Twitter Feed Refresh Scheduler",
     description = "Schedule job which refreshes Twitter Feed components on a recurring basis",
@@ -44,6 +47,12 @@ import com.adobe.acs.commons.util.RunnableOnMaster;
 public final class TwitterFeedScheduler extends RunnableOnMaster {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedScheduler.class);
+
+    private static final String SERVICE_NAME = "twitter-updater";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -59,8 +68,7 @@ public final class TwitterFeedScheduler extends RunnableOnMaster {
         try {
             log.debug("Master Instance, Running ACS AEM Commons Twitter Feed Scheduler");
 
-            resourceResolver = resourceResolverFactory
-                    .getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             twitterFeedService.updateTwitterFeedComponents(resourceResolver);
 

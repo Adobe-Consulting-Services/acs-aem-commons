@@ -1,9 +1,7 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.BufferingResponse;
-import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.WCMMode;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrLookup;
@@ -14,6 +12,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.xss.XSSAPI;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -27,10 +26,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -105,19 +102,15 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             description = "A prefix to add to the browser tab/window title; <THIS VALUE> | <ORIGINAL DOC TITLE>",
             value = DEFAULT_TITLE_PREFIX)
     public static final String PROP_TITLE_PREFIX = "browser-title-prefix";
-    
-    
+
     private static final String[] DEFAULT_EXCLUDED_WCMMODES = {"DISABLED"};
     @Property (label = "Excluded WCM modes",
     		description = "Do not display the indicator when these WCM modes",
     		cardinality = Integer.MAX_VALUE)
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
-    
 
-
-    private static final String[] REJECT_PATH_PREFIXES = new String[]{
-    };
+    private static final String[] REJECT_PATH_PREFIXES = new String[]{};
 
     private String css = "";
 
@@ -260,7 +253,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             filterProps.put("pattern", ".*");
             filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
         }
-        
+
         excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),DEFAULT_EXCLUDED_WCMMODES);
     }
 
@@ -275,13 +268,12 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         // Reset CSS variable
         css = "";
     }
-    
+
     // extract the WCMMode from the request; we cannot use
     // WCMMode.fromRequest(), because this is not a SlingHttpServletRequest
-    private WCMMode extractFromRequest (HttpServletRequest request) {	
-    	
+    private WCMMode extractFromRequest (HttpServletRequest request) {
+
         return (WCMMode) request.getAttribute(
                 WCMMode.REQUEST_ATTRIBUTE_NAME);
     }
-    
 }

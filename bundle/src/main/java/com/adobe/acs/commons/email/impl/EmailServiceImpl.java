@@ -77,6 +77,8 @@ public final class EmailServiceImpl implements EmailService {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
+    private static String SERVICE_NAME = "email-service";
+
     @Override
     public List<String> sendEmail(final String templatePath,
                                   final Map<String, String> emailParams,
@@ -230,7 +232,8 @@ public final class EmailServiceImpl implements EmailService {
         MailTemplate mailTemplate = null;
         ResourceResolver resourceResolver = null;
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
             mailTemplate = MailTemplate.create(templatePath, resourceResolver.adaptTo(Session.class));
 
             if (mailTemplate == null) {

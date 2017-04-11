@@ -92,7 +92,7 @@ public class EmailServiceImplTest {
 
         when(messageGatewayService.getGateway(SimpleEmail.class)).thenReturn(messageGateway);
         when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGatewayHtmlEmail);
-        when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(resourceResolver);
+        when(resourceResolverFactory.getServiceResourceResolver(Matchers.anyMap())).thenReturn(resourceResolver);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
 
         emailTemplatePath = new File(this.getClass().getResource("/emailTemplate.txt").toURI()).getPath();

@@ -47,12 +47,12 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AemObjectsInjectorTest {
+public class AemObjectInjectorTest {
 
     @Mock
     private Resource resource;
@@ -71,7 +71,7 @@ public class AemObjectsInjectorTest {
 
     @Before
     public final void setUp() throws Exception {
-        AemObjectsInjector aemObjectsInjector = new AemObjectsInjector();
+        AemObjectInjector aemObjectsInjector = new AemObjectInjector();
         factory = new TestModelAdapterFactory();
 
         factory.bindInjector(aemObjectsInjector, Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 1L));

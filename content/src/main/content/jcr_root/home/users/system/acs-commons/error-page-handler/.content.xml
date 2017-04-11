@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="80101d3e-6fb1-378e-a4f5-c13a94f795a6"
+    rep:authorizableId="acs-commons-error-page-handler-service"
+    rep:principalName="acs-commons-error-page-handler-service"/>

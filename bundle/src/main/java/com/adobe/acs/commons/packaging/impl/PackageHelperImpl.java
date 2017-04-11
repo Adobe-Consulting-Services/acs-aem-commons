@@ -22,21 +22,21 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
-import com.day.jcr.vault.fs.api.PathFilterSet;
-import com.day.jcr.vault.fs.config.DefaultWorkspaceFilter;
-import com.day.jcr.vault.fs.io.ImportOptions;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import com.day.jcr.vault.packaging.JcrPackageManager;
-import com.day.jcr.vault.packaging.PackageException;
-import com.day.jcr.vault.packaging.PackageId;
-import com.day.jcr.vault.packaging.Packaging;
-import com.day.jcr.vault.packaging.Version;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
+import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
+import org.apache.jackrabbit.vault.fs.io.ImportOptions;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -74,46 +74,38 @@ public final class PackageHelperImpl implements PackageHelper {
     @Reference
     private Packaging packaging;
 
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
     /**
      * {@inheritDoc}
      */
     public void addThumbnail(final JcrPackage jcrPackage, Resource thumbnailResource) {
-        ResourceResolver resourceResolver = null;
-
         if (jcrPackage == null) {
             log.error("JCR Package is null; no package thumbnail needed for null packages!");
             return;
         }
-
-        boolean useDefault = thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE);
+        Node thumbnailNode = null;
+        if (thumbnailResource != null) {
+            thumbnailNode = thumbnailResource.adaptTo(Node.class);
+        }
 
         try {
+            boolean useDefault = thumbnailNode == null || !thumbnailNode.isNodeType(JcrConstants.NT_FILE);
+            final Node dstParentNode = jcrPackage.getDefinition().getNode();
+            final Session session = dstParentNode.getSession();
             if (useDefault) {
                 log.debug("Using default ACS AEM Commons packager package icon.");
-                resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                thumbnailResource = resourceResolver.getResource(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH);
+                if (session.nodeExists(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH)) {
+                    thumbnailNode = session.getNode(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH);
+                }
             }
 
-            if (thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE)) {
+            if (thumbnailNode == null || !thumbnailNode.isNodeType(JcrConstants.NT_FILE)) {
                 log.warn("Cannot find a specific OR a default package icon; no package icon will be used.");
             } else {
-                final Node srcNode = thumbnailResource.adaptTo(Node.class);
-                final Node dstParentNode = jcrPackage.getDefinition().getNode();
-
-                JcrUtil.copy(srcNode, dstParentNode, NN_THUMBNAIL);
+                JcrUtil.copy(thumbnailNode, dstParentNode, NN_THUMBNAIL);
                 dstParentNode.getSession().save();
             }
         } catch (RepositoryException e) {
             log.error("Could not add package thumbnail: {}", e.getMessage());
-        } catch (LoginException e) {
-            log.error("Could not add a default package thumbnail: {}", e.getMessage());
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 
