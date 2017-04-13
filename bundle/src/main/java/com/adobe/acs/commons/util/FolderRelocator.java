@@ -23,7 +23,6 @@ import com.adobe.acs.commons.fam.ControlledProcess;
 import com.adobe.acs.commons.functions.Consumer;
 import com.adobe.acs.commons.util.visitors.TreeFilteringItemVisitor;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import javax.jcr.ItemVisitor;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -191,6 +189,7 @@ public class FolderRelocator extends ControlledProcess {
                     return null;
                 }).filter(Objects::nonNull).findFirst();
         if (error.isPresent()) {
+            Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, "Validation error prior to starting move operations: {0}", error.get().getMessage());
             throw error.get();
         }
     }
@@ -215,10 +214,11 @@ public class FolderRelocator extends ControlledProcess {
         if (count > 0) {
             actionManager.deferredWithResolver(
                     DeferredActions.retry(retries, retryDelay, (ResourceResolver rr) -> {
+                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Executing {0} actions", count);
                         for (Consumer<ResourceResolver> consumer : consumers) {
                             consumer.accept(rr);
                         }
-                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commiting {0} actions", consumers.size());
+                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commiting {0} actions", count);
                         rr.commit();
                         Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commit successful");
                     })
@@ -231,13 +231,7 @@ public class FolderRelocator extends ControlledProcess {
         folderVisitor.setBreadthFirst(true);
         folderVisitor.onEnterNode((node, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, node.getPath(), requiredFolderPrivileges)));
         folderVisitor.onVisitChild((node, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, node.getPath(), requiredNodePrivileges)));
-        sourceToDestination.keySet().forEach(sourcePath -> {
-            try {
-                beginStep(step1, sourcePath, folderVisitor);
-            } catch (Exception ex) {
-                Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
+        sourceToDestination.keySet().forEach(sourcePath -> beginStep(step1, sourcePath, folderVisitor));
     }
 
     private Privilege[] getPrivilegesFromNames(Session session, String[] names) throws RepositoryException {
@@ -263,13 +257,7 @@ public class FolderRelocator extends ControlledProcess {
             String path = node.getPath();
             step2.deferredWithResolver(DeferredActions.retry(5, 100, rr -> buildDestinationFolder(rr, path)));
         });
-        sourceToDestination.keySet().forEach(sourcePath -> {
-            try {
-                beginStep(step2, sourcePath, folderVisitor);
-            } catch (Exception ex) {
-                Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
+        sourceToDestination.keySet().forEach(sourcePath -> beginStep(step2, sourcePath, folderVisitor));
     }
 
     private void abortStep2(List<Failure> errors, ResourceResolver rr) {
@@ -298,14 +286,14 @@ public class FolderRelocator extends ControlledProcess {
             if (destParent.isResourceType(Resource.RESOURCE_TYPE_NON_EXISTING)) {
                 throw new RepositoryException("Unable to find target folder " + targetParentPath);
             }
-            Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Creating target for {0}",sourceFolder);
+            Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Creating target for {0}", sourceFolder);
             rr.create(destParent, targetName, source.getValueMap());
         }
-        if (resourceExists(rr, sourceFolder+"/jcr:content") && !resourceExists(rr, targetPath+"/jcr:content")) {
+        if (resourceExists(rr, sourceFolder + "/jcr:content") && !resourceExists(rr, targetPath + "/jcr:content")) {
             rr.commit();
             rr.refresh();
-            Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Copying {0}/jcr:content",sourceFolder);
-            rr.copy(sourceFolder+"/jcr:content", targetPath+"/jcr:content");
+            Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Copying {0}/jcr:content", sourceFolder);
+            rr.copy(sourceFolder + "/jcr:content", targetPath + "/jcr:content");
         }
     }
 
@@ -325,18 +313,12 @@ public class FolderRelocator extends ControlledProcess {
                 addToBatch(step3, 15, 250, rr -> moveItem(rr, path));
             }
         });
-        sourceToDestination.keySet().forEach(sourcePath -> {
-            try {
-                beginStep(step3, sourcePath, folderVisitor);
-            } catch (Exception ex) {
-                Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
+        sourceToDestination.keySet().forEach(sourcePath -> beginStep(step3, sourcePath, folderVisitor));
         commitBatch(step3, 15, 250);
     }
 
     private void moveItem(ResourceResolver rr, String path) throws RepositoryException {
-        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Moving {0}",path);
+        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Moving {0}", path);
         ActionManager.setCurrentItem(path);
         Session session = rr.adaptTo(Session.class);
         // Inhibits some workflows
@@ -350,9 +332,13 @@ public class FolderRelocator extends ControlledProcess {
         );
     }
 
-    private void beginStep(ActionManager step, String startingNode, ItemVisitor visitor) throws Exception {
-        step.withResolver(rr -> {
-            rr.getResource(startingNode).adaptTo(Node.class).accept(visitor);
-        });
+    private void beginStep(ActionManager step, String startingNode, ItemVisitor visitor) {
+        try {
+            step.withResolver(rr -> {
+                rr.getResource(startingNode).adaptTo(Node.class).accept(visitor);
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
