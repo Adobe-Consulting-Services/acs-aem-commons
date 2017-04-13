@@ -29,6 +29,8 @@ import com.day.cq.replication.Replicator;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.jcr.Session;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -46,6 +48,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 @Service(DeferredActions.class)
 @ProviderType
 public final class DeferredActions {
+
     public static final String ORIGINAL_RENDITION = "original";
 
     @Reference
@@ -62,6 +65,7 @@ public final class DeferredActions {
 
     /**
      * Returns true of glob matches provided path
+     *
      * @param glob Regex expression
      * @return True for matches
      */
@@ -70,8 +74,9 @@ public final class DeferredActions {
     }
 
     /**
-     * Returns false if glob matches provided path
-     * Useful for things like filterOutSubassets
+     * Returns false if glob matches provided path Useful for things like
+     * filterOutSubassets
+     *
      * @param glob Regex expression
      * @return False for matches
      */
@@ -81,6 +86,7 @@ public final class DeferredActions {
 
     /**
      * Exclude subassets from processing
+     *
      * @return true if node is not a subasset
      */
     public static BiFunction<ResourceResolver, String, Boolean> filterOutSubassets() {
@@ -88,8 +94,9 @@ public final class DeferredActions {
     }
 
     /**
-     * Determine if node is a valid asset, skip any non-assets
-     * It's better to filter via query if possible to avoid having to use this
+     * Determine if node is a valid asset, skip any non-assets It's better to
+     * filter via query if possible to avoid having to use this
+     *
      * @return True if asset
      */
     public static BiFunction<ResourceResolver, String, Boolean> filterNonAssets() {
@@ -101,8 +108,10 @@ public final class DeferredActions {
     }
 
     /**
-     * This filter identifies assets where the original rendition is newer than any of the other renditions.
-     * This is an especially useful function for updating assets with missing or outdated thumbnails.
+     * This filter identifies assets where the original rendition is newer than
+     * any of the other renditions. This is an especially useful function for
+     * updating assets with missing or outdated thumbnails.
+     *
      * @return True if asset has no thumbnails or outdated thumbnails
      */
     public static BiFunction<ResourceResolver, String, Boolean> filterAssetsWithOutdatedRenditions() {
@@ -127,13 +136,16 @@ public final class DeferredActions {
                 }
             }
             return counter <= 1;
-        };    
+        };
     }
+
     //-- Query Result consumers (for using withQueryResults)
     /**
-     * Retry provided action a given number of times before giving up and throwing an error.
-     * Before each retry attempt, the resource resolver is reverted so when using
-     * this it is a good idea to commit from your action directly.
+     * Retry provided action a given number of times before giving up and
+     * throwing an error. Before each retry attempt, the resource resolver is
+     * reverted so when using this it is a good idea to commit from your action
+     * directly.
+     *
      * @param retries Number of retries to attempt
      * @param pausePerRetry Milliseconds to wait between attempts
      * @param action Action to attempt
@@ -147,20 +159,21 @@ public final class DeferredActions {
                     action.accept(r, s);
                     return;
                 } catch (Exception e) {
+                    r.revert();
+                    r.refresh();
                     if (remaining-- <= 0) {
                         throw e;
                     } else {
-                        r.revert();
-                        r.refresh();
                         Thread.sleep(pausePerRetry);
                     }
                 }
             }
-        };        
+        };
     }
 
     /**
      * Run nodes through synthetic workflow
+     *
      * @param model Synthetic workflow model
      */
     public BiConsumer<ResourceResolver, String> startSyntheticWorkflows(final SyntheticWorkflowModel model) {
@@ -176,7 +189,7 @@ public final class DeferredActions {
     }
 
     public static BiConsumer<ResourceResolver, String> withAllRenditions(
-            final BiConsumer<ResourceResolver, String> action, 
+            final BiConsumer<ResourceResolver, String> action,
             final BiFunction<ResourceResolver, String, Boolean>... filters) {
         return (ResourceResolver r, String path) -> {
             AssetManager assetManager = r.adaptTo(AssetManager.class);
@@ -187,21 +200,22 @@ public final class DeferredActions {
                 if (filters != null) {
                     for (BiFunction<ResourceResolver, String, Boolean> filter : filters) {
                         if (!filter.apply(r, rendition.getPath())) {
-                            skip=true;
+                            skip = true;
                             break;
                         }
                     }
                 }
                 if (!skip) {
                     action.accept(r, path);
-                }                
+                }
             }
         };
     }
-    
+
     /**
      * Remove all renditions except for the original rendition for assets
-     * @return 
+     *
+     * @return
      */
     public static BiConsumer<ResourceResolver, String> removeAllRenditions() {
         return (ResourceResolver r, String path) -> {
@@ -219,8 +233,9 @@ public final class DeferredActions {
 
     /**
      * Remove all renditions with a given name
+     *
      * @param name
-     * @return 
+     * @return
      */
     public static BiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
         return (ResourceResolver r, String path) -> {
@@ -235,10 +250,11 @@ public final class DeferredActions {
             }
         };
     }
-    
+
     /**
      * Activate all nodes using default replicators
-     * @return 
+     *
+     * @return
      */
     public BiConsumer<ResourceResolver, String> activateAll() {
         return (ResourceResolver r, String path) -> {
@@ -248,10 +264,12 @@ public final class DeferredActions {
     }
 
     /**
-     * Activate all nodes using provided options
-     * NOTE: If using large batch publishing it is highly recommended to set synchronous to true on the replication options
+     * Activate all nodes using provided options NOTE: If using large batch
+     * publishing it is highly recommended to set synchronous to true on the
+     * replication options
+     *
      * @param options
-     * @return 
+     * @return
      */
     public BiConsumer<ResourceResolver, String> activateAllWithOptions(final ReplicationOptions options) {
         return (ResourceResolver r, String path) -> {
@@ -261,10 +279,12 @@ public final class DeferredActions {
     }
 
     /**
-     * Activate all nodes using provided options
-     * NOTE: If using large batch publishing it is highly recommended to set synchronous to true on the replication options
+     * Activate all nodes using provided options NOTE: If using large batch
+     * publishing it is highly recommended to set synchronous to true on the
+     * replication options
+     *
      * @param options
-     * @return 
+     * @return
      */
     public BiConsumer<ResourceResolver, String> activateAllWithRoundRobin(final ReplicationOptions... options) {
         final List<ReplicationOptions> allTheOptions = Arrays.asList(options);
@@ -273,11 +293,12 @@ public final class DeferredActions {
             nameThread("activate-" + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path, roundRobin.next());
         };
-    }    
+    }
 
     /**
      * Deactivate all nodes using default replicators
-     * @return 
+     *
+     * @return
      */
     public BiConsumer<ResourceResolver, String> deactivateAll() {
         return (ResourceResolver r, String path) -> {
@@ -288,9 +309,9 @@ public final class DeferredActions {
 
     /**
      * Deactivate all nodes using provided options
-     * 
+     *
      * @param options
-     * @return 
+     * @return
      */
     public BiConsumer<ResourceResolver, String> deactivateAllWithOptions(final ReplicationOptions options) {
         return (ResourceResolver r, String path) -> {
@@ -302,6 +323,7 @@ public final class DeferredActions {
     //-- Single work consumers (for use for single invocation using deferredWithResolver)
     /**
      * Retry a single action
+     *
      * @param retries Number of retries to attempt
      * @param pausePerRetry Milliseconds to wait between attempts
      * @param action Action to attempt
@@ -315,51 +337,56 @@ public final class DeferredActions {
                     action.accept(r);
                     return;
                 } catch (Exception e) {
+                    r.revert();
+                    r.refresh();
+                    Logger.getLogger(DeferredActions.class.getName()).log(Level.INFO, "Error commit, retry count is " + remaining, e);
                     if (remaining-- <= 0) {
                         throw e;
                     } else {
-                        r.revert();
-                        r.refresh();
                         Thread.sleep(pausePerRetry);
                     }
                 }
             }
-        };        
+        };
     }
-    
+
     /**
      * Run a synthetic workflow on a single node
+     *
      * @param model
      * @param path
-     * @return 
+     * @return
      */
     final public Consumer<ResourceResolver> startSyntheticWorkflow(SyntheticWorkflowModel model, String path) {
         return res -> startSyntheticWorkflows(model).accept(res, path);
     }
-    
+
     /**
      * Remove all non-original renditions from an asset.
+     *
      * @param path
-     * @return 
+     * @return
      */
     final static public Consumer<ResourceResolver> removeRenditions(String path) {
         return res -> removeAllRenditions().accept(res, path);
     }
-    
+
     /**
      * Remove all renditions with a given name
+     *
      * @param path
      * @param name
-     * @return 
+     * @return
      */
     final static public Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
         return res -> removeAllRenditionsNamed(name).accept(res, path);
     }
-    
+
     /**
      * Activate a single node.
+     *
      * @param path
-     * @return 
+     * @return
      */
     final public Consumer<ResourceResolver> activate(String path) {
         return res -> activateAll().accept(res, path);
@@ -367,9 +394,10 @@ public final class DeferredActions {
 
     /**
      * Activate a single node using provided replication options.
+     *
      * @param path
      * @param options
-     * @return 
+     * @return
      */
     final public Consumer<ResourceResolver> activateWithOptions(String path, ReplicationOptions options) {
         return res -> activateAllWithOptions(options).accept(res, path);
@@ -377,8 +405,9 @@ public final class DeferredActions {
 
     /**
      * Deactivate a single node.
+     *
      * @param path
-     * @return 
+     * @return
      */
     final public Consumer<ResourceResolver> deactivate(String path) {
         return res -> deactivateAll().accept(res, path);
@@ -386,9 +415,10 @@ public final class DeferredActions {
 
     /**
      * Deactivate a single node using provided replication options.
+     *
      * @param path
      * @param options
-     * @return 
+     * @return
      */
     final public Consumer<ResourceResolver> deactivateWithOptions(String path, ReplicationOptions options) {
         return res -> deactivateAllWithOptions(options).accept(res, path);
@@ -399,8 +429,10 @@ public final class DeferredActions {
     }
 
     @Activate
-    private void dsActivate() {}
+    private void dsActivate() {
+    }
 
     @Deactivate
-    private void dsDeactivate() {}
+    private void dsDeactivate() {
+    }
 }
