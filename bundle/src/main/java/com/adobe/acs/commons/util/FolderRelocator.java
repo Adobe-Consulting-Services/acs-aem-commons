@@ -20,15 +20,20 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.DeferredActions;
 import com.adobe.acs.commons.fam.ControlledProcess;
+import com.adobe.acs.commons.functions.Consumer;
 import com.adobe.acs.commons.util.visitors.TreeFilteringItemVisitor;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import javax.jcr.ItemVisitor;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -42,7 +47,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * This utility takes an alternate approach to moving folders using a four-step
- * process.  This can be used to move one or more folders as needed.
+ * process. This can be used to move one or more folders as needed.
  * <ul>
  * <li>Step 1: Evaluate the requirements, check for possible authorization
  * issues; Abort sequence halts other work</li>
@@ -51,22 +56,23 @@ import org.apache.sling.api.resource.ResourceResolver;
  * <li>Step 3: Relocate the contents of the folders</li>
  * <li>Step 4: Remove the old folder structures</li>
  * </ul>
- * 
+ *
  * There are different combinations of how this can be used:
  * <ul>
- * <li>Rename a folder, keeping it where it is presently located.  This uses
- * the Rename mode where the source is the folder path and the destination is the
+ * <li>Rename a folder, keeping it where it is presently located. This uses the
+ * Rename mode where the source is the folder path and the destination is the
  * complete path of the folder as it should be after renaming</li>
- * <li>Move a folder, keeping its name intact.  This uses the Move mode where the
- * source is the folder path and the destination is the parent node where it should go.
- * You can also use the RENAME mode for this, provided that the destination path also
- * specifies the node name.  They're technically the same thing, but MOVE is provided
- * for convenience.</li>
- * <li>Move multiple folders, keeping all names intact.  This uses an alternate
- * constructor which takes a list of paths as sources and a single destination for the
- * parent where all folders will be moved to.  This is functionally the same as moving
- * all folders in a loop, except that the operation is batched together as one big
- * process instead of having to define each folder move as a separate process.</li>
+ * <li>Move a folder, keeping its name intact. This uses the Move mode where the
+ * source is the folder path and the destination is the parent node where it
+ * should go. You can also use the RENAME mode for this, provided that the
+ * destination path also specifies the node name. They're technically the same
+ * thing, but MOVE is provided for convenience.</li>
+ * <li>Move multiple folders, keeping all names intact. This uses an alternate
+ * constructor which takes a list of paths as sources and a single destination
+ * for the parent where all folders will be moved to. This is functionally the
+ * same as moving all folders in a loop, except that the operation is batched
+ * together as one big process instead of having to define each folder move as a
+ * separate process.</li>
  * </ul>
  */
 public class FolderRelocator extends ControlledProcess {
@@ -76,10 +82,27 @@ public class FolderRelocator extends ControlledProcess {
     };
     private final Map<String, String> sourceToDestination;
     private final Mode mode;
-    
+    private final String[] requiredFolderPrivilegeNames = {
+        Privilege.JCR_READ,
+        Privilege.JCR_WRITE,
+        Privilege.JCR_REMOVE_CHILD_NODES,
+        Privilege.JCR_REMOVE_NODE
+    };
+
+    private final String[] requiredNodePrivilegeNames = {
+        Privilege.JCR_ALL
+    };
+
+    private Privilege[] requiredFolderPrivileges;
+    private Privilege[] requiredNodePrivileges;
+
+    private int batchSize = 5;
+
     /**
-     * Prepare a folder relocation for multiple folders to be moved under the same target parent node.
-     * Because there are multiple folders being moved under one parent, this assumes the operation is a Move not a Rename.
+     * Prepare a folder relocation for multiple folders to be moved under the
+     * same target parent node. Because there are multiple folders being moved
+     * under one parent, this assumes the operation is a Move not a Rename.
+     *
      * @param amf Action manager factory service
      * @param sourcePaths List of source paths to move
      * @param destinationPath Destination parent path
@@ -91,19 +114,23 @@ public class FolderRelocator extends ControlledProcess {
         this.mode = Mode.MOVE;
 
         for (String sourcePath : sourcePaths) {
-            String nodeName = sourcePath.substring(sourcePath.indexOf('/'));
+            String nodeName = sourcePath.substring(sourcePath.lastIndexOf('/'));
             String destination = destinationPath + nodeName;
-            sourceToDestination.put(sourcePath, destination);           
+            sourceToDestination.put(sourcePath, destination);
         }
     }
 
     /**
      * Prepare a folder relocation for a single folder.
+     *
      * @param amf Action manager factory service
      * @param sourcePath Source node to be moved
-     * @param destinationPath Destination path, which is either the parent (if mode is MOVE) or the desired final path for the node (if mode is RENAME)
+     * @param destinationPath Destination path, which is either the parent (if
+     * mode is MOVE) or the desired final path for the node (if mode is RENAME)
      * @param processName Process name for tracking
-     * @param processMode MOVE if node name stays the same and needs to be under a new parent; RENAME if the node needs to change its name and destination contains that new name.
+     * @param processMode MOVE if node name stays the same and needs to be under
+     * a new parent; RENAME if the node needs to change its name and destination
+     * contains that new name.
      */
     public FolderRelocator(ActionManagerFactory amf, String sourcePath, String destinationPath, String processName, Mode processMode) {
         super(amf, processName);
@@ -112,29 +139,28 @@ public class FolderRelocator extends ControlledProcess {
 
         String destination = destinationPath;
         if (mode == Mode.MOVE) {
-            String nodeName = sourcePath.substring(sourcePath.indexOf('/'));
+            String nodeName = sourcePath.substring(sourcePath.lastIndexOf('/'));
             destination += nodeName;
         }
         sourceToDestination.put(sourcePath, destination);
     }
 
-    String[] requiredFolderPrivilegeNames = {
-        Privilege.JCR_READ,
-        Privilege.JCR_WRITE,
-        Privilege.JCR_REMOVE_CHILD_NODES,
-        Privilege.JCR_REMOVE_NODE
-    };
-
-    String[] requiredNodePrivilegeNames = {
-        Privilege.JCR_ALL
-    };
-
-    Privilege[] requiredFolderPrivileges;
-    Privilege[] requiredNodePrivileges;
+    /**
+     * Batch size determines the number of operations (folder creation or node
+     * moves) performed at a time.
+     *
+     * @param batchSize the batchSize to set
+     */
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
 
     @Override
     public void buildProcess(ResourceResolver rr) throws LoginException, RepositoryException {
         validateInputs(rr);
+        Session ses = rr.adaptTo(Session.class);
+        requiredFolderPrivileges = getPrivilegesFromNames(ses, requiredFolderPrivilegeNames);
+        requiredNodePrivileges = getPrivilegesFromNames(ses, requiredNodePrivilegeNames);
         defineCriticalAction("Validate ACLs", rr, this::validateAllAcls);
         defineCriticalAction("Build target folders", rr, this::buildTargetFolders)
                 .onFailure(this::abortStep2);
@@ -174,12 +200,44 @@ public class FolderRelocator extends ControlledProcess {
         return !Resource.RESOURCE_TYPE_NON_EXISTING.equals(res.getResourceType());
     }
 
+    LinkedBlockingQueue<Consumer<ResourceResolver>> currentBatch = new LinkedBlockingQueue<>();
+
+    private void addToBatch(ActionManager actionManager, int retries, long retryDelay, Consumer<ResourceResolver> action) throws InterruptedException {
+        currentBatch.put(action);
+        if (currentBatch.size() >= batchSize) {
+            commitBatch(actionManager, retries, retryDelay);
+        }
+    }
+
+    private void commitBatch(ActionManager actionManager, int retries, long retryDelay) {
+        final List<Consumer<ResourceResolver>> consumers = new ArrayList<>();
+        int count = currentBatch.drainTo(consumers);
+        if (count > 0) {
+            actionManager.deferredWithResolver(
+                    DeferredActions.retry(retries, retryDelay, (ResourceResolver rr) -> {
+                        for (Consumer<ResourceResolver> consumer : consumers) {
+                            consumer.accept(rr);
+                        }
+                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commiting {0} actions", consumers.size());
+                        rr.commit();
+                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commit successful");
+                    })
+            );
+        }
+    }
+
     private void validateAllAcls(ActionManager step1) {
         TreeFilteringItemVisitor folderVisitor = new TreeFilteringItemVisitor();
         folderVisitor.setBreadthFirst(true);
         folderVisitor.onEnterNode((node, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, node.getPath(), requiredFolderPrivileges)));
         folderVisitor.onVisitChild((node, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, node.getPath(), requiredNodePrivileges)));
-        sourceToDestination.keySet().forEach(sourcePath -> beginStep(step1, sourcePath, folderVisitor));
+        sourceToDestination.keySet().forEach(sourcePath -> {
+            try {
+                beginStep(step1, sourcePath, folderVisitor);
+            } catch (Exception ex) {
+                Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 
     private Privilege[] getPrivilegesFromNames(Session session, String[] names) throws RepositoryException {
@@ -201,11 +259,17 @@ public class FolderRelocator extends ControlledProcess {
     private void buildTargetFolders(ActionManager step2) {
         TreeFilteringItemVisitor folderVisitor = new TreeFilteringItemVisitor();
         folderVisitor.setBreadthFirst(true);
-        folderVisitor.onEnterNode((node, level) -> step2.deferredWithResolver(
-                DeferredActions.retry(5, 100, rr -> buildDestinationFolder(rr, node.getPath()))
-        ));
-        folderVisitor.onVisitChild(null);
-        sourceToDestination.keySet().forEach(sourcePath -> beginStep(step2, sourcePath, folderVisitor));
+        folderVisitor.onEnterNode((node, level) -> {
+            String path = node.getPath();
+            step2.deferredWithResolver(DeferredActions.retry(5, 100, rr -> buildDestinationFolder(rr, path)));
+        });
+        sourceToDestination.keySet().forEach(sourcePath -> {
+            try {
+                beginStep(step2, sourcePath, folderVisitor);
+            } catch (Exception ex) {
+                Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 
     private void abortStep2(List<Failure> errors, ResourceResolver rr) {
@@ -222,16 +286,27 @@ public class FolderRelocator extends ControlledProcess {
     }
 
     private void buildDestinationFolder(ResourceResolver rr, String sourceFolder) throws PersistenceException, RepositoryException {
+        Session session = rr.adaptTo(Session.class);
+        session.getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
         Resource source = rr.getResource(sourceFolder);
         String targetPath = convertSourceToDestination(sourceFolder);
-        ActionManager.setCurrentItem(sourceFolder + "->" + targetPath);
-        String targetParentPath = targetPath.substring(0, targetPath.lastIndexOf('/'));
-        String targetName = targetPath.substring(targetPath.lastIndexOf('/') + 1);
-        Resource destParent = rr.getResource(targetParentPath);
-        if (destParent.isResourceType(Resource.RESOURCE_TYPE_NON_EXISTING)) {
-            throw new RepositoryException("Unable to find target folder " + targetParentPath);
+        if (!resourceExists(rr, targetPath)) {
+            ActionManager.setCurrentItem(sourceFolder + "->" + targetPath);
+            String targetParentPath = targetPath.substring(0, targetPath.lastIndexOf('/'));
+            String targetName = targetPath.substring(targetPath.lastIndexOf('/') + 1);
+            Resource destParent = rr.getResource(targetParentPath);
+            if (destParent.isResourceType(Resource.RESOURCE_TYPE_NON_EXISTING)) {
+                throw new RepositoryException("Unable to find target folder " + targetParentPath);
+            }
+            Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Creating target for {0}",sourceFolder);
+            rr.create(destParent, targetName, source.getValueMap());
         }
-        rr.create(destParent, targetName, source.getValueMap());
+        if (resourceExists(rr, sourceFolder+"/jcr:content") && !resourceExists(rr, targetPath+"/jcr:content")) {
+            rr.commit();
+            rr.refresh();
+            Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Copying {0}/jcr:content",sourceFolder);
+            rr.copy(sourceFolder+"/jcr:content", targetPath+"/jcr:content");
+        }
     }
 
     private String convertSourceToDestination(String path) throws RepositoryException {
@@ -244,26 +319,29 @@ public class FolderRelocator extends ControlledProcess {
     private void moveNodes(ActionManager step3) {
         TreeFilteringItemVisitor folderVisitor = new TreeFilteringItemVisitor();
         folderVisitor.setBreadthFirst(true);
-        folderVisitor.onEnterNode(null);
-        folderVisitor.onVisitChild((node, level) -> step3.deferredWithResolver(
-                DeferredActions.retry(15, 250, rr -> moveItem(rr, node.getPath()))
-        ));
-        sourceToDestination.keySet().forEach(sourcePath -> beginStep(step3, sourcePath, folderVisitor));
+        folderVisitor.onVisitChild((node, level) -> {
+            String path = node.getPath();
+            if (!path.endsWith("jcr:content")) {
+                addToBatch(step3, 15, 250, rr -> moveItem(rr, path));
+            }
+        });
+        sourceToDestination.keySet().forEach(sourcePath -> {
+            try {
+                beginStep(step3, sourcePath, folderVisitor);
+            } catch (Exception ex) {
+                Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        commitBatch(step3, 15, 250);
     }
 
     private void moveItem(ResourceResolver rr, String path) throws RepositoryException {
+        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Moving {0}",path);
         ActionManager.setCurrentItem(path);
         Session session = rr.adaptTo(Session.class);
         // Inhibits some workflows
         session.getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
-        if (path.endsWith("jcr:content")) {
-            session.removeItem(convertSourceToDestination(path));
-        }
         session.move(path, convertSourceToDestination(path));
-        if (path.endsWith("jcr:content")) {
-            session.refresh(true);
-            session.save();
-        }
     }
 
     private void removeSourceFolders(ActionManager step4) {
@@ -272,8 +350,8 @@ public class FolderRelocator extends ControlledProcess {
         );
     }
 
-    private void beginStep(ActionManager step, String startingNode, ItemVisitor visitor) {
-        step.deferredWithResolver(rr -> {
+    private void beginStep(ActionManager step, String startingNode, ItemVisitor visitor) throws Exception {
+        step.withResolver(rr -> {
             rr.getResource(startingNode).adaptTo(Node.class).accept(visitor);
         });
     }
