@@ -201,6 +201,13 @@ class ActionManagerImpl implements ActionManager {
     }
    
     private void runCompletionTasks() {
+        resolvers.forEach(r->{
+            try {
+                r.commit();
+            } catch (PersistenceException ex) {
+                LOG.error("Error in final commit for action "+getName(), ex);                
+            }
+        });
         if (getErrorCount() == 0) {
             successHandlers.forEach(handler -> {
                 try {
@@ -251,6 +258,8 @@ class ActionManagerImpl implements ActionManager {
                 if (!closesResolver) {
                     logError(ex);
                 }
+            } catch (Throwable t) {
+                LOG.error("Error in error handler for action "+getName(), t);
             }
         });
         if (!closesResolver) {
@@ -377,8 +386,7 @@ class ActionManagerImpl implements ActionManager {
             failureData.add(new CompositeDataSupport(
                     failureCompositeType,
                     failureItemNames,
-                    new Object[]{name, ++count, fail.getNodePath(), fail.getException().getMessage()}));
-
+                    new Object[]{name, ++count, fail.getNodePath(), fail.getException() == null ? "Unknown" : fail.getException().getMessage()}));
         }
         return failureData;
     }
