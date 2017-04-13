@@ -69,12 +69,14 @@ public class JobQueueCleaner extends ControlledProcess {
         visitor.setBreadthFirst(false);
         visitor.onLeaveNode((node, level) -> {
             if (level >= MIN_PURGE_FOLDER_LEVEL) {
-                manager.deferredWithResolver(DeferredActions.retry(10, 100, rr -> deleteResource(rr, node.getPath())));
+                String path = node.getPath();
+                manager.deferredWithResolver(DeferredActions.retry(10, 100, rr -> deleteResource(rr, path)));
             }
         });
         visitor.onVisitChild((node, level) -> {
             if (!node.getName().equals(POLICY_NODE_NAME)) {
-                manager.deferredWithResolver(rr -> deleteResource(rr, node.getPath()));
+                String path = node.getPath();
+                manager.deferredWithResolver(rr -> deleteResource(rr, path));
             }
         });
         manager.deferredWithResolver(rr -> {
