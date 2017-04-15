@@ -22,17 +22,15 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
-import com.adobe.acs.commons.workflow.bulk.execution.model.PayloadGroup;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.model.WorkflowModel;
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -301,8 +299,13 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
                     workspace.commit();
                 }
             } catch (Exception e) {
-                log.error("Error processing periodic execution: {}", e);
+                log.error("Error processing periodic execution for job [ {} ] for workspace [ {} ]", new String[]{ jobName, workspace.getPath() }, e);
                 unscheduleJob(scheduler, jobName, configResource, workspace);
+                try {
+                    stop(workspace);
+                } catch (PersistenceException e1) {
+                    log.error("Unable to mark this workspace [ {} ] as stopped.", workspace.getPath(), e1);
+                }
             } finally {
                 if (adminResourceResolver != null) {
                     adminResourceResolver.close();
