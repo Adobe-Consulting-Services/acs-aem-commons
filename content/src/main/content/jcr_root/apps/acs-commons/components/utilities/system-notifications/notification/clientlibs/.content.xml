@@ -20,4 +20,5 @@
   -->
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:ClientLibraryFolder"
-    categories="acs-commons.system-notifications.notification"/>
+          jsProcessor="[default:none,min:gcc]"
+          categories="acs-commons.system-notifications.notification"/>
