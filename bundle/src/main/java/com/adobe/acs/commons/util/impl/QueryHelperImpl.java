@@ -69,7 +69,7 @@ public class QueryHelperImpl implements QueryHelper {
         final List<Resource> resources = new ArrayList<Resource>();
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {
-            final String[] lines = statement.split("[,;\\s\\n\\t]+");
+            final String[] lines = statement.split("[\\n]+");
             final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
 
             // ensure all results are returned
@@ -84,7 +84,7 @@ public class QueryHelperImpl implements QueryHelper {
             }
         } else if (LIST.equalsIgnoreCase(language)) {
             if (StringUtils.isNotBlank(statement)) {
-                final String[] lines = statement.split("[,;\\s\\n\\t]+");
+                final String[] lines = statement.split("[\\n]+");
 
                 for (String line : lines) {
                     if (StringUtils.isNotBlank(line)) {
