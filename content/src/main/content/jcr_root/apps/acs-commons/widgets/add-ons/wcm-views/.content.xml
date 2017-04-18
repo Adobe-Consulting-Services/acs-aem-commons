@@ -21,5 +21,6 @@
 
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:ClientLibraryFolder"
+    jsProcessor="[default:none,min:gcc]"
     categories="[acs-commons.cq-widgets.add-ons.wcm-views,acs-common.cq-widgets.add-ons.wcm-views]"
     dependencies="[acs-commons.json]"/>

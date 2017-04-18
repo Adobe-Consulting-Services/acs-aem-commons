@@ -20,5 +20,6 @@
   -->
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
           jcr:primaryType="cq:ClientLibraryFolder"
+          jsProcessor="[default:none,min:gcc]"
           categories="[acs-commons.app-page]"
           dependencies="[coralui2,moment,acs-commons.json,acs-commons.coralui2.angularjs,acs-commons.angularjs]"/>
