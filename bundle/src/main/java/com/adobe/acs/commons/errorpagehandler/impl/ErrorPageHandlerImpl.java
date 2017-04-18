@@ -257,9 +257,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         if (!isEnabled()) {
             return null;
         }
-        
+
         final String errorsPath = findErrorsPath(request, errorResource);
-        
+
         Resource errorPage = null;
         if (StringUtils.isNotBlank(errorsPath)) {
         	final ResourceResolver resourceResolver = errorResource.getResourceResolver();
@@ -318,18 +318,24 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /**
      * Searches for a resource specific error page.
-     * 
+     *
      * @param errorResource
      * @return path to the default error page or "root" error page
      */
 	private String findErrorsPath(SlingHttpServletRequest request, Resource errorResource) {
 		final String errorResourcePath = errorResource.getPath();
-		final Resource page = findFirstRealParentOrSelf(request, errorResource);
-		
+		Resource real = findFirstRealParentOrSelf(request, errorResource);
+
         String errorsPath = null;
-        if(page != null) {
-            log.trace("Found page is [ {} ]", page.getPath());
-	        final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(page);
+        if (real != null) {
+            log.trace("Found real resource at [ {} ]", real.getPath());
+            if (!JcrConstants.JCR_CONTENT.equals(real.getName())) {
+                Resource tmp = real.getChild(JcrConstants.JCR_CONTENT);
+                if (tmp != null) {
+                    real = tmp;
+                }
+            }
+	        final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(real);
 	        errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
         } else {
         	log.trace("No page found for [ {} ]", errorResource);
@@ -345,11 +351,11 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 }
             }
         }
-        
+
         log.debug("Best matching errors path for request is: {}", errorsPath);
 		return errorsPath;
 	}
-    
+
     /**
      * Gets the resource object for the provided path.
      * <p>
@@ -493,7 +499,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         return ArrayUtils.contains(errorImageExtensions, extension);
     }
-    
+
     /**
      * Given the Request path, find the first Real Parent of the Request (even if the resource doesnt exist).
      *
