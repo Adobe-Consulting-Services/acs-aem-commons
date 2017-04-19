@@ -130,7 +130,7 @@
                                 value="queryBuilder"/>
                         <list
                                 jcr:primaryType="nt:unstructured"
-                                text="List (comma, tab, space, semicolon and line feed delimited)"
+                                text="List (line feed delimited)"
                                 value="list"/>
                     </options>
                 </query-language>
