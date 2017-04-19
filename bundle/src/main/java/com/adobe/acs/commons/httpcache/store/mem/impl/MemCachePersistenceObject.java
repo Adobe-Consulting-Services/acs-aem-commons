@@ -77,7 +77,10 @@ class MemCachePersistenceObject {
         this.headers = HashMultimap.create();
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             for (String value : entry.getValue()) {
-                this.headers.put(entry.getKey(), value);
+                if (!"Sling-Tracer-Protocol-Version".equals(entry.getKey()) && !"Sling-Tracer-Request-Id".equals(entry.getKey())) {
+                    // Do NOT cache Sling Tracer headers as this makes debugging difficult and confusing!
+                    this.headers.put(entry.getKey(), value);
+                }
             }
         }
 

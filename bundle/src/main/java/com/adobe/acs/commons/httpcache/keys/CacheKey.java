@@ -32,6 +32,21 @@ public interface CacheKey {
     String getUri();
 
     /**
+     * Gets the Hierarchy Resource Path (the resourcePath above jcr:content). This is used for invalidations.
+     *
+     * @return the hierarchy resource path
+     */
+    String getHierarchyResourcePath();
+
+    /**
+     * Determines if the @{param cacheKey} will invalidate this cache key entry.
+     *
+     * @param cacheKey
+     * @return true if is invalidated by, otherwise false
+     */
+    boolean isInvalidatedBy(CacheKey cacheKey);
+
+    /**
      * The hashCode for the cache key.
      * @return the hash code.
      */
@@ -49,4 +64,6 @@ public interface CacheKey {
      * @return true if the objects represent the same cache item, false otherwise.
      */
     boolean equals(Object o);
+
+
 }
