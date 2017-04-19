@@ -200,8 +200,14 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     }
 
     @Override
-    public void invalidate(CacheKey key) {
-        cache.invalidate(key);
+    public void invalidate(CacheKey invalidationKey) {
+        final ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
+
+        for (CacheKey key : cacheAsMap.keySet()) {
+            if (key.isInvalidatedBy(invalidationKey)) {
+                cache.invalidate(key);
+            }
+        }
     }
 
     @Override

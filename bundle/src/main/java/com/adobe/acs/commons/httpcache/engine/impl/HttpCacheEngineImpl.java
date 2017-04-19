@@ -393,8 +393,9 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         }
 
         // Spool other attributes to the servlet response.
-        response.setCharacterEncoding(cacheContent.getCharEncoding());
         response.setContentType(cacheContent.getContentType());
+        // Setting the char encoding directly causes severe issues with non-text content; the char-encoding is otherwise set on the content type which appears to work fine.
+        //response.setCharacterEncoding(cacheContent.getCharEncoding());
 
         // Copy the cached data into the servlet output stream.
         try {
@@ -486,7 +487,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    public void invalidateCache(String path) throws HttpCachePersistenceException {
+    public void invalidateCache(String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
 
         // Find out all the cache config which has this path applicable for invalidation.
         for (HttpCacheConfig cacheConfig : cacheConfigs) {
@@ -495,21 +496,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                 // Execute custom rules.
                 for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
                     // Apply rule if it's a configured global or cache-config tied rule.
-                    if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey
-                            ())) {
+                    if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
                         HttpCacheHandlingRule rule = entry.getValue();
                         if (rule.onCacheInvalidate(path)) {
-                            getCacheStore(cacheConfig).invalidate(cacheConfig);
+                            getCacheStore(cacheConfig).invalidate(cacheConfig.buildCacheKey(path));
                         } else {
                             log.debug("Cache invalidation rejected for path {} per custom rule {}", path, rule
                                     .getClass().getName());
                         }
                     }
                 }
-
             }
         }
-
     }
 
     /**

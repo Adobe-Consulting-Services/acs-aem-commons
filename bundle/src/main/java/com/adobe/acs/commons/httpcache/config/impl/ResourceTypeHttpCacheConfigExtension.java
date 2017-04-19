@@ -132,8 +132,13 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     @Override
     public CacheKey build(final SlingHttpServletRequest slingHttpServletRequest, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
-
         return new ResourceTypeCacheKey(slingHttpServletRequest, cacheConfig);
+    }
+
+    @Override
+    public CacheKey build(final String resourcePath, final HttpCacheConfig cacheConfig)
+            throws HttpCacheKeyCreationException {
+        return new ResourceTypeCacheKey(resourcePath, cacheConfig);
     }
 
     @Override
