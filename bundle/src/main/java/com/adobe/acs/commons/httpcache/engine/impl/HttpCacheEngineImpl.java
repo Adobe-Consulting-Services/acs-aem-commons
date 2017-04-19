@@ -394,12 +394,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Spool other attributes to the servlet response.
         response.setContentType(cacheContent.getContentType());
-        // Setting the char encoding directly causes severe issues with non-text content; the char-encoding is otherwise set on the content type which appears to work fine.
-        //response.setCharacterEncoding(cacheContent.getCharEncoding());
+        response.setCharacterEncoding(cacheContent.getCharEncoding());
 
         // Copy the cached data into the servlet output stream.
         try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
             if (log.isDebugEnabled()) {
                 log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
             }
