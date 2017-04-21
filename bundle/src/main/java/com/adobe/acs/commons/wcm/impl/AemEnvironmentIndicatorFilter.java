@@ -15,6 +15,7 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.xss.XSSAPI;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -250,7 +251,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
         if (StringUtils.isNotBlank(css) || StringUtils.isNotBlank(titlePrefix)) {
             Dictionary<String, String> filterProps = new Hashtable<String, String>();
-            filterProps.put("pattern", ".*");
+            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/");
+            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
             filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
         }
 

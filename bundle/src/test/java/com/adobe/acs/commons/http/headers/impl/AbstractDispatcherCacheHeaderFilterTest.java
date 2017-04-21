@@ -52,6 +52,7 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
 import com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractDispatcherCacheHeaderFilterTest {
@@ -144,7 +145,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             @Override
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
-                return StringUtils.equals(pattern, ((Dictionary<String, Object>) item).get("pattern").toString());
+                return StringUtils.equals(pattern, ((Dictionary<String, Object>) item).get(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX).toString());
             };
         };
 
@@ -175,7 +176,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             @Override
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
-                return StringUtils.equals(pattern, ((Dictionary<String, Object>) item).get("pattern").toString());
+                return StringUtils.equals(pattern, ((Dictionary<String, Object>) item).get(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX).toString());
             };
         };
 
@@ -188,7 +189,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             @Override
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
-                return StringUtils.equals(secondPattern, ((Dictionary<String, Object>) item).get("pattern").toString());
+                return StringUtils.equals(secondPattern, ((Dictionary<String, Object>) item).get(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX).toString());
             };
         };
 

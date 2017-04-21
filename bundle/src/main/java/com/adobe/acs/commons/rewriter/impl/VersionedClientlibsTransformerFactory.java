@@ -161,7 +161,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         this.disableVersioning = PropertiesUtil.toBoolean(props.get(PROP_DISABLE_VERSIONING), DEFAULT_DISABLE_VERSIONING);
         this.enforceMd5 = PropertiesUtil.toBoolean(props.get(PROP_ENFORCE_MD5), DEFAULT_ENFORCE_MD5);
         if (enforceMd5) {
-            Dictionary<Object, Object> filterProps = new Hashtable<Object, Object>();
+            Dictionary<String, Object> filterProps = new Hashtable<String, Object>();
             filterProps.put("sling.filter.scope", "REQUEST");
             filterProps.put("service.ranking", Integer.valueOf(0));
 
