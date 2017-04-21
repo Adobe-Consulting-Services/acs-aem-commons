@@ -32,11 +32,9 @@ import java.util.Calendar;
 @Component(
     label = "ACS AEM Commons - Dispatcher Expires Header - Daily",
     description = "Adds an Expires header to content to enable Dispatcher TTL support.",
-    immediate = false,
     metatype = true,
     configurationFactory = true,
     policy = ConfigurationPolicy.REQUIRE)
-@Service
 @Properties({
   @Property(label = "Filter Patterns",
       description = "Patterns on which to apply this Expires rule.",

@@ -26,6 +26,7 @@ import org.apache.jackrabbit.oak.commons.PropertiesUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +147,8 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
             Dictionary<String, String> filterProps = new Hashtable<String, String>();
 
             log.debug("Adding filter ({}) to pattern: {}", this.toString(), pattern);
-            filterProps.put("pattern", pattern);
+            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX, pattern);
+            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
             ServiceRegistration filterReg = context.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
             filterRegistrations.add(filterReg);
         }

@@ -36,11 +36,9 @@ import java.util.Enumeration;
 @Component(
       label = "ACS AEM Commons - Dispacher Cache Control Header - Max Age",
       description = "Adds a Cache-Control max-age header to content to enable Dispatcher TTL support.",
-      immediate = false,
       metatype = true,
       configurationFactory = true,
       policy = ConfigurationPolicy.REQUIRE)
-@Service
 @Properties({
     @Property(label = "Filter Patterns",
         description = "Patterns on which to apply this Max Age cache-control rule.",
