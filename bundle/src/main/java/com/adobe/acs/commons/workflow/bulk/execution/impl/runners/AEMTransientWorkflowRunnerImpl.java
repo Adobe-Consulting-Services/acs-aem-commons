@@ -127,14 +127,14 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
         public void run() {
             log.debug("Running Bulk AEM Transient Workflow job [ {} ]", jobName);
 
-            ResourceResolver adminResourceResolver = null;
+            ResourceResolver serviceResourceResolver = null;
             Resource configResource = null;
             Config config = null;
             Workspace workspace = null;
 
             try {
-                adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                configResource = adminResourceResolver.getResource(configPath);
+                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+                configResource = serviceResourceResolver.getResource(configPath);
 
                 if (configResource != null) {
                     config = configResource.adaptTo(Config.class);
@@ -171,7 +171,7 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
                     }
 
                     WorkflowSession workflowSession =
-                            workflowService.getWorkflowSession(adminResourceResolver.adaptTo(Session.class));
+                            workflowService.getWorkflowSession(serviceResourceResolver.adaptTo(Session.class));
                     WorkflowModel workflowModel = workflowSession.getModel(config.getWorkflowModelId());
 
                     boolean dirty = false;
@@ -221,8 +221,8 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
                     log.error("Unable to mark this workspace [ {} ] as stopped.", workspace.getPath(), e1);
                 }
             } finally {
-                if (adminResourceResolver != null) {
-                    adminResourceResolver.close();
+                if (serviceResourceResolver != null) {
+                    serviceResourceResolver.close();
                 }
             }
         }
