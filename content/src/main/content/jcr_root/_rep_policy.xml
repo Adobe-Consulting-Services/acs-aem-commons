@@ -28,7 +28,7 @@
     <allow3
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-ensure-service-user-service"
-            rep:privileges="{Name}[rep:userManagement]"/>
+            rep:privileges="{Name}[jcr:read,rep:write,jcr:readAccessControl,jcr:modifyAccessControl]"/>
     <!--
     <allow4
             jcr:primaryType="rep:GrantACE"
