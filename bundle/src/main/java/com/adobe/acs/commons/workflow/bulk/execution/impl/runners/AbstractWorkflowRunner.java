@@ -49,7 +49,7 @@ public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(AbstractWorkflowRunner.class);
     private static final int SAVE_THRESHOLD = 1000;
 
-    private static final String SERVICE_NAME = "bulk-workflow-runner";
+    protected static final String SERVICE_NAME = "bulk-workflow-runner";
     protected static final Map<String, Object> AUTH_INFO;
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
