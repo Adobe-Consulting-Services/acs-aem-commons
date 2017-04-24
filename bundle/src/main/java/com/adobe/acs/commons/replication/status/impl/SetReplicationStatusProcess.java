@@ -1,3 +1,23 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2014 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package com.adobe.acs.commons.replication.status.impl;
 
 import java.text.ParseException;
@@ -16,15 +36,9 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.replication.status.ReplicationResourceLocator;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.WorkflowHelper;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.commons.util.DamUtil;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
@@ -51,9 +65,6 @@ public class SetReplicationStatusProcess implements WorkflowProcess {
     private WorkflowHelper workflowHelper;
 	
 	@Reference
-	private ReplicationResourceLocator replResourceLocator;
-	
-	@Reference
 	private ReplicationStatusManager replStatusMgr;
 
 	
@@ -65,7 +76,6 @@ public class SetReplicationStatusProcess implements WorkflowProcess {
 		try {
 			resourceResolver = workflowHelper.getResourceResolver(workflowSession);
 	        String replicatedResourcePath = getReplicatedResourcePath(workItem, resourceResolver);
-	        
 	        
 	        Map<String, String> params = extractWorkflowParams(metadataMap);
 	        
@@ -101,7 +111,7 @@ public class SetReplicationStatusProcess implements WorkflowProcess {
 
 	private String getReplicatedResourcePath(WorkItem workItem, ResourceResolver resourceResolver) {
 		String payloadPath = workItem.getWorkflowData().getPayload().toString();
-		Resource resource = replResourceLocator.getReplicationStatusResource(payloadPath, resourceResolver);
+		Resource resource = replStatusMgr.getReplicationStatusResource(payloadPath, resourceResolver);
 		return resource.getPath();
 	}
 
@@ -113,7 +123,7 @@ public class SetReplicationStatusProcess implements WorkflowProcess {
 
 	private Calendar getReplicationDate(Map<String, String> params) throws ParseException {
 		Calendar replicatedAt = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH);
 		replicatedAt.setTime(sdf.parse(params.get(ARG_REPL_DATE)));
 		return replicatedAt;
 	}

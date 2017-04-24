@@ -1,8 +1,14 @@
 package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationStatus;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -19,12 +25,14 @@ import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
 import java.util.Calendar;
 
+import static junit.framework.Assert.assertEquals;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(JcrUtil.class)
+@PrepareForTest({JcrUtil.class, DamUtil.class})
 public class ReplicationStatusManagerImplTest {
 
     @Mock
@@ -38,6 +46,31 @@ public class ReplicationStatusManagerImplTest {
 
     @Mock
     Session session;
+    
+    @Mock
+    PageManager pageManager;
+    
+    
+    static final String PAGE_PATH = "/content/page";
+
+    @Mock
+    Page pagePage;
+    
+    @Mock
+    Resource pageContentResource;
+    
+    
+    static final String ASSET_PATH = "/content/asset";
+
+    @Mock
+    Resource assetResource;
+
+    @Mock
+    Asset assetAsset;
+    
+    @Mock
+    Resource assetContentResource;
+
 
     static final String UNREPLICATED_PATH = "/content/unreplicated";
 
@@ -63,6 +96,18 @@ public class ReplicationStatusManagerImplTest {
         when(replicationNodeType.getName()).thenReturn(ReplicationStatus.NODE_TYPE);
 
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+        when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
+        
+        /* Page */
+        when(pageManager.getContainingPage(PAGE_PATH)).thenReturn(pagePage);
+        when(pagePage.getContentResource()).thenReturn(pageContentResource);
+        
+        /* Asset */
+        PowerMockito.mockStatic(DamUtil.class);
+        when(resourceResolver.getResource(ASSET_PATH)).thenReturn(assetResource);
+        when(DamUtil.resolveToAsset(assetResource)).thenReturn(assetAsset);
+        when(assetAsset.getPath()).thenReturn(ASSET_PATH);
+        when(assetResource.getChild(JcrConstants.JCR_CONTENT)).thenReturn(assetContentResource);
 
         /* Unreplicated Node */
         when(resourceResolver.getResource(UNREPLICATED_PATH)).thenReturn(unreplicatedResource);
@@ -72,13 +117,27 @@ public class ReplicationStatusManagerImplTest {
         when(unreplicatedNode.getMixinNodeTypes()).thenReturn(new NodeType[] { });
         when(unreplicatedNode.canAddMixin(ReplicationStatus.NODE_TYPE)).thenReturn(true);
 
-
         /* Replicated Node */
         when(resourceResolver.getResource(REPLICATED_PATH)).thenReturn(replicatedResource);
         when(replicatedResource.adaptTo(Node.class)).thenReturn(replicatedNode);
         when(replicatedNode.getSession()).thenReturn(session);
         when(replicatedNode.isNodeType(ReplicationStatus.NODE_TYPE)).thenReturn(true);
         when(replicatedNode.getMixinNodeTypes()).thenReturn(new NodeType[] { replicationNodeType });
+    }
+    
+    @Test
+    public void testGetReplicationStatusResource_Page() {
+    	assertEquals(pageContentResource, replicationStatusManager.getReplicationStatusResource(PAGE_PATH, resourceResolver));
+    }
+    
+    @Test
+    public void testGetReplicationStatusResource_Asset() {
+    	assertEquals(assetContentResource, replicationStatusManager.getReplicationStatusResource(ASSET_PATH, resourceResolver));
+    }
+    
+    @Test
+    public void testGetReplicationStatusResource_Resource() {
+    	assertEquals(unreplicatedResource, replicationStatusManager.getReplicationStatusResource(UNREPLICATED_PATH, resourceResolver));
     }
 
     @Test

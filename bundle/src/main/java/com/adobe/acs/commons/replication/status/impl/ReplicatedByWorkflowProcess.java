@@ -40,7 +40,7 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.replication.status.ReplicationResourceLocator;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.workflow.WorkflowException;
@@ -74,7 +74,7 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
     private WorkflowPackageManager workflowPackageManager;
     
     @Reference
-    private ReplicationResourceLocator replResourceLocator;
+    private ReplicationStatusManager replStatusManager;
 
     @Override
     public final void execute(WorkItem workItem, WorkflowSession workflowSession,
@@ -107,7 +107,7 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
             for (final String path : paths) {
                 // For each item in the WF Package, or if not a WF Package, path = payloadPath
 
-            	Resource resource = replResourceLocator.getReplicationStatusResource(path, resourceResolver);
+            	Resource resource = replStatusManager.getReplicationStatusResource(path, resourceResolver);
 
                 final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
