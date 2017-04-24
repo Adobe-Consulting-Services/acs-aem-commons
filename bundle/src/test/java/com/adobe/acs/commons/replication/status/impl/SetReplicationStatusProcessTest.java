@@ -138,7 +138,11 @@ class CalendarMatcher extends ArgumentMatcher<Calendar> {
 	public boolean matches(Object argument) {
 		if (argument instanceof Calendar) {
 			Calendar rightCal = (Calendar)argument;
-			return leftCal.getTimeInMillis() == rightCal.getTimeInMillis();
+			return (leftCal.get(Calendar.YEAR) == rightCal.get(Calendar.YEAR) &&
+					leftCal.get(Calendar.MONTH) == rightCal.get(Calendar.MONTH) &&
+					leftCal.get(Calendar.DATE) == rightCal.get(Calendar.DATE) &&
+					leftCal.get(Calendar.HOUR) == rightCal.get(Calendar.HOUR) &&
+					leftCal.get(Calendar.MINUTE) == rightCal.get(Calendar.MINUTE));
 		} else {
 			return false;
 		}
