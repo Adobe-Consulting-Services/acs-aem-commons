@@ -47,9 +47,9 @@ import com.day.cq.replication.Replicator;
  */
 public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
 	private static final Logger log = LoggerFactory.getLogger(AutomaticPackageReplicatorJob.class);
-	public static final String SERVICE_USER_NAME = "acs-tools-automatic-package-replication-service";
-	public static final String OSGI_EVENT_REPLICATED_TOPIC = "com/adobe/acs/tools/automatic_page_replicator/REPLICATED";
-	public static final String OSGI_EVENT_FAILED_TOPIC = "com/adobe/acs/tools/automatic_page_replicator/REPLICATION_FAILED";
+	public static final String SERVICE_USER_NAME = "acs-commons-automatic-package-replication-service";
+	public static final String OSGI_EVENT_REPLICATED_TOPIC = "com/adobe/acs/commons/automatic_page_replicator/REPLICATED";
+	public static final String OSGI_EVENT_FAILED_TOPIC = "com/adobe/acs/commons/automatic_page_replicator/REPLICATION_FAILED";
 	public static final String OSGI_EVENT_PACKAGE_PATH_PARAM = "packagePath";
 
 	private final Replicator replicator;
