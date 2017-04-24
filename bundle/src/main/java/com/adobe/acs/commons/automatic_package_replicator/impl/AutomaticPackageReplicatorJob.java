@@ -115,10 +115,9 @@ public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
 
 	@Override
 	public void run() {
-		log.info("Starting Automatic Package Replication task");
+		log.trace("run");
 		try {
 			excute();
-			log.info("Finished Automatic Package Replication task");
 		} catch (Exception e) {
 			log.error("Excepting running Automatic Package Replication task", e);
 		}

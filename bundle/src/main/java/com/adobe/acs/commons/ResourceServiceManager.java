@@ -70,19 +70,19 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 
 	@Activate
 	public void activate(ComponentContext context) throws LoginException {
-		log.info("activate");
+		log.trace("activate");
 		bctx = context.getBundleContext();
 		refreshCache();
-		log.info("Activation successful!");
+		log.trace("Activation successful!");
 	}
 
 	@Deactivate
 	public void deactivate(ComponentContext context) throws LoginException {
-		log.info("deactivate");
+		log.trace("deactivate");
 		for (String id : registeredServices.keySet()) {
 			unregisterService(id);
 		}
-		log.info("Deactivation successful!");
+		log.trace("Deactivation successful!");
 	}
 
 	public BundleContext getBundleContext() {
@@ -135,7 +135,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 
 	@Override
 	public synchronized void refreshCache() {
-		log.debug("refreshCache");
+		log.trace("refreshCache");
 
 		ResourceResolver resolver = null;
 
@@ -146,6 +146,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 			List<String> configuredIds = new ArrayList<String>();
 			for (Resource child : aprRoot.getChildren()) {
 				if (!JcrConstants.JCR_CONTENT.equals(child.getName())) {
+					log.debug("Updating service for configuration {}", child.getPath());
 					updateJobService(child.getPath(), child.getChild(JcrConstants.JCR_CONTENT));
 					configuredIds.add(child.getPath());
 				}
@@ -156,7 +157,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 					bctx.getServiceReferences(Runnable.class.getCanonicalName(), filter),
 					bctx.getServiceReferences(EventHandler.class.getCanonicalName(), filter));
 
-			log.warn("Found {} registered services", serviceReferences.length);
+			log.debug("Found {} registered services", serviceReferences.length);
 			for (ServiceReference reference : serviceReferences) {
 				try {
 					String configurationId = (String) reference.getProperty(CONFIGURATION_ID_KEY);

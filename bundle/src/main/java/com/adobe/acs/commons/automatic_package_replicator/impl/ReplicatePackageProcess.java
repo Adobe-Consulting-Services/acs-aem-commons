@@ -69,7 +69,7 @@ public class ReplicatePackageProcess implements WorkflowProcess {
 		log.trace("execute");
 		String packagePath = args.get(CommandLineProcess.Arguments.PROCESS_ARGS.getArgumentName(), String.class);
 		if (StringUtils.isNotEmpty(packagePath)) {
-			log.info("Executing Automatic Package Replicator Job for package {}", packagePath);
+			log.debug("Executing Automatic Package Replicator Job for package {}", packagePath);
 			AutomaticPackageReplicatorJob aprJob = new AutomaticPackageReplicatorJob(resourceResolverFactory,
 					replicator, eventAdmin, packagePath);
 			try {
