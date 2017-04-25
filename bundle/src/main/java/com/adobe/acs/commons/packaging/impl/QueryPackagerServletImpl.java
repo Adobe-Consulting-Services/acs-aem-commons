@@ -21,10 +21,8 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.day.cq.search.PredicateGroup;
+import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.QueryBuilder;
-import com.day.cq.search.result.Hit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -47,9 +45,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -104,6 +100,9 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
     @Reference
     private QueryBuilder queryBuilder;
 
+    @Reference
+    private QueryHelper queryHelper;
+
     @Override
     public final void doPost(final SlingHttpServletRequest request,
                              final SlingHttpServletResponse response) throws IOException {
@@ -116,7 +115,7 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
         final ValueMap properties = this.getProperties(request);
 
         try {
-            final List<Resource> packageResources = this.findResources(resourceResolver,
+            final List<Resource> packageResources = queryHelper.findResources(resourceResolver,
                     properties.get("queryLanguage", Query.JCR_SQL2),
                     properties.get("query", String.class),
                     properties.get("relPath", String.class));
@@ -186,65 +185,6 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
         }
     }
 
-    /**
-     * Find all the resources needed for the package definition.
-     *
-     * @param resourceResolver the resource resolver to find the resources
-     * @param language         the Query language
-     * @param statement        the Query statement
-     * @param relPath          the relative path to resolve against query result nodes for package resources
-     * @return a unique set of paths to include in the package
-     * @throws RepositoryException
-     */
-    private List<Resource> findResources(final ResourceResolver resourceResolver,
-                                         final String language,
-                                         final String statement,
-                                         final String relPath) throws RepositoryException {
-
-        final List<Resource> resources = new ArrayList<Resource>();
-
-        if (language.equals(QUERY_BUILDER)) {
-            final String[] lines = StringUtils.split(statement, '\n');
-            final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
-
-            // ensure all results are returned
-            params.put("p.limit", "-1");
-
-            final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
-            final List<Hit> hits = query.getResult().getHits();
-            for (final Hit hit : hits) {
-                resources.add(hit.getResource());
-            }
-        } else if (language.equals(LIST)) {
-            if (StringUtils.isNotBlank(statement)) {
-                final String[] lines = statement.split("[,;\\s\\n\\t]+");
-
-                for (String line : lines) {
-                    if (StringUtils.isNotBlank(line)) {
-                        final Resource resource = resourceResolver.getResource(line);
-                        final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
-
-                        if (relativeAwareResource != null) {
-                            resources.add(relativeAwareResource);
-                        }
-                    }
-                }
-            }
-        } else {
-            Iterator<Resource> resourceIterator = resourceResolver.findResources(statement, language);
-
-            while (resourceIterator.hasNext()) {
-                final Resource resource = resourceIterator.next();
-                final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
-
-                if (relativeAwareResource != null) {
-                    resources.add(relativeAwareResource);
-                }
-            }
-        }
-
-        return resources;
-    }
 
     /**
      * Get the relative resource of the given resource if it resolves otherwise

@@ -68,6 +68,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -392,12 +393,12 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         }
 
         // Spool other attributes to the servlet response.
-        response.setCharacterEncoding(cacheContent.getCharEncoding());
         response.setContentType(cacheContent.getContentType());
+        response.setCharacterEncoding(cacheContent.getCharEncoding());
 
         // Copy the cached data into the servlet output stream.
         try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
             if (log.isDebugEnabled()) {
                 log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
             }
@@ -485,7 +486,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    public void invalidateCache(String path) throws HttpCachePersistenceException {
+    public void invalidateCache(String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
 
         // Find out all the cache config which has this path applicable for invalidation.
         for (HttpCacheConfig cacheConfig : cacheConfigs) {
@@ -494,21 +495,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                 // Execute custom rules.
                 for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
                     // Apply rule if it's a configured global or cache-config tied rule.
-                    if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey
-                            ())) {
+                    if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
                         HttpCacheHandlingRule rule = entry.getValue();
                         if (rule.onCacheInvalidate(path)) {
-                            getCacheStore(cacheConfig).invalidate(cacheConfig);
+                            getCacheStore(cacheConfig).invalidate(cacheConfig.buildCacheKey(path));
                         } else {
                             log.debug("Cache invalidation rejected for path {} per custom rule {}", path, rule
                                     .getClass().getName());
                         }
                     }
                 }
-
             }
         }
-
     }
 
     /**
@@ -614,7 +612,9 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                         new String[]{ "HTTP Cache Store" }));
         // @formatter:on
 
-        for (String storeName : this.cacheStoresMap.keySet()) {
+        Enumeration<String> storeNames = cacheStoresMap.keys();
+        while (storeNames.hasMoreElements()) {
+            final String storeName = storeNames.nextElement();
             final Map<String, Object> row = new HashMap<String, Object>();
 
             row.put("HTTP Cache Store", storeName);

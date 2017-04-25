@@ -125,8 +125,13 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     @Override
     public CacheKey build(final SlingHttpServletRequest slingHttpServletRequest, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
-
         return new GroupCacheKey(slingHttpServletRequest, cacheConfig);
+    }
+
+    @Override
+    public CacheKey build(final String resourcePath, final HttpCacheConfig cacheConfig)
+            throws HttpCacheKeyCreationException {
+        return new GroupCacheKey(resourcePath, cacheConfig);
     }
 
     @Override

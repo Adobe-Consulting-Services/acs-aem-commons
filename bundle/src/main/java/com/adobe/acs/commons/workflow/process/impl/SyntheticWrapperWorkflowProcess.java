@@ -27,6 +27,7 @@ import com.adobe.acs.commons.util.visitors.ContentVisitor;
 import com.adobe.acs.commons.util.visitors.ResourceRunnable;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
+import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowRunnerAccessor;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
@@ -70,7 +71,7 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
     private static final String ARG_THROTTLE = "throttle";
 
     @Reference
-    private SyntheticWorkflowRunner syntheticWorkflowRunner;
+    private SyntheticWorkflowRunnerAccessor syntheticWorkflowRunnerAccessor;
 
     @Reference
     private ThrottledTaskRunner throttledTaskRunner;
@@ -81,6 +82,7 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
         ResourceResolver resourceResolver = null;
+        final SyntheticWorkflowRunner syntheticWorkflowRunner = syntheticWorkflowRunnerAccessor.getSyntheticWorkflowRunner();
 
         final String payload = (String) workItem.getWorkflowData().getPayload();
         final ProcessArgs processArgs = new ProcessArgs(metaDataMap);

@@ -110,15 +110,18 @@
             compDragDrop = dropController.get(gAuthor.Component.prototype.getTypeName());
 
             //handle drop action
-            compDragDrop.handleDrop = function(dropFn){
-                return function (event) {
-                    if(!isWithinLimit(event.currentDropTarget.targetEditable)){
-                        return;
-                    }
+            if (compDragDrop !== undefined) {
+                //handle drop action
+                compDragDrop.handleDrop = function(dropFn){
+                    return function (event) {
+                        if(!isWithinLimit(event.currentDropTarget.targetEditable)){
+                            return;
+                        }
 
-                    return dropFn.call(this, event);
-                };
-            }(compDragDrop.handleDrop);
+                        return dropFn.call(this, event);
+                    };
+                }(compDragDrop.handleDrop);
+            }
 
             //handle insert action
             gAuthor.edit.actions.openInsertDialog = function(openDlgFn){

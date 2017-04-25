@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.xss;
 
 import aQute.bnd.annotation.ProviderType;
-import org.apache.sling.xss.XSSAPI;
+import com.adobe.granite.xss.XSSAPI;
 import tldgen.Function;
 
 import java.util.regex.Pattern;

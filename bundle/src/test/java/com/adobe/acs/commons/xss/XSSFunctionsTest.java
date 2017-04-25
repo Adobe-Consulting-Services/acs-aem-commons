@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.xss;
 
+import com.adobe.granite.xss.XSSAPI;
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.sling.xss.XSSAPI;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
