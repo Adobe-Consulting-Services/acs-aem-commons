@@ -62,6 +62,14 @@ public interface ActionManager {
     void withResolver(Consumer<ResourceResolver> action) throws Exception;
     
     /**
+     * After scheduling actions withQueryResults or deferredWithResolver, schedule
+     * a cleanup task to close all remaining resource resolvers.
+     * NOTE: This is automatic now -- only included for backwards compatibility.
+     * @deprecated No need to use this, cleanup is automatic.
+     */
+     void addCleanupTask();
+    
+    /**
      * Register a handler to be fired when the work has completed with no errors.
      * @param successTask 
      */

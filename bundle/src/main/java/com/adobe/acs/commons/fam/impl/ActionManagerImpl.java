@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -185,6 +184,11 @@ class ActionManagerImpl implements ActionManager {
     }
     
     @Override
+    public void addCleanupTask() {
+        // This is deprecated, only included for backwards-compatibility.
+    }
+    
+    @Override
     public void onSuccess(Consumer<ResourceResolver> successTask) {
         successHandlers.add(successTask);
     }
@@ -220,7 +224,7 @@ class ActionManagerImpl implements ActionManager {
         finishHandlers.forEach(Runnable::run);
     }
     
-    private void addCleanupTask() {
+    private void performAutomaticCleanup() {
         if (!cleanupHandlerRegistered.getAndSet(true)) {
             taskRunner.scheduleWork(() -> {
                 while (!isComplete()) {
@@ -277,7 +281,7 @@ class ActionManagerImpl implements ActionManager {
         tasksSuccessful.incrementAndGet();
         if (isComplete()) {
             finished = System.currentTimeMillis();
-            addCleanupTask();
+            performAutomaticCleanup();
         }
     }
 
@@ -291,7 +295,7 @@ class ActionManagerImpl implements ActionManager {
         tasksError.incrementAndGet();
         if (isComplete()) {
             finished = System.currentTimeMillis();
-            addCleanupTask();
+            performAutomaticCleanup();
         }
     }
 
