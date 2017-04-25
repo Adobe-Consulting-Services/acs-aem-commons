@@ -61,7 +61,7 @@ public final class DeferredActions {
     /**
      * Returns opposite of its input, e.g. filterMatching(glob).andThen(not)
      */
-    public static Function<Boolean, Boolean> not = (Boolean t) -> !t;
+    public Function<Boolean, Boolean> not = (Boolean t) -> !t;
 
     /**
      * Returns true of glob matches provided path
@@ -69,7 +69,7 @@ public final class DeferredActions {
      * @param glob Regex expression
      * @return True for matches
      */
-    public static BiFunction<ResourceResolver, String, Boolean> filterMatching(final String glob) {
+    public BiFunction<ResourceResolver, String, Boolean> filterMatching(final String glob) {
         return (ResourceResolver r, String path) -> path.matches(glob);
     }
 
@@ -80,7 +80,7 @@ public final class DeferredActions {
      * @param glob Regex expression
      * @return False for matches
      */
-    public static BiFunction<ResourceResolver, String, Boolean> filterNotMatching(final String glob) {
+    public BiFunction<ResourceResolver, String, Boolean> filterNotMatching(final String glob) {
         return filterMatching(glob).andThen(not);
     }
 
@@ -89,7 +89,7 @@ public final class DeferredActions {
      *
      * @return true if node is not a subasset
      */
-    public static BiFunction<ResourceResolver, String, Boolean> filterOutSubassets() {
+    public BiFunction<ResourceResolver, String, Boolean> filterOutSubassets() {
         return filterNotMatching(".*?/subassets/.*");
     }
 
@@ -99,7 +99,7 @@ public final class DeferredActions {
      *
      * @return True if asset
      */
-    public static BiFunction<ResourceResolver, String, Boolean> filterNonAssets() {
+    public BiFunction<ResourceResolver, String, Boolean> filterNonAssets() {
         return (ResourceResolver r, String path) -> {
             nameThread("filterNonAssets-" + path);
             Resource res = r.getResource(path);
@@ -114,7 +114,7 @@ public final class DeferredActions {
      *
      * @return True if asset has no thumbnails or outdated thumbnails
      */
-    public static BiFunction<ResourceResolver, String, Boolean> filterAssetsWithOutdatedRenditions() {
+    public BiFunction<ResourceResolver, String, Boolean> filterAssetsWithOutdatedRenditions() {
         return (ResourceResolver r, String path) -> {
             nameThread("filterAssetsWithOutdatedRenditions-" + path);
             Resource res = r.getResource(path);
@@ -151,7 +151,7 @@ public final class DeferredActions {
      * @param action Action to attempt
      * @return New retry wrapper around provided action
      */
-    public static BiConsumer<ResourceResolver, String> retryAll(final int retries, final long pausePerRetry, final BiConsumer<ResourceResolver, String> action) {
+    public BiConsumer<ResourceResolver, String> retryAll(final int retries, final long pausePerRetry, final BiConsumer<ResourceResolver, String> action) {
         return (ResourceResolver r, String s) -> {
             int remaining = retries;
             while (remaining > 0) {
@@ -188,7 +188,7 @@ public final class DeferredActions {
         };
     }
 
-    public static BiConsumer<ResourceResolver, String> withAllRenditions(
+    public BiConsumer<ResourceResolver, String> withAllRenditions(
             final BiConsumer<ResourceResolver, String> action,
             final BiFunction<ResourceResolver, String, Boolean>... filters) {
         return (ResourceResolver r, String path) -> {
@@ -217,7 +217,7 @@ public final class DeferredActions {
      *
      * @return
      */
-    public static BiConsumer<ResourceResolver, String> removeAllRenditions() {
+    public BiConsumer<ResourceResolver, String> removeAllRenditions() {
         return (ResourceResolver r, String path) -> {
             nameThread("removeRenditions-" + path);
             AssetManager assetManager = r.adaptTo(AssetManager.class);
@@ -237,7 +237,7 @@ public final class DeferredActions {
      * @param name
      * @return
      */
-    public static BiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
+    public BiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
         return (ResourceResolver r, String path) -> {
             nameThread("removeRenditions-" + path);
             AssetManager assetManager = r.adaptTo(AssetManager.class);
@@ -329,7 +329,7 @@ public final class DeferredActions {
      * @param action Action to attempt
      * @return New retry wrapper around provided action
      */
-    public static Consumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final Consumer<ResourceResolver> action) {
+    public Consumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final Consumer<ResourceResolver> action) {
         return (ResourceResolver r) -> {
             int remaining = retries;
             while (remaining > 0) {
@@ -367,7 +367,7 @@ public final class DeferredActions {
      * @param path
      * @return
      */
-    final static public Consumer<ResourceResolver> removeRenditions(String path) {
+    final public Consumer<ResourceResolver> removeRenditions(String path) {
         return res -> removeAllRenditions().accept(res, path);
     }
 
@@ -378,7 +378,7 @@ public final class DeferredActions {
      * @param name
      * @return
      */
-    final static public Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
+    final public Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
         return res -> removeAllRenditionsNamed(name).accept(res, path);
     }
 

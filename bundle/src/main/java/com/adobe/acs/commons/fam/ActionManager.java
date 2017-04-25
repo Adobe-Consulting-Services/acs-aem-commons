@@ -73,20 +73,20 @@ public interface ActionManager {
      * Register a handler to be fired when the work has completed with no errors.
      * @param successTask 
      */
-    void onSuccess(Consumer<ResourceResolver> successTask);
+     default void onSuccess(Consumer<ResourceResolver> successTask) {}
 
     /**
      * Register a handler to be fired when the work has completed and there was at least one error.
      * @param failureTask 
      */
-    void onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask);
+     default void onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask) {}
     
     /**
      * Register a handler to be fired when the work is completed, successfully or not.  
      * Note: These handlers are called after the success/fail handlers.
      * @param finishHandler 
      */
-    void onFinish(Runnable finishHandler);
+     default void onFinish(Runnable finishHandler) {}
 
     /**
      * Have all actions completed?
