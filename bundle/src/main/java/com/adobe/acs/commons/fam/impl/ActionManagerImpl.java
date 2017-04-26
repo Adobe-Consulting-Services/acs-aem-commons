@@ -73,8 +73,8 @@ class ActionManagerImpl implements ActionManager {
     private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
     private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
-    private final List<IConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final List<IBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
     private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
 
 
@@ -125,21 +125,21 @@ class ActionManagerImpl implements ActionManager {
 
     @Override
     public void deferredWithResolver(final Consumer<ResourceResolver> action) {
-        this.deferredWithResolver((IConsumer<ResourceResolver>) action);
+        this.deferredWithResolver((CheckedConsumer<ResourceResolver>) action);
     }
 
     @Override
-    public void deferredWithResolver(final IConsumer<ResourceResolver> action) {
+    public void deferredWithResolver(final CheckedConsumer<ResourceResolver> action) {
         deferredWithResolver(action, false);
     }
 
     @Override
     public void withResolver(Consumer<ResourceResolver> action) throws Exception {
-        withResolver((IConsumer<ResourceResolver>) action);
+        withResolver((CheckedConsumer<ResourceResolver>) action);
     }
 
     @Override
-    public void withResolver(IConsumer<ResourceResolver> action) throws Exception {
+    public void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception {
         ReusableResolver resolver = getResourceResolver();
         resolver.setCurrentItem(currentPath.get());
         try {
@@ -164,16 +164,16 @@ class ActionManagerImpl implements ActionManager {
             final BiFunction<ResourceResolver, String, Boolean>... filters
     )
             throws RepositoryException, PersistenceException, Exception {
-        return withQueryResults(queryStatement, language, (IBiConsumer<ResourceResolver, String>) callback,
-                Arrays.copyOf(filters, filters.length, IBiFunction[].class));
+        return withQueryResults(queryStatement, language, (CheckedBiConsumer<ResourceResolver, String>) callback,
+                Arrays.copyOf(filters, filters.length, CheckedBiFunction[].class));
     }
     
     @Override
     public int withQueryResults(
             final String queryStatement,
             final String language,
-            final IBiConsumer<ResourceResolver, String> callback,
-            final IBiFunction<ResourceResolver, String, Boolean>... filters
+            final CheckedBiConsumer<ResourceResolver, String> callback,
+            final CheckedBiFunction<ResourceResolver, String, Boolean>... filters
     )
             throws RepositoryException, PersistenceException, Exception {
         withResolver((ResourceResolver resolver) -> {
@@ -188,7 +188,7 @@ class ActionManagerImpl implements ActionManager {
                     deferredWithResolver((ResourceResolver r) -> {
                         currentPath.set(nodePath);
                         if (filters != null) {
-                            for (IBiFunction<ResourceResolver, String, Boolean> filter : filters) {
+                            for (CheckedBiFunction<ResourceResolver, String, Boolean> filter : filters) {
                                 if (!filter.apply(r, nodePath)) {
                                     logFilteredOutItem(nodePath);
                                     return;
@@ -212,12 +212,12 @@ class ActionManagerImpl implements ActionManager {
     }
     
     @Override
-    public void onSuccess(IConsumer<ResourceResolver> successTask) {
+    public void onSuccess(CheckedConsumer<ResourceResolver> successTask) {
         successHandlers.add(successTask);
     }
 
     @Override
-    public void onFailure(IBiConsumer<List<Failure>, ResourceResolver> failureTask) {
+    public void onFailure(CheckedBiConsumer<List<Failure>, ResourceResolver> failureTask) {
         errorHandlers.add(failureTask);
     }
     
@@ -269,7 +269,7 @@ class ActionManagerImpl implements ActionManager {
     }
 
     private void deferredWithResolver(
-            final IConsumer<ResourceResolver> action,
+            final CheckedConsumer<ResourceResolver> action,
             final boolean closesResolver) {
         taskRunner.scheduleWork(() -> {
             started.compareAndSet(0, System.currentTimeMillis());

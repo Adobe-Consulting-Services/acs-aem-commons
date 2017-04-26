@@ -16,6 +16,8 @@
 package com.adobe.acs.commons.fam;
 
 import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.fam.util.Actions;
+import com.adobe.acs.commons.fam.util.Filters;
 import com.adobe.acs.commons.functions.*;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
@@ -29,22 +31,26 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Various deferred actions to be used with the ActionManager
+ * @deprecated Use the Checked function definitions and the fam.util classes now.  This class is only provided for compatibility.
  */
 @Component
 @Service(DeferredActions.class)
 @ProviderType
 public final class DeferredActions {
 
-    public static final String ORIGINAL_RENDITION = IDeferredActions.ORIGINAL_RENDITION;
+    public static final String ORIGINAL_RENDITION = Filters.ORIGINAL_RENDITION;
 
     @Reference
-    private IDeferredActions delegate;
-
+    Replicator replicator;
+    
+    @Reference
+    SyntheticWorkflowRunner workflowRunner;
+    
     //--- Filters (for using withQueryResults)
     /**
      * Returns opposite of its input, e.g. filterMatching(glob).andThen(not)
      */
-    public Function<Boolean, Boolean> not = Function.adapt(delegate.not);
+    public Function<Boolean, Boolean> not = Function.adapt(Filters.NOT);
 
     /**
      * Returns true of glob matches provided path
@@ -53,7 +59,7 @@ public final class DeferredActions {
      * @return True for matches
      */
     public BiFunction<ResourceResolver, String, Boolean> filterMatching(final String glob) {
-        return BiFunction.adapt(delegate.filterMatching(glob));
+        return BiFunction.adapt(Filters.filterMatching(glob));
     }
 
     /**
@@ -64,7 +70,7 @@ public final class DeferredActions {
      * @return False for matches
      */
     public BiFunction<ResourceResolver, String, Boolean> filterNotMatching(final String glob) {
-        return BiFunction.adapt(delegate.filterNotMatching(glob));
+        return BiFunction.adapt(Filters.filterNotMatching(glob));
     }
 
     /**
@@ -73,7 +79,7 @@ public final class DeferredActions {
      * @return true if node is not a subasset
      */
     public BiFunction<ResourceResolver, String, Boolean> filterOutSubassets() {
-        return BiFunction.adapt(delegate.filterOutSubassets());
+        return BiFunction.adapt(Filters.FILTER_OUT_SUBASSETS);
     }
 
     /**
@@ -83,7 +89,7 @@ public final class DeferredActions {
      * @return True if asset
      */
     public BiFunction<ResourceResolver, String, Boolean> filterNonAssets() {
-        return BiFunction.adapt(delegate.filterNonAssets());
+        return BiFunction.adapt(Filters.FILTER_NON_ASSETS);
     }
 
     /**
@@ -94,7 +100,7 @@ public final class DeferredActions {
      * @return True if asset has no thumbnails or outdated thumbnails
      */
     public BiFunction<ResourceResolver, String, Boolean> filterAssetsWithOutdatedRenditions() {
-        return BiFunction.adapt(delegate.filterAssetsWithOutdatedRenditions());
+        return BiFunction.adapt(Filters.FILTER_ASSETS_WITH_OUTDATED_RENDITIONS);
     }
 
     //-- Query Result consumers (for using withQueryResults)
@@ -110,7 +116,7 @@ public final class DeferredActions {
      * @return New retry wrapper around provided action
      */
     public BiConsumer<ResourceResolver, String> retryAll(final int retries, final long pausePerRetry, final BiConsumer<ResourceResolver, String> action) {
-        return BiConsumer.adapt(delegate.retryAll(retries, pausePerRetry, action));
+        return BiConsumer.adapt(Actions.retryAll(retries, pausePerRetry, action));
     }
 
     /**
@@ -119,13 +125,13 @@ public final class DeferredActions {
      * @param model Synthetic workflow model
      */
     public BiConsumer<ResourceResolver, String> startSyntheticWorkflows(final SyntheticWorkflowModel model) {
-        return BiConsumer.adapt(delegate.startSyntheticWorkflows(model));
+        return BiConsumer.adapt(Actions.startSyntheticWorkflows(model, workflowRunner));
     }
 
     public BiConsumer<ResourceResolver, String> withAllRenditions(
             final BiConsumer<ResourceResolver, String> action,
             final BiFunction<ResourceResolver, String, Boolean>... filters) {
-        return BiConsumer.adapt(delegate.withAllRenditions(action, filters));
+        return BiConsumer.adapt(Actions.withAllRenditions(action, filters));
     }
 
     /**
@@ -134,7 +140,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> removeAllRenditions() {
-        return BiConsumer.adapt(delegate.removeAllRenditions());
+        return BiConsumer.adapt(Actions.REMOVE_ALL_RENDITIONS);
     }
 
     /**
@@ -144,7 +150,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
-        return BiConsumer.adapt(delegate.removeAllRenditionsNamed(name));
+        return BiConsumer.adapt(Actions.removeAllRenditionsNamed(name));
     }
 
     /**
@@ -153,7 +159,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> activateAll() {
-        return BiConsumer.adapt(delegate.activateAll());
+        return BiConsumer.adapt(Actions.activateAll(replicator));
     }
 
     /**
@@ -165,7 +171,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> activateAllWithOptions(final ReplicationOptions options) {
-        return BiConsumer.adapt(delegate.activateAllWithOptions(options));
+        return BiConsumer.adapt(Actions.activateAllWithOptions(replicator, options));
     }
 
     /**
@@ -177,7 +183,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> activateAllWithRoundRobin(final ReplicationOptions... options) {
-        return BiConsumer.adapt(delegate.activateAllWithRoundRobin(options));
+        return BiConsumer.adapt(Actions.activateAllWithRoundRobin(replicator, options));
     }
 
     /**
@@ -186,7 +192,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> deactivateAll() {
-        return BiConsumer.adapt(delegate.deactivateAll());
+        return BiConsumer.adapt(Actions.deactivateAll(replicator));
     }
 
     /**
@@ -196,7 +202,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> deactivateAllWithOptions(final ReplicationOptions options) {
-        return BiConsumer.adapt(delegate.deactivateAllWithOptions(options));
+        return BiConsumer.adapt(Actions.deactivateAllWithOptions(replicator, options));
     }
 
     //-- Single work consumers (for use for single invocation using deferredWithResolver)
@@ -209,7 +215,7 @@ public final class DeferredActions {
      * @return New retry wrapper around provided action
      */
     public Consumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final Consumer<ResourceResolver> action) {
-        return Consumer.adapt(delegate.retry(retries, pausePerRetry, action));
+        return Consumer.adapt(Actions.retry(retries, pausePerRetry, action));
     }
 
     /**
@@ -220,7 +226,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> startSyntheticWorkflow(SyntheticWorkflowModel model, String path) {
-        return Consumer.adapt(delegate.startSyntheticWorkflow(model, path));
+        return Consumer.adapt(Actions.startSyntheticWorkflow(model, path, workflowRunner));
     }
 
     /**
@@ -230,7 +236,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> removeRenditions(String path) {
-        return Consumer.adapt(delegate.removeRenditions(path));
+        return Consumer.adapt(Actions.removeRenditions(path));
     }
 
     /**
@@ -241,7 +247,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
-        return Consumer.adapt(delegate.removeRenditionsNamed(path, name));
+        return Consumer.adapt(Actions.removeRenditionsNamed(path, name));
     }
 
     /**
@@ -251,7 +257,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> activate(String path) {
-        return Consumer.adapt(delegate.activate(path));
+        return Consumer.adapt(Actions.activate(replicator, path));
     }
 
     /**
@@ -262,7 +268,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> activateWithOptions(String path, ReplicationOptions options) {
-        return Consumer.adapt(delegate.activateWithOptions(path, options));
+        return Consumer.adapt(Actions.activateWithOptions(replicator, path, options));
     }
 
     /**
@@ -272,7 +278,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> deactivate(String path) {
-        return Consumer.adapt(delegate.deactivate(path));
+        return Consumer.adapt(Actions.deactivate(replicator, path));
     }
 
     /**
@@ -283,12 +289,6 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> deactivateWithOptions(String path, ReplicationOptions options) {
-        return Consumer.adapt(delegate.deactivateWithOptions(path, options));
+        return Consumer.adapt(Actions.deactivateWithOptions(replicator, path, options));
     }
-
-    // these two references are no longer needed, but baseline reports their removal as requiring a major version bump
-    protected void bindWorkflowRunner(SyntheticWorkflowRunner workflowRunner) {}
-    protected void unbindWorkflowRunner(SyntheticWorkflowRunner workflowRunner) {}
-    protected void bindReplicator(Replicator replicator) {}
-    protected void unbindReplicator(Replicator replicator) {}
 }

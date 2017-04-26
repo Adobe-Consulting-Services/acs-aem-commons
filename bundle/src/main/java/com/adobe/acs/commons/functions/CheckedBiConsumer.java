@@ -31,7 +31,7 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @FunctionalInterface
-public interface IBiConsumer<T, U> {
+public interface CheckedBiConsumer<T, U> {
 
     /**
      * Performs this operation on the given arguments.
@@ -54,7 +54,7 @@ public interface IBiConsumer<T, U> {
      * operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */
-    default IBiConsumer<T, U> andThen(final IBiConsumer<? super T, ? super U> after) {
+    default CheckedBiConsumer<T, U> andThen(final CheckedBiConsumer<? super T, ? super U> after) {
         if (after == null) {
             throw new NullPointerException();
         }

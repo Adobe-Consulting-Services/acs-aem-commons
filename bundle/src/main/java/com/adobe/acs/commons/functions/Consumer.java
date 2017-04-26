@@ -27,15 +27,7 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @Deprecated
-public abstract class Consumer<T> implements IConsumer<T> {
-
-    /**
-     * Performs this operation on the given argument.
-     *
-     * @param t the input argument
-     */
-    abstract public void accept(T t) throws Exception;
-
+public abstract class Consumer<T> implements CheckedConsumer<T> {
     /**
      * Returns a composed {@code Consumer} that performs, in sequence, this
      * operation followed by the {@code after} operation. If performing either
@@ -49,28 +41,18 @@ public abstract class Consumer<T> implements IConsumer<T> {
      * @throws NullPointerException if {@code after} is null
      */
     public Consumer<T> andThen(final Consumer<? super T> after) {
-        if (after == null) {
-            throw new NullPointerException();
-        }
-        final Consumer<T> thiss = this;
-        return new Consumer<T>() {
-            @Override
-            public void accept(T t) throws Exception {
-                thiss.accept(t);
-                after.accept(t);
-            }
-        };
+        return adapt(andThen((CheckedConsumer) after));
     }
 
-    public static <X> Consumer<X> adapt(IConsumer<X> delegate) {
+    public static <X> Consumer<X> adapt(CheckedConsumer<X> delegate) {
         return new Adapter<>(delegate);
     }
 
     private static class Adapter<T> extends Consumer<T> {
 
-        private IConsumer<T> delegate;
+        final private CheckedConsumer<T> delegate;
 
-        public Adapter(IConsumer<T> delegate) {
+        public Adapter(CheckedConsumer<T> delegate) {
             this.delegate = delegate;
         }
 

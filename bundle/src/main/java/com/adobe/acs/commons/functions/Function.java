@@ -26,16 +26,7 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @Deprecated
-public abstract class Function<T, R> implements IFunction<T, R> {
-
-    /**
-     * Applies this function to the given argument.
-     *
-     * @param t the function argument
-     * @return the function result
-     */
-    abstract public R apply(T t) throws Exception;
-
+public abstract class Function<T, R> implements CheckedFunction<T, R> {
     /**
      * Returns a composed function that first applies the {@code before}
      * function to its input, and then applies this function to the result.
@@ -52,16 +43,7 @@ public abstract class Function<T, R> implements IFunction<T, R> {
      * @see #andThen(Function)
      */
     public <V> Function<V, R> compose(final Function<? super V, ? extends T> before) {
-        if (before == null) {
-            throw new NullPointerException();
-        }
-        final Function<T,R> thiss = this;
-        return new Function<V, R>() {
-            @Override
-            public R apply(V t) throws Exception {
-                return thiss.apply(before.apply(t));
-            }
-        };
+        return adapt(compose((CheckedFunction) before));
     }
 
     /**
@@ -80,16 +62,7 @@ public abstract class Function<T, R> implements IFunction<T, R> {
      * @see #compose(Function)
      */
     public <V> Function<T, V> andThen(final Function<? super R, ? extends V> after) {
-        if (after == null) {
-            throw new NullPointerException();
-        }
-        final Function<T,R> thiss = this;
-        return new Function<T, V>() {
-            @Override
-            public V apply(T t) throws Exception {
-                return after.apply(thiss.apply(t));
-            }
-        };
+        return adapt(compose((CheckedFunction) after));
     }
 
     /**
@@ -99,23 +72,18 @@ public abstract class Function<T, R> implements IFunction<T, R> {
      * @return a function that always returns its input argument
      */
     public static <T> Function<T, T> identity() {
-        return new Function<T, T>() {
-            @Override
-            public T apply(T t) {
-                return t;
-            }
-        };
+        return adapt(CheckedFunction.identity());
     }
 
-    public static <X, Y> Function<X, Y> adapt(IFunction<X, Y> delegate) {
+    public static <X, Y> Function<X, Y> adapt(CheckedFunction<X, Y> delegate) {
         return new Adapter<>(delegate);
     }
 
     private static class Adapter<T, R> extends Function<T, R> {
 
-        private IFunction<T, R> delegate;
+        final private CheckedFunction<T, R> delegate;
 
-        public Adapter(IFunction<T, R> delegate) {
+        public Adapter(CheckedFunction<T, R> delegate) {
             this.delegate = delegate;
         }
 

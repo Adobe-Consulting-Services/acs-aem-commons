@@ -27,11 +27,11 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @FunctionalInterface
-public interface IConsumer<T> {
+public interface CheckedConsumer<T> {
 
     void accept(T t) throws Exception;
 
-    default IConsumer<T> andThen(final IConsumer<? super T> after) {
+    default CheckedConsumer<T> andThen(final CheckedConsumer<? super T> after) {
         if (after == null) {
             throw new NullPointerException();
         }

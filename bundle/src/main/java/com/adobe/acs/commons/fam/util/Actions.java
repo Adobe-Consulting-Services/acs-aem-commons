@@ -13,27 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.fam;
+package com.adobe.acs.commons.fam.util;
 
-import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.functions.IBiConsumer;
-import com.adobe.acs.commons.functions.IBiFunction;
-import com.adobe.acs.commons.functions.IConsumer;
-import com.adobe.acs.commons.functions.IFunction;
 import com.adobe.acs.commons.functions.RoundRobin;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.adobe.granite.asset.api.Asset;
 import com.adobe.granite.asset.api.AssetManager;
 import com.adobe.granite.asset.api.Rendition;
-import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,106 +32,18 @@ import javax.jcr.Session;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
+import com.adobe.acs.commons.functions.CheckedBiFunction;
+import com.adobe.acs.commons.functions.CheckedConsumer;
 
 /**
  * Various deferred actions to be used with the ActionManager
  */
-@Component
-@Service(IDeferredActions.class)
-@ProviderType
-public final class IDeferredActions {
-
-    private static final Logger log = LoggerFactory.getLogger(IDeferredActions.class);
-
-    static final String ORIGINAL_RENDITION = "original";
-
-    @Reference
-    private SyntheticWorkflowRunner workflowRunner;
-
-    @Reference
-    private Replicator replicator;
-
-    //--- Filters (for using withQueryResults)
-    /**
-     * Returns opposite of its input, e.g. filterMatching(glob).andThen(not)
-     */
-    public IFunction<Boolean, Boolean> not = (Boolean t) -> !t;
-
-    /**
-     * Returns true of glob matches provided path
-     *
-     * @param glob Regex expression
-     * @return True for matches
-     */
-    public IBiFunction<ResourceResolver, String, Boolean> filterMatching(final String glob) {
-        return (ResourceResolver r, String path) -> path.matches(glob);
+public final class Actions {
+    private Actions() {
     }
 
-    /**
-     * Returns false if glob matches provided path Useful for things like
-     * filterOutSubassets
-     *
-     * @param glob Regex expression
-     * @return False for matches
-     */
-    public IBiFunction<ResourceResolver, String, Boolean> filterNotMatching(final String glob) {
-        return filterMatching(glob).andThen(not);
-    }
-
-    /**
-     * Exclude subassets from processing
-     *
-     * @return true if node is not a subasset
-     */
-    public IBiFunction<ResourceResolver, String, Boolean> filterOutSubassets() {
-        return filterNotMatching(".*?/subassets/.*");
-    }
-
-    /**
-     * Determine if node is a valid asset, skip any non-assets It's better to
-     * filter via query if possible to avoid having to use this
-     *
-     * @return True if asset
-     */
-    public IBiFunction<ResourceResolver, String, Boolean> filterNonAssets() {
-        return (ResourceResolver r, String path) -> {
-            nameThread("filterNonAssets-" + path);
-            Resource res = r.getResource(path);
-            return (DamUtil.resolveToAsset(res) != null);
-        };
-    }
-
-    /**
-     * This filter identifies assets where the original rendition is newer than
-     * any of the other renditions. This is an especially useful function for
-     * updating assets with missing or outdated thumbnails.
-     *
-     * @return True if asset has no thumbnails or outdated thumbnails
-     */
-    public IBiFunction<ResourceResolver, String, Boolean> filterAssetsWithOutdatedRenditions() {
-        return (ResourceResolver r, String path) -> {
-            nameThread("filterAssetsWithOutdatedRenditions-" + path);
-            Resource res = r.getResource(path);
-            com.day.cq.dam.api.Asset asset = DamUtil.resolveToAsset(res);
-            if (asset == null) {
-                return false;
-            }
-            com.day.cq.dam.api.Rendition original = asset.getRendition(ORIGINAL_RENDITION);
-            if (original == null) {
-                return false;
-            }
-            long originalTime = original.getResourceMetadata().getCreationTime();
-            int counter = 0;
-            for (com.day.cq.dam.api.Rendition rendition : asset.getRenditions()) {
-                counter++;
-                long time = rendition.getResourceMetadata().getCreationTime();
-                if (time < originalTime) {
-                    return true;
-                }
-            }
-            return counter <= 1;
-        };
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(Actions.class);
 
     //-- Query Result consumers (for using withQueryResults)
     /**
@@ -155,7 +57,7 @@ public final class IDeferredActions {
      * @param action Action to attempt
      * @return New retry wrapper around provided action
      */
-    public IBiConsumer<ResourceResolver, String> retryAll(final int retries, final long pausePerRetry, final IBiConsumer<ResourceResolver, String> action) {
+    public static final CheckedBiConsumer<ResourceResolver, String> retryAll(final int retries, final long pausePerRetry, final CheckedBiConsumer<ResourceResolver, String> action) {
         return (ResourceResolver r, String s) -> {
             int remaining = retries;
             while (remaining > 0) {
@@ -180,7 +82,7 @@ public final class IDeferredActions {
      *
      * @param model Synthetic workflow model
      */
-    public IBiConsumer<ResourceResolver, String> startSyntheticWorkflows(final SyntheticWorkflowModel model) {
+    public static final CheckedBiConsumer<ResourceResolver, String> startSyntheticWorkflows(final SyntheticWorkflowModel model, SyntheticWorkflowRunner workflowRunner) {
         return (ResourceResolver r, String path) -> {
             r.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
             nameThread("synWf-" + path);
@@ -192,9 +94,9 @@ public final class IDeferredActions {
         };
     }
 
-    public IBiConsumer<ResourceResolver, String> withAllRenditions(
-            final IBiConsumer<ResourceResolver, String> action,
-            final IBiFunction<ResourceResolver, String, Boolean>... filters) {
+    public static final CheckedBiConsumer<ResourceResolver, String> withAllRenditions(
+            final CheckedBiConsumer<ResourceResolver, String> action,
+            final CheckedBiFunction<ResourceResolver, String, Boolean>... filters) {
         return (ResourceResolver r, String path) -> {
             AssetManager assetManager = r.adaptTo(AssetManager.class);
             Asset asset = assetManager.getAsset(path);
@@ -202,7 +104,7 @@ public final class IDeferredActions {
                 Rendition rendition = renditions.next();
                 boolean skip = false;
                 if (filters != null) {
-                    for (IBiFunction<ResourceResolver, String, Boolean> filter : filters) {
+                    for (CheckedBiFunction<ResourceResolver, String, Boolean> filter : filters) {
                         if (!filter.apply(r, rendition.getPath())) {
                             skip = true;
                             break;
@@ -219,10 +121,9 @@ public final class IDeferredActions {
     /**
      * Remove all renditions except for the original rendition for assets
      *
-     * @return
      */
-    public IBiConsumer<ResourceResolver, String> removeAllRenditions() {
-        return (ResourceResolver r, String path) -> {
+    public static final CheckedBiConsumer<ResourceResolver, String> REMOVE_ALL_RENDITIONS =
+        (ResourceResolver r, String path) -> {
             nameThread("removeRenditions-" + path);
             AssetManager assetManager = r.adaptTo(AssetManager.class);
             Asset asset = assetManager.getAsset(path);
@@ -233,15 +134,12 @@ public final class IDeferredActions {
                 }
             }
         };
-    }
 
     /**
      * Remove all renditions with a given name
      *
-     * @param name
-     * @return
      */
-    public IBiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
+    public static final CheckedBiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
         return (ResourceResolver r, String path) -> {
             nameThread("removeRenditions-" + path);
             AssetManager assetManager = r.adaptTo(AssetManager.class);
@@ -260,7 +158,7 @@ public final class IDeferredActions {
      *
      * @return
      */
-    public IBiConsumer<ResourceResolver, String> activateAll() {
+    public static final CheckedBiConsumer<ResourceResolver, String> activateAll(Replicator replicator) {
         return (ResourceResolver r, String path) -> {
             nameThread("activate-" + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path);
@@ -275,7 +173,7 @@ public final class IDeferredActions {
      * @param options
      * @return
      */
-    public IBiConsumer<ResourceResolver, String> activateAllWithOptions(final ReplicationOptions options) {
+    public static final CheckedBiConsumer<ResourceResolver, String> activateAllWithOptions(Replicator replicator, final ReplicationOptions options) {
         return (ResourceResolver r, String path) -> {
             nameThread("activate-" + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path, options);
@@ -290,7 +188,7 @@ public final class IDeferredActions {
      * @param options
      * @return
      */
-    public IBiConsumer<ResourceResolver, String> activateAllWithRoundRobin(final ReplicationOptions... options) {
+    public static final CheckedBiConsumer<ResourceResolver, String> activateAllWithRoundRobin(final Replicator replicator, final ReplicationOptions... options) {
         final List<ReplicationOptions> allTheOptions = Arrays.asList(options);
         final Iterator<ReplicationOptions> roundRobin = new RoundRobin(allTheOptions).iterator();
         return (ResourceResolver r, String path) -> {
@@ -304,7 +202,7 @@ public final class IDeferredActions {
      *
      * @return
      */
-    public IBiConsumer<ResourceResolver, String> deactivateAll() {
+    public static final CheckedBiConsumer<ResourceResolver, String> deactivateAll(final Replicator replicator) {
         return (ResourceResolver r, String path) -> {
             nameThread("deactivate-" + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.DEACTIVATE, path);
@@ -317,7 +215,7 @@ public final class IDeferredActions {
      * @param options
      * @return
      */
-    public IBiConsumer<ResourceResolver, String> deactivateAllWithOptions(final ReplicationOptions options) {
+    public static final CheckedBiConsumer<ResourceResolver, String> deactivateAllWithOptions(final Replicator replicator, final ReplicationOptions options) {
         return (ResourceResolver r, String path) -> {
             nameThread("deactivate-" + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.DEACTIVATE, path, options);
@@ -333,7 +231,7 @@ public final class IDeferredActions {
      * @param action Action to attempt
      * @return New retry wrapper around provided action
      */
-    public IConsumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final IConsumer<ResourceResolver> action) {
+    public static final CheckedConsumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final CheckedConsumer<ResourceResolver> action) {
         return (ResourceResolver r) -> {
             int remaining = retries;
             while (remaining > 0) {
@@ -343,7 +241,7 @@ public final class IDeferredActions {
                 } catch (Exception e) {
                     r.revert();
                     r.refresh();
-                    log.info("Error commit, retry count is " + remaining, e);
+                    LOG.info("Error commit, retry count is " + remaining, e);
                     if (remaining-- <= 0) {
                         throw e;
                     } else {
@@ -361,8 +259,8 @@ public final class IDeferredActions {
      * @param path
      * @return
      */
-    final public IConsumer<ResourceResolver> startSyntheticWorkflow(SyntheticWorkflowModel model, String path) {
-        return res -> startSyntheticWorkflows(model).accept(res, path);
+    public static final CheckedConsumer<ResourceResolver> startSyntheticWorkflow(SyntheticWorkflowModel model, String path, SyntheticWorkflowRunner workflowRunner) {
+        return res -> startSyntheticWorkflows(model, workflowRunner).accept(res, path);
     }
 
     /**
@@ -371,8 +269,8 @@ public final class IDeferredActions {
      * @param path
      * @return
      */
-    final public IConsumer<ResourceResolver> removeRenditions(String path) {
-        return res -> removeAllRenditions().accept(res, path);
+    public static final CheckedConsumer<ResourceResolver> removeRenditions(String path) {
+        return res -> REMOVE_ALL_RENDITIONS.accept(res, path);
     }
 
     /**
@@ -382,7 +280,7 @@ public final class IDeferredActions {
      * @param name
      * @return
      */
-    final public IConsumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
+    public static final CheckedConsumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
         return res -> removeAllRenditionsNamed(name).accept(res, path);
     }
 
@@ -392,8 +290,8 @@ public final class IDeferredActions {
      * @param path
      * @return
      */
-    final public IConsumer<ResourceResolver> activate(String path) {
-        return res -> activateAll().accept(res, path);
+    public static final CheckedConsumer<ResourceResolver> activate(final Replicator replicator, String path) {
+        return res -> activateAll(replicator).accept(res, path);
     }
 
     /**
@@ -403,8 +301,8 @@ public final class IDeferredActions {
      * @param options
      * @return
      */
-    final public IConsumer<ResourceResolver> activateWithOptions(String path, ReplicationOptions options) {
-        return res -> activateAllWithOptions(options).accept(res, path);
+    public static final CheckedConsumer<ResourceResolver> activateWithOptions(final Replicator replicator, String path, ReplicationOptions options) {
+        return res -> activateAllWithOptions(replicator, options).accept(res, path);
     }
 
     /**
@@ -413,8 +311,8 @@ public final class IDeferredActions {
      * @param path
      * @return
      */
-    final public IConsumer<ResourceResolver> deactivate(String path) {
-        return res -> deactivateAll().accept(res, path);
+    public static final CheckedConsumer<ResourceResolver> deactivate(final Replicator replicator, String path) {
+        return res -> deactivateAll(replicator).accept(res, path);
     }
 
     /**
@@ -424,11 +322,11 @@ public final class IDeferredActions {
      * @param options
      * @return
      */
-    final public IConsumer<ResourceResolver> deactivateWithOptions(String path, ReplicationOptions options) {
-        return res -> deactivateAllWithOptions(options).accept(res, path);
+    public static final CheckedConsumer<ResourceResolver> deactivateWithOptions(final Replicator replicator, String path, ReplicationOptions options) {
+        return res -> deactivateAllWithOptions(replicator, options).accept(res, path);
     }
 
-    private static void nameThread(String string) {
+    static void nameThread(String string) {
         Thread.currentThread().setName(string);
     }
 }

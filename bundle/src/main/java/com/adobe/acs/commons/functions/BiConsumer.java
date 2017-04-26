@@ -31,15 +31,10 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @Deprecated
-public abstract class BiConsumer<T, U> implements IBiConsumer<T, U> {
-
-    /**
-     * Performs this operation on the given arguments.
-     *
-     * @param t the first input argument
-     * @param u the second input argument
-     */
-    abstract public void accept(T t, U u) throws Exception;
+public abstract class BiConsumer<T, U> implements CheckedBiConsumer<T, U> {
+    public static <X, Y> BiConsumer<X, Y> adapt(CheckedBiConsumer<X, Y> delegate) {
+        return new Adapter<>(delegate);
+    }
 
     /**
      * Returns a composed {@code BiConsumer} that performs, in sequence, this
@@ -54,28 +49,14 @@ public abstract class BiConsumer<T, U> implements IBiConsumer<T, U> {
      * @throws NullPointerException if {@code after} is null
      */
     public BiConsumer<T, U> andThen(final BiConsumer<? super T, ? super U> after) {
-        if (after == null) {
-            throw new NullPointerException();
-        }
-        final BiConsumer<T, U> thiss = this;
-        return new BiConsumer<T, U>() {
-            @Override
-            public void accept(T t, U u) throws Exception {
-                thiss.accept(t, u);
-                after.accept(t, u);
-            }
-        };
+        return new Adapter(andThen((CheckedBiConsumer) after));
     }
-
-    public static <X, Y> BiConsumer<X, Y> adapt(IBiConsumer<X, Y> delegate) {
-        return new Adapter<>(delegate);
-    }
-
+    
     public static class Adapter<T, R> extends BiConsumer<T, R> {
 
-        private IBiConsumer<T, R> delegate;
+        final private CheckedBiConsumer<T, R> delegate;
 
-        public Adapter(IBiConsumer<T, R> delegate) {
+        public Adapter(CheckedBiConsumer<T, R> delegate) {
             this.delegate = delegate;
         }
 

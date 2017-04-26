@@ -26,7 +26,7 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @FunctionalInterface
-public interface IFunction<T, R> {
+public interface CheckedFunction<T, R> {
 
     /**
      * Applies this function to the given argument.
@@ -52,7 +52,7 @@ public interface IFunction<T, R> {
      *
      * @see #andThen(IFunction)
      */
-    default <V> IFunction<V, R> compose(final IFunction<? super V, ? extends T> before) {
+    default <V> CheckedFunction<V, R> compose(final CheckedFunction<? super V, ? extends T> before) {
         if (before == null) {
             throw new NullPointerException();
         }
@@ -74,7 +74,7 @@ public interface IFunction<T, R> {
      *
      * @see #compose(IFunction)
      */
-    default <V> IFunction<T, V> andThen(final IFunction<? super R, ? extends V> after) {
+    default <V> CheckedFunction<T, V> andThen(final CheckedFunction<? super R, ? extends V> after) {
         if (after == null) {
             throw new NullPointerException();
         }
@@ -87,7 +87,7 @@ public interface IFunction<T, R> {
      * @param <T> the type of the input and output objects to the function
      * @return a function that always returns its input argument
      */
-    public static <T> IFunction<T, T> identity() {
+    public static <T> CheckedFunction<T, T> identity() {
         return (T t) -> t;
     }
 }

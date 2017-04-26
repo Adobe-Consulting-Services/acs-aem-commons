@@ -30,7 +30,7 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @FunctionalInterface
-public interface IBiFunction<T, U, R> {
+public interface CheckedBiFunction<T, U, R> {
 
     /**
      * Applies this function to the given arguments.
@@ -55,7 +55,7 @@ public interface IBiFunction<T, U, R> {
      * applies the {@code after} function
      * @throws NullPointerException if after is null
      */
-    default <V> IBiFunction<T, U, V> andThen(final IFunction<? super R, ? extends V> after) {
+    default <V> CheckedBiFunction<T, U, V> andThen(final CheckedFunction<? super R, ? extends V> after) {
         if (after == null) {
             throw new NullPointerException();
         }
