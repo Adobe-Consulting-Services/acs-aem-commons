@@ -24,11 +24,11 @@ import javax.jcr.RepositoryException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
 
-import com.adobe.acs.commons.functions.IBiConsumer;
-import com.adobe.acs.commons.functions.IBiFunction;
-import com.adobe.acs.commons.functions.IConsumer;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
+import com.adobe.acs.commons.functions.CheckedBiFunction;
+import com.adobe.acs.commons.functions.CheckedConsumer;
 
 /**
  *
@@ -67,7 +67,7 @@ public interface ActionManager {
      * @throws PersistenceException
      * @throws Exception
      */
-    int withQueryResults(final String queryStatement, final String language, final IBiConsumer<ResourceResolver, String> callback, final IBiFunction<ResourceResolver, String, Boolean>... filters) throws RepositoryException, PersistenceException, Exception;
+    int withQueryResults(final String queryStatement, final String language, final CheckedBiConsumer<ResourceResolver, String> callback, final CheckedBiFunction<ResourceResolver, String, Boolean>... filters) throws RepositoryException, PersistenceException, Exception;
 
 
     /**
@@ -81,7 +81,7 @@ public interface ActionManager {
      * Perform action at some later time using a provided pooled resolver
      * @param action Action to perform
      */
-    void deferredWithResolver(final IConsumer<ResourceResolver> action);
+    void deferredWithResolver(final CheckedConsumer<ResourceResolver> action);
 
     /**
      * Perform action right now using a provided pooled resolver
@@ -96,7 +96,7 @@ public interface ActionManager {
      * @param action Action to perform
      * @throws java.lang.Exception
      */
-    void withResolver(IConsumer<ResourceResolver> action) throws Exception;
+    void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception;
     
     /**
      * After scheduling actions withQueryResults or deferredWithResolver, schedule
@@ -110,13 +110,13 @@ public interface ActionManager {
      * Register a handler to be fired when the work has completed with no errors.
      * @param successTask 
      */
-     void onSuccess(IConsumer<ResourceResolver> successTask);
+     void onSuccess(CheckedConsumer<ResourceResolver> successTask);
 
     /**
      * Register a handler to be fired when the work has completed and there was at least one error.
      * @param failureTask 
      */
-     void onFailure(IBiConsumer<List<Failure>, ResourceResolver> failureTask);
+     void onFailure(CheckedBiConsumer<List<Failure>, ResourceResolver> failureTask);
     
     /**
      * Register a handler to be fired when the work is completed, successfully or not.  
