@@ -23,6 +23,10 @@ import java.util.List;
 import javax.jcr.RepositoryException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
+
+import com.adobe.acs.commons.functions.IBiConsumer;
+import com.adobe.acs.commons.functions.IBiFunction;
+import com.adobe.acs.commons.functions.IConsumer;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -46,20 +50,53 @@ public interface ActionManager {
      * @throws PersistenceException
      * @throws Exception 
      */
+    @Deprecated
     int withQueryResults(final String queryStatement, final String language, final BiConsumer<ResourceResolver, String> callback, final BiFunction<ResourceResolver, String, Boolean>... filters) throws RepositoryException, PersistenceException, Exception;
+
+    /**
+     * Schedule an activity to occur for every node found by a given query.
+     * Optionally, programmatic filters can be used to ignore query results that
+     * are not of interest to the activity.  These filters can usually take on
+     * more complex logic perform faster than having the query engine do the same.
+     * @param queryStatement Query string
+     * @param language Query language to use
+     * @param callback Callback action to perform for every query result
+     * @param filters Optional filters return true if action should be taken
+     * @return Count of items found in query
+     * @throws RepositoryException
+     * @throws PersistenceException
+     * @throws Exception
+     */
+    int withQueryResults(final String queryStatement, final String language, final IBiConsumer<ResourceResolver, String> callback, final IBiFunction<ResourceResolver, String, Boolean>... filters) throws RepositoryException, PersistenceException, Exception;
+
 
     /**
      * Perform action at some later time using a provided pooled resolver
      * @param action Action to perform
      */
+    @Deprecated
     void deferredWithResolver(final Consumer<ResourceResolver> action);
+
+    /**
+     * Perform action at some later time using a provided pooled resolver
+     * @param action Action to perform
+     */
+    void deferredWithResolver(final IConsumer<ResourceResolver> action);
 
     /**
      * Perform action right now using a provided pooled resolver
      * @param action Action to perform
      * @throws java.lang.Exception
      */
+    @Deprecated
     void withResolver(Consumer<ResourceResolver> action) throws Exception;
+
+    /**
+     * Perform action right now using a provided pooled resolver
+     * @param action Action to perform
+     * @throws java.lang.Exception
+     */
+    void withResolver(IConsumer<ResourceResolver> action) throws Exception;
     
     /**
      * After scheduling actions withQueryResults or deferredWithResolver, schedule
@@ -73,20 +110,20 @@ public interface ActionManager {
      * Register a handler to be fired when the work has completed with no errors.
      * @param successTask 
      */
-     default void onSuccess(Consumer<ResourceResolver> successTask) {}
+     void onSuccess(IConsumer<ResourceResolver> successTask);
 
     /**
      * Register a handler to be fired when the work has completed and there was at least one error.
      * @param failureTask 
      */
-     default void onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask) {}
+     void onFailure(IBiConsumer<List<Failure>, ResourceResolver> failureTask);
     
     /**
      * Register a handler to be fired when the work is completed, successfully or not.  
      * Note: These handlers are called after the success/fail handlers.
      * @param finishHandler 
      */
-     default void onFinish(Runnable finishHandler) {}
+     void onFinish(Runnable finishHandler);
 
     /**
      * Have all actions completed?
