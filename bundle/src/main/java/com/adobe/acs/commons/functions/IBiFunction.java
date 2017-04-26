@@ -59,7 +59,6 @@ public interface IBiFunction<T, U, R> {
         if (after == null) {
             throw new NullPointerException();
         }
-        final IBiFunction<T, U, R> thiss = this;
-        return (T t, U u) -> after.apply(thiss.apply(t, u));
+        return (T t, U u) -> after.apply(apply(t, u));
     }
 }

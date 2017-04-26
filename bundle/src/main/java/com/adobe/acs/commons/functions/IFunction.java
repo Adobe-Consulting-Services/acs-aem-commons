@@ -56,8 +56,7 @@ public interface IFunction<T, R> {
         if (before == null) {
             throw new NullPointerException();
         }
-        final IFunction<T,R> thiss = this;
-        return (V t) -> thiss.apply(before.apply(t));
+        return (V t) -> apply(before.apply(t));
     }
 
     /**
@@ -79,8 +78,7 @@ public interface IFunction<T, R> {
         if (after == null) {
             throw new NullPointerException();
         }
-        final IFunction<T,R> thiss = this;
-        return (T t) -> after.apply(thiss.apply(t));
+        return (T t) -> after.apply(apply(t));
     }
 
     /**

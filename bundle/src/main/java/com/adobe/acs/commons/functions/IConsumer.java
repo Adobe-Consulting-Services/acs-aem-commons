@@ -35,9 +35,8 @@ public interface IConsumer<T> {
         if (after == null) {
             throw new NullPointerException();
         }
-        final IConsumer<T> thiss = this;
         return (T t) -> {
-            thiss.accept(t);
+            accept(t);
             after.accept(t);
         };
     }

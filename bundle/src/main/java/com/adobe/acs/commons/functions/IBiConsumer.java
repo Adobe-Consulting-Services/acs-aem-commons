@@ -58,9 +58,8 @@ public interface IBiConsumer<T, U> {
         if (after == null) {
             throw new NullPointerException();
         }
-        final IBiConsumer<T, U> thiss = this;
         return (T t, U u) -> {
-            thiss.accept(t, u);
+            accept(t, u);
             after.accept(t, u);
         };
     }
