@@ -57,9 +57,12 @@ class PageCompareDataImpl implements PageCompareData {
 
     private final List<VersionSelection> versionSelection = new ArrayList<VersionSelection>();
 
-    PageCompareDataImpl(Resource resource, String versionName) throws RepositoryException {
+    private final FilterConfig filterConfig;
+
+    PageCompareDataImpl(Resource resource, String versionName, FilterConfig filterConfig) throws RepositoryException {
         this.resource = resource.isResourceType(NameConstants.NT_PAGE) ? resource.getChild(NameConstants.NN_CONTENT) : resource;
         this.versionName = versionName;
+        this.filterConfig = filterConfig;
 
         initialize();
     }
@@ -126,12 +129,18 @@ class PageCompareDataImpl implements PageCompareData {
         List<String> keys = new ArrayList<String>(map.keySet());
         Collections.sort(keys);
         for (String key : keys) {
+            if (filterConfig.filterProperty(key)) {
+                continue;
+            }
             Property property = resource.adaptTo(Node.class).getProperty(key);
             lines.add(new PageCompareDataLineImpl(property, basePath, depth + 1));
         }
         Iterator<Resource> iter = resource.getChildren().iterator();
         while (iter.hasNext()) {
             Resource child = iter.next();
+            if (filterConfig.filterResource(child.getName())) {
+                continue;
+            }
             lines.add(new PageCompareDataLineImpl(child, basePath, depth + 1));
             populate(child, basePath, depth + 1);
         }

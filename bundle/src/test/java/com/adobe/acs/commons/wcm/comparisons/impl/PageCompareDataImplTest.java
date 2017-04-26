@@ -67,8 +67,10 @@ public class PageCompareDataImplTest {
 
         Resource resource = mockResource(path, versionName, new Date());
 
+        FilterConfig filterConfig = new FilterConfig(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName, filterConfig);
 
         // then
         assertThat(pageCompareData.getVersions(), not(Collections.<VersionSelection>emptyList()));
@@ -79,8 +81,10 @@ public class PageCompareDataImplTest {
         // given
         Resource resource = mockResource("/my/path", "latest", new Date());
 
+        FilterConfig filterConfig = new FilterConfig(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", filterConfig);
 
         // then
         assertThat(pageCompareData.getResource(), is(resource));
@@ -93,8 +97,10 @@ public class PageCompareDataImplTest {
 
         Resource resource = mockResource("/my/path", versionName, new Date());
 
+        FilterConfig filterConfig = new FilterConfig(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName, filterConfig);
 
         // then
         assertThat(pageCompareData.getVersion(), is(versionName));
@@ -106,8 +112,10 @@ public class PageCompareDataImplTest {
         final Date date = new Date();
         Resource resource = mockResource("/my/path", "latest", date);
 
+        FilterConfig filterConfig = new FilterConfig(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", filterConfig);
 
         // then
         assertThat(pageCompareData.getVersionDate(), is(date));
@@ -119,8 +127,10 @@ public class PageCompareDataImplTest {
         final String path = "/my/path";
         Resource resource = mockResource(path, "latest", new Date());
 
+        FilterConfig filterConfig = new FilterConfig(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", filterConfig);
 
         // then
         assertThat(pageCompareData.getPath(), is(path));
@@ -131,8 +141,10 @@ public class PageCompareDataImplTest {
         // given
         Resource resource = mockResource("/my/path", "latest", new Date());
 
+        FilterConfig filterConfig = new FilterConfig(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", filterConfig);
 
         // then
         assertThat(pageCompareData.getVersions(), not(Collections.<VersionSelection>emptyList()));
@@ -151,8 +163,10 @@ public class PageCompareDataImplTest {
         when(resource.adaptTo(Node.class).getProperty("b")).thenReturn(b);
         when(resource.getValueMap().keySet()).thenReturn(valueMapKeys);
 
+        FilterConfig filterConfig = new FilterConfig(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", filterConfig);
 
         // then
         assertThat(pageCompareData.getLines(), not(Collections.<PageCompareDataLine>emptyList()));
@@ -185,8 +199,10 @@ public class PageCompareDataImplTest {
         List<Resource> children = Lists.newArrayList(childC, childD);
         when(resource.getChildren()).thenReturn(children);
 
+        FilterConfig filterConfig = new FilterConfig(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", filterConfig);
 
         // then
         assertThat(pageCompareData.getLines(), not(Collections.<PageCompareDataLine>emptyList()));
