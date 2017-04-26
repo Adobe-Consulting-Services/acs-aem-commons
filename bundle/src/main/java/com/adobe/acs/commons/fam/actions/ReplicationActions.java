@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.fam.util;
+package com.adobe.acs.commons.fam.actions;
 
-import static com.adobe.acs.commons.fam.util.Actions.nameThread;
+import static com.adobe.acs.commons.fam.actions.Actions.nameThread;
+
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.RoundRobin;
@@ -30,8 +32,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Replication utility functions.
- * @author brobert
  */
+@ProviderType
 public class ReplicationActions {
     private ReplicationActions() {
         // Utility class cannot be instantiated directly.

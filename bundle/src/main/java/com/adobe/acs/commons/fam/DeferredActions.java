@@ -16,10 +16,10 @@
 package com.adobe.acs.commons.fam;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.fam.util.Actions;
-import com.adobe.acs.commons.fam.util.AssetActions;
-import com.adobe.acs.commons.fam.util.ReplicationActions;
-import com.adobe.acs.commons.fam.util.Filters;
+import com.adobe.acs.commons.fam.actions.Actions;
+import com.adobe.acs.commons.fam.actions.AssetActions;
+import com.adobe.acs.commons.fam.actions.ReplicationActions;
+import com.adobe.acs.commons.fam.actions.Filters;
 import com.adobe.acs.commons.functions.*;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
@@ -33,7 +33,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Various deferred actions to be used with the ActionManager
- * @deprecated Use the Checked function definitions and the fam.util classes now.  This class is only provided for compatibility.
+ * @deprecated Use the Checked function definitions and the fam.actions classes now.  This class is only provided for compatibility.
  */
 @Component
 @Service(DeferredActions.class)

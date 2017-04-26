@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.fam.util;
+package com.adobe.acs.commons.fam.actions;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -28,6 +29,7 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 /**
  * Various deferred actions to be used with the ActionManager
  */
+@ProviderType
 public final class Actions {
     private Actions() {
     }

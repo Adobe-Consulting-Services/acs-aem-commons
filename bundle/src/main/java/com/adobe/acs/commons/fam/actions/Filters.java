@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.fam.util;
+package com.adobe.acs.commons.fam.actions;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.functions.CheckedBiFunction;
 import com.adobe.acs.commons.functions.CheckedFunction;
 import com.day.cq.dam.commons.util.DamUtil;
@@ -23,8 +24,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Utility filters useful for sifting through search results without over-complicating search queries.
- * @author brobert
  */
+@ProviderType
 public class Filters {
     private Filters() {
         // Utility class cannot be instantiated directly.

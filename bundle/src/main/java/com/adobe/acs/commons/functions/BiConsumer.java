@@ -52,7 +52,7 @@ public abstract class BiConsumer<T, U> implements CheckedBiConsumer<T, U> {
         return new Adapter(andThen((CheckedBiConsumer) after));
     }
     
-    public static class Adapter<T, R> extends BiConsumer<T, R> {
+    private static class Adapter<T, R> extends BiConsumer<T, R> {
 
         final private CheckedBiConsumer<T, R> delegate;
 
