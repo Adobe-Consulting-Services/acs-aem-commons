@@ -29,8 +29,8 @@ import aQute.bnd.annotation.ConsumerType;
  * @see Function
  */
 @ConsumerType
-@Deprecated
-public abstract class BiFunction<T, U, R> implements IBiFunction<T, U, R> {
+@FunctionalInterface
+public interface IBiFunction<T, U, R> {
 
     /**
      * Applies this function to the given arguments.
@@ -38,8 +38,9 @@ public abstract class BiFunction<T, U, R> implements IBiFunction<T, U, R> {
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result
+     * @throws java.lang.Exception
      */
-    public abstract R apply(T t, U u) throws Exception;
+    R apply(T t, U u) throws Exception;
 
     /**
      * Returns a composed function that first applies this function to
@@ -54,34 +55,11 @@ public abstract class BiFunction<T, U, R> implements IBiFunction<T, U, R> {
      * applies the {@code after} function
      * @throws NullPointerException if after is null
      */
-    public <V> BiFunction<T, U, V> andThen(final Function<? super R, ? extends V> after) {
+    default <V> IBiFunction<T, U, V> andThen(final IFunction<? super R, ? extends V> after) {
         if (after == null) {
             throw new NullPointerException();
         }
-        final BiFunction<T, U, R> thiss = this;
-        return new BiFunction<T, U, V>() {
-            @Override
-            public V apply(T t, U u) throws Exception {
-                return after.apply(thiss.apply(t, u));
-            }
-        };
-    }
-
-    public static <X, Y, Z> BiFunction<X, Y, Z> adapt(IBiFunction<X, Y, Z> delegate) {
-        return new Adapter<>(delegate);
-    }
-
-    private static class Adapter<T, U, R> extends BiFunction<T, U, R> {
-
-        private IBiFunction<T, U, R> delegate;
-
-        public Adapter(IBiFunction<T, U, R> delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public R apply(T t, U u) throws Exception {
-            return delegate.apply(t, u);
-        }
+        final IBiFunction<T, U, R> thiss = this;
+        return (T t, U u) -> after.apply(thiss.apply(t, u));
     }
 }

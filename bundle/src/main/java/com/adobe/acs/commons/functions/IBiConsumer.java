@@ -30,16 +30,17 @@ import aQute.bnd.annotation.ConsumerType;
  * @see Consumer
  */
 @ConsumerType
-@Deprecated
-public abstract class BiConsumer<T, U> implements IBiConsumer<T, U> {
+@FunctionalInterface
+public interface IBiConsumer<T, U> {
 
     /**
      * Performs this operation on the given arguments.
      *
      * @param t the first input argument
      * @param u the second input argument
+     * @throws java.lang.Exception
      */
-    abstract public void accept(T t, U u) throws Exception;
+    void accept(T t, U u) throws Exception;
 
     /**
      * Returns a composed {@code BiConsumer} that performs, in sequence, this
@@ -53,35 +54,14 @@ public abstract class BiConsumer<T, U> implements IBiConsumer<T, U> {
      * operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */
-    public BiConsumer<T, U> andThen(final BiConsumer<? super T, ? super U> after) {
+    default IBiConsumer<T, U> andThen(final IBiConsumer<? super T, ? super U> after) {
         if (after == null) {
             throw new NullPointerException();
         }
-        final BiConsumer<T, U> thiss = this;
-        return new BiConsumer<T, U>() {
-            @Override
-            public void accept(T t, U u) throws Exception {
-                thiss.accept(t, u);
-                after.accept(t, u);
-            }
+        final IBiConsumer<T, U> thiss = this;
+        return (T t, U u) -> {
+            thiss.accept(t, u);
+            after.accept(t, u);
         };
-    }
-
-    public static <X, Y> BiConsumer<X, Y> adapt(IBiConsumer<X, Y> delegate) {
-        return new Adapter<>(delegate);
-    }
-
-    public static class Adapter<T, R> extends BiConsumer<T, R> {
-
-        private IBiConsumer<T, R> delegate;
-
-        public Adapter(IBiConsumer<T, R> delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void accept(T t, R r) throws Exception {
-            delegate.accept(t, r);
-        }
     }
 }

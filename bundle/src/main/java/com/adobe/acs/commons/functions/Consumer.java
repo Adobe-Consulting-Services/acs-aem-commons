@@ -26,16 +26,15 @@ import aQute.bnd.annotation.ConsumerType;
  * @param <T> the type of the input to the operation
  */
 @ConsumerType
-@FunctionalInterface
-public interface Consumer<T> {
+@Deprecated
+public abstract class Consumer<T> implements IConsumer<T> {
 
     /**
      * Performs this operation on the given argument.
      *
      * @param t the input argument
-     * @throws java.lang.Exception
      */
-    void accept(T t) throws Exception;
+    abstract public void accept(T t) throws Exception;
 
     /**
      * Returns a composed {@code Consumer} that performs, in sequence, this
@@ -49,14 +48,35 @@ public interface Consumer<T> {
      * operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */
-    default public Consumer<T> andThen(final Consumer<? super T> after) {
+    public Consumer<T> andThen(final Consumer<? super T> after) {
         if (after == null) {
             throw new NullPointerException();
         }
         final Consumer<T> thiss = this;
-        return (T t) -> {
-            thiss.accept(t);
-            after.accept(t);
+        return new Consumer<T>() {
+            @Override
+            public void accept(T t) throws Exception {
+                thiss.accept(t);
+                after.accept(t);
+            }
         };
+    }
+
+    public static <X> Consumer<X> adapt(IConsumer<X> delegate) {
+        return new Adapter<>(delegate);
+    }
+
+    private static class Adapter<T> extends Consumer<T> {
+
+        private IConsumer<T> delegate;
+
+        public Adapter(IConsumer<T> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void accept(T t) throws Exception {
+            delegate.accept(t);
+        }
     }
 }
