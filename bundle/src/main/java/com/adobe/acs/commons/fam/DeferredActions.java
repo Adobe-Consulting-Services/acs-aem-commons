@@ -17,6 +17,8 @@ package com.adobe.acs.commons.fam;
 
 import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.fam.util.Actions;
+import com.adobe.acs.commons.fam.util.AssetActions;
+import com.adobe.acs.commons.fam.util.ReplicationActions;
 import com.adobe.acs.commons.fam.util.Filters;
 import com.adobe.acs.commons.functions.*;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
@@ -131,7 +133,7 @@ public final class DeferredActions {
     public BiConsumer<ResourceResolver, String> withAllRenditions(
             final BiConsumer<ResourceResolver, String> action,
             final BiFunction<ResourceResolver, String, Boolean>... filters) {
-        return BiConsumer.adapt(Actions.withAllRenditions(action, filters));
+        return BiConsumer.adapt(AssetActions.withAllRenditions(action, filters));
     }
 
     /**
@@ -140,7 +142,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> removeAllRenditions() {
-        return BiConsumer.adapt(Actions.REMOVE_ALL_RENDITIONS);
+        return BiConsumer.adapt(AssetActions.REMOVE_ALL_RENDITIONS);
     }
 
     /**
@@ -150,7 +152,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> removeAllRenditionsNamed(final String name) {
-        return BiConsumer.adapt(Actions.removeAllRenditionsNamed(name));
+        return BiConsumer.adapt(AssetActions.removeAllRenditionsNamed(name));
     }
 
     /**
@@ -159,7 +161,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> activateAll() {
-        return BiConsumer.adapt(Actions.activateAll(replicator));
+        return BiConsumer.adapt(ReplicationActions.activateAll(replicator));
     }
 
     /**
@@ -171,7 +173,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> activateAllWithOptions(final ReplicationOptions options) {
-        return BiConsumer.adapt(Actions.activateAllWithOptions(replicator, options));
+        return BiConsumer.adapt(ReplicationActions.activateAllWithOptions(replicator, options));
     }
 
     /**
@@ -183,7 +185,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> activateAllWithRoundRobin(final ReplicationOptions... options) {
-        return BiConsumer.adapt(Actions.activateAllWithRoundRobin(replicator, options));
+        return BiConsumer.adapt(ReplicationActions.activateAllWithRoundRobin(replicator, options));
     }
 
     /**
@@ -192,7 +194,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> deactivateAll() {
-        return BiConsumer.adapt(Actions.deactivateAll(replicator));
+        return BiConsumer.adapt(ReplicationActions.deactivateAll(replicator));
     }
 
     /**
@@ -202,7 +204,7 @@ public final class DeferredActions {
      * @return
      */
     public BiConsumer<ResourceResolver, String> deactivateAllWithOptions(final ReplicationOptions options) {
-        return BiConsumer.adapt(Actions.deactivateAllWithOptions(replicator, options));
+        return BiConsumer.adapt(ReplicationActions.deactivateAllWithOptions(replicator, options));
     }
 
     //-- Single work consumers (for use for single invocation using deferredWithResolver)
@@ -236,7 +238,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> removeRenditions(String path) {
-        return Consumer.adapt(Actions.removeRenditions(path));
+        return Consumer.adapt(AssetActions.removeRenditions(path));
     }
 
     /**
@@ -247,7 +249,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
-        return Consumer.adapt(Actions.removeRenditionsNamed(path, name));
+        return Consumer.adapt(AssetActions.removeRenditionsNamed(path, name));
     }
 
     /**
@@ -257,7 +259,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> activate(String path) {
-        return Consumer.adapt(Actions.activate(replicator, path));
+        return Consumer.adapt(ReplicationActions.activate(replicator, path));
     }
 
     /**
@@ -268,7 +270,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> activateWithOptions(String path, ReplicationOptions options) {
-        return Consumer.adapt(Actions.activateWithOptions(replicator, path, options));
+        return Consumer.adapt(ReplicationActions.activateWithOptions(replicator, path, options));
     }
 
     /**
@@ -278,7 +280,7 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> deactivate(String path) {
-        return Consumer.adapt(Actions.deactivate(replicator, path));
+        return Consumer.adapt(ReplicationActions.deactivate(replicator, path));
     }
 
     /**
@@ -289,6 +291,6 @@ public final class DeferredActions {
      * @return
      */
     final public Consumer<ResourceResolver> deactivateWithOptions(String path, ReplicationOptions options) {
-        return Consumer.adapt(Actions.deactivateWithOptions(replicator, path, options));
+        return Consumer.adapt(ReplicationActions.deactivateWithOptions(replicator, path, options));
     }
 }
