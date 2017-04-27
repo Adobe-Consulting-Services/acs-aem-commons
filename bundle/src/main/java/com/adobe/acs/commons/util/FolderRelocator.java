@@ -18,9 +18,9 @@ package com.adobe.acs.commons.util;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
-import com.adobe.acs.commons.fam.DeferredActions;
 import com.adobe.acs.commons.fam.ControlledProcess;
-import com.adobe.acs.commons.functions.Consumer;
+import com.adobe.acs.commons.fam.actions.Actions;
+import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.util.visitors.TreeFilteringItemVisitor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -199,9 +199,9 @@ public class FolderRelocator extends ControlledProcess {
         return !Resource.RESOURCE_TYPE_NON_EXISTING.equals(res.getResourceType());
     }
 
-    LinkedBlockingQueue<Consumer<ResourceResolver>> currentBatch = new LinkedBlockingQueue<>();
+    LinkedBlockingQueue<CheckedConsumer<ResourceResolver>> currentBatch = new LinkedBlockingQueue<>();
 
-    private void addToBatch(ActionManager actionManager, int retries, long retryDelay, Consumer<ResourceResolver> action) throws InterruptedException {
+    private void addToBatch(ActionManager actionManager, int retries, long retryDelay, CheckedConsumer<ResourceResolver> action) throws InterruptedException {
         currentBatch.put(action);
         if (currentBatch.size() >= batchSize) {
             commitBatch(actionManager, retries, retryDelay);
@@ -209,13 +209,13 @@ public class FolderRelocator extends ControlledProcess {
     }
 
     private void commitBatch(ActionManager actionManager, int retries, long retryDelay) {
-        final List<Consumer<ResourceResolver>> consumers = new ArrayList<>();
+        final List<CheckedConsumer<ResourceResolver>> consumers = new ArrayList<>();
         int count = currentBatch.drainTo(consumers);
         if (count > 0) {
             actionManager.deferredWithResolver(
-                    DeferredActions.retry(retries, retryDelay, (ResourceResolver rr) -> {
+                    Actions.retry(retries, retryDelay, (ResourceResolver rr) -> {
                         Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Executing {0} actions", count);
-                        for (Consumer<ResourceResolver> consumer : consumers) {
+                        for (CheckedConsumer<ResourceResolver> consumer : consumers) {
                             consumer.accept(rr);
                         }
                         Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commiting {0} actions", count);
@@ -255,7 +255,7 @@ public class FolderRelocator extends ControlledProcess {
         folderVisitor.setBreadthFirst(true);
         folderVisitor.onEnterNode((node, level) -> {
             String path = node.getPath();
-            step2.deferredWithResolver(DeferredActions.retry(5, 100, rr -> buildDestinationFolder(rr, path)));
+            step2.deferredWithResolver(Actions.retry(5, 100, rr -> buildDestinationFolder(rr, path)));
         });
         sourceToDestination.keySet().forEach(sourcePath -> beginStep(step2, sourcePath, folderVisitor));
     }
@@ -279,7 +279,7 @@ public class FolderRelocator extends ControlledProcess {
         Resource source = rr.getResource(sourceFolder);
         String targetPath = convertSourceToDestination(sourceFolder);
         if (!resourceExists(rr, targetPath)) {
-            ActionManager.setCurrentItem(sourceFolder + "->" + targetPath);
+            Actions.setCurrentItem(sourceFolder + "->" + targetPath);
             String targetParentPath = targetPath.substring(0, targetPath.lastIndexOf('/'));
             String targetName = targetPath.substring(targetPath.lastIndexOf('/') + 1);
             Resource destParent = rr.getResource(targetParentPath);
@@ -319,7 +319,7 @@ public class FolderRelocator extends ControlledProcess {
 
     private void moveItem(ResourceResolver rr, String path) throws RepositoryException {
         Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Moving {0}", path);
-        ActionManager.setCurrentItem(path);
+        Actions.setCurrentItem(path);
         Session session = rr.adaptTo(Session.class);
         // Inhibits some workflows
         session.getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");

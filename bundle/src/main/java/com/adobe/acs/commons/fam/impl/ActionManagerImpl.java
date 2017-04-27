@@ -18,6 +18,7 @@ package com.adobe.acs.commons.fam.impl;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,7 +77,7 @@ class ActionManagerImpl implements ActionManager {
     private final List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
     private final List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
     private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
-
+    private final ThreadLocal<String> currentPath;
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;
@@ -140,8 +141,9 @@ class ActionManagerImpl implements ActionManager {
 
     @Override
     public void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception {
+        Actions.setCurrentActionManager(this);
         ReusableResolver resolver = getResourceResolver();
-        resolver.setCurrentItem(ActionManager.getCurrentItem());
+        resolver.setCurrentItem(currentPath.get());
         try {
             action.accept(resolver.getResolver());
         } catch (Exception ex) {
@@ -153,6 +155,7 @@ class ActionManagerImpl implements ActionManager {
                 logPersistenceException(resolver.getPendingItems(), ex);
                 throw ex;
             }
+            Actions.setCurrentActionManager(null);
         }
     }
 
@@ -313,7 +316,7 @@ class ActionManagerImpl implements ActionManager {
     private void logError(Exception ex) {
         LOG.error("Caught exception in task: "+ex.getMessage(), ex);
         Failure fail = new Failure();
-        fail.setNodePath(ActionManager.getCurrentItem());
+        fail.setNodePath(currentPath.get());
         fail.setException(ex);
         failures.add(fail);
         tasksCompleted.incrementAndGet();

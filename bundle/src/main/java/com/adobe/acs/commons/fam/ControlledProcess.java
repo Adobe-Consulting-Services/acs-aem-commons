@@ -15,7 +15,7 @@
  */
 package com.adobe.acs.commons.fam;
 
-import com.adobe.acs.commons.functions.Consumer;
+import com.adobe.acs.commons.functions.CheckedConsumer;
 import java.util.ArrayList;
 import java.util.List;
 import javax.jcr.RepositoryException;
@@ -35,7 +35,7 @@ public abstract class ControlledProcess {
     private static class ActivityDefinition {
         String name;
         ActionManager manager;
-        Consumer<ActionManager> builder;
+        CheckedConsumer<ActionManager> builder;
         boolean critical = false;
     }
 
@@ -55,15 +55,15 @@ public abstract class ControlledProcess {
 
     public abstract void buildProcess(ResourceResolver rr) throws LoginException, RepositoryException;
 
-    final public ActionManager defineCriticalAction(String name, ResourceResolver rr, Consumer<ActionManager> builder) throws LoginException {
+    final public ActionManager defineCriticalAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
         return defineAction(name, rr, builder, true);
     }
 
-    final public ActionManager defineAction(String name, ResourceResolver rr, Consumer<ActionManager> builder) throws LoginException {
+    final public ActionManager defineAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
         return defineAction(name, rr, builder, false);
     }
 
-    private ActionManager defineAction(String name, ResourceResolver rr, Consumer<ActionManager> builder, boolean isCritical) throws LoginException {
+    private ActionManager defineAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder, boolean isCritical) throws LoginException {
         ActivityDefinition definition = new ActivityDefinition();
         definition.builder = builder;
         definition.name = name;

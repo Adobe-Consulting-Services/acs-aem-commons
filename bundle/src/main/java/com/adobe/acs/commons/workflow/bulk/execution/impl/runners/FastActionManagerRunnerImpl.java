@@ -24,6 +24,7 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.DeferredActions;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
 import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
@@ -242,11 +243,11 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
                 resources.stream().map((resource) -> resource.getPath()).forEach((path) -> {
                     manager.deferredWithResolver((ResourceResolver r) -> {
                         try {
-                            ActionManager.setCurrentItem(path);
+                            manager.setCurrentItem(path);
 
                             if (retryCount > 0) {
                                 try {
-                                    DeferredActions.retryAll(retryCount, retryPause, actions.startSyntheticWorkflows(model)).accept(r, path);
+                                    Actions.retryAll(retryCount, retryPause, Actions.startSyntheticWorkflows(model, syntheticWorkflowRunner)).accept(r, path);
                                     success.incrementAndGet();
                                 } catch (Exception e) {
                                     log.warn("Could not process [ {} ] with [ " + retryCount + " ] retries", path, e);
@@ -255,7 +256,7 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
                                 }
                             } else {
                                 try {
-                                    actions.startSyntheticWorkflows(model).accept(r, path);
+                                    Actions.startSyntheticWorkflows(model, syntheticWorkflowRunner).accept(r, path);
                                     success.incrementAndGet();
                                 } catch (Exception e) {
                                     log.warn("Could not process [ {} ]", path, e);

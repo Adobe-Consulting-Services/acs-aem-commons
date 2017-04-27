@@ -16,6 +16,7 @@
 package com.adobe.acs.commons.fam.actions;
 
 import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -35,6 +36,32 @@ public final class Actions {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(Actions.class);
+
+    private static ThreadLocal<ActionManager> currentActionManager = new ThreadLocal<>();
+    /**
+     * Obtain the current action manager -- this is necessary for additional tracking such as current item
+     * @return current action manager
+     */
+    public static ActionManager getCurrentActionManager() {
+        return currentActionManager.get();
+    }
+
+    public static void setCurrentActionManager(ActionManager a) {
+        if (a == null) {
+            currentActionManager.remove();
+        } else {
+            currentActionManager.set(a);
+        }
+    }
+    
+    public static void setCurrentItem(String item) {
+        ActionManager manager = getCurrentActionManager();
+        if (manager != null) {
+            manager.setCurrentItem(item);
+        } else {
+            LOG.error("Could not identify current action manager.", new IllegalStateException());
+        }
+    }
 
     //-- Query Result consumers (for using withQueryResults)
     /**

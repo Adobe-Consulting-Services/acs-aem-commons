@@ -15,7 +15,7 @@
  */
 package com.adobe.acs.commons.util.visitors;
 
-import com.adobe.acs.commons.functions.BiConsumer;
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
@@ -23,10 +23,10 @@ import org.apache.jackrabbit.commons.predicate.Predicate;
 import org.apache.jackrabbit.commons.visitor.FilteringItemVisitor;
 
 public class SimpleFilteringItemVisitor extends FilteringItemVisitor {
-    BiConsumer<Property, Integer> enterPropertyHandler = null;
-    BiConsumer<Property, Integer> leavePropertyHandler = null;
-    BiConsumer<Node, Integer> enterNodeHandler = null;
-    BiConsumer<Node, Integer> leaveNodeHandler = null;
+    CheckedBiConsumer<Property, Integer> enterPropertyHandler = null;
+    CheckedBiConsumer<Property, Integer> leavePropertyHandler = null;
+    CheckedBiConsumer<Node, Integer> enterNodeHandler = null;
+    CheckedBiConsumer<Node, Integer> leaveNodeHandler = null;
     Predicate nodePredicate = Predicate.TRUE;
     Predicate propertyPredicate = Predicate.FALSE;
 
@@ -52,19 +52,19 @@ public class SimpleFilteringItemVisitor extends FilteringItemVisitor {
         propertyPredicate = filter;
     }
     
-    public void onEnterProperty(BiConsumer<Property, Integer> handler) {
+    public void onEnterProperty(CheckedBiConsumer<Property, Integer> handler) {
         enterPropertyHandler = handler;
     }
 
-    public void onLeaveProperty(BiConsumer<Property, Integer> handler) {
+    public void onLeaveProperty(CheckedBiConsumer<Property, Integer> handler) {
         leavePropertyHandler = handler;
     }
     
-    public void onEnterNode(BiConsumer<Node, Integer> handler) {
+    public void onEnterNode(CheckedBiConsumer<Node, Integer> handler) {
         enterNodeHandler = handler;
     }
         
-    public void onLeaveNode(BiConsumer<Node, Integer> handler) {
+    public void onLeaveNode(CheckedBiConsumer<Node, Integer> handler) {
         leaveNodeHandler = handler;
     }
 

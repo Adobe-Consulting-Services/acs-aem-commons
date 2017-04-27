@@ -15,8 +15,7 @@
  */
 package com.adobe.acs.commons.util.visitors;
 
-import com.adobe.acs.commons.functions.BiConsumer;
-import com.adobe.acs.commons.util.visitors.SimpleFilteringItemVisitor;
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import com.day.cq.commons.jcr.JcrConstants;
 import java.util.LinkedList;
 import java.util.logging.Level;
@@ -83,9 +82,9 @@ public class TreeFilteringItemVisitor extends SimpleFilteringItemVisitor {
         return false;
     }
 
-    BiConsumer<Node, Integer> childVisitorHandler = null;
+    CheckedBiConsumer<Node, Integer> childVisitorHandler = null;
 
-    public void onVisitChild(BiConsumer<Node, Integer> handler) {
+    public void onVisitChild(CheckedBiConsumer<Node, Integer> handler) {
         childVisitorHandler = handler;
     }
 

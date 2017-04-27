@@ -18,7 +18,7 @@ package com.adobe.acs.commons.util;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.ControlledProcess;
-import com.adobe.acs.commons.fam.DeferredActions;
+import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.util.visitors.TreeFilteringItemVisitor;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +70,7 @@ public class JobQueueCleaner extends ControlledProcess {
         visitor.onLeaveNode((node, level) -> {
             if (level >= MIN_PURGE_FOLDER_LEVEL) {
                 String path = node.getPath();
-                manager.deferredWithResolver(DeferredActions.retry(10, 100, rr -> deleteResource(rr, path)));
+                manager.deferredWithResolver(Actions.retry(10, 100, rr -> deleteResource(rr, path)));
             }
         });
         visitor.onVisitChild((node, level) -> {
@@ -87,7 +87,7 @@ public class JobQueueCleaner extends ControlledProcess {
     }
 
     private void deleteResource(ResourceResolver rr, String path) throws PersistenceException {
-        ActionManager.setCurrentItem(path);
+        Actions.setCurrentItem(path);
         Resource r = rr.resolve(path);
         if (!r.isResourceType(Resource.RESOURCE_TYPE_NON_EXISTING)) {
             rr.delete(r);
