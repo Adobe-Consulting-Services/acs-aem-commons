@@ -10,8 +10,8 @@
          id="${versionEntry.uniqueName}-${evoCounter}">
         <div class="inner-version-entry depth-${versionEntry.depth} color-${line.state}">
             <span class="key"><c:out value="${versionEntry.name}"/>:</span>
-            <span class="value" data-target="#popover-${versionEntry.uniqueName}-${evoCounter}" data-toggle="popover" data-point-from="bottom" data-align-from="top"><c:out value="${versionEntry.valueStringShort}"/></span>
-            <div id="popover-${versionEntry.uniqueName}-${evoCounter}" class="coral-Popover">
+            <span class="value" data-target="#popover-${side}-${forStatus.index}" data-toggle="popover" data-point-from="bottom" data-align-from="top"><c:out value="${versionEntry.valueStringShort}"/></span>
+            <div id="popover-${side}-${forStatus.index}" class="coral-Popover">
                 <div class="coral-Popover-content u-coral-padding">
                     <c:out value="${versionEntry.valueString}"/>
                 </div>

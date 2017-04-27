@@ -58,8 +58,6 @@
                                             </c:forEach>
                                         </select>
                                     </c:if>
-
-
                                 </div>
                             </div>
                             <div class="half">
@@ -99,6 +97,7 @@
                                                     <table>
                                                         <c:forEach var="line" items="${model.data}" varStatus="forStatus">
                                                             <c:set var="versionEntry" value="${line.left}" />
+                                                            <c:set var="side" value="left" />
                                                             <c:if test="${!empty versionEntry}">
                                                                 <%@include file="one.jsp" %>
                                                             </c:if>
@@ -134,6 +133,7 @@
                                                     <table>
                                                         <c:forEach var="line" items="${model.data}" varStatus="forStatus">
                                                             <c:set var="versionEntry" value="${line.right}" />
+                                                            <c:set var="side" value="right" />
                                                             <c:if test="${!empty versionEntry}">
                                                                 <%@include file="one.jsp" %>
                                                             </c:if>
