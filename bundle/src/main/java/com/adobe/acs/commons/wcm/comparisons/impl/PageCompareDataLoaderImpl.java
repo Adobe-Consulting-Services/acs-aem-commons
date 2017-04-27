@@ -52,18 +52,18 @@ public class PageCompareDataLoaderImpl implements PageCompareDataLoader {
     static final String PROPERTY_IGNORES = "properties.ignore";
     static final String RESOURCE_IGNORES = "resources.ignore";
 
-    private FilterConfig filterConfig;
+    private CompareFilter compareFilter;
 
     @Override
     public PageCompareData load(Resource resource, String versionName) throws RepositoryException {
-        return new PageCompareDataImpl(resource, versionName, filterConfig);
+        return new PageCompareDataImpl(resource, versionName, compareFilter);
     }
 
     @Activate
     protected void activate(final Map<String, String> config) {
         String[] propertyIgnores = PropertiesUtil.toStringArray(config.get(PROPERTY_IGNORES), new String[] { "" });
         String[] resourceIgnores = PropertiesUtil.toStringArray(config.get(RESOURCE_IGNORES), new String[] { "" });
-        this.filterConfig = new FilterConfig(propertyIgnores, resourceIgnores);
+        this.compareFilter = new CompareFilter(propertyIgnores, resourceIgnores);
         log.debug("Ignored properties: {}", propertyIgnores);
         log.debug("Ignored resources: {}", resourceIgnores);
     }

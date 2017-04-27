@@ -57,12 +57,12 @@ class PageCompareDataImpl implements PageCompareData {
 
     private final List<VersionSelection> versionSelection = new ArrayList<VersionSelection>();
 
-    private final FilterConfig filterConfig;
+    private final CompareFilter compareFilter;
 
-    PageCompareDataImpl(Resource resource, String versionName, FilterConfig filterConfig) throws RepositoryException {
+    PageCompareDataImpl(Resource resource, String versionName, CompareFilter compareFilter) throws RepositoryException {
         this.resource = resource.isResourceType(NameConstants.NT_PAGE) ? resource.getChild(NameConstants.NN_CONTENT) : resource;
         this.versionName = versionName;
-        this.filterConfig = filterConfig;
+        this.compareFilter = compareFilter;
 
         initialize();
     }
@@ -71,24 +71,26 @@ class PageCompareDataImpl implements PageCompareData {
         if (versionName.equals("latest")) {
             populate(resource, resource.getPath(), 0);
             versionDate = Properties.lastModified(resource);
-        }
 
-        VersionManager versionManager = resource.getResourceResolver().adaptTo(Session.class).getWorkspace().getVersionManager();
-        try {
-            VersionHistory history = versionManager.getVersionHistory(this.resource.getPath());
-            VersionIterator versionIterator = history.getAllVersions();
-            while (versionIterator.hasNext()) {
-                Version next = versionIterator.nextVersion();
-                versionSelection.add(new VersionSelectionImpl(next.getName(), next.getCreated().getTime()));
-                if (next.getName().equalsIgnoreCase(versionName)) {
-                    String versionPath = next.getFrozenNode().getPath();
-                    Resource versionResource = resource.getResourceResolver().resolve(versionPath);
-                    populate(versionResource, versionPath, 0);
-                    versionDate = next.getCreated().getTime();
+        } else {
+            VersionManager versionManager = resource.getResourceResolver().adaptTo(Session.class).getWorkspace().getVersionManager();
+            try {
+                VersionHistory history = versionManager.getVersionHistory(this.resource.getPath());
+                VersionIterator versionIterator = history.getAllVersions();
+                while (versionIterator.hasNext()) {
+                    Version next = versionIterator.nextVersion();
+                    versionSelection.add(new VersionSelectionImpl(next.getName(), next.getCreated().getTime()));
+                    if (next.getName().equalsIgnoreCase(versionName)) {
+                        String versionPath = next.getFrozenNode().getPath();
+                        Resource versionResource = resource.getResourceResolver().resolve(versionPath);
+                        populate(versionResource, versionPath, 0);
+                        versionDate = next.getCreated().getTime();
+                    }
                 }
+            } catch (javax.jcr.UnsupportedRepositoryOperationException e) {
+                log.debug(String.format("node %s not versionable", this.resource.getPath()));
             }
-        } catch (javax.jcr.UnsupportedRepositoryOperationException e) {
-            log.debug(String.format("node %s not versionable", this.resource.getPath()));
+
         }
         versionSelection.add(new VersionSelectionImpl("latest", Properties.lastModified(resource)));
     }
@@ -129,7 +131,7 @@ class PageCompareDataImpl implements PageCompareData {
         List<String> keys = new ArrayList<String>(map.keySet());
         Collections.sort(keys);
         for (String key : keys) {
-            if (filterConfig.filterProperty(key)) {
+            if (compareFilter.filterProperty(key)) {
                 continue;
             }
             Property property = resource.adaptTo(Node.class).getProperty(key);
@@ -138,7 +140,7 @@ class PageCompareDataImpl implements PageCompareData {
         Iterator<Resource> iter = resource.getChildren().iterator();
         while (iter.hasNext()) {
             Resource child = iter.next();
-            if (filterConfig.filterResource(child.getName())) {
+            if (compareFilter.filterResource(child.getName())) {
                 continue;
             }
             lines.add(new PageCompareDataLineImpl(child, basePath, depth + 1));
