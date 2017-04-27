@@ -25,8 +25,18 @@ import aQute.bnd.annotation.ConsumerType;
  * @param <R> the type of the result of the function
  */
 @ConsumerType
-@Deprecated
-public abstract class Function<T, R> implements CheckedFunction<T, R> {
+@FunctionalInterface
+public interface CheckedFunction<T, R> {
+
+    /**
+     * Applies this function to the given argument.
+     *
+     * @param t the function argument
+     * @return the function result
+     * @throws java.lang.Exception
+     */
+    public R apply(T t) throws Exception;
+
     /**
      * Returns a composed function that first applies the {@code before}
      * function to its input, and then applies this function to the result.
@@ -40,10 +50,13 @@ public abstract class Function<T, R> implements CheckedFunction<T, R> {
      * function and then applies this function
      * @throws NullPointerException if before is null
      *
-     * @see #andThen(Function)
+     * @see #andThen(IFunction)
      */
-    public <V> Function<V, R> compose(final Function<? super V, ? extends T> before) {
-        return adapt(compose((CheckedFunction) before));
+    default <V> CheckedFunction<V, R> compose(final CheckedFunction<? super V, ? extends T> before) {
+        if (before == null) {
+            throw new NullPointerException();
+        }
+        return (V t) -> apply(before.apply(t));
     }
 
     /**
@@ -59,10 +72,13 @@ public abstract class Function<T, R> implements CheckedFunction<T, R> {
      * applies the {@code after} function
      * @throws NullPointerException if after is null
      *
-     * @see #compose(Function)
+     * @see #compose(IFunction)
      */
-    public <V> Function<T, V> andThen(final Function<? super R, ? extends V> after) {
-        return adapt(compose((CheckedFunction) after));
+    default <V> CheckedFunction<T, V> andThen(final CheckedFunction<? super R, ? extends V> after) {
+        if (after == null) {
+            throw new NullPointerException();
+        }
+        return (T t) -> after.apply(apply(t));
     }
 
     /**
@@ -71,25 +87,7 @@ public abstract class Function<T, R> implements CheckedFunction<T, R> {
      * @param <T> the type of the input and output objects to the function
      * @return a function that always returns its input argument
      */
-    public static <T> Function<T, T> identity() {
-        return adapt(CheckedFunction.identity());
-    }
-
-    public static <X, Y> Function<X, Y> adapt(CheckedFunction<X, Y> delegate) {
-        return new Adapter<>(delegate);
-    }
-
-    private static class Adapter<T, R> extends Function<T, R> {
-
-        final private CheckedFunction<T, R> delegate;
-
-        public Adapter(CheckedFunction<T, R> delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public R apply(T t) throws Exception {
-            return delegate.apply(t);
-        }
+    public static <T> CheckedFunction<T, T> identity() {
+        return (T t) -> t;
     }
 }

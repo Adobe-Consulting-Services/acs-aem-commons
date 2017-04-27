@@ -19,46 +19,48 @@ import aQute.bnd.annotation.ConsumerType;
 
 /**
  * Created work-alike for functionality not introduced until Java 8
- * Represents an operation that accepts a single input argument and returns no
- * result. Unlike most other functional interfaces, {@code Consumer} is expected
+ * Represents an operation that accepts two input arguments and returns no
+ * result.  This is the two-arity specialization of {@link Consumer}.
+ * Unlike most other functional interfaces, {@code BiConsumer} is expected
  * to operate via side-effects.
  *
- * @param <T> the type of the input to the operation
+ * @param <T> the type of the first argument to the operation
+ * @param <U> the type of the second argument to the operation
+ *
+ * @see Consumer
  */
 @ConsumerType
-@Deprecated
-public abstract class Consumer<T> implements CheckedConsumer<T> {
+@FunctionalInterface
+public interface CheckedBiConsumer<T, U> {
+
     /**
-     * Returns a composed {@code Consumer} that performs, in sequence, this
+     * Performs this operation on the given arguments.
+     *
+     * @param t the first input argument
+     * @param u the second input argument
+     * @throws java.lang.Exception
+     */
+    void accept(T t, U u) throws Exception;
+
+    /**
+     * Returns a composed {@code BiConsumer} that performs, in sequence, this
      * operation followed by the {@code after} operation. If performing either
      * operation throws an exception, it is relayed to the caller of the
      * composed operation.  If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
      * @param after the operation to perform after this operation
-     * @return a composed {@code Consumer} that performs in sequence this
+     * @return a composed {@code BiConsumer} that performs in sequence this
      * operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */
-    public Consumer<T> andThen(final Consumer<? super T> after) {
-        return adapt(andThen((CheckedConsumer) after));
-    }
-
-    public static <X> Consumer<X> adapt(CheckedConsumer<X> delegate) {
-        return new Adapter<>(delegate);
-    }
-
-    private static class Adapter<T> extends Consumer<T> {
-
-        final private CheckedConsumer<T> delegate;
-
-        public Adapter(CheckedConsumer<T> delegate) {
-            this.delegate = delegate;
+    default CheckedBiConsumer<T, U> andThen(final CheckedBiConsumer<? super T, ? super U> after) {
+        if (after == null) {
+            throw new NullPointerException();
         }
-
-        @Override
-        public void accept(T t) throws Exception {
-            delegate.accept(t);
-        }
+        return (T t, U u) -> {
+            accept(t, u);
+            after.accept(t, u);
+        };
     }
 }

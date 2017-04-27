@@ -23,8 +23,12 @@ import java.util.List;
 import javax.jcr.RepositoryException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
+
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
+import com.adobe.acs.commons.functions.CheckedBiFunction;
+import com.adobe.acs.commons.functions.CheckedConsumer;
 
 /**
  *
@@ -46,42 +50,80 @@ public interface ActionManager {
      * @throws PersistenceException
      * @throws Exception 
      */
+    @Deprecated
     int withQueryResults(final String queryStatement, final String language, final BiConsumer<ResourceResolver, String> callback, final BiFunction<ResourceResolver, String, Boolean>... filters) throws RepositoryException, PersistenceException, Exception;
+
+    /**
+     * Schedule an activity to occur for every node found by a given query.
+     * Optionally, programmatic filters can be used to ignore query results that
+     * are not of interest to the activity.  These filters can usually take on
+     * more complex logic perform faster than having the query engine do the same.
+     * @param queryStatement Query string
+     * @param language Query language to use
+     * @param callback Callback action to perform for every query result
+     * @param filters Optional filters return true if action should be taken
+     * @return Count of items found in query
+     * @throws RepositoryException
+     * @throws PersistenceException
+     * @throws Exception
+     */
+    int withQueryResults(final String queryStatement, final String language, final CheckedBiConsumer<ResourceResolver, String> callback, final CheckedBiFunction<ResourceResolver, String, Boolean>... filters) throws RepositoryException, PersistenceException, Exception;
+
 
     /**
      * Perform action at some later time using a provided pooled resolver
      * @param action Action to perform
      */
+    @Deprecated
     void deferredWithResolver(final Consumer<ResourceResolver> action);
+
+    /**
+     * Perform action at some later time using a provided pooled resolver
+     * @param action Action to perform
+     */
+    void deferredWithResolver(final CheckedConsumer<ResourceResolver> action);
 
     /**
      * Perform action right now using a provided pooled resolver
      * @param action Action to perform
      * @throws java.lang.Exception
      */
+    @Deprecated
     void withResolver(Consumer<ResourceResolver> action) throws Exception;
+
+    /**
+     * Perform action right now using a provided pooled resolver
+     * @param action Action to perform
+     * @throws java.lang.Exception
+     */
+    void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception;
+    
+    /**
+     * After scheduling actions withQueryResults or deferredWithResolver, schedule
+     * a cleanup task to close all remaining resource resolvers.
+     * NOTE: This is automatic now -- only included for backwards compatibility.
+     * @deprecated No need to use this, cleanup is automatic.
+     */
+     void addCleanupTask();
     
     /**
      * Register a handler to be fired when the work has completed with no errors.
      * @param successTask 
-     * @return the current action manager
      */
-    ActionManager onSuccess(Consumer<ResourceResolver> successTask);
+     void onSuccess(CheckedConsumer<ResourceResolver> successTask);
 
     /**
      * Register a handler to be fired when the work has completed and there was at least one error.
      * @param failureTask 
-     * @return the current action manager
      */
-    ActionManager onFailure(BiConsumer<List<Failure>, ResourceResolver> failureTask);
+     void onFailure(CheckedBiConsumer<List<Failure>, ResourceResolver> failureTask);
     
     /**
      * Register a handler to be fired when the work is completed, successfully or not.  
      * Note: These handlers are called after the success/fail handlers.
      * @param finishHandler 
-     * @return the current action manager
      */
-    ActionManager onFinish(Runnable finishHandler);
+     void onFinish(Runnable finishHandler);
 
     /**
      * Have all actions completed?
@@ -115,19 +157,12 @@ public interface ActionManager {
      */
     CompositeData getStatistics() throws OpenDataException;
 
-    static final ThreadLocal<String> currentItem = new ThreadLocal<>();
     /**
      * Note the name or path of the item currently being processed
      * This is particularly useful for error reporting
      * @param item Item name or path being processed currently
      */
-    static void setCurrentItem(String item) {
-        currentItem.set(item);
-    }
-
-    static String getCurrentItem() {
-        return currentItem.get();
-    }
+    void setCurrentItem(String item);
     
     /**
      * @return The name set on this action manager at the time of its creation
