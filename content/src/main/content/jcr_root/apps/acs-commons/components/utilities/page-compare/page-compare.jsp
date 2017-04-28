@@ -38,29 +38,27 @@
 
                         <h1 acs-coral-heading>Page Compare</h1>
 
-
                         <div class="legende">
                             <div class="definition" data-legend="EQUAL">
                                 <div class="color"></div>
-                                <div class="text">Identisch</div>
+                                <div class="text">Equals</div>
                             </div>
                             <div class="definition" data-legend="NOT_EQUAL">
                                 <div class="color color-NOT_EQUAL"></div>
-                                <div class="text">Geändert</div>
+                                <div class="text">Changed</div>
                             </div>
                             <div class="definition" data-legend="ONLY_LEFT">
                                 <div class="color color-ONLY_LEFT"></div>
                                 <div class="color empty second"></div>
-                                <div class="text">Nur links</div>
+                                <div class="text">Only left</div>
                             </div>
                             <div class="definition" data-legend="ONLY_RIGHT">
                                 <div class="color empty"></div>
                                 <div class="color color-ONLY_RIGHT second"></div>
-                                <div class="text">Nur rechts</div>
+                                <div class="text">Only right</div>
                             </div>
                             <div class="clearer"></div>
                         </div>
-
 
                         <div class="search">
 

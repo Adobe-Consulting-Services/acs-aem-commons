@@ -1,6 +1,6 @@
 
 pageCompareApp
-.directive('detailsOpener', function() {
+.directive('detailsOpener', function($timeout) {
     return {
         restrict: 'AE',
         replace: 'true',
@@ -9,12 +9,19 @@ pageCompareApp
             var id = $(element).attr('id');
             var right = $('#' + id.replace('left', 'right') + '-detail');
             var left = $('#' + id.replace('right', 'left') + '-detail');
-            var height = right.height() > left.height() ? right.height() : left.height();
             left.hide();
             right.hide();
-            left.height(height);
-            right.height(height);
+            var height = -1;
             $(element).click(function() {
+                if (height < 0) {
+                    left.show();
+                    right.show();
+                    height = right.height() > left.height() ? right.height() : left.height();
+                    left.hide();
+                    right.hide();
+                    left.height(height);
+                    right.height(height);
+                }
                 if (left.is(":visible") === true) {
                     left.slideUp();
                     right.slideUp();
