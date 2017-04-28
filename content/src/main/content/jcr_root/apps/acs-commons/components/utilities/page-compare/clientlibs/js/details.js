@@ -10,7 +10,7 @@ pageCompareApp
                 var id = $(element).attr('id');
                 var right = $('#' + id.replace('left', 'right') + '-detail');
                 var left = $('#' + id.replace('right', 'left') + '-detail');
-                if (left.is(":visible") == true) {
+                if (left.is(":visible") === true) {
                     left.slideUp();
                     right.slideUp();
                 } else {
@@ -20,9 +20,7 @@ pageCompareApp
                     left.slideDown();
                     right.slideDown();
                 }
-
-            })
-
+            });
         }
     };
 
@@ -35,8 +33,7 @@ pageCompareApp
         compile: function(element, attrs) {
             $(element).click(function(e) {
                 e.stopPropagation();
-            })
-
+            });
         }
     };
 

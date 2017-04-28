@@ -15,9 +15,7 @@ pageCompareApp
                     $(element).fadeTo(200 , 1);
                     $('.elem-' + type).fadeIn();
                 }
-            })
-
+            });
         }
     };
-
 });

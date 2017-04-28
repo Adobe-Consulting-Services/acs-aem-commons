@@ -154,7 +154,7 @@ public class PageCompareDataImplTest {
     @Test
     public void getLines() throws Exception {
         // given
-        Resource resource = mockResource("/my/path", "latest", new Date());
+        Resource resource = mockResource("/my/path", "1.0", new Date());
 
         Set<String> valueMapKeys = Sets.newHashSet("a", "b");
         when(resource.getValueMap().keySet()).thenReturn(valueMapKeys);

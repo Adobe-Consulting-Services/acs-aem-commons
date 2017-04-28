@@ -72,26 +72,27 @@ class PageCompareDataImpl implements PageCompareData {
             populate(resource, resource.getPath(), 0);
             versionDate = Properties.lastModified(resource);
 
-        } else {
-            VersionManager versionManager = resource.getResourceResolver().adaptTo(Session.class).getWorkspace().getVersionManager();
-            try {
-                VersionHistory history = versionManager.getVersionHistory(this.resource.getPath());
-                VersionIterator versionIterator = history.getAllVersions();
-                while (versionIterator.hasNext()) {
-                    Version next = versionIterator.nextVersion();
-                    versionSelection.add(new VersionSelectionImpl(next.getName(), next.getCreated().getTime()));
-                    if (next.getName().equalsIgnoreCase(versionName)) {
-                        String versionPath = next.getFrozenNode().getPath();
-                        Resource versionResource = resource.getResourceResolver().resolve(versionPath);
-                        populate(versionResource, versionPath, 0);
-                        versionDate = next.getCreated().getTime();
-                    }
-                }
-            } catch (javax.jcr.UnsupportedRepositoryOperationException e) {
-                log.debug(String.format("node %s not versionable", this.resource.getPath()));
-            }
-
         }
+
+        VersionManager versionManager = resource.getResourceResolver().adaptTo(Session.class).getWorkspace().getVersionManager();
+        try {
+            VersionHistory history = versionManager.getVersionHistory(this.resource.getPath());
+            VersionIterator versionIterator = history.getAllVersions();
+            while (versionIterator.hasNext()) {
+                Version next = versionIterator.nextVersion();
+                versionSelection.add(new VersionSelectionImpl(next.getName(), next.getCreated().getTime()));
+                if (versionName.equalsIgnoreCase(next.getName())) {
+                    String versionPath = next.getFrozenNode().getPath();
+                    Resource versionResource = resource.getResourceResolver().resolve(versionPath);
+                    populate(versionResource, versionPath, 0);
+                    versionDate = next.getCreated().getTime();
+                }
+            }
+        } catch (javax.jcr.UnsupportedRepositoryOperationException e) {
+            log.debug(String.format("node %s not versionable", this.resource.getPath()));
+        }
+
+
         versionSelection.add(new VersionSelectionImpl("latest", Properties.lastModified(resource)));
     }
 

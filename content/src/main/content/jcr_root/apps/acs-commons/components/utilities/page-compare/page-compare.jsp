@@ -126,7 +126,11 @@
                                                                 <%@include file="one.jsp" %>
                                                             </c:if>
                                                             <c:if test="${empty versionEntry}">
-                                                                <div class="version-entry elem-${line.state}"><div class="inner-version-entry color-${line.state} empty">&nbsp;</div></div>
+                                                                <div class="version-entry elem-${line.state}"><div class="inner-version-entry color-${line.state} empty">
+                                                                        &nbsp;
+                                                                        <div id="details-${side}-${forStatus.index}-detail" class="detail" data-details>
+                                                                        </div>
+                                                                </div></div>
                                                             </c:if>
                                                         </c:forEach>
                                                     </table>
@@ -162,7 +166,14 @@
                                                                 <%@include file="one.jsp" %>
                                                             </c:if>
                                                             <c:if test="${empty versionEntry}">
-                                                                <div class="version-entry elem-${line.state}"><div class="inner-version-entry color-${line.state} empty">&nbsp;</div></div>
+                                                                <div class="version-entry elem-${line.state}">
+                                                                    <div class="inner-version-entry color-${line.state} empty">
+                                                                        &nbsp;
+                                                                        <div id="details-${side}-${forStatus.index}-detail" class="detail" data-details>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
                                                             </c:if>
                                                         </c:forEach>
                                                     </table>
