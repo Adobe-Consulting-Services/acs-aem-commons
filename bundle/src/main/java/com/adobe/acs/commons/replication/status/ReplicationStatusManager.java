@@ -48,6 +48,16 @@ public interface ReplicationStatusManager {
     }
 
     /**
+     * Returns the Resource responsible for tracking replication properties for a given path. 
+     * <p>
+     * Pages and Assets return their respective content resource while any other path returns itself
+     *
+     * @param path 			   The path to retrieve the resource for.
+     * @param resourceResolver The resource resolver must have access to read the specified path.
+     */
+    Resource getReplicationStatusResource(String path, ResourceResolver resourceResolver);
+    
+    /**
      * Marks the resources at the provides paths with the parameterized replication status.
      * <p>
      * Only resources that are of the OSGi Property parameterized "node-types" are candidates for Replication Status
