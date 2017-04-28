@@ -136,7 +136,7 @@
         }
     }
 
-    .version-entry{
+    .version-entry {
         border-top: 1px solid grey;
         overflow: hidden;
         cursor: pointer;
@@ -245,11 +245,23 @@
         margin-bottom: 2.8em;
     }
 
+    .color {
+        background-color: #FFF;
+    }
+    .color.empty {
+        background-color: lightgrey;
+    }
     .color-ONLY_LEFT {
         background-color: #FFBFCB;
+        &.empty {
+            background-color: lightgrey;
+        }
     }
     .color-ONLY_RIGHT {
         background-color: #CBFFCA;
+        &.empty {
+            background-color: lightgrey;
+        }
     }
     .color-EQUAL {
     }
@@ -257,6 +269,34 @@
         background-color: #FDFFA9;
     }
 
+    .legende {
+
+        margin-bottom: 16px;
+        cursor: pointer;
+        .definition {
+            .color {
+                width: 16px;
+                height: 16px;
+                border: 1px solid grey;
+            }
+            .color.second {
+                border-left: none;
+            }
+            display: block;
+            float: left;
+            padding-right: 12px;
+
+            .color,
+            .text {
+                display: block;
+                float: left;
+            }
+            .text {
+                padding-left: 4px;
+            }
+        }
+
+    }
 
 
 }
