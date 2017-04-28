@@ -47,7 +47,7 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
     
     public ActionManagerFactoryImpl() throws NotCompliantMBeanException {
         super(ActionManagerMBean.class);
-        tasks = new ConcurrentHashMap<String, ActionManagerImpl>();
+        tasks = new ConcurrentHashMap<>();
     }
     
     @Override

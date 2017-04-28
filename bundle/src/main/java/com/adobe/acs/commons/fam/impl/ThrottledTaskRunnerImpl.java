@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.concurrent.*;
 import javax.management.Attribute;
 import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
@@ -143,9 +145,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         if (!isRunning()) {
             initThreadPool();
             if (isPaused && resumeList != null) {
-                for (Runnable task : resumeList) {
-                    workerPool.execute(task);
-                }
+                resumeList.forEach(workerPool::execute);
                 resumeList.clear();
             }
             isPaused = false;
@@ -166,25 +166,44 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         return maxThreads;
     }
 
+    private final Semaphore pollingLock = new Semaphore(1);
+    private long lastCheck = -1;
+    private boolean wasRecentlyBusy = false;
+
+    private boolean isTooBusy() throws InterruptedException {
+        if (maxCpu <= 0 && maxHeap <= 0) {
+            return false;
+        }
+
+        long now = System.currentTimeMillis();
+        long timeSinceLastCheck = now - lastCheck;
+        if (timeSinceLastCheck < 0 || timeSinceLastCheck > cooldownWaitTime) {
+            pollingLock.acquire();
+            now = System.currentTimeMillis();
+            timeSinceLastCheck = now - lastCheck;
+            if (timeSinceLastCheck < 0 || timeSinceLastCheck > cooldownWaitTime) {
+                try {
+                    double cpuLevel = maxCpu > 0 ? getCpuLevel() : -1;
+                    double heapUsage = maxHeap > 0 ? getMemoryUsage() : -1;
+
+                    wasRecentlyBusy = ((maxCpu > 0 && cpuLevel >= maxCpu)
+                            || (maxHeap > 0 && heapUsage >= maxHeap));
+                } catch (InstanceNotFoundException ex) {
+                    LOG.error("OS MBean Instance not found (should not ever happen)", ex);
+                } catch (ReflectionException ex) {
+                    LOG.error("OS MBean Instance reflection error (should not ever happen)", ex);
+                }
+                lastCheck = System.currentTimeMillis();
+            }
+            pollingLock.release();
+        }
+        return wasRecentlyBusy;
+    }
+
     @Override
     public void waitForLowCpuAndLowMemory() throws InterruptedException {
-        boolean tooHigh = true;
-        try {
-            while (tooHigh) {
-                double cpuLevel = getCpuLevel();
-                double heapUsage = getMemoryUsage();
-
-                if ((maxCpu <= 0 || cpuLevel <= maxCpu)
-                        && (maxHeap <= 0 || heapUsage <= maxHeap)) {
-                    tooHigh = false;
-                } else {
-                    Thread.sleep(cooldownWaitTime);
-                }
-            }
-        } catch (InstanceNotFoundException ex) {
-            LOG.error("OS MBean Instance not found (should not ever happen)", ex);
-        } catch (ReflectionException ex) {
-            LOG.error("OS MBean Instance reflection error (should not ever happen)", ex);
+        while (isTooBusy()) {
+            Thread.sleep(cooldownWaitTime);
         }
     }
 
@@ -210,7 +229,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
             long max = (Long) cd.get("max");
             long used = (Long) cd.get("used");
             return (double) used / (double) max;
-        } catch (Exception e) {
+        } catch (AttributeNotFoundException | InstanceNotFoundException | MBeanException | ReflectionException e) {
             LOG.error("No Memory stats found for HeapMemoryUsage", e);
             return -1;
         }
@@ -231,10 +250,10 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         maxThreads = newSize;
         initThreadPool();
     }
-    
+
     private void initThreadPool() {
         if (workQueue == null) {
-            workQueue = new LinkedBlockingDeque<Runnable>();
+            workQueue = new LinkedBlockingDeque<>();
         }
 
         // Terminate pool if the thread size has changed
@@ -263,9 +282,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         try {
             memBeanName = ObjectName.getInstance("java.lang:type=Memory");
             osBeanName = ObjectName.getInstance("java.lang:type=OperatingSystem");
-        } catch (MalformedObjectNameException ex) {
-            LOG.error("Error getting OS MBean (shouldn't ever happen)", ex);
-        } catch (NullPointerException ex) {
+        } catch (MalformedObjectNameException | NullPointerException ex) {
             LOG.error("Error getting OS MBean (shouldn't ever happen)", ex);
         }
 

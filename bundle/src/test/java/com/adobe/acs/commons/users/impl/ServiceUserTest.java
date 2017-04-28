@@ -100,4 +100,60 @@ public class ServiceUserTest {
         new ServiceUser(config);
     }
 
+
+    @Test
+    public void testServiceUser_principalName() throws EnsureServiceUserException {
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
+
+        ServiceUser serviceUser = new ServiceUser(config);
+
+        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
+        Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
+    }
+
+    @Test
+    public void testServiceUser_relativePrincipalName1() throws EnsureServiceUserException {
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "folder/test-service-user");
+
+        ServiceUser serviceUser = new ServiceUser(config);
+
+        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
+        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+    }
+
+    @Test
+    public void testServiceUser_relativePrincipalName2() throws EnsureServiceUserException {
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "./folder/test-service-user");
+
+        ServiceUser serviceUser = new ServiceUser(config);
+
+        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
+        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+    }
+
+    @Test
+    public void testServiceUser_relativePrincipalName3() throws EnsureServiceUserException {
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "/folder/test-service-user");
+
+        ServiceUser serviceUser = new ServiceUser(config);
+
+        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
+        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+    }
+
+    @Test
+    public void testServiceUser_absoluteRealtivePrincipalName2() throws EnsureServiceUserException {
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "/home/users/system/folder/test-service-user");
+
+        ServiceUser serviceUser = new ServiceUser(config);
+
+        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
+        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+    }
+
 }

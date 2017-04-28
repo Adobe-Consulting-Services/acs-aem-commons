@@ -29,8 +29,19 @@ import aQute.bnd.annotation.ConsumerType;
  * @see Function
  */
 @ConsumerType
-@Deprecated
-public abstract class BiFunction<T, U, R> implements CheckedBiFunction<T, U, R> {
+@FunctionalInterface
+public interface CheckedBiFunction<T, U, R> {
+
+    /**
+     * Applies this function to the given arguments.
+     *
+     * @param t the first function argument
+     * @param u the second function argument
+     * @return the function result
+     * @throws java.lang.Exception
+     */
+    R apply(T t, U u) throws Exception;
+
     /**
      * Returns a composed function that first applies this function to
      * its input, and then applies the {@code after} function to the result.
@@ -44,25 +55,10 @@ public abstract class BiFunction<T, U, R> implements CheckedBiFunction<T, U, R> 
      * applies the {@code after} function
      * @throws NullPointerException if after is null
      */
-    public <V> BiFunction<T, U, V> andThen(final Function<? super R, ? extends V> after) {
-        return adapt(andThen((CheckedFunction) after));
-    }
-
-    public static <X, Y, Z> BiFunction<X, Y, Z> adapt(CheckedBiFunction<X, Y, Z> delegate) {
-        return new Adapter<>(delegate);
-    }
-
-    private static class Adapter<T, U, R> extends BiFunction<T, U, R> {
-
-        final private CheckedBiFunction<T, U, R> delegate;
-
-        public Adapter(CheckedBiFunction<T, U, R> delegate) {
-            this.delegate = delegate;
+    default <V> CheckedBiFunction<T, U, V> andThen(final CheckedFunction<? super R, ? extends V> after) {
+        if (after == null) {
+            throw new NullPointerException();
         }
-
-        @Override
-        public R apply(T t, U u) throws Exception {
-            return delegate.apply(t, u);
-        }
+        return (T t, U u) -> after.apply(apply(t, u));
     }
 }

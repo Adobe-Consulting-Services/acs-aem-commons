@@ -18,6 +18,6 @@
  * #L%
  */
 /**
- * Dispatcher utilities.
+ * Replication utilities.
  */
 @aQute.bnd.annotation.Version("1.1.0") package com.adobe.acs.commons.replication.status;

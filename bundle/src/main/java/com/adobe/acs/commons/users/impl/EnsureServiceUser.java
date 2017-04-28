@@ -198,6 +198,7 @@ public final class EnsureServiceUser {
             final UserManager userManager = resourceResolver.adaptTo(UserManager.class);
 
             // No principal found with this name; create the system user
+            log.debug("Requesting creation of system user [ {} ] at [ {} ]", serviceUser.getPrincipalName(), serviceUser.getIntermediatePath());
             user = userManager.createSystemUser(serviceUser.getPrincipalName(), serviceUser.getIntermediatePath());
             log.debug("Created system user at [ {} ]", user.getPath());
         }
@@ -211,9 +212,11 @@ public final class EnsureServiceUser {
      * @param resourceResolver the resource resolver to perform the user management
      * @param systemUser       the System User the Service User represents
      * @param serviceUser      the Service User
+     * return                  # of ace entries that could not be processed
      * @throws RepositoryException
      */
-    private void ensureACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
+    private int ensureACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
+        int failures = 0;
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager = (JackrabbitAccessControlManager) session.getAccessControlManager();
@@ -237,7 +240,7 @@ public final class EnsureServiceUser {
 
                 } else if (!serviceUserCoversThisPath) {
                     // Remove all ACE's for this user from this ACL since this Service User is not configured to cover this path
-                    log.debug("Service user does NOT cover the path yet has an ACE; ensureRemoval the ace! {}", ace.toString());
+                    log.debug("Service user does NOT cover the path yet has an ACE; ensure removal of the ace! {}", ace.toString());
                     acl.removeAccessControlEntry(ace);
 
                 } else {
@@ -256,10 +259,12 @@ public final class EnsureServiceUser {
             accessControlManager.setPolicy(acl.getPath(), acl);
         }
 
-        // Create an ACEs that do not yet ensureExistance
+        // Create an ACEs that do not yet exist
         for (Ace ace : serviceUser.getMissingAces()) {
             if (resourceResolver.getResource(ace.getContentPath()) == null) {
-                log.warn("Unable to apply Service User [ {} ] privileges due to missing path at [ {} ]. Please create the path and re-ensure this service user.");
+                log.warn("Unable to apply Service User [ {} ] privileges due to missing path at [ {} ]. Please create the path and re-ensure this service user.",
+                        serviceUser.getPrincipalName(), ace.getContentPath());
+                failures++;
                 continue;
             }
 
@@ -301,6 +306,8 @@ public final class EnsureServiceUser {
 
             log.debug("Added Service User ACE for [ {} ] to [ {} ]", serviceUser.getPrincipalName(), ace.getContentPath());
         }
+
+        return failures;
     }
 
 
@@ -444,7 +451,7 @@ public final class EnsureServiceUser {
 
 
         } catch (EnsureServiceUserException e) {
-            log.error("Unable to ensure Service User [ {} ]", PropertiesUtil.toString(config.get(PROP_ENSURE_IMMEDIATELY), "Undefined Service User Principal Name"), e);
+            log.error("Unable to ensure Service User [ {} ]", PropertiesUtil.toString(config.get(PROP_PRINCIPAL_NAME), "Undefined Service User Principal Name"), e);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown Ensure Service User operation [ " +  operationStr + " ]", e);
         }

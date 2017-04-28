@@ -22,11 +22,7 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
-import com.adobe.acs.commons.workflow.bulk.execution.model.PayloadGroup;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
+import com.adobe.acs.commons.workflow.bulk.execution.model.*;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.day.cq.workflow.WorkflowException;
@@ -34,7 +30,6 @@ import org.apache.commons.collections.ListUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -119,16 +114,16 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
         }
 
         public void run() {
-            ResourceResolver resourceResolver = null;
+            ResourceResolver serviceResourceResolver = null;
             Resource configResource;
             long start = System.currentTimeMillis();
             int total = 0;
             boolean stopped = false;
 
             try {
-                resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
-                resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.bulk-workflow-manager");
-                configResource = resourceResolver.getResource(configPath);
+                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+                serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.bulk-workflow-manager");
+                configResource = serviceResourceResolver.getResource(configPath);
 
                 final Config config = configResource.adaptTo(Config.class);
                 final Workspace workspace = config.getWorkspace();
@@ -138,8 +133,8 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
                 }
 
                 try {
-                    SyntheticWorkflowModel model = syntheticWorkflowRunner.getSyntheticWorkflowModel(resourceResolver, config.getWorkflowModelId(), true);
-                    resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
+                    SyntheticWorkflowModel model = syntheticWorkflowRunner.getSyntheticWorkflowModel(serviceResourceResolver, config.getWorkflowModelId(), true);
+                    serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
 
                     PayloadGroup payloadGroup = null;
                     if (workspace.getActivePayloadGroups().size() > 0) {
@@ -177,7 +172,7 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
                                 }
 
                                 long processStart = System.currentTimeMillis();
-                                swr.execute(resourceResolver, payload.getPayloadPath(), model, false, false);
+                                swr.execute(serviceResourceResolver, payload.getPayloadPath(), model, false, false);
                                 complete(workspace, payload);
                                 log.info("Processed [ {} ] in {} ms", payload.getPayloadPath(), System.currentTimeMillis() - processStart);
                             } catch (WorkflowException e) {
@@ -212,8 +207,8 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
             } catch (Exception e) {
                 log.error("Error processing Bulk Synthetic Workflow execution.", e);
             } finally {
-                if (resourceResolver != null) {
-                    resourceResolver.close();
+                if (serviceResourceResolver != null) {
+                    serviceResourceResolver.close();
                 }
             }
         }
