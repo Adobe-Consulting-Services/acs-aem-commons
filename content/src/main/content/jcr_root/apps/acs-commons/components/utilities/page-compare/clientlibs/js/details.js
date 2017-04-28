@@ -6,17 +6,19 @@ pageCompareApp
         replace: 'true',
         transclude: false,
         compile: function(element, attrs) {
+            var id = $(element).attr('id');
+            var right = $('#' + id.replace('left', 'right') + '-detail');
+            var left = $('#' + id.replace('right', 'left') + '-detail');
+            var height = right.height() > left.height() ? right.height() : left.height();
+            left.hide();
+            right.hide();
+            left.height(height);
+            right.height(height);
             $(element).click(function() {
-                var id = $(element).attr('id');
-                var right = $('#' + id.replace('left', 'right') + '-detail');
-                var left = $('#' + id.replace('right', 'left') + '-detail');
                 if (left.is(":visible") === true) {
                     left.slideUp();
                     right.slideUp();
                 } else {
-                    var height = right.height() > left.height() ? right.height() : left.height();
-                    left.height(height);
-                    right.height(height);
                     left.slideDown();
                     right.slideDown();
                 }
