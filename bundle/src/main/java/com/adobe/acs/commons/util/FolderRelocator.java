@@ -252,6 +252,7 @@ public class FolderRelocator extends ControlledProcess {
     }
 
     private void checkNodeAcls(ResourceResolver res, String path, Privilege[] prvlgs) throws RepositoryException {
+        Actions.setCurrentItem(path);
         Session session = res.adaptTo(Session.class);
         if (!session.getAccessControlManager().hasPrivileges(path, prvlgs)) {
             throw new RepositoryException("Insufficient permissions to permit move operation");
