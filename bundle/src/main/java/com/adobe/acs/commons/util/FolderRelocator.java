@@ -181,10 +181,18 @@ public class FolderRelocator extends ControlledProcess {
                         return new RepositoryException("Destination must be outside of source folder");
                     }
                     if (!resourceExists(res, sourcePath)) {
-                        return new RepositoryException("Unable to find source " + sourcePath);
+                        if (!sourcePath.startsWith("/")) {
+                            return new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + sourcePath);                            
+                        } else {
+                            return new RepositoryException("Unable to find source " + sourcePath);
+                        }
                     }
                     if (!resourceExists(res, destinationPath.substring(0, destinationPath.lastIndexOf('/')))) {
-                        return new RepositoryException("Unable to find destination " + destinationPath);
+                        if (!destinationPath.startsWith("/")) {
+                            return new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + destinationPath);
+                        } else {
+                            return new RepositoryException("Unable to find destination " + destinationPath);
+                        }
                     }
                     return null;
                 }).filter(Objects::nonNull).findFirst();
@@ -195,8 +203,8 @@ public class FolderRelocator extends ControlledProcess {
     }
 
     private boolean resourceExists(ResourceResolver rr, String path) {
-        Resource res = rr.resolve(path);
-        return !Resource.RESOURCE_TYPE_NON_EXISTING.equals(res.getResourceType());
+        Resource res = rr.getResource(path);
+        return res != null && !Resource.RESOURCE_TYPE_NON_EXISTING.equals(res.getResourceType());
     }
 
     LinkedBlockingQueue<CheckedConsumer<ResourceResolver>> currentBatch = new LinkedBlockingQueue<>();
@@ -328,10 +336,15 @@ public class FolderRelocator extends ControlledProcess {
 
     private void removeSourceFolders(ActionManager step4) {
         sourceToDestination.keySet().forEach(sourcePath
-                -> step4.deferredWithResolver(rr -> rr.delete(rr.getResource(sourcePath)))
+                -> step4.deferredWithResolver(rr -> deleteResource(rr, sourcePath))
         );
     }
 
+    private void deleteResource(ResourceResolver rr, String path) throws PersistenceException {
+        Actions.setCurrentItem(path);
+        rr.delete(rr.getResource(path));
+    }
+    
     private void beginStep(ActionManager step, String startingNode, ItemVisitor visitor) {
         try {
             step.withResolver(rr -> {
