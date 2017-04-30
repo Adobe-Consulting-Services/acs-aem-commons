@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.util;
+package com.adobe.acs.commons.mcp.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
-import com.adobe.acs.commons.fam.ControlledProcess;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.util.visitors.TreeFilteringItemVisitor;
+import com.adobe.acs.commons.mcp.ControlledProcess;
+import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.util.ArrayList;
 import java.util.List;
-import javax.jcr.Node;
-import javax.jcr.Session;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -65,24 +63,25 @@ public class JobQueueCleaner extends ControlledProcess {
     }
 
     private void purgeJobs(ActionManager manager) {
-        TreeFilteringItemVisitor visitor = new TreeFilteringItemVisitor();
-        visitor.setBreadthFirst(false);
-        visitor.onLeaveNode((node, level) -> {
+        TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
+        visitor.setDepthFirstMode();
+        visitor.setResourceVisitor((res, level) -> {
             if (level >= MIN_PURGE_FOLDER_LEVEL) {
-                String path = node.getPath();
+                String path = res.getPath();
                 manager.deferredWithResolver(Actions.retry(10, 100, rr -> deleteResource(rr, path)));
             }
         });
-        visitor.onVisitChild((node, level) -> {
-            if (!node.getName().equals(POLICY_NODE_NAME)) {
-                String path = node.getPath();
+        visitor.setLeafVisitor((res, level) -> {
+            if (!res.getName().equals(POLICY_NODE_NAME)) {
+                String path = res.getPath();
                 manager.deferredWithResolver(rr -> deleteResource(rr, path));
             }
         });
         manager.deferredWithResolver(rr -> {
-            Session session = rr.adaptTo(Session.class);
-            Node queue = session.getNode(EVENT_QUEUE_LOCATION);
-            queue.accept(visitor);
+            Resource res = rr.getResource(EVENT_QUEUE_LOCATION);
+            if (res != null) {
+                visitor.accept(res);
+            }
         });
     }
 

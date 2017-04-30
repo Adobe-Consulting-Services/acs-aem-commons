@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.util;
+package com.adobe.acs.commons.mcp.processes;
 
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
-import com.adobe.acs.commons.fam.ControlledProcess;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.util.visitors.TreeFilteringItemVisitor;
+import com.adobe.acs.commons.mcp.ControlledProcess;
+import com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor;
+import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +33,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import javax.jcr.ItemVisitor;
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
@@ -235,10 +234,10 @@ public class FolderRelocator extends ControlledProcess {
     }
 
     private void validateAllAcls(ActionManager step1) {
-        TreeFilteringItemVisitor folderVisitor = new TreeFilteringItemVisitor();
-        folderVisitor.setBreadthFirst(true);
-        folderVisitor.onEnterNode((node, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, node.getPath(), requiredFolderPrivileges)));
-        folderVisitor.onVisitChild((node, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, node.getPath(), requiredNodePrivileges)));
+        TreeFilteringResourceVisitor folderVisitor = new TreeFilteringResourceVisitor();
+        folderVisitor.setBreadthFirstMode();
+        folderVisitor.setResourceVisitor((resource, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, resource.getPath(), requiredFolderPrivileges)));
+        folderVisitor.setLeafVisitor((resource, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, resource.getPath(), requiredNodePrivileges)));
         sourceToDestination.keySet().forEach(sourcePath -> beginStep(step1, sourcePath, folderVisitor));
     }
 
@@ -260,10 +259,10 @@ public class FolderRelocator extends ControlledProcess {
     }
 
     private void buildTargetFolders(ActionManager step2) {
-        TreeFilteringItemVisitor folderVisitor = new TreeFilteringItemVisitor();
-        folderVisitor.setBreadthFirst(true);
-        folderVisitor.onEnterNode((node, level) -> {
-            String path = node.getPath();
+        TreeFilteringResourceVisitor folderVisitor = new TreeFilteringResourceVisitor();
+        folderVisitor.setBreadthFirstMode();
+        folderVisitor.setResourceVisitor((res, level) -> {
+            String path = res.getPath();
             step2.deferredWithResolver(Actions.retry(5, 100, rr -> buildDestinationFolder(rr, path)));
         });
         sourceToDestination.keySet().forEach(sourcePath -> beginStep(step2, sourcePath, folderVisitor));
@@ -314,12 +313,16 @@ public class FolderRelocator extends ControlledProcess {
     }
 
     private void moveNodes(ActionManager step3) {
-        TreeFilteringItemVisitor folderVisitor = new TreeFilteringItemVisitor();
-        folderVisitor.setBreadthFirst(true);
-        folderVisitor.onVisitChild((node, level) -> {
-            String path = node.getPath();
+        TreeFilteringResourceVisitor folderVisitor = new TreeFilteringResourceVisitor();
+        folderVisitor.setBreadthFirstMode();
+        folderVisitor.setLeafVisitor((res, level) -> {
+            String path = res.getPath();
             if (!path.endsWith("jcr:content")) {
-                addToBatch(step3, 15, 250, rr -> moveItem(rr, path));
+                try {
+                    addToBatch(step3, 15, 250, rr -> moveItem(rr, path));
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         sourceToDestination.keySet().forEach(sourcePath -> beginStep(step3, sourcePath, folderVisitor));
@@ -346,11 +349,11 @@ public class FolderRelocator extends ControlledProcess {
         rr.delete(rr.getResource(path));
     }
     
-    private void beginStep(ActionManager step, String startingNode, ItemVisitor visitor) {
+    private void beginStep(ActionManager step, String startingNode, SimpleFilteringResourceVisitor visitor) {
         try {
-            step.withResolver(rr -> {
-                rr.getResource(startingNode).adaptTo(Node.class).accept(visitor);
-            });
+            step.withResolver(rr -> 
+                visitor.accept(rr.getResource(startingNode))
+            );
         } catch (Exception ex) {
             Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
         }
