@@ -63,3 +63,30 @@
            ng-model="form.interval"
            placeholder="# of seconds between retries [ Default: 10 ]"/>
 </div>
+
+
+<div class="coral-Form-fieldwrapper">
+    <label class="coral-Form-fieldlabel">Set user-event-data</label>
+
+    <select
+            class="acs-select"
+            ng-required="true"
+            ng-model="form.selectUserEventData"
+            ng-options="userEventData as userEventData.label for userEventData in formOptions.userEventData"
+            ng-change="form.userEventData = form.selectUserEventData.value">
+    </select>
+
+    <br/>
+    <br/>
+
+    <input
+            type="text"
+            name="userEventData"
+            class="coral-Form-field coral-Textfield"
+            ng-model="form.userEventData"
+            ng-readonly="form.selectUserEventData.value"
+            placeholder="Leave blank to not set user-event-data"/>
+
+    <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
+          data-quicktip-content="user-event-data can be used to prevent WF Launchers from launching based on the activity performed by this workflow execution"></span>
+</div>

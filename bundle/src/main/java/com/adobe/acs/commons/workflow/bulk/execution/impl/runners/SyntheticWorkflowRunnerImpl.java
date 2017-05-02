@@ -122,7 +122,6 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
 
             try {
                 serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
-                serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.bulk-workflow-manager");
                 configResource = serviceResourceResolver.getResource(configPath);
 
                 final Config config = configResource.adaptTo(Config.class);
@@ -134,7 +133,10 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
 
                 try {
                     SyntheticWorkflowModel model = syntheticWorkflowRunner.getSyntheticWorkflowModel(serviceResourceResolver, config.getWorkflowModelId(), true);
-                    serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
+
+                    if (config.isUserEventData()) {
+                        serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(config.getUserEventData());
+                    }
 
                     PayloadGroup payloadGroup = null;
                     if (workspace.getActivePayloadGroups().size() > 0) {
