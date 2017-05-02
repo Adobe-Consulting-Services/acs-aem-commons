@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons;
+package com.adobe.acs.commons.util.impl;
 
 import java.util.List;
 

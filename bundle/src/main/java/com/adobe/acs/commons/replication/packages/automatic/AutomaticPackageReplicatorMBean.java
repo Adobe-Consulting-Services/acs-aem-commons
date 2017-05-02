@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.automatic_package_replicator;
+package com.adobe.acs.commons.replication.packages.automatic;
 
-import com.adobe.acs.commons.ResourceServiceManagerMBean;
+import com.adobe.acs.commons.util.impl.ResourceServiceManagerMBean;
 import com.adobe.granite.jmx.annotation.Description;
 
 /**

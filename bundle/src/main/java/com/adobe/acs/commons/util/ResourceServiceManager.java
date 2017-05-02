@@ -17,35 +17,26 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons;
+package com.adobe.acs.commons.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
-import javax.management.NotCompliantMBeanException;
-
+import com.adobe.acs.commons.util.impl.ResourceServiceManagerMBean;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import com.day.cq.commons.jcr.JcrConstants;
+import javax.management.NotCompliantMBeanException;
+import java.util.*;
 
 /**
  * Base class for services to extend which want to manage other services based
