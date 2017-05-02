@@ -18,9 +18,7 @@
  * #L%
  */
 /**
- * Miscellaneous Utilities.
+ * Automatic Package Replication.
  */
-@Version("2.4.0")
-package com.adobe.acs.commons.util;
-
-import aQute.bnd.annotation.Version;
+@aQute.bnd.annotation.Version("1.0.0")
+package com.adobe.acs.commons.replication.packages.automatic;

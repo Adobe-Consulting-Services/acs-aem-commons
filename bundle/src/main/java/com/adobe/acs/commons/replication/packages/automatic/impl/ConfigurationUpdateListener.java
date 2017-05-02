@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.automatic_package_replicator.impl;
+package com.adobe.acs.commons.replication.packages.automatic.impl;
 
 import java.util.Hashtable;
 
@@ -44,10 +44,10 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.ResourceServiceManager;
-import com.adobe.acs.commons.automatic_package_replicator.AutomaticPackageReplicatorMBean;
-import com.adobe.acs.commons.automatic_package_replicator.model.AutomaticPackageReplicatorModel;
-import com.adobe.acs.commons.automatic_package_replicator.model.AutomaticPackageReplicatorModel.TRIGGER;
+import com.adobe.acs.commons.util.ResourceServiceManager;
+import com.adobe.acs.commons.replication.packages.automatic.AutomaticPackageReplicatorMBean;
+import com.adobe.acs.commons.replication.packages.automatic.model.AutomaticPackageReplicatorModel;
+import com.adobe.acs.commons.replication.packages.automatic.model.AutomaticPackageReplicatorModel.TRIGGER;
 import com.day.cq.replication.Replicator;
 
 /**
