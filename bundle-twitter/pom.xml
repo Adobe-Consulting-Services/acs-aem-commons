@@ -49,7 +49,8 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle-twitter</Bundle-SymbolicName>
-                        <Import-Package>twitter4j*;version="[3.0.5,4)",*</Import-Package>
+                        <Import-Package>*;resolution:=optional</Import-Package>
+                        <Embed-Dependency>twitter4j-core;scope=compile|runtime</Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>
