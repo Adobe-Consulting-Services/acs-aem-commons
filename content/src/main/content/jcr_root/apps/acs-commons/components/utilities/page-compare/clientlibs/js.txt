@@ -1,3 +1,5 @@
 #base=js
 
 app.js
+details.js
+legend.js
