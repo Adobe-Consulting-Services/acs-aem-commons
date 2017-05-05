@@ -20,8 +20,9 @@
 
 package com.adobe.acs.commons.images.transformers.impl;
 
-import com.adobe.acs.commons.images.ImageTransformer;
-import com.day.image.Layer;
+import java.awt.Color;
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -32,7 +33,9 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import com.adobe.acs.commons.images.ImageTransformer;
+import com.day.cq.wcm.foundation.AdaptiveImageHelper;
+import com.day.image.Layer;
 
 /**
  * ACS AEM Commons - Image Transformer - Resize
@@ -77,6 +80,9 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
         int width = properties.get(KEY_WIDTH, properties.get(KEY_WIDTH_ALIAS, 0));
         int height = properties.get(KEY_HEIGHT, properties.get(KEY_HEIGHT_ALIAS, 0));
+        
+        int originalWidth = layer.getWidth();
+        int originalHeight = layer.getHeight();
 
         if (width > maxDimension) {
             width = maxDimension;
@@ -97,12 +103,53 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
             height = Math.round(layer.getHeight() * aspect);
         }
 
-        layer.resize(width, height);
+      //If original image aspect ratio is different from the final image aspect ratio, then resize it and give letterboxing/pillarboxing
+        if(isExpectedAspectRatioSameAsOriginal(originalWidth, originalHeight, width, height) != 0) {
+            if(isExpectedAspectRatioSameAsOriginal(originalWidth, originalHeight, width, height) < 0) {
+                ////If original aspect ratio is lesser than the final aspect ratio, fix the height of the final image and calculate the width based on the original image aspect ratio
+                int widthToResize = (height * originalWidth)/originalHeight;
+                layer.resize(widthToResize, height);
+            } else if(isExpectedAspectRatioSameAsOriginal(originalWidth, originalHeight, width, height) > 0){
+                //If original aspect ratio is greater than the final aspect ratio, fix the width of the final image and calculate the height based on the original image aspect ratio
+                int heightToResize = (width * originalHeight)/originalWidth;
+                layer.resize(width, heightToResize);
+            }
+            Layer backgroundLayer = placeResizedImageLayerOverFinalLayer(layer,
+                    width, height);
+            return backgroundLayer;
+        } else {
+            layer.resize(width, height);
+        }
 
         return layer;
     }
 
+    private double isExpectedAspectRatioSameAsOriginal(int originalWidth, int originalHeight, int finalWidth, int finalHeight) {
+        float aspectRatioOfOriginal = originalWidth / (float)originalHeight;
+        float aspectRatioOfFinal = finalWidth / (float)finalHeight;
+        return Double.compare(aspectRatioOfOriginal, aspectRatioOfFinal);
+    }
 
+    private Layer placeResizedImageLayerOverFinalLayer(final Layer layer,
+            int expectedWidth, int expectedHeight) {
+        Layer backgroundLayer = AdaptiveImageHelper.renderScaledPlaceholderImage(expectedWidth, expectedHeight);
+        backgroundLayer.colorize(Color.BLACK, Color.BLACK);
+        addLayer(backgroundLayer, layer);
+        return backgroundLayer;
+    }
+    
+    //Used to place one layer above another layer
+    private void addLayer(Layer backgroundLayer, Layer resizedImageLayer) {
+        if(backgroundLayer.getHeight() == resizedImageLayer.getHeight()) {
+            //Pillarboxing
+            backgroundLayer.blit(resizedImageLayer, (int)((backgroundLayer.getWidth() - resizedImageLayer.getWidth())/2), 0, resizedImageLayer.getWidth(),
+                resizedImageLayer.getHeight(), 0, 0);
+        } else if (backgroundLayer.getWidth() == resizedImageLayer.getWidth()) {
+            //Letterboxing
+            backgroundLayer.blit(resizedImageLayer, 0, (int)((backgroundLayer.getHeight() - resizedImageLayer.getHeight())/2), resizedImageLayer.getWidth(),
+                    resizedImageLayer.getHeight(), 0, 0);
+        } 
+    }
     @Activate
     protected final void activate(final Map<String, String> config) {
         maxDimension = PropertiesUtil.toInteger(config.get(PROP_MAX_DIMENSION), DEFAULT_MAX_DIMENSION);

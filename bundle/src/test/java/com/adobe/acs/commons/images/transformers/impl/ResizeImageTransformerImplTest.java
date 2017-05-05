@@ -20,8 +20,14 @@
 
 package com.adobe.acs.commons.images.transformers.impl;
 
-import com.adobe.acs.commons.images.transformers.impl.ResizeImageTransformerImpl;
-import com.day.image.Layer;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -32,20 +38,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import com.day.image.Layer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResizeImageTransformerImplTest {
     ResizeImageTransformerImpl transformer;
-
+    
     @Mock
     Layer layer;
 
@@ -67,18 +65,33 @@ public class ResizeImageTransformerImplTest {
     }
 
     @Test
-    public void testTransform() throws Exception {
+    public void testTransform_originalAspectRatio_greater_than_final() throws Exception {
         final int width = 100;
         final int height = 200;
 
+        int heightToResize = (Integer)(width * layer.getHeight())/layer.getWidth();
         map.put("width", width);
         map.put("height", height);
         ValueMap properties = new ValueMapDecorator(map);
-
+        
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).resize(width, height);
-        verifyNoMoreInteractions(layer);
+        verify(layer, times(1)).resize(width, heightToResize);
+    }
+    
+    @Test
+    public void testTransform_originalAspectRatio_lesser_than_final() throws Exception {
+        final int width = 200;
+        final int height = 100;
+
+        int widthToResize = (height * layer.getWidth())/layer.getHeight();
+        map.put("width", width);
+        map.put("height", height);
+        ValueMap properties = new ValueMapDecorator(map);
+        
+        transformer.transform(layer, properties);
+
+        verify(layer, times(1)).resize(widthToResize, height);
     }
 
     @Test
