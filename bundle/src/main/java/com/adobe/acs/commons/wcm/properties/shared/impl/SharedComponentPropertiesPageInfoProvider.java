@@ -192,6 +192,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
 
             Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
             resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+            resourceResolver.refresh();
             ComponentManager componentManager = resourceResolver.adaptTo(ComponentManager.class);
             Map<String, List<Boolean>> localComponentsWithSharedProperties = new HashMap<>();
             for (Component component : componentManager.getComponents()) {
