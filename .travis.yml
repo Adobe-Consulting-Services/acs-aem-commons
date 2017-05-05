@@ -4,7 +4,7 @@ env:
 - MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=512m"
 script: mvn verify -B
 after_success:
-  - mvn clean test jacoco:report coveralls:report
+  - mvn clean jacoco:prepare-agent test jacoco:report coveralls:report
 sudo: false
 notifications:
   slack:
