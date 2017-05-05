@@ -1,0 +1,16 @@
+<!--/*
+
+  ==============================================================================
+
+  Base (Sightly) AJAX component
+
+  ==============================================================================
+*/-->
+<div data-sly-test="${wcmmode.preview || wcmmode.disabled}"
+     data-url="${resource.path}.${resource.ajaxSelectors || 'ajax'}.${resource.ajaxExtension || 'html'}"
+     data-ajax-component class="acs-ajax-component">
+    <div data-sly-test="${${resource.ajaxLoadingIndicator}}" class="${resource.ajaxLoadingIndicator}"></div>
+</div>
+<div data-sly-test="${wcmmode.edit || wcmmode.design}"
+     data-sly-resource="${resource.path}.${resource.ajaxSelectors || 'ajax'}.${resource.ajaxExtension || 'html'}"
+     data-sly-unwrap></div>
