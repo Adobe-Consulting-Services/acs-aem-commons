@@ -25,6 +25,8 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageInfoProvider;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
@@ -33,6 +35,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.jcr.api.SlingRepository;
@@ -118,7 +121,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
                 if (accessControlManager.hasPrivileges(page.getPath() + "/jcr:content", requiredPrivs)) {
                     props.put("enabled", true);
                     props.put("root", page.getPath());
-                    props.put("components", componentsWithSharedProperties);
+                    props.put("components", Maps.transformValues(componentsWithSharedProperties, (Function<List<Boolean>, Object>) JSONArray::new));
                 } else {
                     log.debug("User does not have [ {} ] on [ {} ]", requiredPrivs, page.getPath() + "/jcr:content");
                 }
