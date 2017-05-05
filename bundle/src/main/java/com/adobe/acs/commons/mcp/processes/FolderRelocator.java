@@ -18,18 +18,16 @@ package com.adobe.acs.commons.mcp.processes;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
+import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcess;
 import com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -206,33 +204,6 @@ public class FolderRelocator extends ControlledProcess {
         return res != null && !Resource.RESOURCE_TYPE_NON_EXISTING.equals(res.getResourceType());
     }
 
-    LinkedBlockingQueue<CheckedConsumer<ResourceResolver>> currentBatch = new LinkedBlockingQueue<>();
-
-    private void addToBatch(ActionManager actionManager, int retries, long retryDelay, CheckedConsumer<ResourceResolver> action) throws InterruptedException {
-        currentBatch.put(action);
-        if (currentBatch.size() >= batchSize) {
-            commitBatch(actionManager, retries, retryDelay);
-        }
-    }
-
-    private void commitBatch(ActionManager actionManager, int retries, long retryDelay) {
-        final List<CheckedConsumer<ResourceResolver>> consumers = new ArrayList<>();
-        int count = currentBatch.drainTo(consumers);
-        if (count > 0) {
-            actionManager.deferredWithResolver(
-                    Actions.retry(retries, retryDelay, (ResourceResolver rr) -> {
-                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Executing {0} actions", count);
-                        for (CheckedConsumer<ResourceResolver> consumer : consumers) {
-                            consumer.accept(rr);
-                        }
-                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commiting {0} actions", count);
-                        rr.commit();
-                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commit successful");
-                    })
-            );
-        }
-    }
-
     private void validateAllAcls(ActionManager step1) {
         TreeFilteringResourceVisitor folderVisitor = new TreeFilteringResourceVisitor();
         folderVisitor.setBreadthFirstMode();
@@ -313,20 +284,17 @@ public class FolderRelocator extends ControlledProcess {
     }
 
     private void moveNodes(ActionManager step3) {
+        ActionBatch batch = new ActionBatch(step3, batchSize);
         TreeFilteringResourceVisitor folderVisitor = new TreeFilteringResourceVisitor();
         folderVisitor.setBreadthFirstMode();
         folderVisitor.setLeafVisitor((res, level) -> {
             String path = res.getPath();
             if (!path.endsWith("jcr:content")) {
-                try {
-                    addToBatch(step3, 15, 250, rr -> moveItem(rr, path));
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                batch.add(rr -> moveItem(rr, path));
             }
         });
         sourceToDestination.keySet().forEach(sourcePath -> beginStep(step3, sourcePath, folderVisitor));
-        commitBatch(step3, 15, 250);
+        batch.commitBatch();
     }
 
     private void moveItem(ResourceResolver rr, String path) throws RepositoryException {
