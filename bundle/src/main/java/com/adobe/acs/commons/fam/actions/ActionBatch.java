@@ -17,7 +17,6 @@ package com.adobe.acs.commons.fam.actions;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.processes.FolderRelocator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,7 +31,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 public class ActionBatch extends LinkedBlockingQueue<CheckedConsumer<ResourceResolver>> {
 
-    private ActionManager manager;
+    private final ActionManager manager;
     private int retryCount = 5;
     private long retryDelay = 100;
 
@@ -73,13 +72,13 @@ public class ActionBatch extends LinkedBlockingQueue<CheckedConsumer<ResourceRes
         if (count > 0) {
             manager.deferredWithResolver(
                     Actions.retry(retryCount, retryDelay, (ResourceResolver rr) -> {
-                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Executing {0} actions", count);
+                        Logger.getLogger(ActionBatch.class.getName()).log(Level.INFO, "Executing {0} actions", count);
                         for (CheckedConsumer<ResourceResolver> consumer : consumers) {
                             consumer.accept(rr);
                         }
-                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commiting {0} actions", count);
+                        Logger.getLogger(ActionBatch.class.getName()).log(Level.INFO, "Commiting {0} actions", count);
                         rr.commit();
-                        Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Commit successful");
+                        Logger.getLogger(ActionBatch.class.getName()).log(Level.INFO, "Commit successful");
                     })
             );
         }
