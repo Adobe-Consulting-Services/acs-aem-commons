@@ -21,8 +21,14 @@
 package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationStatus;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -51,6 +57,33 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final String REP_STATUS_DEACTIVATE = "Deactivate";
     private static final int SAVE_THRESHOLD = 1024;
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+	public Resource getReplicationStatusResource(String path, ResourceResolver resourceResolver) {
+		final Page page = resourceResolver.adaptTo(PageManager.class).getContainingPage(path);
+		final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(path));
+
+		Resource resource;
+		String type;
+
+		if (page != null) {
+			type = "Page";
+		    resource = page.getContentResource();
+		} else if (asset != null) {
+			type = "Asset";
+		    Resource assetResource = resourceResolver.getResource(asset.getPath());
+		    resource = assetResource.getChild(JcrConstants.JCR_CONTENT);
+		} else {
+			type = "Resource";
+		    resource = resourceResolver.getResource(path);
+		}
+		
+		log.trace(type + "'s resource that tracks replication status is " + resource.getPath());
+		return resource;
+	}
+    
     /**
      * {@inheritDoc}
      */
