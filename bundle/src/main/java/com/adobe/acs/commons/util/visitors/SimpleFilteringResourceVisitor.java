@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import org.apache.jackrabbit.spi.commons.iterator.Iterators;
 import org.apache.sling.api.resource.Resource;
 
 public class SimpleFilteringResourceVisitor {
@@ -102,6 +103,7 @@ public class SimpleFilteringResourceVisitor {
                     if (leafVisitor != null) {
                         leafVisitor.accept(res, level);
                     }
+                    this.traverseChildren(Iterators.empty(), level);
                 }
             }
 
