@@ -68,7 +68,7 @@ import java.util.Map;
  * https://docs.adobe.com/docs/en/cq/5-6-1/developing/pageinfo.html#Creating a Page Information Provider
  */
 @org.apache.felix.scr.annotations.Component
-@Service
+@Service(PageInfoProvider.class)
 public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvider, EventListener {
     private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesPageInfoProvider.class);
 
@@ -92,7 +92,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
 
     private Map<String, List<Boolean>> componentsWithSharedProperties;
 
-    private Calendar scheduledSharedComponentsMapUpdate = null;
+    private long scheduledSharedComponentsMapUpdate = -1L;
 
     /**
      * Add a "sharedComponentProperties" section to pageInfo so that JS libs in the authoring interface
@@ -101,8 +101,8 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
     @Override
     public void updatePageInfo(SlingHttpServletRequest request, JSONObject info, Resource resource)
             throws JSONException {
-        if (scheduledSharedComponentsMapUpdate != null && Calendar.getInstance().after(scheduledSharedComponentsMapUpdate)) {
-            scheduledSharedComponentsMapUpdate = null;
+        if (scheduledSharedComponentsMapUpdate > 0 && Calendar.getInstance().getTimeInMillis() > scheduledSharedComponentsMapUpdate) {
+            scheduledSharedComponentsMapUpdate = -1L;
             updateSharedComponentsMap();
         }
 
@@ -174,9 +174,8 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
      * and also prevents stampedes from multiple JCR update events such as during a package installation.
      */
     private void scheduleSharedComponentsMapUpdate() {
-        Calendar timeToUpdate = Calendar.getInstance();
-        timeToUpdate.add(Calendar.SECOND, 5);
-        scheduledSharedComponentsMapUpdate = timeToUpdate;
+        log.debug("Flagging for rebuild of the map of components with shared properties dialogs");
+        scheduledSharedComponentsMapUpdate = Calendar.getInstance().getTimeInMillis() + 5000;
     }
 
     /**
@@ -207,7 +206,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
                     }
                 }
             }
-            componentsWithSharedProperties = localComponentsWithSharedProperties;
+            componentsWithSharedProperties = Collections.unmodifiableMap(localComponentsWithSharedProperties);
 
             log.debug("Calculated map of components with shared properties dialogs: {}", componentsWithSharedProperties);
         } catch (org.apache.sling.api.resource.LoginException e) {
@@ -266,7 +265,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
 
     @Deactivate
     public void deactivate(final Map<String, String> config) throws RepositoryException {
-        scheduledSharedComponentsMapUpdate = null;
+        scheduledSharedComponentsMapUpdate = -1L;
         try {
             if (observationManager != null) {
                 observationManager.removeEventListener(this);
