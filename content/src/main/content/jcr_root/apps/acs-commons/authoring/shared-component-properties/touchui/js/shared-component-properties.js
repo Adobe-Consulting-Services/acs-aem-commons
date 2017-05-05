@@ -60,33 +60,35 @@
                 var enabled = ns.page.info.sharedComponentProperties && ns.page.info.sharedComponentProperties.enabled;
                 var canModify = ns.page.info.permissions && ns.page.info.permissions.modify;
                 if (!!enabled && !!editable.config.dialog && !!canModify) {
-                    var componentSharedDialogs = ns.page.info.sharedComponentProperties.components[editable.type];
-                    if (type == "shared") {
-                        // Use this timeout to move the shared component configuration icons to the
-                        // right of the standard component configuration icon.
-                        setTimeout(function () {
-                            var toolbar = $("#EditableToolbar");
-                            var propsButton = toolbar.find("[data-action='CONFIGURE']");
-                            if (propsButton.size() > 0) {
-                                var sharedPropsButton = toolbar.find("[data-action='SHARED-COMPONENT-PROPS']");
-                                sharedPropsButton.remove();
-                                var globalPropsButton = toolbar.find("[data-action='GLOBAL-COMPONENT-PROPS']");
-                                globalPropsButton.remove();
+                    var componentSharedDialogs = ns.page.info.sharedComponentProperties.components[editable.type] || {};
+                    if (componentSharedDialogs[0] || componentSharedDialogs[1]) {
+                        if (type == "shared") {
+                            // Use this timeout to move the shared component configuration icons to the
+                            // right of the standard component configuration icon.
+                            setTimeout(function () {
+                                var toolbar = $("#EditableToolbar");
+                                var propsButton = toolbar.find("[data-action='CONFIGURE']");
+                                if (propsButton.size() > 0) {
+                                    var sharedPropsButton = toolbar.find("[data-action='SHARED-COMPONENT-PROPS']");
+                                    sharedPropsButton.remove();
+                                    var globalPropsButton = toolbar.find("[data-action='GLOBAL-COMPONENT-PROPS']");
+                                    globalPropsButton.remove();
 
-                                // If shared properties are enabled for this component...
-                                if (componentSharedDialogs[0]) {
-                                    propsButton.after(sharedPropsButton);
-                                    propsButton = sharedPropsButton;
-                                }
+                                    // If shared properties are enabled for this component...
+                                    if (componentSharedDialogs[0]) {
+                                        propsButton.after(sharedPropsButton);
+                                        propsButton = sharedPropsButton;
+                                    }
 
-                                // If global properties are enabled for this component...
-                                if (componentSharedDialogs[1]) {
-                                    propsButton.after(globalPropsButton);
+                                    // If global properties are enabled for this component...
+                                    if (componentSharedDialogs[1]) {
+                                        propsButton.after(globalPropsButton);
+                                    }
                                 }
-                            }
-                        }, 0);
+                            }, 0);
+                        }
+                        return true;
                     }
-                    return true;
                 }
                 return false;
             },
