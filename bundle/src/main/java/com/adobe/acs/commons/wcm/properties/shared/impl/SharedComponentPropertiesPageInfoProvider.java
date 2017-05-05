@@ -54,7 +54,6 @@ import javax.jcr.observation.ObservationManager;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +100,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
     @Override
     public void updatePageInfo(SlingHttpServletRequest request, JSONObject info, Resource resource)
             throws JSONException {
-        if (scheduledSharedComponentsMapUpdate > 0 && Calendar.getInstance().getTimeInMillis() > scheduledSharedComponentsMapUpdate) {
+        if (scheduledSharedComponentsMapUpdate > 0 && System.currentTimeMillis() > scheduledSharedComponentsMapUpdate) {
             scheduledSharedComponentsMapUpdate = -1L;
             updateSharedComponentsMap();
         }
@@ -175,7 +174,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
      */
     private void scheduleSharedComponentsMapUpdate() {
         log.debug("Flagging for rebuild of the map of components with shared properties dialogs");
-        scheduledSharedComponentsMapUpdate = Calendar.getInstance().getTimeInMillis() + 5000;
+        scheduledSharedComponentsMapUpdate = System.currentTimeMillis() + 5000;
     }
 
     /**
