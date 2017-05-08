@@ -106,6 +106,10 @@ public class StatusServlet extends SlingAllMethodsServlet {
             json.put("throttle", config.getThrottle());
             json.put("message", workspace.getMessage());
 
+            if (config.isUserEventData()) {
+                json.put("userEventData", config.getUserEventData());
+            }
+
             ActionManager actionManager = actionManagerFactory.getActionManager(workspace.getActionManagerName());
             if (actionManager != null
                     && !Status.COMPLETED.equals(workspace.getStatus())) {
