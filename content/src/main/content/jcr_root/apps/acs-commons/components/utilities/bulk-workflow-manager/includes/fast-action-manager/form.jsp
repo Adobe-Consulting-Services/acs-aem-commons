@@ -88,5 +88,5 @@
             placeholder="Leave blank to not set user-event-data"/>
 
     <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right"
-          data-quicktip-content="user-event-data can be used to prevent WF Launchers from launching based on the activity performed by this workflow execution"></span>
+          data-quicktip-content="user-event-data can be used to prevent WF Launchers from being invoked from the modifications made by this execution of Bulk Workflow Manager."></span>
 </div>

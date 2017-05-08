@@ -136,6 +136,7 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
 
                     if (config.isUserEventData()) {
                         serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(config.getUserEventData());
+                        log.debug("Set JCR Sessions user-event-data to [ {} ]", config.getUserEventData());
                     }
 
                     PayloadGroup payloadGroup = null;
