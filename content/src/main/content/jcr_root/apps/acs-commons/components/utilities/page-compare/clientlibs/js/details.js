@@ -26,7 +26,7 @@ pageCompareApp
                 right.hide();
                 left.height(height);
                 right.height(height);
-            }
+            };
 
             var compare = function() {
                 var rightText = $('.inner', right).text().trim();
@@ -38,22 +38,20 @@ pageCompareApp
 
                 $('.inner', left).html(newLeftText);
                 $('.inner', right).html(newRigthText);
-            }
+            };
 
             var open = function() {
                 left.slideDown();
                 right.slideDown();
-            }
+            };
 
             var close = function() {
                 left.slideUp();
                 right.slideUp();
-            }
+            };
 
             $(element).click(function() {
-                //if (height < 0) {
-                    init();
-                //}
+                init();
                 if (left.is(":visible") === true) {
                     close();
                 } else {
