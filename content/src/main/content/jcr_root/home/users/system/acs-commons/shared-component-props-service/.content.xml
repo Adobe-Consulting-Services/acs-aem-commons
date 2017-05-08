@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="de08ffa2-0d09-36a5-9a11-536e92940515"
+    rep:authorizableId="acs-commons-shared-component-props-service"
+    rep:principalName="acs-commons-shared-component-props-service"/>
