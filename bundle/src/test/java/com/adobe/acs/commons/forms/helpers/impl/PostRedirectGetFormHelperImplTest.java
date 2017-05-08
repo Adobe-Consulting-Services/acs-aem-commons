@@ -60,25 +60,9 @@ public class PostRedirectGetFormHelperImplTest {
 
     @Before
     public void setup() throws LoginException, PersistenceException {
+        // force resource resolver creation
+        slingContext.resourceResolver();
         slingContext.registerService(XSSAPI.class, xss, new Hashtable<String, Object>());
-        // TODO - remove once SLING-6841 is fixed
-        slingContext.registerService(ResourceResolverFactory.class, new ResourceResolverFactory() {
-            @Override
-            public ResourceResolver getResourceResolver(Map<String, Object> map) throws LoginException {
-                return slingContext.resourceResolver();
-            }
-
-            @Override
-            public ResourceResolver getAdministrativeResourceResolver(Map<String, Object> map) throws LoginException {
-                return slingContext.resourceResolver();
-            }
-
-            @Override
-            public ResourceResolver getServiceResourceResolver(Map<String, Object> map) throws LoginException {
-                return slingContext.resourceResolver();
-            }
-        });
-
         slingContext.registerService(FormsRouter.class, new FormsRouterImpl(), ROUTER_PROPS);
         formHelper = slingContext.registerInjectActivateService(new PostRedirectGetFormHelperImpl());
 

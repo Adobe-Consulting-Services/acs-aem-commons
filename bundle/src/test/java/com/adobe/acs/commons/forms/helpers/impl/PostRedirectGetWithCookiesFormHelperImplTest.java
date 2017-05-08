@@ -6,6 +6,7 @@ import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.impl.FormsRouterImpl;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.xss.XSSAPI;
 import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -41,7 +42,7 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
     public static final String RESOURCE_PATH = "/test";
 
     @Rule
-    public SlingContext slingContext = new SlingContext();
+    public SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
     @Mock
     private XSSAPI xss;
 
@@ -54,24 +55,10 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
 
     @Before
     public void setup() throws LoginException, PersistenceException {
+        // force resource resolver creation
+        slingContext.resourceResolver();
+
         slingContext.registerService(XSSAPI.class, xss);
-        // TODO - remove once SLING-6841 is fixed
-        slingContext.registerService(ResourceResolverFactory.class, new ResourceResolverFactory() {
-            @Override
-            public ResourceResolver getResourceResolver(Map<String, Object> map) throws LoginException {
-                return slingContext.resourceResolver();
-            }
-
-            @Override
-            public ResourceResolver getAdministrativeResourceResolver(Map<String, Object> map) throws LoginException {
-                return slingContext.resourceResolver();
-            }
-
-            @Override
-            public ResourceResolver getServiceResourceResolver(Map<String, Object> map) throws LoginException {
-                return slingContext.resourceResolver();
-            }
-        });
         slingContext.registerService(FormsRouter.class, new FormsRouterImpl());
 
         formHelper = slingContext.registerInjectActivateService(new PostRedirectGetWithCookiesFormHelperImpl());
