@@ -65,7 +65,7 @@ public class PathInfoUtilTest {
     @Test
     public void testGetQueryParam_HttpServletRequest_String() {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource("/apple/macbookair"));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString("show");
@@ -84,7 +84,7 @@ public class PathInfoUtilTest {
     @Test
     public void testGetQueryParam_withDefault() {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource("/apple/macbookair"));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString("show");
@@ -110,7 +110,7 @@ public class PathInfoUtilTest {
     @Test
     public void testGetSelector() {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource("/apple/macbookair"));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString("show.test");
@@ -138,7 +138,7 @@ public class PathInfoUtilTest {
     @Test
     public void testGetSuffixSegment() {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource("/apple/macbookair"));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString("show.test");
@@ -167,7 +167,7 @@ public class PathInfoUtilTest {
     @Test
     public void testGetSuffix() {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource("/apple/macbookair"));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString("show.test");
@@ -183,7 +183,7 @@ public class PathInfoUtilTest {
     @Test
     public void testGetSuffixSegments() {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource("/apple/macbookair"));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString("show.test");
@@ -199,7 +199,7 @@ public class PathInfoUtilTest {
     @Test
     public void testGetSuffixSegments_empty() {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource("/apple/macbookair"));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString("show.test");
@@ -214,7 +214,7 @@ public class PathInfoUtilTest {
     @Test
     public void testGetFirstSuffixSegments() {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource("/apple/macbookair"));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString("show.test");
@@ -230,7 +230,7 @@ public class PathInfoUtilTest {
     @Test
     public void testGetLastSuffixSegments() {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource("/apple/macbookair"));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString("show.test");

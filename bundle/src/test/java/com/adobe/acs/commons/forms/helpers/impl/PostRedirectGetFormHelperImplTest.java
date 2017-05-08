@@ -4,6 +4,9 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.impl.FormsRouterImpl;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.xss.XSSAPI;
 import com.day.cq.commons.PathInfo;
 import com.google.common.collect.ImmutableMap;
@@ -44,7 +47,7 @@ public class PostRedirectGetFormHelperImplTest {
     private static final Map<String, Object> ROUTER_PROPS = ImmutableMap.<String, Object>of("suffix", SUFFIX);
 
     @Rule
-    public SlingContext slingContext = new SlingContext();
+    public SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
     @Mock
     private XSSAPI xss;
 
@@ -58,6 +61,23 @@ public class PostRedirectGetFormHelperImplTest {
     @Before
     public void setup() throws LoginException, PersistenceException {
         slingContext.registerService(XSSAPI.class, xss, new Hashtable<String, Object>());
+        // TODO - remove once SLING-6841 is fixed
+        slingContext.registerService(ResourceResolverFactory.class, new ResourceResolverFactory() {
+            @Override
+            public ResourceResolver getResourceResolver(Map<String, Object> map) throws LoginException {
+                return slingContext.resourceResolver();
+            }
+
+            @Override
+            public ResourceResolver getAdministrativeResourceResolver(Map<String, Object> map) throws LoginException {
+                return slingContext.resourceResolver();
+            }
+
+            @Override
+            public ResourceResolver getServiceResourceResolver(Map<String, Object> map) throws LoginException {
+                return slingContext.resourceResolver();
+            }
+        });
 
         slingContext.registerService(FormsRouter.class, new FormsRouterImpl(), ROUTER_PROPS);
         formHelper = slingContext.registerInjectActivateService(new PostRedirectGetFormHelperImpl());

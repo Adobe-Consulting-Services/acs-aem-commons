@@ -4,6 +4,8 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.impl.FormsRouterImpl;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.xss.XSSAPI;
 import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -25,6 +27,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.servlet.http.Cookie;
 import java.util.Collections;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -52,6 +55,23 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
     @Before
     public void setup() throws LoginException, PersistenceException {
         slingContext.registerService(XSSAPI.class, xss);
+        // TODO - remove once SLING-6841 is fixed
+        slingContext.registerService(ResourceResolverFactory.class, new ResourceResolverFactory() {
+            @Override
+            public ResourceResolver getResourceResolver(Map<String, Object> map) throws LoginException {
+                return slingContext.resourceResolver();
+            }
+
+            @Override
+            public ResourceResolver getAdministrativeResourceResolver(Map<String, Object> map) throws LoginException {
+                return slingContext.resourceResolver();
+            }
+
+            @Override
+            public ResourceResolver getServiceResourceResolver(Map<String, Object> map) throws LoginException {
+                return slingContext.resourceResolver();
+            }
+        });
         slingContext.registerService(FormsRouter.class, new FormsRouterImpl());
 
         formHelper = slingContext.registerInjectActivateService(new PostRedirectGetWithCookiesFormHelperImpl());
