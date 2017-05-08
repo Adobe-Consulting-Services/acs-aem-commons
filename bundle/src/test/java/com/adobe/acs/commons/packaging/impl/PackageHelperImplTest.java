@@ -36,10 +36,10 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.commons.testing.sling.MockResource;
-import org.apache.sling.commons.testing.sling.MockResourceResolver;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -135,6 +135,9 @@ public class PackageHelperImplTest {
 
     @InjectMocks
     final PackageHelperImpl packageHelper = new PackageHelperImpl();
+
+    @Rule
+    private SlingContext slingContext = new SlingContext();
 
     List<PathFilterSet> packageOneFilterSets;
     List<PathFilterSet> packageTwoFilterSets;
@@ -340,12 +343,11 @@ public class PackageHelperImplTest {
 
     @Test
     public void testGetPreviewJSON() throws Exception {
-        final MockResourceResolver resourceResolver = new MockResourceResolver();
         final Set<Resource> resources = new HashSet<Resource>();
 
-        resources.add(new MockResource(resourceResolver, "/a/b/c", ""));
-        resources.add(new MockResource(resourceResolver, "/d/e/f", ""));
-        resources.add(new MockResource(resourceResolver, "/g/h/i", ""));
+        resources.add(slingContext.create().resource("/a/b/c"));
+        resources.add(slingContext.create().resource("/d/e/f"));
+        resources.add(slingContext.create().resource("/g/h/i"));
 
 
         final String actual = packageHelper.getPreviewJSON(resources);
