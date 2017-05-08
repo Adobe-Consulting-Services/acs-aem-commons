@@ -144,7 +144,7 @@ class ActionManagerImpl implements ActionManager {
         resolver.setCurrentItem(currentPath.get());
         try {
             action.accept(resolver.getResolver());
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             throw ex;
         } finally {
             try {
@@ -278,7 +278,7 @@ class ActionManagerImpl implements ActionManager {
                 if (!closesResolver) {
                     logCompletetion();
                 }
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 if (!closesResolver) {
                     logError(ex);
                 }
@@ -308,11 +308,15 @@ class ActionManagerImpl implements ActionManager {
         }
     }
 
-    private void logError(Exception ex) {
+    private void logError(Throwable ex) {
         LOG.error("Caught exception in task: "+ex.getMessage(), ex);
         Failure fail = new Failure();
         fail.setNodePath(currentPath.get());
-        fail.setException(ex);
+        if (ex instanceof Exception) {
+            fail.setException((Exception) ex);
+        } else {
+            fail.setException(new RuntimeException("Uncaught exception", ex));
+        }
         failures.add(fail);
         tasksCompleted.incrementAndGet();
         tasksError.incrementAndGet();
