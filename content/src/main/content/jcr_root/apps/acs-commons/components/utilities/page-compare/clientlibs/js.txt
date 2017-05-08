@@ -1,5 +1,6 @@
 #base=js
 
 app.js
+diff.js
 details.js
 legend.js
