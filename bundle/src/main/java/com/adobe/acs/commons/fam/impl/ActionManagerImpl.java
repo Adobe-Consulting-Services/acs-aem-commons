@@ -278,9 +278,10 @@ class ActionManagerImpl implements ActionManager {
                 if (!closesResolver) {
                     logCompletetion();
                 }
-            } catch (Throwable ex) {
+            } catch (Throwable t) {
+                LOG.error("Error in error handler for action "+getName(), t);
                 if (!closesResolver) {
-                    logError(ex);
+                    logError(t);
                 }
             }
         });
