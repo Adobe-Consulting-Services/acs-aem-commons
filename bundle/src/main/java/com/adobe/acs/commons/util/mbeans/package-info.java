@@ -18,6 +18,9 @@
  * #L%
  */
 /**
- * Replication utilities.
+ * Miscellaneous Utilities Mbeans.
  */
-@aQute.bnd.annotation.Version("1.1.0") package com.adobe.acs.commons.replication.status;
+@Version("1.0.0")
+package com.adobe.acs.commons.util.mbeans;
+
+import aQute.bnd.annotation.Version;
