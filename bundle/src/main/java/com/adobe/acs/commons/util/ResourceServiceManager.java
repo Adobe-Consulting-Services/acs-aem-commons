@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.util;
 
-import com.adobe.acs.commons.util.impl.ResourceServiceManagerMBean;
+import com.adobe.acs.commons.util.mbeans.ResourceServiceManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.commons.lang.ArrayUtils;

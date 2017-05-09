@@ -27,9 +27,9 @@ import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
-import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
+import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
@@ -193,8 +193,6 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
             try {
                 resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
-                resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.bulk-workflow-manager");
-
                 configResource = resourceResolver.getResource(configPath);
 
                 final Config config = configResource.adaptTo(Config.class);
@@ -204,6 +202,10 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
                         && actionManagerFactory.hasActionManager(workspace.getActionManagerName())) {
                     log.warn("Action Manager already exists for [ {} ]", workspace.getActionManagerName());
                     return;
+                }
+
+                if (config.isUserEventData()) {
+                    resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(config.getUserEventData());
                 }
 
                 /** Collect and initialize the workspace **/

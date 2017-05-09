@@ -1,15 +1,15 @@
 /*
  * #%L
- * ACS AEM Tools Bundle
+ * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2017 - Adobe
+ * Copyright (C) 2013 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,24 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.util.impl;
-
-import java.util.List;
-
-import org.apache.sling.api.resource.LoginException;
-
-import com.adobe.granite.jmx.annotation.Description;
-
 /**
- * Base methods for the JMX Interface for a ResourceServiceManager
- * 
- * @author danklco
+ * Miscellaneous Utilities Mbeans.
  */
-public interface ResourceServiceManagerMBean {
+@Version("1.0.0")
+package com.adobe.acs.commons.util.mbeans;
 
-	@Description("Gets the configurations currently registered")
-	List<String> getRegisteredConfigurations();
-
-	@Description("Refreshes the cache of registered configurations")
-	void refreshCache() throws LoginException;
-}
+import aQute.bnd.annotation.Version;
