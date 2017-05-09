@@ -20,19 +20,13 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.util.WorkflowHelper;
+import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowData;
+import com.day.cq.workflow.metadata.MetaDataMap;
+import junitx.util.PrivateAccessor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -43,14 +37,16 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.adobe.acs.commons.util.WorkflowHelper;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowData;
-import com.day.cq.workflow.metadata.MetaDataMap;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
-import junitx.util.PrivateAccessor;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 public class SetReplicationStatusProcessTest {
@@ -100,17 +96,17 @@ public class SetReplicationStatusProcessTest {
 	
 	@Test
 	public void testUpdateStatusWithProvidedParams() throws Exception {
-		String workflowParams = "replicationDate=2017-04-21T15:02" + System.lineSeparator();
-		workflowParams += "replicatedBy=customUser" + System.lineSeparator();
+		String workflowParams = "replicationDate=2017-04-21T15:02" + System.getProperty("line.separator").toString();
+		workflowParams += "replicatedBy=customUser" + System.getProperty("line.separator").toString();
 		workflowParams += "replicationAction=ACTIVATED";
-		
+
 		when(metadataMap.get(WorkflowHelper.PROCESS_ARGS, "")).thenReturn(workflowParams);
 		
 		setReplicationStatusProcess.execute(workItem, workflowSession, metadataMap);
 		
 		CalendarMatcher calMatch = new CalendarMatcher("2017-04-21T15:02");
 		
-		verify(replicationStatusManager).setReplicationStatus(any(), eq("customUser"), argThat(calMatch), eq(ReplicationStatusManager.Status.valueOf("ACTIVATED")), eq(workflowPayload));
+		verify(replicationStatusManager).setReplicationStatus(any(ResourceResolver.class), eq("customUser"), argThat(calMatch), eq(ReplicationStatusManager.Status.valueOf("ACTIVATED")), eq(workflowPayload));
 	}
 	
 	@Test
@@ -120,7 +116,7 @@ public class SetReplicationStatusProcessTest {
 		
 		setReplicationStatusProcess.execute(workItem, workflowSession, metadataMap);
 		
-		verify(replicationStatusManager, never()).setReplicationStatus(any(), any(), any(), any(), anyString());
+		verify(replicationStatusManager, never()).setReplicationStatus(any(ResourceResolver.class), anyString(), any(Calendar.class), any(ReplicationStatusManager.Status.class), anyString());
 	}
 
 	@Test
@@ -134,7 +130,7 @@ public class SetReplicationStatusProcessTest {
 		
 		CalendarMatcher calMatch = new CalendarMatcher(now);
 		
-		verify(replicationStatusManager).setReplicationStatus(any(), eq("migration"), argThat(calMatch), any(), anyString());
+		verify(replicationStatusManager).setReplicationStatus(any(ResourceResolver.class), eq("migration"), argThat(calMatch), any(ReplicationStatusManager.Status.class), anyString());
 	}
 
 }

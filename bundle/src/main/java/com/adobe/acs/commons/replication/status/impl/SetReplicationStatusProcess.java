@@ -20,12 +20,14 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.Map;
-
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.adobe.acs.commons.util.WorkflowHelper;
+import com.day.cq.workflow.WorkflowException;
+import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowProcess;
+import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -36,14 +38,11 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.adobe.acs.commons.util.WorkflowHelper;
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowProcess;
-import com.day.cq.workflow.metadata.MetaDataMap;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.Map;
 
 @Component
 @Property(
@@ -116,7 +115,7 @@ public class SetReplicationStatusProcess implements WorkflowProcess {
 	}
 
 	private Map<String, String> extractWorkflowParams(MetaDataMap metadataMap) {
-		String[] lines = StringUtils.split(metadataMap.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+		String[] lines = StringUtils.split(metadataMap.get(WorkflowHelper.PROCESS_ARGS, ""), System.getProperty("line.separator").toString());
 		Map<String, String> params = ParameterUtil.toMap(lines, "=");
 		return params;
 	}
