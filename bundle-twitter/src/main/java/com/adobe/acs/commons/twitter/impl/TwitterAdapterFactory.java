@@ -21,7 +21,6 @@ package com.adobe.acs.commons.twitter.impl;
 
 import java.util.Map;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -56,7 +55,7 @@ import com.day.cq.wcm.webservicesupport.ConfigurationManager;
                 "com.day.cq.wcm.webservicesupport.Configuration" }, propertyPrivate = true),
         @Property(name = AdapterFactory.ADAPTER_CLASSES, value = { "twitter4j.Twitter",
                 "com.adobe.acs.commons.twitter.TwitterClient" }, propertyPrivate = true) })
-public class TwitterAdapterFactory implements AdapterFactory {
+public final class TwitterAdapterFactory implements AdapterFactory {
 
     private static final String CLOUD_SERVICE_NAME = "twitterconnect";
 
@@ -124,7 +123,7 @@ public class TwitterAdapterFactory implements AdapterFactory {
         String consumerSecret = oauthProps.get("oauth.client.secret", String.class);
 
         if (consumerKey != null && consumerSecret != null) {
-            Twitter t = getInstance();
+            Twitter t = factory.getInstance();
             log.debug("Creating client for key {}.", consumerKey);
             t.setOAuthConsumer(consumerKey, consumerSecret);
             try {
@@ -139,11 +138,6 @@ public class TwitterAdapterFactory implements AdapterFactory {
         }
 
         return null;
-    }
-
-    @VisibleForTesting
-    Twitter getInstance() {
-        return factory.getInstance();
     }
 
     private TwitterClient createTwitterClient(Page page) {
