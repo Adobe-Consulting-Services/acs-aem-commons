@@ -350,6 +350,10 @@
             <artifactId>org.apache.sling.testing.jcr-mock</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.wcm</groupId>
+            <artifactId>io.wcm.testing.aem-mock</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
         </dependency>
