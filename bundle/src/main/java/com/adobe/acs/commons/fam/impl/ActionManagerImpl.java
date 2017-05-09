@@ -391,12 +391,12 @@ class ActionManagerImpl implements ActionManager {
     }
 
     @Override
-    public void closeAllResolvers() {
+    public synchronized void closeAllResolvers() {
         if (!resolvers.isEmpty()) {
             resolvers.stream()
                     .map(ReusableResolver::getResolver)
                     .filter(ResourceResolver::isLive)
-                    .forEachOrdered(ResourceResolver::close);
+                    .forEach(ResourceResolver::close);
             resolvers.clear();
         }
         baseResolver.close();
