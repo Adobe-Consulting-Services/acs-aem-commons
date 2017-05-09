@@ -278,11 +278,17 @@ class ActionManagerImpl implements ActionManager {
                 if (!closesResolver) {
                     logCompletetion();
                 }
-            } catch (Throwable t) {
-                LOG.error("Error in error handler for action "+getName(), t);
+            } catch (Exception ex) {
+                LOG.error("Error in error handler for action "+getName(), ex);
                 if (!closesResolver) {
-                    logError(t);
+                    logError(ex);
                 }
+            } catch (Throwable t) {
+                LOG.error("Fatal uncaught error in error handler for action "+getName(), t);
+                if (!closesResolver) {
+                    logError(new RuntimeException(t));
+                }
+                throw t;
             }
         });
         if (!closesResolver) {
@@ -309,15 +315,11 @@ class ActionManagerImpl implements ActionManager {
         }
     }
 
-    private void logError(Throwable ex) {
+    private void logError(Exception ex) {
         LOG.error("Caught exception in task: "+ex.getMessage(), ex);
         Failure fail = new Failure();
         fail.setNodePath(currentPath.get());
-        if (ex instanceof Exception) {
-            fail.setException((Exception) ex);
-        } else {
-            fail.setException(new RuntimeException("Uncaught exception", ex));
-        }
+        fail.setException((Exception) ex);
         failures.add(fail);
         tasksCompleted.incrementAndGet();
         tasksError.incrementAndGet();
