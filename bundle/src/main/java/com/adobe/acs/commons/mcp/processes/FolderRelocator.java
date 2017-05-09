@@ -252,7 +252,7 @@ public class FolderRelocator extends ControlledProcess {
         });
     }
 
-    private void buildDestinationFolder(ResourceResolver rr, String sourceFolder) throws PersistenceException, RepositoryException {
+    private void buildDestinationFolder(ResourceResolver rr, String sourceFolder) throws PersistenceException, RepositoryException, InterruptedException {
         Session session = rr.adaptTo(Session.class);
         session.getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
         Resource source = rr.getResource(sourceFolder);
@@ -261,19 +261,34 @@ public class FolderRelocator extends ControlledProcess {
             Actions.setCurrentItem(sourceFolder + "->" + targetPath);
             String targetParentPath = targetPath.substring(0, targetPath.lastIndexOf('/'));
             String targetName = targetPath.substring(targetPath.lastIndexOf('/') + 1);
+            waitUntilResourceFound(rr, targetParentPath);
             Resource destParent = rr.getResource(targetParentPath);
-            if (destParent.isResourceType(Resource.RESOURCE_TYPE_NON_EXISTING)) {
-                throw new RepositoryException("Unable to find target folder " + targetParentPath);
-            }
             Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Creating target for {0}", sourceFolder);
             rr.create(destParent, targetName, source.getValueMap());
-        }
-        if (resourceExists(rr, sourceFolder + "/jcr:content") && !resourceExists(rr, targetPath + "/jcr:content")) {
             rr.commit();
             rr.refresh();
-            Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Copying {0}/jcr:content", sourceFolder);
-            rr.copy(sourceFolder + "/jcr:content", targetPath + "/jcr:content");
         }
+        if (resourceExists(rr, sourceFolder + "/jcr:content")) {
+            Actions.getCurrentActionManager().deferredWithResolver(Actions.retry(5,50,(rrr)->{
+                if (!resourceExists(rrr, targetPath + "/jcr:content")) {
+                    waitUntilResourceFound(rrr, targetPath);
+                    rrr.copy(sourceFolder + "/jcr:content", targetPath);
+                    rrr.commit();
+                    rrr.refresh();
+                }
+            }));
+        }
+    }
+
+    private void waitUntilResourceFound(ResourceResolver rr, String path) throws InterruptedException, RepositoryException {
+        for (int i=0; i < 10; i++) {
+            if (resourceExists(rr, path)) {
+                return;
+            }
+            Thread.sleep(100);
+            rr.refresh();
+        }
+        throw new RepositoryException("Resource not found: "+path);
     }
 
     private String convertSourceToDestination(String path) throws RepositoryException {
