@@ -4,6 +4,9 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.impl.FormsRouterImpl;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.xss.XSSAPI;
 import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -25,6 +28,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.servlet.http.Cookie;
 import java.util.Collections;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -38,7 +42,7 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
     public static final String RESOURCE_PATH = "/test";
 
     @Rule
-    public SlingContext slingContext = new SlingContext();
+    public SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
     @Mock
     private XSSAPI xss;
 
@@ -51,6 +55,9 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
 
     @Before
     public void setup() throws LoginException, PersistenceException {
+        // force resource resolver creation
+        slingContext.resourceResolver();
+
         slingContext.registerService(XSSAPI.class, xss);
         slingContext.registerService(FormsRouter.class, new FormsRouterImpl());
 
