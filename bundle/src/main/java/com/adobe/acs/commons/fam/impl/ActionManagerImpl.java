@@ -144,7 +144,7 @@ class ActionManagerImpl implements ActionManager {
         resolver.setCurrentItem(currentPath.get());
         try {
             action.accept(resolver.getResolver());
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             throw ex;
         } finally {
             try {
@@ -279,9 +279,16 @@ class ActionManagerImpl implements ActionManager {
                     logCompletetion();
                 }
             } catch (Exception ex) {
+                LOG.error("Error in error handler for action "+getName(), ex);
                 if (!closesResolver) {
                     logError(ex);
                 }
+            } catch (Throwable t) {
+                LOG.error("Fatal uncaught error in error handler for action "+getName(), t);
+                if (!closesResolver) {
+                    logError(new RuntimeException(t));
+                }
+                throw t;
             }
         });
         if (!closesResolver) {

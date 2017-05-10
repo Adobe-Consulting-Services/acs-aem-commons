@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.twitter.impl;
 
 import com.adobe.acs.commons.twitter.TwitterClient;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.adobe.cq.commerce.common.ValueMapDecorator;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.webservicesupport.ConfigurationConstants;
@@ -31,7 +30,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.stubbing.Answer;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -39,7 +37,6 @@ import twitter4j.conf.Configuration;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import static org.junit.Assert.*;
