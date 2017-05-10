@@ -55,7 +55,12 @@ public final class Actions {
                 try {
                     action.accept(r, s);
                     return;
-                } catch (Exception e) {
+                } catch (InterruptedException e) {
+                    r.revert();
+                    r.refresh();
+                    LOG.info("Timeout reached, aborting work", e);
+                    throw e;
+                } catch (Throwable e) {
                     r.revert();
                     r.refresh();
                     if (remaining-- <= 0) {
@@ -101,7 +106,12 @@ public final class Actions {
                 try {
                     action.accept(r);
                     return;
-                } catch (Exception e) {
+                } catch (InterruptedException e) {
+                    r.revert();
+                    r.refresh();
+                    LOG.info("Timeout reached, aborting work", e);
+                    throw e;
+                } catch (Throwable e) {
                     r.revert();
                     r.refresh();
                     LOG.info("Error commit, retry count is " + remaining, e);
