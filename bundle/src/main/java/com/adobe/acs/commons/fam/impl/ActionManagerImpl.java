@@ -319,7 +319,7 @@ class ActionManagerImpl implements ActionManager {
         LOG.error("Caught exception in task: "+ex.getMessage(), ex);
         Failure fail = new Failure();
         fail.setNodePath(currentPath.get());
-        fail.setException((Exception) ex);
+        fail.setException(ex);
         failures.add(fail);
         tasksCompleted.incrementAndGet();
         tasksError.incrementAndGet();
