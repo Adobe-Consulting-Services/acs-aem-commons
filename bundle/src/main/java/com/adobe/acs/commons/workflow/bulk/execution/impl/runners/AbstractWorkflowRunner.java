@@ -33,18 +33,27 @@ import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(AbstractWorkflowRunner.class);
     private static final int SAVE_THRESHOLD = 1000;
+
+    protected static final String SERVICE_NAME = "bulk-workflow-runner";
+    protected static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     /**
      * {@inheritDoc}

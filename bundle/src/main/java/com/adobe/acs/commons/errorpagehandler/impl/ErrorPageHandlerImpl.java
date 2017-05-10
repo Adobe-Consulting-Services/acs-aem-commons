@@ -31,22 +31,12 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestProgressTracker;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.auth.core.AuthUtil;
 import org.apache.sling.commons.auth.Authenticator;
@@ -63,15 +53,7 @@ import javax.servlet.ServletException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -215,6 +197,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /* Error image extensions to handle */
     private static final String[] DEFAULT_ERROR_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif"};
 
+    private static final String SERVICE_NAME = "error-page-handler";
+
     private String[] errorImageExtensions = DEFAULT_ERROR_IMAGE_EXTENSIONS;
 
     @Property(
@@ -256,56 +240,29 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             return null;
         }
 
-        Resource page = null;
-        final ResourceResolver resourceResolver = errorResource.getResourceResolver();
-        final String errorResourcePath = errorResource.getPath();
+        final String errorsPath = findErrorsPath(request, errorResource);
 
-        // Get error page name to look for based on the error code/name
-        String errorsPath = null;
-
-        // Try to find the closest real parent for the requested resource
-        final Resource parent = findFirstRealParentOrSelf(request, errorResource);
-        if (parent != null) {
-            // Get content resource of the page
-            final Resource parentContentResource = parent.getChild(JcrConstants.JCR_CONTENT);
-
-            if (parentContentResource != null) {
-                final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(parentContentResource);
-                errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
-
-                // could not find inherited property
-                if (errorsPath == null) {
-                    for (final Map.Entry<String, String> mapPage : pathMap.entrySet()) {
-                        if (errorResourcePath.startsWith(mapPage.getKey())) {
-                            errorsPath = mapPage.getValue();
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
+        Resource errorPage = null;
         if (StringUtils.isNotBlank(errorsPath)) {
-            log.debug("Best matching errors path for request is: {}", errorsPath);
+        	final ResourceResolver resourceResolver = errorResource.getResourceResolver();
+            final String errorPath = errorsPath + "/" + getErrorPageName(request);
+            errorPage = getResource(resourceResolver, errorPath);
 
-            String errorPath = errorsPath + "/" + getErrorPageName(request);
-            page = getResource(resourceResolver, errorPath);
-
-            // No error-specific page could be found, use the "default" error page
-            // for the Root content path
-            if (page == null && StringUtils.isNotBlank(errorsPath)) {
-                page = resourceResolver.resolve(errorsPath);
+            if (errorPage == null && StringUtils.isNotBlank(errorsPath)) {
+            	log.trace("No error-specific errorPage could be found, use the 'default' error errorPage for the Root content path");
+                errorPage = resourceResolver.resolve(errorsPath);
             }
         }
 
         String errorPagePath = null;
-        if (page == null || ResourceUtil.isNonExistingResource(page)) {
-            // If no error page could be found
+        if (errorPage == null || ResourceUtil.isNonExistingResource(errorPage)) {
+            log.trace("no custom error page could be found");
             if (this.hasSystemErrorPage()) {
                 errorPagePath = this.getSystemErrorPagePath();
+                log.trace("using system error page [ {} ]", errorPagePath);
             }
         } else {
-            errorPagePath = page.getPath();
+            errorPagePath = errorPage.getPath();
         }
 
         if (errorImagesEnabled && this.isImageRequest(request)) {
@@ -340,6 +297,46 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         }
         return null;
     }
+
+    /**
+     * Searches for a resource specific error page.
+     *
+     * @param errorResource
+     * @return path to the default error page or "root" error page
+     */
+	private String findErrorsPath(SlingHttpServletRequest request, Resource errorResource) {
+		final String errorResourcePath = errorResource.getPath();
+		Resource real = findFirstRealParentOrSelf(request, errorResource);
+
+        String errorsPath = null;
+        if (real != null) {
+            log.trace("Found real resource at [ {} ]", real.getPath());
+            if (!JcrConstants.JCR_CONTENT.equals(real.getName())) {
+                Resource tmp = real.getChild(JcrConstants.JCR_CONTENT);
+                if (tmp != null) {
+                    real = tmp;
+                }
+            }
+	        final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(real);
+	        errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
+        } else {
+        	log.trace("No page found for [ {} ]", errorResource);
+        }
+
+        if (errorsPath == null) {
+        	log.trace("could not find inherited property for [ {} ]", errorResource);
+            for (final Map.Entry<String, String> mapPage : pathMap.entrySet()) {
+                if (errorResourcePath.startsWith(mapPage.getKey())) {
+                	log.trace("found error path in map [ {} ]", mapPage.getKey());
+                    errorsPath = mapPage.getValue();
+                    break;
+                }
+            }
+        }
+
+        log.debug("Best matching errors path for request is: {}", errorsPath);
+		return errorsPath;
+	}
 
     /**
      * Gets the resource object for the provided path.
@@ -867,10 +864,11 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Absolute path
         if (StringUtils.startsWith(this.errorImagePath, "/")) {
-            ResourceResolver adminResourceResolver = null;
+            ResourceResolver serviceResourceResolver = null;
             try {
-                adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                final Resource resource = adminResourceResolver.resolve(this.errorImagePath);
+                Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+                final Resource resource = serviceResourceResolver.resolve(this.errorImagePath);
 
                 if (resource != null && resource.isResourceType(JcrConstants.NT_FILE)) {
                     final PathInfo pathInfo = new PathInfo(this.errorImagePath);
@@ -885,8 +883,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             } catch (LoginException e) {
                 log.error("Could not get admin resource resolver to inspect validity of absolute errorImagePath");
             } finally {
-                if (adminResourceResolver != null) {
-                    adminResourceResolver.close();
+                if (serviceResourceResolver != null) {
+                    serviceResourceResolver.close();
                 }
             }
         }

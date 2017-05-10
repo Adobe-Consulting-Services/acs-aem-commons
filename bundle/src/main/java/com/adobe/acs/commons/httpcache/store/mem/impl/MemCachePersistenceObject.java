@@ -38,6 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Value for cache item in mem store.
  */
 class MemCachePersistenceObject {
+    /** Response status **/
+    private int status;
     /** Response character encoding */
     private String charEncoding;
     /** Response content type */
@@ -64,9 +66,10 @@ class MemCachePersistenceObject {
      * @param dataInputStream
      * @throws HttpCacheDataStreamException
      */
-    public MemCachePersistenceObject buildForCaching(String charEncoding, String contentType, Map<String,
+    public MemCachePersistenceObject buildForCaching(int status, String charEncoding, String contentType, Map<String,
             List<String>> headers, InputStream dataInputStream) throws HttpCacheDataStreamException {
 
+        this.status = status;
         this.charEncoding = charEncoding;
         this.contentType = contentType;
 
@@ -74,7 +77,10 @@ class MemCachePersistenceObject {
         this.headers = HashMultimap.create();
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             for (String value : entry.getValue()) {
-                this.headers.put(entry.getKey(), value);
+                if (!"Sling-Tracer-Protocol-Version".equals(entry.getKey()) && !"Sling-Tracer-Request-Id".equals(entry.getKey())) {
+                    // Do NOT cache Sling Tracer headers as this makes debugging difficult and confusing!
+                    this.headers.put(entry.getKey(), value);
+                }
             }
         }
 
@@ -88,6 +94,13 @@ class MemCachePersistenceObject {
         return this;
     }
 
+    /**
+     * Get response status
+     * @return the status code
+     */
+    public int getStatus() {
+        return status;
+    }
     /**
      * Get char encoding.
      *

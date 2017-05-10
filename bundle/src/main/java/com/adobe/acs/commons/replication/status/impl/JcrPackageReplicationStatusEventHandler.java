@@ -25,9 +25,6 @@ import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.day.cq.jcrclustersupport.ClusterAware;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationStatus;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.PackageException;
-import com.day.jcr.vault.packaging.Packaging;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -40,6 +37,9 @@ import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -47,8 +47,9 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.apache.sling.event.jobs.JobProcessor;
-import org.apache.sling.event.jobs.JobUtil;
+import org.apache.sling.event.jobs.Job;
+import org.apache.sling.event.jobs.JobManager;
+import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -60,21 +61,22 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Component(
         label = "ACS AEM Commons - Package Replication Status Updater",
         description = "Event handler that listens for Jcr Package replications and updates the Replication Status of "
-                 + "its content accordingly.",
+                + "its content accordingly.",
         metatype = true,
-        immediate =  true,
+        immediate = true,
         policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
         @Property(
                 label = "Event Topics",
-                value = { ReplicationAction.EVENT_TOPIC },
+                value = {ReplicationAction.EVENT_TOPIC},
                 description = "[Required] Event Topics this event handler will to respond to.",
                 name = EventConstants.EVENT_TOPIC,
                 propertyPrivate = true
@@ -84,10 +86,16 @@ import java.util.Map;
                 value = "(" + ReplicationAction.PROPERTY_TYPE + "=ACTIVATE)",
                 name = EventConstants.EVENT_FILTER,
                 propertyPrivate = true
+        ),
+        @Property(
+                name = JobConsumer.PROPERTY_TOPICS,
+                value = JcrPackageReplicationStatusEventHandler.JOB_TOPIC
         )
 })
 @Service
-public class JcrPackageReplicationStatusEventHandler implements JobProcessor, EventHandler, ClusterAware {
+public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, ClusterAware {
+    private static final String PROPERTY_PATHS = "paths";
+
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
     private enum ReplicatedAt {
@@ -119,6 +127,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
             })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
 
+    protected static final String JOB_TOPIC = "acs-commons/replication/package";
+
     @Reference
     private Packaging packaging;
 
@@ -131,7 +141,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
     @Reference
     private PackageHelper packageHelper;
 
-    private ResourceResolver adminResourceResolver;
+    @Reference
+    private JobManager jobManager;
 
     private boolean isMaster = false;
 
@@ -158,70 +169,101 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
             })
     public static final String PROP_REPLICATED_AT = "replicated-at";
 
+    private static final String SERVICE_NAME = "package-replication-status-event-listener";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
+
     @Override
     public final void handleEvent(final Event event) {
         if (this.isMaster) {
             // Only run on master
 
-            final String[] paths = (String[]) event.getProperty("paths");
+            final String[] paths = (String[]) event.getProperty(PROPERTY_PATHS);
 
-            if (this.containsJcrPackagePath(paths) && !CollectionUtils.isEmpty(this.getJcrPackages(paths))) {
-                JobUtil.processJob(event, this);
+            if (this.containsJcrPackagePath(paths)) {
+                ResourceResolver resourceResolver = null;
+                try {
+                    resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+
+                    if (CollectionUtils.isNotEmpty(this.getJcrPackages(resourceResolver, paths))) {
+                        jobManager.addJob(JOB_TOPIC, Collections.<String, Object>singletonMap(PROPERTY_PATHS, paths));
+                    }
+                } catch (LoginException e) {
+                    log.error("Could not obtain a resource resolver.", e);
+                } finally {
+                    if (resourceResolver != null) {
+                        resourceResolver.close();
+                    }
+                }
             }
         }
     }
 
     @Override
-    public final boolean process(final Event event) {
-        final String[] paths = (String[]) event.getProperty("paths");
+    public final JobResult process(final Job job) {
+        final String[] paths = (String[]) job.getProperty(PROPERTY_PATHS);
 
         log.debug("Processing Replication Status Update for JCR Package: {}", paths);
 
-        final List<JcrPackage> jcrPackages = this.getJcrPackages(paths);
+        ResourceResolver resourceResolver = null;
+        try {
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
-        if (CollectionUtils.isEmpty(jcrPackages)) {
-            log.warn("JCR Package is unavailable for Replication Status Update at: {}", paths);
-            return true;
-        }
+            final List<JcrPackage> jcrPackages = this.getJcrPackages(resourceResolver, paths);
 
-        for (final JcrPackage jcrPackage : jcrPackages) {
-            try {
-                final List<Resource> resources = new ArrayList<Resource>();
+            if (CollectionUtils.isEmpty(jcrPackages)) {
+                log.warn("JCR Package is unavailable for Replication Status Update at: {}", paths);
+                return JobResult.OK;
+            }
 
-                for (final String packagePath : packageHelper.getContents(jcrPackage)) {
-                    final Resource resource = this.adminResourceResolver.getResource(packagePath);
-                    if (this.accept(resource))  {
-                        resources.add(resource);
+            for (final JcrPackage jcrPackage : jcrPackages) {
+                try {
+                    final List<Resource> resources = new ArrayList<Resource>();
+
+                    for (final String packagePath : packageHelper.getContents(jcrPackage)) {
+                        final Resource resource = resourceResolver.getResource(packagePath);
+                        if (this.accept(resource))  {
+                            resources.add(resource);
+                        }
                     }
+
+                    if (resources.size() > 0) {
+                        replicationStatusManager.setReplicationStatus(resourceResolver,
+                                this.replicatedBy,
+                                getJcrPackageLastModified(resourceResolver, jcrPackage),
+                                ReplicationStatusManager.Status.ACTIVATED,
+                                resources.toArray(new Resource[resources.size()]));
+
+                        log.info("Updated Replication Status for JCR Package: {}", jcrPackage.getDefinition().getId());
+                    } else {
+                        log.info("Could not find any resources in JCR Package [ {} ] that are candidates to have their Replication Status updated",
+                                jcrPackage.getDefinition().getId());
+                    }
+                } catch (RepositoryException e) {
+                    log.error("RepositoryException occurred updating replication status for contents of package");
+                    log.error(e.getMessage());
+
+                } catch (IOException e) {
+                    log.error("IOException occurred updating replication status for contents of package");
+                    log.error(e.getMessage());
+
+                } catch (PackageException e) {
+                    log.error("Could not retrieve the Packages contents.");
+                    log.error(e.getMessage());
                 }
-
-                if (resources.size() > 0) {
-                    replicationStatusManager.setReplicationStatus(this.adminResourceResolver,
-                            this.replicatedBy,
-                            getJcrPackageLastModified(this.adminResourceResolver, jcrPackage),
-                            ReplicationStatusManager.Status.ACTIVATED,
-                            resources.toArray(new Resource[resources.size()]));
-
-                    log.info("Updated Replication Status for JCR Package: {}", jcrPackage.getDefinition().getId());
-                } else {
-                    log.info("Could not find any resources in JCR Package [ {} ] that are candidates to have their Replication Status updated",
-                            jcrPackage.getDefinition().getId());
-                }
-            } catch (RepositoryException e) {
-                log.error("RepositoryException occurred updating replication status for contents of package");
-                log.error(e.getMessage());
-
-            } catch (IOException e) {
-                log.error("IOException occurred updating replication status for contents of package");
-                log.error(e.getMessage());
-
-            } catch (PackageException e) {
-                log.error("Could not retrieve the Packages contents.");
-                log.error(e.getMessage());
+            }
+        } catch (LoginException e) {
+            log.error("Could not obtain a resource resolver for applying replication status updates", e);
+            return JobResult.FAILED;
+        } finally {
+            if (resourceResolver != null) {
+                resourceResolver.close();
             }
         }
 
-        return true;
+        return JobResult.OK;
     }
 
     /**
@@ -252,11 +294,11 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
      * @param paths the list of paths to resolve to Jcr Packages
      * @return a list of Jcr Packages that correspond to the provided paths
      */
-    private List<JcrPackage> getJcrPackages(final String[] paths) {
+    private List<JcrPackage> getJcrPackages(final ResourceResolver resourceResolver, final String[] paths) {
         final List<JcrPackage> packages = new ArrayList<JcrPackage>();
 
         for (final String path : paths) {
-            final Resource eventResource = this.adminResourceResolver.getResource(path);
+            final Resource eventResource = resourceResolver.getResource(path);
 
             JcrPackage jcrPackage;
 
@@ -291,9 +333,9 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
             boolean match = true;
             Resource walkingResource = resource;
 
-            for(int i = (hierarchyNodeTypes.length - 1); i >= 0; i--) {
+            for (int i = (hierarchyNodeTypes.length - 1); i >= 0; i--) {
 
-                if(walkingResource == null) {
+                if (walkingResource == null) {
                     match = false;
                     break;
                 } else {
@@ -308,7 +350,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
                 }
             }
 
-            if(match) {
+            if (match) {
                 return true;
             }
         }
@@ -341,8 +383,6 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
     private void activate(final Map<String, String> config) throws LoginException {
         log.trace("Activating the ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)");
 
-        this.adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-
         this.replicatedBy = PropertiesUtil.toString(config.get(PROP_REPLICATED_BY), DEFAULT_REPLICATED_BY);
 
         String tmp = PropertiesUtil.toString(config.get(PROP_REPLICATED_AT), "");
@@ -359,13 +399,6 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
         log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
         log.info("Package Replication Status - Node Types: [ {} ]",
                 StringUtils.join(this.replicationStatusNodeTypes, ", "));
-    }
-
-    @Deactivate
-    private void deactivate(final Map<String, String> properties) {
-        if (this.adminResourceResolver != null) {
-            this.adminResourceResolver.close();
-        }
     }
 
     @Override

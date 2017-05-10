@@ -22,16 +22,16 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
-import com.day.jcr.vault.fs.api.PathFilterSet;
-import com.day.jcr.vault.fs.api.WorkspaceFilter;
-import com.day.jcr.vault.fs.config.MetaInf;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import com.day.jcr.vault.packaging.JcrPackageManager;
-import com.day.jcr.vault.packaging.PackageId;
-import com.day.jcr.vault.packaging.Packaging;
-import com.day.jcr.vault.packaging.Version;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
+import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
+import org.apache.jackrabbit.vault.fs.config.MetaInf;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
@@ -236,7 +236,7 @@ public class PackageHelperImplTest {
         Node thumbnailNode = mock(Node.class);
 
         when(thumbnailResource.adaptTo(Node.class)).thenReturn(thumbnailNode);
-        when(thumbnailResource.isResourceType("nt:file")).thenReturn(true);
+        when(thumbnailNode.isNodeType("nt:file")).thenReturn(true);
 
         when(packageOneDefNode.getSession()).thenReturn(mock(Session.class));
 

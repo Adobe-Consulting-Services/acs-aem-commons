@@ -7,28 +7,39 @@
         <exclude pattern="/apps/acs-commons/components/utilities/page/clientlibs/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/oak-index-manager/clientlibs/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/bulk-workflow-manager/clientlibs/css/generated"/>
+        <include pattern="/apps/acs-commons/components/utilities/page-compare(.*)?" />
+        <exclude pattern="/apps/acs-commons/components/utilities/page-compare/clientlibs/css/generated"/>
+        <include pattern="/apps/acs-commons/components/utilities/version-compare(.*)?" />
+        <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
     </filter>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/dam/video/mp3hq"/>
     <filter root="/etc/dam/video/ogghq"/>
+    <filter root="/etc/dam/video/flacmono"/>
     <filter root="/etc/cloudservices/typekit">
         <include pattern="/etc/cloudservices/typekit/jcr:content"/>
+        <include pattern="/etc/cloudservices/typekit/rep:policy"/>
     </filter>
     <filter root="/etc/cloudservices/dtm">
         <include pattern="/etc/cloudservices/dtm/jcr:content"/>
+        <include pattern="/etc/cloudservices/dtm/rep:policy"/>
     </filter>
     <filter root="/etc/cloudservices/sharethis">
         <include pattern="/etc/cloudservices/sharethis/jcr:content"/>
+        <include pattern="/etc/cloudservices/sharethis/rep:policy"/>
     </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/oak-index-manager(.*)?" />
+        <include pattern="/etc/acs-commons/automatic-package-replication"/>
+        <include pattern="/etc/acs-commons/automatic-package-replication/jcr:content"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager" />
         <include pattern="/etc/acs-commons/bulk-workflow-manager/jcr:content" />
         <include pattern="/etc/acs-commons/jcr-compare(.*)?" />
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?" />
         <include pattern="/etc/acs-commons/version-replicator(.*)?" />
         <include pattern="/etc/acs-commons/version-compare(.*)?" />
+        <include pattern="/etc/acs-commons/page-compare(.*)?" />
         <include pattern="/etc/acs-commons/dispatcher-flush"/>
         <include pattern="/etc/acs-commons/dispatcher-flush/jcr:content"/>
         <include pattern="/etc/acs-commons/lists"/>
@@ -48,6 +59,16 @@
         <include pattern="/etc/acs-commons/workflow-remover(.*)"/>
         <include pattern="/etc/acs-commons/exporters" />
         <include pattern="/etc/acs-commons/exporters/jcr:content" />
+        <include pattern="/etc/acs-commons/audit-log-search(.*)?" />
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
+    <filter root="/home/users/system/acs-commons"/>
+    <filter root="/apps/rep:policy"/>
+    <filter root="/oak:index/rep:policy"/>
+    <filter root="/rep:policy"/>
+    <filter root="/etc/notification/email/rep:policy"/>
+    <filter root="/content/dam/rep:policy"/>
+    <filter root="/content/rep:policy"/>
+    <filter root="/etc/workflow/instances/rep:policy"/>
+    <filter root="/home/users/rep:policy"/>
 </workspaceFilter>

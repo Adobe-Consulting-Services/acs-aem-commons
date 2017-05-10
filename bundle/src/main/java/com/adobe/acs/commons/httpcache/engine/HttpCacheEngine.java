@@ -62,7 +62,7 @@ public interface HttpCacheEngine {
      * Get the first, based on cache config order, cache config applicable for the given request.
      *
      * @param request
-     * @param slingFilterScope
+     * @param filterScope
      * @return Applicable CacheConfig
      * @throws HttpCacheConfigConflictException When more than one cache config matches.
      * @throws HttpCacheRepositoryAccessException
@@ -146,5 +146,5 @@ public interface HttpCacheEngine {
      * @param path JCR repository path.
      * @throws HttpCachePersistenceException
      */
-    void invalidateCache(String path) throws HttpCachePersistenceException;
+    void invalidateCache(String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException;
 }

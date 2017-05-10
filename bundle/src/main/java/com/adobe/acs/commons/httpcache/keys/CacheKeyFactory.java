@@ -40,6 +40,16 @@ public interface CacheKeyFactory {
     CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException;
 
     /**
+     * Build a cache key.
+     *
+     * @param resourcePath
+     * @param cacheConfig
+     * @return
+     * @throws HttpCacheKeyCreationException
+     */
+    CacheKey build(String resourcePath, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException;
+
+    /**
      * Does the Cache Key matches the Htt[ Cache Config.
      * @param key
      * @param cacheConfig

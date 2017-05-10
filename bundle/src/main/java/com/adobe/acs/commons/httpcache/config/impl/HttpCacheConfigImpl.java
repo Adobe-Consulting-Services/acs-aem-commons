@@ -346,6 +346,11 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     }
 
     @Override
+    public CacheKey buildCacheKey(String resourcePath) throws HttpCacheKeyCreationException {
+        return this.cacheKeyFactory.build(resourcePath, this);
+    }
+
+    @Override
     public boolean isValid() {
         return CollectionUtils.isNotEmpty(this.requestUriPatterns);
     }

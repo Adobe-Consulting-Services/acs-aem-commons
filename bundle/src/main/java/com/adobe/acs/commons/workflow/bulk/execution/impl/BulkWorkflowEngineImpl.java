@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +53,12 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowEngineImpl.class);
 
     private static final String BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH = "/etc/acs-commons/bulk-workflow-manager";
+
+    private static final String SERVICE_NAME = "bulk-workflow";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     @Reference
     private QueryHelper queryHelper;
@@ -124,7 +131,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
     protected final void deactivate(final Map<String, String> args) {
         ResourceResolver adminResourceResolver = null;
         try {
-            adminResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
             final Resource root = adminResourceResolver.getResource(BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH);
 
             if (root == null) {

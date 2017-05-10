@@ -100,6 +100,15 @@ public interface HttpCacheConfig {
     CacheKey buildCacheKey(SlingHttpServletRequest request) throws HttpCacheKeyCreationException;
 
     /**
+     * Creates the CacheKey object using the CacheKeyFactory associated with this HttpCacheConfig factory instance.
+     *
+     * @param resourcePath the resourcePath associated with the Cache Key
+     * @return the CacheKey
+     */
+    CacheKey buildCacheKey(String resourcePath) throws HttpCacheKeyCreationException;
+
+
+    /**
      * Determines if a JCR path is a candidate for invalidating this cache.
      *
      * @param path the jcr path

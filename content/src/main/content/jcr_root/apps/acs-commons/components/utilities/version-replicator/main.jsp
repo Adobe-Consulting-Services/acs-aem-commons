@@ -20,7 +20,6 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@ page contentType="text/html" pageEncoding="utf-8" session="false"
          import="com.day.cq.i18n.I18n,
-                 com.day.cq.widget.HtmlLibraryManager,
                  com.day.cq.replication.AgentManager,
                  java.util.Collection,
                  com.day.cq.replication.Agent"

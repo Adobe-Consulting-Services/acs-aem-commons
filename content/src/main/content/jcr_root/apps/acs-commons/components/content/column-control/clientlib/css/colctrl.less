@@ -43,7 +43,7 @@ This basically loops and creates that many number of classes
 // helper class, will never show up in resulting css
 // will be called as long the index is above 0
 .loopingClass (@index) when (@index > 0) {
-    (~".acs-commons-resp-colctrl-col-@{index}") {
+    .acs-commons-resp-colctrl-col-@{index} {
         position: relative;
         min-height: 1px;
         padding-left:  1px;

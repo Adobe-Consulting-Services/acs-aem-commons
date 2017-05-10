@@ -35,11 +35,11 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
     private static final Logger log = LoggerFactory.getLogger(EvolutionEntryImpl.class);
 
     private static int MAX_CHARS = 200;
-    private static String V_ADDED = "added";
-    private static String V_CHANGED = "changed";
-    private static String V_REMOVED = "removed";
-    private static String V_ADDED_REMOVED = "added-removed";
-    private static String V_CHANGED_REMOVED = "changed-removed";
+    static String V_ADDED = "added";
+    static String V_CHANGED = "changed";
+    static String V_REMOVED = "removed";
+    static String V_ADDED_REMOVED = "added-removed";
+    static String V_CHANGED_REMOVED = "changed-removed";
 
     private EvolutionEntryType type;
     private String name;
@@ -55,11 +55,11 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
         this.config = config;
         this.type = EvolutionEntryType.RESOURCE;
         this.name = resource.getName();
-        this.depth = config.getDepthForPath(resource.getPath());
+        this.depth = EvolutionPathUtil.getDepthForPath(resource.getPath());
         this.path = resource.getParent().getName();
         this.version = version;
         this.value = null;
-        this.relativePath = config.getRelativeResourceName(resource.getPath());
+        this.relativePath = EvolutionPathUtil.getRelativeResourceName(resource.getPath());
     }
 
     public EvolutionEntryImpl(Property property, Version version, EvolutionConfig config) {
@@ -68,11 +68,11 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
             this.property = property;
             this.type = EvolutionEntryType.PROPERTY;
             this.name = property.getName();
-            this.depth = config.getDepthForPath(property.getPath());
+            this.depth = EvolutionPathUtil.getDepthForPath(property.getPath());
             this.version = version;
             this.path = property.getParent().getName();
             this.value = config.printProperty(property);
-            this.relativePath = config.getRelativePropertyName(property.getPath());
+            this.relativePath = EvolutionPathUtil.getRelativePropertyName(property.getPath());
         } catch (Exception e) {
             log.error("Could not inititalize VersionEntry", e);
         }
@@ -90,7 +90,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public String getUniqueName() {
-        return (name + path).replace(":", "_").replace("/", "_").replace("@", "_");
+        return (name + path).replace(":", "_").replace("/", "_").replace("@", "_").replace("frozenNode", "node");
     }
 
     @Override

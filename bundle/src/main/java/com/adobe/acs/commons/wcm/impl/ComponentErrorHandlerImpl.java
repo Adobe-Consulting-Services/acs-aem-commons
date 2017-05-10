@@ -51,6 +51,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 @Component(
@@ -85,6 +86,13 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     static final String REQ_ATTR_PREVIOUSLY_PROCESSED =
             ComponentErrorHandlerImpl.class.getName() + "_previouslyProcessed";
+
+
+    private static final String SERVICE_NAME = "component-error-handler";
+    private static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -278,8 +286,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         try {
             // Component error renditions are typically stored under /apps as part of the application; and thus
             // requires elevated ACLs to work on Publish instances.
-            // ONLY use this admin resource resolver to get the component error HTML and then immediately close.
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             return ResourceDataUtil.getNTFileAsString(path, resourceResolver);
         } catch (final Exception e) {

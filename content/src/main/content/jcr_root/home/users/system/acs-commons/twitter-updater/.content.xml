@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="71bf2fa4-4e65-3a40-be1f-008699379c61"
+    rep:authorizableId="acs-commons-twitter-updater-service"
+    rep:principalName="acs-commons-twitter-updater-service"/>

@@ -21,6 +21,7 @@ package com.adobe.acs.commons.twitter.impl;
 
 import java.util.Map;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -55,7 +56,7 @@ import com.day.cq.wcm.webservicesupport.ConfigurationManager;
                 "com.day.cq.wcm.webservicesupport.Configuration" }, propertyPrivate = true),
         @Property(name = AdapterFactory.ADAPTER_CLASSES, value = { "twitter4j.Twitter",
                 "com.adobe.acs.commons.twitter.TwitterClient" }, propertyPrivate = true) })
-public final class TwitterAdapterFactory implements AdapterFactory {
+public class TwitterAdapterFactory implements AdapterFactory {
 
     private static final String CLOUD_SERVICE_NAME = "twitterconnect";
 
@@ -71,9 +72,6 @@ public final class TwitterAdapterFactory implements AdapterFactory {
 
     @Property(label = "Use SSL", description = "Use SSL Connections", boolValue = DEFAULT_USE_SSL)
     private static final String PROP_USE_SSL = "use.ssl";
-
-    @Reference
-    private ConfigurationManager configurationManager;
 
     private TwitterFactory factory;
 
@@ -123,7 +121,7 @@ public final class TwitterAdapterFactory implements AdapterFactory {
         String consumerSecret = oauthProps.get("oauth.client.secret", String.class);
 
         if (consumerKey != null && consumerSecret != null) {
-            Twitter t = factory.getInstance();
+            Twitter t = getInstance();
             log.debug("Creating client for key {}.", consumerKey);
             t.setOAuthConsumer(consumerKey, consumerSecret);
             try {
@@ -140,6 +138,11 @@ public final class TwitterAdapterFactory implements AdapterFactory {
         return null;
     }
 
+    @VisibleForTesting
+    Twitter getInstance() {
+        return factory.getInstance();
+    }
+
     private TwitterClient createTwitterClient(Page page) {
         com.day.cq.wcm.webservicesupport.Configuration config = findTwitterConfiguration(page);
         if (config != null) {
@@ -149,6 +152,8 @@ public final class TwitterAdapterFactory implements AdapterFactory {
     }
 
     private com.day.cq.wcm.webservicesupport.Configuration findTwitterConfiguration(Page page) {
+        ConfigurationManager configurationManager = page.getContentResource().getResourceResolver().adaptTo(ConfigurationManager.class);
+
         final HierarchyNodeInheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(
                 page.getContentResource());
         final String[] services = pageProperties.getInherited(ConfigurationConstants.PN_CONFIGURATIONS,

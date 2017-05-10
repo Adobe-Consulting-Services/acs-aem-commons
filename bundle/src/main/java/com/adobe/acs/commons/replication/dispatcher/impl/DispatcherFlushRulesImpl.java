@@ -48,6 +48,7 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -121,6 +122,12 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
             value = { })
     private static final String PROP_RESOURCE_ONLY_FLUSH_RULES = "prop.rules.resource-only";
 
+    private static final String SERVICE_NAME = "dispatcher-flush";
+    protected static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
+
     @Reference
     private DispatcherFlusher dispatcherFlusher;
 
@@ -154,7 +161,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         ResourceResolver resourceResolver = null;
 
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             // Flush full content hierarchies
             for (final Map.Entry<Pattern, String[]> entry : this.hierarchicalFlushRules.entrySet()) {

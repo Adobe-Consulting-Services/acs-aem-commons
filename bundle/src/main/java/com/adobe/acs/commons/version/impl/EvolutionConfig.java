@@ -19,18 +19,23 @@
  */
 package com.adobe.acs.commons.version.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import javax.jcr.Property;
+import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
+import javax.jcr.Value;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.sling.jcr.resource.JcrResourceUtil;
 
-public final class EvolutionConfig {
+public class EvolutionConfig {
 
     private String[] ignoreProperties;
     private String[] ignoreResources;
@@ -40,17 +45,6 @@ public final class EvolutionConfig {
         this.ignoreResources = ArrayUtils.clone(ignoreResources);
     }
 
-    public int getDepthForPath(String path) {
-        return StringUtils.countMatches(StringUtils.substringAfterLast(path, "jcr:frozenNode"), "/");
-    }
-
-    public String getRelativePropertyName(String path) {
-        return StringUtils.substringAfterLast(path, "jcr:frozenNode").replaceFirst("/", "");
-    }
-
-    public String getRelativeResourceName(String path) {
-        return StringUtils.substringAfterLast(path, "jcr:frozenNode/");
-    }
 
     public boolean handleProperty(String name) {
         for (String entry : ignoreProperties) {
@@ -70,15 +64,15 @@ public final class EvolutionConfig {
         return true;
     }
 
-    public String printProperty(javax.jcr.Property property) {
+    public static String printProperty(javax.jcr.Property property) {
         try {
-            return printObject(JcrResourceUtil.toJavaObject(property));
+            return printObject(toJavaObject(property));
         } catch (RepositoryException e1) {
             return e1.getMessage();
         }
     }
 
-    public String printObject(Object obj) {
+    public static String printObject(Object obj) {
         if (obj == null) {
             return "";
         }
@@ -104,6 +98,154 @@ public final class EvolutionConfig {
         } else {
             return obj.toString();
         }
+    }
+
+    private static Object toJavaObject(Property property)
+            throws RepositoryException {
+        // multi-value property: return an array of values
+        if (property.isMultiple()) {
+            Value[] values = property.getValues();
+            final Object firstValue = values.length > 0 ? toJavaObject(values[0]) : null;
+            final Object[] result;
+            if ( firstValue instanceof Boolean ) {
+                result = new Boolean[values.length];
+            } else if ( firstValue instanceof Calendar ) {
+                result = new Calendar[values.length];
+            } else if ( firstValue instanceof Double ) {
+                result = new Double[values.length];
+            } else if ( firstValue instanceof Long ) {
+                result = new Long[values.length];
+            } else if ( firstValue instanceof BigDecimal) {
+                result = new BigDecimal[values.length];
+            } else if ( firstValue instanceof InputStream) {
+                result = new Object[values.length];
+            } else {
+                result = new String[values.length];
+            }
+            for (int i = 0; i < values.length; i++) {
+                Value value = values[i];
+                if (value != null) {
+                    result[i] = toJavaObject(value);
+                }
+            }
+            return result;
+        }
+
+        // single value property
+        return toJavaObject(property.getValue());
+    }
+
+    private static Object toJavaObject(Value value) throws RepositoryException {
+        switch (value.getType()) {
+            case PropertyType.DECIMAL:
+                return value.getDecimal();
+            case PropertyType.BINARY:
+                return new LazyInputStream(value);
+            case PropertyType.BOOLEAN:
+                return value.getBoolean();
+            case PropertyType.DATE:
+                return value.getDate();
+            case PropertyType.DOUBLE:
+                return value.getDouble();
+            case PropertyType.LONG:
+                return value.getLong();
+            case PropertyType.NAME: // fall through
+            case PropertyType.PATH: // fall through
+            case PropertyType.REFERENCE: // fall through
+            case PropertyType.STRING: // fall through
+            case PropertyType.UNDEFINED: // not actually expected
+            default: // not actually expected
+                return value.getString();
+        }
+    }
+
+    /**
+     * Lazily acquired InputStream which only accesses the JCR Value InputStream if
+     * data is to be read from the stream.
+     */
+    private static class LazyInputStream extends InputStream {
+
+        /** The JCR Value from which the input stream is requested on demand */
+        private final Value value;
+
+        /** The inputstream created on demand, null if not used */
+        private InputStream delegatee;
+
+        public LazyInputStream(Value value) {
+            this.value = value;
+        }
+
+        /**
+         * Closes the input stream if acquired otherwise does nothing.
+         */
+        @Override
+        public void close() throws IOException {
+            if (delegatee != null) {
+                delegatee.close();
+            }
+        }
+
+        @Override
+        public int available() throws IOException {
+            return getStream().available();
+        }
+
+        @Override
+        public int read() throws IOException {
+            return getStream().read();
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            return getStream().read(b);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            return getStream().read(b, off, len);
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            return getStream().skip(n);
+        }
+
+        @Override
+        public boolean markSupported() {
+            try {
+                return getStream().markSupported();
+            } catch (IOException ioe) {
+                // ignore
+            }
+            return false;
+        }
+
+        @Override
+        public synchronized void mark(int readlimit) {
+            try {
+                getStream().mark(readlimit);
+            } catch (IOException ioe) {
+                // ignore
+            }
+        }
+
+        @Override
+        public synchronized void reset() throws IOException {
+            getStream().reset();
+        }
+
+        /** Actually retrieves the input stream from the underlying JCR Value */
+        private InputStream getStream() throws IOException {
+            if (delegatee == null) {
+                try {
+                    delegatee = value.getBinary().getStream();
+                } catch (RepositoryException re) {
+                    throw (IOException) new IOException(re.getMessage()).initCause(re);
+                }
+            }
+            return delegatee;
+        }
+
     }
 
 }

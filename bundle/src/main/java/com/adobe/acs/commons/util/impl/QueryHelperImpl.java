@@ -35,9 +35,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.query.Query;
-import javax.jcr.query.QueryManager;
-import javax.jcr.query.QueryResult;
+import javax.jcr.query.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,9 +67,9 @@ public class QueryHelperImpl implements QueryHelper {
                                         final String relPath) throws RepositoryException {
 
         final List<Resource> resources = new ArrayList<Resource>();
+        final String[] lines = StringUtils.split(statement, '\n');
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {
-            final String[] lines = statement.split("[,;\\s\\n\\t]+");
             final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
 
             // ensure all results are returned
@@ -86,8 +84,6 @@ public class QueryHelperImpl implements QueryHelper {
             }
         } else if (LIST.equalsIgnoreCase(language)) {
             if (StringUtils.isNotBlank(statement)) {
-                final String[] lines = statement.split("[,;\\s\\n\\t]+");
-
                 for (String line : lines) {
                     if (StringUtils.isNotBlank(line)) {
                         final Resource resource = resourceResolver.getResource(line);
@@ -116,6 +112,26 @@ public class QueryHelperImpl implements QueryHelper {
         }
 
         return resources;
+    }
+
+    @Override
+    public boolean isTraversal(ResourceResolver resourceResolver, String language, String statement) throws RepositoryException {
+        final QueryManager queryManager = resourceResolver.adaptTo(Session.class).getWorkspace().getQueryManager();
+
+        final Query query = queryManager.createQuery("explain " + statement, language);
+        final QueryResult queryResult = query.execute();
+
+        final RowIterator rows = queryResult.getRows();
+        final Row firstRow = rows.nextRow();
+
+        final String plan = firstRow.getValue("plan").getString();
+        return StringUtils.contains(plan, " /* traverse ");
+    }
+
+    @Override
+    public boolean isTraversal(ResourceResolver resourceResolver, Map<String, String> queryBuilderParams) throws RepositoryException {
+        final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
+        return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
     }
 
     /**

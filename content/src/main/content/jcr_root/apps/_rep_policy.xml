@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+          jcr:primaryType="rep:ACL">
+    <allow
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-ensure-oak-index-service"
+            rep:privileges="{Name}[jcr:read]"/>
+    <allow0
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-component-error-handler-service"
+            rep:privileges="{Name}[jcr:read]"/>
+    <allow1
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-shared-component-props-service"
+            rep:privileges="{Name}[jcr:read]"/>
+</jcr:root>
