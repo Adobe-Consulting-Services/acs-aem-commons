@@ -11,7 +11,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Added
 
-- `native` QueryBuilder PredicateEvaluator
 - `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be retried if any of them fail and break the commit.
 
 ### Changed
