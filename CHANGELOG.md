@@ -12,9 +12,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - `native` QueryBuilder PredicateEvaluator
+- `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be retried if any of them fail and break the commit.
+
+### Changed
+
+- Updated Fast Action Manager retry logic to support more failure cases properly.
+- Updated Fast Action Manager retry logic to  be savvy about interrupted exceptions thrown by the watchdog trying to kill the thread.
 
 <!---
-### Changed
 
 ### Fixed
  
