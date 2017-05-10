@@ -115,10 +115,14 @@ public final class Actions {
                     r.revert();
                     r.refresh();
                     LOG.info("Error commit, retry count is " + remaining, e);
-                    if (remaining-- <= 0) {
-                        throw e;
+                    if (e instanceof Exception) {
+                        if (remaining-- <= 0) {
+                            throw e;
+                        } else {
+                            Thread.sleep(pausePerRetry);
+                        }
                     } else {
-                        Thread.sleep(pausePerRetry);
+                        throw e;
                     }
                 }
             }
