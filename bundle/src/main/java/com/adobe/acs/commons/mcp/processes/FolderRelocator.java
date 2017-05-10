@@ -20,7 +20,9 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.mcp.ControlledProcess;
+import com.adobe.acs.commons.mcp.ControlledProcessManager;
+import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.util.HashMap;
@@ -70,7 +72,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  * separate process.</li>
  * </ul>
  */
-public class FolderRelocator extends ControlledProcess {
+public class FolderRelocator implements ProcessDefinition {
 
     public static enum Mode {
         RENAME, MOVE
@@ -103,8 +105,7 @@ public class FolderRelocator extends ControlledProcess {
      * @param destinationPath Destination parent path
      * @param processName Process name for tracking
      */
-    public FolderRelocator(ActionManagerFactory amf, String[] sourcePaths, String destinationPath, String processName) {
-        super(amf, processName);
+    public FolderRelocator(String[] sourcePaths, String destinationPath) {
         sourceToDestination = new HashMap<>();
         this.mode = Mode.MOVE;
 
@@ -118,17 +119,14 @@ public class FolderRelocator extends ControlledProcess {
     /**
      * Prepare a folder relocation for a single folder.
      *
-     * @param amf Action manager factory service
      * @param sourcePath Source node to be moved
      * @param destinationPath Destination path, which is either the parent (if
      * mode is MOVE) or the desired final path for the node (if mode is RENAME)
-     * @param processName Process name for tracking
      * @param processMode MOVE if node name stays the same and needs to be under
      * a new parent; RENAME if the node needs to change its name and destination
      * contains that new name.
      */
-    public FolderRelocator(ActionManagerFactory amf, String sourcePath, String destinationPath, String processName, Mode processMode) {
-        super(amf, processName);
+    public FolderRelocator(String sourcePath, String destinationPath, Mode processMode) {
         sourceToDestination = new HashMap<>();
         this.mode = processMode;
 
@@ -151,16 +149,16 @@ public class FolderRelocator extends ControlledProcess {
     }
 
     @Override
-    public void buildProcess(ResourceResolver rr) throws LoginException, RepositoryException {
+    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         validateInputs(rr);
         Session ses = rr.adaptTo(Session.class);
         requiredFolderPrivileges = getPrivilegesFromNames(ses, requiredFolderPrivilegeNames);
         requiredNodePrivileges = getPrivilegesFromNames(ses, requiredNodePrivilegeNames);
-        defineCriticalAction("Validate ACLs", rr, this::validateAllAcls);
-        defineCriticalAction("Build target folders", rr, this::buildTargetFolders)
+        instance.defineCriticalAction("Validate ACLs", rr, this::validateAllAcls);
+        instance.defineCriticalAction("Build target folders", rr, this::buildTargetFolders)
                 .onFailure(this::abortStep2);
-        defineCriticalAction("Move nodes", rr, this::moveNodes);
-        defineCriticalAction("Remove old folders", rr, this::removeSourceFolders);
+        instance.defineCriticalAction("Move nodes", rr, this::moveNodes);
+        instance.defineCriticalAction("Remove old folders", rr, this::removeSourceFolders);
     }
 
     private void validateInputs(ResourceResolver res) throws RepositoryException {

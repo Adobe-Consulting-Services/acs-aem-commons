@@ -16,9 +16,9 @@
 package com.adobe.acs.commons.mcp.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.mcp.ControlledProcess;
+import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import org.apache.sling.event.jobs.Queue;
 /**
  * Stops all running sling jobs and empties the queue entirely.
  */
-public class JobQueueCleaner extends ControlledProcess {
+public class JobQueueCleaner implements ProcessDefinition {
 
     public static final String JOB_TYPE = "slingevent:Job";
     public static final String POLICY_NODE_NAME = "rep:policy";
@@ -41,16 +41,15 @@ public class JobQueueCleaner extends ControlledProcess {
     private final List<String> suspendedQueues = new ArrayList<>();
     private final JobManager jobManager;
 
-    public JobQueueCleaner(ActionManagerFactory amf, JobManager jm, String name) {
-        super(amf, name);
+    public JobQueueCleaner(JobManager jm) {
         this.jobManager = jm;
     }
 
     @Override
-    public void buildProcess(ResourceResolver rr) throws LoginException {
-        defineCriticalAction("Stop job queues", rr, this::stopJobQueues);
-        defineAction("Purge jobs", rr, this::purgeJobs);
-        defineCriticalAction("Resume job queues", rr, this::resumeJobQueues);
+    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException {
+        instance.defineCriticalAction("Stop job queues", rr, this::stopJobQueues);
+        instance.defineAction("Purge jobs", rr, this::purgeJobs);
+        instance.defineCriticalAction("Resume job queues", rr, this::resumeJobQueues);
     }
 
     private void stopJobQueues(ActionManager manager) {

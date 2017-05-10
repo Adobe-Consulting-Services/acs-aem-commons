@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp;
+package com.adobe.acs.commons.mcp.impl;
 
+import com.adobe.acs.commons.mcp.*;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.jcr.RepositoryException;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -29,11 +33,11 @@ import org.apache.sling.api.resource.ResourceResolver;
  * Abstraction of a Process which runs using FAM and consists of one or more
  * actions.
  */
-public abstract class ControlledProcess {
-
-    private final String name;
-    private final ActionManagerFactory amf;
+public class ProcessInstanceImpl implements ProcessInstance {
+    private ControlledProcessManager manager = null;
     private final List<ActivityDefinition> actions;
+    private final ProcessDefinition definition;
+    private final ManagedProcess infoBean;
 
     private static class ActivityDefinition {
         String name;
@@ -42,52 +46,73 @@ public abstract class ControlledProcess {
         boolean critical = false;
     }
 
-    public ControlledProcess(ActionManagerFactory amf, String name) {
-        this.amf = amf;
-        this.name = name;
+    public ProcessInstanceImpl(ProcessDefinition process, String description) {
+        infoBean = new ManagedProcess();
         this.actions = new ArrayList<>();
+        this.definition = process;
+        infoBean.description = description;
     }
 
+    @Override
     public String getName() {
-        return name;
+        return infoBean.description;
+    }
+    
+    @Override
+    public void init(ControlledProcessManager cpm) {
+        manager = cpm;
     }
 
+    @Override
     public ActionManagerFactory getActionManagerFactory() {
-        return amf;
+        return manager.getActionManagerFactory();
     }
-
-    public abstract void buildProcess(ResourceResolver rr) throws LoginException, RepositoryException;
-
+ 
+    @Override
     final public ActionManager defineCriticalAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
         return defineAction(name, rr, builder, true);
     }
 
+    @Override
     final public ActionManager defineAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
         return defineAction(name, rr, builder, false);
     }
 
     private ActionManager defineAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder, boolean isCritical) throws LoginException {
-        ActivityDefinition definition = new ActivityDefinition();
-        definition.builder = builder;
-        definition.name = name;
-        definition.manager = amf.createTaskManager(getName() + ": " + name, rr, 1);
-        definition.critical = isCritical;
-        actions.add(definition);
-        return definition.manager;
+        ActivityDefinition activityDefinition = new ActivityDefinition();
+        activityDefinition.builder = builder;
+        activityDefinition.name = name;
+        activityDefinition.manager = getActionManagerFactory().createTaskManager(getName() + ": " + name, rr, 1);
+        activityDefinition.critical = isCritical;
+        actions.add(activityDefinition);
+        return activityDefinition.manager;
     }
 
-    final public void run() {
-        runStep(0);
+    @Override
+    final public void run(ResourceResolver rr) {
+        try {
+            definition.buildProcess(this, rr);
+            runStep(0);
+        } catch (LoginException | RepositoryException ex) {
+            Logger.getLogger(ProcessInstanceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            recordCancellation();
+            terminate();
+        }
     }
 
     private void runStep(int step) {
         if (step >= actions.size()) {
-            wrapUp();
+            recordCompletion();
+            terminate();
         } else {
             ActivityDefinition action = actions.get(step);
             if (action.critical) {
                 action.manager.onSuccess(rr -> runStep(step + 1));
-                action.manager.onFailure((failures, rr) -> haltOnError(step, failures, rr));
+                action.manager.onFailure((failures, rr) -> {
+                    recordErrors(step, failures, rr);
+                    recordCancellation();
+                    terminate();
+                });
             } else {
                 action.manager.onFailure((failures, rr) -> recordErrors(step, failures, rr));
                 action.manager.onFinish(()->runStep(step+1));
@@ -96,15 +121,24 @@ public abstract class ControlledProcess {
         }
     }
 
-    final private void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
+    private void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
         //...
     }
     
-    final private void haltOnError(int step, List<Failure> failures, ResourceResolver rr) {
-        //...
+
+    private void recordCompletion() {
     }
 
-    final public void wrapUp() {
-        actions.stream().map(a->a.manager).forEach(ActionManager::closeAllResolvers);
+    private void recordCancellation() {
+    }
+
+    @Override
+    public ManagedProcess getInfo() {
+        return infoBean;
+    }    
+    
+    @Override
+    final public void terminate() {
+        actions.stream().map(a->a.manager).forEach(getActionManagerFactory()::purge);
     }
 }
