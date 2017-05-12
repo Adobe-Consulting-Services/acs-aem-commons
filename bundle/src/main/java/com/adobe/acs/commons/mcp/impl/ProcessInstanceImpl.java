@@ -133,6 +133,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
         try {
             definition.buildProcess(this, rr);
             infoBean.setStartTime(System.currentTimeMillis());
+            infoBean.setIsRunning(true);
             runStep(0);
         } catch (LoginException | RepositoryException ex) {
             LOG.error("Error starting managed process " + getName(), ex);
@@ -175,11 +176,9 @@ public class ProcessInstanceImpl implements ProcessInstance {
     }
 
     private void recordCompletion() {
-        infoBean.setStopTime(System.currentTimeMillis());
     }
 
     private void recordCancellation() {
-        infoBean.setStopTime(System.currentTimeMillis());
     }
 
     @Override
@@ -189,6 +188,8 @@ public class ProcessInstanceImpl implements ProcessInstance {
 
     @Override
     final public void halt() {
+        infoBean.setStopTime(System.currentTimeMillis());
+        infoBean.setIsRunning(false);
         actions.stream().map(a -> a.manager).forEach(getActionManagerFactory()::purge);
     }
 

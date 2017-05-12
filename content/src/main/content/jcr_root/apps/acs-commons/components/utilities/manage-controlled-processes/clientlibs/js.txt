@@ -6,3 +6,4 @@ vendor/messages.js
 vendor/en.js
 nav.js
 scriptEditor.js
+scriptRunner.js
