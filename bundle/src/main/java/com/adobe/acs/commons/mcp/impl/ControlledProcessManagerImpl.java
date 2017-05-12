@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularDataSupport;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -69,8 +71,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
 
     @Override
     public ProcessInstance createManagedProcessInstance(ProcessDefinition definition, String description) {
-        ProcessInstance instance = new ProcessInstanceImpl(definition, description);
-        instance.init(this);
+        ProcessInstance instance = new ProcessInstanceImpl(this, definition, description);
         activeProcesses.put(instance.getId(), instance);
         return instance;
     }
@@ -91,5 +92,40 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     public ResourceResolver getServiceResourceResolver() throws LoginException {
         return resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
     }
+
+    @Override
+    public ProcessDefinition findDefinitionByNameOrPath(String nameOrPath) throws ReflectiveOperationException {
+        if (nameOrPath.startsWith("/")) {
+            return findDefinitionByPath(nameOrPath);
+        } else {
+            return findDefinitionByName(nameOrPath);
+        }
+    }
     
+    private ProcessDefinition findDefinitionByName(String name) throws ReflectiveOperationException {
+        Class defClass = Class.forName(name);
+        Object definition = defClass.newInstance();
+        return (ProcessDefinition) definition;
+    }
+    
+    private ProcessDefinition findDefinitionByPath(String path) throws ReflectiveOperationException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public TabularDataSupport getStatistics() throws OpenDataException {
+        TabularDataSupport stats = new TabularDataSupport(ProcessInstanceImpl.getStaticsTableType());
+        activeProcesses.values().stream().map(ProcessInstance::getStatistics).forEach(stats::put);
+        return stats;
+    }
+
+    @Override
+    public void haltProcessById(String id) {
+        getManagedProcessInstanceByIdentifier(id).halt();
+    }
+
+    @Override
+    public void haltProcessByPath(String path) {
+        getManagedProcessInstanceByPath(path).halt();
+    }
 }

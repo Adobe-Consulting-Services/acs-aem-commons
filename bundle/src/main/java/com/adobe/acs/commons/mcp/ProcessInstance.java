@@ -19,6 +19,9 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
+import java.util.Map;
+import javax.jcr.RepositoryException;
+import javax.management.openmbean.CompositeData;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -30,8 +33,8 @@ public interface ProcessInstance {
 
     String getName();
     
-    void init(ControlledProcessManager cpm);
-    
+    public void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws RepositoryException;
+
     ActionManagerFactory getActionManagerFactory();
  
     ActionManager defineCriticalAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException;
@@ -47,4 +50,7 @@ public interface ProcessInstance {
     void run(ResourceResolver rr);
     
     void halt();
+
+    public CompositeData getStatistics();
+
 }

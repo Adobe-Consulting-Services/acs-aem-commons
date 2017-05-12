@@ -26,7 +26,8 @@ import java.util.Calendar;
 public final class Failure {
     
     private String nodePath;
-    private Exception exception;
+    private String error;
+    transient private Exception exception;
     private final Calendar failedAt;
 
     public Failure() {
@@ -59,6 +60,9 @@ public final class Failure {
      */
     public void setException(Exception exception) {
         this.exception = exception;
+        if (exception != null) {
+            this.error = exception.getMessage();
+        }
     }
 
     /**

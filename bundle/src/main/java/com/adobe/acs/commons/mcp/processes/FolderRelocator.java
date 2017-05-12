@@ -76,8 +76,8 @@ public class FolderRelocator implements ProcessDefinition {
     public static enum Mode {
         RENAME, MOVE
     };
-    private final Map<String, String> sourceToDestination;
-    private final Mode mode;
+    private Map<String, String> sourceToDestination;
+    private Mode mode;
     private final String[] requiredFolderPrivilegeNames = {
         Privilege.JCR_READ,
         Privilege.JCR_WRITE,
@@ -94,6 +94,10 @@ public class FolderRelocator implements ProcessDefinition {
 
     private int batchSize = 5;
 
+    public FolderRelocator() {
+        // Invoked when starting via the MCP servlet
+    }
+    
     /**
      * Prepare a folder relocation for multiple folders to be moved under the
      * same target parent node. Because there are multiple folders being moved
@@ -105,14 +109,7 @@ public class FolderRelocator implements ProcessDefinition {
      * @param processName Process name for tracking
      */
     public FolderRelocator(String[] sourcePaths, String destinationPath) {
-        sourceToDestination = new HashMap<>();
-        this.mode = Mode.MOVE;
-
-        for (String sourcePath : sourcePaths) {
-            String nodeName = sourcePath.substring(sourcePath.lastIndexOf('/'));
-            String destination = destinationPath + nodeName;
-            sourceToDestination.put(sourcePath, destination);
-        }
+        init(sourcePaths, destinationPath);
     }
 
     /**
@@ -126,6 +123,21 @@ public class FolderRelocator implements ProcessDefinition {
      * contains that new name.
      */
     public FolderRelocator(String sourcePath, String destinationPath, Mode processMode) {
+        init(sourcePath, destinationPath, processMode);
+    }
+    
+    private void init(String[] sourcePaths, String destinationPath) {
+        sourceToDestination = new HashMap<>();
+        this.mode = Mode.MOVE;
+
+        for (String sourcePath : sourcePaths) {
+            String nodeName = sourcePath.substring(sourcePath.lastIndexOf('/'));
+            String destination = destinationPath + nodeName;
+            sourceToDestination.put(sourcePath, destination);
+        }        
+    }
+    
+    private void init(String sourcePath, String destinationPath, Mode processMode) {
         sourceToDestination = new HashMap<>();
         this.mode = processMode;
 
@@ -134,14 +146,23 @@ public class FolderRelocator implements ProcessDefinition {
             String nodeName = sourcePath.substring(sourcePath.lastIndexOf('/'));
             destination += nodeName;
         }
-        sourceToDestination.put(sourcePath, destination);
+        sourceToDestination.put(sourcePath, destination);        
     }
     
     @Override
     public void parseInputs(ValueMap input) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        mode = Mode.valueOf(String.valueOf(input.getOrDefault("mode", "MOVE")));
+        String destinationPath = input.get("destination", String.class);
+        Object sourcePaths = input.get("source");
+        
+        if (sourcePaths instanceof String) {
+            init((String) sourcePaths, destinationPath, mode);
+        } else {
+            init((String[]) sourcePaths, destinationPath);
+        }
     }
 
+    @Override
     public String getName() {
         return "Folder relocator";
     }

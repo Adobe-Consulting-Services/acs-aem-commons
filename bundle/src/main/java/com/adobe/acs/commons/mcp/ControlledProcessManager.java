@@ -16,13 +16,14 @@
 package com.adobe.acs.commons.mcp;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
+import com.adobe.acs.commons.mcp.mbean.CPMBean;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Core management container for managing controlled processes.
  */
-public interface ControlledProcessManager {
+public interface ControlledProcessManager extends CPMBean {
 
     ActionManagerFactory getActionManagerFactory();
     
@@ -31,11 +32,9 @@ public interface ControlledProcessManager {
     ProcessInstance getManagedProcessInstanceByIdentifier(String id);
     
     ProcessInstance createManagedProcessInstance(ProcessDefinition definition, String description);
-
-    void haltActiveProcesses();
-    
-    void purgeCompletedProcesses();
     
     ResourceResolver getServiceResourceResolver() throws LoginException;
+
+    public ProcessDefinition findDefinitionByNameOrPath(String nameOrPath) throws ReflectiveOperationException;
     
 }

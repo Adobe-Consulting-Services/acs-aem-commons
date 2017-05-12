@@ -51,12 +51,12 @@ import org.slf4j.LoggerFactory;
  */
 class ActionManagerImpl implements ActionManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
+    transient private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
     // This is a delay of how long an action manager should wait before it can safely assume it really is done and no more work is being added
     // This helps prevent an action manager from closing itself down while the queue is warming up.
-    public static final int HESITATION_DELAY = 50;
+    transient public static final int HESITATION_DELAY = 50;
     // The cleanup task will wait this many milliseconds between its polling to see if the queue has been completely processed
-    public static final int COMPLETION_CHECK_INTERVAL = 100;
+    transient public static final int COMPLETION_CHECK_INTERVAL = 100;
     private final AtomicInteger tasksAdded = new AtomicInteger();
     private final AtomicInteger tasksCompleted = new AtomicInteger();
     private final AtomicInteger tasksFilteredOut = new AtomicInteger();
@@ -67,17 +67,16 @@ class ActionManagerImpl implements ActionManager {
     private long finished;
     private int saveInterval;
 
-    private final ResourceResolver baseResolver;
-    private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
-    private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
-    private final ThrottledTaskRunner taskRunner;
-    private final ThreadLocal<String> currentPath;
+    transient private final ResourceResolver baseResolver;
+    transient private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
+    transient private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
+    transient private final ThrottledTaskRunner taskRunner;
+    transient private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
-    private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
-    private final List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
-
+    transient private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
+    transient private final List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
+    transient private final List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
+    transient private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;
@@ -351,7 +350,7 @@ class ActionManagerImpl implements ActionManager {
         LOG.info("Filtered out " + path);
     }
 
-    private long getRuntime() {
+    public long getRuntime() {
         if (isComplete()) {
             return finished - started.get();
         } else if (tasksAdded.get() == 0) {
@@ -423,12 +422,12 @@ class ActionManagerImpl implements ActionManager {
         return failureData;
     }
 
-    private static String[] statsItemNames;
-    private static CompositeType statsCompositeType;
-    private static TabularType statsTabularType;
-    private static String[] failureItemNames;
-    private static CompositeType failureCompositeType;
-    private static TabularType failureTabularType;
+    transient private static String[] statsItemNames;
+    transient private static CompositeType statsCompositeType;
+    transient private static TabularType statsTabularType;
+    transient private static String[] failureItemNames;
+    transient private static CompositeType failureCompositeType;
+    transient private static TabularType failureTabularType;
 
     static {
         try {
