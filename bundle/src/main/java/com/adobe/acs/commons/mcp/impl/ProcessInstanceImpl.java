@@ -99,6 +99,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
     @Override
     public void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws RepositoryException {
         ValueMap inputs = new ModifiableValueMapDecorator(parameterMap);
+        infoBean.setRequestInputs(inputs);
         definition.parseInputs(inputs);
     }
 

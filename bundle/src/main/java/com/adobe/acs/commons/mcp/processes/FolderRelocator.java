@@ -78,19 +78,19 @@ public class FolderRelocator implements ProcessDefinition {
     };
     private Map<String, String> sourceToDestination;
     private Mode mode;
-    private final String[] requiredFolderPrivilegeNames = {
+    transient private final String[] requiredFolderPrivilegeNames = {
         Privilege.JCR_READ,
         Privilege.JCR_WRITE,
         Privilege.JCR_REMOVE_CHILD_NODES,
         Privilege.JCR_REMOVE_NODE
     };
 
-    private final String[] requiredNodePrivilegeNames = {
+    transient private final String[] requiredNodePrivilegeNames = {
         Privilege.JCR_ALL
     };
 
-    private Privilege[] requiredFolderPrivileges;
-    private Privilege[] requiredNodePrivileges;
+    transient private Privilege[] requiredFolderPrivileges;
+    transient private Privilege[] requiredNodePrivileges;
 
     private int batchSize = 5;
 
