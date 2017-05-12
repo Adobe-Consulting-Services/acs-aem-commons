@@ -26,6 +26,7 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.event.jobs.Queue;
 
@@ -43,6 +44,16 @@ public class JobQueueCleaner implements ProcessDefinition {
 
     public JobQueueCleaner(JobManager jm) {
         this.jobManager = jm;
+    }
+
+    @Override
+    public String getName() {
+        return "Job Queue Cleaner";
+    }
+
+    @Override
+    public void parseInputs(ValueMap input) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -98,5 +109,10 @@ public class JobQueueCleaner implements ProcessDefinition {
                 manager.deferredWithResolver(rr -> q.resume());
             }
         }
+    }
+
+    @Override
+    public void storeReport(ProcessInstance instance) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

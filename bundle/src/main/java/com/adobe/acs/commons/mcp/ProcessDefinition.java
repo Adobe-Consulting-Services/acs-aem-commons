@@ -18,11 +18,18 @@ package com.adobe.acs.commons.mcp;
 import javax.jcr.RepositoryException;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 
 /**
  * Describes a process and provides a builder which creates the process
  */
 public interface ProcessDefinition {
-   public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
+
+    public String getName();
+
+    public void parseInputs(ValueMap input) throws RepositoryException;
     
+    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
+
+    public void storeReport(ProcessInstance instance) throws RepositoryException;
 }

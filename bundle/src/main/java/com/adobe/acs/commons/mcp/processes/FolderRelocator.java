@@ -17,10 +17,8 @@ package com.adobe.acs.commons.mcp.processes;
 
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor;
@@ -41,6 +39,7 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 
 /**
  * This utility takes an alternate approach to moving folders using a four-step
@@ -137,7 +136,16 @@ public class FolderRelocator implements ProcessDefinition {
         }
         sourceToDestination.put(sourcePath, destination);
     }
+    
+    @Override
+    public void parseInputs(ValueMap input) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
+    public String getName() {
+        return "Folder relocator";
+    }
+    
     /**
      * Batch size determines the number of operations (folder creation or node
      * moves) performed at a time.
@@ -338,5 +346,10 @@ public class FolderRelocator implements ProcessDefinition {
         } catch (Exception ex) {
             Logger.getLogger(FolderRelocator.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    @Override
+    public void storeReport(ProcessInstance instance) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -16,6 +16,7 @@
 package com.adobe.acs.commons.mcp;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
@@ -25,8 +26,16 @@ public interface ControlledProcessManager {
 
     ActionManagerFactory getActionManagerFactory();
     
+    ProcessInstance getManagedProcessInstanceByPath(String path);
+    
+    ProcessInstance getManagedProcessInstanceByIdentifier(String id);
+    
     ProcessInstance createManagedProcessInstance(ProcessDefinition definition, String description);
 
-    ResourceResolver getServiceResourceResolver();
+    void haltActiveProcesses();
+    
+    void purgeCompletedProcesses();
+    
+    ResourceResolver getServiceResourceResolver() throws LoginException;
     
 }

@@ -23,6 +23,7 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jcr.RepositoryException;
@@ -38,6 +39,19 @@ public class ProcessInstanceImpl implements ProcessInstance {
     private final List<ActivityDefinition> actions;
     private final ProcessDefinition definition;
     private final ManagedProcess infoBean;
+    private final String id;
+    private final String path;
+    private static final Random rng = new Random();
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getPath() {
+        return path;
+    }
 
     private static class ActivityDefinition {
         String name;
@@ -50,12 +64,13 @@ public class ProcessInstanceImpl implements ProcessInstance {
         infoBean = new ManagedProcess();
         this.actions = new ArrayList<>();
         this.definition = process;
-        infoBean.description = description;
+        infoBean.setDescription(description);
+        id = String.format("%016X", Math.abs(rng.nextLong()));
+        path = "/var/acs/mcp/instances/"+id;
     }
 
-    @Override
     public String getName() {
-        return infoBean.description;
+        return definition.getName() + ": " + infoBean.getDescription();
     }
     
     @Override
@@ -96,14 +111,14 @@ public class ProcessInstanceImpl implements ProcessInstance {
         } catch (LoginException | RepositoryException ex) {
             Logger.getLogger(ProcessInstanceImpl.class.getName()).log(Level.SEVERE, null, ex);
             recordCancellation();
-            terminate();
+            halt();
         }
     }
 
     private void runStep(int step) {
         if (step >= actions.size()) {
             recordCompletion();
-            terminate();
+            halt();
         } else {
             ActivityDefinition action = actions.get(step);
             if (action.critical) {
@@ -111,7 +126,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
                 action.manager.onFailure((failures, rr) -> {
                     recordErrors(step, failures, rr);
                     recordCancellation();
-                    terminate();
+                    halt();
                 });
             } else {
                 action.manager.onFailure((failures, rr) -> recordErrors(step, failures, rr));
@@ -138,7 +153,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
     }    
     
     @Override
-    final public void terminate() {
+    final public void halt() {
         actions.stream().map(a->a.manager).forEach(getActionManagerFactory()::purge);
     }
 }

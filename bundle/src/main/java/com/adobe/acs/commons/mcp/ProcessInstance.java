@@ -40,7 +40,11 @@ public interface ProcessInstance {
     
     ManagedProcess getInfo();
     
+    String getId();
+    
+    String getPath();
+    
     void run(ResourceResolver rr);
-
-    void terminate();
+    
+    void halt();
 }
