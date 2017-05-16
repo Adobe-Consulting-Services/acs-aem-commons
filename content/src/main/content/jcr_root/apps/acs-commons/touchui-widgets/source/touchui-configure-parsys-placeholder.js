@@ -135,7 +135,7 @@
     }
 
     function extendParsys(event){
-        if(event.layer !== "Edit"){
+        if(event.layer !== "Edit" || !gAuthor){
             return;
         }
 
@@ -147,7 +147,7 @@
     $document.on('cq-layer-activated', extendParsys);
 
     $document.on("cq-overlay-hover.cq-edit-layer", function (event) {
-        if(!event.inspectable){
+        if(!event.inspectable || !gAuthor){
             return;
         }
 
