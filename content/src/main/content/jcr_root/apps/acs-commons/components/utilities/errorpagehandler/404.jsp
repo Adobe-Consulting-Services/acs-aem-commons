@@ -18,7 +18,10 @@
   #L%
   --%>
 <%@page session="false"
-        import="com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService"%><%
+        import="com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService,
+        org.apache.sling.api.resource.Resource,
+      	org.apache.sling.api.SlingHttpServletRequest,
+      	org.apache.commons.lang3.StringUtils"%><%
 %><%@include file="/libs/foundation/global.jsp" %><%
     ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
 
@@ -26,12 +29,23 @@
         // Check for and handle 404 Requests properly according on Author/Publish
         if (errorPageHandlerService.doHandle404(slingRequest, slingResponse)) {
 
-            final String path = errorPageHandlerService.findErrorPage(slingRequest, resource);
+            SlingHttpServletRequest req = sling.getRequest();
 
+            String resourcePath = StringUtils.removeEnd(resource.getPath(),resource.getName());
+
+            Resource res = resource.getResourceResolver().resolve(req , resourcePath);
+
+
+            final String path = errorPageHandlerService.findErrorPage(slingRequest, res);
+
+           
             if (path != null) {
                 slingResponse.setStatus(404);
                 errorPageHandlerService.includeUsingGET(slingRequest, slingResponse, path);
                 return;
+
+
+                
             }
         }
     }
