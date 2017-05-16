@@ -21,6 +21,7 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
+import com.adobe.acs.commons.mcp.util.DeserializeException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
     }
 
     @Override
-    public void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws RepositoryException {
+    public void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws DeserializeException, RepositoryException {
         ValueMap inputs = new ModifiableValueMapDecorator(parameterMap);
         infoBean.setRequestInputs(inputs);
         definition.parseInputs(inputs);

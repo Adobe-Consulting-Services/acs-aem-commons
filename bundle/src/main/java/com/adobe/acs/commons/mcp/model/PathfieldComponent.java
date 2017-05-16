@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp;
+package com.adobe.acs.commons.mcp.model;
 
-import javax.jcr.RepositoryException;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
+import com.adobe.acs.commons.mcp.FieldComponent;
 
 /**
- * Describes a process and provides a builder which creates the process
+ * Provisions for path fields
  */
-public interface ProcessDefinition extends FormProcessor {
-
-    public String getName();
-
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
-
-    public void storeReport(ProcessInstance instance) throws RepositoryException;
+public abstract class PathfieldComponent implements FieldComponent {
+    public static class AssetSelectComponent extends PathfieldComponent {
+        
+    }
+    public static class PageSelectComponent extends PathfieldComponent {
+        
+    }
+    public static class FolderSelectComponent extends PathfieldComponent {
+        
+    }
 }

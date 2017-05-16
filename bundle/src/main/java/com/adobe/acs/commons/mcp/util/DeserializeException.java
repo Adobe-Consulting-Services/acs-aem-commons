@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp;
-
-import javax.jcr.RepositoryException;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
+package com.adobe.acs.commons.mcp.util;
 
 /**
- * Describes a process and provides a builder which creates the process
+ * Error thrown when deserializing form input data.
  */
-public interface ProcessDefinition extends FormProcessor {
-
-    public String getName();
-
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
-
-    public void storeReport(ProcessInstance instance) throws RepositoryException;
+public class DeserializeException extends Exception {
+    public DeserializeException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

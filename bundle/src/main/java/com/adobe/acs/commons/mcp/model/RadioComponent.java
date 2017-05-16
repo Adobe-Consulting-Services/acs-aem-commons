@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp;
+package com.adobe.acs.commons.mcp.model;
 
-import javax.jcr.RepositoryException;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
+import com.adobe.acs.commons.mcp.FieldComponent;
 
 /**
- * Describes a process and provides a builder which creates the process
+ * Radio button selector component
  */
-public interface ProcessDefinition extends FormProcessor {
-
-    public String getName();
-
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
-
-    public void storeReport(ProcessInstance instance) throws RepositoryException;
+public abstract class RadioComponent implements FieldComponent {
+    public static class EnumerationSelector extends RadioComponent {
+        
+    }
+    
 }

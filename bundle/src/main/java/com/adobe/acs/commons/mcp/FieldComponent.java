@@ -15,18 +15,9 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import javax.jcr.RepositoryException;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
-
 /**
- * Describes a process and provides a builder which creates the process
+ * Describes a component in a manner which supports auto-generated forms
  */
-public interface ProcessDefinition extends FormProcessor {
-
-    public String getName();
-
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
-
-    public void storeReport(ProcessInstance instance) throws RepositoryException;
+public interface FieldComponent {
+    
 }

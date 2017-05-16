@@ -15,18 +15,21 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import javax.jcr.RepositoryException;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
+import com.adobe.acs.commons.mcp.model.TextfieldComponent;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Describes a process and provides a builder which creates the process
+ * Annotation used to declare process inputs.
  */
-public interface ProcessDefinition extends FormProcessor {
-
-    public String getName();
-
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
-
-    public void storeReport(ProcessInstance instance) throws RepositoryException;
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface FormField {
+    String name();
+    String description() default "";
+    boolean required() default true;
+    Class<? extends FieldComponent> component() default TextfieldComponent.Standard.class;
+    String[] options() default {};
 }

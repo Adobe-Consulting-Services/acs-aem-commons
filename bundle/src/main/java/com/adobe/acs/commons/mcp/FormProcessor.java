@@ -15,18 +15,19 @@
  */
 package com.adobe.acs.commons.mcp;
 
+import com.adobe.acs.commons.mcp.util.DeserializeException;
+import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import javax.jcr.RepositoryException;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 
 /**
- * Describes a process and provides a builder which creates the process
+ * Handles a particular form of input data and deserializes the form into a bean defined with @FormField annotated fields.
  */
-public interface ProcessDefinition extends FormProcessor {
+public interface FormProcessor {
+    default void parseInputs(ValueMap input) throws DeserializeException, RepositoryException {
+        AnnotatedFieldDeserializer.processInput(this, input);
+        init();
+    }
 
-    public String getName();
-
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
-
-    public void storeReport(ProcessInstance instance) throws RepositoryException;
+    void init() throws RepositoryException;
 }

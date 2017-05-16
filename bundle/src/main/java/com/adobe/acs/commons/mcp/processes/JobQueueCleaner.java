@@ -26,7 +26,6 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.event.jobs.Queue;
 
@@ -52,8 +51,8 @@ public class JobQueueCleaner implements ProcessDefinition {
     }
 
     @Override
-    public void parseInputs(ValueMap input) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void init() {
+        // Nothing to do here
     }
 
     @Override

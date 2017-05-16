@@ -19,6 +19,7 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
+import com.adobe.acs.commons.mcp.util.DeserializeException;
 import java.util.Map;
 import javax.jcr.RepositoryException;
 import javax.management.openmbean.CompositeData;
@@ -33,7 +34,7 @@ public interface ProcessInstance {
 
     String getName();
     
-    public void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws RepositoryException;
+    void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws DeserializeException, RepositoryException;
 
     ActionManagerFactory getActionManagerFactory();
  

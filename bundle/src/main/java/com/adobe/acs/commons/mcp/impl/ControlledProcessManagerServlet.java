@@ -18,6 +18,7 @@ package com.adobe.acs.commons.mcp.impl;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.Arrays;
@@ -76,7 +77,7 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
         gson.toJson(result, response.getWriter());
     }
 
-    private ProcessInstance doStartProcess(SlingHttpServletRequest request) throws RepositoryException, ReflectiveOperationException {
+    private ProcessInstance doStartProcess(SlingHttpServletRequest request) throws RepositoryException, ReflectiveOperationException, DeserializeException {
         String def = request.getParameter("definition");
         String description = request.getParameter("description");
         ProcessDefinition definition = manager.findDefinitionByNameOrPath(def);

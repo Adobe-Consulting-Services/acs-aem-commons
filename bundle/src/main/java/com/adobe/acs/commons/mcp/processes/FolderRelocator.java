@@ -21,6 +21,8 @@ import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.model.PathfieldComponent;
+import com.adobe.acs.commons.mcp.model.RadioComponent;
 import com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.util.HashMap;
@@ -40,6 +42,7 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import com.adobe.acs.commons.mcp.FormField;
 
 /**
  * This utility takes an alternate approach to moving folders using a four-step
@@ -72,12 +75,26 @@ import org.apache.sling.api.resource.ValueMap;
  * </ul>
  */
 public class FolderRelocator implements ProcessDefinition {
-
     public static enum Mode {
         RENAME, MOVE
     };
     private Map<String, String> sourceToDestination;
+    @FormField(name="Mode", 
+            description="Move relocates one or more folders.  Rename relocates and takes the last part of the path as the new name for one folder.",
+            required=false,
+            component=RadioComponent.EnumerationSelector.class)
     private Mode mode;
+    @FormField(name="Source folder(s)", 
+            description="One or more source folders must be provided.  Multiple folders implies a move operation.",
+            component=PathfieldComponent.FolderSelectComponent.class,
+            options={"base=/content/dam","multiple"})
+    private String[] sourcePaths;
+    @FormField(name="Destination folder", 
+            description="Destination parent for move, or destination parent folder plus new name for rename",
+            component=PathfieldComponent.FolderSelectComponent.class,
+            options={"base=/content/dam"})
+    private String destinationPath;
+    
     transient private final String[] requiredFolderPrivilegeNames = {
         Privilege.JCR_READ,
         Privilege.JCR_WRITE,
@@ -103,10 +120,8 @@ public class FolderRelocator implements ProcessDefinition {
      * same target parent node. Because there are multiple folders being moved
      * under one parent, this assumes the operation is a Move not a Rename.
      *
-     * @param amf Action manager factory service
      * @param sourcePaths List of source paths to move
      * @param destinationPath Destination parent path
-     * @param processName Process name for tracking
      */
     public FolderRelocator(String[] sourcePaths, String destinationPath) {
         init(sourcePaths, destinationPath);
@@ -126,6 +141,15 @@ public class FolderRelocator implements ProcessDefinition {
         init(sourcePath, destinationPath, processMode);
     }
     
+    @Override
+    public void init() throws RepositoryException {
+        if (sourcePaths != null && sourcePaths.length == 1) {
+            init(sourcePaths[0], destinationPath, mode);
+        } else {
+            init(sourcePaths, destinationPath);
+        }
+    }
+
     private void init(String[] sourcePaths, String destinationPath) {
         sourceToDestination = new HashMap<>();
         this.mode = Mode.MOVE;
@@ -149,19 +173,6 @@ public class FolderRelocator implements ProcessDefinition {
         sourceToDestination.put(sourcePath, destination);        
     }
     
-    @Override
-    public void parseInputs(ValueMap input) {
-        mode = Mode.valueOf(String.valueOf(input.getOrDefault("mode", "MOVE")));
-        String destinationPath = input.get("destination", String.class);
-        Object sourcePaths = input.get("source");
-        
-        if (sourcePaths instanceof String) {
-            init((String) sourcePaths, destinationPath, mode);
-        } else {
-            init((String[]) sourcePaths, destinationPath);
-        }
-    }
-
     @Override
     public String getName() {
         return "Folder relocator";
