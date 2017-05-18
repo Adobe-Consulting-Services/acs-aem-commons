@@ -3,6 +3,7 @@ package com.adobe.acs.commons.dam.impl;
 import com.day.text.Text;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -20,10 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component(
         label = "ACS AEM Commons - Assets Folder Properties Support",
@@ -59,12 +57,28 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
     private static final String[] DEFAULT_PROPERTIES = new String[]{};
     private List<String> properties = null;
     @Property(label = "Allowed properties to persist",
-            description = "Relative paths from /content/dam/.../[sling:Folder] | [sling:OrderedFolder]",
+            description = "Relative property paths from /content/dam/.../[sling:Folder] | [sling:OrderedFolder]. Example: jcr:content/mpConfig",
             value = {})
     public static final String PROP_PROPERTIES = "properties";
 
     public static final String GRANITE_UI_FORM_VALUES = "granite.ui.form.values";
 
+    /**
+     * This method is responsible for post processing POSTs to the FolderShareHandler PostOperation (:operation = dam.share.folder).
+     * This method will store a whitelisted set of request parameters to their relative location off of the [sling:*Folder] node.
+     *
+     * Note, this is executed AFTER the OOTB FolderShareHandler PostOperation.
+     *
+     * At this time this method only supports single-value Strings and ignores all @typeHints.
+     *
+     * This method must fail fast via the accepts(...) method.
+     *
+     * @param servletRequest the request object
+     * @param servletResponse the response object
+     * @param chain the fitler chain
+     * @throws IOException
+     * @throws ServletException
+     */
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         final SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
 
@@ -80,16 +94,19 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
         }
 
         for (final String property : properties) {
-            log.debug("Looking for request parameter named [ {} ] in [ {} ]", property, StringUtils.join(request.getRequestParameterMap().keySet()));
+            if (log.isDebugEnabled()) {
+                log.debug("Looking for request parameter named [ {} ] in [ {} ]", property, StringUtils.join(request.getRequestParameterMap().keySet()));
+            }
             boolean deleteHint = false;
             boolean propertyParamExists = false;
 
-            if (request.getRequestParameterMap().keySet().contains(property)) {
+            final Set<String> requestParameterKeys = request.getRequestParameterMap().keySet();
+            if (requestParameterKeys.contains(property)) {
                 log.trace("Request parameter named [ {} ] does NOT exist", property);
                 propertyParamExists = true;
             }
 
-            if (request.getRequestParameterMap().keySet().contains(property + "@Delete")) {
+            if (requestParameterKeys.contains(property + "@Delete")) {
                 log.trace("Delete hint'd request parameter named [ {} ] does NOT exist", property + "@Delete");
                 deleteHint = true;
             }
@@ -167,6 +184,22 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
     }
 
 
+    /**
+     * This method handles the READING of the properties so that granite UI widgets can display stored data in the form.
+     * This needs to be included AFTER 	/apps/dam/gui/content/assets/foldersharewizard/jcr:content/body/items/form/items/wizard/items/settingStep/items/fixedColumns/items/fixedColumn2/items/tabs/items/tab1/items/folderproperties
+     * such that it can augment the Property map constructed by that OOTB script.
+     *
+     * Note that this exposes a value map for the [sling:*Folder] node, and NOT the [sling:*Folder]/jcr:content, so properties must be prefixed with jcr:content/...
+     *
+     * This can be achieved by creating a resource merge:
+     * /apps/dam/gui/content/assets/foldersharewizard/jcr:content/body/items/form/items/wizard/items/settingStep/items/fixedColumns/items/fixedColumn2/items/tabs/items/tab1/items/folderproperties/assets-folder-properties-support@sling:resourceType = acs-commons/touchui-widgets/asset-folder-properties-support
+     * /apps/dam/gui/content/assets/foldersharewizard/jcr:content/body/items/form/items/wizard/items/settingStep/items/fixedColumns/items/fixedColumn2/items/tabs/items/tab1/items/folderproperties/assets-folder-properties-support@sling:orderBefore = titlefield
+     *
+     * @param request the request object
+     * @param response the response object
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         final Resource suffixResource = request.getRequestPathInfo().getSuffixResource();
@@ -198,6 +231,3 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
         log.info("Initialized AssetsFolderPropertiesSupport with registered properties: {}", properties);
     }
 }
-
-
-
