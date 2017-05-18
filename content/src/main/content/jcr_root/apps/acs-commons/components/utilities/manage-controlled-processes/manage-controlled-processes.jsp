@@ -20,7 +20,6 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@page session="false" %>
 <cq:includeClientLib css="acs-commons.manage-controlled-processes.app'}"/>
-"/>
 <cq:includeClientLib categories="coralui3,coralui2,cq.authoring.dialog,granite.ui.coral.foundation,granite.ui.shell"/>
 <coral-shell>
     <coral-shell-header class="coral--dark">
@@ -38,8 +37,8 @@
                     <div class="granite-actionbar-centerwrapper">
                         <div class="granite-actionbar-center"><span class="granite-title" role="heading" aria-level="1">Manage Controlled Processes</span></div>
                     </div>
-                    <div class="granite-actionbar-left"></div>
-                    <div class="granite-actionbar-right"></div>
+                    <div class="granite-actionbar-left" style="margin-left: 3em;"></div>
+                    <div class="granite-actionbar-right" style="margin-right: 3em;"></div>
                 </div>                    
             </div>
             <div class="foundation-layout-panel-bodywrapper">

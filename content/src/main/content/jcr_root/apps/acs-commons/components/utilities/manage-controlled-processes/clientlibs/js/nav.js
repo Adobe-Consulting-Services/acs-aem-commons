@@ -16,9 +16,22 @@
 /* global jQuery, Granite */
 var MCPMenu = {
     init: function () {
-        var menu = document.getElementById('mcp-main-menu');
+        var rightContents, rightMenu, menu = document.getElementById('mcp-main-menu');
         if (menu) {
             menu.on('coral-columnview:activeitemchange', MCPMenu.menuSelected);
+        }
+        rightMenu = window.top.document.getElementsByClassName("granite-actionbar-right")[0];
+        if (rightMenu) {
+            while (rightMenu.firstChild) {
+                rightMenu.removeChild(rightMenu.firstChild);
+            }
+        }
+        rightContents = document.getElementById('right-action-bar-contents');
+        if (rightContents) {
+            while (rightContents.firstChild) {
+                rightMenu.appendChild(rightContents.firstChild);
+            }
+            rightContents.parentNode.removeChild(rightContents);
         }
     },
     menuSelected: function (evt) {
