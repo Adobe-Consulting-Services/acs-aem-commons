@@ -14,45 +14,99 @@
  * limitations under the License.
  */
 
+/* global Coral, Granite */
+
 var ScriptRunner = {
-    init : function() {
+    init: function () {
 //        $(".coral-Pathbrowser-picker").on("coral-pathbrowser-picker-confirm", ScriptRunner.capturePath);
         jQuery("#startButton").on("click", ScriptRunner.performMove);
+        jQuery(document).on("coral-selectlist:change", "#processDefinitionSelector", ScriptRunner.processDefinitionSelected);
         ScriptRunner.progress = jQuery("#moveProgress");
     },
-    performMove : function() {
-        var source,dest;
+    showStartProgressForm: function () {
+        var url, dialog;
+        url = Granite.HTTP.getPath() + ".start-process.html";
+
+        jQuery.ajax({
+            url: url,
+            dataType: "html",
+            success: function (html) {
+                var dialog = new Coral.Dialog().set({
+                    id: 'startProcessDialog',
+                    header: {
+                        innerHTML: 'Start Process'
+                    },
+                    content: {
+                        innerHTML: html
+                    },
+                    footer: {
+                        innerHTML: '<button id="cancelButton" is="coral-button" variant="default" coral-close>Cancel</button>'
+                    },
+                    closable: true,
+                    variant: "warning"
+                });
+                dialog.on("coral-overlay:open", function () {
+                    dialog.querySelector("coral-Icon").icon = "pausePlay";
+                });
+                dialog.fullscreen = true;
+                document.body.appendChild(dialog);
+                dialog.show();
+            }
+        });
+    },
+    processDefinitionSelected: function(event) {
+        ScriptRunner.showProcessInputForm(event.target.selectedItem.value);
+        ScriptRunner.definitionName = event.target.selectedItem.content;
+        document.getElementById("startProcessWizard").next();
+    },
+    showProcessInputForm: function(definition) {
+        var url = Granite.HTTP.getPath() + ".start-process-form.html";
+        ScriptRunner.definition = event.target.selectedItem.value;
+
+        jQuery.ajax({
+            url: url,
+            dataType: "html",
+            success: function(html) {
+                document.getElementById("processDefinitionInput").innerHTML = html;
+            },
+            data: {
+                processDefinition: definition
+            }
+        });
+    },
+    performMove: function () {
+        var source, dest;
         source = document.forms[0].sourceFolder.value;
         dest = document.forms[0].destinationFolder.value;
         ScriptRunner.setProgress(-1);
         jQuery.ajax({
             url: "/bin/mcp",
-            dataType:"json",
+            dataType: "json",
             success: ScriptRunner.pollingLoop,
             error: ScriptRunner.error,
             data: {
-                action:"start",
-                description:"demo",
-                definition:"com.adobe.acs.commons.mcp.processes.FolderRelocator",
-                source:source,
-                destination:dest
+                action: "start",
+                description: "demo",
+                definition: "com.adobe.acs.commons.mcp.processes.FolderRelocator",
+                source: source,
+                destination: dest
             }
         });
     },
-    pollingLoop: function(data) {
+    pollingLoop: function (data) {
         ScriptRunner.status = data;
         ScriptRunner.updateProgress();
         if (data.infoBean.isRunning) {
-            window.setTimeout(function() {
+            window.setTimeout(function () {
                 console.log("polling status...");
                 jQuery.ajax({
                     url: "/bin/mcp",
-                    dataType:"json",
+                    dataType: "json",
                     success: ScriptRunner.pollingLoop,
                     error: ScriptRunner.error,
                     data: {
-                        action:"status",
-                        id:data.id
+                        action: "status",
+                        id: data.id
                     }
                 });
             }, 250);
@@ -60,24 +114,24 @@ var ScriptRunner = {
             ScriptRunner.finished();
         }
     },
-    error: function() {
+    error: function () {
         ScriptRunner.progress.hide();
         console.log("Error condition detected -- check logs!");
     },
-    updateProgress: function() {
+    updateProgress: function () {
         var i, total, sectionWeight, action;
         total = 0;
         sectionWeight = 1.0 / ScriptRunner.status.actions.length;
-        for (i=0; i < ScriptRunner.status.actions.length; i++) {
+        for (i = 0; i < ScriptRunner.status.actions.length; i++) {
             action = ScriptRunner.status.actions[i];
             if (action.manager.tasksAdded.value > 0) {
                 total += (action.manager.tasksCompleted.value / action.manager.tasksAdded.value) * sectionWeight;
             }
         }
-        console.log("Percent completion " + (total*100));
+        console.log("Percent completion " + (total * 100));
         ScriptRunner.setProgress(total);
     },
-    setProgress: function(val) {
+    setProgress: function (val) {
         var percent, label;
         ScriptRunner.progress.show();
         percent = val * 100;
@@ -87,20 +141,21 @@ var ScriptRunner = {
             ScriptRunner.progress.attr("value", percent);
         } else {
             if (val < 0) {
-               label = "Working...  Please wait...";
+                label = "Working...  Please wait...";
             }
             ScriptRunner.progress.attr("indeterminate", true);
             ScriptRunner.progress.attr("value", 50);
         }
         ScriptRunner.progress[0].label.show();
-        ScriptRunner.progress[0].label.innerHTML=label;
+        ScriptRunner.progress[0].label.innerHTML = label;
     },
-    finished: function() {
+    finished: function () {
         ScriptRunner.progress.hide();
         console.log("DONE!");
     }
 };
 
-jQuery('#processManager').ready(function() {
+jQuery('#processManager').ready(function () {
     ScriptRunner.init();
 });
+jQuery(document).on("click", "#startProcess", ScriptRunner.showStartProgressForm);

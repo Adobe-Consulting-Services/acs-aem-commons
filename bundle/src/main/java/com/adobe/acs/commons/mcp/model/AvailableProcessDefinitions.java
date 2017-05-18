@@ -20,7 +20,6 @@ import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.cq.sightly.WCMUsePojo;
 import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,6 +43,9 @@ public class AvailableProcessDefinitions extends WCMUsePojo {
         definitions = Stream.of(allDefinitions)
                 .collect(Collectors.toMap(o -> o.getClass().getName(), o -> o));
         String processDefinitionName = get("processDefinition", String.class);
+        if (StringUtils.isEmpty(processDefinitionName)) {
+            processDefinitionName = getRequest().getParameter("processDefinition");
+        }
         if (StringUtils.isNotEmpty(processDefinitionName) && definitions.containsKey(processDefinitionName)) {
             formFields = FieldUtils.getFieldsListWithAnnotation(definitions.get(processDefinitionName).getClass(), FormField.class)
                     .stream()

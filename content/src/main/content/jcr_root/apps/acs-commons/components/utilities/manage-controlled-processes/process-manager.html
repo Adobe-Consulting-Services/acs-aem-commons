@@ -6,16 +6,9 @@
 <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html" 
      data-sly-call="${clientlib.css @ categories='acs-commons.manage-controlled-processes.app'}"
      data-sly-call="${clientlib.all @ categories='coralui3,coralui2,cq.authoring.dialog,granite.ui.coral.foundation'}"
-    />
-<sly data-sly-use.processes="${'com.adobe.acs.commons.mcp.model.AvailableProcessDefinitions' @ processDefinition='com.adobe.acs.commons.mcp.processes.FolderRelocator'}">
-    <ul data-sly-list.definitionName="${processes.definitions}">
-        <li>${definitionName} -> ${processes.definitions[definitionName].name}</li>
-    </ul>
-    <ul data-sly-list.fieldName="${processes.formFields}">
-        <li>${fieldName} -> ${processes.formFields[fieldName].name}</li>
-    </ul>
-</sly>
-<div id="right-action-bar-contents"><button is="coral-Button" variant="primary" title="Start Process">Start Process</button></div>
+     />
+<b>TODO:</b> List currently running processes and their status here...
+<div id="right-action-bar-contents"><button id="startProcess" is="coral-Button" variant="primary" title="Start Process">Start Process</button></div>
 <!--
 <section style="width:50%; margin: 5px;" class="coral-Well" id="processManager">
     <form class="coral-Form coral-Form--vertical">
@@ -50,4 +43,4 @@
 -->
 <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html" 
      data-sly-call="${clientlib.js @ categories='acs-commons.manage-controlled-processes.app'}"
-/>
+     />
