@@ -72,10 +72,9 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
     @Reference
     private DAMSyncService damSyncService;
 
-    @Override
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
         ResourceResolver resourceResolver = null;
-        final List<String> assetPaths = new ArrayList<>();
+        final List<String> assetPaths = new ArrayList<String>();
 
         final ReplicationActionType replicationActionType = getReplicationActionType(metaDataMap);
 
@@ -85,7 +84,8 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
             final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, (String) workItem.getWorkflowData().getPayload());
 
             for (final String payload : payloads) {
-
+                // Convert the payloads to Assets, in preparation for Brand Portal publication
+                // Note that this only supports Assets as payloads and NOT Asset Folders
                 final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(payload));
 
                 if (asset == null) {
@@ -95,6 +95,7 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
                 }
             }
 
+            // Based on the WF Process activation/deactivation directive; leverage the DamSyncService to publish the the Asset
             if (ReplicationActionType.ACTIVATE.equals(replicationActionType)) {
                 damSyncService.publishResourcesToMP(assetPaths, resourceResolver);
             } else if (ReplicationActionType.DEACTIVATE.equals(replicationActionType)) {
@@ -115,7 +116,7 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
         }
     }
 
-    private ReplicationActionType getReplicationActionType(MetaDataMap metaDataMap) {
+    protected final ReplicationActionType getReplicationActionType(MetaDataMap metaDataMap) {
         final String processArgs = StringUtils.trim(metaDataMap.get("PROCESS_ARGS", ReplicationActionType.ACTIVATE.getName()));
 
         if (StringUtils.equalsIgnoreCase(processArgs, ReplicationActionType.ACTIVATE.getName())) {
