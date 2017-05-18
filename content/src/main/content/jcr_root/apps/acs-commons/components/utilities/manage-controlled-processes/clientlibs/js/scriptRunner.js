@@ -20,7 +20,6 @@ var ScriptRunner = {
     init: function () {
 //        $(".coral-Pathbrowser-picker").on("coral-pathbrowser-picker-confirm", ScriptRunner.capturePath);
         jQuery("#startButton").on("click", ScriptRunner.performMove);
-        jQuery(document).on("coral-selectlist:change", "#processDefinitionSelector", ScriptRunner.processDefinitionSelected);
         ScriptRunner.progress = jQuery("#moveProgress");
     },
     showStartProgressForm: function () {
@@ -46,13 +45,20 @@ var ScriptRunner = {
                     variant: "warning"
                 });
                 dialog.on("coral-overlay:open", function () {
-                    dialog.querySelector("coral-Icon").icon = "pausePlay";
+                    ScriptRunner.initStartDialog(dialog);
+                });
+                dialog.on("coral-overlay:close", function () {
+                    document.body.removeChild(dialog);
                 });
                 dialog.fullscreen = true;
                 document.body.appendChild(dialog);
                 dialog.show();
             }
         });
+    },
+    initStartDialog: function(dialog) {
+        dialog.querySelector("coral-Icon").icon = "pausePlay";
+        dialog.querySelector("#processDefinitionSelector").on("coral-selectlist:change", ScriptRunner.processDefinitionSelected);
     },
     processDefinitionSelected: function(event) {
         ScriptRunner.showProcessInputForm(event.target.selectedItem.value);
