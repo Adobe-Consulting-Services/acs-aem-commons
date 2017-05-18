@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component(
-        label = "ACS AEM Commons - Asset Folder Properties Support",
+        label = "ACS AEM Commons - Assets Folder Properties Support",
         metatype = true,
         policy = ConfigurationPolicy.REQUIRE
 )
@@ -90,7 +90,7 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
             }
 
             if (request.getRequestParameterMap().keySet().contains(property + "@Delete")) {
-                log.trace("DeRequest parameter named [ {} ] does NOT exist", property + "@Delete");
+                log.trace("Delete hint'd request parameter named [ {} ] does NOT exist", property + "@Delete");
                 deleteHint = true;
             }
 
@@ -118,7 +118,7 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
 
             if (deleteHint) {
                 mvm.remove(propertyName);
-                log.debug("Processes @Delete hint for property [ {} ] from [ {} ]", propertyName, resource.getPath());
+                log.debug("Processed @Delete hint for property [ {} ] from [ {} ]", propertyName, resource.getPath());
             }
 
             if (value == null && !deleteHint) {
@@ -171,11 +171,8 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         final Resource suffixResource = request.getRequestPathInfo().getSuffixResource();
         if (suffixResource == null) { return; }
-        //final Resource jcrContent = suffixResource.getChild(JcrConstants.JCR_CONTENT);
-        //if (jcrContent == null) { return; }
 
-
-        log.trace("AssetsFolderPropertiesSupport GET method for Folder resource [ {} ]", suffixResource.getPath());
+        log.trace("AssetsFolderPropertiesSupport GET method for folder resource [ {} ]", suffixResource.getPath());
 
         ValueMap formProperties = (ValueMap) request.getAttribute(GRANITE_UI_FORM_VALUES);
 
