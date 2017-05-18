@@ -22,6 +22,9 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -32,17 +35,19 @@ import org.apache.sling.event.jobs.Queue;
 /**
  * Stops all running sling jobs and empties the queue entirely.
  */
+@Component
+@Service(ProcessDefinition.class)
 public class JobQueueCleaner implements ProcessDefinition {
+    @Reference
+    private static JobManager jobManager;
 
     public static final String JOB_TYPE = "slingevent:Job";
     public static final String POLICY_NODE_NAME = "rep:policy";
     public static final String EVENT_QUEUE_LOCATION = "/var/eventing";
     public static final int MIN_PURGE_FOLDER_LEVEL = 3;
     private final List<String> suspendedQueues = new ArrayList<>();
-    private final JobManager jobManager;
 
-    public JobQueueCleaner(JobManager jm) {
-        this.jobManager = jm;
+    public JobQueueCleaner() {
     }
 
     @Override

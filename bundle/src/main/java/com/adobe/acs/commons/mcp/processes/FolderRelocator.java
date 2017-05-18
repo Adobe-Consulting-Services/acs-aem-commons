@@ -41,8 +41,9 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
 import com.adobe.acs.commons.mcp.FormField;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 
 /**
  * This utility takes an alternate approach to moving folders using a four-step
@@ -74,6 +75,8 @@ import com.adobe.acs.commons.mcp.FormField;
  * separate process.</li>
  * </ul>
  */
+@Component
+@Service(ProcessDefinition.class)
 public class FolderRelocator implements ProcessDefinition {
     public static enum Mode {
         RENAME, MOVE
