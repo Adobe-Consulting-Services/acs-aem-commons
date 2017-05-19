@@ -16,11 +16,14 @@ limitations under the License.
 -->
 <sly data-sly-use.processes="${'com.adobe.acs.commons.mcp.model.AvailableProcessDefinitions'}">
     <form class="coral-Form coral-Form--aligned u-columnLarge">
-        <section class="coral-Form-fieldset" data-sly-list.field="${processes.fieldComponents}">
-            <div class="coral-Form-fieldwrapper">
-                <label class="coral-Form-fieldlabel" id="label-${field}">${processes.fieldComponents[field].fieldDefinition.name}</label>
-                ${processes.fieldComponents[field].html}
-            </div>
+        <section class="coral-Form-fieldset">
+            <h3 class="coral-Form-fieldset-legend">Process Inputs</h3>
+            <sly data-sly-list.field="${processes.fieldComponents}">
+                <div class="coral-Form-fieldwrapper">
+                    <label class="coral-Form-fieldlabel" id="label-${field}">${processes.fieldComponents[field].fieldDefinition.name}<span data-sly-test="${processes.fieldComponents[field].fieldDefinition.required}"> *</span></label>
+                    ${processes.fieldComponents[field].html}
+                </div>
+            </sly>
         </section>
     </form>
 </sly>

@@ -19,7 +19,7 @@
 --%>
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@page session="false" %>
-<cq:includeClientLib css="acs-commons.manage-controlled-processes.app'}"/>
+<cq:includeClientLib css="acs-commons.manage-controlled-processes.app"/>
 <cq:includeClientLib categories="coralui3,coralui2,cq.authoring.dialog,granite.ui.coral.foundation,granite.ui.shell"/>
 <coral-shell>
     <coral-shell-header class="coral--dark">
@@ -29,7 +29,6 @@
         <coral-shell-header-actions>
         </coral-shell-header-actions>
     </coral-shell-header>
-
     <coral-shell-content role="main">
         <div id="granite-shell-content" class="foundation-layout-panel">
             <div class="foundation-layout-panel-header">
@@ -37,14 +36,14 @@
                     <div class="granite-actionbar-centerwrapper">
                         <div class="granite-actionbar-center"><span class="granite-title" role="heading" aria-level="1">Manage Controlled Processes</span></div>
                     </div>
-                    <div class="granite-actionbar-left" style="margin-left: 3em;"></div>
-                    <div class="granite-actionbar-right" style="margin-right: 3em;"></div>
+                    <div class="granite-actionbar-left"></div>
+                    <div class="granite-actionbar-right"></div>
                 </div>                    
             </div>
             <div class="foundation-layout-panel-bodywrapper">
                 <div class="foundation-layout-panel-body">
                     <div class="foundation-layout-panel-content">
-                        <coral-columnview id="mcp-main-menu" style="max-width:175px; position:absolute; left:0; overflow-x: hidden;">
+                        <coral-columnview id="mcp-main-menu">
                             <coral-columnview-column>
                                 <coral-columnview-column-content>
                                     <coral-columnview-item role="treeitem" variant="drilldown" icon="plug" data-src="block-browser">Blocks</coral-columnview-item>
@@ -54,7 +53,7 @@
                                 </coral-columnview-column-content>
                             </coral-columnview-column>
                         </coral-columnview>
-                        <div id="mcp-workspace" style="position:absolute; left:176px; right:0px; text-align: center;">
+                        <div id="mcp-workspace">
                             <h3>Please select from one the options on the left to get started.</h3>
                         </div>                        
                     </div>

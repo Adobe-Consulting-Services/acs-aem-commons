@@ -44,6 +44,7 @@ var ScriptRunner = {
                     closable: true,
                     variant: "warning"
                 });
+                dialog.classList.add("coral--dark");
                 dialog.on("coral-overlay:open", function () {
                     ScriptRunner.initStartDialog(dialog);
                 });
