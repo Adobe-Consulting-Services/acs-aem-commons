@@ -20,7 +20,7 @@ import com.adobe.acs.commons.mcp.FieldComponent;
 /**
  * Radio button selector component
  */
-public abstract class RadioComponent implements FieldComponent {
+public abstract class RadioComponent extends FieldComponent {
     public static class EnumerationSelector extends RadioComponent {
         
     }

@@ -39,7 +39,7 @@ import org.apache.sling.event.jobs.Queue;
 @Service(ProcessDefinition.class)
 public class JobQueueCleaner implements ProcessDefinition {
     @Reference
-    private static JobManager jobManager;
+    private JobManager jobManager;
 
     public static final String JOB_TYPE = "slingevent:Job";
     public static final String POLICY_NODE_NAME = "rep:policy";

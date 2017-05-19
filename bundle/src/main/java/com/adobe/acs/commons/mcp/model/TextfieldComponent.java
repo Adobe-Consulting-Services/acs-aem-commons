@@ -20,8 +20,8 @@ import com.adobe.acs.commons.mcp.FieldComponent;
 /**
  *
  */
-public abstract class TextfieldComponent implements FieldComponent {
+public abstract class TextfieldComponent extends FieldComponent {
     public static class Standard extends TextfieldComponent {
         
-    };
+    };    
 }

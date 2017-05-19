@@ -19,8 +19,11 @@ import com.adobe.acs.commons.mcp.FieldComponent;
 
 /**
  * Provisions for path fields
+ * Accepts the following options:
+ * base=[path] -- Root of tree shown to user
+ * multiple    -- If added it indicates the user can make multiple selections and values are stored in a multi-value field
  */
-public abstract class PathfieldComponent implements FieldComponent {
+public abstract class PathfieldComponent extends FieldComponent {
     public static class AssetSelectComponent extends PathfieldComponent {
         
     }

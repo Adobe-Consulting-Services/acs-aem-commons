@@ -15,7 +15,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <sly data-sly-use.processes="${'com.adobe.acs.commons.mcp.model.AvailableProcessDefinitions'}">
-    <ul data-sly-list.fieldName="${processes.formFields}">
-        <li>${fieldName} -> ${processes.formFields[fieldName].name}</li>
-    </ul>
+    <form class="coral-Form coral-Form--aligned u-columnLarge">
+        <section class="coral-Form-fieldset" data-sly-list.field="${processes.fieldComponents}">
+            <div class="coral-Form-fieldwrapper">
+                <label class="coral-Form-fieldlabel" id="label-${field}">${processes.fieldComponents[field].fieldDefinition.name}</label>
+                ${processes.fieldComponents[field].html}
+            </div>
+        </section>
+    </form>
 </sly>
