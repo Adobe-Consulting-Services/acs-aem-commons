@@ -16,13 +16,48 @@
 package com.adobe.acs.commons.mcp.model;
 
 import com.adobe.acs.commons.mcp.FieldComponent;
+import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
+import com.day.cq.commons.jcr.JcrUtil;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceMetadata;
 
 /**
  * Radio button selector component
  */
 public abstract class RadioComponent extends FieldComponent {
     public static class EnumerationSelector extends RadioComponent {
-        
+
+        @Override
+        public Map<String, String> getOptions() {
+            return Stream.of((Enum[]) getField().getType().getEnumConstants())
+                    .collect(Collectors.toMap(Enum::name, Enum::name));
+        }        
     }
     
+    @Override
+    public void init() {
+        setResourceType("granite/ui/components/foundation/form/radiogroup");
+    }
+
+    @Override
+    public Resource buildComponentResource() {
+        AbstractResourceImpl component = (AbstractResourceImpl) super.buildComponentResource();
+        AbstractResourceImpl options = new AbstractResourceImpl("items", null, null, new ResourceMetadata());
+        component.addChild(options);
+        getOptions().forEach((value, name)->{
+            ResourceMetadata meta = new ResourceMetadata();
+            String nodeName = JcrUtil.escapeIllegalJcrChars(value);
+            meta.put("name", getName());
+            meta.put("value", value);
+            meta.put("text", name);
+            AbstractResourceImpl option = new AbstractResourceImpl("option_"+nodeName, "granite/ui/components/foundation/form/radio", "granite/ui/components/foundation/form/field", meta);
+            options.addChild(option);
+        });
+        return component;
+    }
+    
+    abstract public Map<String, String> getOptions();
 }

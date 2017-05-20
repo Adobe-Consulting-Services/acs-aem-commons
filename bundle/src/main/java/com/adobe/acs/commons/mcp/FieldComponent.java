@@ -15,13 +15,11 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import org.apache.sling.api.resource.AbstractResource;
+import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
+import java.lang.reflect.Field;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingScriptHelper;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 /**
  * Describes a component in a manner which supports auto-generated forms
@@ -29,23 +27,32 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 public abstract class FieldComponent {
     private String name;
     protected FormField formField;
+    protected Field javaField;
     protected SlingScriptHelper sling;
     private final ResourceMetadata componentMetadata = new ResourceMetadata();
     private String resourceType = "/libs/granite/ui/components/coral/foundation/form/textfield";
     private String resourceSuperType = "/libs/granite/ui/components/coral/foundation/form/field";
+    private Resource resource;
 
-
-    public void init(String name, FormField field, SlingScriptHelper sling) {
+    public final void setup(String name, Field javaField, FormField field, SlingScriptHelper sling) {
         this.name = name;
         this.formField = field;
         this.sling = sling;
+        this.javaField = javaField;
         componentMetadata.put("name", name);
-        componentMetadata.put("required", field.required());
-        componentMetadata.put("emptyText", field.description());
+        componentMetadata.put("required", formField.required());
+        componentMetadata.put("emptyText", formField.description());
+        init();
     }
-
+    
+    abstract public void init();
+    
     public SlingScriptHelper getHelper() {
         return sling;
+    }
+    
+    public Field getField() {
+        return javaField;
     }
     
     public FormField getFieldDefinition() {
@@ -53,42 +60,25 @@ public abstract class FieldComponent {
     }
     
     public String getHtml() {
-        sling.include(buildComponentResource());
+        sling.include(getComponentResource());
         return "";
     }
 
+    private Resource getComponentResource() {
+        if (resource == null) {
+            resource = buildComponentResource();
+        }
+        return resource;
+    }
+
+    /**
+     * If your component needs child nodes then override this method, call the superclass implementation, and then use addChildren
+     * to add additional nodes to it.
+     * @return 
+     */
     public Resource buildComponentResource() {
-        Resource res = new AbstractResource() {
-            @Override
-            public String getPath() {
-                return "/not/a/real/path";
-            }
-
-            @Override
-            public String getResourceType() {
-                return resourceType;
-            }
-
-            @Override
-            public String getResourceSuperType() {
-                return resourceSuperType;
-            }
-
-            @Override
-            public ResourceMetadata getResourceMetadata() {
-                return getComponentMetadata();
-            }
-            
-            @Override
-            public ValueMap getValueMap() {
-                return new ValueMapDecorator(getComponentMetadata());
-            }
-
-            @Override
-            public ResourceResolver getResourceResolver() {
-                return sling.getRequest().getResourceResolver();
-            }
-        };
+        AbstractResourceImpl res = new AbstractResourceImpl("/fake/path", resourceType, resourceSuperType, componentMetadata);
+        res.setResourceResolver(sling.getRequest().getResourceResolver());
         return res;
     }
 
@@ -133,4 +123,5 @@ public abstract class FieldComponent {
     public String getName() {
         return name;
     }
+
 }

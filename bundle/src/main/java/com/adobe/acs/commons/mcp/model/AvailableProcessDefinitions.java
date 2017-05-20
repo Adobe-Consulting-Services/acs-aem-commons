@@ -59,7 +59,7 @@ public class AvailableProcessDefinitions extends WCMUsePojo {
                         FieldComponent component;
                         try {
                             component = fieldDefinition.component().newInstance();
-                            component.init(f.getName(), fieldDefinition, sling);
+                            component.setup(f.getName(), f, fieldDefinition, sling);
                             return component;
                         } catch (InstantiationException | IllegalAccessException ex) {
                             Logger.getLogger(AvailableProcessDefinitions.class.getName()).log(Level.SEVERE, null, ex);
