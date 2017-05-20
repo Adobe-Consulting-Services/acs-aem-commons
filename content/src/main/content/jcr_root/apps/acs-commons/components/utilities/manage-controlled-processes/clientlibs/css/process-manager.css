@@ -18,11 +18,11 @@ limitations under the License.
     background-color: #333 !important
 }
 
-#startProcessWizard .coral-Form-field {
+coral-Dialog-content .coral-Form-field {
     width: 55%;
     text-align: left;
 } 
 
-#startProcessWizard .coral-Form-fieldlabel {
+coral-Dialog-content .coral-Form-fieldlabel {
     min-width:10em
 }

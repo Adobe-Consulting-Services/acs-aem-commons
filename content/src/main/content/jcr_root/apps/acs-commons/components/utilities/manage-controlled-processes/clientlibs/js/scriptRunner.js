@@ -57,24 +57,35 @@ var ScriptRunner = {
             }
         });
     },
-    initStartDialog: function(dialog) {
+    initStartDialog: function (dialog) {
         dialog.querySelector("coral-Icon").icon = "pausePlay";
         dialog.querySelector("#processDefinitionSelector").on("coral-selectlist:change", ScriptRunner.processDefinitionSelected);
     },
-    processDefinitionSelected: function(event) {
-        ScriptRunner.showProcessInputForm(event.target.selectedItem.value);
-        ScriptRunner.definitionName = event.target.selectedItem.content;
-        document.getElementById("startProcessWizard").next();
+    processDefinitionSelected: function (event) {
+        if (event && event.target && event.target.selectedItem) {
+            ScriptRunner.showProcessInputForm(event.target.selectedItem.value);
+            ScriptRunner.definitionName = event.target.selectedItem.content;
+            document.getElementById("startProcessWizard").next();
+        }
     },
-    showProcessInputForm: function(definition) {
+    showProcessInputForm: function (definition) {
         var url = Granite.HTTP.getPath() + ".start-process-form.html";
         ScriptRunner.definition = event.target.selectedItem.value;
 
         jQuery.ajax({
             url: url,
             dataType: "html",
-            success: function(html) {
-                document.getElementById("processDefinitionInput").innerHTML = html;
+            success: function (response) {
+                var inputForm = jQuery("#processDefinitionInput");
+                var $html, html = Granite.UI.Foundation.Utils.processHtml(response, "#processDefinitionInput", false, true);
+                $html = jQuery(html);
+                $html.find("coral-icon").each(function() {
+                    if (this.icon) {
+                        this.classList.add("coral-Icon--"+this.icon);
+                    }
+                });
+                inputForm.html("").append($html);
+                $html.trigger("foundation-contentloaded");
             },
             data: {
                 processDefinition: definition

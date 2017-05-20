@@ -16,6 +16,9 @@
 package com.adobe.acs.commons.mcp.model;
 
 import com.adobe.acs.commons.mcp.FieldComponent;
+import com.adobe.acs.commons.mcp.FormField;
+import java.util.stream.Stream;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 
 /**
  * Provisions for path fields
@@ -24,13 +27,43 @@ import com.adobe.acs.commons.mcp.FieldComponent;
  * multiple    -- If added it indicates the user can make multiple selections and values are stored in a multi-value field
  */
 public abstract class PathfieldComponent extends FieldComponent {
+
+    @Override
+    public void init(String name, FormField field, SlingScriptHelper sling) {
+        super.init(name, field, sling);
+        setResourceType("/libs/granite/ui/components/coral/foundation/form/pathbrowser");
+        Stream.of(field.options())
+                .filter(s->s.equalsIgnoreCase("multiple"))
+                .findFirst().ifPresent(o->getComponentMetadata().put("pickerMultiselect", true));
+        Stream.of(field.options())
+                .filter(s->s.startsWith("base="))
+                .findFirst().ifPresent(o->{
+                    String[] parts = o.split("=");
+                    getComponentMetadata().put("rootPath", parts[1]);
+        });
+        getComponentMetadata().put("predicate", "nosystem");
+    }
+    
+    
     public static class AssetSelectComponent extends PathfieldComponent {
-        
+        @Override
+        public void init(String name, FormField field, SlingScriptHelper sling) {
+            super.init(name, field, sling);
+            getComponentMetadata().put("predicate", "hierarchy");
+        }
     }
     public static class PageSelectComponent extends PathfieldComponent {
-        
+        @Override
+        public void init(String name, FormField field, SlingScriptHelper sling) {
+            super.init(name, field, sling);
+            getComponentMetadata().put("predicate", "hierarchyNotFile");
+        }
     }
     public static class FolderSelectComponent extends PathfieldComponent {
-        
+        @Override
+        public void init(String name, FormField field, SlingScriptHelper sling) {
+            super.init(name, field, sling);
+            getComponentMetadata().put("predicate", "folder");
+        }
     }
 }
