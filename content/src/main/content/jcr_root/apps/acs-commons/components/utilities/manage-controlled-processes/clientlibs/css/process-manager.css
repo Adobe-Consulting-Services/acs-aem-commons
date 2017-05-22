@@ -26,3 +26,8 @@ coral-Dialog-content .coral-Form-field {
 coral-Dialog-content .coral-Form-fieldlabel {
     min-width:10em
 }
+
+.coral-Form--aligned .coral-Form-fieldwrapper .coral-Form-fieldwrapper {
+    margin: 0;
+    clear: none;
+}

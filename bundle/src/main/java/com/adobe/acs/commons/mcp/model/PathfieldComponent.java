@@ -16,7 +16,6 @@
 package com.adobe.acs.commons.mcp.model;
 
 import com.adobe.acs.commons.mcp.FieldComponent;
-import java.util.stream.Stream;
 
 /**
  * Provisions for path fields Accepts the following options: base=[path] -- Root
@@ -28,15 +27,8 @@ public abstract class PathfieldComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/pathbrowser");
-        Stream.of(formField.options())
-                .filter(s -> s.equalsIgnoreCase("multiple"))
-                .findFirst().ifPresent(o -> getComponentMetadata().put("pickerMultiselect", true));
-        Stream.of(formField.options())
-                .filter(s -> s.startsWith("base="))
-                .findFirst().ifPresent(o -> {
-                    String[] parts = o.split("=");
-                    getComponentMetadata().put("rootPath", parts[1]);
-                });
+        getComponentMetadata().put("pickerMultiselect", hasOption("multiple"));
+        getOption("base").ifPresent(path->getComponentMetadata().put("rootPath", path));
         getComponentMetadata().put("predicate", "nosystem");
     }
 

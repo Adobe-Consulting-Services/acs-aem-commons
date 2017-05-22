@@ -40,6 +40,7 @@ public abstract class RadioComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/foundation/form/radiogroup");
+        getComponentMetadata().put("vertical", hasOption("vertical"));
     }
 
     @Override

@@ -17,6 +17,8 @@ package com.adobe.acs.commons.mcp;
 
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import java.lang.reflect.Field;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.scripting.SlingScriptHelper;
@@ -124,4 +126,15 @@ public abstract class FieldComponent {
         return name;
     }
 
+    public boolean hasOption(String optionName) {
+        return Stream.of(formField.options())
+                .filter(s -> s.equalsIgnoreCase(optionName))
+                .findFirst().isPresent();
+    }
+    
+    public Optional<String> getOption(String option) {
+        return Stream.of(formField.options())
+                .filter(s -> s.startsWith(option+"="))
+                .findFirst().map(o -> o.split("=")[1]);
+    }
 }
