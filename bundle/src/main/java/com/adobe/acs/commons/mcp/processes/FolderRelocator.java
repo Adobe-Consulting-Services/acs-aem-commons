@@ -82,11 +82,6 @@ public class FolderRelocator implements ProcessDefinition {
         RENAME, MOVE
     };
     private Map<String, String> sourceToDestination;
-    @FormField(name="Mode", 
-            description="Move relocates one or more folders.  Rename relocates and takes the last part of the path as the new name for one folder.",
-            required=false,
-            component=RadioComponent.EnumerationSelector.class)
-    private Mode mode;
     @FormField(name="Source folder(s)", 
             description="One or more source folders must be provided.  Multiple folders implies a move operation.",
             component=PathfieldComponent.FolderSelectComponent.class,
@@ -97,6 +92,12 @@ public class FolderRelocator implements ProcessDefinition {
             component=PathfieldComponent.FolderSelectComponent.class,
             options={"base=/content/dam"})
     private String destinationPath;
+    @FormField(name="Mode", 
+            description="Move relocates one or more folders.  Rename relocates and takes the last part of the path as the new name for one folder.",
+            required=false,
+            component=RadioComponent.EnumerationSelector.class,
+            options={"vertical"})
+    private Mode mode;
     
     transient private final String[] requiredFolderPrivilegeNames = {
         Privilege.JCR_READ,
