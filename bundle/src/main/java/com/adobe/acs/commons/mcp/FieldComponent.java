@@ -45,7 +45,7 @@ public abstract class FieldComponent {
         componentMetadata.put("fieldLabel", formField.name());
         componentMetadata.put("fieldDescription", formField.description());
         componentMetadata.put("required", formField.required());
-        componentMetadata.put("emptyText", formField.description());
+        componentMetadata.put("emptyText", formField.hint());
         init();
     }
     

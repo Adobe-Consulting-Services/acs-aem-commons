@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FormField {
     String name();
+    String hint() default "";
     String description() default "";
     boolean required() default true;
     Class<? extends FieldComponent> component() default TextfieldComponent.Standard.class;

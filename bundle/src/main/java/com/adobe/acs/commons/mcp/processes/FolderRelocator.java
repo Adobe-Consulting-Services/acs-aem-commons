@@ -84,11 +84,13 @@ public class FolderRelocator implements ProcessDefinition {
     private Map<String, String> sourceToDestination;
     @FormField(name="Source folder(s)", 
             description="One or more source folders must be provided.  Multiple folders implies a move operation.",
+            hint="/content/dam/someFolder",
             component=PathfieldComponent.FolderSelectComponent.class,
             options={"base=/content/dam","multiple"})
     private String[] sourcePaths;
     @FormField(name="Destination folder", 
             description="Destination parent for move, or destination parent folder plus new name for rename",
+            hint="Move: /content/dam/moveToFolder | Rename: /content/dam/moveToFolder/newName",
             component=PathfieldComponent.FolderSelectComponent.class,
             options={"base=/content/dam"})
     private String destinationPath;
