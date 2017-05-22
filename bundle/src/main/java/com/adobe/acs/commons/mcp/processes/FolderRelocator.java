@@ -96,7 +96,7 @@ public class FolderRelocator implements ProcessDefinition {
             description="Move relocates one or more folders.  Rename relocates and takes the last part of the path as the new name for one folder.",
             required=false,
             component=RadioComponent.EnumerationSelector.class,
-            options={"vertical"})
+            options={"horizontal"})
     private Mode mode;
     
     transient private final String[] requiredFolderPrivilegeNames = {

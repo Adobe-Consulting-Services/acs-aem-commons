@@ -41,15 +41,18 @@ var ScriptRunner = {
                     footer: {
                         innerHTML: '<button id="cancelButton" is="coral-button" variant="default" coral-close>Cancel</button>'
                     },
-                    closable: true,
+                    closable: false,
                     variant: "warning"
                 });
                 dialog.classList.add("coral--dark");
                 dialog.on("coral-overlay:open", function () {
                     ScriptRunner.initStartDialog(dialog);
                 });
-                dialog.on("coral-overlay:close", function () {
-                    document.body.removeChild(dialog);
+                dialog.on("coral-overlay:close", function (evt) {
+                    // This event also triggers for closing sub-dialogs and tooltips
+                    if (evt.target === evt.currentTarget) {
+                        document.body.removeChild(dialog);
+                    }
                 });
                 dialog.fullscreen = true;
                 document.body.appendChild(dialog);

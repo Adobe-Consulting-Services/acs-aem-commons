@@ -32,8 +32,8 @@ public abstract class FieldComponent {
     protected Field javaField;
     protected SlingScriptHelper sling;
     private final ResourceMetadata componentMetadata = new ResourceMetadata();
-    private String resourceType = "/libs/granite/ui/components/coral/foundation/form/textfield";
-    private String resourceSuperType = "/libs/granite/ui/components/coral/foundation/form/field";
+    private String resourceType = "granite/ui/components/coral/foundation/form/textfield";
+    private String resourceSuperType = "granite/ui/components/coral/foundation/form/field";
     private Resource resource;
 
     public final void setup(String name, Field javaField, FormField field, SlingScriptHelper sling) {
@@ -42,6 +42,8 @@ public abstract class FieldComponent {
         this.sling = sling;
         this.javaField = javaField;
         componentMetadata.put("name", name);
+        componentMetadata.put("fieldLabel", formField.name());
+        componentMetadata.put("fieldDescription", formField.description());
         componentMetadata.put("required", formField.required());
         componentMetadata.put("emptyText", formField.description());
         init();
