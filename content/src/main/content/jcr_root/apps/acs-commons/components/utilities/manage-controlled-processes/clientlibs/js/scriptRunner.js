@@ -19,18 +19,17 @@
 var ScriptRunner = {
     init: function () {
 //        $(".coral-Pathbrowser-picker").on("coral-pathbrowser-picker-confirm", ScriptRunner.capturePath);
-        jQuery("#startButton").on("click", ScriptRunner.performMove);
         ScriptRunner.progress = jQuery("#moveProgress");
     },
     showStartProgressForm: function () {
-        var url, dialog;
+        var url;
         url = Granite.HTTP.getPath() + ".start-process.html";
 
         jQuery.ajax({
             url: url,
             dataType: "html",
             success: function (html) {
-                var dialog = new Coral.Dialog().set({
+                ScriptRunner.startDialog = new Coral.Dialog().set({
                     id: 'startProcessDialog',
                     header: {
                         innerHTML: 'Start Process'
@@ -44,36 +43,37 @@ var ScriptRunner = {
                     closable: false,
                     variant: "warning"
                 });
-                dialog.classList.add("coral--dark");
-                dialog.on("coral-overlay:open", function () {
-                    ScriptRunner.initStartDialog(dialog);
+                ScriptRunner.startDialog.classList.add("coral--dark");
+                ScriptRunner.startDialog.on("coral-overlay:open", function () {
+                    ScriptRunner.initStartDialog(ScriptRunner.startDialog);
                 });
-                dialog.on("coral-overlay:close", function (evt) {
+                ScriptRunner.startDialog.on("coral-overlay:close", function (evt) {
                     // This event also triggers for closing sub-dialogs and tooltips
                     if (evt.target === evt.currentTarget) {
-                        document.body.removeChild(dialog);
+                        document.body.removeChild(ScriptRunner.startDialog);
                     }
                 });
-                dialog.fullscreen = true;
-                document.body.appendChild(dialog);
-                dialog.show();
+                ScriptRunner.startDialog.fullscreen = true;
+                document.body.appendChild(ScriptRunner.startDialog);
+                ScriptRunner.startDialog.show();
             }
         });
     },
     initStartDialog: function (dialog) {
         dialog.querySelector("coral-Icon").icon = "pausePlay";
         dialog.querySelector("#processDefinitionSelector").on("coral-selectlist:change", ScriptRunner.processDefinitionSelected);
+        dialog.querySelector("#startButton").on("click", ScriptRunner.startProcess);
     },
     processDefinitionSelected: function (event) {
         if (event && event.target && event.target.selectedItem) {
-            ScriptRunner.showProcessInputForm(event.target.selectedItem.value);
-            ScriptRunner.definitionName = event.target.selectedItem.content;
+            ScriptRunner.definition = event.target.selectedItem.value;
+            ScriptRunner.definitionName = event.target.selectedItem.innerText;
+            ScriptRunner.showProcessInputForm(ScriptRunner.definition);
             document.getElementById("startProcessWizard").next();
         }
     },
     showProcessInputForm: function (definition) {
         var url = Granite.HTTP.getPath() + ".start-process-form.html";
-        ScriptRunner.definition = event.target.selectedItem.value;
 
         jQuery.ajax({
             url: url,
@@ -82,9 +82,11 @@ var ScriptRunner = {
                 var inputForm = jQuery("#processDefinitionInput");
                 var $html, html = Granite.UI.Foundation.Utils.processHtml(response, "#processDefinitionInput", false, true);
                 $html = jQuery(html);
-                $html.find("coral-icon").each(function() {
+                $html.find("#processName").text(ScriptRunner.definitionName);
+                $html.find("#process").val(ScriptRunner.definition);
+                $html.find("coral-icon").each(function () {
                     if (this.icon) {
-                        this.classList.add("coral-Icon--"+this.icon);
+                        this.classList.add("coral-Icon--" + this.icon);
                     }
                 });
                 inputForm.html("").append($html);
@@ -95,24 +97,36 @@ var ScriptRunner = {
             }
         });
     },
-    performMove: function () {
-        var source, dest;
-        source = document.forms[0].sourceFolder.value;
-        dest = document.forms[0].destinationFolder.value;
-        ScriptRunner.setProgress(-1);
+    startProcess: function () {
+        var data = {};
+        jQuery("#processDefinitionInput form").serializeArray().map(function (x) {
+            data[x.name] = x.value;
+        });
         jQuery.ajax({
             url: "/bin/mcp",
             dataType: "json",
-            success: ScriptRunner.pollingLoop,
+            success: ScriptRunner.startedSuccessfully,
             error: ScriptRunner.error,
-            data: {
-                action: "start",
-                description: "demo",
-                definition: "com.adobe.acs.commons.mcp.processes.FolderRelocator",
-                source: source,
-                destination: dest
-            }
+            data: data
         });
+    },
+    startedSuccessfully: function () {
+        var success = new Coral.Dialog().set({
+            header: {
+                innerHTML: 'Process Started'
+            },
+            content: {
+                innerHTML: "The process was started successfully."
+            },
+            backdrop: "modal",
+            closable: "on",
+            variant: "info"
+        });
+        success.classList.add("coral--dark");
+        document.body.appendChild(success);
+        success.show();
+        ScriptRunner.startDialog.hide();
+        document.body.removeChild(ScriptRunner.startDialog);
     },
     pollingLoop: function (data) {
         ScriptRunner.status = data;

@@ -22,9 +22,6 @@ limitations under the License.
         <coral-step class="coral-Step" role="tab" id="coral-id-3">
             <coral-step-label class="coral-Step-label">Provide Input</coral-step-label>
         </coral-step>
-        <coral-step class="coral-Step" role="tab" id="coral-id-5">
-            <coral-step-label class="coral-Step-label">Confirm</coral-step-label>
-        </coral-step>
     </coral-steplist>
     <coral-panelstack coral-wizardview-panelstack="" class="coral-PanelStack" role="presentation">
         <coral-panel class="coral-Well coral-Panel" selected="" role="tabpanel">
@@ -37,19 +34,10 @@ limitations under the License.
                 <coral-panel-content id="processDefinitionInput">
                     <div id="processDefinitionInput"></div>
                 </coral-panel-content>
-                <button is="coral-button" variant="primary" coral-wizardview-previous="" class="coral-Button coral-Button--primary" size="M">
+                <button is="coral-button" variant="primary" coral-wizardview-previous="" size="M">
                     <coral-button-label>Previous</coral-button-label>
                 </button>
-                <button is="coral-button" variant="primary" coral-wizardview-next="" class="coral-Button coral-Button--primary" size="M">
-                    <coral-button-label>Next</coral-button-label>
-                </button>
-            </coral-panel-content></coral-panel>
-        <coral-panel class="coral-Well coral-Panel" role="tabpanel"><coral-panel-content>
-                This is the content of the third step.
-                <button is="coral-button" variant="primary" coral-wizardview-previous="" class="coral-Button coral-Button--primary" size="M">
-                    <coral-button-label>Previous</coral-button-label>
-                </button>
-                <button is="coral-button" variant="primary" class="coral-Button coral-Button--primary" size="M">
+                <button id="startButton" is="coral-button" variant="primary" size="M">
                     <coral-button-label>Start</coral-button-label>
                 </button>
             </coral-panel-content></coral-panel>

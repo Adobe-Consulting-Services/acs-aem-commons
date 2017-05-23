@@ -20,7 +20,9 @@ limitations under the License.
 <sly data-sly-use.processes="${'com.adobe.acs.commons.mcp.model.AvailableProcessDefinitions'}">
     <form class="coral-Form coral-Form--aligned u-columnLarge">
         <section class="coral-Form-fieldset">
-            <h3 class="coral-Form-fieldset-legend">Process Inputs</h3>
+            <h3 class="coral-Form-fieldset-legend" id="processName">Process Inputs</h3>
+            <input type="hidden" id="process" name="definition">
+            <input type="hidden" name="action" value="start">
             <sly data-sly-list.field="${processes.fieldComponents}">
                 ${processes.fieldComponents[field].html}
             </sly>

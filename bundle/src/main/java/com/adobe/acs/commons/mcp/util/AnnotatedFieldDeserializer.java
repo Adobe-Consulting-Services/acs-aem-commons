@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.ValueMap;
 import com.adobe.acs.commons.mcp.FormField;
+import java.lang.reflect.Array;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
@@ -73,7 +74,11 @@ public class AnnotatedFieldDeserializer {
             convertedValues.add(convertValue(value, field.getType()));
         }
         if (field.getType().isArray()) {
-            FieldUtils.writeField(field, target, convertedValues.toArray(), true);
+            Object array = Array.newInstance(field.getType().getComponentType(), convertedValues.size());
+            for (int i=0; i < convertedValues.size(); i++) {
+                Array.set(array, i, convertedValues.get(i));
+            }
+            FieldUtils.writeField(field, target, array, true);
         } else {
             Collection c = (Collection) field.getType().newInstance();
             c.addAll(convertedValues);
@@ -93,7 +98,7 @@ public class AnnotatedFieldDeserializer {
         Class clazz = type.isArray() ? type.getComponentType() : type;
         if (clazz.isPrimitive()) {
             return convertPrimitiveValue(value, clazz);
-        } else if (clazz.isInstance(String.class)) {
+        } else if (clazz == String.class) {
             return value;
         } else if (clazz.isEnum()) {
             return Enum.valueOf((Class<Enum>) clazz, value);
