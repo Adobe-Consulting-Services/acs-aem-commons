@@ -18,7 +18,6 @@
 
 var ScriptRunner = {
     init: function () {
-//        $(".coral-Pathbrowser-picker").on("coral-pathbrowser-picker-confirm", ScriptRunner.capturePath);
         ScriptRunner.progress = jQuery("#moveProgress");
     },
     showStartProgressForm: function () {
@@ -153,15 +152,6 @@ var ScriptRunner = {
         console.log("Error condition detected -- check logs!");
     },
     updateProgress: function () {
-        var i, total, sectionWeight, action;
-        total = 0;
-        sectionWeight = 1.0 / ScriptRunner.status.actions.length;
-        for (i = 0; i < ScriptRunner.status.actions.length; i++) {
-            action = ScriptRunner.status.actions[i];
-            if (action.manager.tasksAdded.value > 0) {
-                total += (action.manager.tasksCompleted.value / action.manager.tasksAdded.value) * sectionWeight;
-            }
-        }
         console.log("Percent completion " + (total * 100));
         ScriptRunner.setProgress(total);
     },

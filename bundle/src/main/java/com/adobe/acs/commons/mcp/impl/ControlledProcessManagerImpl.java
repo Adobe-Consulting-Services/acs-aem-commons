@@ -19,9 +19,11 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.management.openmbean.OpenDataException;
@@ -66,7 +68,11 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
 
     @Override
     public ProcessInstance getManagedProcessInstanceByIdentifier(String id) {
-        return activeProcesses.get(id);
+        ProcessInstance process = activeProcesses.get(id);
+        if (process != null) {
+            process.updateProgress();
+        }
+        return process;
     }
 
     @Override
@@ -127,5 +133,11 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     @Override
     public void haltProcessByPath(String path) {
         getManagedProcessInstanceByPath(path).halt();
+    }
+
+    @Override
+    public Collection<ProcessInstance> getActiveProcesses() {
+        activeProcesses.forEach((id,process)->process.updateProgress());
+        return activeProcesses.values();
     }
 }

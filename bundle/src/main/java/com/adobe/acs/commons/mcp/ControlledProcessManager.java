@@ -17,6 +17,8 @@ package com.adobe.acs.commons.mcp;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.mbean.CPMBean;
+import java.util.Collection;
+import java.util.List;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -35,6 +37,8 @@ public interface ControlledProcessManager extends CPMBean {
     
     ResourceResolver getServiceResourceResolver() throws LoginException;
 
-    public ProcessDefinition findDefinitionByNameOrPath(String nameOrPath) throws ReflectiveOperationException;
+    ProcessDefinition findDefinitionByNameOrPath(String nameOrPath) throws ReflectiveOperationException;
+
+    Collection<ProcessInstance> getActiveProcesses();
     
 }

@@ -22,6 +22,7 @@ import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,6 +54,9 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
             switch (action) {
                 case "start":
                     result = doStartProcess(request);
+                    break;
+                case "list":
+                    result = doProcessList();
                     break;
                 case "status":
                     result = doProcessStatusCheck(request);
@@ -127,5 +131,9 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
                         entry -> entry.getKey(),
                         entry -> (Object) (entry.getValue().length == 1 ? entry.getValue()[0] : entry.getValue())
                 ));
+    }
+
+    private Collection<ProcessInstance> doProcessList() {
+        return manager.getActiveProcesses();
     }
 }

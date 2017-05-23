@@ -39,6 +39,8 @@ public class ManagedProcess {
     @Inject
     private boolean isRunning;
     @Inject
+    private double progress;
+    @Inject
     private String status;
     @Inject
     private Result result;
@@ -153,5 +155,19 @@ public class ManagedProcess {
      */
     public void setResult(Result result) {
         this.result = result;
+    }
+
+    /**
+     * @return the progress
+     */
+    public double getProgress() {
+        return progress;
+    }
+
+    /**
+     * @param progress the progress to set
+     */
+    public void setProgress(double progress) {
+        this.progress = progress;
     }
 }

@@ -44,6 +44,8 @@ public interface ProcessInstance {
     
     ManagedProcess getInfo();
     
+    double updateProgress();
+    
     String getId();
     
     String getPath();

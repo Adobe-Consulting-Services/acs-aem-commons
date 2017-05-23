@@ -67,6 +67,19 @@ public class ProcessInstanceImpl implements ProcessInstance {
         return path;
     }
 
+    @Override
+    public double updateProgress() {
+        double sectionWeight = 1.0 / actions.size();
+        double progress = actions.stream()
+                .map(action->action.manager)
+                .filter(action->action.getAddedCount() > 0)
+                .collect(Collectors.summingDouble(action-> 
+                        sectionWeight * (double) action.getCompletedCount() / (double) action.getAddedCount()
+                ));
+        infoBean.setProgress(progress);
+        return progress;
+    }
+
     private static class ActivityDefinition {
         String name;
         ActionManager manager;
@@ -209,6 +222,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
                         actions.stream().filter(a -> a.manager.isComplete()).collect(Collectors.counting()),
                         actions.stream().map(a -> a.manager.getSuccessCount()).collect(Collectors.summingInt(Integer::intValue)),
                         actions.stream().map(a -> a.manager.getErrorCount()).collect(Collectors.summingInt(Integer::intValue)),
+                        updateProgress(),
                         getRuntime()
                     }
             );
@@ -224,13 +238,13 @@ public class ProcessInstanceImpl implements ProcessInstance {
 
     static {
         try {
-            statsItemNames = new String[]{"_id", "_taskName", "started", "completed", "successful", "errors", "runtime"};
+            statsItemNames = new String[]{"_id", "_taskName", "started", "completed", "successful", "errors", "runtime", "pct_complete"};
             statsCompositeType = new CompositeType(
                     "Statics Row",
                     "Single row of statistics",
                     statsItemNames,
-                    new String[]{"ID", "Name", "Started", "Completed", "Successful", "Errors", "Runtime"},
-                    new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.LONG, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG});
+                    new String[]{"ID", "Name", "Started", "Completed", "Successful", "Errors", "Runtime", "Percent complete"},
+                    new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.LONG, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DOUBLE});
             statsTabularType = new TabularType("Statistics", "Collected statistics", statsCompositeType, new String[]{"_id"});
         } catch (OpenDataException ex) {
             LOG.error("Unable to build MBean composite types", ex);
