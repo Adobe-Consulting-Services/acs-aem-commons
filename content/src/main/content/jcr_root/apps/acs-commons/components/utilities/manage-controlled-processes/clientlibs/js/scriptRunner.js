@@ -126,7 +126,6 @@ var ScriptRunner = {
         document.body.appendChild(success);
         success.show();
         ScriptRunner.startDialog.hide();
-        document.body.removeChild(ScriptRunner.startDialog);
     },
     pollingLoop: function (data) {
         ScriptRunner.status = data;
