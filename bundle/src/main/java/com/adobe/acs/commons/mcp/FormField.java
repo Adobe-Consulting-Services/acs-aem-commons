@@ -31,6 +31,6 @@ public @interface FormField {
     String hint() default "";
     String description() default "";
     boolean required() default true;
-    Class<? extends FieldComponent> component() default TextfieldComponent.Standard.class;
+    Class<? extends FieldComponent> component() default TextfieldComponent.class;
     String[] options() default {};
 }

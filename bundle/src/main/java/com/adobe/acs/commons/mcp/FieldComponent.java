@@ -46,6 +46,7 @@ public abstract class FieldComponent {
         componentMetadata.put("fieldDescription", formField.description());
         componentMetadata.put("required", formField.required());
         componentMetadata.put("emptyText", formField.hint());
+        getOption("default").ifPresent(val->componentMetadata.put("value", val));
         init();
     }
     
