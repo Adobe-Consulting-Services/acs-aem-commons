@@ -21,15 +21,13 @@
 package com.adobe.acs.commons.replication;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentConfig;
 import com.day.cq.replication.AgentFilter;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * Replication Agent Filter used to identify Flush agents.
+ * Replication Agent Filter used to identify AEM Publish Replication agents.
  */
 @ProviderType
 public class AemPublishAgentFilter implements AgentFilter {
