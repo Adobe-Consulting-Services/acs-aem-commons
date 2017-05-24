@@ -46,7 +46,6 @@ import java.util.List;
 
 @Component(
         label = "ACS AEM Commons - Assets Folder Properties Support",
-        metatype = true,
         policy = ConfigurationPolicy.REQUIRE,
         immediate = true
 )
