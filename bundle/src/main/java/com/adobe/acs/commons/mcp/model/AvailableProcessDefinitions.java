@@ -24,19 +24,20 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Produce a list of available process definitions that can be started by the
  * user.
  */
 public class AvailableProcessDefinitions extends WCMUsePojo {
+    transient private static final Logger LOG = LoggerFactory.getLogger(AvailableProcessDefinitions.class);
 
     Map<String, ProcessDefinition> definitions = Collections.EMPTY_MAP;
     Map<String, FieldComponent> fieldComponents = Collections.EMPTY_MAP;
@@ -62,7 +63,7 @@ public class AvailableProcessDefinitions extends WCMUsePojo {
                             component.setup(f.getName(), f, fieldDefinition, sling);
                             return component;
                         } catch (InstantiationException | IllegalAccessException ex) {
-                            Logger.getLogger(AvailableProcessDefinitions.class.getName()).log(Level.SEVERE, null, ex);
+                            LOG.error("Unable to instantiate field component for "+f.getName(), ex);
                         }
                         return null;
                     }, (a,b)->a, LinkedHashMap::new));

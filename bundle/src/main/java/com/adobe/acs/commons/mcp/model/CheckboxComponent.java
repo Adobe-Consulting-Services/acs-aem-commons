@@ -20,12 +20,14 @@ import com.adobe.acs.commons.mcp.FieldComponent;
 /**
  * Radio button selector component
  */
-public abstract class CheckboxComponent extends FieldComponent {
+public class CheckboxComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/foundation/form/checkbox");
+        getComponentMetadata().put("text", getFieldDefinition().name());        
         getComponentMetadata().put("value", "true");
         getComponentMetadata().put("uncheckedValue", "false");
+        getComponentMetadata().put("required", false);
         getComponentMetadata().put("checked", hasOption("checked"));
     }    
 }

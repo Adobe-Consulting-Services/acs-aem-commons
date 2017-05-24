@@ -20,7 +20,7 @@ import com.adobe.acs.commons.mcp.FieldComponent;
 /**
  *
  */
-public abstract class TextfieldComponent extends FieldComponent {
+public class TextfieldComponent extends FieldComponent {
     @Override
     public void init() {
         getOption("maxlength").ifPresent(val->getComponentMetadata().put("maxlength", val));

@@ -31,3 +31,12 @@ coral-Dialog-content .coral-Form-fieldlabel {
     margin: 0;
     clear: none;
 }
+
+.coral-Form--aligned .coral-Form-fieldwrapper--singleline {
+    margin-left: 8.65em !important;
+}
+
+.coral-Form--aligned .coral-Form-fieldwrapper--singleline label.coral-Checkbox {
+    width: 20%;
+    min-width: 140px;
+}

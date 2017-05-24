@@ -21,12 +21,16 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.model.CheckboxComponent;
 import com.adobe.acs.commons.mcp.model.PathfieldComponent;
 import javax.jcr.RepositoryException;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Reports number and size of assets within a given folder structure.
  */
+@Component
+@Service(ProcessDefinition.class)
 public class AssetReport implements ProcessDefinition {
 
     @FormField(
@@ -34,7 +38,7 @@ public class AssetReport implements ProcessDefinition {
             description = "Examines everying in this folder and all other subfolders below it",
             hint = "/content/dam",
             component = PathfieldComponent.FolderSelectComponent.class,
-            options = {"defaultValue=/content/dam"}
+            options = {"default=/content/dam", "base=/cotent/dam"}
     )
     private String baseFolder;
     @FormField(
