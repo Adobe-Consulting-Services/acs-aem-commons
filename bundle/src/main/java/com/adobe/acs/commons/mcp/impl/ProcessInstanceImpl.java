@@ -21,6 +21,7 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
+import com.adobe.acs.commons.mcp.model.Result;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,16 +72,25 @@ public class ProcessInstanceImpl implements ProcessInstance {
     public double updateProgress() {
         double sectionWeight = 1.0 / actions.size();
         double progress = actions.stream()
-                .map(action->action.manager)
-                .filter(action->action.getAddedCount() > 0)
-                .collect(Collectors.summingDouble(action-> 
-                        sectionWeight * (double) action.getCompletedCount() / (double) action.getAddedCount()
+                .map(action -> action.manager)
+                .filter(action -> action.getAddedCount() > 0)
+                .collect(Collectors.summingDouble(action
+                        -> sectionWeight * (double) action.getCompletedCount() / (double) action.getAddedCount()
                 ));
         infoBean.setProgress(progress);
+        infoBean.setStatus(actions.stream().filter(a -> !a.manager.isComplete()).map(a -> a.name).findFirst().orElse("Please wait..."));
+        infoBean.getResult().setTasksCompleted(
+                actions.stream().collect(Collectors.summingInt(action -> action.manager.getCompletedCount()))
+        );
+        infoBean.getResult().setReportedErrors(
+                actions.stream().flatMap(a -> a.manager.getFailureList().stream()).collect(Collectors.toList())
+        );
+
         return progress;
     }
 
     private static class ActivityDefinition {
+
         String name;
         ActionManager manager;
         transient CheckedConsumer<ActionManager> builder;
@@ -94,7 +104,9 @@ public class ProcessInstanceImpl implements ProcessInstance {
         infoBean.setStopTime(-1L);
         this.actions = new ArrayList<>();
         this.definition = process;
-        infoBean.setDescription(description);
+        infoBean.setName(process.getName());
+        infoBean.setDescription(description == null ? "No description" : description);
+        infoBean.setResult(new Result());
         id = String.format("%016X", Math.abs(RANDOM.nextLong()));
         path = "/var/acs/mcp/instances/" + id;
     }
@@ -222,8 +234,8 @@ public class ProcessInstanceImpl implements ProcessInstance {
                         actions.stream().filter(a -> a.manager.isComplete()).collect(Collectors.counting()),
                         actions.stream().map(a -> a.manager.getSuccessCount()).collect(Collectors.summingInt(Integer::intValue)),
                         actions.stream().map(a -> a.manager.getErrorCount()).collect(Collectors.summingInt(Integer::intValue)),
-                        updateProgress(),
-                        getRuntime()
+                        getRuntime(),
+                        updateProgress()
                     }
             );
         } catch (OpenDataException ex) {

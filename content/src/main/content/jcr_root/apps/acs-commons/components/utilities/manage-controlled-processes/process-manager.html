@@ -5,10 +5,37 @@
 -->
 <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html" 
      data-sly-call="${clientlib.css @ categories='acs-commons.manage-controlled-processes.app'}"
-     data-sly-call="${clientlib.all @ categories='coralui3,coralui2,cq.authoring.dialog,granite.ui.coral.foundation'}"
      />
-<b>TODO:</b> List currently running processes and their status here...
+<sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html" 
+     data-sly-call="${clientlib.all @ categories='cq.authoring.dialog,granite.ui.coral.foundation,coralui3'}"
+     />
+<div id="processListing">
+    <coral-table>
+        <table is="coral-table-inner" selectable>
+            <colgroup>
+                <col is="coral-col" sortable sortabledirection="ascending">
+                <col is="coral-col" sortable sortabledirection="ascending">
+                <col is="coral-col" sortable sortabledirection="ascending">
+                <col is="coral-col">
+                <col is="coral-col" sortable sortabledirection="ascending">
+                <col is="coral-col" sortable sortabledirection="ascending">
+            </colgroup>
+            <thead is="coral-thead">
+                <tr is="coral-tr">
+                    <th is="coral-th" sortable>Process</th>
+                    <th is="coral-th" sortable>Description</th>
+                    <th is="coral-th" sortable>Started</th>
+                    <th is="coral-th">Completed</th>
+                    <th is="coral-th" sortable>Tasks completed</th>
+                    <th is="coral-th" sortable>Errors</th>
+                </tr>
+            </thead>
+            <tbody is="coral-tbody">
+            </tbody>
+        </table>
+    </coral-table>
+</div>
 <div id="right-action-bar-contents"><button id="startProcess" is="coral-Button" variant="primary" title="Start Process">Start Process</button></div>
 <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html" 
      data-sly-call="${clientlib.js @ categories='acs-commons.manage-controlled-processes.app'}"
-    />
+     />

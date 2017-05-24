@@ -35,6 +35,8 @@ public class ManagedProcess {
     @Inject
     private Long stopTime;
     @Inject
+    private String name;
+    @Inject
     private String description;
     @Inject
     private boolean isRunning;
@@ -169,5 +171,19 @@ public class ManagedProcess {
      */
     public void setProgress(double progress) {
         this.progress = progress;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 }

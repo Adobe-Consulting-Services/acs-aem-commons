@@ -28,6 +28,8 @@ import org.apache.sling.models.annotations.Model;
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class Result {
     @Inject
+    private int tasksCompleted;
+    @Inject
     private List<Failure> reportedErrors;
     @Inject
     private Long runtime;
@@ -74,5 +76,19 @@ public class Result {
      */
     public void setReport(Resource report) {
         this.report = report;
+    }
+
+    /**
+     * @return the tasksCompleted
+     */
+    public int getTasksCompleted() {
+        return tasksCompleted;
+    }
+
+    /**
+     * @param tasksCompleted the tasksCompleted to set
+     */
+    public void setTasksCompleted(int tasksCompleted) {
+        this.tasksCompleted = tasksCompleted;
     }
 }

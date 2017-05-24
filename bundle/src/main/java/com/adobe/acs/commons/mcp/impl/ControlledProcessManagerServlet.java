@@ -23,9 +23,12 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
 import org.apache.felix.scr.annotations.Reference;
@@ -91,9 +94,13 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
         return instance;
     }
 
-    private ProcessInstance doProcessStatusCheck(SlingHttpServletRequest request) {
+    private List<ProcessInstance> doProcessStatusCheck(SlingHttpServletRequest request) {
         ProcessInstance instance = getProcessFromRequest(request);
-        return instance;
+        if (instance == null) {
+            return getProcessesFromRequest(request);
+        } else {
+            return Arrays.asList(instance);
+        }
     }
 
     private Object doHaltProcess(SlingHttpServletRequest request) {
@@ -118,9 +125,22 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
             return manager.getManagedProcessInstanceByIdentifier(id);
         } else {
             String path = request.getParameter("path");
-            return manager.getManagedProcessInstanceByPath(path);
+            if (path != null) {
+                return manager.getManagedProcessInstanceByPath(path);
+            }
+        }
+        return null;
+    }
+
+    private List<ProcessInstance> getProcessesFromRequest(SlingHttpServletRequest request) {
+        String[] ids = request.getParameterValues("ids");
+        if (ids != null) {
+            return Stream.of(ids).map(manager::getManagedProcessInstanceByIdentifier).collect(Collectors.toList());
+        } else {
+            return Collections.EMPTY_LIST;
         }
     }
+    
 
     List<String> ignoredInputs = Arrays.asList("definition", "description", "action");
 
