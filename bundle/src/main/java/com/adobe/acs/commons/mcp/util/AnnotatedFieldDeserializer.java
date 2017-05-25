@@ -25,6 +25,8 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.ValueMap;
 import com.adobe.acs.commons.mcp.FormField;
 import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
@@ -37,7 +39,7 @@ public class AnnotatedFieldDeserializer {
             try {
                 parseInput(target, input, field);
             } catch (ParseException | ReflectiveOperationException | NullPointerException ex) {
-                throw new DeserializeException("Error when processing field "+field.getName(), ex);
+                throw new DeserializeException("Error when processing field " + field.getName(), ex);
             }
         }
     }
@@ -46,41 +48,43 @@ public class AnnotatedFieldDeserializer {
         FormField inputAnnotation = field.getAnnotation(FormField.class);
         if (input.get(field.getName()) == null) {
             if (inputAnnotation.required()) {
-                throw new NullPointerException("Required field missing: "+field.getName());
+                throw new NullPointerException("Required field missing: " + field.getName());
             } else {
                 return;
             }
         }
-        
+
         Object value = input.get(field.getName());
         if (isListOrArray(field)) {
             if (value instanceof String[]) {
                 parseInputList(target, (String[]) value, field);
             } else {
-                parseInputList(target, new String[]{String.valueOf(value)}, field);                
+                parseInputList(target, new String[]{String.valueOf(value)}, field);
             }
         } else {
             if (value instanceof String[]) {
                 parseInputValue(target, ((String[]) value)[0], field);
             } else {
-                parseInputValue(target, (String) value, field);            
+                parseInputValue(target, (String) value, field);
             }
-        }        
+        }
     }
 
     private static void parseInputList(Object target, String[] values, Field field) throws ReflectiveOperationException, ParseException {
         List convertedValues = new ArrayList();
+        Class type = getListType(field);
         for (String value : values) {
-            convertedValues.add(convertValue(value, field.getType()));
+            Object val = convertValue(value, type);
+            convertedValues.add(val);
         }
         if (field.getType().isArray()) {
             Object array = Array.newInstance(field.getType().getComponentType(), convertedValues.size());
-            for (int i=0; i < convertedValues.size(); i++) {
+            for (int i = 0; i < convertedValues.size(); i++) {
                 Array.set(array, i, convertedValues.get(i));
             }
             FieldUtils.writeField(field, target, array, true);
         } else {
-            Collection c = (Collection) field.getType().newInstance();
+            Collection c = (Collection) getCollectionType(field.getType()).newInstance();
             c.addAll(convertedValues);
             FieldUtils.writeField(field, target, c, true);
         }
@@ -91,12 +95,12 @@ public class AnnotatedFieldDeserializer {
     }
 
     private static boolean isListOrArray(Field field) {
-        return field.getType().isArray() && ! field.getType().isInstance(Collection.class);
+        return field.getType().isArray() || Collection.class.isAssignableFrom(field.getType());
     }
 
     private static Object convertValue(String value, Class<?> type) throws ParseException {
         Class clazz = type.isArray() ? type.getComponentType() : type;
-        if (clazz.isPrimitive()) {
+        if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) || clazz == Boolean.class) {
             return convertPrimitiveValue(value, clazz);
         } else if (clazz == String.class) {
             return value;
@@ -107,25 +111,55 @@ public class AnnotatedFieldDeserializer {
     }
 
     private static Object convertPrimitiveValue(String value, Class<?> type) throws ParseException {
-        NumberFormat numberFormat = NumberFormat.getNumberInstance();
-        Number num = numberFormat.parse(value);
-        if (type.equals(Byte.class) || type.equals(Byte.TYPE)) {
-            return num.byteValue();
-        } else if (type.equals(Double.class) || type.equals(Double.TYPE)) {
-            return num.doubleValue();
-        } else if (type.equals(Float.class) || type.equals(Float.TYPE)) {
-            return num.floatValue();
-        } else if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
-            return num.intValue();
-        } else if (type.equals(Long.class) || type.equals(Long.TYPE)) {
-            return num.longValue();
-        } else if (type.equals(Short.class) || type.equals(Short.TYPE)) {
-            return num.shortValue();
+        if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
+            return value.toLowerCase().trim().equals("true");
         } else {
-            return null;
+            NumberFormat numberFormat = NumberFormat.getNumberInstance();
+            Number num = numberFormat.parse(value);
+            if (type.equals(Byte.class) || type.equals(Byte.TYPE)) {
+                return num.byteValue();
+            } else if (type.equals(Double.class) || type.equals(Double.TYPE)) {
+                return num.doubleValue();
+            } else if (type.equals(Float.class) || type.equals(Float.TYPE)) {
+                return num.floatValue();
+            } else if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
+                return num.intValue();
+            } else if (type.equals(Long.class) || type.equals(Long.TYPE)) {
+                return num.longValue();
+            } else if (type.equals(Short.class) || type.equals(Short.TYPE)) {
+                return num.shortValue();
+            } else {
+                return null;
+            }
         }
     }
-    
+
+    private static Class<?> getListType(Field field) {
+        if (Collection.class.isAssignableFrom(field.getType())) {
+            Type genericType = field.getGenericType();
+            if (genericType instanceof ParameterizedType) {
+                ParameterizedType t = (ParameterizedType) genericType;
+                if (t.getActualTypeArguments().length == 1) {
+                    return (Class) t.getActualTypeArguments()[0];
+                } else {
+                    return null;
+                }
+            } else {
+                return Object.class;
+            }
+        } else {
+            return field.getType();
+        }
+    }
+
+    private static Class getCollectionType(Class<?> type) {
+        if (type == List.class || type == Collection.class || type == Iterable.class) {
+            return ArrayList.class;
+        } else {
+            return type;
+        }
+    }
+
     private AnnotatedFieldDeserializer() {
         // Utility class has no constructor
     }
