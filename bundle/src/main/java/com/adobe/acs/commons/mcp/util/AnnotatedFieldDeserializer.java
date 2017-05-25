@@ -27,6 +27,8 @@ import com.adobe.acs.commons.mcp.FormField;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
@@ -72,7 +74,7 @@ public class AnnotatedFieldDeserializer {
 
     private static void parseInputList(Object target, String[] values, Field field) throws ReflectiveOperationException, ParseException {
         List convertedValues = new ArrayList();
-        Class type = getListType(field);
+        Class type = getCollectionComponentType(field);
         for (String value : values) {
             Object val = convertValue(value, type);
             convertedValues.add(val);
@@ -84,7 +86,7 @@ public class AnnotatedFieldDeserializer {
             }
             FieldUtils.writeField(field, target, array, true);
         } else {
-            Collection c = (Collection) getCollectionType(field.getType()).newInstance();
+            Collection c = (Collection) getInstantiatableListType(field.getType()).newInstance();
             c.addAll(convertedValues);
             FieldUtils.writeField(field, target, c, true);
         }
@@ -134,7 +136,7 @@ public class AnnotatedFieldDeserializer {
         }
     }
 
-    private static Class<?> getListType(Field field) {
+    private static Class<?> getCollectionComponentType(Field field) {
         if (Collection.class.isAssignableFrom(field.getType())) {
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
@@ -152,9 +154,11 @@ public class AnnotatedFieldDeserializer {
         }
     }
 
-    private static Class getCollectionType(Class<?> type) {
+    private static Class getInstantiatableListType(Class<?> type) {
         if (type == List.class || type == Collection.class || type == Iterable.class) {
             return ArrayList.class;
+        } else if (type == Set.class) {
+            return LinkedHashSet.class;
         } else {
             return type;
         }
