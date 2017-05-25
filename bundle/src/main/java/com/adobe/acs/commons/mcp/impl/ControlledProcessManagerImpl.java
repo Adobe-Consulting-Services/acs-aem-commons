@@ -19,6 +19,8 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,11 +28,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -45,6 +52,9 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 public class ControlledProcessManagerImpl implements ControlledProcessManager {
     private static final String SERVICE_NAME = "mcp";
     private static final Map<String, Object> AUTH_INFO;
+    @Reference(cardinality= ReferenceCardinality.MANDATORY_MULTIPLE, bind="bindDefinition", unbind="unbindDefinition", referenceInterface = ProcessDefinition.class,policy = ReferencePolicy.DYNAMIC)
+    private final List<ProcessDefinition> processDefinitions = Collections.synchronizedList(new ArrayList<>());
+    
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -55,12 +65,20 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     
     @Reference
     ActionManagerFactory amf;
-    
+        
     @Override
     public ActionManagerFactory getActionManagerFactory() {
         return amf;
     }
+    
+    protected void bindDefinition(ProcessDefinition def) {
+        processDefinitions.add(def);
+    }
 
+    protected void unbindDefinition(ProcessDefinition def) {
+        processDefinitions.remove(def);
+    }
+    
     @Override
     public ProcessInstance getManagedProcessInstanceByPath(String path) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -110,8 +128,22 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     
     private ProcessDefinition findDefinitionByName(String name) throws ReflectiveOperationException {
         Class defClass = Class.forName(name);
-        Object definition = defClass.newInstance();
-        return (ProcessDefinition) definition;
+        ProcessDefinition definition = (ProcessDefinition) defClass.newInstance();
+        processDefinitions.stream().filter(d->d.getClass().equals(defClass)).findFirst().ifPresent(svc->copyReferences(svc,definition));
+        return definition;
+    }
+    
+    private <T> void copyReferences(T src, T dest) {
+        for (Field f : src.getClass().getDeclaredFields()) {
+            try {
+                Object srcValue = FieldUtils.readField(f, src, true);
+                if (srcValue != null && FieldUtils.readField(f, dest, true) == null) {
+                    FieldUtils.writeField(f, dest, srcValue);
+                }
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(ControlledProcessManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
     
     private ProcessDefinition findDefinitionByPath(String path) throws ReflectiveOperationException {

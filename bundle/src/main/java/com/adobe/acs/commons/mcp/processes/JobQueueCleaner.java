@@ -17,8 +17,10 @@ package com.adobe.acs.commons.mcp.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.Actions;
+import com.adobe.acs.commons.mcp.FormField;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.model.PathfieldComponent;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,13 +41,22 @@ import org.apache.sling.event.jobs.Queue;
 @Service(ProcessDefinition.class)
 public class JobQueueCleaner implements ProcessDefinition {
     @Reference
-    private JobManager jobManager;
+    transient private JobManager jobManager;
+
+    @FormField(name="Starting folder", 
+        description="Starting point for event removal",
+        hint="/var/eventing",
+        component=PathfieldComponent.FolderSelectComponent.class,
+        options={"base=/var/eventing", "default=/var/eventing"})
+    public String startingFolder;
+    @FormField(name="Minimum purge level",
+        description="Folder depth relative to start where purge will happen",
+        options={"default=3"})
+    public int minPurgeDepth = 3;
 
     public static final String JOB_TYPE = "slingevent:Job";
     public static final String POLICY_NODE_NAME = "rep:policy";
-    public static final String EVENT_QUEUE_LOCATION = "/var/eventing";
-    public static final int MIN_PURGE_FOLDER_LEVEL = 3;
-    private final List<String> suspendedQueues = new ArrayList<>();
+    transient private final List<String> suspendedQueues = new ArrayList<>();
 
     public JobQueueCleaner() {
     }
@@ -80,7 +91,7 @@ public class JobQueueCleaner implements ProcessDefinition {
         TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
         visitor.setDepthFirstMode();
         visitor.setResourceVisitor((res, level) -> {
-            if (level >= MIN_PURGE_FOLDER_LEVEL) {
+            if (level >= minPurgeDepth) {
                 String path = res.getPath();
                 manager.deferredWithResolver(Actions.retry(10, 100, rr -> deleteResource(rr, path)));
             }
@@ -88,11 +99,11 @@ public class JobQueueCleaner implements ProcessDefinition {
         visitor.setLeafVisitor((res, level) -> {
             if (!res.getName().equals(POLICY_NODE_NAME)) {
                 String path = res.getPath();
-                manager.deferredWithResolver(rr -> deleteResource(rr, path));
+                manager.deferredWithResolver(Actions.retry(10, 100, rr -> deleteResource(rr, path)));
             }
         });
         manager.deferredWithResolver(rr -> {
-            Resource res = rr.getResource(EVENT_QUEUE_LOCATION);
+            Resource res = rr.getResource(startingFolder);
             if (res != null) {
                 visitor.accept(res);
             }
