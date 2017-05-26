@@ -53,6 +53,11 @@ public class JobQueueCleaner implements ProcessDefinition {
         description="Folder depth relative to start where purge will happen",
         options={"default=3"})
     public int minPurgeDepth = 3;
+    @FormField(name="Passes",
+        description="Number of passes to attempt removal",
+        hint="1,2,3",
+        options={"default=3"})
+    public int numPasses = 3;
 
     public static final String JOB_TYPE = "slingevent:Job";
     public static final String POLICY_NODE_NAME = "rep:policy";
@@ -74,7 +79,15 @@ public class JobQueueCleaner implements ProcessDefinition {
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException {
         instance.defineCriticalAction("Stop job queues", rr, this::stopJobQueues);
-        instance.defineAction("Purge jobs", rr, this::purgeJobs);
+        if (numPasses > 0) {
+            instance.defineAction("1st pass", rr, this::purgeJobs);
+        }
+        if (numPasses > 1) {
+            instance.defineAction("2nd pass", rr, this::purgeJobs);
+        }
+        if (numPasses > 2) {
+            instance.defineAction("3rd pass", rr, this::purgeJobs);
+        }
         instance.defineCriticalAction("Resume job queues", rr, this::resumeJobQueues);
     }
 
@@ -112,8 +125,8 @@ public class JobQueueCleaner implements ProcessDefinition {
 
     private void deleteResource(ResourceResolver rr, String path) throws PersistenceException {
         Actions.setCurrentItem(path);
-        Resource r = rr.resolve(path);
-        if (!r.isResourceType(Resource.RESOURCE_TYPE_NON_EXISTING)) {
+        Resource r = rr.getResource(path);
+        if (r != null) {
             rr.delete(r);
         }
     }
@@ -128,6 +141,5 @@ public class JobQueueCleaner implements ProcessDefinition {
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -30,25 +30,9 @@ public class Result {
     @Inject
     private int tasksCompleted;
     @Inject
-    private List<Failure> reportedErrors;
-    @Inject
     private Long runtime;
     @Inject
     private Resource report;
-
-    /**
-     * @return the reportedErrors
-     */
-    public List<Failure> getReportedErrors() {
-        return reportedErrors;
-    }
-
-    /**
-     * @param reportedErrors the reportedErrors to set
-     */
-    public void setReportedErrors(List<Failure> reportedErrors) {
-        this.reportedErrors = reportedErrors;
-    }
 
     /**
      * @return the runtime

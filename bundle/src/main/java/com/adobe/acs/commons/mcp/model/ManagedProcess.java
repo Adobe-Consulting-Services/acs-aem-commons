@@ -15,6 +15,10 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import com.adobe.acs.commons.fam.Failure;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 import javax.inject.Inject;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -46,6 +50,26 @@ public class ManagedProcess {
     private String status;
     @Inject
     private Result result;
+    @Inject
+    private Collection<Failure> reportedErrors;
+
+    /**
+     * @return the reportedErrors
+     */
+    public Collection<Failure> getReportedErrors() {
+        if (reportedErrors == null) {
+            reportedErrors = new LinkedHashSet<>();
+        }
+        return reportedErrors;
+    }
+
+    /**
+     * @param reportedErrors the reportedErrors to set
+     */
+    public void setReportedErrors(List<Failure> reportedErrors) {
+        this.reportedErrors = reportedErrors;
+    }
+
 
     /**
      * @return the requester

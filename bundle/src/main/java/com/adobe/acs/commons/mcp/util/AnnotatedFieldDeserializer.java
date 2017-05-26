@@ -25,12 +25,13 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.ValueMap;
 import com.adobe.acs.commons.mcp.FormField;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
-import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.isListOrArray;
 import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
+import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
@@ -59,18 +60,14 @@ public class AnnotatedFieldDeserializer {
         }
 
         Object value = input.get(field.getName());
-        if (isListOrArray(field)) {
-            if (value instanceof String[]) {
-                parseInputList(target, (String[]) value, field);
-            } else {
-                parseInputList(target, new String[]{String.valueOf(value)}, field);
-            }
+        if (hasMultipleValues(field.getType())) {
+            parseInputList(target, serializeToStringArray(value), field);
         } else {
-            if (value instanceof String[]) {
-                parseInputValue(target, ((String[]) value)[0], field);
-            } else {
-                parseInputValue(target, (String) value, field);
+            Object val = value;
+            if (value.getClass().isArray()) {
+                val = ((Object[]) value)[0];
             }
+            parseInputValue(target, String.valueOf(val), field);
         }
     }
 

@@ -24,10 +24,20 @@ import java.util.Collection;
  * General introspection utilities
  */
 public class IntrospectionUtil {
-    public static boolean isListOrArray(Field field) {
-        return field.getType().isArray() || Collection.class.isAssignableFrom(field.getType());
+    /**
+     * Figure out if field represents multiple values
+     * @param clazz Field to evaluate
+     * @return true if field is an array or collection
+     */
+    public static boolean hasMultipleValues(Class clazz) {
+        return clazz.isArray() || Collection.class.isAssignableFrom(clazz);
     }
     
+    /**
+     * Determine if the field is a list or array and return its component type if so.
+     * @param field Field to evaluate
+     * @return List/Array component type or field type if not a list or array
+     */
     public static Class<?> getCollectionComponentType(Field field) {
         if (Collection.class.isAssignableFrom(field.getType())) {
             Type genericType = field.getGenericType();
@@ -47,10 +57,25 @@ public class IntrospectionUtil {
             return field.getType();
         }
     }
-    
+
+    /**
+     * A primitive field is one which is a single or array/list of primitive values.
+     * @param field Field to evaluate
+     * @return true if primitive or list/array of primitive values
+     */
     public static boolean isPrimitive(Field field) {
         Class basicType = getCollectionComponentType(field);
         return basicType.isPrimitive() || basicType.getPackage().toString().startsWith("java.lang");
+    }
+    
+    /**
+     * A simple field is either primitive, an enumeration, or a string.
+     * @param field Field to evaluate
+     * @return true if primitive, an enumeration, or a string
+     */
+    public static boolean isSimple(Field field) {
+        Class basicType = getCollectionComponentType(field);
+        return isPrimitive(field) || basicType.isEnum() || basicType == String.class;
     }
     
     private IntrospectionUtil() {

@@ -18,6 +18,7 @@ package com.adobe.acs.commons.fam;
 import aQute.bnd.annotation.ProviderType;
 
 import java.util.Calendar;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Represents a failure on a specific node
@@ -27,11 +28,14 @@ public final class Failure {
     
     private String nodePath;
     private String error;
+    private String stackTrace;
+    private Long time;
     transient private Exception exception;
     private final Calendar failedAt;
 
     public Failure() {
         this.failedAt = Calendar.getInstance();
+        time = System.currentTimeMillis();
     }
 
     /**
@@ -62,6 +66,7 @@ public final class Failure {
         this.exception = exception;
         if (exception != null) {
             this.error = exception.getMessage();
+            this.stackTrace = ExceptionUtils.getStackTrace(exception);
         }
     }
 

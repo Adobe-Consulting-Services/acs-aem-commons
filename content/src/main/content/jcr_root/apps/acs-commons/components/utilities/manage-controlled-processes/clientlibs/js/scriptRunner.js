@@ -143,8 +143,7 @@ var ScriptRunner = {
 
                     if (!process.infoBean.result) {
                         process.infoBean.result = {
-                            tasksCompleted: '???',
-                            reportedErrors: []
+                            tasksCompleted: '???'
                         };
                     }
                     processDom = jQuery("<tr is='coral-tr' id='process-" + process.id + "'>" +
@@ -158,7 +157,7 @@ var ScriptRunner = {
                                     ) +
                             "</td>" +
                             "<td is='coral-td' class='process-tasks-completed'>" + process.infoBean.result.tasksCompleted + "</td>" +
-                            "<td is='coral-td' class='process-reported-errors'>" + process.infoBean.result.reportedErrors.length + "</td>" +
+                            "<td is='coral-td' class='process-reported-errors'>" + process.infoBean.reportedErrors.length + "</td>" +
                             "</tr>"
                             );
                     tableBody.append(processDom);
@@ -187,9 +186,9 @@ var ScriptRunner = {
                             } else {
                                 processRow.find(".process-stop-time").html(ScriptRunner.formatTime(process.infoBean.stopTime));
                             }
+                            processRow.find(".process-reported-errors").html(process.infoBean.reportedErrors.length);
                             if (process.infoBean.result) {
                                 processRow.find(".process-tasks-completed").html(process.infoBean.result.tasksCompleted);
-                                processRow.find(".process-reported-errors").html(process.infoBean.result.reportedErrors.length);
                             }
                         }
                         ScriptRunner.pollingLoop();

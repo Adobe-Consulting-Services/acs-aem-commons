@@ -50,27 +50,28 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 @Service(ControlledProcessManager.class)
 @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Manage Controlled Processes")
 public class ControlledProcessManagerImpl implements ControlledProcessManager {
-    private static final String SERVICE_NAME = "mcp";
+
+    private static final String SERVICE_NAME = "manage-controlled-processes";
     private static final Map<String, Object> AUTH_INFO;
-    @Reference(cardinality= ReferenceCardinality.MANDATORY_MULTIPLE, bind="bindDefinition", unbind="unbindDefinition", referenceInterface = ProcessDefinition.class,policy = ReferencePolicy.DYNAMIC)
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, bind = "bindDefinition", unbind = "unbindDefinition", referenceInterface = ProcessDefinition.class, policy = ReferencePolicy.DYNAMIC)
     private final List<ProcessDefinition> processDefinitions = Collections.synchronizedList(new ArrayList<>());
-    
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
     Map<String, ProcessInstance> activeProcesses = Collections.synchronizedMap(new LinkedHashMap<>());
-    
+
     @Reference
     ResourceResolverFactory resourceResolverFactory;
-    
+
     @Reference
     ActionManagerFactory amf;
-        
+
     @Override
     public ActionManagerFactory getActionManagerFactory() {
         return amf;
     }
-    
+
     protected void bindDefinition(ProcessDefinition def) {
         processDefinitions.add(def);
     }
@@ -78,7 +79,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     protected void unbindDefinition(ProcessDefinition def) {
         processDefinitions.remove(def);
     }
-    
+
     @Override
     public ProcessInstance getManagedProcessInstanceByPath(String path) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -125,14 +126,14 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
             return findDefinitionByName(nameOrPath);
         }
     }
-    
+
     private ProcessDefinition findDefinitionByName(String name) throws ReflectiveOperationException {
         Class defClass = Class.forName(name);
         ProcessDefinition definition = (ProcessDefinition) defClass.newInstance();
-        processDefinitions.stream().filter(d->d.getClass().equals(defClass)).findFirst().ifPresent(svc->copyReferences(svc,definition));
+        processDefinitions.stream().filter(d -> d.getClass().equals(defClass)).findFirst().ifPresent(svc -> copyReferences(svc, definition));
         return definition;
     }
-    
+
     private <T> void copyReferences(T src, T dest) {
         for (Field f : src.getClass().getDeclaredFields()) {
             try {
@@ -145,7 +146,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
             }
         }
     }
-    
+
     private ProcessDefinition findDefinitionByPath(String path) throws ReflectiveOperationException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -169,7 +170,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
 
     @Override
     public Collection<ProcessInstance> getActiveProcesses() {
-        activeProcesses.forEach((id,process)->process.updateProgress());
+        activeProcesses.forEach((id, process) -> process.updateProgress());
         return activeProcesses.values();
     }
 }

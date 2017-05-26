@@ -20,13 +20,14 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.functions.Consumer;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.mcp.model.Result;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.adobe.acs.commons.mcp.util.ValueMapSerializer;
+import com.day.cq.commons.jcr.JcrUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -34,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -41,7 +43,9 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -57,7 +61,7 @@ import org.slf4j.LoggerFactory;
 public class ProcessInstanceImpl implements ProcessInstance {
 
     transient private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ProcessInstanceImpl.class);
-
+    transient private static final String BASE_PATH = "/var/acs-commons/mcp/instances";
     transient private ControlledProcessManager manager = null;
     private final List<ActivityDefinition> actions;
     private final ProcessDefinition definition;
@@ -91,9 +95,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
         infoBean.getResult().setTasksCompleted(
                 actions.stream().collect(Collectors.summingInt(action -> action.manager.getCompletedCount()))
         );
-        infoBean.getResult().setReportedErrors(
-                actions.stream().flatMap(a -> a.manager.getFailureList().stream()).collect(Collectors.toList())
-        );
+        actions.stream().flatMap(a -> a.manager.getFailureList().stream()).collect(Collectors.toCollection(infoBean::getReportedErrors));
 
         return progress;
     }
@@ -117,7 +119,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
         infoBean.setDescription(description == null ? "No description" : description);
         infoBean.setResult(new Result());
         id = String.format("%016X", Math.abs(RANDOM.nextLong()));
-        path = "/var/acs/mcp/instances/" + id;
+        path = BASE_PATH + "/" + id;
     }
 
     @Override
@@ -188,16 +190,18 @@ public class ProcessInstanceImpl implements ProcessInstance {
         } else {
             updateProgress();
             updateStatus(step);
-            withResourceResolver(this::persistStatus);
+            asServiceUser(this::persistStatus);
             ActivityDefinition action = actions.get(step);
             if (action.critical) {
                 action.manager.onSuccess(rr -> runStep(step + 1));
                 action.manager.onFailure((failures, rr) -> {
-                    recordErrors(step, failures, rr);
+                    asServiceUser(service->recordErrors(step, failures, service));
                     halt();
                 });
             } else {
-                action.manager.onFailure((failures, rr) -> recordErrors(step, failures, rr));
+                action.manager.onFailure((failures, rr) -> {
+                    asServiceUser(service->recordErrors(step, failures, service));
+                });
                 action.manager.onFinish(() -> runStep(step + 1));
             }
             action.manager.deferredWithResolver(rr -> action.builder.accept(action.manager));
@@ -205,7 +209,27 @@ public class ProcessInstanceImpl implements ProcessInstance {
     }
 
     private void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
-        infoBean.getResult().getReportedErrors().addAll(failures);
+        if (failures.isEmpty()) {
+            return;
+        }
+        infoBean.getReportedErrors().addAll(failures);
+        try {
+            String errFolder = getPath() + "/jcr:content/failures/step" + (step + 1);
+            JcrUtil.createPath(errFolder, "nt:unstructured", rr.adaptTo(Session.class));
+            if (rr.hasChanges()) {
+                rr.commit();
+                rr.refresh();
+            }
+            for (int i = 0; i < failures.size(); i++) {
+                String errPath = errFolder + "/err" + i;
+                Map<String,Object> values = new HashMap<>();
+                ValueMapSerializer.serializeToMap(values, failures.get(i));
+                ResourceUtil.getOrCreateResource(rr, errPath, values, null, false);
+            }
+            rr.commit();
+        } catch (RepositoryException | PersistenceException ex) {
+            LOG.error("Unable to record errors", ex);
+        }
     }
 
     private long getRuntime() {
@@ -229,13 +253,16 @@ public class ProcessInstanceImpl implements ProcessInstance {
         infoBean.setStatus("Aborted");
     }
 
-    private void withResourceResolver(CheckedConsumer<ResourceResolver> action) {
+    private void asServiceUser(CheckedConsumer<ResourceResolver> action) {
         ResourceResolver rr = null;
         try {
-            rr = ((ControlledProcessManagerImpl) getActionManagerFactory()).getServiceResourceResolver();
+            rr = manager.getServiceResourceResolver();
             action.accept(rr);
+            if (rr.hasChanges()) {
+                rr.commit();
+            }
         } catch (Exception ex) {
-            Logger.getLogger(ProcessInstanceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("Error while performing JCR operations", ex);
         } finally {
             if (rr != null) {
                 rr.close();
@@ -243,17 +270,18 @@ public class ProcessInstanceImpl implements ProcessInstance {
         }
     }
 
-    private Resource persistStatus(ResourceResolver rr) throws PersistenceException {
-        Resource r = ResourceUtil.getOrCreateResource(rr, getPath(), "cq:Page", "nt:unstructured", true);
-        ValueMapSerializer.serializeToMap(r.getValueMap(), infoBean);
+    private void persistStatus(ResourceResolver rr) throws PersistenceException {
+        Map<String,Object> props = new HashMap<>();
+        props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FOLDER);
+        ResourceUtil.getOrCreateResource(rr, BASE_PATH, props, null, true);
+        props.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Page");
+        Resource r = ResourceUtil.getOrCreateResource(rr, getPath(), props, null, true);
+        ModifiableValueMap jcrContent = ResourceUtil.getOrCreateResource(rr, getPath() + "/jcr:content", ProcessInstance.RESOURCE_TYPE, null, false).adaptTo(ModifiableValueMap.class);
+        jcrContent.put("jcr:primaryType","cq:PageContent");
+        jcrContent.put("jcr:title", getName());
+        ValueMapSerializer.serializeToMap(jcrContent, infoBean);
         rr.commit();
         rr.refresh();
-        Resource jcrContent = ResourceUtil.getOrCreateResource(rr, getPath() + "/jcr:content", "cq:PageContent", "nt:unstructured", true);
-        jcrContent.getValueMap().put("sling:resourceType", "acs-commons/components/utilities/process-instance");
-        jcrContent.getValueMap().put("jcr:title", getName());
-        rr.commit();
-        rr.refresh();
-        return jcrContent;
     }
 
     @Override
@@ -270,7 +298,10 @@ public class ProcessInstanceImpl implements ProcessInstance {
         } else {
             setStatusAborted();
         }
-        withResourceResolver(rr -> definition.storeReport(this, rr));
+        asServiceUser(rr -> {
+            persistStatus(rr);
+            definition.storeReport(this, rr);
+        });
         actions.stream().map(a -> a.manager).forEach(getActionManagerFactory()::purge);
     }
 

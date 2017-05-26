@@ -32,6 +32,8 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 public interface ProcessInstance {
 
+    public static final String RESOURCE_TYPE = "acs-commons/components/utilities/process-instance";
+
     String getName();
     
     void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws DeserializeException, RepositoryException;

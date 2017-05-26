@@ -344,6 +344,7 @@ public class FolderRelocator implements ProcessDefinition {
 
     private void moveNodes(ActionManager step3) {
         ActionBatch batch = new ActionBatch(step3, batchSize);
+        batch.setRetryCount(10);
         TreeFilteringResourceVisitor folderVisitor = new TreeFilteringResourceVisitor();
         folderVisitor.setBreadthFirstMode();
         folderVisitor.setLeafVisitor((res, level) -> {
@@ -367,7 +368,7 @@ public class FolderRelocator implements ProcessDefinition {
 
     private void removeSourceFolders(ActionManager step4) {
         sourceToDestination.keySet().forEach(sourcePath
-                -> step4.deferredWithResolver(rr -> deleteResource(rr, sourcePath))
+                -> step4.deferredWithResolver(Actions.retry(5, 100, rr -> deleteResource(rr, sourcePath)))
         );
     }
 
@@ -388,6 +389,5 @@ public class FolderRelocator implements ProcessDefinition {
     
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
