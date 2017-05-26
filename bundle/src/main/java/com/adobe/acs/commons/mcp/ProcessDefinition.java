@@ -28,5 +28,5 @@ public interface ProcessDefinition extends FormProcessor {
 
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
 
-    public void storeReport(ProcessInstance instance) throws RepositoryException;
+    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException;
 }

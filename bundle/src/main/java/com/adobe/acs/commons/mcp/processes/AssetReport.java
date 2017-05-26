@@ -78,7 +78,7 @@ public class AssetReport implements ProcessDefinition {
     }
 
     @Override
-    public void storeReport(ProcessInstance instance) throws RepositoryException {
+    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

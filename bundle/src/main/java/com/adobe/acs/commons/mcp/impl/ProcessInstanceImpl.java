@@ -20,13 +20,18 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.functions.Consumer;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.mcp.model.Result;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
+import com.adobe.acs.commons.mcp.util.ValueMapSerializer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
 import javax.management.openmbean.CompositeData;
@@ -37,7 +42,10 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.slf4j.LoggerFactory;
@@ -56,6 +64,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
     private final ManagedProcess infoBean;
     private final String id;
     private final String path;
+    transient private boolean completedNormally = false;
     transient private static final Random RANDOM = new Random();
 
     @Override
@@ -157,28 +166,34 @@ public class ProcessInstanceImpl implements ProcessInstance {
     @Override
     final public void run(ResourceResolver rr) {
         try {
-            definition.buildProcess(this, rr);
+            infoBean.setRequester(rr.getUserID());
             infoBean.setStartTime(System.currentTimeMillis());
+            definition.buildProcess(this, rr);
             infoBean.setIsRunning(true);
             runStep(0);
         } catch (LoginException | RepositoryException ex) {
+            Failure f = new Failure();
+            f.setException(ex);
+            f.setNodePath(getPath());
+            recordErrors(-1, Arrays.asList(f), rr);
             LOG.error("Error starting managed process " + getName(), ex);
-            recordCancellation();
             halt();
         }
     }
 
     private void runStep(int step) {
         if (step >= actions.size()) {
-            recordCompletion();
+            completedNormally = true;
             halt();
         } else {
+            updateProgress();
+            updateStatus(step);
+            withResourceResolver(this::persistStatus);
             ActivityDefinition action = actions.get(step);
             if (action.critical) {
                 action.manager.onSuccess(rr -> runStep(step + 1));
                 action.manager.onFailure((failures, rr) -> {
                     recordErrors(step, failures, rr);
-                    recordCancellation();
                     halt();
                 });
             } else {
@@ -190,7 +205,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
     }
 
     private void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
-        //...
+        infoBean.getResult().getReportedErrors().addAll(failures);
     }
 
     private long getRuntime() {
@@ -201,10 +216,44 @@ public class ProcessInstanceImpl implements ProcessInstance {
         return stop - infoBean.getStartTime();
     }
 
-    private void recordCompletion() {
+    private void updateStatus(int step) {
+        infoBean.setStatus("Step " + (step + 1) + ": " + actions.get(step).name);
     }
 
-    private void recordCancellation() {
+    private void setStatusCompleted() {
+        infoBean.setStatus("Completed");
+        infoBean.setProgress(1.0D);
+    }
+
+    private void setStatusAborted() {
+        infoBean.setStatus("Aborted");
+    }
+
+    private void withResourceResolver(CheckedConsumer<ResourceResolver> action) {
+        ResourceResolver rr = null;
+        try {
+            rr = ((ControlledProcessManagerImpl) getActionManagerFactory()).getServiceResourceResolver();
+            action.accept(rr);
+        } catch (Exception ex) {
+            Logger.getLogger(ProcessInstanceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (rr != null) {
+                rr.close();
+            }
+        }
+    }
+
+    private Resource persistStatus(ResourceResolver rr) throws PersistenceException {
+        Resource r = ResourceUtil.getOrCreateResource(rr, getPath(), "cq:Page", "nt:unstructured", true);
+        ValueMapSerializer.serializeToMap(r.getValueMap(), infoBean);
+        rr.commit();
+        rr.refresh();
+        Resource jcrContent = ResourceUtil.getOrCreateResource(rr, getPath() + "/jcr:content", "cq:PageContent", "nt:unstructured", true);
+        jcrContent.getValueMap().put("sling:resourceType", "acs-commons/components/utilities/process-instance");
+        jcrContent.getValueMap().put("jcr:title", getName());
+        rr.commit();
+        rr.refresh();
+        return jcrContent;
     }
 
     @Override
@@ -216,6 +265,12 @@ public class ProcessInstanceImpl implements ProcessInstance {
     final public void halt() {
         infoBean.setStopTime(System.currentTimeMillis());
         infoBean.setIsRunning(false);
+        if (completedNormally) {
+            setStatusCompleted();
+        } else {
+            setStatusAborted();
+        }
+        withResourceResolver(rr -> definition.storeReport(this, rr));
         actions.stream().map(a -> a.manager).forEach(getActionManagerFactory()::purge);
     }
 
@@ -262,5 +317,4 @@ public class ProcessInstanceImpl implements ProcessInstance {
             LOG.error("Unable to build MBean composite types", ex);
         }
     }
-
 }

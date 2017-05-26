@@ -24,6 +24,8 @@ import java.util.List;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.ValueMap;
 import com.adobe.acs.commons.mcp.FormField;
+import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
+import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.isListOrArray;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -96,10 +98,6 @@ public class AnnotatedFieldDeserializer {
         FieldUtils.writeField(field, target, convertValue(value, field.getType()), true);
     }
 
-    private static boolean isListOrArray(Field field) {
-        return field.getType().isArray() || Collection.class.isAssignableFrom(field.getType());
-    }
-
     private static Object convertValue(String value, Class<?> type) throws ParseException {
         Class clazz = type.isArray() ? type.getComponentType() : type;
         if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) || clazz == Boolean.class) {
@@ -133,24 +131,6 @@ public class AnnotatedFieldDeserializer {
             } else {
                 return null;
             }
-        }
-    }
-
-    private static Class<?> getCollectionComponentType(Field field) {
-        if (Collection.class.isAssignableFrom(field.getType())) {
-            Type genericType = field.getGenericType();
-            if (genericType instanceof ParameterizedType) {
-                ParameterizedType t = (ParameterizedType) genericType;
-                if (t.getActualTypeArguments().length == 1) {
-                    return (Class) t.getActualTypeArguments()[0];
-                } else {
-                    return null;
-                }
-            } else {
-                return Object.class;
-            }
-        } else {
-            return field.getType();
         }
     }
 

@@ -98,7 +98,7 @@ public class FolderRelocator implements ProcessDefinition {
             description="Move relocates one or more folders.  Rename relocates and takes the last part of the path as the new name for one folder.",
             required=false,
             component=RadioComponent.EnumerationSelector.class,
-            options={"horizontal"})
+            options={"horizontal","default=MOVE"})
     private Mode mode;
     
     transient private final String[] requiredFolderPrivilegeNames = {
@@ -387,7 +387,7 @@ public class FolderRelocator implements ProcessDefinition {
     }
     
     @Override
-    public void storeReport(ProcessInstance instance) {
+    public void storeReport(ProcessInstance instance, ResourceResolver rr) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

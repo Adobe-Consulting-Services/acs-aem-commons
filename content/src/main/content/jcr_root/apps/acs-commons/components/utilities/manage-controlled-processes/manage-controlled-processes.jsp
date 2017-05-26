@@ -21,6 +21,7 @@
 %><%@page session="false" %>
 <cq:includeClientLib css="acs-commons.manage-controlled-processes.app"/>
 <cq:includeClientLib categories="coralui3,coralui2,cq.authoring.dialog,granite.ui.coral.foundation,granite.ui.shell"/>
+<link rel="shortcut icon" href="/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/images/favicon.ico" />
 <coral-shell>
     <coral-shell-header class="coral--dark">
         <coral-shell-header-home  data-globalnav-navigator-main-href="/mnt/overlay/granite/ui/content/shell/globalnav.html">

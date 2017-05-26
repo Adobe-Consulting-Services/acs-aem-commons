@@ -127,7 +127,7 @@ public class JobQueueCleaner implements ProcessDefinition {
     }
 
     @Override
-    public void storeReport(ProcessInstance instance) {
+    public void storeReport(ProcessInstance instance, ResourceResolver rr) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
