@@ -15,16 +15,24 @@
  */
 package com.adobe.acs.commons.mcp.processes;
 
-import com.adobe.acs.commons.mcp.FormField;
+import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
-import com.adobe.acs.commons.mcp.model.CheckboxComponent;
-import com.adobe.acs.commons.mcp.model.PathfieldComponent;
+import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.form.CheckboxComponent;
+import com.adobe.acs.commons.mcp.form.PathfieldComponent;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 /**
  * Reports number and size of assets within a given folder structure.
@@ -32,6 +40,16 @@ import org.apache.sling.api.resource.ResourceResolver;
 @Component
 @Service(ProcessDefinition.class)
 public class AssetReport implements ProcessDefinition {
+    public static enum Column {
+        total_asset_count, total_subfolder_count, 
+        total_asset_renditions, total_asset_versions, total_subassets,
+        total_original_size, total_version_size, total_subasset_size, total_combined_size, 
+        local_asset_count, local_size, local_subfolder_count,
+        local_asset_renditions, local_asset_versions, local_subassets,
+        local_original_size, local_version_size, local_subasset_size, local_combined_size
+    }
+    GenericReport report = new GenericReport();
+    Map<String, EnumMap<Column, Long>> reportData = new LinkedHashMap<>();
 
     @FormField(
             name = "Folder",
@@ -76,9 +94,17 @@ public class AssetReport implements ProcessDefinition {
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    private EnumMap<Column, Long> getReportRow(String path) {
+        if (!reportData.containsKey(path)) {
+            reportData.put(path, new EnumMap<>(Column.class));
+        }
+        return reportData.get(path);
+    }
 
     @Override
-    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {        
+        report.setRows(reportData, "Path", Column.class);
+        report.persist(rr, instance.getPath()+"/jcr:content/report");
     }
 }

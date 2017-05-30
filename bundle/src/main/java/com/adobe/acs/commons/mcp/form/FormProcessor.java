@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp;
+package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
@@ -25,7 +25,7 @@ import org.apache.sling.api.resource.ValueMap;
  */
 public interface FormProcessor {
     default void parseInputs(ValueMap input) throws DeserializeException, RepositoryException {
-        AnnotatedFieldDeserializer.processInput(this, input);
+        AnnotatedFieldDeserializer.deserializeFormFields(this, input);
         init();
     }
 

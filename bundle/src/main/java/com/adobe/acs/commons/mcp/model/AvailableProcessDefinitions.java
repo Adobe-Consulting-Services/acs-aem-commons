@@ -15,8 +15,8 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
-import com.adobe.acs.commons.mcp.FieldComponent;
-import com.adobe.acs.commons.mcp.FormField;
+import com.adobe.acs.commons.mcp.form.FieldComponent;
+import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.cq.sightly.WCMUsePojo;
 import java.lang.reflect.Field;

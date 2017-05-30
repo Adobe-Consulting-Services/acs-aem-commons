@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp;
+package com.adobe.acs.commons.mcp.form;
 
+import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import java.lang.reflect.Field;
 import java.util.Optional;

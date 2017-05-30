@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.model;
+package com.adobe.acs.commons.mcp.form;
 
-import com.adobe.acs.commons.mcp.FieldComponent;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.day.cq.commons.jcr.JcrUtil;
 import java.util.Map;

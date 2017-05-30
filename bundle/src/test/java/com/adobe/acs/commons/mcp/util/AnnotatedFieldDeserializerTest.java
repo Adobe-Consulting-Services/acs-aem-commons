@@ -15,7 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.util;
 
-import com.adobe.acs.commons.mcp.FormField;
+import com.adobe.acs.commons.mcp.form.FormField;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +66,7 @@ public class AnnotatedFieldDeserializerTest {
         params.put("floatValue", "234.567");
         params.put("longValue", "1234567890");
         params.put("booleanValue", "true");
-        AnnotatedFieldDeserializer.processInput(target, new ModifiableValueMapDecorator(params));
+        AnnotatedFieldDeserializer.deserializeFormFields(target, new ModifiableValueMapDecorator(params));
         assertEquals(123, target.intValue);
         assertEquals(123.456D, target.doubleValue, 0);
         assertEquals(234.567F, target.floatValue, 0);
@@ -97,7 +97,7 @@ public class AnnotatedFieldDeserializerTest {
         params.put("intValue", new String[]{"123", "456", "789"});
         params.put("doubleValue", "123.456");
         params.put("floatValue", new String[]{"234.567", "111.222", "333.444", "555.666"});
-        AnnotatedFieldDeserializer.processInput(target, new ModifiableValueMapDecorator(params));
+        AnnotatedFieldDeserializer.deserializeFormFields(target, new ModifiableValueMapDecorator(params));
         assertArrayEquals(new int[]{123, 456, 789}, target.intValue);
         assertArrayEquals(new double[]{123.456D}, target.doubleValue, 0);
         assertNotNull(target.floatValue);

@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.model;
-
-import com.adobe.acs.commons.mcp.FieldComponent;
+package com.adobe.acs.commons.mcp.form;
 
 /**
  * Provisions for path fields Accepts the following options: base=[path] -- Root

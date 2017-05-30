@@ -23,23 +23,25 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.ValueMap;
-import com.adobe.acs.commons.mcp.FormField;
+import com.adobe.acs.commons.mcp.form.FormField;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
 import java.lang.reflect.Array;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
 import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
  */
 public class AnnotatedFieldDeserializer {
 
-    public static void processInput(Object target, ValueMap input) throws DeserializeException {
+    public static void deserializeFormFields(Object target, ValueMap input) throws DeserializeException {
         List<Field> fields = FieldUtils.getFieldsListWithAnnotation(target.getClass(), FormField.class);
+        deserializeFields(target, fields, input);
+    }
+
+    public static void deserializeFields(Object target, List<Field> fields, ValueMap input) throws DeserializeException {
         for (Field field : fields) {
             try {
                 parseInput(target, input, field);
@@ -47,12 +49,12 @@ public class AnnotatedFieldDeserializer {
                 throw new DeserializeException("Error when processing field " + field.getName(), ex);
             }
         }
-    }
-
+    }    
+    
     private static void parseInput(Object target, ValueMap input, Field field) throws ReflectiveOperationException, ParseException {
         FormField inputAnnotation = field.getAnnotation(FormField.class);
         if (input.get(field.getName()) == null) {
-            if (inputAnnotation.required()) {
+            if (inputAnnotation != null && inputAnnotation.required()) {
                 throw new NullPointerException("Required field missing: " + field.getName());
             } else {
                 return;

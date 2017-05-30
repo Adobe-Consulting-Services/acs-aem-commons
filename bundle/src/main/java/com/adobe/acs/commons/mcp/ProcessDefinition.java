@@ -15,8 +15,10 @@
  */
 package com.adobe.acs.commons.mcp;
 
+import com.adobe.acs.commons.mcp.form.FormProcessor;
 import javax.jcr.RepositoryException;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
@@ -28,5 +30,5 @@ public interface ProcessDefinition extends FormProcessor {
 
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
 
-    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException;
+    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException;
 }
