@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -31,48 +32,52 @@ import org.slf4j.LoggerFactory;
  * Utilities for serializing objects back to value maps
  */
 public class ValueMapSerializer {
+
     transient private static final Logger LOG = LoggerFactory.getLogger(ValueMapSerializer.class);
+
     public static void serializeToResource(Resource r, Object sourceObject) {
         Map<String, Object> map = r.adaptTo(ModifiableValueMap.class);
         if (map == null) {
-            LOG.error("Unable to get modifiable value map for resource "+r.getPath());
+            LOG.error("Unable to get modifiable value map for resource " + r.getPath());
         } else {
             serializeToMap(map, sourceObject);
         }
     }
 
     public static void serializeToMap(Map<String, Object> map, Object sourceObject) {
+        if (sourceObject == null) {
+            return;
+        }
         FieldUtils.getAllFieldsList(sourceObject.getClass()).stream()
                 .filter(IntrospectionUtil::isSimple)
-                .collect(Collectors.toMap(
-                        Field::getName,
-                        f -> {
-                            try {
-                                return FieldUtils.readField(f, sourceObject, true);
-                            } catch (IllegalAccessException ex) {
-                                LOG.error("Error serializing to map for field "+f.getName(), ex);
-                                return null;
-                            }
-                        },
-                        (a, b) -> b,
-                        () -> map));
+                .forEach(f -> {
+                    try {
+                        Object value = FieldUtils.readField(f, sourceObject, true);
+                        if (value != null) {
+                            map.put(f.getName(), value);
+                        }
+                    } catch (IllegalAccessException ex) {
+                        java.util.logging.Logger.getLogger(ValueMapSerializer.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
     }
 
     public static String[] serializeToStringArray(Object value) {
-        if (value instanceof String[]) {
+        if (value == null) {
+            return new String[0];
+        } else if (value instanceof String[]) {
             return (String[]) value;
         } else if (value.getClass().isArray()) {
             List<String> values = (List) Arrays.asList((Object[]) value).stream().map(String::valueOf).collect(Collectors.toList());
-            return (String[]) values.toArray();            
+            return (String[]) values.toArray();
         } else if (value instanceof Collection) {
             List<String> values = (List) ((Collection) value).stream().map(String::valueOf).collect(Collectors.toList());
             return (String[]) values.toArray();
         } else {
             return new String[]{value.toString()};
-        }        
+        }
     }
 
-    
     private ValueMapSerializer() {
         //Utility class, not to be instantiated directly
     }

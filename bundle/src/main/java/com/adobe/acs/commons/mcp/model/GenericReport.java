@@ -62,7 +62,7 @@ public class GenericReport {
         int rowCounter = 0;
         for (Map<String, Object> row : rows) {
             rowCounter++;
-            ResourceUtil.getOrCreateResource(rr, path+"/row-"+rowCounter, row, null, true);
+            ResourceUtil.getOrCreateResource(rr, path+"/rows/row-"+rowCounter, row, null, true);
         }
         rr.commit();
         rr.refresh();
