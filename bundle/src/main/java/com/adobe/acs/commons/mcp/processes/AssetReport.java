@@ -143,6 +143,9 @@ public class AssetReport implements ProcessDefinition {
                 folderList.add(r.getPath());
             }
         });
+        visitor.setResourceVisitor((r, depth) -> {
+            tabulate(getParentPath(r.getPath()), Column.subfolder_count, 1);
+        });
         manager.deferredWithResolver(rr -> visitor.accept(rr.getResource(baseFolder)));
     }
 

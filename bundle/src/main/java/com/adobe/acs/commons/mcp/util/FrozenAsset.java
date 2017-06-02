@@ -22,6 +22,7 @@ import org.apache.sling.api.resource.ValueMap;
 import com.adobe.granite.asset.api.AssetIOException;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
+import static com.day.cq.dam.api.DamConstants.SUBASSETS_FOLDER;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.api.RenditionPicker;
 import com.day.cq.dam.api.Revision;
@@ -29,29 +30,36 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FrozenAsset implements Asset {
+
     private static final Logger LOG = LoggerFactory.getLogger(FrozenAsset.class);
     private static final Joiner pathJoiner = Joiner.on('/').skipNulls();
-    
+
     private static final String CONTENT_PATH = pathJoiner.join(JcrConstants.JCR_CONTENT, DamConstants.RENDITIONS_FOLDER, DamConstants.ORIGINAL_FILE, JcrConstants.JCR_CONTENT);
     private static final String RENDITIONS_PATH = pathJoiner.join(JcrConstants.JCR_CONTENT, DamConstants.RENDITIONS_FOLDER);
     private static final String METADATA_PATH = pathJoiner.join(JcrConstants.JCR_CONTENT, DamConstants.METADATA_FOLDER);
-    
+
     private final Asset head;
     private final Resource frozenResource;
-    private final String id;
-    
-    public FrozenAsset (Asset head, Revision revision) throws RepositoryException {
+
+    public FrozenAsset(Asset head, Revision revision) throws RepositoryException {
         final Node frozenNode = revision.getVersion().getFrozenNode();
-        frozenResource = head.adaptTo(Resource.class).getResourceResolver().getResource(frozenNode.getPath());
         this.head = head;
-        this.id = revision.getId();
+        frozenResource = head.adaptTo(Resource.class).getResourceResolver().getResource(frozenNode.getPath());
     }
-    
-    
+
+    public FrozenAsset(ResourceResolver rr, String path) throws RepositoryException {
+        this.head = null;
+        frozenResource = rr.getResource(path);
+    }
+
     @Override
     public String getPath() {
         return frozenResource.getPath();
@@ -65,88 +73,81 @@ public class FrozenAsset implements Asset {
     @SuppressWarnings("unchecked")
     @Override
     public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-        if(type.equals(Resource.class)) {
-            return (AdapterType)frozenResource;
+        if (type.equals(Resource.class)) {
+            return (AdapterType) frozenResource;
         }
         return null;
     }
 
-
     public String getMetadataValue(final String name) {
         Resource meta = frozenResource.getChild(METADATA_PATH);
-        if(meta == null) { 
+        if (meta == null) {
             return null;
         }
-        
+
         return meta.getValueMap().get(name, String.class);
     }
-
 
     @Override
     public Object getMetadata(String name) {
         return getMetadata().get(name);
     }
 
-
     @Override
     public long getLastModified() {
         Resource r = frozenResource.getChild(CONTENT_PATH);
-        if(r == null) {
+        if (r == null) {
             return System.currentTimeMillis();
         }
         return r.getValueMap().get(JcrConstants.JCR_LASTMODIFIED, Calendar.getInstance()).getTimeInMillis();
     }
 
-
     @Override
     public Rendition getRendition(String name) {
         Resource r = frozenResource.getChild(pathJoiner.join(RENDITIONS_PATH, name));
-        if(r == null) {
+        if (r == null) {
             return null;
         }
         return new FrozenRendition(r);
     }
-
 
     @Override
     public Rendition getOriginal() {
         return getRendition(DamConstants.ORIGINAL_FILE);
     }
 
-
     @Override
     public Rendition getCurrentOriginal() {
         return getOriginal();
     }
 
-
     @Override
     public boolean isSubAsset() {
-        return head.isSubAsset();
+        if (head != null) {
+            return head.isSubAsset();
+        } else {
+            return SUBASSETS_FOLDER.equals(ResourceUtil.getName(ResourceUtil.getParent(frozenResource)));
+        }
     }
-
 
     @Override
     public Map<String, Object> getMetadata() {
         Resource meta = frozenResource.getChild(METADATA_PATH);
-        if(meta == null) { 
+        if (meta == null) {
             return null;
         }
         return meta.getValueMap();
     }
-
 
     @Override
     public Resource setRendition(String name, InputStream is, String mimeType) {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public void setCurrentOriginal(String name) {
         throw new UnsupportedOperationException();
     }
-
 
     @Override
     public Revision createRevision(String label, String comment)
@@ -154,50 +155,43 @@ public class FrozenAsset implements Asset {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public List<Rendition> getRenditions() {
         Resource renditions = frozenResource.getChild(RENDITIONS_PATH);
-        if(renditions == null) {
+        if (renditions == null) {
             return Lists.newArrayList();
         }
         List<Rendition> rv = Lists.newArrayList();
-        for(Resource r : renditions.getChildren()) {
+        for (Resource r : renditions.getChildren()) {
             rv.add(getRendition(r.getName()));
         }
         return rv;
     }
-
 
     @Override
     public Iterator<Rendition> listRenditions() {
         return getRenditions().iterator();
     }
 
-
     @Override
     public Rendition getRendition(RenditionPicker picker) {
         throw new UnsupportedOperationException();
     }
-
 
     @Override
     public String getModifier() {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public Asset restore(String revisionId) throws Exception {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public Collection<Revision> getRevisions(Calendar cal) throws Exception {
         throw new UnsupportedOperationException();
     }
-
 
     @Override
     public String getMimeType() {
@@ -212,12 +206,10 @@ public class FrozenAsset implements Asset {
         return mimeType;
     }
 
-
     @Override
     public Rendition addRendition(String name, InputStream is, String mimeType) {
         throw new UnsupportedOperationException();
     }
-
 
     @Override
     public Rendition addRendition(String name, InputStream is,
@@ -225,24 +217,41 @@ public class FrozenAsset implements Asset {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public Asset addSubAsset(String name, String mimeType, InputStream stream) {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public Collection<Asset> getSubAssets() {
-        return Collections.EMPTY_LIST;
-    }
+        if (head == null) {
+            throw new UnsupportedOperationException();
+        }
+        Resource subassets = frozenResource.getChild(DamConstants.SUBASSETS_FOLDER);
+        if (subassets != null) {
+            Stream<Resource> subs = StreamSupport.stream(
+                    subassets.getChildren().spliterator(), false
+            );
 
+            return subs.map(r -> {
+                try {
+                    return new FrozenAsset(
+                            frozenResource.getResourceResolver(),
+                            r.getPath());
+                } catch (RepositoryException ex) {
+                    LOG.error("Error retrieving subasset from "+r.getPath(), ex);
+                }
+                return null;
+            }).collect(Collectors.toList());
+        } else {
+            return Collections.EMPTY_LIST;
+        }
+    }
 
     @Override
     public void removeRendition(String name) {
         throw new UnsupportedOperationException();
     }
-
 
     @Override
     public void setBatchMode(boolean mode) {
@@ -260,25 +269,26 @@ public class FrozenAsset implements Asset {
     }
 
     @Override
-    public String getMetadataValueFromJcr(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String getMetadataValueFromJcr(String name) {
+        return getMetadataValue(name);
     }
 
     @Override
     public String getID() {
-        return id;
+        return frozenResource.getValueMap().get(Property.JCR_FROZEN_UUID, String.class);
     }
-    
+
     private class FrozenRendition implements Rendition {
+
         private final Resource container;
-        
+
         private final Resource renditionData;
-        
+
         public FrozenRendition(Resource container) {
             this.container = container;
             this.renditionData = container.getChild(JcrConstants.JCR_CONTENT);
         }
-        
+
         @Override
         public Resource getParent() {
             return container.getParent();
@@ -337,8 +347,8 @@ public class FrozenAsset implements Asset {
         @SuppressWarnings("unchecked")
         @Override
         public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-            if(type == Resource.class) {
-                return (AdapterType)container;
+            if (type == Resource.class) {
+                return (AdapterType) container;
             }
             return container.adaptTo(type);
         }
