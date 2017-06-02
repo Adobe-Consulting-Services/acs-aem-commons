@@ -87,6 +87,12 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
     private static final String GRANITE_UI_FORM_VALUES = "granite.ui.form.values";
 
     /**
+     * The is a reference to the OOTB AEM PostOperation that handles updates for Folder Properties; This is used below in process(..) to ensure that all OOTB behaviors are executed.
+     */
+    @Reference(target="&(sling.post.operation=dam.share.folder)(sling.servlet.methods=POST)")
+    private PostOperation folderShareHandler;
+
+    /**
      * This method is responsible for post processing POSTs to the FolderShareHandler PostOperation (:operation = dam.share.folder).
      * This method will store a whitelisted set of request parameters to their relative location off of the [sling:*Folder] node.
      *
@@ -123,22 +129,15 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
         // Do Nothing
     }
 
-    @Reference(target="&(sling.post.operation=dam.share.folder)(sling.servlet.methods=POST)")
-    private PostOperation folderShareHandler;
-
     public void process(SlingHttpServletRequest request, List<Modification> changes) throws Exception {
         if (AssetsFolderPropertiesSupportRequest.isMarked(request)) {
-            if (folderShareHandler != null) {
-                log.trace("Sending the the wrapped dam.folder.share request to the AEM Assets dam.folder.share PostOperation for final processing");
+            log.trace("Sending the the wrapped dam.folder.share request to the AEM Assets dam.folder.share PostOperation for final processing");
 
-                final AssetsFolderPropertiesSupportRequest wrappedRequest = new AssetsFolderPropertiesSupportRequest(request, DAM_FOLDER_SHARE_OPERATION);
+            final AssetsFolderPropertiesSupportRequest wrappedRequest = new AssetsFolderPropertiesSupportRequest(request, DAM_FOLDER_SHARE_OPERATION);
 
-                folderShareHandler.run(wrappedRequest, new DummyPostResponse(), new SlingPostProcessor[]{});
+            folderShareHandler.run(wrappedRequest, new DummyPostResponse(), new SlingPostProcessor[]{});
 
-                log.trace("Processed the the wrapped dam.folder.share request with the AEM Assets dam.folder.share PostOperation");
-            } else {
-                log.error("Folder Share Handler PostOperation is NOT active.");
-            }
+            log.trace("Processed the the wrapped dam.folder.share request with the AEM Assets dam.folder.share PostOperation");
         }
     }
 
