@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -38,31 +39,39 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 
 /**
- * Describes a very simple table, which is up to the process definition to outline.
+ * Describes a very simple table, which is up to the process definition to
+ * outline.
  */
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class GenericReport {
+
+    public static final String GENERIC_REPORT_RESOURCE_TYPE = ProcessInstance.RESOURCE_TYPE + "/process-generic-report";
+
     @Inject
     private List<String> columns;
-    
+
     @Inject
     private List<ValueMap> rows;
-    
+
+    @Inject
+    private String name = "report";
+
     public String getResourceType() {
-        return ProcessInstance.RESOURCE_TYPE + "/process-generic-report";
+        return GENERIC_REPORT_RESOURCE_TYPE;
     }
     
     public void persist(ResourceResolver rr, String path) throws PersistenceException, RepositoryException {
         ModifiableValueMap jcrContent = ResourceUtil.getOrCreateResource(rr, path, getResourceType(), null, false).adaptTo(ModifiableValueMap.class);
-        jcrContent.put("jcr:primaryType","nt:unstructured");
+        jcrContent.put("jcr:primaryType", "nt:unstructured");
         jcrContent.put("columns", getColumns().toArray(new String[0]));
+        jcrContent.put("name", name);
         rr.commit();
         rr.refresh();
-        JcrUtil.createPath(path+"/rows", "nt:unstructured", rr.adaptTo(Session.class));
+        JcrUtil.createPath(path + "/rows", "nt:unstructured", rr.adaptTo(Session.class));
         int rowCounter = 0;
         for (Map<String, Object> row : rows) {
             rowCounter++;
-            ResourceUtil.getOrCreateResource(rr, path+"/rows/row-"+rowCounter, row, null, true);
+            ResourceUtil.getOrCreateResource(rr, path + "/rows/row-" + rowCounter, row, null, true);
         }
         rr.commit();
         rr.refresh();
@@ -73,7 +82,7 @@ public class GenericReport {
         getColumns().add(keyName);
         Stream.of(enumClass.getEnumConstants()).map(Object::toString).collect(Collectors.toCollection(this::getColumns));
         getRows().clear();
-        reportData.forEach((path, row)->{
+        reportData.forEach((path, row) -> {
             Map<String, Object> r = new LinkedHashMap<>();
             r.put(keyName, path);
             for (Enum<E> c : enumClass.getEnumConstants()) {
@@ -103,5 +112,28 @@ public class GenericReport {
             rows = new ArrayList<>();
         }
         return rows;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<String> getColumnNames() {
+        return columns.stream().map(this::getFriendlyName).collect(Collectors.toList());
+    }
+
+    public String getFriendlyName(String orig) {
+        String parts[] = StringUtils.split(orig, "._-");
+        if (parts.length == 1) {
+            parts = StringUtils.splitByCharacterTypeCamelCase(orig);
+        }
+       return Stream.of(parts).map(String::toLowerCase).map(StringUtils::capitalize).collect(Collectors.joining(" "));
     }
 }

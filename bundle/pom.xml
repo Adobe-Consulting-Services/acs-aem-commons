@@ -89,9 +89,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                   <systemPropertyVariables>
-                       <artifactPath>${project.artifact.file.absolutePath}</artifactPath>
-                   </systemPropertyVariables>
+                    <systemPropertyVariables>
+                        <artifactPath>${project.artifact.file.absolutePath}</artifactPath>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
@@ -290,7 +290,7 @@
             <artifactId>commons-dbcp</artifactId>
             <version>1.4</version>
             <scope>test</scope>
-         </dependency>
+        </dependency>
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty</artifactId>
@@ -315,6 +315,13 @@
             <artifactId>org.apache.sling.commons.html</artifactId>
             <version>1.0.0</version>
             <scope>test</scope>
+        </dependency>
+        <!-- Apache POI used for exporting Excel spreadsheets -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.6</version>
+            <type>jar</type>
         </dependency>
         <!-- the custom annotation for AemObject -->
         <dependency>

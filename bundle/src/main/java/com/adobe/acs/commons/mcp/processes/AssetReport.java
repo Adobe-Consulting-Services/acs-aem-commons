@@ -26,7 +26,6 @@ import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.util.FrozenAsset;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.AssetManager;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.api.Revision;
@@ -39,15 +38,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.version.Version;
-import javax.jcr.version.VersionHistory;
-import javax.jcr.version.VersionIterator;
-import javax.jcr.version.VersionManager;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
@@ -104,7 +96,7 @@ public class AssetReport implements ProcessDefinition {
 
     @Override
     public void init() throws RepositoryException {
-        depthLimit = getDepth(baseFolder) + folderLevels;
+        depthLimit = getDepth(baseFolder) + folderLevels;        
     }
 
     public int getDepth(String path) {
@@ -118,6 +110,7 @@ public class AssetReport implements ProcessDefinition {
 
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
+        report.setName(instance.getName());
         instance.defineCriticalAction("Evaluate structure", rr, this::evaluateStructure);
         instance.defineAction("First pass", rr, this::examineAssets);
         instance.defineAction("Deep scan", rr, this::evaluateDeepStructure);

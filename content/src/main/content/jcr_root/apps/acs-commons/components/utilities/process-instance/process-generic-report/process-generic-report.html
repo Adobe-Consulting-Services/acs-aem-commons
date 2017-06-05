@@ -14,21 +14,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<html>
+<html data-sly-use.report="com.adobe.acs.commons.mcp.model.GenericReport">
     <head>
-        <title></title>
+        <title>${report.name}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <table data-sly-use.report="com.adobe.acs.commons.mcp.model.GenericReport">
+        <table>
             <thead>
-                <tr data-sly-list.column="${properties.columns}">
+                <tr data-sly-list.column="${report.columnNames}">
                     <th>${column}</th>
                 </tr>
             </thead>
             <tbody data-sly-list.row="${report.rows}">
-                <tr data-sly-list.column="${properties.columns}">
+                <tr data-sly-list.column="${report.columns}">
                     <td>${row[column]}</td>
                 </tr>
             </tbody>
