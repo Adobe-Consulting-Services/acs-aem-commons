@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -68,7 +69,12 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
             
     private Workbook createSpreadsheet(GenericReport report) {
         Workbook wb = new XSSFWorkbook();
-        XSSFSheet sheet = (XSSFSheet) wb.createSheet(report.getName());
+        
+        String name = report.getName();
+        for (char ch : new char[]{'\\','/','*','[',']',':','?'}) {
+            name = StringUtils.remove(name, ch);
+        }
+        XSSFSheet sheet = (XSSFSheet) wb.createSheet(name);
 
         XSSFRow headerRow = sheet.createRow(0);
         
@@ -84,11 +90,11 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
 
             //make columns
             for (int c = 0; c < report.getColumns().size(); c++) {
-                String name = report.getColumns().get(c);
+                String col = report.getColumns().get(c);
                 XSSFCell cell = row.createCell(c);
 
-                if (rows.get(r).containsKey(name)) {
-                    Object val = rows.get(r).get(name);
+                if (rows.get(r).containsKey(col)) {
+                    Object val = rows.get(r).get(col);
                     if (val instanceof Number) {
                         Number n = (Number) val;
                         cell.setCellValue(((Number) val).doubleValue());                        

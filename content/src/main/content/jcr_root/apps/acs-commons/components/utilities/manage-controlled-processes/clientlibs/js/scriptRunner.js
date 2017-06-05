@@ -160,6 +160,7 @@ var ScriptRunner = {
                             "<td is='coral-td' class='process-reported-errors'>" + process.infoBean.reportedErrors.length + "</td>" +
                             "</tr>"
                             );
+                    processDom.click(ScriptRunner.viewProcessCallback(process.path));
                     tableBody.append(processDom);
                 }
                 jQuery("#processListing").trigger("foundation-contentloaded");
@@ -224,7 +225,7 @@ var ScriptRunner = {
     },
     formatTime: function (ms) {
         var d = new Date(ms), now = new Date();
-        if (ms <=0 ) {
+        if (ms <= 0) {
             return "n/a";
         } else {
             if (d.toLocaleDateString() === now.toLocaleDateString()) {
@@ -233,7 +234,42 @@ var ScriptRunner = {
                 return d.toLocaleString();
             }
         }
+    },
+    viewProcesCallback: function(path) {
+        return function(){
+            ScriptRunner.viewProcess(path);
+        };        
+    },
+    viewProcess: function (path) {
+        var iframe = "<iframe src='" + path + ".html'>";
+        var diag = new Coral.Dialog().set({
+            id: 'viewProcess',
+            header: {
+                innerHTML: 'Process Details'
+            },
+            content: {
+                innerHTML: iframe
+            },
+            footer: {
+                innerHTML: '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+            },
+            closable: true,
+            variant: "info"
+        });
+//                ScriptRunner.startDialog.classList.add("coral--dark");
+//                ScriptRunner.startDialog.on("coral-overlay:open", function () {
+//                    ScriptRunner.initStartDialog(ScriptRunner.startDialog);
+//                });
+//                ScriptRunner.startDialog.on("coral-overlay:close", function (evt) {
+//                    // This event also triggers for closing sub-dialogs and tooltips
+//                    if (evt.target === evt.currentTarget) {
+//                        window.top.document.body.removeChild(ScriptRunner.startDialog);
+//                    }
+//                });
+        window.top.document.body.appendChild(diag);
+        diag.show();
     }
+
 };
 
 jQuery('#processListing').ready(function () {

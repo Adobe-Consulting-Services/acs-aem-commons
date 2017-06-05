@@ -58,7 +58,7 @@ public class AssetReport implements ProcessDefinition {
     public static final String SHA1 = "dam:sha1";
 
     public static enum Column {
-        asset_count, subfolder_count,
+        level, asset_count, subfolder_count,
         rendition_count, version_count, subasset_count,
         original_size, rendition_size, version_size, subasset_size, combined_size
     }
@@ -68,7 +68,7 @@ public class AssetReport implements ProcessDefinition {
             description = "Examines everying in this folder and all other subfolders below it",
             hint = "/content/dam",
             component = PathfieldComponent.FolderSelectComponent.class,
-            options = {"default=/content/dam", "base=/cotent/dam"}
+            options = {"default=/content/dam", "base=/content/dam"}
     )
     private String baseFolder;
     @FormField(
@@ -133,10 +133,12 @@ public class AssetReport implements ProcessDefinition {
                 assetList.add(r.getPath());
             } else if (visitor.isFolder(r)) {
                 tabulate(getParentPath(r.getPath()), Column.subfolder_count, 1);
+                setValue(r.getPath(), Column.level, depth+1);
                 folderList.add(r.getPath());
             }
         });
         visitor.setResourceVisitor((r, depth) -> {
+            setValue(r.getPath(), Column.level, depth+1);
             tabulate(getParentPath(r.getPath()), Column.subfolder_count, 1);
         });
         manager.deferredWithResolver(rr -> visitor.accept(rr.getResource(baseFolder)));
@@ -177,8 +179,17 @@ public class AssetReport implements ProcessDefinition {
         return path.substring(0, path.lastIndexOf('/'));
     }
 
-    private void tabulate(String path, Column counter, long amount) {
+    private void setValue(String path, Column field, long amount) {
         if (getDepth(path) < depthLimit) {
+            synchronized (report) {
+                EnumMap<Column, Long> row = getReportRow(path);
+                row.put(field, amount);
+            }
+        }
+    }
+
+    private void tabulate(String path, Column counter, long amount) {
+        if (getDepth(path) < depthLimit && path.length() >= baseFolder.length()) {
             synchronized (report) {
                 EnumMap<Column, Long> row = getReportRow(path);
                 if (row.containsKey(counter)) {

@@ -18,6 +18,11 @@ limitations under the License.
     width: 100%
 }
 
+.coral-Dialog-content iframe {
+    border: none;
+    min-height: 250px;
+}
+
 .coral--dark .coral-Dialog-wrapper, .coral--dark .coral-Dialog-header, .coral--dark coral-Dialog-content {
     background-color: #333 !important
 }

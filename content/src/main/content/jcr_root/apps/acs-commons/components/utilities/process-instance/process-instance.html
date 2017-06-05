@@ -14,13 +14,45 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<html>
+<html data-sly-use.process="com.adobe.acs.commons.mcp.model.ManagedProcess">
     <head>
-        <title>TODO supply a title</title>
+        <title>${process.name}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html" 
+             data-sly-call="${clientlib.all @ categories='coralui3,coralui2,cq.authoring.dialog,granite.ui.coral.foundation'}"
+             />
     </head>
     <body>
-        <div>TODO write content</div>
+        <h3>Process: ${process.name}</h3>
+        <form class="coral-Form coral-Form--aligned">
+            <section class="coral-Form-fieldset">
+                <label class="coral-Form-fieldlabel">Description</label>
+                <span class="coral-Form-field">${process.description}</span>
+            </section>
+            <section class="coral-Form-fieldset">
+                <label class="coral-Form-fieldlabel">Started</label>
+                <span class="coral-Form-field">${process.startTime} by ${process.requester}</span>
+            </section>
+            <section class="coral-Form-fieldset" data-sly-test="${process.isRunning}">
+                <label class="coral-Form-fieldlabel">Ended</label>
+                <span class="coral-Form-field">${process.stopTime}</span>
+            </section>
+            <section class="coral-Form-fieldset" data-sly-test="${!process.isRunning}">
+                <label class="coral-Form-fieldlabel">Progress</label>
+                <span class="coral-Form-field">${process.progress}</span>
+            </section>
+            <section class="coral-Form-fieldset">
+                <label class="coral-Form-fieldlabel">Status</label>
+                <span class="coral-Form-field">${process.status}</span>
+            </section>
+            <section class="coral-Form-fieldset">
+                <label class="coral-Form-fieldlabel">Report</label>
+                <span class="coral-Form-field">
+                    <a is="coral-anchorbutton" icon="browse" href="${resource.path}/report.html" target="_new">View</a>
+                    <a is="coral-anchorbutton" icon="download" href="${resource.path}/report.xlsx">Download (Excel)</a>
+                </span>
+            </section>
+        </form>
     </body>
 </html>

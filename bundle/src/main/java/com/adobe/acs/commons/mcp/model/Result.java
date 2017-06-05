@@ -15,8 +15,6 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
-import com.adobe.acs.commons.fam.Failure;
-import java.util.List;
 import javax.inject.Inject;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
