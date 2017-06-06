@@ -44,7 +44,7 @@ $(qrCode.qrElement).on("click", function () {
     } else {
         // Configs are present but none of them matches with current host
         $("#qrcodeTable").css('color', 'black');
-        jQuery('#qrcodeTable').html("No Configurations are available for this Host, Add it from <a href='/etc/acs-tools/qr-code-config.html' target='_blank' ><i>here</i></a");
+        jQuery('#qrcodeTable').html("No Configurations are available for this Host, Add from <a href='/etc/acs-commons/qr-code-config.html' target='_blank' ><i>here</i></a");
 
     }
     $("#qrcodeTable").toggle();
