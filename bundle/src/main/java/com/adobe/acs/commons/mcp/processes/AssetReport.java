@@ -23,7 +23,8 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport.Format;
+import com.adobe.acs.commons.mcp.model.FieldFormat;
+import com.adobe.acs.commons.mcp.model.Format;
 import com.adobe.acs.commons.mcp.util.FrozenAsset;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.dam.api.Asset;
@@ -61,14 +62,16 @@ public class AssetReport implements ProcessDefinition {
     public static enum Column {
         level, asset_count, subfolder_count,
         rendition_count, version_count, subasset_count,
-        original_size(Format.storageSize), rendition_size(Format.storageSize), 
-        version_size(Format.storageSize), subasset_size(Format.storageSize), 
-        combined_size(Format.storageSize);
-        Format format = Format.plain;
-        Column(){}
-        Column(Format fmt) {
-            format = fmt;
-        }
+        @FieldFormat(Format.storageSize)
+        original_size,
+        @FieldFormat(Format.storageSize)
+        rendition_size,
+        @FieldFormat(Format.storageSize)
+        version_size,
+        @FieldFormat(Format.storageSize)
+        subasset_size,
+        @FieldFormat(Format.storageSize)
+        combined_size;
     }
 
     @FormField(

@@ -17,19 +17,21 @@ package com.adobe.acs.commons.mcp.model;
 
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.day.cq.commons.jcr.JcrUtil;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -46,57 +48,6 @@ import org.apache.sling.models.annotations.Model;
  */
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class GenericReport {
-    public static enum Format {
-        plain(), storageSize("_short", GenericReport::getHumanSize);
-        int columnCount = 1;
-        String suffix = "";
-        Function<Object, Object> altFunction;
-        Format() {}
-        Format(String alternate, Function<Object, Object> altFunc) {
-            columnCount = 2;
-            suffix = alternate;
-            altFunction = altFunc;
-        }
-        public static Format forField(Enum e) {
-            try {
-                Object o = FieldUtils.readDeclaredField(e, "format", true);
-                if (o == null) {
-                    return Format.plain;
-                } else if (o instanceof Format) {
-                    return (Format) o;
-                } else {
-                    return Format.valueOf(String.valueOf(o));
-                }
-            } catch (IllegalAccessException | IllegalArgumentException ex) {
-                // Ignore errors, assume plain
-            }
-            return Format.plain;
-        }
-
-        public Object getAlternateValue(Object val) {
-            return altFunction.apply(val);
-        }
-    }
-    
-    public static String getHumanSize(Object val) {
-        Long v = (val instanceof Long) ? (Long) val : Long.parseLong(String.valueOf(val));
-        int magnitude = ( Long.numberOfTrailingZeros(Long.highestOneBit(v)));
-        String scale = "B";
-        if (magnitude >= 50) {
-            scale = "PB";
-        } else if (magnitude >= 40) {
-            scale = "TB";
-        } else if (magnitude >= 30) {
-            scale = "GB";
-        } else if (magnitude >= 20) {
-            scale = "MB";
-        } else if (magnitude >= 10) {
-            scale = "KB";
-        }
-        Long shortVal = (v >> ((magnitude / 10)*10));
-        return shortVal + " " + scale;
-    }
-
     public static final String GENERIC_REPORT_RESOURCE_TYPE = ProcessInstance.RESOURCE_TYPE + "/process-generic-report";
 
     @Inject
