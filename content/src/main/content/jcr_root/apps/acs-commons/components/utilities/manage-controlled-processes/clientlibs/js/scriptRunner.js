@@ -235,7 +235,7 @@ var ScriptRunner = {
             }
         }
     },
-    viewProcesCallback: function(path) {
+    viewProcessCallback: function(path) {
         return function(){
             ScriptRunner.viewProcess(path);
         };        
