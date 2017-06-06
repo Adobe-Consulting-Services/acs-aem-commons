@@ -203,9 +203,9 @@ var ScriptRunner = {
             }, 250);
         }
     },
-    error: function () {
-        ScriptRunner.progress.hide();
+    error: function (e) {
         console.log("Error condition detected -- check logs!");
+        console.log(e);
     },
     setProgress: function (progress, label, val) {
         var percent;

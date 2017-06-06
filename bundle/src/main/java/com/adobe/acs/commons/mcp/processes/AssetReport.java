@@ -230,7 +230,7 @@ public class AssetReport implements ProcessDefinition {
         Rendition original = renditions.remove("original");
         tabulate(folderPath, Column.rendition_count, renditions.size());
 
-        if (original != null) {
+        if (original != null) { 
             long size = original.getSize();
             tabulate(folderPath, Column.original_size, size);
             tabulate(folderPath, Column.combined_size, size);

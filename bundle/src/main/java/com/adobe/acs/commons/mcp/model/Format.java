@@ -56,21 +56,15 @@ public enum Format {
     }
 
     public static String getHumanSize(Object val) {
-        Long v = (val instanceof Long) ? (Long) val : Long.parseLong(String.valueOf(val));
-        int magnitude = ( Long.numberOfTrailingZeros(Long.highestOneBit(v)));
-        String scale = "B";
-        if (magnitude >= 50) {
-            scale = "PB";
-        } else if (magnitude >= 40) {
-            scale = "TB";
-        } else if (magnitude >= 30) {
-            scale = "GB";
-        } else if (magnitude >= 20) {
-            scale = "MB";
-        } else if (magnitude >= 10) {
-            scale = "KB";
+        if (val == null) {
+            return null;
         }
-        Long shortVal = (v >> ((magnitude / 10)*10));
-        return shortVal + " " + scale;
-    }    
+        Long bytes = (val instanceof Long) ? (Long) val : Long.parseLong(String.valueOf(val));
+        if (bytes < 1024) {
+            return bytes + " b";
+        }
+        int exp = (int) (Math.log(bytes) / Math.log(1024));
+        char pre = "kmgtpe".charAt(exp - 1);
+        return String.format("%.1f %cb", bytes / Math.pow(1024, exp), pre);
+    }
 }

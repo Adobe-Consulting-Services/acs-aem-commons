@@ -107,6 +107,32 @@ public class GenericReport {
             getRows().add(new ValueMapDecorator(r));
         });
     }
+    
+    public <E extends Enum<E>, V> void setRows(List<EnumMap<E, V>> reportData, Class<E> enumClass) throws PersistenceException, RepositoryException {
+        getColumns().clear();
+        Stream.of().map(Object::toString).collect(Collectors.toCollection(this::getColumns));
+        for (Enum e : enumClass.getEnumConstants()) {
+            this.getColumns().add(e.toString());
+            Format format = Format.forField(e);
+            if (format.columnCount > 1) {
+                this.getColumns().add(e.toString() + format.suffix);
+            }
+        }
+        getRows().clear();
+        reportData.forEach(row -> {
+            Map<String, Object> r = new LinkedHashMap<>();
+            for (Enum<E> c : enumClass.getEnumConstants()) {
+                if (row.containsKey(c)) {
+                    Format format = Format.forField(c);
+                    r.put(c.toString(), row.get(c));
+                    if (format.columnCount > 1) {
+                        r.put(c.toString()+format.suffix, format.getAlternateValue(row.get(c)));
+                    }
+                }
+            }
+            getRows().add(new ValueMapDecorator(r));
+        });
+    }    
 
     /**
      * @return the columns
