@@ -40,4 +40,5 @@ public interface ControlledProcessManager extends CPMBean {
 
     Collection<ProcessInstance> getActiveProcesses();
     
+    Collection<ProcessInstance> getInactiveProcesses();    
 }

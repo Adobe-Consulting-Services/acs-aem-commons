@@ -35,25 +35,25 @@ public interface ProcessInstance {
     public static final String RESOURCE_TYPE = "acs-commons/components/utilities/process-instance";
 
     String getName();
-    
+
     void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws DeserializeException, RepositoryException;
 
     ActionManagerFactory getActionManagerFactory();
- 
+
     ActionManager defineCriticalAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException;
 
     ActionManager defineAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException;
-    
+
     ManagedProcess getInfo();
-    
+
     double updateProgress();
-    
+
     String getId();
-    
+
     String getPath();
-    
+
     void run(ResourceResolver rr);
-    
+
     void halt();
 
     public CompositeData getStatistics();

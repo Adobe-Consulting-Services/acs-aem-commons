@@ -137,14 +137,9 @@ var ScriptRunner = {
                 ScriptRunner.watchList = [];
                 for (i = 0; i < response.length; i++) {
                     process = response[i];
+                    ScriptRunner.cleanProcessObject(process);
                     if (process.infoBean.isRunning) {
                         ScriptRunner.watchList.push(process.id);
-                    }
-
-                    if (!process.infoBean.result) {
-                        process.infoBean.result = {
-                            tasksCompleted: '???'
-                        };
                     }
                     processDom = jQuery("<tr is='coral-tr' id='process-" + process.id + "'>" +
                             "<td is='coral-td'>" + process.infoBean.name + "</td>" +
@@ -168,6 +163,16 @@ var ScriptRunner = {
             }
         });
     },
+    cleanProcessObject: function (process) {
+        if (!process.infoBean.result) {
+            process.infoBean.result = {
+                tasksCompleted: '???'
+            };
+        }
+        if (!process.infoBean.reportedErrors) {
+            process.infoBean.reportedErrors = [];
+        }
+    },
     pollingLoop: function () {
         if (ScriptRunner.watchList && ScriptRunner.watchList.length > 0) {
             window.setTimeout(function () {
@@ -180,6 +185,7 @@ var ScriptRunner = {
                         ScriptRunner.watchList = [];
                         for (i = 0; i < statusList.length; i++) {
                             process = statusList[i];
+                            ScriptRunner.cleanProcessObject(process);
                             processRow = jQuery(ScriptRunner.processTable).find("#process-" + process.id);
                             if (process.infoBean.isRunning) {
                                 ScriptRunner.watchList.push(process.id);
@@ -188,9 +194,7 @@ var ScriptRunner = {
                                 processRow.find(".process-stop-time").html(ScriptRunner.formatTime(process.infoBean.stopTime));
                             }
                             processRow.find(".process-reported-errors").html(process.infoBean.reportedErrors.length);
-                            if (process.infoBean.result) {
-                                processRow.find(".process-tasks-completed").html(process.infoBean.result.tasksCompleted);
-                            }
+                            processRow.find(".process-tasks-completed").html(process.infoBean.result.tasksCompleted);
                         }
                         ScriptRunner.pollingLoop();
                     },
@@ -235,10 +239,10 @@ var ScriptRunner = {
             }
         }
     },
-    viewProcessCallback: function(path) {
-        return function(){
+    viewProcessCallback: function (path) {
+        return function () {
             ScriptRunner.viewProcess(path);
-        };        
+        };
     },
     viewProcess: function (path) {
         var iframe = "<iframe src='" + path + ".html'>";

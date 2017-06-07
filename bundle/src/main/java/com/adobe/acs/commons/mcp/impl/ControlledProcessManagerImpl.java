@@ -19,6 +19,8 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.model.ArchivedProcessInstance;
+import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,8 +42,10 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of ControlProcessManager service
@@ -50,6 +54,7 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 @Service(ControlledProcessManager.class)
 @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Manage Controlled Processes")
 public class ControlledProcessManagerImpl implements ControlledProcessManager {
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ControlledProcessManagerImpl.class);
 
     private static final String SERVICE_NAME = "manage-controlled-processes";
     private static final Map<String, Object> AUTH_INFO;
@@ -172,5 +177,23 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     public Collection<ProcessInstance> getActiveProcesses() {
         activeProcesses.forEach((id, process) -> process.updateProgress());
         return activeProcesses.values();
+    }
+    
+    @Override
+    public Collection<ProcessInstance> getInactiveProcesses() {
+        ArrayList<ProcessInstance> processes = new ArrayList();
+        try (ResourceResolver rr = getServiceResourceResolver()) {
+            Resource tree = rr.getResource(ProcessInstanceImpl.BASE_PATH);
+            TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
+            visitor.setLeafVisitor((r,l)->{
+                if (!activeProcesses.containsKey(r.getName())) {
+                    processes.add(r.adaptTo(ArchivedProcessInstance.class));
+                }
+            });
+            visitor.accept(tree);
+        } catch (LoginException ex) {
+            LOG.error("Error getting inactive process list", ex);
+        }
+        return processes;
     }
 }

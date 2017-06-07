@@ -21,6 +21,7 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -153,6 +154,9 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
     }
 
     private Collection<ProcessInstance> doProcessList() {
-        return manager.getActiveProcesses();
+        ArrayList<ProcessInstance> processes = new ArrayList();
+        processes.addAll(manager.getActiveProcesses());
+        processes.addAll(manager.getInactiveProcesses());
+        return processes;
     }
 }

@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
 public class ProcessInstanceImpl implements ProcessInstance {
 
     transient private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ProcessInstanceImpl.class);
-    transient private static final String BASE_PATH = "/var/acs-commons/mcp/instances";
+    transient static final String BASE_PATH = "/var/acs-commons/mcp/instances";
     transient private ControlledProcessManager manager = null;
     private final List<ActivityDefinition> actions;
     private final ProcessDefinition definition;
