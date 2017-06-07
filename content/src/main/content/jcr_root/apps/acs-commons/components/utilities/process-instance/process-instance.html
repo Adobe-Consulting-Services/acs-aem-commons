@@ -28,27 +28,27 @@ limitations under the License.
         <form class="coral-Form coral-Form--aligned">
             <section class="coral-Form-fieldset">
                 <label class="coral-Form-fieldlabel">Description</label>
-                <span class="coral-Form-field">${process.description}</span>
+                <span class="process-dialog-field">${process.description}</span>
             </section>
             <section class="coral-Form-fieldset">
                 <label class="coral-Form-fieldlabel">Started</label>
-                <span class="coral-Form-field">${process.startTime} by ${process.requester}</span>
+                <span class="process-dialog-field">${process.startTimeFormatted} by ${process.requester}</span>
             </section>
             <section class="coral-Form-fieldset" data-sly-test="${process.isRunning}">
                 <label class="coral-Form-fieldlabel">Ended</label>
-                <span class="coral-Form-field">${process.stopTime}</span>
+                <span class="process-dialog-field">${process.stopTimeFormatted}</span>
             </section>
             <section class="coral-Form-fieldset" data-sly-test="${!process.isRunning}">
                 <label class="coral-Form-fieldlabel">Progress</label>
-                <span class="coral-Form-field">${process.progress}</span>
+                <span class="process-dialog-field">${process.progressPercent}</span>
             </section>
             <section class="coral-Form-fieldset">
                 <label class="coral-Form-fieldlabel">Status</label>
-                <span class="coral-Form-field">${process.status}</span>
+                <span class="process-dialog-field">${process.status}</span>
             </section>
             <section class="coral-Form-fieldset">
                 <label class="coral-Form-fieldlabel">Report</label>
-                <span class="coral-Form-field">
+                <span class="process-dialog-field">
                     <a is="coral-anchorbutton" icon="browse" href="${resource.path}/report.html" target="_new">View</a>
                     <a is="coral-anchorbutton" icon="download" href="${resource.path}/report.xlsx">Download (Excel)</a>
                 </span>

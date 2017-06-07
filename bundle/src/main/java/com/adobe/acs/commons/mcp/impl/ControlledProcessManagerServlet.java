@@ -102,10 +102,12 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
             return Arrays.asList(instance);
         }
     }
-
+    
     private Object doHaltProcess(SlingHttpServletRequest request) {
         ProcessInstance instance = getProcessFromRequest(request);
-        instance.halt();
+        if (instance != null) {
+            instance.halt();
+        }
         return instance;
     }
 

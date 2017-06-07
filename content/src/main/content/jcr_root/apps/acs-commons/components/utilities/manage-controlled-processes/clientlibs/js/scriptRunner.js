@@ -155,7 +155,7 @@ var ScriptRunner = {
                             "<td is='coral-td' class='process-reported-errors'>" + process.infoBean.reportedErrors.length + "</td>" +
                             "</tr>"
                             );
-                    processDom.click(ScriptRunner.viewProcessCallback(process.path));
+                    processDom.click(ScriptRunner.viewProcessCallback(process.id, process.path));
                     tableBody.append(processDom);
                 }
                 jQuery("#processListing").trigger("foundation-contentloaded");
@@ -239,41 +239,70 @@ var ScriptRunner = {
             }
         }
     },
-    viewProcessCallback: function (path) {
+    viewProcessCallback: function (id, path) {
         return function () {
-            ScriptRunner.viewProcess(path);
+            ScriptRunner.viewProcess(id, path);
         };
     },
-    viewProcess: function (path) {
-        var iframe = "<iframe src='" + path + ".html'>";
-        var diag = new Coral.Dialog().set({
-            id: 'viewProcess',
+    viewProcess: function (processId, path) {
+        jQuery.ajax({
+            url: path + ".html",
+            dataType: "html",
+            error: ScriptRunner.error,
+            success: function(response) {
+                var diag = new Coral.Dialog().set({
+                    id: 'viewProcess',
+                    header: {
+                        innerHTML: 'Process Details'
+                    },
+                    content: {
+                        innerHTML: response
+                    },
+                    footer: {
+                        innerHTML: '<button id="haltButton" is="coral-button" variant="default">Halt</button><button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+                    },
+                    closable: true,
+                    variant: "info"
+                });
+                window.top.document.body.appendChild(diag);
+                diag.show();                
+                diag.on('click', '#haltButton', function () {
+                    diag.hide();
+                    ScriptRunner.haltProcess(processId);                    
+                });
+            }
+        });
+    },
+    haltProcess: function (processId) {
+        var haltDialog = new Coral.Dialog().set({
+            id: 'haltProcessDialog',
             header: {
-                innerHTML: 'Process Details'
+                innerHTML: 'Halt Process'
             },
             content: {
-                innerHTML: iframe
+                innerHTML: "Do you want to proceed?"
             },
             footer: {
-                innerHTML: '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+                innerHTML: '<button id="haltButton" is="coral-button" variant="default" coral-close>Yes</button><button id="cancelButton" is="coral-button" variant="default" coral-close>No</button>'
             },
             closable: true,
-            variant: "info"
+            variant: "warning"
         });
-//                ScriptRunner.startDialog.classList.add("coral--dark");
-//                ScriptRunner.startDialog.on("coral-overlay:open", function () {
-//                    ScriptRunner.initStartDialog(ScriptRunner.startDialog);
-//                });
-//                ScriptRunner.startDialog.on("coral-overlay:close", function (evt) {
-//                    // This event also triggers for closing sub-dialogs and tooltips
-//                    if (evt.target === evt.currentTarget) {
-//                        window.top.document.body.removeChild(ScriptRunner.startDialog);
-//                    }
-//                });
-        window.top.document.body.appendChild(diag);
-        diag.show();
+        window.top.document.body.appendChild(haltDialog);
+        haltDialog.show();
+        haltDialog.on('click', '#haltButton', function () {
+            jQuery.ajax({
+                url: "/bin/mcp",
+                dataType: "json",
+                error: ScriptRunner.error,
+                data: {
+                    action: "halt",
+                    id: processId
+                }
+            });
+            haltDialog.hide();
+        });
     }
-
 };
 
 jQuery('#processListing').ready(function () {

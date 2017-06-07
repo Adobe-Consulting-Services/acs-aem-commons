@@ -18,9 +18,9 @@ limitations under the License.
     width: 100%
 }
 
-.coral-Dialog-content iframe {
-    border: none;
-    min-height: 250px;
+.coral-Form--aligned .process-dialog-field {
+    float: left;
+    margin: 0.6rem 0 .9375rem 0;
 }
 
 .coral--dark .coral-Dialog-wrapper, .coral--dark .coral-Dialog-header, .coral--dark coral-Dialog-content {

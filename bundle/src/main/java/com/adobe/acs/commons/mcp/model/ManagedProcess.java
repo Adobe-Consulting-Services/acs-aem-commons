@@ -16,10 +16,15 @@
 package com.adobe.acs.commons.mcp.model;
 
 import com.adobe.acs.commons.fam.Failure;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import javax.inject.Inject;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
@@ -105,6 +110,10 @@ public class ManagedProcess {
     public Long getStartTime() {
         return startTime;
     }
+    
+    public String getStartTimeFormatted() {
+        return startTime != null ? formatDate(startTime) : "";
+    }
 
     /**
      * @param startTime the startTime to set
@@ -120,6 +129,10 @@ public class ManagedProcess {
         return stopTime;
     }
 
+    public String getStopTimeFormatted() {
+        return stopTime != null ? formatDate(stopTime) : "";
+    }
+    
     /**
      * @param stopTime the stopTime to set
      */
@@ -189,6 +202,10 @@ public class ManagedProcess {
     public double getProgress() {
         return progress;
     }
+    
+    public String getProgressPercent() {
+        return String.format("%.1f%%", progress);
+    }
 
     /**
      * @param progress the progress to set
@@ -209,5 +226,21 @@ public class ManagedProcess {
      */
     public void setName(String name) {
         this.name = name;
+    }
+    
+    private String formatDate(long time) {
+        Calendar today = Calendar.getInstance();
+        today.clear(Calendar.HOUR_OF_DAY);
+        today.clear(Calendar.MINUTE);
+        today.clear(Calendar.SECOND);
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(time);
+        DateFormat format;
+        if (c.after(today)) {
+            format = SimpleDateFormat.getTimeInstance();        
+        } else {
+            format = SimpleDateFormat.getDateTimeInstance();
+        }
+        return format.format(new Date(time));
     }
 }
