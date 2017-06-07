@@ -38,6 +38,14 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
     public void scheduleWork(Runnable work);
 
     /**
+     * Schedule some kind of work to run in the future using the internal thread pool.
+     * The work will be throttled according to the CPU/Memory settings.  This action can be canceled at any time.
+     * @param work 
+     * @param cancelHandler
+     */
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler);
+    
+    /**
      * Record statistics
      * @param created Task creation time (Milliseconds since epoch) -- This is when the work is added to the queue
      * @param started Start time (Milliseconds since epoch) -- This is recorded when the work is picked up by a thread

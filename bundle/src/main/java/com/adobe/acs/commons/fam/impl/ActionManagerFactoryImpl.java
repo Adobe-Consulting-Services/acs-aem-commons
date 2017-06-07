@@ -105,6 +105,9 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
 
     @Override
     public void purge(ActionManager manager) {
+        if (!manager.isComplete()) {
+            manager.cancel(true);
+        }
         manager.closeAllResolvers();
         tasks.values().remove(manager);
     }

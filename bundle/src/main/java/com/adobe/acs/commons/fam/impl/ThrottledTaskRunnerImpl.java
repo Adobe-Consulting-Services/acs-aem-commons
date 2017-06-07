@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
@@ -77,6 +78,11 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS);
         workerPool.submit(r);
     }
+    
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler);
+        workerPool.submit(r);
+    }    
 
     RunningStatistic waitTime = new RunningStatistic("Queue wait time");
     RunningStatistic throttleTime = new RunningStatistic("Throttle time");

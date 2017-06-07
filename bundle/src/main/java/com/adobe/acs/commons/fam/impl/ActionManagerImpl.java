@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages a pool of reusable resource resolvers and injects them into tasks
  */
-class ActionManagerImpl implements ActionManager {
+class ActionManagerImpl extends CancelHandler implements ActionManager {
 
     transient private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
     // This is a delay of how long an action manager should wait before it can safely assume it really is done and no more work is being added
@@ -292,7 +293,7 @@ class ActionManagerImpl implements ActionManager {
                 }
                 throw t;
             }
-        });
+        }, this);
         if (!closesResolver) {
             tasksAdded.incrementAndGet();
         }
