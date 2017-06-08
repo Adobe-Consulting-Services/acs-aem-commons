@@ -36,7 +36,7 @@ public class TimedRunnable implements Runnable {
     ThrottledTaskRunner runner;
     int timeout;
     TimeUnit timeoutUnit;
-    Optional<CancelHandler> cancelHandler;
+    Optional<CancelHandler> cancelHandler = Optional.empty();
     private static final Logger LOG = LoggerFactory.getLogger(TimedRunnable.class);
 
     public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit) {

@@ -204,7 +204,7 @@ public class ManagedProcess {
     }
     
     public String getProgressPercent() {
-        return String.format("%.1f%%", progress);
+        return String.format("%.1f%%", progress*100.0);
     }
 
     /**
