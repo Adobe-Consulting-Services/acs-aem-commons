@@ -57,7 +57,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 @Service(ProcessDefinition.class)
 public class AssetReport implements ProcessDefinition {
 
-    public static final String SHA1 = "dam:sha1";
+    transient public static final String SHA1 = "dam:sha1";
 
     public static enum Column {
         level, asset_count, subfolder_count,
@@ -103,11 +103,11 @@ public class AssetReport implements ProcessDefinition {
             options = {"checked"}
     )
     private boolean includeVersions = false;
-    private int depthLimit;
+    transient private int depthLimit;
 
     @Override
     public void init() throws RepositoryException {
-        depthLimit = getDepth(baseFolder) + folderLevels;        
+        depthLimit = getDepth(baseFolder) + folderLevels;
     }
 
     public int getDepth(String path) {
@@ -128,11 +128,11 @@ public class AssetReport implements ProcessDefinition {
         instance.defineAction("Final pass", rr, this::examineAssets);
     }
 
-    private final GenericReport report = new GenericReport();
-    private final Map<String, EnumMap<Column, Long>> reportData = new TreeMap<>();
+    transient private final GenericReport report = new GenericReport();
+    transient private final Map<String, EnumMap<Column, Long>> reportData = new TreeMap<>();
 
-    private final Queue<String> assetList = new ConcurrentLinkedQueue<>();
-    private final Queue<String> folderList = new ConcurrentLinkedQueue<>();
+    transient private final Queue<String> assetList = new ConcurrentLinkedQueue<>();
+    transient private final Queue<String> folderList = new ConcurrentLinkedQueue<>();
 
     public void evaluateStructure(ActionManager manager) {
         TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
@@ -144,19 +144,19 @@ public class AssetReport implements ProcessDefinition {
                 assetList.add(r.getPath());
             } else if (visitor.isFolder(r)) {
                 tabulate(getParentPath(r.getPath()), Column.subfolder_count, 1);
-                setValue(r.getPath(), Column.level, depth+1);
+                setValue(r.getPath(), Column.level, depth + 1);
                 folderList.add(r.getPath());
             }
         });
         visitor.setResourceVisitor((r, depth) -> {
-            setValue(r.getPath(), Column.level, depth+1);
+            setValue(r.getPath(), Column.level, depth + 1);
             tabulate(getParentPath(r.getPath()), Column.subfolder_count, 1);
         });
         manager.deferredWithResolver(rr -> visitor.accept(rr.getResource(baseFolder)));
     }
 
     public void evaluateDeepStructure(ActionManager manager) {
-        folderList.forEach(folder -> {
+        folderList.stream().peek(folderList::remove).forEach(folder -> {
             manager.deferredWithResolver(rr -> {
                 Actions.setCurrentItem(folder);
                 TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
@@ -170,6 +170,7 @@ public class AssetReport implements ProcessDefinition {
                 visitor.setResourceVisitor((r, depth) -> {
                     tabulate(getParentPath(r.getPath()), Column.subfolder_count, 1);
                 });
+                visitor.accept(rr.getResource(folder));
             });
         });
     }
@@ -230,12 +231,12 @@ public class AssetReport implements ProcessDefinition {
         Rendition original = renditions.remove("original");
         tabulate(folderPath, Column.rendition_count, renditions.size());
 
-        if (original != null) { 
+        if (original != null) {
             long size = original.getSize();
             tabulate(folderPath, Column.original_size, size);
             tabulate(folderPath, Column.combined_size, size);
         }
-        
+
         renditions.values().forEach(rendition -> {
             long size = rendition.getSize();
             tabulate(folderPath, Column.rendition_size, size);
