@@ -20,6 +20,7 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.mcp.model.ArchivedProcessFailure;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.mcp.model.Result;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
@@ -58,14 +59,14 @@ import org.slf4j.LoggerFactory;
  */
 public class ProcessInstanceImpl implements ProcessInstance {
 
-    transient private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ProcessInstanceImpl.class);
-    transient static final String BASE_PATH = "/var/acs-commons/mcp/instances";
-    transient private ControlledProcessManager manager = null;
-    private final List<ActivityDefinition> actions;
-    private final ProcessDefinition definition;
     private final ManagedProcess infoBean;
     private final String id;
     private final String path;
+    transient private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ProcessInstanceImpl.class);
+    transient private final List<ActivityDefinition> actions;
+    transient static final String BASE_PATH = "/var/acs-commons/mcp/instances";
+    transient private ControlledProcessManager manager = null;
+    transient private final ProcessDefinition definition;
     transient private boolean completedNormally = false;
     transient private static final Random RANDOM = new Random();
 
@@ -93,7 +94,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
         infoBean.getResult().setTasksCompleted(
                 actions.stream().collect(Collectors.summingInt(action -> action.manager.getCompletedCount()))
         );
-        actions.stream().flatMap(a -> a.manager.getFailureList().stream()).collect(Collectors.toCollection(infoBean::getReportedErrors));
+        actions.stream().flatMap(a -> a.manager.getFailureList().stream()).map(ArchivedProcessFailure::adapt).collect(Collectors.toCollection(infoBean::getReportedErrors));
 
         return progress;
     }
@@ -210,7 +211,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
         if (failures.isEmpty()) {
             return;
         }
-        infoBean.getReportedErrors().addAll(failures);
+        failures.stream().map(ArchivedProcessFailure::adapt).collect(Collectors.toCollection(infoBean::getReportedErrors));
         try {
             String errFolder = getPath() + "/jcr:content/failures/step" + (step + 1);
             JcrUtil.createPath(errFolder, "nt:unstructured", rr.adaptTo(Session.class));

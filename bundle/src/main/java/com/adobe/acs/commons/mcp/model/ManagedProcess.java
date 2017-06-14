@@ -18,13 +18,14 @@ package com.adobe.acs.commons.mcp.model;
 import com.adobe.acs.commons.fam.Failure;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
@@ -55,13 +56,16 @@ public class ManagedProcess {
     private String status;
     @Inject
     private Result result;
-    @Inject
-    private Collection<Failure> reportedErrors;
 
+    private Collection<ArchivedProcessFailure> reportedErrors;
+
+    @Inject
+    transient private Resource resource;
+        
     /**
      * @return the reportedErrors
      */
-    public Collection<Failure> getReportedErrors() {
+    public Collection<ArchivedProcessFailure> getReportedErrors() {
         if (reportedErrors == null) {
             reportedErrors = new LinkedHashSet<>();
         }
@@ -71,7 +75,7 @@ public class ManagedProcess {
     /**
      * @param reportedErrors the reportedErrors to set
      */
-    public void setReportedErrors(List<Failure> reportedErrors) {
+    public void setReportedErrors(List<ArchivedProcessFailure> reportedErrors) {
         this.reportedErrors = reportedErrors;
     }
 
@@ -226,6 +230,19 @@ public class ManagedProcess {
      */
     public void setName(String name) {
         this.name = name;
+    }
+    
+    @PostConstruct
+    private void readErrors() {
+        Resource failuresRoot = resource.getChild("failures");
+        if (failuresRoot != null && failuresRoot.hasChildren()) {
+            reportedErrors = new ArrayList<>();
+            failuresRoot.getChildren().forEach(step->
+                    step.getChildren().forEach(f -> 
+                            reportedErrors.add(f.adaptTo(ArchivedProcessFailure.class))
+                    )
+            );             
+        }
     }
     
     private String formatDate(long time) {

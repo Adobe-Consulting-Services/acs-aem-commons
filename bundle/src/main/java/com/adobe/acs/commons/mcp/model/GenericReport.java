@@ -17,15 +17,11 @@ package com.adobe.acs.commons.mcp.model;
 
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.day.cq.commons.jcr.JcrUtil;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
