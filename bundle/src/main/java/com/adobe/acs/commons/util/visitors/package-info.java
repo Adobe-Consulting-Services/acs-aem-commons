@@ -20,7 +20,7 @@
 /**
  * Miscellaneous Utilities.
  */
-@Version("1.0.0")
+@Version("1.1.0")
 package com.adobe.acs.commons.util.visitors;
 
 import aQute.bnd.annotation.Version;

@@ -1,27 +1,31 @@
 package com.adobe.acs.commons.wcm.vanity;
 
+import aQute.bnd.annotation.ProviderType;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
+import javax.jcr.RepositoryException;
+import javax.servlet.ServletException;
+import java.io.IOException;
+
+@ProviderType
 public interface VanityURLService {
-	
 	/**
+	 * Checks if the provided vanity path is sling:vanityPath under /content
+	 *
 	 * @param vanityPath Vanity path that needs to be validated.
 	 * @param request SlingHttpServletRequest object used for performing query/lookup
-	 * @return return true if valid else false
+	 * @return return true if the vanityPath is a registered sling:vanityPath under /content
 	 */
-	boolean isValidVanityURL(String vanityPath, SlingHttpServletRequest request);
+	boolean isVanityPath(String vanityPath, SlingHttpServletRequest request) throws RepositoryException;
 
-	
 	/**
 	 * This method checks if a given request URI (after performing the Resource Resolver Mapping) is a valid vanity URL, 
 	 * if true it will perform the FORWARD using Request Dispatcher.  
-	 * 
-	 * 
-	 * @param request
-	 * @param response
-	 * @return true if this request is dispatched cause it's a valid Vanity path, else false.
+	 *
+	 * @param request the request object
+	 * @param response the response object
+	 * @return true if this request is dispatched because it's a valid Vanity path, else false.
 	 */
-	boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response);
-
+	boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException, RepositoryException;
 }

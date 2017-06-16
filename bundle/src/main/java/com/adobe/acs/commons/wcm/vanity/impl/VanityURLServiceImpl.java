@@ -1,91 +1,97 @@
 package com.adobe.acs.commons.wcm.vanity.impl;
 
-import java.util.Iterator;
-
-import javax.jcr.query.Query;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.day.cq.commons.PathInfo;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.SearchResult;
+import com.day.cq.wcm.api.NameConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.request.RequestPathInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.wcm.vanity.VanityURLService;
-import com.day.cq.wcm.api.NameConstants;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Vanity URL Service",
-        description = "This service provides business methods around AEM Vanity URL functionality.",
-        immediate = false, metatype = false)
+@Component
 @Service
 public class VanityURLServiceImpl implements VanityURLService {
 
 	private static final Logger log = LoggerFactory.getLogger(VanityURLServiceImpl.class);
 
-	private static final String VANITY_DISPATCH_CHECK_ATTR = "vanity-dispatch-check";
+    private static final String VANITY_DISPATCH_CHECK_ATTR = "acs-aem-commons__vanity-dispatch-check";
+    private static final String HTML_EXTENSION = ".html";
 
-	@Override
-	public boolean isValidVanityURL(String vanityPath, SlingHttpServletRequest request) {
+	@Reference
+	QueryBuilder queryBuilder;
 
-		boolean result = false;
+	public boolean isVanityPath(String vanityPath, SlingHttpServletRequest request) throws RepositoryException {
+		final long start = System.currentTimeMillis();
 
-		final ResourceResolver resolver = request.getResourceResolver();
+		final Map<String, String> params = new HashMap<String, String>();
 
-		if (StringUtils.isNotBlank(vanityPath)) {
-			String xpath = "//element(*)[" + NameConstants.PN_SLING_VANITY_PATH + "='" + vanityPath + "']";
-			@SuppressWarnings("deprecation")
-			Iterator<Resource> resources = resolver.findResources(xpath, Query.XPATH);
-			while (resources.hasNext()) {
-				result = true;
+		// Limit to /content as this could show up in /jcr:system version nodes, etc.
+		params.put("path", "/content");
+		params.put("property", NameConstants.PN_SLING_VANITY_PATH);
+		params.put("property.value", vanityPath);
+		params.put("p.limit", "1");
+		params.put("p.guessTotal", "true");
+
+		final Query query = queryBuilder.createQuery(PredicateGroup.create(params), request.getResourceResolver().adaptTo(Session.class));
+		final SearchResult result = query.getResult();
+
+		if (result.getTotalMatches() > 0) {
+			if (log.isDebugEnabled()) {
+				log.debug("Found matching Sling vanity path [ {} ] on [ {} ]", vanityPath, result.getHits().get(0).getPath());
 			}
+
+			if (result.hasMore()) {
+				log.warn("Found more than 1 resources that match the Sling vanity path [ {} ]", vanityPath);
+			}
+
+			// Found at least one matching vanity path; returning it!
+			return true;
+		} else {
+			log.debug("Could not find a resource with the Sling vanity path [ {}  ]", vanityPath);
 		}
 
-		log.debug("Is given URI {} a valid Vanity Path? --> {}", vanityPath, result);
+		log.debug("Look-up of Sling vanity path [ {} ] took [ {} ] ms", vanityPath, System.currentTimeMillis() - start);
 
-		return result;
+		return false;
 	}
 
-	@Override
-	public boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response) {
-
-		boolean hasDispatched = false;
-
-		ResourceResolver resolver = request.getResourceResolver();
-
-		try {
-
-			if (request.getAttribute(VANITY_DISPATCH_CHECK_ATTR) == null) {
-
-				request.setAttribute(VANITY_DISPATCH_CHECK_ATTR, true);
-
-				String requestURI = ((HttpServletRequest) request).getRequestURI();
-
-				String candidateVanity = resolver.map(request, requestURI);
-				candidateVanity = FilenameUtils.removeExtension(candidateVanity);
-
-				if (!StringUtils.equals(candidateVanity, requestURI) && isValidVanityURL(candidateVanity, request)) {
-
-					RequestDispatcher requestDispathcher = request.getRequestDispatcher(candidateVanity);
-					log.debug("Forwarding current request to {} using RequestDispatcher, as it's a valid vanity:"
-							+ candidateVanity);
-
-					requestDispathcher.forward(request, response);
-
-					hasDispatched = true;
-				}
-			}
-
-		} catch (Exception e) {
-			log.error("Error while dispatching request to Vanity URL, details are:", e);
+	public boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException, RepositoryException {
+		if (request.getAttribute(VANITY_DISPATCH_CHECK_ATTR) != null) {
+			log.trace("Processing a previously vanity dispatched request. Skipping...");
+			return false;
 		}
 
-		return hasDispatched;
+		request.setAttribute(VANITY_DISPATCH_CHECK_ATTR, true);
+
+		final String requestURI = request.getRequestURI();
+		final RequestPathInfo requestPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
+		final String candidateVanity = StringUtils.removeEnd(requestPathInfo.getResourcePath(), HTML_EXTENSION);
+
+		if (!StringUtils.equals(candidateVanity, requestURI) && isVanityPath(candidateVanity, request)) {
+			log.debug("Forwarding request to vanity resource [ {} ]", candidateVanity);
+
+			final RequestDispatcher requestDispatcher = request.getRequestDispatcher(candidateVanity);
+			requestDispatcher.forward(new ExtensionlessRequestWrapper(request), response);
+			return true;
+		}
+
+		return false;
 	}
 }

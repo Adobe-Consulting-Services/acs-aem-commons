@@ -5,11 +5,15 @@
 .settings/
 target/
 .DS_Store
+lib/
 
 #Intellij
 .idea/
 *.iml
 generated/
+
+#Netbeans
+nb-configuration.xml
 
 #vlt directories
 content/src/main/content/jcr_root/.content.xml

@@ -102,7 +102,7 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
     }
 
     @Activate
-    private void activate(Map<String, Object> config) {
+    protected void activate(Map<String, Object> config) {
         this.excludeAll = PropertiesUtil.toBoolean(config.get(PROP_EXCLUDE_ALL), DEFAULT_EXCLUDE_ALL);
         this.categories = PropertiesUtil.toStringArray(config.get(PROP_CATEGORIES), DEFAULT_CATEGORIES);
     }

@@ -269,13 +269,15 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             final Resource notificationsFolder = resourceResolver.getResource(PATH_NOTIFICATIONS);
-            final Iterator<Resource> resources = notificationsFolder.listChildren();
+            if (notificationsFolder != null) {
+                final Iterator<Resource> resources = notificationsFolder.listChildren();
 
-            while (resources.hasNext()) {
-                final Resource resource = resources.next();
-                if (!JcrConstants.JCR_CONTENT.equals(resource.getName()) &&
-                        !REP_POLICY.equals(resource.getName())) {
-                    return true;
+                while (resources.hasNext()) {
+                    final Resource resource = resources.next();
+                    if (!JcrConstants.JCR_CONTENT.equals(resource.getName()) &&
+                            !REP_POLICY.equals(resource.getName())) {
+                        return true;
+                    }
                 }
             }
         } catch (LoginException e) {
@@ -357,6 +359,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             this.registerAsEventHandler();
 
             if (this.hasNotifications()) {
+                this.isFilter.set(true);
                 this.registerAsFilter();
             }
         }

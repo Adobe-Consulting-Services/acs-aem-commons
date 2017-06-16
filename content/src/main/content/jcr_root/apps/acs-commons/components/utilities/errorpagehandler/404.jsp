@@ -24,13 +24,13 @@
     ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
 		  
     if (errorPageHandlerService != null && errorPageHandlerService.isEnabled()) {
-    	
-    	if(errorPageHandlerService.isVanityDispatchCheckEnabled()){
-    		
-    		VanityURLService vanityURLService = sling.getService(VanityURLService.class);
-    		if(vanityURLService.dispatch(slingRequest, slingResponse)){
-    			return;
-    		}
+
+        // Handle ACS AEM Commons vanity logic
+    	if (errorPageHandlerService.isVanityDispatchCheckEnabled()){
+            final VanityURLService vanityURLService = sling.getService(VanityURLService.class);
+            if (vanityURLService != null && vanityURLService.dispatch(slingRequest, slingResponse)){
+                return;
+            }
     	}
         
     	// Check for and handle 404 Requests properly according on Author/Publish

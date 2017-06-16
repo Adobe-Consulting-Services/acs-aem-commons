@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -89,6 +90,9 @@ public class Config {
     @Default(booleanValues = true)
     private boolean autoThrottle;
 
+    @Inject
+    @Optional
+    private String userEventData;
 
     public Config(Resource resource) {
         this.resource = resource;
@@ -148,6 +152,14 @@ public class Config {
 
     public boolean isAutoThrottle() {
         return autoThrottle;
+    }
+
+    public String getUserEventData() {
+        return userEventData;
+    }
+
+    public boolean isUserEventData() {
+        return StringUtils.isNotBlank(userEventData);
     }
 
     public Workspace getWorkspace() {
