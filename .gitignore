@@ -5,6 +5,7 @@
 .settings/
 target/
 .DS_Store
+lib/
 
 #Intellij
 .idea/
