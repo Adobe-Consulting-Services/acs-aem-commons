@@ -65,7 +65,7 @@ public class IntrospectionUtil {
      */
     public static boolean isPrimitive(Field field) {
         Class basicType = getCollectionComponentType(field);
-        return basicType.isPrimitive() || basicType.getPackage().toString().startsWith("java.lang");
+        return basicType.isPrimitive() || Number.class.isAssignableFrom(basicType) || basicType == String.class;
     }
     
     /**

@@ -15,7 +15,6 @@
  */
 package com.adobe.acs.commons.mcp.util;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -72,7 +71,7 @@ public class ValueMapSerializer {
             return (String[]) values.toArray();
         } else if (value instanceof Collection) {
             List<String> values = (List) ((Collection) value).stream().map(String::valueOf).collect(Collectors.toList());
-            return (String[]) values.toArray();
+            return (String[]) values.toArray(new String[0]);
         } else {
             return new String[]{value.toString()};
         }
