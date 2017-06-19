@@ -68,7 +68,7 @@ public class ValueMapSerializer {
             return (String[]) value;
         } else if (value.getClass().isArray()) {
             List<String> values = (List) Arrays.asList((Object[]) value).stream().map(String::valueOf).collect(Collectors.toList());
-            return (String[]) values.toArray();
+            return (String[]) values.toArray(new String[0]);
         } else if (value instanceof Collection) {
             List<String> values = (List) ((Collection) value).stream().map(String::valueOf).collect(Collectors.toList());
             return (String[]) values.toArray(new String[0]);

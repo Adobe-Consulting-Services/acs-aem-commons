@@ -64,7 +64,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
     private final String path;
     transient private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ProcessInstanceImpl.class);
     transient private final List<ActivityDefinition> actions;
-    transient static final String BASE_PATH = "/var/acs-commons/mcp/instances";
+    transient public static final String BASE_PATH = "/var/acs-commons/mcp/instances";
     transient private ControlledProcessManager manager = null;
     transient private final ProcessDefinition definition;
     transient private boolean completedNormally = false;
@@ -302,6 +302,7 @@ public class ProcessInstanceImpl implements ProcessInstance {
             definition.storeReport(this, rr);
         });
         actions.stream().map(a -> a.manager).forEach(getActionManagerFactory()::purge);
+        manager.purgeCompletedProcesses();
     }
 
     public static TabularType getStaticsTableType() {

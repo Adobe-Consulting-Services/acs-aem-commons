@@ -115,7 +115,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
 
     @Override
     public void purgeCompletedProcesses() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        activeProcesses.values().removeIf(proc -> !proc.getInfo().isIsRunning());
     }
 
     @Override
