@@ -91,8 +91,9 @@ public class ProcessInstanceImpl implements ProcessInstance {
                 ));
         infoBean.setProgress(progress);
         infoBean.setStatus(actions.stream().filter(a -> !a.manager.isComplete()).map(a -> a.name).findFirst().orElse("Please wait..."));
+        int countCompleted = actions.stream().collect(Collectors.summingInt(action -> action.manager.getCompletedCount()));
         infoBean.getResult().setTasksCompleted(
-                actions.stream().collect(Collectors.summingInt(action -> action.manager.getCompletedCount()))
+                Math.max(infoBean.getResult().getTasksCompleted(), countCompleted)
         );
         actions.stream().flatMap(a -> a.manager.getFailureList().stream()).map(ArchivedProcessFailure::adapt).collect(Collectors.toCollection(infoBean::getReportedErrors));
 
@@ -279,6 +280,9 @@ public class ProcessInstanceImpl implements ProcessInstance {
         jcrContent.put("jcr:primaryType","cq:PageContent");
         jcrContent.put("jcr:title", getName());
         ValueMapSerializer.serializeToMap(jcrContent, infoBean);
+        ModifiableValueMap resultNode = ResourceUtil.getOrCreateResource(rr, getPath() + "/jcr:content/result", ProcessInstance.RESOURCE_TYPE+"/result", null, false).adaptTo(ModifiableValueMap.class);
+        resultNode.put("jcr:primaryType",JcrConstants.NT_UNSTRUCTURED);
+        ValueMapSerializer.serializeToMap(resultNode, infoBean.getResult());
         rr.commit();
         rr.refresh();
     }
@@ -290,13 +294,15 @@ public class ProcessInstanceImpl implements ProcessInstance {
 
     @Override
     final public void halt() {
+        updateProgress();
         infoBean.setStopTime(System.currentTimeMillis());
+        infoBean.getResult().setRuntime(infoBean.getStopTime() - infoBean.getStartTime());
         infoBean.setIsRunning(false);
         if (completedNormally) {
             setStatusCompleted();
         } else {
             setStatusAborted();
-        }
+        }       
         asServiceUser(rr -> {
             persistStatus(rr);
             definition.storeReport(this, rr);
