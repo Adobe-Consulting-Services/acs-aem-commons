@@ -46,7 +46,8 @@ public class VanityURLServiceImpl implements VanityURLService {
 
 		final String requestURI = request.getRequestURI();
 		final RequestPathInfo requestPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
-		// Odd the extension has to be manually stripped but requestPathInfo.getResourcePath() includes it?
+
+		// Manually strip off any selectors or extensions from the URL
 		String candidateVanity = StringUtils.substringBefore(requestPathInfo.getResourcePath(), ".");
 		// Map the incoming URL to remove any prefix
 		candidateVanity = request.getResourceResolver().map(candidateVanity);
