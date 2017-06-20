@@ -110,7 +110,7 @@ public class VanityURLServiceImplTest {
 
     @Test
     public void dispatch_Loop() throws Exception {
-        request.setAttribute("acs-aem-commons__vanity-dispatch-check", true);
+        request.setAttribute("acs-aem-commons__vanity-check-loop-detection", true);
 
         assertFalse(vanityURLService.dispatch(request, response));
         verify(requestDispatcher, times(0)).forward(any(ExtensionlessRequestWrapper.class), eq(response));

@@ -31,7 +31,8 @@ public class VanityURLServiceImpl implements VanityURLService {
 
 	private static final Logger log = LoggerFactory.getLogger(VanityURLServiceImpl.class);
 
-    private static final String VANITY_DISPATCH_CHECK_ATTR = "acs-aem-commons__vanity-dispatch-check";
+    private static final String VANITY_DISPATCH_CHECK_ATTR = "acs-aem-commons__vanity-check-loop-detection";
+    private static final String DEFAULT_PATH_SCOPE = "/content";
 
 	@Reference
 	QueryBuilder queryBuilder;
@@ -48,17 +49,18 @@ public class VanityURLServiceImpl implements VanityURLService {
 		final RequestPathInfo requestPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
 
 		// Manually strip off any selectors or extensions from the URL
-		String candidateVanity = StringUtils.substringBefore(requestPathInfo.getResourcePath(), ".");
+		final String resourcePath = StringUtils.substringBefore(requestPathInfo.getResourcePath(), ".");
 		// Map the incoming URL to remove any prefix
-		candidateVanity = request.getResourceResolver().map(candidateVanity);
+		final String candidateVanity = request.getResourceResolver().map(resourcePath);
+		final String pathScope = StringUtils.removeEnd(resourcePath, candidateVanity);
 
-		log.debug("Candidate vanity URL to check and dispatch: [ {} }", candidateVanity);
+		log.debug("Candidate vanity URL to check and dispatch: [ {} ]", candidateVanity);
 
 		// Check if...
 		// 1) the candidateVanity and the requestURI are the same; If they are it means the request has already
 		// gone through resource resolution and failed so there is no sense in sending it through again.
 		// 2) the candidate is in at least 1 sling:vanityPath under /content
-		if (!StringUtils.equals(candidateVanity, requestURI) && isVanityPath(candidateVanity, request)) {
+		if (!StringUtils.equals(candidateVanity, requestURI) && isVanityPath(pathScope, candidateVanity, request)) {
 			log.debug("Forwarding request to vanity resource [ {} ]", candidateVanity);
 
 			final RequestDispatcher requestDispatcher = request.getRequestDispatcher(candidateVanity);
@@ -70,23 +72,26 @@ public class VanityURLServiceImpl implements VanityURLService {
 	}
 
 	/**
-	 * Checks if the provided vanity path is sling:vanityPath under /content
+	 * Checks if the provided vanity path is sling:vanityPath under the mapped path prefix
 	 *
+	 * @param pathScope The content path to scope the vanity search too.
 	 * @param vanityPath Vanity path that needs to be validated.
 	 * @param request SlingHttpServletRequest object used for performing query/lookup
 	 * @return return true if the vanityPath is a registered sling:vanityPath under /content
 	 */
-	protected boolean isVanityPath(String vanityPath, SlingHttpServletRequest request) throws RepositoryException {
+	protected boolean isVanityPath(String pathScope, String vanityPath, SlingHttpServletRequest request) throws RepositoryException {
 		final long start = System.currentTimeMillis();
 
-		final Map<String, String> params = new HashMap<String, String>();
+		final Map<String, String> params = new HashMap<>();
 
-		// Limit to /content as this could show up in /jcr:system version nodes, etc.
-		params.put("path", "/content");
+		// Limit to <pathScope> to get 1/2 to multi-tenant support
+		params.put("path", StringUtils.defaultIfEmpty(pathScope, DEFAULT_PATH_SCOPE));
 		params.put("property", NameConstants.PN_SLING_VANITY_PATH);
 		params.put("property.value", vanityPath);
 		params.put("p.limit", "1");
 		params.put("p.guessTotal", "true");
+
+		log.debug("Searching for vanity path [ {} ] under [ {} ]", vanityPath, pathScope);
 
 		final Query query = queryBuilder.createQuery(PredicateGroup.create(params), request.getResourceResolver().adaptTo(Session.class));
 		final SearchResult result = query.getResult();
@@ -103,7 +108,7 @@ public class VanityURLServiceImpl implements VanityURLService {
 			// Found at least one matching vanity path; returning it!
 			return true;
 		} else {
-			log.debug("Could not find a resource with the Sling vanity path [ {}  ]", vanityPath);
+			log.debug("Could not find a resource with the Sling vanity path [ {} ]", vanityPath);
 		}
 
 		log.debug("Look-up of Sling vanity path [ {} ] took [ {} ] ms", vanityPath, System.currentTimeMillis() - start);
