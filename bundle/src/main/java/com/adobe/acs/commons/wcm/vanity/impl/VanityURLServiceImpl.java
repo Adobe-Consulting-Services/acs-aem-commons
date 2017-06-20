@@ -32,12 +32,51 @@ public class VanityURLServiceImpl implements VanityURLService {
 	private static final Logger log = LoggerFactory.getLogger(VanityURLServiceImpl.class);
 
     private static final String VANITY_DISPATCH_CHECK_ATTR = "acs-aem-commons__vanity-dispatch-check";
-    private static final String HTML_EXTENSION = ".html";
 
 	@Reference
 	QueryBuilder queryBuilder;
 
-	public boolean isVanityPath(String vanityPath, SlingHttpServletRequest request) throws RepositoryException {
+	public boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException, RepositoryException {
+		if (request.getAttribute(VANITY_DISPATCH_CHECK_ATTR) != null) {
+			log.trace("Processing a previously vanity dispatched request. Skipping...");
+			return false;
+		}
+
+		request.setAttribute(VANITY_DISPATCH_CHECK_ATTR, true);
+
+		final String requestURI = request.getRequestURI();
+		final RequestPathInfo requestPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
+
+		// Manually strip off any selectors or extensions from the URL
+		String candidateVanity = StringUtils.substringBefore(requestPathInfo.getResourcePath(), ".");
+		// Map the incoming URL to remove any prefix
+		candidateVanity = request.getResourceResolver().map(candidateVanity);
+
+		log.debug("Candidate vanity URL to check and dispatch: [ {} }", candidateVanity);
+
+		// Check if...
+		// 1) the candidateVanity and the requestURI are the same; If they are it means the request has already
+		// gone through resource resolution and failed so there is no sense in sending it through again.
+		// 2) the candidate is in at least 1 sling:vanityPath under /content
+		if (!StringUtils.equals(candidateVanity, requestURI) && isVanityPath(candidateVanity, request)) {
+			log.debug("Forwarding request to vanity resource [ {} ]", candidateVanity);
+
+			final RequestDispatcher requestDispatcher = request.getRequestDispatcher(candidateVanity);
+			requestDispatcher.forward(new ExtensionlessRequestWrapper(request), response);
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if the provided vanity path is sling:vanityPath under /content
+	 *
+	 * @param vanityPath Vanity path that needs to be validated.
+	 * @param request SlingHttpServletRequest object used for performing query/lookup
+	 * @return return true if the vanityPath is a registered sling:vanityPath under /content
+	 */
+	protected boolean isVanityPath(String vanityPath, SlingHttpServletRequest request) throws RepositoryException {
 		final long start = System.currentTimeMillis();
 
 		final Map<String, String> params = new HashMap<String, String>();
@@ -68,29 +107,6 @@ public class VanityURLServiceImpl implements VanityURLService {
 		}
 
 		log.debug("Look-up of Sling vanity path [ {} ] took [ {} ] ms", vanityPath, System.currentTimeMillis() - start);
-
-		return false;
-	}
-
-	public boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException, RepositoryException {
-		if (request.getAttribute(VANITY_DISPATCH_CHECK_ATTR) != null) {
-			log.trace("Processing a previously vanity dispatched request. Skipping...");
-			return false;
-		}
-
-		request.setAttribute(VANITY_DISPATCH_CHECK_ATTR, true);
-
-		final String requestURI = request.getRequestURI();
-		final RequestPathInfo requestPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
-		final String candidateVanity = StringUtils.removeEnd(requestPathInfo.getResourcePath(), HTML_EXTENSION);
-
-		if (!StringUtils.equals(candidateVanity, requestURI) && isVanityPath(candidateVanity, request)) {
-			log.debug("Forwarding request to vanity resource [ {} ]", candidateVanity);
-
-			final RequestDispatcher requestDispatcher = request.getRequestDispatcher(candidateVanity);
-			requestDispatcher.forward(new ExtensionlessRequestWrapper(request), response);
-			return true;
-		}
 
 		return false;
 	}
