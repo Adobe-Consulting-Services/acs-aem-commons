@@ -97,6 +97,7 @@ public class VanityURLServiceImplTest {
         request.setServletPath("/content/sample/my-vanity.html");
 
         assertTrue(vanityURLService.dispatch(request, response));
+        verify(requestDispatcher, times(1)).forward(any(ExtensionlessRequestWrapper.class), eq(response));
     }
 
     @Test
@@ -104,6 +105,7 @@ public class VanityURLServiceImplTest {
         request.setServletPath("/my-vanity");
 
         assertFalse(vanityURLService.dispatch(request, response));
+        verify(requestDispatcher, times(0)).forward(any(ExtensionlessRequestWrapper.class), eq(response));
     }
 
     @Test
@@ -111,7 +113,7 @@ public class VanityURLServiceImplTest {
         request.setAttribute("acs-aem-commons__vanity-dispatch-check", true);
 
         assertFalse(vanityURLService.dispatch(request, response));
-        verify(requestDispatcher, times(1)).forward(any(ExtensionlessRequestWrapper.class), eq(response));
+        verify(requestDispatcher, times(0)).forward(any(ExtensionlessRequestWrapper.class), eq(response));
     }
 
     private Hit hit = new Hit() {
