@@ -32,6 +32,7 @@ public class VanityURLServiceImpl implements VanityURLService {
 	private static final Logger log = LoggerFactory.getLogger(VanityURLServiceImpl.class);
 
     private static final String VANITY_DISPATCH_CHECK_ATTR = "acs-aem-commons__vanity-check-loop-detection";
+    private static final String DEFAULT_PATH_SCOPE = "/content";
 
 	@Reference
 	QueryBuilder queryBuilder;
@@ -84,7 +85,7 @@ public class VanityURLServiceImpl implements VanityURLService {
 		final Map<String, String> params = new HashMap<>();
 
 		// Limit to <pathScope> to get 1/2 to multi-tenant support
-		params.put("path", pathScope);
+		params.put("path", StringUtils.defaultIfEmpty(pathScope, DEFAULT_PATH_SCOPE));
 		params.put("property", NameConstants.PN_SLING_VANITY_PATH);
 		params.put("property.value", vanityPath);
 		params.put("p.limit", "1");
