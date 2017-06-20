@@ -91,7 +91,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Property(label = "Vanity Dispatch Check", description = "Enables/Disables Vanity Dispatch check, "
     		+ "if this is enabled and current request URI is a valid vanity (after performing resource resolver mapping), "
-    		+ "request will be forwarded to it. [Optional... but highly recommended] [Default: false]",
+    		+ "request will be forwarded to it. [Optional... but recommended when using resource resolver based out-going mapping] [Default: false]",
             boolValue = DEFAULT_VANITY_DISPATCH_ENABLED)
     private static final String PROP_VANITY_DISPATCH_ENABLED = "vanity.dispatch.enabled";
 

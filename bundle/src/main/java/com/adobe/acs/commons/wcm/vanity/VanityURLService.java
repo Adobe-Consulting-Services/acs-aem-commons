@@ -10,14 +10,6 @@ import java.io.IOException;
 
 @ProviderType
 public interface VanityURLService {
-	/**
-	 * Checks if the provided vanity path is sling:vanityPath under /content
-	 *
-	 * @param vanityPath Vanity path that needs to be validated.
-	 * @param request SlingHttpServletRequest object used for performing query/lookup
-	 * @return return true if the vanityPath is a registered sling:vanityPath under /content
-	 */
-	boolean isVanityPath(String vanityPath, SlingHttpServletRequest request) throws RepositoryException;
 
 	/**
 	 * This method checks if a given request URI (after performing the Resource Resolver Mapping) is a valid vanity URL, 
