@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -159,6 +160,7 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
         ArrayList<ProcessInstance> processes = new ArrayList();
         processes.addAll(manager.getActiveProcesses());
         processes.addAll(manager.getInactiveProcesses());
+        processes.sort(Comparator.comparing((ProcessInstance p)->p.getInfo().getStartTime()).reversed());
         return processes;
     }
 }

@@ -144,8 +144,8 @@ var ScriptRunner = {
                     processDom = jQuery("<tr is='coral-tr' id='process-" + process.id + "'>" +
                             "<td is='coral-td'>" + process.infoBean.name + "</td>" +
                             "<td is='coral-td'>" + process.infoBean.description + "</td>" +
-                            "<td is='coral-td'>" + ScriptRunner.formatTime(process.infoBean.startTime) + "</td>" +
-                            "<td is='coral-td' class='process-stop-time'>" +
+                            "<td is='coral-td' value='"+process.infoBean.startTime+"'>" + ScriptRunner.formatTime(process.infoBean.startTime) + "</td>" +
+                            "<td is='coral-td' value='"+process.infoBean.stopTime+"' class='process-stop-time'>" +
                             (process.infoBean.isRunning ?
                                     "<coral-progress class='process-progress'></coral-progress>" :
                                     ScriptRunner.formatTime(process.infoBean.stopTime)
@@ -192,6 +192,7 @@ var ScriptRunner = {
                                 ScriptRunner.setProgress(processRow.find(".process-progress"), process.infoBean.status || "Please wait...", process.infoBean.progress);
                             } else {
                                 processRow.find(".process-stop-time").html(ScriptRunner.formatTime(process.infoBean.stopTime));
+                                processRow.find(".process-stop-time").attr("value", process.infoBean.stopTime);
                             }
                             processRow.find(".process-reported-errors").html(process.infoBean.reportedErrors.length);
                             processRow.find(".process-tasks-completed").html(process.infoBean.result.tasksCompleted);
