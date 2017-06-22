@@ -35,10 +35,9 @@ public class VanityURLServiceImpl implements VanityURLService {
 		request.setAttribute(VANITY_DISPATCH_CHECK_ATTR, true);
 
 		final String requestURI = request.getRequestURI();
-		final RequestPathInfo unmappedPathInfo = new PathInfo(requestURI);
         final RequestPathInfo mappedPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
         final String candidateVanity = mappedPathInfo.getResourcePath();
-		final String pathScope = StringUtils.removeEnd(unmappedPathInfo.getResourcePath(), candidateVanity);
+		final String pathScope = StringUtils.removeEnd(requestURI, candidateVanity);
 
 		log.debug("Candidate vanity URL to check and dispatch: [ {} ]", candidateVanity);
 
@@ -85,4 +84,6 @@ public class VanityURLServiceImpl implements VanityURLService {
 
 		return false;
 	}
+
+
 }
