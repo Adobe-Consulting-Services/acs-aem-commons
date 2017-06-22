@@ -2,28 +2,20 @@ package com.adobe.acs.commons.wcm.vanity.impl;
 
 import com.adobe.acs.commons.wcm.vanity.VanityURLService;
 import com.day.cq.commons.PathInfo;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
-import com.day.cq.search.result.SearchResult;
-import com.day.cq.wcm.api.NameConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
+import org.apache.sling.api.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 @Service
@@ -34,9 +26,6 @@ public class VanityURLServiceImpl implements VanityURLService {
     private static final String VANITY_DISPATCH_CHECK_ATTR = "acs-aem-commons__vanity-check-loop-detection";
     private static final String DEFAULT_PATH_SCOPE = "/content";
 
-	@Reference
-	QueryBuilder queryBuilder;
-
 	public boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException, RepositoryException {
 		if (request.getAttribute(VANITY_DISPATCH_CHECK_ATTR) != null) {
 			log.trace("Processing a previously vanity dispatched request. Skipping...");
@@ -46,13 +35,10 @@ public class VanityURLServiceImpl implements VanityURLService {
 		request.setAttribute(VANITY_DISPATCH_CHECK_ATTR, true);
 
 		final String requestURI = request.getRequestURI();
-		final RequestPathInfo requestPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
-
-		// Manually strip off any selectors or extensions from the URL
-		final String resourcePath = StringUtils.substringBefore(requestPathInfo.getResourcePath(), ".");
-		// Map the incoming URL to remove any prefix
-		final String candidateVanity = request.getResourceResolver().map(resourcePath);
-		final String pathScope = StringUtils.removeEnd(resourcePath, candidateVanity);
+		final RequestPathInfo unmappedPathInfo = new PathInfo(requestURI);
+        final RequestPathInfo mappedPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
+        final String candidateVanity = mappedPathInfo.getResourcePath();
+		final String pathScope = StringUtils.removeEnd(unmappedPathInfo.getResourcePath(), candidateVanity);
 
 		log.debug("Candidate vanity URL to check and dispatch: [ {} ]", candidateVanity);
 
@@ -72,46 +58,30 @@ public class VanityURLServiceImpl implements VanityURLService {
 	}
 
 	/**
-	 * Checks if the provided vanity path is sling:vanityPath under the mapped path prefix
+	 * Checks if the provided vanity path is a valid redirect
 	 *
-	 * @param pathScope The content path to scope the vanity search too.
+	 * @param pathScope The content path to scope the vanity path too.
 	 * @param vanityPath Vanity path that needs to be validated.
 	 * @param request SlingHttpServletRequest object used for performing query/lookup
 	 * @return return true if the vanityPath is a registered sling:vanityPath under /content
 	 */
 	protected boolean isVanityPath(String pathScope, String vanityPath, SlingHttpServletRequest request) throws RepositoryException {
-		final long start = System.currentTimeMillis();
+		final Resource vanityResource = request.getResourceResolver().resolve(vanityPath);
 
-		final Map<String, String> params = new HashMap<>();
+		if (vanityResource != null) {
+            String targetPath = null;
 
-		// Limit to <pathScope> to get 1/2 to multi-tenant support
-		params.put("path", StringUtils.defaultIfEmpty(pathScope, DEFAULT_PATH_SCOPE));
-		params.put("property", NameConstants.PN_SLING_VANITY_PATH);
-		params.put("property.value", vanityPath);
-		params.put("p.limit", "1");
-		params.put("p.guessTotal", "true");
+            if (vanityResource.isResourceType("sling:redirect")) {
+                targetPath = vanityResource.getValueMap().get("sling:target", String.class);
+            } else if (!StringUtils.equals(vanityPath, vanityResource.getPath())) {
+                targetPath = vanityResource.getPath();
+            }
 
-		log.debug("Searching for vanity path [ {} ] under [ {} ]", vanityPath, pathScope);
-
-		final Query query = queryBuilder.createQuery(PredicateGroup.create(params), request.getResourceResolver().adaptTo(Session.class));
-		final SearchResult result = query.getResult();
-
-		if (result.getTotalMatches() > 0) {
-			if (log.isDebugEnabled()) {
-				log.debug("Found matching Sling vanity path [ {} ] on [ {} ]", vanityPath, result.getHits().get(0).getPath());
+			if (targetPath != null && StringUtils.startsWith(targetPath, StringUtils.defaultIfEmpty(pathScope, DEFAULT_PATH_SCOPE))) {
+				log.debug("Found vanity resource at [ {} ] for sling:vanityPath [ {} ]", targetPath, vanityPath);
+				return true;
 			}
-
-			if (result.hasMore()) {
-				log.warn("Found more than 1 resources that match the Sling vanity path [ {} ]", vanityPath);
-			}
-
-			// Found at least one matching vanity path; returning it!
-			return true;
-		} else {
-			log.debug("Could not find a resource with the Sling vanity path [ {} ]", vanityPath);
 		}
-
-		log.debug("Look-up of Sling vanity path [ {} ] took [ {} ] ms", vanityPath, System.currentTimeMillis() - start);
 
 		return false;
 	}
