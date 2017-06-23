@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
 import com.adobe.acs.commons.mcp.form.FieldComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
@@ -45,8 +46,12 @@ public class AvailableProcessDefinitions extends WCMUsePojo {
     @Override
     public void activate() throws Exception {
         SlingScriptHelper sling = getSlingScriptHelper();
+        boolean isAdminUser = sling.getRequest().getUserPrincipal().getName().equalsIgnoreCase("admin");
         ProcessDefinition[] allDefinitions = sling.getServices(ProcessDefinition.class, null);
         definitions = Stream.of(allDefinitions)
+                .filter(o->
+                    !(o instanceof HiddenProcessDefinition) || isAdminUser
+                )
                 .collect(Collectors.toMap(o -> o.getClass().getName(), o -> o, (a,b)->a, TreeMap::new));
         String processDefinitionName = get("processDefinition", String.class);
         if (StringUtils.isEmpty(processDefinitionName)) {
