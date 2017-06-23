@@ -64,6 +64,7 @@
     </filter>
     <filter root="/var/acs-commons" mode="merge"/>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
+    <filter root="/etc/acs-commons/manage-controlled-processes/rep:policy"/>
     <filter root="/home/users/system/acs-commons"/>
     <filter root="/apps/rep:policy"/>
     <filter root="/oak:index/rep:policy"/>
