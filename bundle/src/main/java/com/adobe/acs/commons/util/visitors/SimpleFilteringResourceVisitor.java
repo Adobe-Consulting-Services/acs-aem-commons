@@ -69,6 +69,10 @@ public class SimpleFilteringResourceVisitor {
     }
 
     public void accept(final Resource head) {
+        if (head == null) {
+            return;
+        }
+        
         stack.clear();
         stack.add(head);
 
