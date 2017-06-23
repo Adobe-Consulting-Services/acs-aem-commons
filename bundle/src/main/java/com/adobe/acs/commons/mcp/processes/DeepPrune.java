@@ -44,7 +44,7 @@ import org.apache.sling.event.jobs.Queue;
  */
 @Component
 @Service(ProcessDefinition.class)
-public class JobQueueCleaner implements ProcessDefinition, HiddenProcessDefinition {
+public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition {
     @Reference
     transient private JobManager jobManager;
 
@@ -52,7 +52,7 @@ public class JobQueueCleaner implements ProcessDefinition, HiddenProcessDefiniti
         description="Starting point for event removal",
         hint="/var/eventing",
         component=PathfieldComponent.FolderSelectComponent.class,
-        options={"base=/var/eventing", "default=/var/eventing"})
+        options={"base=/", "default=/var/eventing"})
     public String startingFolder;
     @FormField(name="Minimum purge level",
         description="Folder depth relative to start where purge will happen",
@@ -72,7 +72,7 @@ public class JobQueueCleaner implements ProcessDefinition, HiddenProcessDefiniti
 
     @FormField(
             name = "Stop job queues",
-            description = "If checked, stop job queues before and after the purge process",
+            description = "If checked, stop job queues before and resume them after the purge process",
             component = CheckboxComponent.class,
             options = {"checked"}
     )
@@ -81,12 +81,12 @@ public class JobQueueCleaner implements ProcessDefinition, HiddenProcessDefiniti
     public static final String JOB_TYPE = "slingevent:Job";
     transient private final List<String> suspendedQueues = new ArrayList<>();
 
-    public JobQueueCleaner() {
+    public DeepPrune() {
     }
 
     @Override
     public String getName() {
-        return "Job Queue Cleaner";
+        return "Deep Prune";
     }
 
     @Override
@@ -111,6 +111,7 @@ public class JobQueueCleaner implements ProcessDefinition, HiddenProcessDefiniti
         if (stopJobs) {
             instance.defineCriticalAction("Resume job queues", rr, this::resumeJobQueues);
         }
+        instance.getInfo().setDescription(startingFolder);
     }
 
     private void stopJobQueues(ActionManager manager) {
