@@ -63,9 +63,15 @@ var ScriptRunner = {
         });
     },
     initStartDialog: function (dialog) {
+        var started = false;
         dialog.querySelector("coral-Icon").icon = "pausePlay";
         dialog.querySelector("#processDefinitionSelector").on("coral-selectlist:change", ScriptRunner.processDefinitionSelected);
-        dialog.querySelector("#startButton").on("click", ScriptRunner.startProcess);
+        dialog.querySelector("#startButton").on("click", function() {
+            if (!started) {
+                started = true;
+                ScriptRunner.startProcess();
+            }
+        });    
     },
     processDefinitionSelected: function (event) {
         if (event && event.target && event.target.selectedItem) {
