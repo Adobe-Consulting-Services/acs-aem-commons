@@ -16,14 +16,19 @@
 package com.adobe.acs.commons.mcp.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.fam.actions.Actions;
+import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -39,7 +44,7 @@ import org.apache.sling.event.jobs.Queue;
  */
 @Component
 @Service(ProcessDefinition.class)
-public class JobQueueCleaner implements ProcessDefinition {
+public class JobQueueCleaner implements ProcessDefinition, HiddenProcessDefinition {
     @Reference
     transient private JobManager jobManager;
 
@@ -58,9 +63,22 @@ public class JobQueueCleaner implements ProcessDefinition {
         hint="1,2,3",
         options={"default=3"})
     public int numPasses = 3;
+    @FormField(name="Ignore",
+        description="Ignore nodes which have these names (comma-delimited)",
+        hint="rep:policy,jobs,offloading",
+        options={"default=rep:policy,jobs,offloading"})
+    public String ignore;
+    private List<String> ignoreList;
+
+    @FormField(
+            name = "Stop job queues",
+            description = "If checked, stop job queues before and after the purge process",
+            component = CheckboxComponent.class,
+            options = {"checked"}
+    )
+    private boolean stopJobs = true;
 
     public static final String JOB_TYPE = "slingevent:Job";
-    public static final String POLICY_NODE_NAME = "rep:policy";
     transient private final List<String> suspendedQueues = new ArrayList<>();
 
     public JobQueueCleaner() {
@@ -73,12 +91,14 @@ public class JobQueueCleaner implements ProcessDefinition {
 
     @Override
     public void init() {
-        // Nothing to do here
+        ignoreList = Arrays.asList(ignore.split(","));
     }
 
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException {
-        instance.defineCriticalAction("Stop job queues", rr, this::stopJobQueues);
+        if (stopJobs) {
+            instance.defineCriticalAction("Stop job queues", rr, this::stopJobQueues);
+        }
         if (numPasses > 0) {
             instance.defineAction("1st pass", rr, this::purgeJobs);
         }
@@ -88,7 +108,9 @@ public class JobQueueCleaner implements ProcessDefinition {
         if (numPasses > 2) {
             instance.defineAction("3rd pass", rr, this::purgeJobs);
         }
-        instance.defineCriticalAction("Resume job queues", rr, this::resumeJobQueues);
+        if (stopJobs) {
+            instance.defineCriticalAction("Resume job queues", rr, this::resumeJobQueues);
+        }
     }
 
     private void stopJobQueues(ActionManager manager) {
@@ -100,19 +122,34 @@ public class JobQueueCleaner implements ProcessDefinition {
         }
     }
 
+    private boolean shouldIgnore(Resource res) {
+        return res == null || ignoreList.contains(res.getName());
+    }
+    
     private void purgeJobs(ActionManager manager) {
+        ActionBatch batch = new ActionBatch(manager, 20);
+        batch.setRetryCount(10);
+        batch.setRetryWait(100);
         TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
         visitor.setDepthFirstMode();
+        visitor.setTraversalFilter(res->visitor.isFolder(res) && !shouldIgnore(res));
+        AtomicInteger lastLevel = new AtomicInteger(0);
         visitor.setResourceVisitor((res, level) -> {
-            if (level >= minPurgeDepth) {
+            if (level >= minPurgeDepth && !shouldIgnore(res)) {
+                if (lastLevel.getAndSet(level) != level) {
+                    batch.commitBatch();
+                }
                 String path = res.getPath();
-                manager.deferredWithResolver(Actions.retry(10, 100, rr -> deleteResource(rr, path)));
+                batch.add(rr -> deleteResource(rr, path));
             }
         });
         visitor.setLeafVisitor((res, level) -> {
-            if (!res.getName().equals(POLICY_NODE_NAME)) {
+            if (!shouldIgnore(res)) {
+                if (lastLevel.getAndSet(level) != level) {
+                    batch.commitBatch();
+                }
                 String path = res.getPath();
-                manager.deferredWithResolver(Actions.retry(10, 100, rr -> deleteResource(rr, path)));
+                batch.add(rr -> deleteResource(rr, path));
             }
         });
         manager.deferredWithResolver(rr -> {
@@ -120,6 +157,7 @@ public class JobQueueCleaner implements ProcessDefinition {
             if (res != null) {
                 visitor.accept(res);
             }
+            batch.commitBatch();
         });
     }
 
