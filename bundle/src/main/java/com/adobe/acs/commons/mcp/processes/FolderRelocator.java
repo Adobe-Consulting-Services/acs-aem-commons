@@ -42,6 +42,7 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import com.adobe.acs.commons.mcp.form.FormField;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 
@@ -205,6 +206,12 @@ public class FolderRelocator implements ProcessDefinition {
                 .onFailure(this::abortStep2);
         instance.defineCriticalAction("Move nodes", rr, this::moveNodes);
         instance.defineCriticalAction("Remove old folders", rr, this::removeSourceFolders);
+        if (sourcePaths.length > 1) {
+            instance.getInfo().setDescription("Move "+sourcePaths.length+" folders to "+destinationPath);
+        } else {
+            String verb = StringUtils.capitalize(mode.name().toLowerCase());
+            instance.getInfo().setDescription(verb + " " + sourcePaths[0] + " to "+destinationPath);            
+        }
     }
 
     private void validateInputs(ResourceResolver res) throws RepositoryException {

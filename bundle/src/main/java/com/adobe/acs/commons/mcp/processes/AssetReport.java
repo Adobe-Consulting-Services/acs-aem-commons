@@ -126,6 +126,9 @@ public class AssetReport implements ProcessDefinition {
         instance.defineAction("First pass", rr, this::examineAssets);
         instance.defineAction("Deep scan", rr, this::evaluateDeepStructure);
         instance.defineAction("Final pass", rr, this::examineAssets);
+        String detail = includeSubassets && includeVersions ? "full" 
+                : includeSubassets || includeVersions ? "partial" : "light";
+        instance.getInfo().setDescription(baseFolder + " - " + detail);        
     }
 
     transient private final GenericReport report = new GenericReport();
