@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * that are tied to it.
  */
 public class CancelHandler {
-    private final Set<Thread> activeWork = ConcurrentHashMap.newKeySet();
+    transient private final Set<Thread> activeWork = ConcurrentHashMap.newKeySet();
     private boolean cancelled = false;
     private boolean force = false;
   
