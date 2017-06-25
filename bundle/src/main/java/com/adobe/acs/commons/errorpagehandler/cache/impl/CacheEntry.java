@@ -26,6 +26,8 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class CacheEntry {
+    private String contentType;
+
     private String data;
 
     private final AtomicInteger hits;
@@ -39,6 +41,7 @@ class CacheEntry {
         this.misses = new AtomicInteger();
         this.data = "";
         this.expiresAt = new Date(0);
+        this.contentType = "UTF-8";
     }
 
     public final String getData() {
@@ -54,6 +57,12 @@ class CacheEntry {
             this.data = "";
         } else {
             this.data = data;
+        }
+    }
+
+    public final void setContentType(final String contentType) {
+        if (contentType != null) {
+            this.contentType = contentType;
         }
     }
 
@@ -106,6 +115,8 @@ class CacheEntry {
     }
 
     final int getBytes() {
-        return getData().getBytes(Charset.forName("UTF-8")).length;
+        return getData().getBytes(Charset.forName(getContentType())).length;
     }
+
+    final String getContentType() { return this.contentType; }
 }

@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
 public class CacheEntryTest {
 
     @Test
-    public void testGetData() throws Exception {
+    public void testSetGetData() throws Exception {
         CacheEntry cacheEntry = new CacheEntry();
 
         final String expResult = "hello world";
@@ -43,13 +43,25 @@ public class CacheEntryTest {
     }
 
     @Test
-    public void testSetData() throws Exception {
+    public void testSetGetContentType() throws Exception {
         CacheEntry cacheEntry = new CacheEntry();
 
-        final String expResult = "hello world";
-        cacheEntry.setData(expResult);
+        final String expResult = "ISO-8601";
+        cacheEntry.setContentType(expResult);
 
-        final String result = cacheEntry.getData();
+        final String result = cacheEntry.getContentType();
+
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testSetGetContentType_Null() throws Exception {
+        CacheEntry cacheEntry = new CacheEntry();
+
+        final String expResult = "UTF-8";
+        cacheEntry.setContentType(null);
+
+        final String result = cacheEntry.getContentType();
 
         assertEquals(expResult, result);
     }
