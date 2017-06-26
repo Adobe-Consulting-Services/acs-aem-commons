@@ -24,13 +24,39 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import org.apache.sling.api.resource.ResourceResolver;
 
+import java.util.List;
 import java.util.Map;
 
 public interface SyntheticWorkflowRunner extends WorkflowService {
     String PROCESS_ARGS = "PROCESS_ARGS";
 
+    enum WorkflowProcessIdType {
+        PROCESS_LABEL,
+        PROCESS_NAME
+    }
+
+
     /**
      * Process a payload path using using the provided Workflow Processes.
+     *
+     * @param resourceResolver                 the resourceResolver object that provides access to the JCR for WF ops
+     * @param payloadPath                      the path to execute the workflow against
+     * @param workflowSteps                    defines the list of WF Steps to process, each representing a WF Process
+     * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
+     * @param autoSaveAtEnd                    persist changes to JCR after all Workflow Process complete
+     * @throws com.day.cq.workflow.WorkflowException
+     */
+    @Deprecated
+    void execute(ResourceResolver resourceResolver,
+                 String payloadPath,
+                 List<SyntheticWorkflowStep> workflowSteps,
+                 boolean autoSaveAfterEachWorkflowProcess,
+                 boolean autoSaveAtEnd) throws WorkflowException;
+
+    /**
+     * Process a payload path using using the provided Workflow Processes.
+     *
+     * This is deprecated as it only allows a single workflow step of a particular process type to be executed.
      *
      * @param resourceResolver                 the resourceResolver object that provides access to the JCR for WF ops
      * @param payloadPath                      the path to execute the workflow against
@@ -42,6 +68,7 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
      * @param autoSaveAtEnd                    persist changes to JCR after all Workflow Process complete
      * @throws com.day.cq.workflow.WorkflowException
      */
+    @Deprecated
     void execute(ResourceResolver resourceResolver,
                  String payloadPath,
                  WorkflowProcessIdType workflowProcessIdType,
@@ -52,6 +79,8 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
 
     /**
      * Process a payload path using using the provided Workflow Processes.
+     *
+     * This is deprecated as it only allows a single workflow step of a particular process type to be executed.
      *
      * @param resourceResolver                 the resourceResolver object that provides access to the JCR for WF operations
      * @param payloadPath                      the path to execute the workflow against
@@ -114,10 +143,23 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
                                                      String workflowModelId,
                                                      boolean ignoreIncompatibleTypes) throws WorkflowException;
 
-    enum WorkflowProcessIdType {
-        PROCESS_LABEL,
-        PROCESS_NAME
-    }
+    /**
+     * Gets the Synthetic Workflow Step that represents the label. This method sets the MetadataMap to empty.
+     *
+     * @param id the workflow process id
+     * @param type the type of workflow process id (name or label)
+     * @return the SyntheticWorkflowStep object
+     */
+    SyntheticWorkflowStep getSyntheticWorkflowStep(String id, WorkflowProcessIdType type);
+
+    /**
+     * Gets the Synthetic Workflow Step that represents the label.
+     *
+     * @param id the workflow process id
+     * @param type the type of workflow process id (name or label)
+     * @return the SyntheticWorkflowStep object
+     */
+    SyntheticWorkflowStep getSyntheticWorkflowStep(String id, WorkflowProcessIdType type, Map<String, Object> metadataMap);
 }
 
 

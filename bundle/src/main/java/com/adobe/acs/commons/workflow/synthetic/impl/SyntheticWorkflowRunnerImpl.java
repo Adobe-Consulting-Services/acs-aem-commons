@@ -22,6 +22,7 @@ package com.adobe.acs.commons.workflow.synthetic.impl;
 
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
+import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowStep;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.SyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.SyntheticWorkflow;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.SyntheticWorkflowSession;
@@ -32,14 +33,7 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkflowProcess;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -52,11 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.Date;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -133,30 +123,18 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                 autoSaveAtEnd);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public final void execute(final ResourceResolver resourceResolver,
-                              final String payloadPath,
-                              final WorkflowProcessIdType workflowProcessIdType,
-                              final String[] workflowProcessIds,
-                              Map<String, Map<String, Object>> processArgs,
-                              final boolean autoSaveAfterEachWorkflowProcess,
-                              final boolean autoSaveAtEnd) throws WorkflowException {
+    public void execute(ResourceResolver resourceResolver, String payloadPath, List<SyntheticWorkflowStep> workflowSteps, boolean autoSaveAfterEachWorkflowProcess, boolean autoSaveAtEnd) throws WorkflowException {
 
         final long start = System.currentTimeMillis();
 
-        if (processArgs == null) {
-            processArgs = new HashMap<String, Map<String, Object>>();
-        }
 
         int count = 0;
         do {
             count++;
 
             try {
-                run(resourceResolver, payloadPath, workflowProcessIdType, workflowProcessIds, processArgs,
+                run(resourceResolver, payloadPath, workflowSteps,
                         autoSaveAfterEachWorkflowProcess, autoSaveAtEnd);
                 if (log.isInfoEnabled()) {
                     long duration = System.currentTimeMillis() - start;
@@ -176,13 +154,36 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
             }
 
         } while (count < MAX_RESTART_COUNT);
+
+
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Deprecated
+    public final void execute(final ResourceResolver resourceResolver,
+                              final String payloadPath,
+                              final WorkflowProcessIdType workflowProcessIdType,
+                              final String[] workflowProcessIds,
+                              Map<String, Map<String, Object>> processArgs,
+                              final boolean autoSaveAfterEachWorkflowProcess,
+                              final boolean autoSaveAtEnd) throws WorkflowException {
+
+        if (processArgs == null) {
+            processArgs = new HashMap<String, Map<String, Object>>();
+        }
+
+        List<SyntheticWorkflowStep> workflowSteps = convertToSyntheticWorkflowSteps(workflowProcessIds, workflowProcessIdType, processArgs);
+
+        execute(resourceResolver, payloadPath, workflowSteps, autoSaveAfterEachWorkflowProcess, autoSaveAtEnd);
+    }
+
 
     private void run(final ResourceResolver resourceResolver,
                      final String payloadPath,
-                     final WorkflowProcessIdType workflowProcessIdType,
-                     final String[] workflowProcessIds,
-                     final Map<String, Map<String, Object>> metaDataMaps,
+                     final List<SyntheticWorkflowStep> workflowSteps,
                      final boolean autoSaveAfterEachWorkflowProcess,
                      final boolean autoSaveAtEnd) throws WorkflowException {
 
@@ -201,20 +202,20 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
         boolean terminated = false;
 
-        for (final String workflowProcessId : workflowProcessIds) {
+        for (final SyntheticWorkflowStep workflowStep : workflowSteps) {
             SyntheticWorkflowProcess workflowProcess;
 
-            if (WorkflowProcessIdType.PROCESS_LABEL.equals(workflowProcessIdType)) {
-                workflowProcess = this.workflowProcessesByLabel.get(workflowProcessId);
+            if (WorkflowProcessIdType.PROCESS_LABEL.equals(workflowStep.getIdType())) {
+                workflowProcess = this.workflowProcessesByLabel.get(workflowStep.getId());
             } else {
-                workflowProcess = this.workflowProcessesByProcessName.get(workflowProcessId);
+                workflowProcess = this.workflowProcessesByProcessName.get(workflowStep.getId());
             }
 
             if (workflowProcess != null) {
                 final long start = System.currentTimeMillis();
 
                 try {
-                    final SyntheticMetaDataMap workflowProcessMetaDataMap = new SyntheticMetaDataMap(metaDataMaps.get(workflowProcessId));
+                    final SyntheticMetaDataMap workflowProcessMetaDataMap = new SyntheticMetaDataMap(workflowStep.getMetadataMap());
 
                     if (SyntheticWorkflowProcess.Type.GRANITE.equals(workflowProcess.getWorkflowType())) {
                         runGraniteWorkflowProcess(session, graniteWorkflow, workflowProcessMetaDataMap, workflowProcess);
@@ -253,17 +254,17 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
                         log.debug("Executed synthetic workflow process [ {} ] on [ {} ] in [ "
                                         + String.valueOf(System.currentTimeMillis() - start) + " ] ms",
-                                workflowProcessId, payloadPath);
+                                workflowStep.getId(), payloadPath);
                     } catch (RepositoryException e) {
                         log.error("Could not save at end of synthetic workflow process execution"
-                                + " [ {} ] for payload path [ {} ]", workflowProcessId, payloadPath);
+                                + " [ {} ] for payload path [ {} ]", workflowStep.getId(), payloadPath);
                         log.error("Synthetic workflow process save failed.", e);
                         throw new WorkflowException(e);
                     }
                 }
             } else {
                 log.error("Synthetic workflow runner retrieved a null Workflow Process for process.label [ {} ]",
-                        workflowProcessId);
+                        workflowStep.getId());
             }
         } // end for loop
 
@@ -341,6 +342,25 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     }
 
 
+    /**
+     * Converts the legacy Workflow Process IDs and Process Args maps into the SyntheticWorkflowStep abstraction that allows for
+     * multiple Processes of the same type to be executed in the same WF.
+     * @param workflowProcessIds the ordered list of workflow process id or labels
+     * @param processArgs the metadata map args, indexed by workflowProcessId
+     * @return the ordered list of SyntheticWorkflowSteps that represent the parameter data
+     */
+    private List<SyntheticWorkflowStep> convertToSyntheticWorkflowSteps(String[] workflowProcessIds,
+                                                                        WorkflowProcessIdType idType,
+                                                                        Map<String, Map<String, Object>> processArgs) {
+        final List<SyntheticWorkflowStep> workflowSteps = new ArrayList<>();
+
+        for (String workflowProcessId : workflowProcessIds) {
+            workflowSteps.add(getSyntheticWorkflowStep(workflowProcessId, idType, processArgs.get(workflowProcessId)));
+        }
+
+        return workflowSteps;
+    }
+
     @Override
     public final void execute(final ResourceResolver resourceResolver,
                               final String payloadPath,
@@ -368,6 +388,16 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
         final WorkflowSession workflowSession = aemWorkflowService.getWorkflowSession(resourceResolver.adaptTo(Session.class));
         return new SyntheticWorkflowModelImpl(workflowSession, workflowModelId, ignoreIncompatibleTypes);
+    }
+
+    @Override
+    public SyntheticWorkflowStep getSyntheticWorkflowStep(String id, WorkflowProcessIdType type) {
+        return getSyntheticWorkflowStep(id, type, Collections.EMPTY_MAP);
+    }
+
+    @Override
+    public SyntheticWorkflowStep getSyntheticWorkflowStep(String id, WorkflowProcessIdType type, Map<String, Object> metadataMap) {
+        return new SyntheticWorkflowStepImpl(id, type, metadataMap);
     }
 
     /**
