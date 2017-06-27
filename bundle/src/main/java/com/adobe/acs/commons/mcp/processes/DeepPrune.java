@@ -24,11 +24,15 @@ import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
+import com.adobe.acs.commons.mcp.form.RadioComponent.EnumerationSelector;
+import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -47,7 +51,14 @@ import org.apache.sling.event.jobs.Queue;
 public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition {
     @Reference
     transient private JobManager jobManager;
-
+    
+    static enum FolderRule {all(s->true),numeric(StringUtils::isNumeric),hexadecimal(StringUtil::isHex),none(s->false);
+        Function<String, Boolean> matcher;
+        FolderRule(Function<String, Boolean> m) {
+            matcher = m;
+        }    
+    };
+    
     @FormField(name="Starting folder", 
         description="Starting point for event removal",
         hint="/var/eventing",
@@ -69,6 +80,28 @@ public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition {
         options={"default=rep:policy,jobs,offloading"})
     public String ignore;
     private List<String> ignoreList;
+    @FormField(name="Batch size",
+        description="Max number of operations to commit at a time",
+        hint="10",
+        options={"default=10"})
+    public int batchSize = 10;
+    @FormField(name="Retries",
+        description="Max number of retries per commit",
+        hint="3",
+        options={"default=3"})
+    public int retryCount = 3;
+    @FormField(name="Retry delay",
+        description="Delay between retries (in milliseconds)",
+        hint="25,50,100,...",
+        options={"default=25"})
+    public int retryWait = 25;
+    @FormField(
+            name = "Delete Folders",
+            description = "Define which folders to delete, if any.",
+            component = EnumerationSelector.class,
+            options={"default=all","vertical"}
+    )
+    private FolderRule folderRule = FolderRule.all;
 
     @FormField(
             name = "Stop job queues",
@@ -128,15 +161,15 @@ public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition {
     }
     
     private void purgeJobs(ActionManager manager) {
-        ActionBatch batch = new ActionBatch(manager, 20);
-        batch.setRetryCount(10);
-        batch.setRetryWait(100);
+        ActionBatch batch = new ActionBatch(manager, batchSize);
+        batch.setRetryCount(retryCount);
+        batch.setRetryWait(retryWait);
         TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
         visitor.setDepthFirstMode();
         visitor.setTraversalFilter(res->visitor.isFolder(res) && !shouldIgnore(res));
         AtomicInteger lastLevel = new AtomicInteger(0);
         visitor.setResourceVisitor((res, level) -> {
-            if (level >= minPurgeDepth && !shouldIgnore(res)) {
+            if (level >= minPurgeDepth && !shouldIgnore(res) && folderRule.matcher.apply(res.getName())) {
                 if (lastLevel.getAndSet(level) != level) {
                     batch.commitBatch();
                 }
