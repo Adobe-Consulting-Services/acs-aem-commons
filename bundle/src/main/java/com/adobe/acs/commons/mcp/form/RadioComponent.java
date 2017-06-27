@@ -16,6 +16,7 @@
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
+import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.jcr.JcrUtil;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ public abstract class RadioComponent extends FieldComponent {
         @Override
         public Map<String, String> getOptions() {
             return Stream.of((Enum[]) getField().getType().getEnumConstants())
-                    .collect(Collectors.toMap(Enum::name, Enum::name));
+                    .collect(Collectors.toMap(Enum::name, e->StringUtil.getFriendlyName(e.name())));
         }        
     }
     
@@ -40,6 +41,7 @@ public abstract class RadioComponent extends FieldComponent {
     public void init() {
         setResourceType("granite/ui/components/foundation/form/radiogroup");
         getComponentMetadata().put("vertical", hasOption("vertical"));
+        getComponentMetadata().put("text", getFieldDefinition().name());
     }
 
     @Override
@@ -47,9 +49,16 @@ public abstract class RadioComponent extends FieldComponent {
         AbstractResourceImpl component = (AbstractResourceImpl) super.buildComponentResource();
         AbstractResourceImpl options = new AbstractResourceImpl("items", null, null, new ResourceMetadata());
         component.addChild(options);
+        
+        String defaultValue = getOption("default").orElse(null);
+        
         getOptions().forEach((value, name)->{
             ResourceMetadata meta = new ResourceMetadata();
             String nodeName = JcrUtil.escapeIllegalJcrChars(value);
+            
+            if (value.equals(defaultValue)) {
+                meta.put("checked", true);
+            }
             meta.put("name", getName());
             meta.put("value", value);
             meta.put("text", name);

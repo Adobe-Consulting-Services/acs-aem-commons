@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import org.apache.commons.lang.StringUtils;
+import com.adobe.acs.commons.mcp.util.StringUtil;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -162,14 +162,6 @@ public class GenericReport {
     }
 
     public List<String> getColumnNames() {
-        return columns.stream().map(this::getFriendlyName).collect(Collectors.toList());
-    }
-
-    public String getFriendlyName(String orig) {
-        String parts[] = StringUtils.split(orig, "._-");
-        if (parts.length == 1) {
-            parts = StringUtils.splitByCharacterTypeCamelCase(orig);
-        }
-       return Stream.of(parts).map(String::toLowerCase).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+        return columns.stream().map(StringUtil::getFriendlyName).collect(Collectors.toList());
     }
 }
