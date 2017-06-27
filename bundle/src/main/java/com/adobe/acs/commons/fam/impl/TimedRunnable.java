@@ -98,6 +98,7 @@ public class TimedRunnable implements Runnable {
                 LOG.error("Watchdog thread interrupted", ex);
             }
             if (!finished1) {
+                LOG.error("Watchdog reached interval timeout, worker thread will now be interrupted!");
                 workThread.interrupt();
             }
         };
