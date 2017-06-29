@@ -278,6 +278,11 @@ public class FrozenAsset implements Asset {
         return frozenResource.getValueMap().get(Property.JCR_FROZEN_UUID, String.class);
     }
 
+    //@Override -- required for 6.3 but not required in 6.2
+    public void initAssetState() throws RepositoryException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     private class FrozenRendition implements Rendition {
 
         private final Resource container;
