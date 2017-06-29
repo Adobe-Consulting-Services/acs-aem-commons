@@ -59,9 +59,10 @@ angular.module('acs-commons-qr-code-generator-app', ['acsCoral', 'ACS.Commons.no
         };
 
         if ($scope.form.enable && !isValid()) {
-            NotificationsService.add('error', "Error", "Please add atleast one AEM Environments Configuration");
+            NotificationsService.add('error', "Error", "Please add a QR configuration");
             return;
         }
+
 
         $http({
             method: 'POST',
@@ -73,8 +74,28 @@ angular.module('acs-commons-qr-code-generator-app', ['acsCoral', 'ACS.Commons.no
         }).
         success(function (data, status, headers, config) {
             $scope.app.running = false;
-            NotificationsService.add('success', "Success", "Your Configurations has been saved");
+            NotificationsService.add('success', "Success", "Your configuration has been saved");
             NotificationsService.running($scope.app.running);
+
+            if ($scope.form.enable) {
+                $http({
+                    method: 'POST',
+                    url: $scope.app.uri,
+                    data: './clientlib-authoring/categories=cq.authoring.editor',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+            } else {
+                $http({
+                    method: 'POST',
+                    url: $scope.app.uri,
+                    data: './clientlib-authoring/categories@Delete',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+            }
 
         }).
         error(function (data, status, headers, config) {
@@ -95,7 +116,7 @@ angular.module('acs-commons-qr-code-generator-app', ['acsCoral', 'ACS.Commons.no
             // Fetch previously saved configurations
             $http({
                 method: 'GET',
-                url: qrCode.pageURL,
+                url: $scope.app.uri,
                 headers: {
                     'Accept': '*/*',
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'

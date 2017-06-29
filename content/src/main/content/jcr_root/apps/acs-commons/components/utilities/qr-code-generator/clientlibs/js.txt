@@ -1,4 +1,3 @@
 #base=js
 
 app.js
-script.js

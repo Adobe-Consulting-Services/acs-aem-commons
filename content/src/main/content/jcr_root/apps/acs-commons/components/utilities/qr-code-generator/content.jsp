@@ -21,7 +21,7 @@
 %><%@page session="false" %><%
 
 %><div ng-controller="MainCtrl"
-     ng-init="app.uri = '${resourcePath}.qr-code.json';">
+     ng-init="app.uri = '${resourcePath}.json';">
 
     <p>QR Code for an AEM Page URL can be generated while Authoring. It will easily allow you to view published page in Mobile / Tablet devices</p>
     <p>More Information :-</p>
