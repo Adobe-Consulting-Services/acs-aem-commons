@@ -20,7 +20,7 @@
 
 /*global angular: false, ace: false qrCode: false*/
 
-angular.module('acs-commons-qr-code-generator-app', ['acsCoral', 'ACS.Commons.notifications']).controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService', function ($scope, $http, $timeout, NotificationsService) {
+angular.module('acs-commons-qr-code-app', ['acsCoral', 'ACS.Commons.notifications']).controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService', function ($scope, $http, $timeout, NotificationsService) {
 
     $scope.app = {
         uri: ''
@@ -62,7 +62,6 @@ angular.module('acs-commons-qr-code-generator-app', ['acsCoral', 'ACS.Commons.no
             NotificationsService.add('error', "Error", "Please add a QR configuration");
             return;
         }
-
 
         $http({
             method: 'POST',

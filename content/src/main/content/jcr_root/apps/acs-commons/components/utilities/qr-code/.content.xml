@@ -5,4 +5,4 @@
     jcr:title="QR Code Generator"
     sling:resourceSuperType="acs-commons/components/utilities/app-page"
     componentGroup=".hidden"
-    favicon="/apps/acs-commons/components/utilities/qr-code-generator/clientlibs/images/favicon.ico"/>
+    favicon="/apps/acs-commons/components/utilities/qr-code/clientlibs/images/favicon.ico"/>

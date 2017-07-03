@@ -3,7 +3,6 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="cq:PageContent"
-        jcr:title="QR Code Config"
-        sling:resourceType="acs-commons/components/utilities/qr-code-generator">
-    </jcr:content>
+        jcr:title="QR Code"
+        sling:resourceType="acs-commons/components/utilities/qr-code"/>
 </jcr:root>

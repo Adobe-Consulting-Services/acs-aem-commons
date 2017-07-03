@@ -1,6 +1,4 @@
-/* CSS for QR code pop up */
-
-#qrcodeTable {
+#acs-commons--qr-code {
     padding: 10px;
     margin: 30px 20px;
     position: absolute;
@@ -10,4 +8,3 @@
     border: 10px solid;
     display: none;
 }
-

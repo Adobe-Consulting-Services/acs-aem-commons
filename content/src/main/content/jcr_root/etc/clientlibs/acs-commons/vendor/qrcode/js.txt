@@ -1,2 +1,3 @@
 #base=js
-qrcode.min.js 
+
+qrcode.min.js
