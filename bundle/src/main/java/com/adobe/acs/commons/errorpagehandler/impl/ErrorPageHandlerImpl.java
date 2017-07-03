@@ -159,7 +159,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             options = {
                     @PropertyOption(value = "Redirect to Login", name = REDIRECT_TO_LOGIN),
                     @PropertyOption(value = "Respond with 404", name = RESPOND_WITH_404)
-            })
+            },
+            value = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR)
     private static final String PROP_NOT_FOUND_DEFAULT_BEHAVIOR = "not-found.behavior";
 
 
