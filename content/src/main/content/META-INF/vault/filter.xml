@@ -62,6 +62,7 @@
         <include pattern="/etc/acs-commons/audit-log-search(.*)?" />
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
+    <filter root="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/url"/>
     <filter root="/home/users/system/acs-commons"/>
     <filter root="/apps/rep:policy"/>
     <filter root="/oak:index/rep:policy"/>
