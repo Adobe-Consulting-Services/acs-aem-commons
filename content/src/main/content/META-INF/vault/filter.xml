@@ -67,6 +67,7 @@
     <filter root="/oak:index/rep:policy"/>
     <filter root="/rep:policy"/>
     <filter root="/etc/notification/email/rep:policy"/>
+    <filter root="/etc/notification/email/acs-commons"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
     <filter root="/etc/workflow/instances/rep:policy"/>

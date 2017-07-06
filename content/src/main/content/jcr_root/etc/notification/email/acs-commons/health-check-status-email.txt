@@ -1,0 +1,16 @@
+From: aemdemosmtp@gmail.com
+Subject: ${subject}
+
+This is your automated AEM Health Check report.
+
+====================================================================================================
+
+Server: ${serverName}
+Executed at: ${executedAt}
+Health checks executed in: ${timeTaken} ms
+
+====================================================================================================
+
+${failure}
+
+${success}
