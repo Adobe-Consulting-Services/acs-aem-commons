@@ -1,30 +1,36 @@
 /*global JSON: false */
 
 (function($, $document){
-        var QR_CODE_TABLE_ID = "acs-commons--qr-code",
+        var QR_CODE_ID = "acs-commons__qr-code",
+            QR_CODE_NO_CONFIG_CSS_CLASS = "acs-commons__qr-code--no-config",
             QR_CODE_CONFIG_URL = '/etc/acs-commons/qr-code/_jcr_content/config.json',
+            EDITOR_PATH_PREFIX = '/editor.html',
             initialized = false;
 
-        $document.on("foundation-contentloaded", function() {
-            var $button;
-            if (!initialized) {
+    /**
+     * Bind to the Page Editor load event; This is the main hook.
+     */
+    $document.on("foundation-contentloaded", function() {
+        var $button;
 
-                getConfig().then(function(config) {
-                    config = JSON.parse(config);
-                    if (config.enabled) {
-                        $button = buildButton();
-                        $qrCode = buildQrCode(config);
-                        bindToButton($button, $qrCode);
-                    }
-                });
+        if (!initialized) {
+            $.when(getConfig()).then(function(data) {
+                var config = JSON.parse(data.config),
+                    $qrCode;
 
-                initialized = true;
-            }
-        });
+                if (config.enable) {
+                    $button = buildButton();
+                    $qrCode = buildQrCode($button, config);
+                    bindToButton($button, $qrCode);
+                }
+            });
 
+            initialized = true;
+        }
+    });
 
     /**
-     * Get the Config from AEM...
+     * Get the Config from AEM.
      */
     function getConfig() {
         var config = {
@@ -42,69 +48,85 @@
         });
     }
 
-
     /**
      * Builds and inject the QR Code button to the end of the Page Editor action bar.
      */
     function buildButton() {
-            var $button = $('<a ' +
-                'id="acs-commons--qr-code-button" ' +
-                'class="editor-GlobalBar-item foundation-toggleable-control coral-Button coral-Button--minimal" ' +
-                'data-foundation-toggleable-control-target="#' + QR_CODE_TABLE_ID + '" ' +
-                'href="#qr-code" ' +
-                'title="CQ Code" ' +
-                'aria-label="QR Code" ' +
-                'is="coral-anchorbutton" ' +
-                'icon="properties" ' +
-                'iconsize="S" ' +
-                'variant="minimal" ' +
-                'size="M" ' +
-                'role="button" ' +
-                'aria-disabled="false">' +
-                '<coral-icon class="coral-Icon coral-Icon--sizeS coral-Icon--properties" icon="properties" size="S" role="img" aria-label="properties"></coral-icon>' +
-                '<coral-anchorbutton-label></coral-anchorbutton-label>' +
-                '</a>');
+        var $button = $(new Coral.Button().set({
+                variant: "minimal",
+                icon: "viewGrid",
+                iconSize: "S",
+                title: "QR Code",
+                'data-foundation-toggleable-control-target': "#" + QR_CODE_ID
+        }));
 
-            $($button).appendTo($("coral-actionbar-primary"));
+        // Hack to fit the aesthetic of Page Editor
+        $button.addClass("editor-GlobalBar-item");
 
-            return $button;
+        $button.appendTo($("coral-actionbar-primary"));
+
+        return $button;
+     }
+
+    /**
+     * Bind click behavior to button.
+     *
+     * @param $button
+     * @param $qrCode
+     */
+    function bindToButton($button, $qrCode) {
+        $button.on("click", function () {
+           if ($qrCode.length == 1) {
+               $qrCode.toggle();
+           }
+        });
+    }
+
+    /**
+     * Builds the QR Code DOM element and injects into the DOM.
+     *
+     * @param config
+     * @returns {*|jQuery}
+     */
+    function buildQrCode($button, config) {
+        var $qrCode = $('<div>').attr('id', QR_CODE_ID),
+            url = window.location.pathname,
+            publishHost = getMappedHost(config.properties);
+
+        if (publishHost) {
+            if (url.indexOf(EDITOR_PATH_PREFIX) > -1) {
+                // Remove <servletContext>/editor.html from URL
+                url = url.substring(url.indexOf(EDITOR_PATH_PREFIX) + EDITOR_PATH_PREFIX.length, url.length);
+            }
+            url = publishHost + url;
+
+            $qrCode.empty().qrcode(url);
+        } else {
+            // Configs are present but none of them matches with current host
+            $qrCode.empty();
+
+            $qrCode
+                .addClass(QR_CODE_NO_CONFIG_CSS_CLASS)
+                .html('<p>No QR configurations are available for ' + window.location.host + '.</p>' +
+                        '<p><a href="/etc/acs-commons/qr-code.html" target="_blank"><i>Configure QR code generation</i></a></p>');
         }
 
 
-        function bindToButton($button, $qrCode) {
-            $button.on("click", function () {
-                if (publishHost && $qrCode.length == 1) {
+        $button.parent().append($qrCode);
 
-                    url = window.location.pathname;
-                    if (url.indexOf('/editor.html') > -1) {
-                        // Remove <servletContext>/editor.html from URL
-                        url = url.substring(url.indexOf('/editor.html') + '/editor.html'.length, url.length);
-                    }
-                    url = publishHost + url;
+        return $qrCode;
+    }
 
-                    $qrCodeTable.empty().qrcode(url);
-                } else {
-                    // Configs are present but none of them matches with current host
-                    $qrCode
-                        .css('color', 'black')
-                        .html('No Configurations are available for this Host; <a href="/etc/acs-commons/qr-code-config.html" target="_blank"><i>Configure here</i></a');
-                }
-                $qrCode.toggle();
-            });
-        }
+    /**
+     * Determines what the mapped hostname is based on the current windows address.
+     *
+     * @param mappingConfig
+     * @returns {null}
+     */
+    function getMappedHost(mappingConfig) {
+        var host;
 
-
-        function buildQrCode() {
-            var $qrCode = $('<div>').attr('id', QR_CODE_TABLE_ID);
-
-            $('body').append($qrCode);
-
-            return $qrCode;
-        }
-
-        function getMappedHost(mappingConfig) {
-            var host;
-
+        if (mappingConfig) {
             for (host in mappingConfig) {
                 if (mappingConfig[host].name.indexOf(window.location.host) !== -1) {
                     if (mappingConfig[host].value) {
@@ -112,8 +134,9 @@
                     }
                 }
             }
-
-            return null;
         }
+
+        return null;
+    }
 
 }($, $(document)));

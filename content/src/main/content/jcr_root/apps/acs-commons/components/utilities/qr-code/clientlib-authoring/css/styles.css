@@ -1,10 +1,20 @@
-#acs-commons--qr-code {
-    padding: 10px;
-    margin: 30px 20px;
-    position: absolute;
-    top: 10px;
-    left: 20px;
+#acs-commons__qr-code {
     background-color: white;
-    border: 10px solid;
+    padding: 10px;
+    position: absolute;
+    top: 45px;
+    left: 100px;
+    border: 10px solid black;
     display: none;
+    z-index: 10000;
+    box-shadow: 0px 5px 20px black;
+}
+
+.acs-commons__qr-code--no-config {
+    color: black;
+    width: 500px;
+}
+
+#acs-commons__qr-code canvas {
+    display: block;
 }

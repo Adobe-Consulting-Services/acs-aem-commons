@@ -27,14 +27,11 @@ angular.module('acs-commons-qr-code-app', ['acsCoral', 'ACS.Commons.notification
     };
 
     $scope.form = {
-        bucketType: 'sling:Folder',
-        properties: [
-            {
+        properties: [{
                 name: '',
-                value: '',
-                multi: false
+                value: ''
             }
-            ]
+        ]
     };
 
     $scope.results = {};
