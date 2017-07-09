@@ -23,13 +23,23 @@
 %><div ng-controller="MainCtrl"
      ng-init="app.uri = '${resourcePath}.json';">
 
-    <p>QR Code for an AEM Page URL can be generated while Authoring. It will easily allow you to view published page in Mobile / Tablet devices</p>
-    <p>More Information :-</p>
+    <p>The ACS Commons QR Code exposes a QR Code for the AEM Publish equivalent of the page being authored.
+        This allows for quick review of published pages on the AEM Publish server via a physical mobile/tablet device.</p>
+
     <ul>
-        <li>Once enabled, QR Icon will be available while authoring a page.</li>
-        <li>Mapping for Author and Publish Host URL. Example- Assume Author Host is '<i>author-project.com</i>' and Publish Host is '<i>project.com</i>'. If the page being authored is <b>author-project.com/content/project/en/home.html</b>, then generated QR code will have URL as <b>project.com/content/project/en/home.html</b></li>
-        <li>Do not add protocol <i>http</i> or <i>https</i> to the url.</li>
+        <li>Once enabled, the QR Icon will be available in the Touch UI Page Editor's top action base.</li>
+        <li>The AEM Author  Publish Host URL mapping defined below determines for which host the QR Code will be generated for.
+            <br/>
+            For example:
+            <ul>
+                <li>Assume AEM Author host is '<i>aem-author.example.com</i>' and AEM Publish host is '<i>www.example.com</i>'.</li>
+                <li>If the page being authored is <b>aem-author.project.com/content/example/en/home.html</b>, then generated QR code will have URL as <b>www.example.com/content/project/en/home.html</b></li>
+            </ul>
+        </li>
+        <li>Do <strong>not</strong> add <i>http</i> or <i>https</i> to the url mappings; ONLY specify the host names.</li>
     </ul>
+
+    <hr/>
 
     <cq:include script="includes/form.jsp"/>
 </div>

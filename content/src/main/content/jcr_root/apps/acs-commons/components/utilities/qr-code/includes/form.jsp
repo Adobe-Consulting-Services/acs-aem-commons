@@ -20,43 +20,42 @@
 
     <form class="no-separator" novalidate ng-submit="saveConfig()">
         <div class="form-row">
-            <h4 acs-coral-heading>Enable QR Code Generator</h4>
+            <h3 acs-coral-heading>Enable QR Code generator</h3>
 
             <span>
             <label acs-coral-checkbox><input
                 ng-model="form.enable"
                 type="checkbox"><span>
-           Enabling this will allow you to generate QR code for URL</span></label>
+                Enable QR code generation</span></label>
             </span>
         </div>
 
         <div class="form-row" qr-code-config>
-            <h4>Multiple AEM Environments</h4>
+            <h3>AEM Author / Publish host mappings</h3>
 
             <table class="coral-Table coral-Table--hover coral-Table--bordered properties-table">
                 <thead>
                     <tr class="coral-Table-row">
-                        <th class="coral-Table-headerCell property-name">Author</th>
-                        <th class="coral-Table-headerCell property-value">Publish</th>
+                        <th class="coral-Table-headerCell property-name">AEM Author Host</th>
+                        <th class="coral-Table-headerCell property-value">AEM Publish Host</th>
                         <th class="coral-Table-headerCell property-remove"></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="coral-Table-row" ng-repeat="property in form.properties">
-                        {{property.name}}
-                        <td class="coral-Table-cell property-name"><input type="text" class="coral-Textfield" ng-model="property.name" placeholder="Author Host URL" /></td>
-
-                        <td class="coral-Table-cell property-value"><input type="text" class="coral-Textfield" ng-model="property.value" placeholder="Publish Host URL" /></td>
-
+                    <tr class="acs-commons__qr-code__mappings coral-Table-row" ng-repeat="property in form.properties">
+                        <td class="coral-Table-cell property-name">
+                            <input type="text" class="coral-Textfield" ng-model="property.name" placeholder="aem-author.example.com" /></td>
+                        <td class="coral-Table-cell property-value">
+                            <input type="text" class="coral-Textfield" ng-model="property.value" placeholder="www.example.com" /></td>
                         <td class="coral-Table-cell property-remove"><span ng-show="form.properties.length > 1" ng-click="removeProperty(form.properties, $index)">
-                            <i class="coral-Icon coral-Icon--minusCircle"></i>&nbsp;Remove</span>
+                            <i class="coral-Icon coral-Icon--minusCircle"></i></span>
                         </td>
                     </tr>
 
                     <tr class="coral-Table-row">
                         <td colspan="4" class="coral-Table-cell property-add">
                             <span ng-click="addProperty(form.properties)">
-                       <i class="coral-Icon coral-Icon--addCircle"></i>&nbsp;Add Property</span>
+                       <i class="coral-Icon coral-Icon--addCircle"></i>&nbsp;Add Host Mapping</span>
                         </td>
                     </tr>
                 </tbody>
@@ -64,6 +63,6 @@
         </div>
         <div class="form-row">
             <div class="form-left-cell">&nbsp;</div>
-            <button class="coral-Button coral-Button--primary save-config">Save Configurations</button>
+            <button class="coral-Button coral-Button--primary save-config">Save Configuration</button>
         </div>
     </form>
