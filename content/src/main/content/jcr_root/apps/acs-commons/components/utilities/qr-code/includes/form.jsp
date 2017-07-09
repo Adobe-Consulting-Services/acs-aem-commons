@@ -20,7 +20,7 @@
 
     <form class="no-separator" novalidate ng-submit="saveConfig()">
         <div class="form-row">
-            <h3 acs-coral-heading>Enable QR Code generator</h3>
+            <h3>Enable QR Code generator</h3>
 
             <span>
             <label acs-coral-checkbox><input
