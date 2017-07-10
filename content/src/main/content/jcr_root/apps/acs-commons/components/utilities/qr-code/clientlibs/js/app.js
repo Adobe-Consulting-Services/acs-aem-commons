@@ -27,57 +27,40 @@ angular.module('acs-commons-qr-code-app', ['acsCoral', 'ACS.Commons.notification
     };
 
     $scope.form = {
-        properties: [{
-                name: '',
-                value: ''
-            }
-        ]
+        enabled: false
     };
 
-    $scope.results = {};
+    $scope.init = function(appUri) {
+        $scope.app.uri = appUri;
 
-    $scope.addProperty = function (properties) {
-        properties.push({
-            name: '',
-            value: ''
+        $http({
+            method: 'GET',
+            url: $scope.app.uri + '/config/enabled'
+        }).success(function (data) {
+            $scope.form.enabled = data;
+        }).error(function (data, status) {
+            // Response code 404 will be when configs are not available
+            if (status !== 404) {
+                NotificationsService.add('error', "Error", "Something went wrong while fetching previous configurations");
+            }
         });
     };
 
-    $scope.removeProperty = function (properties, index) {
-        properties.splice(index, 1);
-    };
-
     $scope.saveConfig = function () {
-
-        // If enabled, at least 1 entry should be present
-        var isValid = function () {
-            return $scope.form.properties.length >= 1 && $scope.form.properties[0].name !== "" && $scope.form.properties[0].value !== "";
-
-        };
-
-        if ($scope.form.enable && !isValid()) {
-            NotificationsService.add('error', "Error", "Please add a QR configuration");
-            return;
-        }
-
         $http({
             method: 'POST',
-            url: $scope.app.uri,
-            data: 'config=' + encodeURIComponent(JSON.stringify($scope.form)),
+            url: $scope.app.uri + '/config',
+            data: 'enabled=' + $scope.form.enabled || 'false',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         }).
         success(function (data, status, headers, config) {
-            $scope.app.running = false;
-            NotificationsService.add('success', "Success", "Your configuration has been saved");
-            NotificationsService.running($scope.app.running);
-
-            if ($scope.form.enable) {
+            if ($scope.form.enabled) {
                 $http({
                     method: 'POST',
                     url: $scope.app.uri,
-                    data: './clientlib-authoring/categories=cq.authoring.editor',
+                    data: './clientlib-authoring/categories=cq.authoring.editor.hook',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
@@ -93,42 +76,15 @@ angular.module('acs-commons-qr-code-app', ['acsCoral', 'ACS.Commons.notification
                 });
             }
 
+            $scope.app.running = false;
+            NotificationsService.add('success', "Success", "Your configuration has been saved");
+            NotificationsService.running($scope.app.running);
         }).
-        error(function (data, status, headers, config) {
+        error(function (data) {
             NotificationsService.add('error', 'ERROR', data.title + '. ' + data.message);
             $scope.app.running = false;
             NotificationsService.running($scope.app.running);
 
         });
     };
-
-    }]).directive('qrCodeConfig', function ($http, NotificationsService) {
-    return {
-        restrict: 'A',
-        link: function ($scope, $elem, attrs) {
-
-            var parsedResponse;
-
-            // Fetch previously saved configurations
-            $http({
-                method: 'GET',
-                url: $scope.app.uri,
-                headers: {
-                    'Accept': '*/*',
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                }
-            }).success(function (data, status, headers, config) {
-                parsedResponse = JSON.parse(data.config);
-                $scope.form.properties = parsedResponse.properties;
-                $scope.form.enable = parsedResponse.enable;
-
-            }).error(function (data, status, headers, config) {
-                // Response code 404 will be when configs are not available
-                if (status !== 404) {
-                    NotificationsService.add('error', "Error", "Something went wrong while fetching previous configurations");
-                }
-            });
-
-        }
-    };
-});
+}]);
