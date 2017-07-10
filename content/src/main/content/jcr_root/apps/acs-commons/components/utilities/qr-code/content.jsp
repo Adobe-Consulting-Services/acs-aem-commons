@@ -24,15 +24,21 @@
        ng-cloak
        ng-init="init('${resourcePath}');">
 
-    <p>The ACS Commons QR Code exposes a QR Code for the AEM Publish equivalent of the page being authored.
+
+    <cq:include script="includes/form.jsp"/>
+
+    <br/>
+    <hr/>
+
+    <p>The ACS Commons QR Code feature exposes a QR Code for the AEM Publish equivalent of the page being authored.
         This allows for quick review of published pages on the AEM Publish server via a physical mobile/tablet device.</p>
 
     <ul>
         <li>Once enabled, the QR Icon will be available in the Touch UI Page Editor's top action base.</li>
-        <li>AEM's Externalizer will be used to map</li>
+        <li>AEM's Externalizer will be used to generate the Publish URL.</li>
     </ul>
 
-    <hr/>
-
-    <cq:include script="includes/form.jsp"/>
+    <center>
+        <img src="./qr-code/_jcr_content/qr-code-image.png" title="QR Code"/>
+    </center>
 </div>
