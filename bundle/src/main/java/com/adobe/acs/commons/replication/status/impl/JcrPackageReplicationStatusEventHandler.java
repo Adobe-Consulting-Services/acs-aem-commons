@@ -27,6 +27,7 @@ import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.replication.ReplicationStatus;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -77,7 +78,7 @@ import java.util.Map;
 @Properties({
         @Property(
                 label = "Event Topics",
-                value = {ReplicationAction.EVENT_TOPIC},
+                value = {ReplicationAction.EVENT_TOPIC, ReplicationEvent.EVENT_TOPIC},
                 description = "[Required] Event Topics this event handler will to respond to.",
                 name = EventConstants.EVENT_TOPIC,
                 propertyPrivate = true
@@ -90,13 +91,15 @@ import java.util.Map;
         ),
         @Property(
                 name = JobConsumer.PROPERTY_TOPICS,
-                value = JcrPackageReplicationStatusEventHandler.JOB_TOPIC
+                value = JcrPackageReplicationStatusEventHandler.JOB_TOPIC,
+                propertyPrivate = true
         )
 })
 @Service
 public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, ClusterAware {
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
+    private static final String FALLBACK_REPLICATION_USER_ID = "Package Replication";
     private static final String PROPERTY_PATHS = "paths";
     private static final String PROPERTY_REPLICATED_BY = "replicatedBy";
 
@@ -149,12 +152,13 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     private boolean isMaster = false;
 
     // Previously "Package Replication"
-    private static final String DEFAULT_REPLICATED_BY = "";
-    private String replicatedBy = DEFAULT_REPLICATED_BY;
+    private static final String DEFAULT_REPLICATED_BY_OVERRIDE = "";
+    private String replicatedByOverride = DEFAULT_REPLICATED_BY_OVERRIDE;
     @Property(label = "'Replicated By' Override",
             description = "The 'user name' to set the 'replicated by' property to. If left blank the ACTUAL user that issued the package replication will be used. Defaults to blank.",
-            value = DEFAULT_REPLICATED_BY)
-    public static final String PROP_REPLICATED_BY = "replicated-by";
+            value = DEFAULT_REPLICATED_BY_OVERRIDE)
+    public static final String PROP_REPLICATED_BY_OVERRIDE = "replicated-by.override";
+    public static final String LEGACY_PROP_REPLICATED_BY_OVERRIDE = "replicated-by";
 
 
     private static final ReplicatedAt DEFAULT_REPLICATED_AT = ReplicatedAt.PACKAGE_LAST_MODIFIED;
@@ -184,21 +188,21 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         if (this.isMaster) {
             // Only run on master
 
-            final ReplicationEvent replicationEvent = ReplicationEvent.fromEvent(event);
-            final ReplicationAction replicationAction = replicationEvent.getReplicationAction();
-
-            final String[] paths = replicationAction.getPaths();
+            final Map<String, Object> jobConfig = getInfoFromEvent(event);
+            final String[] paths = (String[]) jobConfig.get(PROPERTY_PATHS);
 
             if (this.containsJcrPackagePath(paths)) {
                 ResourceResolver resourceResolver = null;
                 try {
                     resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
-                    if (CollectionUtils.isNotEmpty(this.getJcrPackages(resourceResolver, paths))) {
+                    final List<JcrPackage> jcrPackages = this.getJcrPackages(resourceResolver, paths);
+                    if (CollectionUtils.isNotEmpty(jcrPackages)) {
 
-                        final Map<String, Object> jobConfig = new HashMap<>();
-                        jobConfig.put(PROPERTY_PATHS, paths);
-                        jobConfig.put(PROPERTY_REPLICATED_BY, replicationAction.getUserId());
+                        for (final JcrPackage jcrPackage : jcrPackages) {
+                            // Close jcrPackages after they've been used to check if a Job should be invoked.
+                            jcrPackage.close();
+                        }
 
                         jobManager.addJob(JOB_TOPIC, jobConfig);
                     }
@@ -217,7 +221,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     public final JobResult process(final Job job) {
         final String[] paths = (String[]) job.getProperty(PROPERTY_PATHS);
         final String replicatedBy =
-                StringUtils.defaultIfEmpty(this.replicatedBy, (String) job.getProperty(PROPERTY_REPLICATED_BY));
+                StringUtils.defaultIfEmpty(this.replicatedByOverride, (String) job.getProperty(PROPERTY_REPLICATED_BY));
 
         log.debug("Processing Replication Status Update for JCR Package: {}", paths);
 
@@ -245,7 +249,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
                     if (resources.size() > 0) {
                         replicationStatusManager.setReplicationStatus(resourceResolver,
-                                StringUtils.defaultIfEmpty(replicatedBy, "Package Replication"),
+                                replicatedBy,
                                 getJcrPackageLastModified(resourceResolver, jcrPackage),
                                 ReplicationStatusManager.Status.ACTIVATED,
                                 resources.toArray(new Resource[resources.size()]));
@@ -262,6 +266,9 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
                 } catch (PackageException e) {
                     log.error("Could not retrieve the Packages contents.", e);
+                } finally {
+                    // Close each package when we are done.
+                    jcrPackage.close();
                 }
             }
         } catch (LoginException e) {
@@ -274,6 +281,39 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         }
 
         return JobResult.OK;
+    }
+
+    /**
+     * Extracts relevant event information from a Granite Replication Event OR a Day CQ Replication event.
+     * @param event the Osgi Event
+     * @return a Map containing the relevant data points.
+     */
+    protected final Map<String, Object> getInfoFromEvent(Event event) {
+        final Map<String, Object> eventConfig = new HashMap<>();
+
+        final ReplicationEvent replicationEvent = ReplicationEvent.fromEvent(event);
+        if (replicationEvent != null) {
+            // Granite event
+            final ReplicationAction replicationAction = replicationEvent.getReplicationAction();
+            eventConfig.put(PROPERTY_PATHS, replicationAction.getPaths());
+            eventConfig.put(PROPERTY_REPLICATED_BY, replicationAction.getUserId());
+        } else {
+            // CQ event
+            String[] paths = (String[]) event.getProperty(ReplicationAction.PROPERTY_PATHS);
+            if (paths == null) {
+                paths = ArrayUtils.EMPTY_STRING_ARRAY;
+            }
+
+            String userId = (String) event.getProperty(ReplicationAction.PROPERTY_USER_ID);
+            if (StringUtils.isBlank(userId)) {
+                userId = StringUtils.defaultIfEmpty(this.replicatedByOverride, FALLBACK_REPLICATION_USER_ID);
+            }
+
+            eventConfig.put(PROPERTY_PATHS, paths);
+            eventConfig.put(PROPERTY_REPLICATED_BY,userId);
+        }
+
+        return eventConfig;
     }
 
     /**
@@ -319,12 +359,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                 }
             } catch (RepositoryException e) {
                 log.warn("Error checking if the path [ {} ] is a JCR Package.", path);
-            } finally {
-                if (jcrPackage != null) {
-                    jcrPackage.close();
-                }
             }
-
         }
         return packages;
     }
@@ -394,10 +429,12 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     }
 
     @Activate
-    private void activate(final Map<String, String> config) throws LoginException {
+    protected void activate(final Map<String, String> config) throws LoginException {
         log.trace("Activating the ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)");
 
-        this.replicatedBy = PropertiesUtil.toString(config.get(PROP_REPLICATED_BY), DEFAULT_REPLICATED_BY);
+        this.replicatedByOverride = PropertiesUtil.toString(config.get(PROP_REPLICATED_BY_OVERRIDE),
+                                        PropertiesUtil.toString(config.get(LEGACY_PROP_REPLICATED_BY_OVERRIDE),
+                                                DEFAULT_REPLICATED_BY_OVERRIDE));
 
         String tmp = PropertiesUtil.toString(config.get(PROP_REPLICATED_AT), "");
         try {
@@ -409,7 +446,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         this.replicationStatusNodeTypes = PropertiesUtil.toStringArray(config.get(PROP_REPLICATION_STATUS_NODE_TYPES),
                 DEFAULT_REPLICATION_STATUS_NODE_TYPES);
 
-        log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedBy);
+        log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedByOverride);
         log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
         log.info("Package Replication Status - Node Types: [ {} ]",
                 StringUtils.join(this.replicationStatusNodeTypes, ", "));

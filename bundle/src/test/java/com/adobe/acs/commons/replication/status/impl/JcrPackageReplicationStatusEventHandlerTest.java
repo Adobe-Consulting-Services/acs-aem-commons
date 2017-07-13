@@ -17,7 +17,6 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -145,13 +144,12 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(contentNode3parent.isNodeType("sling:OrderedFolder")).thenReturn(true);
     }
 
-    @After
-    public void tearDown() throws Exception {
-
-    }
-
     @Test
     public void testProcess() throws Exception {
+        Map<String, String> config = new HashMap<>();
+        config.put("replicated-by.override", "Package Replication");
+        eventHandler.activate(config);
+
         eventHandler.process(job);
 
         verify(replicationStatusManager, times(1)).setReplicationStatus(
@@ -161,7 +159,6 @@ public class JcrPackageReplicationStatusEventHandlerTest {
                 eq(ReplicationStatusManager.Status.ACTIVATED),
                 eq(contentResource1), eq(contentResource2), eq(contentResource3));
     }
-
 
     @Test
     public void testHandleEvent() throws LoginException {
