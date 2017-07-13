@@ -19,8 +19,6 @@
             }
 
             if (config.enabled) {
-                isAEM62 = Granite.author.ui.globalBar.element.find('.editor-GlobalBar-leftContainer').length > 0;
-
                 $button = buildButton(config.publishURL);
                 $qrCode = buildQrCode($button, config);
                 bindToButton($button, $qrCode);
@@ -60,8 +58,8 @@
             Granite.I18n.get("QR Code for") + " " + publishURL);
         qrCodeButton.attr('data-foundation-toggleable-control-target', "#" + QR_CODE_ID);
 
-        // Hack required for AEM 6.2 backwards compatability
-        if (isAEM62) {
+        // Hack required for AEM 6.2 backwards compatibility
+        if (Granite.author.ui.globalBar.element.find('.editor-GlobalBar-leftContainer').length > 0) {
             qrCodeButton.find('i').addClass('coral-Icon--viewGrid');
         }
 
