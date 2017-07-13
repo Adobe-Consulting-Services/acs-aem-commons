@@ -148,6 +148,15 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
     private boolean isMaster = false;
 
+    // Previously "Package Replication"
+    private static final String DEFAULT_REPLICATED_BY = "";
+    private String replicatedBy = DEFAULT_REPLICATED_BY;
+    @Property(label = "'Replicated By' Override",
+            description = "The 'user name' to set the 'replicated by' property to. If left blank the ACTUAL user that issued the package replication will be used. Defaults to blank.",
+            value = DEFAULT_REPLICATED_BY)
+    public static final String PROP_REPLICATED_BY = "replicated-by";
+
+
     private static final ReplicatedAt DEFAULT_REPLICATED_AT = ReplicatedAt.PACKAGE_LAST_MODIFIED;
     private ReplicatedAt replicatedAt = DEFAULT_REPLICATED_AT;
     @Property(label = "Replicated At",
@@ -207,7 +216,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     @Override
     public final JobResult process(final Job job) {
         final String[] paths = (String[]) job.getProperty(PROPERTY_PATHS);
-        final String replicatedBy = (String) job.getProperty(PROPERTY_REPLICATED_BY);
+        final String replicatedBy =
+                StringUtils.defaultIfEmpty(this.replicatedBy, (String) job.getProperty(PROPERTY_REPLICATED_BY));
 
         log.debug("Processing Replication Status Update for JCR Package: {}", paths);
 
@@ -387,6 +397,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     private void activate(final Map<String, String> config) throws LoginException {
         log.trace("Activating the ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)");
 
+        this.replicatedBy = PropertiesUtil.toString(config.get(PROP_REPLICATED_BY), DEFAULT_REPLICATED_BY);
+
         String tmp = PropertiesUtil.toString(config.get(PROP_REPLICATED_AT), "");
         try {
             this.replicatedAt = ReplicatedAt.valueOf(tmp);
@@ -397,6 +409,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         this.replicationStatusNodeTypes = PropertiesUtil.toStringArray(config.get(PROP_REPLICATION_STATUS_NODE_TYPES),
                 DEFAULT_REPLICATION_STATUS_NODE_TYPES);
 
+        log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedBy);
         log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
         log.info("Package Replication Status - Node Types: [ {} ]",
                 StringUtils.join(this.replicationStatusNodeTypes, ", "));
