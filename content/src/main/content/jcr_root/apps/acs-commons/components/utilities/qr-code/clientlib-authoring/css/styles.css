@@ -6,7 +6,6 @@
     left: 100px;
     border: 10px solid black;
     display: none;
-    z-index: 10000;
     box-shadow: 0px 5px 20px black;
 }
 

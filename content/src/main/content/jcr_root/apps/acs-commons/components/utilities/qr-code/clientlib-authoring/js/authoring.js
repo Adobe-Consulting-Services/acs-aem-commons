@@ -4,7 +4,8 @@
             QR_CODE_NO_CONFIG_CSS_CLASS = "acs-commons__qr-code--no-config",
             QR_CODE_CONFIG_URL = '/etc/acs-commons/qr-code/_jcr_content/config.json',
             $button,
-            $qrCode;
+            $qrCode,
+            isAEM62 = false;
 
     /**
      * Bind to the Page Editor load event; This is the main hook.
@@ -18,6 +19,8 @@
             }
 
             if (config.enabled) {
+                isAEM62 = Granite.author.ui.globalBar.element.find('.editor-GlobalBar-leftContainer').length > 0;
+
                 $button = buildButton(config.publishURL);
                 $qrCode = buildQrCode($button, config);
                 bindToButton($button, $qrCode);
@@ -52,8 +55,15 @@
      * Builds and inject the QR Code button to the end of the Page Editor action bar.
      */
     function buildButton(publishURL) {
-        var qrCodeButton = Granite.author.ui.globalBar.addButton('', 'viewGrid',  "QR Code for " + publishURL);
+        // Initial css class of 'coral-Icon--viewGrid' required to support AEM 6.2
+        var qrCodeButton = Granite.author.ui.globalBar.addButton('', 'viewGrid',
+            Granite.I18n.get("QR Code for") + " " + publishURL);
         qrCodeButton.attr('data-foundation-toggleable-control-target', "#" + QR_CODE_ID);
+
+        // Hack required for AEM 6.2 backwards compatability
+        if (isAEM62) {
+            qrCodeButton.find('i').addClass('coral-Icon--viewGrid');
+        }
 
         return qrCodeButton;
      }

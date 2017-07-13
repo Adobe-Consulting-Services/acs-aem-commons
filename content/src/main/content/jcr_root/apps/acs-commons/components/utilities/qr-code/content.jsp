@@ -24,7 +24,6 @@
        ng-cloak
        ng-init="init('${resourcePath}');">
 
-
     <cq:include script="includes/form.jsp"/>
 
     <br/>
