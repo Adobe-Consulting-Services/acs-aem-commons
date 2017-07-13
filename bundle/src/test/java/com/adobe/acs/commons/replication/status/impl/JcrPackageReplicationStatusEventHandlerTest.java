@@ -2,6 +2,7 @@ package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationEvent;
 import org.apache.jackrabbit.JcrConstants;
@@ -146,10 +147,11 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
     @Test
     public void testProcess() throws Exception {
-        Map<String, String> config = new HashMap<>();
-        config.put("replicated-by.override", "Package Replication");
-        eventHandler.activate(config);
+        final Map<String, String> config = new HashMap<>();
 
+        config.put("replicated-by.override", "Package Replication");
+
+        eventHandler.activate(config);
         eventHandler.process(job);
 
         verify(replicationStatusManager, times(1)).setReplicationStatus(
@@ -162,30 +164,60 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
     @Test
     public void testHandleEvent() throws LoginException {
-        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
+        final Map<String, Object> eventParams  = new HashMap<>();
+        eventParams.put("paths", new String[]{PACKAGE_PATH});
+        eventParams.put("userId", "replication-user");
 
-        // Set to master
+        final Event event = new Event(ReplicationAction.EVENT_TOPIC, eventParams);
+
+        final ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
+
         eventHandler.bindRepository(null, null, true);
+        eventHandler.handleEvent(event);
 
-        Map<String, Object> modification  = new HashMap<>();
-        modification.put("paths", new String[]{PACKAGE_PATH});
-        modification.put("userId", "replication-user");
+        verify(jobManager, times(1)).addJob(eq("acs-commons/replication/package"), captor.capture());
+        final Map<String, Object> actual = captor.getValue();
+        assertEquals("replication-user", (String) actual.get("replicatedBy"));
+    }
+
+    @Test
+    public void testGetInfoFromEvent_CQEvent() {
+        final String[] expectedPaths = new String[]{PACKAGE_PATH};
+        final String expectedUserId = "replication-user";
+
+        final Map<String, Object> properties  = new HashMap<>();
+        properties.put("paths", expectedPaths);
+        properties.put("userId", expectedUserId);
+
+        final Event event = new Event(ReplicationAction.EVENT_TOPIC, properties);
+
+        final Map<String, Object> actual = eventHandler.getInfoFromEvent(event);
+        assertEquals(expectedPaths, actual.get("paths"));
+        assertEquals(expectedUserId, actual.get("replicatedBy"));
+    }
+
+    @Test
+    public void testGetInfoFromEvent_GraniteEvent() {
+        final String[] expectedPaths = new String[]{PACKAGE_PATH};
+        final String expectedUserId = "replication-user";
+
+        final Map<String, Object> modification  = new HashMap<>();
+        modification.put("paths", expectedPaths);
+        modification.put("userId", expectedUserId);
         modification.put("type", ReplicationActionType.ACTIVATE);
         modification.put("time", 0l);
         modification.put("revision", "1");
 
-        List<Map<String, Object>> modifications = new ArrayList<>();
+        final List<Map<String, Object>> modifications = new ArrayList<>();
         modifications.add(modification);
 
-        Map<String, Object> eventParams  = new HashMap<>();
-        eventParams.put("modifications", modifications);
+        final Map<String, Object> properties  = new HashMap<>();
+        properties.put("modifications", modifications);
 
-        Event event = new Event(ReplicationEvent.EVENT_TOPIC, eventParams);
+        final Event event = new Event(ReplicationEvent.EVENT_TOPIC, properties);
 
-        eventHandler.handleEvent(event);
-
-        verify(jobManager, times(1)).addJob(eq("acs-commons/replication/package"), captor.capture());
-        Map<String, Object> actual = captor.getValue();
-        assertEquals("replication-user", (String) actual.get("replicatedBy"));
+        final Map<String, Object> actual = eventHandler.getInfoFromEvent(event);
+        assertEquals(expectedPaths, actual.get("paths"));
+        assertEquals(expectedUserId, actual.get("replicatedBy"));
     }
 }

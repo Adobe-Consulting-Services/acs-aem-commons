@@ -344,7 +344,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
      * @param paths the list of paths to resolve to Jcr Packages
      * @return a list of Jcr Packages that correspond to the provided paths
      */
-    List<JcrPackage> getJcrPackages(final ResourceResolver resourceResolver, final String[] paths) {
+    private List<JcrPackage> getJcrPackages(final ResourceResolver resourceResolver, final String[] paths) {
         final List<JcrPackage> packages = new ArrayList<JcrPackage>();
 
         for (final String path : paths) {
