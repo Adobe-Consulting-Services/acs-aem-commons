@@ -246,16 +246,12 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                                 jcrPackage.getDefinition().getId());
                     }
                 } catch (RepositoryException e) {
-                    log.error("RepositoryException occurred updating replication status for contents of package");
-                    log.error(e.getMessage());
-
+                    log.error("RepositoryException occurred updating replication status for contents of package", e);
                 } catch (IOException e) {
-                    log.error("IOException occurred updating replication status for contents of package");
-                    log.error(e.getMessage());
+                    log.error("IOException occurred updating replication status for contents of package", e);
 
                 } catch (PackageException e) {
-                    log.error("Could not retrieve the Packages contents.");
-                    log.error(e.getMessage());
+                    log.error("Could not retrieve the Packages contents.", e);
                 }
             }
         } catch (LoginException e) {
@@ -304,7 +300,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         for (final String path : paths) {
             final Resource eventResource = resourceResolver.getResource(path);
 
-            JcrPackage jcrPackage;
+            JcrPackage jcrPackage = null;
 
             try {
                 jcrPackage = packaging.open(eventResource.adaptTo(Node.class), false);
@@ -313,6 +309,10 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                 }
             } catch (RepositoryException e) {
                 log.warn("Error checking if the path [ {} ] is a JCR Package.", path);
+            } finally {
+                if (jcrPackage != null) {
+                    jcrPackage.close();
+                }
             }
 
         }
