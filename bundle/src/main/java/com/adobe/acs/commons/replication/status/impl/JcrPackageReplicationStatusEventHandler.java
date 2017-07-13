@@ -24,13 +24,13 @@ import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.day.cq.jcrclustersupport.ClusterAware;
 import com.day.cq.replication.ReplicationAction;
+import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.replication.ReplicationStatus;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -94,9 +95,10 @@ import java.util.Map;
 })
 @Service
 public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, ClusterAware {
-    private static final String PROPERTY_PATHS = "paths";
-
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
+
+    private static final String PROPERTY_PATHS = "paths";
+    private static final String PROPERTY_REPLICATED_BY = "replicatedBy";
 
     private enum ReplicatedAt {
         CURRENT_TIME,
@@ -146,13 +148,6 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
     private boolean isMaster = false;
 
-    private static final String DEFAULT_REPLICATED_BY = "Package Replication";
-    private String replicatedBy = DEFAULT_REPLICATED_BY;
-    @Property(label = "Replicated By",
-            description = "The 'name' to set the 'replicated by' property to. Defaults to: " + DEFAULT_REPLICATED_BY,
-            value = DEFAULT_REPLICATED_BY)
-    public static final String PROP_REPLICATED_BY = "replicated-by";
-
     private static final ReplicatedAt DEFAULT_REPLICATED_AT = ReplicatedAt.PACKAGE_LAST_MODIFIED;
     private ReplicatedAt replicatedAt = DEFAULT_REPLICATED_AT;
     @Property(label = "Replicated At",
@@ -180,7 +175,10 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         if (this.isMaster) {
             // Only run on master
 
-            final String[] paths = (String[]) event.getProperty(PROPERTY_PATHS);
+            final ReplicationEvent replicationEvent = ReplicationEvent.fromEvent(event);
+            final ReplicationAction replicationAction = replicationEvent.getReplicationAction();
+
+            final String[] paths = replicationAction.getPaths();
 
             if (this.containsJcrPackagePath(paths)) {
                 ResourceResolver resourceResolver = null;
@@ -188,7 +186,12 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                     resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
                     if (CollectionUtils.isNotEmpty(this.getJcrPackages(resourceResolver, paths))) {
-                        jobManager.addJob(JOB_TOPIC, Collections.<String, Object>singletonMap(PROPERTY_PATHS, paths));
+
+                        final Map<String, Object> jobConfig = new HashMap<>();
+                        jobConfig.put(PROPERTY_PATHS, paths);
+                        jobConfig.put(PROPERTY_REPLICATED_BY, replicationAction.getUserId());
+
+                        jobManager.addJob(JOB_TOPIC, jobConfig);
                     }
                 } catch (LoginException e) {
                     log.error("Could not obtain a resource resolver.", e);
@@ -204,6 +207,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     @Override
     public final JobResult process(final Job job) {
         final String[] paths = (String[]) job.getProperty(PROPERTY_PATHS);
+        final String replicatedBy = (String) job.getProperty(PROPERTY_REPLICATED_BY);
 
         log.debug("Processing Replication Status Update for JCR Package: {}", paths);
 
@@ -231,7 +235,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
                     if (resources.size() > 0) {
                         replicationStatusManager.setReplicationStatus(resourceResolver,
-                                this.replicatedBy,
+                                StringUtils.defaultIfEmpty(replicatedBy, "Package Replication"),
                                 getJcrPackageLastModified(resourceResolver, jcrPackage),
                                 ReplicationStatusManager.Status.ACTIVATED,
                                 resources.toArray(new Resource[resources.size()]));
@@ -294,7 +298,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
      * @param paths the list of paths to resolve to Jcr Packages
      * @return a list of Jcr Packages that correspond to the provided paths
      */
-    private List<JcrPackage> getJcrPackages(final ResourceResolver resourceResolver, final String[] paths) {
+    List<JcrPackage> getJcrPackages(final ResourceResolver resourceResolver, final String[] paths) {
         final List<JcrPackage> packages = new ArrayList<JcrPackage>();
 
         for (final String path : paths) {
@@ -383,8 +387,6 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     private void activate(final Map<String, String> config) throws LoginException {
         log.trace("Activating the ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)");
 
-        this.replicatedBy = PropertiesUtil.toString(config.get(PROP_REPLICATED_BY), DEFAULT_REPLICATED_BY);
-
         String tmp = PropertiesUtil.toString(config.get(PROP_REPLICATED_AT), "");
         try {
             this.replicatedAt = ReplicatedAt.valueOf(tmp);
@@ -395,7 +397,6 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         this.replicationStatusNodeTypes = PropertiesUtil.toStringArray(config.get(PROP_REPLICATION_STATUS_NODE_TYPES),
                 DEFAULT_REPLICATION_STATUS_NODE_TYPES);
 
-        log.info("Package Replication Status - Replicated By: [ {} ]", this.replicatedBy);
         log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
         log.info("Package Replication Status - Node Types: [ {} ]",
                 StringUtils.join(this.replicationStatusNodeTypes, ", "));

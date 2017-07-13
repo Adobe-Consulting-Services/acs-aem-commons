@@ -2,21 +2,26 @@ package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationEvent;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.event.jobs.Job;
+import org.apache.sling.event.jobs.JobManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -29,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -38,6 +44,9 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JcrPackageReplicationStatusEventHandlerTest {
+    final String PACKAGE_PATH = "/etc/packages/acs-commons/test.zip";
+
+    Calendar calendar;
 
     @Mock
     ReplicationStatusManager replicationStatusManager;
@@ -54,30 +63,33 @@ public class JcrPackageReplicationStatusEventHandlerTest {
     @Mock
     ResourceResolver resourceResolver;
 
+    @Mock
+    JobManager jobManager;
+
+    @Mock
+    Job job;
+
+    @Mock
+    Resource contentResource1;
+
+    @Mock
+    Resource contentResource2;
+
+    @Mock
+    Resource contentResource3;
+
     @InjectMocks
-    JcrPackageReplicationStatusEventHandler jcrPackageReplicationStatusEventHandler = new
-            JcrPackageReplicationStatusEventHandler();
+    JcrPackageReplicationStatusEventHandler eventHandler= new JcrPackageReplicationStatusEventHandler();
 
     @Before
     public void setUp() throws Exception {
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
-    }
-
-    @Test
-    public void testProcess() throws Exception {
-        final Calendar calendar = Calendar.getInstance();
+       calendar = Calendar.getInstance();
 
         final List<String> contentPaths = new ArrayList<String>();
         contentPaths.add("/content/foo/jcr:content");
         contentPaths.add("/content/bar");
         contentPaths.add("/content/dam/folder/jcr:content");
 
-        final String packagePath = "/etc/packages/acs-commons/test.zip";
         final Resource packageResource = mock(Resource.class);
         final Node packageNode = mock(Node.class);
         final JcrPackage jcrPackage = mock(JcrPackage.class);
@@ -85,10 +97,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final JcrPackageDefinition jcrPackageDefinition = mock(JcrPackageDefinition.class);
         final Resource jcrPackageJcrContent = mock(Resource.class);
 
-        final Resource contentResource1 = mock(Resource.class);
         final Resource contentResource1parent = mock(Resource.class);
-        final Resource contentResource2 = mock(Resource.class);
-        final Resource contentResource3 = mock(Resource.class);
         final Resource contentResource3parent = mock(Resource.class);
 
         final Node contentNode1 = mock(Node.class);
@@ -97,20 +106,19 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Node contentNode3 = mock(Node.class);
         final Node contentNode3parent = mock(Node.class);
 
-        final String[] paths = new String[] { packagePath };
+        final String[] paths = new String[] {PACKAGE_PATH};
 
-        final Job job = mock(Job.class);
         when(job.getProperty("paths")).thenReturn(paths);
 
         when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
-        when(resourceResolver.getResource(packagePath)).thenReturn(packageResource);
+        when(resourceResolver.getResource(PACKAGE_PATH)).thenReturn(packageResource);
         when(packageResource.adaptTo(Node.class)).thenReturn(packageNode);
         when(packaging.open(packageNode, false)).thenReturn(jcrPackage);
         when(packageHelper.getContents(jcrPackage)).thenReturn(contentPaths);
         when(jcrPackage.getDefinition()).thenReturn(jcrPackageDefinition);
         when(jcrPackageDefinition.getId()).thenReturn(mock(PackageId.class));
         when(jcrPackage.getNode()).thenReturn(jcrPackageNode);
-        when(jcrPackageNode.getPath()).thenReturn(packagePath);
+        when(jcrPackageNode.getPath()).thenReturn(PACKAGE_PATH);
         when(packageResource.getChild("jcr:content")).thenReturn(jcrPackageJcrContent);
 
         Map<String, Object> properties = new HashMap<String, Object>();
@@ -135,8 +143,16 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(contentResource3.getParent()).thenReturn(contentResource3parent);
         when(contentResource3parent.adaptTo(Node.class)).thenReturn(contentNode3parent);
         when(contentNode3parent.isNodeType("sling:OrderedFolder")).thenReturn(true);
+    }
 
-        jcrPackageReplicationStatusEventHandler.process(job);
+    @After
+    public void tearDown() throws Exception {
+
+    }
+
+    @Test
+    public void testProcess() throws Exception {
+        eventHandler.process(job);
 
         verify(replicationStatusManager, times(1)).setReplicationStatus(
                 eq(resourceResolver),
@@ -144,5 +160,35 @@ public class JcrPackageReplicationStatusEventHandlerTest {
                 eq(calendar),
                 eq(ReplicationStatusManager.Status.ACTIVATED),
                 eq(contentResource1), eq(contentResource2), eq(contentResource3));
+    }
+
+
+    @Test
+    public void testHandleEvent() throws LoginException {
+        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
+
+        // Set to master
+        eventHandler.bindRepository(null, null, true);
+
+        Map<String, Object> modification  = new HashMap<>();
+        modification.put("paths", new String[]{PACKAGE_PATH});
+        modification.put("userId", "replication-user");
+        modification.put("type", ReplicationActionType.ACTIVATE);
+        modification.put("time", 0l);
+        modification.put("revision", "1");
+
+        List<Map<String, Object>> modifications = new ArrayList<>();
+        modifications.add(modification);
+
+        Map<String, Object> eventParams  = new HashMap<>();
+        eventParams.put("modifications", modifications);
+
+        Event event = new Event(ReplicationEvent.EVENT_TOPIC, eventParams);
+
+        eventHandler.handleEvent(event);
+
+        verify(jobManager, times(1)).addJob(eq("acs-commons/replication/package"), captor.capture());
+        Map<String, Object> actual = captor.getValue();
+        assertEquals("replication-user", (String) actual.get("replicatedBy"));
     }
 }
