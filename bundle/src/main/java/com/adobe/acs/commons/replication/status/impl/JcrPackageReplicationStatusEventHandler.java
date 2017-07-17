@@ -37,7 +37,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.jackrabbit.vault.packaging.Packaging;
@@ -46,7 +45,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
@@ -416,15 +414,11 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
      * @throws RepositoryException
      */
     private Calendar getJcrPackageLastModified(final ResourceResolver resourceResolver,
-                                               final JcrPackage jcrPackage) throws RepositoryException {
+                                               final JcrPackage jcrPackage) throws RepositoryException, IOException {
         if (ReplicatedAt.CURRENT_TIME.equals(this.replicatedAt)) {
             return Calendar.getInstance();
         } else {
-            final String path = jcrPackage.getNode().getPath();
-            final Resource resource = resourceResolver.getResource(path).getChild(JcrConstants.JCR_CONTENT);
-            final ValueMap properties = resource.adaptTo(ValueMap.class);
-
-            return properties.get(JcrConstants.JCR_LASTMODIFIED, Calendar.class);
+            return jcrPackage.getPackage().getCreated();
         }
     }
 
