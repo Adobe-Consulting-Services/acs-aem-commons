@@ -10,6 +10,7 @@ import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.VaultPackage;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -93,6 +94,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Resource packageResource = mock(Resource.class);
         final Node packageNode = mock(Node.class);
         final JcrPackage jcrPackage = mock(JcrPackage.class);
+        final VaultPackage vaultPackage = mock(VaultPackage.class);
         final Node jcrPackageNode = mock(Node.class);
         final JcrPackageDefinition jcrPackageDefinition = mock(JcrPackageDefinition.class);
         final Resource jcrPackageJcrContent = mock(Resource.class);
@@ -120,6 +122,9 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(jcrPackage.getNode()).thenReturn(jcrPackageNode);
         when(jcrPackageNode.getPath()).thenReturn(PACKAGE_PATH);
         when(packageResource.getChild("jcr:content")).thenReturn(jcrPackageJcrContent);
+
+        when(jcrPackage.getPackage()).thenReturn(vaultPackage);
+        when(vaultPackage.getCreated()).thenReturn(calendar);
 
         Map<String, Object> properties = new HashMap<String, Object>();
         properties.put(JcrConstants.JCR_LASTMODIFIED, calendar);
