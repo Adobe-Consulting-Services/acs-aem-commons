@@ -16,10 +16,7 @@
 /* global jQuery, Granite */
 var MCPMenu = {
     init: function () {
-        var rightContents, rightMenu, menu = document.getElementById('mcp-main-menu');
-        if (menu) {
-            menu.on('coral-columnview:activeitemchange', MCPMenu.menuSelected);
-        }
+        var rightContents, rightMenu;
         rightMenu = window.top.document.getElementsByClassName("granite-actionbar-right")[0];
         if (rightMenu) {
             while (rightMenu.firstChild) {
@@ -33,11 +30,6 @@ var MCPMenu = {
             }
             rightContents.parentNode.removeChild(rightContents);
         }
-    },
-    menuSelected: function (evt) {
-        var detail = evt.detail.activeItem.attributes['data-src'].value;
-        var url = Granite.HTTP.getPath() + "." + detail + ".html";
-        document.getElementById('mcp-workspace').innerHTML="<iframe src='"+url+"' style='display:block; width: 100%; height:100%; border:none'></iframe>";
     }
 };
 
