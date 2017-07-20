@@ -16,7 +16,6 @@
 package com.adobe.acs.commons.mcp.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
@@ -40,13 +39,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -108,7 +103,7 @@ public class AssetIngestor implements ProcessDefinition, HiddenProcessDefinition
             name = "Ignore extensions",
             description = "List of file extensions to ignore",
             hint = "mp4,txt, etc.",
-            options = {"default=txt,html,css,js"}
+            options = {"default=txt,html,css,js,thm,exe,db"}
     )
     String ignoreExtensions;
     List<String> ignoreExtensionList;
