@@ -44,18 +44,8 @@
             <div class="foundation-layout-panel-bodywrapper">
                 <div class="foundation-layout-panel-body">
                     <div class="foundation-layout-panel-content">
-                        <coral-columnview id="mcp-main-menu">
-                            <coral-columnview-column>
-                                <coral-columnview-column-content>
-                                    <coral-columnview-item role="treeitem" variant="drilldown" icon="plug" data-src="block-browser">Blocks</coral-columnview-item>
-                                    <coral-columnview-item role="treeitem" variant="drilldown" icon="scribble" data-src="script-editor">Scripts</coral-columnview-item>
-                                    <coral-columnview-item role="treeitem" variant="drilldown" icon="pausePlay" data-src="process-manager">Processes</coral-columnview-item>
-                                    <coral-columnview-item role="treeitem" variant="drilldown" icon="properties" data-src="settings">Settings</coral-columnview-item>
-                                </coral-columnview-column-content>
-                            </coral-columnview-column>
-                        </coral-columnview>
                         <div id="mcp-workspace">
-                            <h3>Please select from one the options on the left to get started.</h3>
+                            <iframe src='manage-controlled-processes.process-manager.html' style='display:block; width: 100%; height:100%; border:none'></iframe>
                         </div>                        
                     </div>
                 </div>
