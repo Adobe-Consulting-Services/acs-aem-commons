@@ -38,7 +38,7 @@ import static org.hamcrest.collection.IsMapContaining.*;
 public class GQLToQueryBuilderConverterTest {
 
     @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.NONE);
+    public final SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     @Test
     public void convertToQueryBuilderNoParam() {

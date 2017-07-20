@@ -21,15 +21,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manage a queue of actions that are processed and committed in batches.
  * The number of actions processed in a batch is determined by the size of the queue.
  */
 public class ActionBatch extends LinkedBlockingQueue<CheckedConsumer<ResourceResolver>> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ActionBatch.class);
 
     private final ActionManager manager;
     private int retryCount = 5;
@@ -72,13 +74,13 @@ public class ActionBatch extends LinkedBlockingQueue<CheckedConsumer<ResourceRes
         if (count > 0) {
             manager.deferredWithResolver(
                     Actions.retry(retryCount, retryDelay, (ResourceResolver rr) -> {
-                        Logger.getLogger(ActionBatch.class.getName()).log(Level.INFO, "Executing {0} actions", count);
+                        LOG.info("Executing {} actions", count);
                         for (CheckedConsumer<ResourceResolver> consumer : consumers) {
                             consumer.accept(rr);
                         }
-                        Logger.getLogger(ActionBatch.class.getName()).log(Level.INFO, "Commiting {0} actions", count);
+                        LOG.info("Commiting {} actions", count);
                         rr.commit();
-                        Logger.getLogger(ActionBatch.class.getName()).log(Level.INFO, "Commit successful");
+                        LOG.info("Commit successful");
                     })
             );
         }
