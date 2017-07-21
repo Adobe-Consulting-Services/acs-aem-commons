@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.processes;
+package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.Actions;
@@ -24,7 +24,7 @@ import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.model.FieldFormat;
-import com.adobe.acs.commons.mcp.model.Format;
+import com.adobe.acs.commons.mcp.model.ValueFormat;
 import com.adobe.acs.commons.mcp.util.FrozenAsset;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.dam.api.Asset;
@@ -32,6 +32,7 @@ import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.api.Revision;
 import com.day.cq.dam.commons.util.DamUtil;
+import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,22 +56,23 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 @Component
 @Service(ProcessDefinition.class)
-public class AssetReport implements ProcessDefinition {
+public class AssetReport implements ProcessDefinition, Serializable {
+    private static final long serialVersionUID = 7526472295622776160L;
 
     transient public static final String SHA1 = "dam:sha1";
 
     public static enum Column {
         level, asset_count, subfolder_count,
         rendition_count, version_count, subasset_count,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         original_size,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         rendition_size,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         version_size,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         subasset_size,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         combined_size;
     }
 
@@ -266,7 +268,7 @@ public class AssetReport implements ProcessDefinition {
                         observedHashes.add(versionHash);
                     }
                 }
-                Long size = getTotalAssetSize(assetVersion);
+                long size = getTotalAssetSize(assetVersion);
                 tabulate(folderPath, Column.version_size, size);
                 tabulate(folderPath, Column.combined_size, size);
             }
@@ -274,7 +276,7 @@ public class AssetReport implements ProcessDefinition {
     }
 
     private long getTotalAssetSize(Asset asset) {
-        Long size = asset.getRenditions().stream().collect(Collectors.summingLong(r -> r.getSize()));
+        long size = asset.getRenditions().stream().collect(Collectors.summingLong(r -> r.getSize()));
         if (includeSubassets && !asset.isSubAsset()) {
             size += DamUtil.getSubAssets(asset.adaptTo(Resource.class)).stream().collect(Collectors.summingLong(this::getTotalAssetSize));
         }

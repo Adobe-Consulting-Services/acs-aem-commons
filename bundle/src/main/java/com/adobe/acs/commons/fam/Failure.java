@@ -16,6 +16,7 @@
 package com.adobe.acs.commons.fam;
 
 import aQute.bnd.annotation.ProviderType;
+import java.io.Serializable;
 
 import java.util.Calendar;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -24,8 +25,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
  * Represents a failure on a specific node
  */
 @ProviderType
-public final class Failure {
-    
+public final class Failure implements Serializable {
+    private static final long serialVersionUID = 7526472295622776148L;
+
     private String nodePath;
     private String error;
     private String stackTrace;

@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import aQute.bnd.annotation.ProviderType;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,6 +24,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation used to declare process inputs.
  */
+@ProviderType
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FormField {

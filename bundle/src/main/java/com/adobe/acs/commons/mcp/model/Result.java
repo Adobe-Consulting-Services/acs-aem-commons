@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import aQute.bnd.annotation.ProviderType;
 import javax.inject.Inject;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
@@ -23,6 +24,7 @@ import org.apache.sling.models.annotations.Model;
 /**
  * This bean captures the commonly-collected report summary details from a controlled process
  */
+@ProviderType
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class Result {
     @Inject

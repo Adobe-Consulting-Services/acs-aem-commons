@@ -15,6 +15,9 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,8 +36,11 @@ import org.apache.sling.models.annotations.Model;
 /**
  * Model bean for process instances.
  */
+@ProviderType
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
-public class ManagedProcess {
+public class ManagedProcess implements Serializable {
+    private static final long serialVersionUID = 7526472295622776156L;
+
     @Inject
     private String requester;
     @Inject

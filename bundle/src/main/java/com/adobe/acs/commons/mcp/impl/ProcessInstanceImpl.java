@@ -20,12 +20,13 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.model.ArchivedProcessFailure;
+import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.mcp.model.Result;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.adobe.acs.commons.mcp.util.ValueMapSerializer;
 import com.day.cq.commons.jcr.JcrUtil;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,7 +58,8 @@ import org.slf4j.LoggerFactory;
  * Abstraction of a Process which runs using FAM and consists of one or more
  * actions.
  */
-public class ProcessInstanceImpl implements ProcessInstance {
+public class ProcessInstanceImpl implements ProcessInstance, Serializable {
+    private static final long serialVersionUID = 7526472295622776151L;
 
     private final ManagedProcess infoBean;
     private final String id;

@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
 import com.adobe.acs.commons.mcp.form.FieldComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
@@ -37,8 +38,9 @@ import org.slf4j.LoggerFactory;
  * Produce a list of available process definitions that can be started by the
  * user.
  */
+@ProviderType
 public class AvailableProcessDefinitions extends WCMUsePojo {
-    transient private static final Logger LOG = LoggerFactory.getLogger(AvailableProcessDefinitions.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AvailableProcessDefinitions.class);
 
     Map<String, ProcessDefinition> definitions = Collections.EMPTY_MAP;
     Map<String, FieldComponent> fieldComponents = Collections.EMPTY_MAP;

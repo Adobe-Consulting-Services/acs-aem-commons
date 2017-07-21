@@ -15,11 +15,13 @@
  */
 package com.adobe.acs.commons.fam;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 /**
  * In addition to MBean operations, a ThrottledTaskRunner lets the caller schedule work and provides a throttle method.
  * The logCompletion method should also allow a runnable action provide appropriate notification of success/failure
  */
+@ProviderType
 public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
 
     /**

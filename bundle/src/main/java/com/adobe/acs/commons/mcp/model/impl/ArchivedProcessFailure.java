@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.model;
+package com.adobe.acs.commons.mcp.model.impl;
 
 import com.adobe.acs.commons.fam.Failure;
 import javax.inject.Inject;

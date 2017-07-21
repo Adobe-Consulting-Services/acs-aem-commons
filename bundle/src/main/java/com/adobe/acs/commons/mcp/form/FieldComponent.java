@@ -15,7 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import com.adobe.acs.commons.mcp.form.FormField;
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import java.lang.reflect.Field;
 import java.util.Optional;
@@ -27,6 +27,7 @@ import org.apache.sling.api.scripting.SlingScriptHelper;
 /**
  * Describes a component in a manner which supports auto-generated forms
  */
+@ProviderType
 public abstract class FieldComponent {
     private String name;
     protected FormField formField;

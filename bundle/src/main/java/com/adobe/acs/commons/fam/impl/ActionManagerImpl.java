@@ -21,6 +21,7 @@ import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,7 +51,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages a pool of reusable resource resolvers and injects them into tasks
  */
-class ActionManagerImpl extends CancelHandler implements ActionManager {
+class ActionManagerImpl extends CancelHandler implements ActionManager, Serializable {
+    private static final long serialVersionUID = 7526472295622776150L;
 
     transient private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
     // This is a delay of how long an action manager should wait before it can safely assume it really is done and no more work is being added

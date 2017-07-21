@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.functions.CheckedConsumer;
@@ -30,6 +31,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  * Abstraction of a Process which runs using FAM and consists of one or more
  * actions.
  */
+@ProviderType
 public interface ProcessInstance {
 
     public static final String RESOURCE_TYPE = "acs-commons/components/utilities/process-instance";
