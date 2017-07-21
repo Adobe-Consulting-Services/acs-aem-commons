@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.day.cq.commons.jcr.JcrUtil;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import org.apache.sling.models.annotations.Model;
  * Describes a very simple table, which is up to the process definition to
  * outline.
  */
+@ProviderType
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class GenericReport {
     public static final String GENERIC_REPORT_RESOURCE_TYPE = ProcessInstance.RESOURCE_TYPE + "/process-generic-report";

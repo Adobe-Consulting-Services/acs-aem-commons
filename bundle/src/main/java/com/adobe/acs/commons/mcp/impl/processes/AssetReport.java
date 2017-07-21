@@ -64,15 +64,15 @@ public class AssetReport implements ProcessDefinition, Serializable {
     public static enum Column {
         level, asset_count, subfolder_count,
         rendition_count, version_count, subasset_count,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         original_size,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         rendition_size,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         version_size,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         subasset_size,
-        @FieldFormat(Format.storageSize)
+        @FieldFormat(ValueFormat.storageSize)
         combined_size;
     }
 

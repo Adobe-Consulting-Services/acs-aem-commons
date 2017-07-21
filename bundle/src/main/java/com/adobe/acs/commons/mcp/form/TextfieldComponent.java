@@ -15,9 +15,12 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
- *
+ * Text field component
  */
+@ProviderType
 public class TextfieldComponent extends FieldComponent {
     @Override
     public void init() {

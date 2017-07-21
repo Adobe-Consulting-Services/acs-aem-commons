@@ -25,8 +25,8 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.FieldFormat;
-import com.adobe.acs.commons.mcp.model.ValueFormat;
 import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.ValueFormat;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
@@ -315,7 +315,7 @@ public class AssetIngestor implements ProcessDefinition, HiddenProcessDefinition
         createAsset(sourceFile, assetPath, r, r.getResource(assetPath) != null);
     }    
 
-    enum ReportColumns {folder_count, asset_count, files_skipped, @FieldFormat(Format.storageSize) data_imported};
+    enum ReportColumns {folder_count, asset_count, files_skipped, @FieldFormat(ValueFormat.storageSize) data_imported};
     GenericReport report = new GenericReport();
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
