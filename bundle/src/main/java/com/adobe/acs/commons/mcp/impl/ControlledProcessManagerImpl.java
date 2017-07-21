@@ -19,7 +19,7 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
-import com.adobe.acs.commons.mcp.model.ArchivedProcessInstance;
+import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessInstance;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;

@@ -17,5 +17,5 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("3.0.0")
+@aQute.bnd.annotation.Version("2.3.0")
 package com.adobe.acs.commons.fam;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.processes;
+package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.ActionBatch;
