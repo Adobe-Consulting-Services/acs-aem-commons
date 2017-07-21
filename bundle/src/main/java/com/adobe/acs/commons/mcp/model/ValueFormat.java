@@ -21,26 +21,26 @@ import java.util.function.Function;
 /**
  * Describes the desired output format of a value within a report
  */
-public enum Format {
-    plain, storageSize("_short", Format::getHumanSize);
+public enum ValueFormat {
+    plain, storageSize("_short", ValueFormat::getHumanSize);
     int columnCount = 1;
     String suffix = "";
     Function<Object, Object> altFunction;
 
-    Format() {
+    ValueFormat() {
     }
 
-    Format(String alternate, Function<Object, Object> altFunc) {
+    ValueFormat(String alternate, Function<Object, Object> altFunc) {
         columnCount = 2;
         suffix = alternate;
         altFunction = altFunc;
     }
 
-    public static Format forField(Enum e) {
+    public static ValueFormat forField(Enum e) {
         try {
             Field f = e.getDeclaringClass().getField(e.name());
             if (!f.isAnnotationPresent(FieldFormat.class)) {
-                return Format.plain;
+                return ValueFormat.plain;
             } else {
                 FieldFormat rf = f.getAnnotation(FieldFormat.class);
                 return rf.value();
@@ -48,7 +48,7 @@ public enum Format {
         } catch (IllegalArgumentException | NoSuchFieldException | SecurityException ex) {
             // Ignore errors, assume plain
         }
-        return Format.plain;
+        return ValueFormat.plain;
     }
 
     public Object getAlternateValue(Object val) {
