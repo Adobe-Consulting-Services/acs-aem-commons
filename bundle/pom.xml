@@ -58,7 +58,6 @@
                             com.day.cq.wcm.workflow.process;version="[6.0,8)", <!-- using a wider version range for forward compatibility -->
                             com.day.cq.mailer;version="[5.9,7)", <!-- using a wider version range for forward compatibility -->
                             com.adobe.cq.sightly;version="[2.5,4)",
-                            com.day.cq.dam.api;version="[1.16,2)", <!-- using a wider version range for forward compatibility -->
                             *
                         </Import-Package>
                         <Embed-Dependency>guava</Embed-Dependency>
