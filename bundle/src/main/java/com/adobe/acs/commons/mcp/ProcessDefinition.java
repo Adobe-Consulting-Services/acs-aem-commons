@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp;
 
+import aQute.bnd.annotation.ConsumerType;
 import com.adobe.acs.commons.mcp.form.FormProcessor;
 import javax.jcr.RepositoryException;
 import org.apache.sling.api.resource.LoginException;
@@ -24,6 +25,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * Describes a process and provides a builder which creates the process
  */
+@ConsumerType
 public interface ProcessDefinition extends FormProcessor {
 
     public String getName();

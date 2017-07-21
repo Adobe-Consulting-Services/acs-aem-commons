@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.jcr.JcrUtil;
@@ -27,6 +28,7 @@ import org.apache.sling.api.resource.ResourceMetadata;
 /**
  * Radio button selector component
  */
+@ProviderType
 public abstract class RadioComponent extends FieldComponent {
     public static class EnumerationSelector extends RadioComponent {
 

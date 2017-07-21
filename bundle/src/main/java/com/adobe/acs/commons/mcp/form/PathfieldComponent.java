@@ -15,11 +15,14 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provisions for path fields Accepts the following options: base=[path] -- Root
  * of tree shown to user multiple -- If added it indicates the user can make
  * multiple selections and values are stored in a multi-value field
  */
+@ProviderType
 public abstract class PathfieldComponent extends FieldComponent {
 
     @Override

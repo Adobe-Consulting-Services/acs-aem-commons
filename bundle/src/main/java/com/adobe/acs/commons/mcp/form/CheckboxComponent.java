@@ -15,9 +15,12 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Radio button selector component
  */
+@ProviderType
 public class CheckboxComponent extends FieldComponent {
     @Override
     public void init() {
