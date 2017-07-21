@@ -20,7 +20,7 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.model.ArchivedProcessFailure;
+import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.mcp.model.Result;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
