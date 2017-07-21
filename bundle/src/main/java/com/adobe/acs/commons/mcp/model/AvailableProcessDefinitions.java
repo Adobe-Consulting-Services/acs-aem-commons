@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * user.
  */
 public class AvailableProcessDefinitions extends WCMUsePojo {
-    transient private static final Logger LOG = LoggerFactory.getLogger(AvailableProcessDefinitions.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AvailableProcessDefinitions.class);
 
     Map<String, ProcessDefinition> definitions = Collections.EMPTY_MAP;
     Map<String, FieldComponent> fieldComponents = Collections.EMPTY_MAP;

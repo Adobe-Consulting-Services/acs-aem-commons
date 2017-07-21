@@ -27,6 +27,7 @@ import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent.EnumerationSelector;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +49,9 @@ import org.apache.sling.event.jobs.Queue;
  */
 @Component
 @Service(ProcessDefinition.class)
-public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition {
+public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition, Serializable {
+    private static final long serialVersionUID = 7526472295622776160L;
+    
     @Reference
     transient private JobManager jobManager;
     

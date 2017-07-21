@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ValueMapSerializer {
 
-    transient private static final Logger LOG = LoggerFactory.getLogger(ValueMapSerializer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ValueMapSerializer.class);
 
     public static void serializeToResource(Resource r, Object sourceObject) {
         Map<String, Object> map = r.adaptTo(ModifiableValueMap.class);

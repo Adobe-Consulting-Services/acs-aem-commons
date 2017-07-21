@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,7 +35,9 @@ import org.apache.sling.models.annotations.Model;
  * Model bean for process instances.
  */
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
-public class ManagedProcess {
+public class ManagedProcess implements Serializable {
+    private static final long serialVersionUID = 7526472295622776156L;
+
     @Inject
     private String requester;
     @Inject

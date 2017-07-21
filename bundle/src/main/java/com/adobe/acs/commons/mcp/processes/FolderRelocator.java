@@ -42,6 +42,7 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import com.adobe.acs.commons.mcp.form.FormField;
+import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -78,7 +79,9 @@ import org.apache.felix.scr.annotations.Service;
  */
 @Component
 @Service(ProcessDefinition.class)
-public class FolderRelocator implements ProcessDefinition {
+public class FolderRelocator implements ProcessDefinition, Serializable {
+    private static final long serialVersionUID = 7526472295622776160L;
+    
     public static enum Mode {
         RENAME, MOVE
     };
