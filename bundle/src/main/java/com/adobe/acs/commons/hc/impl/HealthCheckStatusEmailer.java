@@ -252,7 +252,7 @@ public class HealthCheckStatusEmailer implements Runnable {
      * @param results the  Health Check Execution Results to render as plain text
      * @return the String for this section to be embedded in the e-mail
      */
-    private String resultToPlainText(final String title, final List<HealthCheckExecutionResult> results) {
+    protected String resultToPlainText(final String title, final List<HealthCheckExecutionResult> results) {
         final StringBuilder sb = new StringBuilder();
 
         sb.append(title);
