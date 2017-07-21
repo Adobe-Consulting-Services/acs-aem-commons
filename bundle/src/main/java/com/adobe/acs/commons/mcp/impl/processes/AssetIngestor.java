@@ -25,7 +25,7 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.FieldFormat;
-import com.adobe.acs.commons.mcp.model.Format;
+import com.adobe.acs.commons.mcp.model.ValueFormat;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;

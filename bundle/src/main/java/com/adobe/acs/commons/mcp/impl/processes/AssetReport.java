@@ -24,7 +24,7 @@ import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.model.FieldFormat;
-import com.adobe.acs.commons.mcp.model.Format;
+import com.adobe.acs.commons.mcp.model.ValueFormat;
 import com.adobe.acs.commons.mcp.util.FrozenAsset;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.dam.api.Asset;
