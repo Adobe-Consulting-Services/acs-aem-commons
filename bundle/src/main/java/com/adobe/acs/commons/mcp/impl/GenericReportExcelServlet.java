@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 @SlingServlet(resourceTypes = GenericReport.GENERIC_REPORT_RESOURCE_TYPE, extensions = {"xlsx","xls"})
 public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
-    transient private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GenericReportExcelServlet.class);
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GenericReportExcelServlet.class);
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {

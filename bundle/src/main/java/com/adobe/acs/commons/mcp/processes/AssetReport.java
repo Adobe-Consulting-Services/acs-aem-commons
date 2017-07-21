@@ -32,6 +32,7 @@ import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.api.Revision;
 import com.day.cq.dam.commons.util.DamUtil;
+import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,7 +56,8 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 @Component
 @Service(ProcessDefinition.class)
-public class AssetReport implements ProcessDefinition {
+public class AssetReport implements ProcessDefinition, Serializable {
+    private static final long serialVersionUID = 7526472295622776160L;
 
     transient public static final String SHA1 = "dam:sha1";
 

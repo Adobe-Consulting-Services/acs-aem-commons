@@ -20,6 +20,7 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
+import java.io.Serializable;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -37,7 +38,9 @@ import org.apache.sling.models.annotations.Via;
  *
  */
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
-public class ArchivedProcessInstance implements ProcessInstance {
+public class ArchivedProcessInstance implements ProcessInstance, Serializable {
+    private static final long serialVersionUID = 7526472295622776155L;
+
     @Inject
     transient private Resource resource;
 
