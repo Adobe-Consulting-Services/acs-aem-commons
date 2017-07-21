@@ -266,7 +266,7 @@ public class AssetReport implements ProcessDefinition {
                         observedHashes.add(versionHash);
                     }
                 }
-                Long size = getTotalAssetSize(assetVersion);
+                long size = getTotalAssetSize(assetVersion);
                 tabulate(folderPath, Column.version_size, size);
                 tabulate(folderPath, Column.combined_size, size);
             }
@@ -274,7 +274,7 @@ public class AssetReport implements ProcessDefinition {
     }
 
     private long getTotalAssetSize(Asset asset) {
-        Long size = asset.getRenditions().stream().collect(Collectors.summingLong(r -> r.getSize()));
+        long size = asset.getRenditions().stream().collect(Collectors.summingLong(r -> r.getSize()));
         if (includeSubassets && !asset.isSubAsset()) {
             size += DamUtil.getSubAssets(asset.adaptTo(Resource.class)).stream().collect(Collectors.summingLong(this::getTotalAssetSize));
         }
