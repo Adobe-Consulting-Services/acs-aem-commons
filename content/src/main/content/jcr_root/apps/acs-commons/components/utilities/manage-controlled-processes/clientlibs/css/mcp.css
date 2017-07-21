@@ -30,7 +30,8 @@ limitations under the License.
 
 #mcp-workspace {
     position:absolute; 
-    left:176px; 
+    /*left:176px;*/
+    left:0px;
     right:0px; 
     text-align: center;
 }

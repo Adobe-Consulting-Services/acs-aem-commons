@@ -259,7 +259,7 @@ public class AssetReport implements ProcessDefinition, Serializable {
         if (includeVersions) {
             for (Revision rev : asset.getRevisions(null)) {
                 tabulate(folderPath, Column.version_count, 1);
-                FrozenAsset assetVersion = new FrozenAsset(asset, rev);
+                Asset assetVersion = FrozenAsset.createFrozenAsset(asset, rev);
                 String versionHash = assetVersion.getMetadataValue(SHA1);
                 if (versionHash != null) {
                     if (observedHashes.contains(versionHash)) {
