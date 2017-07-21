@@ -82,7 +82,7 @@ public class GenericReport {
         Stream.of().map(Object::toString).collect(Collectors.toCollection(this::getColumns));
         for (Enum e : enumClass.getEnumConstants()) {
             this.getColumns().add(e.toString());
-            Format format = Format.forField(e);
+            ValueFormat format = ValueFormat.forField(e);
             if (format.columnCount > 1) {
                 this.getColumns().add(e.toString() + format.suffix);
             }
@@ -93,7 +93,7 @@ public class GenericReport {
             r.put(keyName, path);
             for (Enum<E> c : enumClass.getEnumConstants()) {
                 if (row.containsKey(c)) {
-                    Format format = Format.forField(c);
+                    ValueFormat format = ValueFormat.forField(c);
                     r.put(c.toString(), row.get(c));
                     if (format.columnCount > 1) {
                         r.put(c.toString()+format.suffix, format.getAlternateValue(row.get(c)));
@@ -109,7 +109,7 @@ public class GenericReport {
         Stream.of().map(Object::toString).collect(Collectors.toCollection(this::getColumns));
         for (Enum e : enumClass.getEnumConstants()) {
             this.getColumns().add(e.toString());
-            Format format = Format.forField(e);
+            ValueFormat format = ValueFormat.forField(e);
             if (format.columnCount > 1) {
                 this.getColumns().add(e.toString() + format.suffix);
             }
@@ -119,7 +119,7 @@ public class GenericReport {
             Map<String, Object> r = new LinkedHashMap<>();
             for (Enum<E> c : enumClass.getEnumConstants()) {
                 if (row.containsKey(c)) {
-                    Format format = Format.forField(c);
+                    ValueFormat format = ValueFormat.forField(c);
                     r.put(c.toString(), row.get(c));
                     if (format.columnCount > 1) {
                         r.put(c.toString()+format.suffix, format.getAlternateValue(row.get(c)));
