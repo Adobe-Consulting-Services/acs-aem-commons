@@ -92,7 +92,6 @@ public class HealthCheckStatusEmailer implements Runnable {
             value = DEFAULT_EMAIL_TEMPLATE_PATH)
     public static final String PROP_TEMPLATE_PATH = "email.template.path";
 
-
     private static final String DEFAULT_EMAIL_SUBJECT_PREFIX = "AEM Health Check report";
     private String emailSubject = DEFAULT_EMAIL_SUBJECT_PREFIX;
     @Property(label = "E-mail Subject Prefix",
@@ -122,6 +121,13 @@ public class HealthCheckStatusEmailer implements Runnable {
             cardinality = Integer.MAX_VALUE,
             value = {"system"})
     public static final String PROP_HEALTH_CHECK_TAGS = "hc.tags";
+
+    private static final int DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE = -1;
+    private int healthCheckTimeoutOverride = DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE;
+    @Property(label = "Health Check Timeout Override",
+            description = "The AEM Health Check timeout override in milliseconds. Set < 1 to disable. [ Default: -1 ]",
+            intValue = DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE)
+    public static final String PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE = "hc.timeout.override";
 
     private static final boolean DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR = true;
     private boolean healthCheckTagsOptionsOr = DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR;
@@ -173,6 +179,9 @@ public class HealthCheckStatusEmailer implements Runnable {
         final HealthCheckExecutionOptions options = new HealthCheckExecutionOptions();
         options.setForceInstantExecution(true);
         options.setCombineTagsWithOr(healthCheckTagsOptionsOr);
+        if (healthCheckTimeoutOverride > 0) {
+            options.setOverrideGlobalTimeout(healthCheckTimeoutOverride);
+        }
         final List<HealthCheckExecutionResult> results = healthCheckExecutor.execute(options, healthCheckTags);
 
         log.debug("Obtained [ {} ] results for Health Check tags [ {} ]", results.size(), StringUtils.join(healthCheckTags, ", "));
@@ -294,6 +303,7 @@ public class HealthCheckStatusEmailer implements Runnable {
         if (throttleInMins < 0) {
             throttleInMins = DEFAULT_THROTTLE_IN_MINS;
         }
+        healthCheckTimeoutOverride = PropertiesUtil.toInteger(config.get(PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE), DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE);
     }
 
     /**
