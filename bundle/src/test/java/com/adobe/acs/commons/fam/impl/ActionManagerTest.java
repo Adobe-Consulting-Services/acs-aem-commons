@@ -16,6 +16,8 @@
 package com.adobe.acs.commons.fam.impl;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import static org.junit.Assert.*;
@@ -26,50 +28,85 @@ import static org.mockito.Mockito.*;
  * Basic tests covering simple Action Manager operations
  */
 public class ActionManagerTest {
+
+    private void run(Runnable r) {
+        try {
+            Thread t = new Thread(r);
+            t.start();
+            t.join();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ActionManagerTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     private ThrottledTaskRunner getTaskRunner() {
         ThrottledTaskRunner taskRunner = mock(ThrottledTaskRunner.class);
         doAnswer(i -> {
-            ((Runnable) i.getArguments()[0]).run();
+            run((Runnable) i.getArguments()[0]);
             return null;
         }).when(taskRunner).scheduleWork(any());
         doAnswer(i -> {
-            ((Runnable) i.getArguments()[0]).run();
+            run((Runnable) i.getArguments()[0]);
             return null;
         }).when(taskRunner).scheduleWork(any(), any());
         return taskRunner;
     }
 
-    @Test
-    public void statsCounterTest() throws LoginException, Exception {
+    private ResourceResolver getMockResolver() throws LoginException {
         ResourceResolver rr = mock(ResourceResolver.class);
         when(rr.clone(any())).thenReturn(rr);
+        when(rr.isLive()).thenReturn(true);
+        return rr;
+    }
+    
+    @Test
+    public void nullStatsCounterTest() throws LoginException, Exception {
+        // Counters don't do tabulate in-thread actions, only deferred actions
+        ResourceResolver rr = getMockResolver();
         ActionManagerImpl manager = new ActionManagerImpl("test", getTaskRunner(), rr, 1);
         assertEquals(0, manager.getAddedCount());
-        manager.withResolver(resolver->{});
+        manager.withResolver(resolver -> {});
+        assertEquals(0, manager.getAddedCount());
+        assertEquals(0, manager.getCompletedCount());
+        manager.withResolver(resolver -> {});
+        assertEquals(0, manager.getAddedCount());
+        assertEquals(0, manager.getCompletedCount());
+        assertEquals(0, manager.getErrorCount());
+        assertEquals(0, manager.getRemainingCount());
+        assertTrue(manager.isComplete());
+    }
+
+    @Test
+    public void deferredStatsCounterTest() throws LoginException, Exception {
+        ResourceResolver rr = getMockResolver();
+        ActionManagerImpl manager = new ActionManagerImpl("test", getTaskRunner(), rr, 1);
+        assertEquals(0, manager.getAddedCount());
+        manager.deferredWithResolver(resolver -> {
+        });
         assertEquals(1, manager.getAddedCount());
         assertEquals(1, manager.getCompletedCount());
-        manager.withResolver(resolver->{});
+        manager.deferredWithResolver(resolver -> {
+        });
         assertEquals(2, manager.getAddedCount());
         assertEquals(2, manager.getCompletedCount());
         assertEquals(0, manager.getErrorCount());
         assertEquals(0, manager.getRemainingCount());
         assertTrue(manager.isComplete());
     }
-    
+
     @Test
-    public void deferredStatsCounterTest() throws LoginException, Exception {
-        ResourceResolver rr = mock(ResourceResolver.class);
-        when(rr.clone(any())).thenReturn(rr);
+    public void closeAllResolversTest() throws LoginException, Exception {
+        ResourceResolver rr = getMockResolver();
         ActionManagerImpl manager = new ActionManagerImpl("test", getTaskRunner(), rr, 1);
-        assertEquals(0, manager.getAddedCount());
-        manager.deferredWithResolver(resolver->{});
-        assertEquals(1, manager.getAddedCount());
-        assertEquals(1, manager.getCompletedCount());
-        manager.deferredWithResolver(resolver->{});
-        assertEquals(2, manager.getAddedCount());
-        assertEquals(2, manager.getCompletedCount());
-        assertEquals(0, manager.getErrorCount());
-        assertEquals(0, manager.getRemainingCount());
-        assertTrue(manager.isComplete());
+        manager.deferredWithResolver(resolver -> {
+        });
+        manager.deferredWithResolver(resolver -> {
+        });
+        manager.deferredWithResolver(resolver -> {
+        });
+        manager.deferredWithResolver(resolver -> {
+        });
+        manager.closeAllResolvers();
+        verify(rr, times(5)).close();
     }
 }
