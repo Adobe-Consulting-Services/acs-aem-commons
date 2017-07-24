@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.mcp.util;
 
+import com.adobe.acs.commons.mcp.form.FieldComponent;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -30,11 +31,19 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
 import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
  */
 public class AnnotatedFieldDeserializer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AnnotatedFieldDeserializer.class);
 
     public static void deserializeFormFields(Object target, ValueMap input) throws DeserializeException {
         List<Field> fields = FieldUtils.getFieldsListWithAnnotation(target.getClass(), FormField.class);
@@ -49,8 +58,8 @@ public class AnnotatedFieldDeserializer {
                 throw new DeserializeException("Error when processing field " + field.getName(), ex);
             }
         }
-    }    
-    
+    }
+
     private static void parseInput(Object target, ValueMap input, Field field) throws ReflectiveOperationException, ParseException {
         FormField inputAnnotation = field.getAnnotation(FormField.class);
         if (input.get(field.getName()) == null) {
@@ -141,6 +150,23 @@ public class AnnotatedFieldDeserializer {
         } else {
             return type;
         }
+    }
+
+    public static Map<String, FieldComponent> getFormFields(Class source, SlingScriptHelper sling) {
+        return FieldUtils.getFieldsListWithAnnotation(source, FormField.class)
+                .stream()
+                .collect(Collectors.toMap(Field::getName, f -> {
+                    FormField fieldDefinition = f.getAnnotation(FormField.class);
+                    FieldComponent component;
+                    try {
+                        component = fieldDefinition.component().newInstance();
+                        component.setup(f.getName(), f, fieldDefinition, sling);
+                        return component;
+                    } catch (InstantiationException | IllegalAccessException ex) {
+                        LOG.error("Unable to instantiate field component for " + f.getName(), ex);
+                    }
+                    return null;
+                }, (a, b) -> a, LinkedHashMap::new));
     }
 
     private AnnotatedFieldDeserializer() {

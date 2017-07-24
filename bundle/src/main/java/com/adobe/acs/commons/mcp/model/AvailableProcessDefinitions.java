@@ -18,18 +18,15 @@ package com.adobe.acs.commons.mcp.model;
 import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
 import com.adobe.acs.commons.mcp.form.FieldComponent;
-import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import com.adobe.cq.sightly.WCMUsePojo;
-import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,20 +57,8 @@ public class AvailableProcessDefinitions extends WCMUsePojo {
             processDefinitionName = getRequest().getParameter("processDefinition");
         }
         if (StringUtils.isNotEmpty(processDefinitionName) && definitions.containsKey(processDefinitionName)) {
-            fieldComponents = FieldUtils.getFieldsListWithAnnotation(definitions.get(processDefinitionName).getClass(), FormField.class)
-                    .stream()
-                    .collect(Collectors.toMap(Field::getName, f -> {
-                        FormField fieldDefinition = f.getAnnotation(FormField.class);
-                        FieldComponent component;
-                        try {
-                            component = fieldDefinition.component().newInstance();
-                            component.setup(f.getName(), f, fieldDefinition, sling);
-                            return component;
-                        } catch (InstantiationException | IllegalAccessException ex) {
-                            LOG.error("Unable to instantiate field component for "+f.getName(), ex);
-                        }
-                        return null;
-                    }, (a,b)->a, LinkedHashMap::new));
+            Class clazz = definitions.get(processDefinitionName).getClass();
+            fieldComponents = AnnotatedFieldDeserializer.getFormFields(clazz, sling);
         }
     }
 
