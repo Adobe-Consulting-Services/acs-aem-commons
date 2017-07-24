@@ -55,4 +55,21 @@ public class ActionManagerTest {
         assertEquals(0, manager.getRemainingCount());
         assertTrue(manager.isComplete());
     }
+    
+    @Test
+    public void deferredStatsCounterTest() throws LoginException, Exception {
+        ResourceResolver rr = mock(ResourceResolver.class);
+        when(rr.clone(any())).thenReturn(rr);
+        ActionManagerImpl manager = new ActionManagerImpl("test", getTaskRunner(), rr, 1);
+        assertEquals(0, manager.getAddedCount());
+        manager.deferredWithResolver(resolver->{});
+        assertEquals(1, manager.getAddedCount());
+        assertEquals(1, manager.getCompletedCount());
+        manager.deferredWithResolver(resolver->{});
+        assertEquals(2, manager.getAddedCount());
+        assertEquals(2, manager.getCompletedCount());
+        assertEquals(0, manager.getErrorCount());
+        assertEquals(0, manager.getRemainingCount());
+        assertTrue(manager.isComplete());
+    }
 }
