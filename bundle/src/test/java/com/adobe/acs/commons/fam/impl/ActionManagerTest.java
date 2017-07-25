@@ -55,6 +55,11 @@ public class ActionManagerTest {
     }
 
     static ResourceResolver mockResolver;
+    public static ResourceResolver getFreshMockResolver() throws LoginException {
+        mockResolver = null;
+        return getMockResolver();
+    }
+    
     public static ResourceResolver getMockResolver() throws LoginException {
         if (mockResolver == null) {
             mockResolver = mock(ResourceResolver.class);
