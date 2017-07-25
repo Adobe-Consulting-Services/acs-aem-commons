@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.*;
  */
 public class ActionManagerTest {
 
-    private void run(Runnable r) {
+    public static void run(Runnable r) {
         try {
             Thread t = new Thread(r);
             t.start();
@@ -40,7 +41,7 @@ public class ActionManagerTest {
         }
     }
 
-    private ThrottledTaskRunner getTaskRunner() {
+    public static ThrottledTaskRunner getTaskRunner() {
         ThrottledTaskRunner taskRunner = mock(ThrottledTaskRunner.class);
         doAnswer(i -> {
             run((Runnable) i.getArguments()[0]);
@@ -53,18 +54,23 @@ public class ActionManagerTest {
         return taskRunner;
     }
 
-    private ResourceResolver getMockResolver() throws LoginException {
+    public static ResourceResolver getMockResolver() throws LoginException {
         ResourceResolver rr = mock(ResourceResolver.class);
         when(rr.clone(any())).thenReturn(rr);
         when(rr.isLive()).thenReturn(true);
         return rr;
     }
     
+    public static ActionManager getActionManager() throws LoginException {
+        ResourceResolver rr = getMockResolver();
+        return new ActionManagerImpl("test", getTaskRunner(), rr, 1);        
+    }
+    
     @Test
     public void nullStatsCounterTest() throws LoginException, Exception {
         // Counters don't do tabulate in-thread actions, only deferred actions
         ResourceResolver rr = getMockResolver();
-        ActionManagerImpl manager = new ActionManagerImpl("test", getTaskRunner(), rr, 1);
+        ActionManager manager = getActionManager();
         assertEquals(0, manager.getAddedCount());
         manager.withResolver(resolver -> {});
         assertEquals(0, manager.getAddedCount());
@@ -80,7 +86,7 @@ public class ActionManagerTest {
     @Test
     public void deferredStatsCounterTest() throws LoginException, Exception {
         ResourceResolver rr = getMockResolver();
-        ActionManagerImpl manager = new ActionManagerImpl("test", getTaskRunner(), rr, 1);
+        ActionManager manager = getActionManager();
         assertEquals(0, manager.getAddedCount());
         manager.deferredWithResolver(resolver -> {
         });
@@ -99,7 +105,7 @@ public class ActionManagerTest {
     @Test
     public void deferredStatsCounterErrorTest() throws LoginException, Exception {
         ResourceResolver rr = getMockResolver();
-        ActionManagerImpl manager = new ActionManagerImpl("test", getTaskRunner(), rr, 1);
+        ActionManager manager = getActionManager();
         assertEquals(0, manager.getAddedCount());
         manager.deferredWithResolver(resolver -> {
             throw new Exception("Bad things");
@@ -135,7 +141,7 @@ public class ActionManagerTest {
     @Test
     public void closeAllResolversTest() throws LoginException, Exception {
         ResourceResolver rr = getMockResolver();
-        ActionManagerImpl manager = new ActionManagerImpl("test", getTaskRunner(), rr, 1);
+        ActionManager manager = getActionManager();
         manager.deferredWithResolver(resolver -> {
         });
         manager.deferredWithResolver(resolver -> {
