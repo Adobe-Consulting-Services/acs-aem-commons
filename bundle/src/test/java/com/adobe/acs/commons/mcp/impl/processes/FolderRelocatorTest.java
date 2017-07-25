@@ -27,11 +27,14 @@ import com.adobe.acs.commons.mcp.util.DeserializeException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import static org.junit.Assert.*;
@@ -42,12 +45,74 @@ import static org.mockito.Mockito.*;
  * Tests a few cases for folder relocator
  */
 public class FolderRelocatorTest {
-
     @Test
-    public void testInit() throws LoginException, DeserializeException, RepositoryException {
+    public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException {
+        ResourceResolver rr = getEnhancedMockResolver();
         FolderRelocator tool = new FolderRelocator();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
-        ResourceResolver rr = getMockResolver();
+
+        assertEquals("Folder relocator: relocator test", instance.getName());
+        try {
+            instance.init(rr, Collections.EMPTY_MAP);
+            fail("That should have thrown an error");
+        } catch (DeserializeException ex) {
+            // Expected
+        }
+    }
+    
+    @Test
+    public void barebonesRun() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
+        ResourceResolver rr = getEnhancedMockResolver();
+        FolderRelocator tool = new FolderRelocator();
+        ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
+
+        assertEquals("Folder relocator: relocator test", instance.getName());
+        Map<String, Object> values = new HashMap<>();
+        values.put("sourcePaths", "/content/folderA");
+        values.put("destinationPath", "/content/folderB");
+        values.put("mode", FolderRelocator.Mode.MOVE.toString());
+        instance.init(rr, values);
+        assertEquals(0.0, instance.updateProgress(), 0.00001);
+        instance.run(rr);
+        assertEquals(1.0, instance.updateProgress(), 0.00001);
+        verify(rr, times(3)).commit();
+    }
+    
+    @Test
+    public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException {
+        ResourceResolver rr = getEnhancedMockResolver();
+        FolderRelocator tool = new FolderRelocator();
+        ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
+
+        assertEquals("Folder relocator: relocator test", instance.getName());
+        Map<String, Object> values = new HashMap<>();
+        values.put("sourcePaths", "/content/folderA");
+        values.put("destinationPath", "/content/folderB");
+        values.put("mode", FolderRelocator.Mode.MOVE.toString());
+        instance.init(rr, values);
+        
+        CompletableFuture<Boolean> f = new CompletableFuture<>();
+        
+        instance.defineAction("Halt", rr, am->{
+            instance.halt();
+            try {
+                assertTrue(instance.updateProgress() < 1.0);
+                assertFalse(instance.getInfo().isIsRunning());
+                f.complete(true);
+            } catch (Throwable t) {
+                f.completeExceptionally(t);
+            }            
+        });
+        instance.run(rr);
+        assertTrue(f.get());
+        verify(rr, times(1)).commit();
+    }
+
+    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
+        ResourceResolver rr = getFreshMockResolver();
+        
+        when(rr.hasChanges()).thenReturn(true);
+
         AbstractResourceImpl mockFolderA = new AbstractResourceImpl("/content/folderA", "", "", new ResourceMetadata());
         when(rr.getResource("/content/folderA")).thenReturn(mockFolderA);
         AbstractResourceImpl mockFolderB = new AbstractResourceImpl("/content/folderB", "", "", new ResourceMetadata());
@@ -56,26 +121,14 @@ public class FolderRelocatorTest {
         when(rr.getResource("/content")).thenReturn(mockFolder);
         mockFolder.addChild(mockFolderA);
         mockFolder.addChild(mockFolderB);
-        
+
         Session ses = mock(Session.class);
         when(rr.adaptTo(Session.class)).thenReturn(ses);
         AccessControlManager acm = mock(AccessControlManager.class);
         when(ses.getAccessControlManager()).thenReturn(acm);
         when(acm.privilegeFromName(any())).thenReturn(mock(Privilege.class));
-        
-        assertEquals("Folder relocator: relocator test", instance.getName());
-        try {
-            instance.init(getMockResolver(), Collections.EMPTY_MAP);
-            fail("That should have thrown an error");
-        } catch (DeserializeException ex) {
-            // Expected
-        }
-        Map<String, Object> values = new HashMap<>();
-        values.put("sourcePaths", "/content/folderA");
-        values.put("destinationPath", "/content/folderB");
-        values.put("mode", FolderRelocator.Mode.MOVE.toString());
-        instance.init(rr, values);
-        instance.run(rr);
+
+        return rr;
     }
 
     private ControlledProcessManager getControlledProcessManager() throws LoginException {
