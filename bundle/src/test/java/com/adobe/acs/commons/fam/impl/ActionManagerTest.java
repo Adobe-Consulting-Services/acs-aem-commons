@@ -88,11 +88,35 @@ public class ActionManagerTest {
         manager.deferredWithResolver(resolver -> {
         });
         assertEquals(2, manager.getAddedCount());
+        assertEquals(2, manager.getSuccessCount());
         assertEquals(2, manager.getCompletedCount());
         assertEquals(0, manager.getErrorCount());
         assertEquals(0, manager.getRemainingCount());
         assertTrue(manager.isComplete());
     }
+    
+    @Test
+    public void deferredStatsCounterErrorTest() throws LoginException, Exception {
+        ResourceResolver rr = getMockResolver();
+        ActionManagerImpl manager = new ActionManagerImpl("test", getTaskRunner(), rr, 1);
+        assertEquals(0, manager.getAddedCount());
+        manager.deferredWithResolver(resolver -> {
+            throw new Exception("Bad things");
+        });
+        assertEquals(1, manager.getAddedCount());
+        assertEquals(1, manager.getCompletedCount());
+        manager.deferredWithResolver(resolver -> {
+            throw new Exception("Bad things");
+        });
+        assertEquals(2, manager.getAddedCount());
+        assertEquals(2, manager.getCompletedCount());
+        assertEquals(2, manager.getErrorCount());
+        assertNotNull(manager.getFailureList());
+        assertEquals(2, manager.getFailures().size());
+        assertEquals(0, manager.getSuccessCount());
+        assertEquals(0, manager.getRemainingCount());
+        assertTrue(manager.isComplete());
+    }    
 
     @Test
     public void closeAllResolversTest() throws LoginException, Exception {
