@@ -19,6 +19,7 @@ import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -111,8 +112,21 @@ public class ActionManagerTest {
         assertEquals(2, manager.getAddedCount());
         assertEquals(2, manager.getCompletedCount());
         assertEquals(2, manager.getErrorCount());
+        manager.deferredWithResolver(resolver -> {
+            throw new NullPointerException("Bad things");
+        });
+        assertEquals(3, manager.getAddedCount());
+        assertEquals(3, manager.getCompletedCount());
+        assertEquals(3, manager.getErrorCount());
+        
+        manager.deferredWithResolver(resolver -> {
+            throw new PersistenceException("Bad things");
+        });
+        assertEquals(4, manager.getAddedCount());
+        assertEquals(4, manager.getCompletedCount());
+        assertEquals(4, manager.getErrorCount());
         assertNotNull(manager.getFailureList());
-        assertEquals(2, manager.getFailures().size());
+        assertEquals(4, manager.getFailures().size());
         assertEquals(0, manager.getSuccessCount());
         assertEquals(0, manager.getRemainingCount());
         assertTrue(manager.isComplete());
