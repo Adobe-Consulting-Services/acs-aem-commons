@@ -54,11 +54,14 @@ public class ActionManagerTest {
         return taskRunner;
     }
 
+    static ResourceResolver mockResolver;
     public static ResourceResolver getMockResolver() throws LoginException {
-        ResourceResolver rr = mock(ResourceResolver.class);
-        when(rr.clone(any())).thenReturn(rr);
-        when(rr.isLive()).thenReturn(true);
-        return rr;
+        if (mockResolver == null) {
+            mockResolver = mock(ResourceResolver.class);
+            when(mockResolver.clone(any())).thenReturn(mockResolver);
+            when(mockResolver.isLive()).thenReturn(true);
+        }
+        return mockResolver;
     }
     
     public static ActionManager getActionManager() throws LoginException {
