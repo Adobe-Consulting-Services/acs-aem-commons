@@ -22,6 +22,9 @@ import static org.junit.Assert.*;
  * Basic sanity check of value formats in MCP
  */
 public class ValueFormatTest {
+
+    private static String ONE = String.format("%.1f", 1f);
+
     enum fieldEnum {
         @FieldFormat(ValueFormat.plain)
         somePlainField,
@@ -43,21 +46,21 @@ public class ValueFormatTest {
     
     @Test
     public void oneKb() {
-        assertEquals("1.0 kb", ValueFormat.getHumanSize(1 << 10));
+        assertEquals(ONE + " kb", ValueFormat.getHumanSize(1 << 10));
     }
     
     @Test
     public void oneMb() {
-        assertEquals("1.0 mb", ValueFormat.getHumanSize(1 << 20));
+        assertEquals(ONE + " mb", ValueFormat.getHumanSize(1 << 20));
     }    
     
     @Test
     public void oneGb() {
-        assertEquals("1.0 gb", ValueFormat.getHumanSize(1 << 30));
+        assertEquals(ONE + " gb", ValueFormat.getHumanSize(1 << 30));
     }
     
     @Test
     public void onetb() {
-        assertEquals("1.0 tb", ValueFormat.getHumanSize(((long) (1 << 30)) * 1024L));
+        assertEquals(ONE + " tb", ValueFormat.getHumanSize(((long) (1 << 30)) * 1024L));
     }
 }
