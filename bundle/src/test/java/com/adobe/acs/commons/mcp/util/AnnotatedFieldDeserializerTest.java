@@ -24,10 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- *
- * @author brobert
- */
+
 public class AnnotatedFieldDeserializerTest {
 
     public AnnotatedFieldDeserializerTest() {
@@ -58,6 +55,7 @@ public class AnnotatedFieldDeserializerTest {
      */
     @Test
     public void testPrimitiveInputs() throws Exception {
+
         System.out.println("processInput");
         PrimitivesTest target = new PrimitivesTest();
         Map<String, Object> params = new HashMap<>();

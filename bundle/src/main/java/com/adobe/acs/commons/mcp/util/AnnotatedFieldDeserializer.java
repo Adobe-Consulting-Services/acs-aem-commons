@@ -122,20 +122,18 @@ public class AnnotatedFieldDeserializer {
         if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
             return value.toLowerCase().trim().equals("true");
         } else {
-            NumberFormat numberFormat = NumberFormat.getNumberInstance();
-            Number num = numberFormat.parse(value);
             if (type.equals(Byte.class) || type.equals(Byte.TYPE)) {
-                return num.byteValue();
+                return Byte.parseByte(value);
             } else if (type.equals(Double.class) || type.equals(Double.TYPE)) {
-                return num.doubleValue();
+                return Double.parseDouble(value);
             } else if (type.equals(Float.class) || type.equals(Float.TYPE)) {
-                return num.floatValue();
+                return Float.parseFloat(value);
             } else if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
-                return num.intValue();
+                return Integer.parseInt(value);
             } else if (type.equals(Long.class) || type.equals(Long.TYPE)) {
-                return num.longValue();
+                return Long.parseLong(value);
             } else if (type.equals(Short.class) || type.equals(Short.TYPE)) {
-                return num.shortValue();
+                return Short.parseShort(value);
             } else {
                 return null;
             }
