@@ -135,6 +135,7 @@ public final class ProtectedSystemUsers {
                 "acs-commons-dispatcher-flush-service",
                 "acs-commons-twitter-updater-service",
                 "acs-commons-review-task-asset-mover-service",
+                "acs-commons-manage-controlled-processes-service"
     };
 
     public static final boolean isProtected(String principalName) {

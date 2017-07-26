@@ -15,10 +15,13 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,14 +51,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages a pool of reusable resource resolvers and injects them into tasks
  */
-class ActionManagerImpl implements ActionManager {
+class ActionManagerImpl extends CancelHandler implements ActionManager, Serializable {
+    private static final long serialVersionUID = 7526472295622776150L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
+    transient private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
     // This is a delay of how long an action manager should wait before it can safely assume it really is done and no more work is being added
     // This helps prevent an action manager from closing itself down while the queue is warming up.
-    public static final int HESITATION_DELAY = 50;
+    transient public static final int HESITATION_DELAY = 50;
     // The cleanup task will wait this many milliseconds between its polling to see if the queue has been completely processed
-    public static final int COMPLETION_CHECK_INTERVAL = 100;
+    transient public static final int COMPLETION_CHECK_INTERVAL = 100;
     private final AtomicInteger tasksAdded = new AtomicInteger();
     private final AtomicInteger tasksCompleted = new AtomicInteger();
     private final AtomicInteger tasksFilteredOut = new AtomicInteger();
@@ -66,17 +70,16 @@ class ActionManagerImpl implements ActionManager {
     private long finished;
     private int saveInterval;
 
-    private final ResourceResolver baseResolver;
-    private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
-    private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
-    private final ThrottledTaskRunner taskRunner;
-    private final ThreadLocal<String> currentPath;
+    transient private final ResourceResolver baseResolver;
+    transient private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
+    transient private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
+    transient private final ThrottledTaskRunner taskRunner;
+    transient private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
-    private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
-    private final List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
-
+    transient private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
+    transient private final List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
+    transient private final List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
+    transient private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;
@@ -140,6 +143,7 @@ class ActionManagerImpl implements ActionManager {
 
     @Override
     public void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception {
+        Actions.setCurrentActionManager(this);
         ReusableResolver resolver = getResourceResolver();
         resolver.setCurrentItem(currentPath.get());
         try {
@@ -153,6 +157,7 @@ class ActionManagerImpl implements ActionManager {
                 logPersistenceException(resolver.getPendingItems(), ex);
                 throw ex;
             }
+            Actions.setCurrentActionManager(null);
         }
     }
 
@@ -290,7 +295,7 @@ class ActionManagerImpl implements ActionManager {
                 }
                 throw t;
             }
-        });
+        }, this);
         if (!closesResolver) {
             tasksAdded.incrementAndGet();
         }
@@ -348,7 +353,7 @@ class ActionManagerImpl implements ActionManager {
         LOG.info("Filtered out " + path);
     }
 
-    private long getRuntime() {
+    public long getRuntime() {
         if (isComplete()) {
             return finished - started.get();
         } else if (tasksAdded.get() == 0) {
@@ -391,12 +396,12 @@ class ActionManagerImpl implements ActionManager {
     }
 
     @Override
-    public void closeAllResolvers() {
+    public synchronized void closeAllResolvers() {
         if (!resolvers.isEmpty()) {
             resolvers.stream()
                     .map(ReusableResolver::getResolver)
                     .filter(ResourceResolver::isLive)
-                    .forEachOrdered(ResourceResolver::close);
+                    .forEach(ResourceResolver::close);
             resolvers.clear();
         }
         baseResolver.close();
@@ -415,18 +420,17 @@ class ActionManagerImpl implements ActionManager {
             failureData.add(new CompositeDataSupport(
                     failureCompositeType,
                     failureItemNames,
-                    new Object[]{name, ++count, fail.getNodePath(), fail.getException().getMessage()}));
-
+                    new Object[]{name, ++count, fail.getNodePath(), fail.getException() == null ? "Unknown" : fail.getException().getMessage()}));
         }
         return failureData;
     }
 
-    private static String[] statsItemNames;
-    private static CompositeType statsCompositeType;
-    private static TabularType statsTabularType;
-    private static String[] failureItemNames;
-    private static CompositeType failureCompositeType;
-    private static TabularType failureTabularType;
+    transient private static String[] statsItemNames;
+    transient private static CompositeType statsCompositeType;
+    transient private static TabularType statsTabularType;
+    transient private static String[] failureItemNames;
+    transient private static CompositeType failureCompositeType;
+    transient private static TabularType failureTabularType;
 
     static {
         try {
