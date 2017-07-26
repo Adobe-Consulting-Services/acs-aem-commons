@@ -17,6 +17,7 @@
 /* global Coral, Granite */
 
 var ScriptRunner = {
+    SERVLET_URL: "/etc/acs-commons/manage-controlled-processes/jcr:content",
     init: function () {
         if (document.getElementById("processListing")) {
             ScriptRunner.processTable = document.getElementById("processListing");
@@ -113,7 +114,8 @@ var ScriptRunner = {
             data[x.name] = x.value;
         });
         jQuery.ajax({
-            url: "/bin/mcp",
+            url: ScriptRunner.SERVLET_URL + ".start.json",
+            method: "POST",
             dataType: "json",
             success: ScriptRunner.startedSuccessfully,
             error: ScriptRunner.error,
@@ -133,11 +135,8 @@ var ScriptRunner = {
     },
     rebuildProcessList: function () {
         jQuery.ajax({
-            url: "/bin/mcp",
+            url: ScriptRunner.SERVLET_URL + ".list.json",
             dataType: "json",
-            data: {
-                action: "list"
-            },
             success: function (response) {
                 var processDom, process, i, tableBody = jQuery(ScriptRunner.processTable).find("tbody");
                 tableBody.empty();
@@ -185,7 +184,7 @@ var ScriptRunner = {
             window.setTimeout(function () {
                 console.log("polling status...");
                 jQuery.ajax({
-                    url: "/bin/mcp",
+                    url: ScriptRunner.SERVLET_URL + ".status.json",
                     dataType: "json",
                     success: function (statusList) {
                         var i, process, processRow;
@@ -208,7 +207,6 @@ var ScriptRunner = {
                     },
                     error: ScriptRunner.error,
                     data: {
-                        action: "status",
                         ids: ScriptRunner.watchList
                     }
                 });
@@ -258,6 +256,7 @@ var ScriptRunner = {
             dataType: "html",
             error: ScriptRunner.error,
             success: function(response) {
+                var halt = response.indexOf("Ended") > 0;
                 var diag = new Coral.Dialog().set({
                     id: 'viewProcess',
                     header: {
@@ -267,7 +266,8 @@ var ScriptRunner = {
                         innerHTML: response
                     },
                     footer: {
-                        innerHTML: '<button id="haltButton" is="coral-button" variant="default">Halt</button><button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+                        innerHTML: (halt ? '<button id="haltButton" is="coral-button" variant="default">Halt</button>':'') +
+                                '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
                     },
                     closable: true,
                     variant: "info"
@@ -300,11 +300,10 @@ var ScriptRunner = {
         haltDialog.show();
         haltDialog.on('click', '#haltButton', function () {
             jQuery.ajax({
-                url: "/bin/mcp",
+                url: ScriptRunner.SERVLET_URL + ".halt.json",
                 dataType: "json",
                 error: ScriptRunner.error,
                 data: {
-                    action: "halt",
                     id: processId
                 }
             });

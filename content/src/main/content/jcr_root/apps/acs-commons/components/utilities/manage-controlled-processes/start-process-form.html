@@ -22,7 +22,6 @@ limitations under the License.
         <section class="coral-Form-fieldset">
             <h3 class="coral-Form-fieldset-legend" id="processName">Process Inputs</h3>
             <input type="hidden" id="process" name="definition">
-            <input type="hidden" name="action" value="start">
             <sly data-sly-list.field="${processes.fieldComponents}">
                 ${processes.fieldComponents[field].html}
             </sly>
