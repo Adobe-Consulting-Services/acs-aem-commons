@@ -16,10 +16,14 @@
 package com.adobe.acs.commons.mcp.util;
 
 import com.adobe.acs.commons.mcp.form.FormField;
+
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -27,11 +31,11 @@ import static org.junit.Assert.*;
 
 public class AnnotatedFieldDeserializerTest {
 
-    public AnnotatedFieldDeserializerTest() {
-    }
+    private NumberFormat numberFormat;
 
-    @BeforeClass
-    public static void setUpClass() {
+    @Before
+    public void setup() {
+        numberFormat = NumberFormat.getNumberInstance();
     }
 
     public static class PrimitivesTest {
@@ -60,8 +64,8 @@ public class AnnotatedFieldDeserializerTest {
         PrimitivesTest target = new PrimitivesTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", "123");
-        params.put("doubleValue", Double.toString(123.456));
-        params.put("floatValue", Float.toString(234.567f));
+        params.put("doubleValue", numberFormat.format(123.456));
+        params.put("floatValue",  numberFormat.format(234.567f));
         params.put("longValue", "1234567890");
         params.put("booleanValue", "true");
         AnnotatedFieldDeserializer.deserializeFormFields(target, new ModifiableValueMapDecorator(params));
@@ -93,12 +97,12 @@ public class AnnotatedFieldDeserializerTest {
         PrimitiveArrayTest target = new PrimitiveArrayTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", new String[]{"123", "456", "789"});
-        params.put("doubleValue", Double.toString(123.456));
+        params.put("doubleValue",  numberFormat.format(123.456));
         params.put("floatValue", new String[]{
-                Float.toString(234.567f),
-                Float.toString(111.222f),
-                Float.toString(333.444f),
-                Float.toString(555.666f)});
+                numberFormat.format(234.567f),
+                numberFormat.format(111.222f),
+                numberFormat.format(333.444f),
+                numberFormat.format(555.666f)});
         AnnotatedFieldDeserializer.deserializeFormFields(target, new ModifiableValueMapDecorator(params));
         assertArrayEquals(new int[]{123, 456, 789}, target.intValue);
         assertArrayEquals(new double[]{123.456D}, target.doubleValue, 0);
