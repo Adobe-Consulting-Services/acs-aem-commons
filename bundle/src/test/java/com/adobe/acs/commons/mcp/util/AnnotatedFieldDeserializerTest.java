@@ -62,8 +62,8 @@ public class AnnotatedFieldDeserializerTest {
         PrimitivesTest target = new PrimitivesTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", "123");
-        params.put("doubleValue", "123.456");
-        params.put("floatValue", "234.567");
+        params.put("doubleValue", Double.toString(123.456));
+        params.put("floatValue", Float.toString(234.567f));
         params.put("longValue", "1234567890");
         params.put("booleanValue", "true");
         AnnotatedFieldDeserializer.deserializeFormFields(target, new ModifiableValueMapDecorator(params));
@@ -95,8 +95,12 @@ public class AnnotatedFieldDeserializerTest {
         PrimitiveArrayTest target = new PrimitiveArrayTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", new String[]{"123", "456", "789"});
-        params.put("doubleValue", "123.456");
-        params.put("floatValue", new String[]{"234.567", "111.222", "333.444", "555.666"});
+        params.put("doubleValue", Double.toString(123.456));
+        params.put("floatValue", new String[]{
+                Float.toString(234.567f),
+                Float.toString(111.222f),
+                Float.toString(333.444f),
+                Float.toString(555.666f)});
         AnnotatedFieldDeserializer.deserializeFormFields(target, new ModifiableValueMapDecorator(params));
         assertArrayEquals(new int[]{123, 456, 789}, target.intValue);
         assertArrayEquals(new double[]{123.456D}, target.doubleValue, 0);
