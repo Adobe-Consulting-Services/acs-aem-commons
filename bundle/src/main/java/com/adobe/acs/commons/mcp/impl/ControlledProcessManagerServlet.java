@@ -36,23 +36,34 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Servlet for interacting with MCP.
  */
-@SlingServlet(paths = "/bin/mcp")
-public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
+@SlingServlet(
+        resourceTypes = "acs-commons/components/utilities/manage-controlled-processes",
+        selectors = {"start", "list", "status", "halt", "haltAll", "purge"},
+        methods = {"GET", "POST"},
+        extensions = {"json"}
+)
+public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
+
     private static final Logger LOG = LoggerFactory.getLogger(ControlledProcessManagerServlet.class);
 
     @Reference
     ControlledProcessManager manager;
 
     @Override
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+        doGet(request, response);
+    }
+
+    @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
-        String action = request.getParameter("action");
+        String action = request.getRequestPathInfo().getSelectorString();
         Object result = null;
         try {
             switch (action) {
@@ -69,6 +80,8 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
                     result = doHaltProcess(request);
                     break;
                 case "haltAll":
+                case "halt.all":
+                case "halt-all":
                     result = doHaltAllProcesses(request);
                     break;
                 case "purge":
@@ -78,7 +91,7 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
                     throw new Exception("Action not understood.");
             }
         } catch (Exception ex) {
-            result = "Exception occurred "+ex.getMessage();
+            result = "Exception occurred " + ex.getMessage();
             LOG.error(ex.getMessage() + " -- End of line.", ex);
         }
         Gson gson = new Gson();
@@ -103,7 +116,7 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
             return Arrays.asList(instance);
         }
     }
-    
+
     private Object doHaltProcess(SlingHttpServletRequest request) {
         ProcessInstance instance = getProcessFromRequest(request);
         if (instance != null) {
@@ -143,7 +156,6 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
             return Collections.EMPTY_LIST;
         }
     }
-    
 
     List<String> ignoredInputs = Arrays.asList("definition", "description", "action");
 
@@ -160,7 +172,7 @@ public class ControlledProcessManagerServlet extends SlingSafeMethodsServlet {
         ArrayList<ProcessInstance> processes = new ArrayList();
         processes.addAll(manager.getActiveProcesses());
         processes.addAll(manager.getInactiveProcesses());
-        processes.sort(Comparator.comparing((ProcessInstance p)->p.getInfo().getStartTime()).reversed());
+        processes.sort(Comparator.comparing((ProcessInstance p) -> p.getInfo().getStartTime()).reversed());
         return processes;
     }
 }

@@ -46,7 +46,7 @@ limitations under the License.
                 <label class="coral-Form-fieldlabel">Status</label>
                 <span class="process-dialog-field">${process.status}</span>
             </section>
-            <section class="coral-Form-fieldset">
+            <section class="coral-Form-fieldset" data-sly-test="${resource['report/jcr:primaryType']}">
                 <label class="coral-Form-fieldlabel">Report</label>
                 <span class="process-dialog-field">
                     <a is="coral-anchorbutton" icon="browse" href="${resource.path}/report.html" target="_new">View</a>
