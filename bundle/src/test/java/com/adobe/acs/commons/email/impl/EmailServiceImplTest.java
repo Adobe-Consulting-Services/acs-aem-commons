@@ -78,7 +78,7 @@ public class EmailServiceImplTest {
     private Session session;
 
     @InjectMocks
-    private EmailServiceImpl emailService;
+    private EmailServiceImpl emailService = new EmailServiceImpl();
 
     @Rule
     private ExpectedException thrown = ExpectedException.none();
