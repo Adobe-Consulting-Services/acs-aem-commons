@@ -18,9 +18,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - Updated Fast Action Manager retry logic to support more failure cases properly.
 - Updated Fast Action Manager retry logic to  be savvy about interrupted exceptions thrown by the watchdog trying to kill the thread.
 
-<!---
-
 ### Fixed
+
+- Emails sent via EmailService do not have connection/socket timeouts #1051
+
+<!---
  
 ### Removed
 
