@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be retried if any of them fail and break the commit.
+- Asset Folder Properties Support to allow custom fields/properties to be added to AEM Assets Folders in UI
+- Content Modification Framework API
+- Named Image Transform Servlet Sharpen transform 
+- AEM Assets Brand Portal workflow process and Agent filter
 
 ### Changed
 
@@ -20,6 +24,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Fixed
 
+- Error page handler OSGi confiuration missing web hit for 'not-found' behavior.
+- Touch UI Multi-field saved Userpicker values were not populated in dialog
 - Emails sent via EmailService do not have connection/socket timeouts #1051
 
 <!---
