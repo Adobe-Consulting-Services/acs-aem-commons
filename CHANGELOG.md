@@ -23,8 +23,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - Updated Fast Action Manager retry logic to  be savvy about interrupted exceptions thrown by the watchdog trying to kill the thread.
 
 ### Fixed
+
 - Error page handler OSGi confiuration missing web hit for 'not-found' behavior.
 - Touch UI Multi-field saved Userpicker values were not populated in dialog
+- Emails sent via EmailService do not have connection/socket timeouts #1051
 
 <!---
  
