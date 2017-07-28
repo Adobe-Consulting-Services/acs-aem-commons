@@ -168,7 +168,14 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
                 try {
                     resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
 
-                    if (CollectionUtils.isNotEmpty(this.getJcrPackages(resourceResolver, paths))) {
+                    final List<JcrPackage> jcrPackages = this.getJcrPackages(resourceResolver, paths);
+                    if (CollectionUtils.isNotEmpty(jcrPackages)) {
+
+                        for (final JcrPackage jcrPackage : jcrPackages) {
+                            // Close jcrPackages after they've been used to check if a Job should be invoked.
+                            jcrPackage.close();
+                        }
+
                         JobUtil.processJob(event, this);
                     }
                 } catch (LoginException e) {
@@ -279,7 +286,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
         for (final String path : paths) {
             final Resource eventResource = resourceResolver.getResource(path);
 
-            JcrPackage jcrPackage;
+            JcrPackage jcrPackage = null;
 
             try {
                 jcrPackage = packaging.open(eventResource.adaptTo(Node.class), false);
