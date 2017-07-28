@@ -22,13 +22,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Changed
 
 - Updated Fast Action Manager retry logic to support more failure cases properly.
-- Updated Fast Action Manager retry logic to  be savvy about interrupted exceptions thrown by the watchdog trying to kill the thread.
+- Updated Fast Action Manager retry logic to be savvy about interrupted exceptions thrown by the watchdog trying to kill the thread.
+- #1033: Allow Rewrite attributes to be passed in as an array
 
 ### Fixed
 
-- Error page handler OSGi confiuration missing web hit for 'not-found' behavior.
-- Touch UI Multi-field saved Userpicker values were not populated in dialog
-- Emails sent via EmailService do not have connection/socket timeouts #1051
+- Error page handler OSGi configuration missing web hint for 'not-found' behavior.
+- Touch UI Multi-field saved User-picker values were not populated in dialog 
+- #1051: Emails sent via EmailService do not have connection/socket timeouts 
+- #982: Fixed issue with Touch UI Icon Picker was prefixing icon classes with 'fa' 
+- #108: Email subject mangled for non-latin chars
+- #1043: JCR Package Replication now populates the replicated by properties of the packaged resources with the actual user that requested the replication of the package (with configurable override via OSGi config for backwards compat) 
+- #1044: JCR Package Replication fixes a resource leak where the JCR Packages were not closed after being opened 
 - Fast Action Manager is much more efficient in how it gauges CPU usage, which makes it even faster than before.
 
 <!---
