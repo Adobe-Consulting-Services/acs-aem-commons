@@ -21,13 +21,17 @@ package com.adobe.acs.commons.replication.packages.automatic;
 
 import com.adobe.acs.commons.util.mbeans.ResourceServiceManagerMBean;
 import com.adobe.granite.jmx.annotation.Description;
+import com.adobe.granite.jmx.annotation.Name;
+
+import aQute.bnd.annotation.ProviderType;
 
 /**
  * MBean interface for interacting with the Automatic Package Replicator
  */
+@ProviderType
 @Description("MBean for managing the Automatic Package Replicator.")
 public interface AutomaticPackageReplicatorMBean extends ResourceServiceManagerMBean {
 
 	@Description("Executes the automatic package replication configuration with the specified id")
-	void execute(String id);
+	void execute(@Name(value = "Configuration ID") String id);
 }

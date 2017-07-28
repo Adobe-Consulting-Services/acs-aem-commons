@@ -46,7 +46,7 @@ import java.util.Map;
  * Base class for services to extend which want to manage other services based
  * on repository configurations.
  */
-public abstract class ResourceServiceManager extends AnnotatedStandardMBean
+public abstract class ResourceServiceManager<Type> extends AnnotatedStandardMBean
 		implements ResourceServiceManagerMBean, EventHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(ResourceServiceManager.class);
@@ -57,7 +57,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 
 	private BundleContext bctx;
 
-	private Map<String, ServiceRegistration> registeredServices = new HashMap<String, ServiceRegistration>();
+	private Map<String, ServiceRegistration<Type>> registeredServices = new HashMap<String, ServiceRegistration<Type>>();
 
 	protected ResourceServiceManager(Class<?> mbeanInterface) throws NotCompliantMBeanException {
 		super(mbeanInterface);
@@ -91,7 +91,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 		return registeredConfigurations;
 	}
 
-	public Map<String, ServiceRegistration> getRegisteredServices() {
+	public Map<String, ServiceRegistration<Type>> getRegisteredServices() {
 		return registeredServices;
 	}
 
@@ -126,7 +126,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 	 * @return true if the ServiceReference is up to date with the resource,
 	 *         false otherwise
 	 */
-	protected abstract boolean isServiceUpdated(Resource config, ServiceReference reference);
+	protected abstract boolean isServiceUpdated(Resource config, ServiceReference<Type> reference);
 
 	@Override
 	public synchronized void refreshCache() {
@@ -148,21 +148,26 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 			}
 
 			String filter = "(" + SERVICE_OWNER_KEY + "=" + getClass().getCanonicalName() + ")";
-			ServiceReference[] serviceReferences = (ServiceReference[]) ArrayUtils.addAll(
+			@SuppressWarnings("unchecked")
+			ServiceReference<Type>[] serviceReferences = (ServiceReference<Type>[]) ArrayUtils.addAll(
 					bctx.getServiceReferences(Runnable.class.getCanonicalName(), filter),
 					bctx.getServiceReferences(EventHandler.class.getCanonicalName(), filter));
 
-			log.debug("Found {} registered services", serviceReferences.length);
-			for (ServiceReference reference : serviceReferences) {
-				try {
-					String configurationId = (String) reference.getProperty(CONFIGURATION_ID_KEY);
-					if (!configuredIds.contains(configurationId)) {
-						log.debug("Unregistering service for configuration {}", configurationId);
-						this.unregisterService(configurationId);
+			if (serviceReferences != null) {
+				log.debug("Found {} registered services", serviceReferences.length);
+				for (ServiceReference<Type> reference : serviceReferences) {
+					try {
+						String configurationId = (String) reference.getProperty(CONFIGURATION_ID_KEY);
+						if (!configuredIds.contains(configurationId)) {
+							log.debug("Unregistering service for configuration {}", configurationId);
+							this.unregisterService(configurationId);
+						}
+					} catch (Exception e) {
+						log.warn("Exception unregistering reference " + reference, e);
 					}
-				} catch (Exception e) {
-					log.warn("Exception unregistering reference " + reference, e);
 				}
+			} else {
+				log.warn("No service references found!");
 			}
 
 		} catch (InvalidSyntaxException e) {
@@ -174,11 +179,11 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 		}
 	}
 
-	private ServiceRegistration registerService(String id, Resource config) {
+	private ServiceRegistration<Type> registerService(String id, Resource config) {
 		Hashtable<String, Object> props = new Hashtable<String, Object>();
 		props.put(SERVICE_OWNER_KEY, getClass().getCanonicalName());
 		props.put(CONFIGURATION_ID_KEY, id);
-		ServiceRegistration serviceRegistration = registerServiceObject(config, props);
+		ServiceRegistration<Type> serviceRegistration = registerServiceObject(config, props);
 
 		registeredServices.put(id, serviceRegistration);
 		log.debug("Automatic Package Replication job {} successfully updated with service {}",
@@ -196,12 +201,12 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 	 *            the default properties
 	 * @return the ServiceRegistration from registering the service
 	 */
-	protected abstract ServiceRegistration registerServiceObject(Resource config, Hashtable<String, Object> props);
+	protected abstract ServiceRegistration<Type> registerServiceObject(Resource config, Hashtable<String, Object> props);
 
 	private void unregisterService(String id) {
 		log.debug("Unregistering job: {}", id);
 		try {
-			ServiceRegistration registration = registeredServices.remove(id);
+			ServiceRegistration<Type> registration = registeredServices.remove(id);
 			if (registration != null) {
 				registration.unregister();
 			}
@@ -218,12 +223,13 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 
 			String filter = "(&(" + SERVICE_OWNER_KEY + "=" + getClass().getCanonicalName() + ")" + "("
 					+ CONFIGURATION_ID_KEY + "=" + id + "))";
-			ServiceReference[] serviceReferences = (ServiceReference[]) ArrayUtils.addAll(
+			@SuppressWarnings("unchecked")
+			ServiceReference<Type>[] serviceReferences = (ServiceReference[]) ArrayUtils.addAll(
 					bctx.getServiceReferences(Runnable.class.getCanonicalName(), filter),
 					bctx.getServiceReferences(EventHandler.class.getCanonicalName(), filter));
 
 			if (serviceReferences != null && serviceReferences.length > 0) {
-				ServiceReference sr = serviceReferences[0];
+				ServiceReference<Type> sr = serviceReferences[0];
 				if (isServiceUpdated(resource, sr)) {
 					log.debug("Service for {} up to date, no changes necessary", id);
 				} else {
