@@ -20,11 +20,14 @@
 package com.adobe.acs.commons.hc.impl;
 
 import com.adobe.acs.commons.email.EmailService;
+import com.adobe.granite.license.ProductInfo;
+import com.adobe.granite.license.ProductInfoService;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionOptions;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionResult;
 import org.apache.sling.hc.api.execution.HealthCheckExecutor;
 import org.apache.sling.hc.util.HealthCheckMetadata;
+import org.apache.sling.settings.SlingSettingsService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,8 +37,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,6 +67,12 @@ public class HealthCheckStatusEmailerTest {
 
     @Mock
     EmailService emailService;
+
+    @Mock
+    ProductInfoService productInfoService;
+
+    @Mock
+    SlingSettingsService slingSettingsService;
 
     @InjectMocks
     HealthCheckStatusEmailer healthCheckStatusEmailer = new HealthCheckStatusEmailer();
@@ -95,6 +106,11 @@ public class HealthCheckStatusEmailerTest {
 
         results = new ArrayList<>();
         when(healthCheckExecutor.execute(any(HealthCheckExecutionOptions.class), any(String[].class))).thenReturn(results);
+
+        when(productInfoService.getInfos()).thenReturn(new ProductInfo[]{mock(ProductInfo.class)});
+        Set<String> runModes = new HashSet<String>();
+        runModes.add("author");
+        when(slingSettingsService.getRunModes()).thenReturn(runModes);
     }
 
     @Test
@@ -157,6 +173,24 @@ public class HealthCheckStatusEmailerTest {
         assertTrue(titleMatcher.find());
         assertTrue(entryMatcher.find());
         assertFalse(negativeMatcher.find());
+    }
+
+    @Test
+    public void throttledExecution() {
+        results.add(failureExecutionResult);
+
+        config.put(HealthCheckStatusEmailer.PROP_SEND_EMAIL_ONLY_ON_FAILURE, true);
+        // Set a long delay to ensure we hit it on the 2nd .run() call..
+        config.put(HealthCheckStatusEmailer.PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE, 100000);
+        healthCheckStatusEmailer.activate(config);
+
+        // Send the first time
+        healthCheckStatusEmailer.run();
+        // Get throttled the 2nd time
+        healthCheckStatusEmailer.run();
+
+        verify(emailService, times(1)).sendEmail(any(String.class),
+                any(Map.class), any(String[].class));
     }
 }
 

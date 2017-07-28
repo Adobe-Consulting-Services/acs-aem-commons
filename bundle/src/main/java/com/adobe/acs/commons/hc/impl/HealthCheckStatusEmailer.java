@@ -81,7 +81,7 @@ public class HealthCheckStatusEmailer implements Runnable {
     private static final int HEALTH_CHECK_STATUS_PADDING = 20;
     private static final int NUM_DASHES = 100;
 
-    private Calendar nextEmailTime = null;
+    private Calendar nextEmailTime = Calendar.getInstance();
 
     /* OSGi Properties */
 
