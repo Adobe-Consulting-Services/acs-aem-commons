@@ -124,10 +124,12 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     }
 
     @Override
-    public void execute(ResourceResolver resourceResolver, String payloadPath, List<SyntheticWorkflowStep> workflowSteps, boolean autoSaveAfterEachWorkflowProcess, boolean autoSaveAtEnd) throws WorkflowException {
-
+    public void execute(ResourceResolver resourceResolver,
+                        String payloadPath,
+                        List<SyntheticWorkflowStep> workflowSteps,
+                        boolean autoSaveAfterEachWorkflowProcess,
+                        boolean autoSaveAtEnd) throws WorkflowException {
         final long start = System.currentTimeMillis();
-
 
         int count = 0;
         do {
