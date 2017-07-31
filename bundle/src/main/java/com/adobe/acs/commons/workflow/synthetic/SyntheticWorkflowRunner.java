@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic;
 
+import aQute.bnd.annotation.ProviderType;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -27,6 +28,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import java.util.List;
 import java.util.Map;
 
+@ProviderType
 public interface SyntheticWorkflowRunner extends WorkflowService {
     String PROCESS_ARGS = "PROCESS_ARGS";
 
