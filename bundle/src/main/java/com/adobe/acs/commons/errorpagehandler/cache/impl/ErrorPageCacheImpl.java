@@ -67,12 +67,10 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
         log.info(" > Serve authenticated requests from cache: {}", serveAuthenticatedFromCache);
     }
 
-
     @Override
     public String get(final String path,
-                            final SlingHttpServletRequest request,
-                            final SlingHttpServletResponse response) {
-
+                      final SlingHttpServletRequest request,
+                      final SlingHttpServletResponse response) {
 
         if (!serveAuthenticatedFromCache && !isAnonymousRequest(request)) {
             // For authenticated requests, don't return from cache
@@ -98,6 +96,7 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
             }
 
             cacheEntry.setData(data);
+            cacheEntry.setContentType(request.getContentType());
             cacheEntry.setExpiresIn(ttl);
             cacheEntry.incrementMisses();
 
@@ -110,6 +109,8 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
                 final long time = System.currentTimeMillis() - start;
                 log.debug("Served cache MISS for [ {} ] in [ {} ] ms", path, time);
             }
+
+            response.setContentType(cacheEntry.getContentType());
 
             return data;
         } else {
@@ -124,6 +125,8 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
                 final long time = System.currentTimeMillis() - start;
                 log.debug("Served cache HIT for [ {} ] in [ {} ] ms", path, time);
             }
+
+            response.setContentType(cacheEntry.getContentType());
 
             return data;
         }
@@ -193,10 +196,10 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
         final CompositeType cacheEntryType = new CompositeType(
                 "cacheEntry",
                 "Cache Entry",
-                new String[]{"errorPage", "hit", "miss", "hitRate", "missRate", "sizeInKB" },
-                new String[]{"Error Page", "Hit", "Miss", "Hit Rate", "Miss Rate", "Size in KB" },
+                new String[]{"errorPage", "hit", "miss", "hitRate", "missRate", "sizeInKB", "contentType" },
+                new String[]{"Error Page", "Hit", "Miss", "Hit Rate", "Miss Rate", "Size in KB", "Content Type" },
                 new OpenType[]{SimpleType.STRING, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.FLOAT,
-                        SimpleType.FLOAT, SimpleType.INTEGER }
+                        SimpleType.FLOAT, SimpleType.INTEGER, SimpleType.STRING }
         );
 
         final TabularDataSupport tabularData = new TabularDataSupport(
