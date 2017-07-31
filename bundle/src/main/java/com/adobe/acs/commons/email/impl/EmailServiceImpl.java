@@ -249,6 +249,11 @@ public final class EmailServiceImpl implements EmailService {
             email.setSocketTimeout(soTimeout);
         }
 
+        // #1008 setting the subject via the setSubject(..) parameter.
+        if (params.containsKey(EmailServiceConstants.SUBJECT)) {
+            email.setSubject(params.get(EmailServiceConstants.SUBJECT));
+        }
+
         return email;
     }
 
