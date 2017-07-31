@@ -19,11 +19,15 @@
  */
 package com.adobe.acs.commons.util.mbeans;
 
-import aQute.bnd.annotation.ProviderType;
-import com.adobe.granite.jmx.annotation.Description;
+import java.util.List;
+
+import javax.management.DynamicMBean;
+
 import org.apache.sling.api.resource.LoginException;
 
-import java.util.List;
+import com.adobe.granite.jmx.annotation.Description;
+
+import aQute.bnd.annotation.ProviderType;
 
 /**
  * Base methods for the JMX Interface for a ResourceServiceManager
@@ -31,7 +35,7 @@ import java.util.List;
  * @author danklco
  */
 @ProviderType
-public interface ResourceServiceManagerMBean {
+public interface ResourceServiceManagerMBean extends DynamicMBean {
 
 	@Description("Gets the configurations currently registered")
 	List<String> getRegisteredConfigurations();
