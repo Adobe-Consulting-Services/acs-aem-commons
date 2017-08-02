@@ -116,6 +116,11 @@ public class PageRelocator implements ProcessDefinition {
             options = {"checked"})
     private boolean updateStatus;
     
+    @FormField(name = "Extensive ACL checks",
+            description = "If checked, this evaluates ALL nodes.  If not checked, it only evaluates pages.",
+            component = CheckboxComponent.class)
+    private boolean extensiveACLChecks = false;
+    
     @FormField(name = "Dry run",
             description = "This runs the ACL checks but doesn't do any actual work.",
             component = CheckboxComponent.class,
@@ -205,10 +210,15 @@ public class PageRelocator implements ProcessDefinition {
     }
 
     protected void validateAllAcls(ActionManager step1) {
-        SimpleFilteringResourceVisitor pageVisitor = new SimpleFilteringResourceVisitor();
+        SimpleFilteringResourceVisitor pageVisitor;
+        if (extensiveACLChecks) {
+            pageVisitor = new SimpleFilteringResourceVisitor();            
+            pageVisitor.setLeafVisitor((resource, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, resource.getPath(), requiredPrivileges)));
+        } else {
+            pageVisitor = new TreeFilteringResourceVisitor(NameConstants.NT_PAGE);
+        }
         pageVisitor.setBreadthFirstMode();
         pageVisitor.setResourceVisitor((resource, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, resource.getPath(), requiredPrivileges)));
-        pageVisitor.setLeafVisitor((resource, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, resource.getPath(), requiredPrivileges)));
         beginStep(step1, sourcePath, pageVisitor);
     }
 
