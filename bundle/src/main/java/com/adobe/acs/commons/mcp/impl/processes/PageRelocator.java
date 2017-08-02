@@ -85,9 +85,9 @@ public class PageRelocator implements ProcessDefinition {
 
     @FormField(name = "Destination",
             description = "Destination parent for move, or destination parent folder plus new name for rename",
-            hint = "Move: /content/dam/moveToFolder | Rename: /content/dam/moveToFolder/newName",
-            component = PathfieldComponent.FolderSelectComponent.class,
-            options = {"base=/content/dam"})
+            hint = "Move: /content/my-site/some-page | Rename: /content/my-site/some-page/new-name",
+            component = PathfieldComponent.PageSelectComponent.class,
+            options = {"base=/content"})
     private String destinationPath;
 
     @FormField(name = "Mode",
