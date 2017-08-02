@@ -23,6 +23,7 @@ import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
+import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.replication.ReplicationActionType;
@@ -33,8 +34,10 @@ import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.PageManagerFactory;
 import java.lang.reflect.Field;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -61,7 +64,7 @@ public class PageRelocator implements ProcessDefinition {
 
     @Reference
     PageManagerFactory pageManagerFactory;
-    
+
     @Reference
     Replicator replicator;
 
@@ -100,18 +103,18 @@ public class PageRelocator implements ProcessDefinition {
             component = RadioComponent.EnumerationSelector.class,
             options = {"horizontal", "default=SELF_MANAGED"})
     public PUBLISH_METHOD publishMethod;
-    
+
     @FormField(name = "Create versions",
             description = "Create versions for anything being replicated",
             component = CheckboxComponent.class,
             options = {"checked"})
-    private boolean createVerionsOnReplicate;    
-    
+    private boolean createVerionsOnReplicate;
+
     @FormField(name = "Update status",
             description = "Updates status of content affected by this operation",
             component = CheckboxComponent.class,
             options = {"checked"})
-    private boolean updateStatus;    
+    private boolean updateStatus;
 
     transient private final String[] requiredPrivilegeNames = {
         Privilege.JCR_READ,
@@ -136,7 +139,7 @@ public class PageRelocator implements ProcessDefinition {
             String nodeName = sourcePath.substring(sourcePath.lastIndexOf('/'));
             destinationPath += nodeName;
         }
-        
+
         replicationOptions = new ReplicationOptions();
         switch (publishMethod) {
             case SELF_MANAGED:
@@ -148,7 +151,7 @@ public class PageRelocator implements ProcessDefinition {
         }
         replicationOptions.setSuppressVersions(!createVerionsOnReplicate);
         replicationOptions.setSuppressStatusUpdate(!updateStatus);
-        
+
     }
 
     private void validateInputs(ResourceResolver res) throws RepositoryException {
@@ -257,45 +260,25 @@ public class PageRelocator implements ProcessDefinition {
         }
     }
 
-    private void createTargetPage(ResourceResolver rr, String sourcePage) throws Exception {
-        String targetPage = convertSourceToDestination(sourcePage);
-        String targetParent = targetPage.substring(0, targetPage.lastIndexOf('/'));
-        Actions.retry(10, 500, res -> {
-            waitUntilResourceFound(res, targetParent);
-            Map<String, Object> props = new HashMap<>();
-            Resource parent = res.getResource(targetParent);
-            Resource source = res.getResource(sourcePage);
-            res.create(parent, source.getName(), source.getValueMap());
-        }).accept(rr);
-    }
+    enum REPORT {
+        target, acl_check, move_time, activate_time, deactivate_time
+    };
+    final private Map<String, EnumMap<REPORT, Object>> reportData = new TreeMap<>();
 
-    private void movePage(ResourceResolver rr, String sourcePage) throws Exception {
-        PageManager manager = pageManagerFactory.getPageManager(rr);
-        Field replicatorField = FieldUtils.getDeclaredField(manager.getClass(), "replicator", true);
-        FieldUtils.writeField(replicatorField, manager, replicatorQueue);
-        String destination = convertSourceToDestination(sourcePage);
-        String beforeName = "";
-        String[] adjustRefs = {};
-        Actions.retry(10, 500, res -> {
-            String contentPath = sourcePage + "/jcr:content";
-            if (resourceExists(res, contentPath)) {
-                Resource sourceContent = rr.getResource(contentPath);
-                manager.move(sourceContent, destination, beforeName, true, true, adjustRefs);
-                res.commit();
-                res.refresh();
+    private void note(String page, REPORT col, Object value) {
+        synchronized (reportData) {
+            if (!reportData.containsKey(page)) {
+                reportData.put(page, new EnumMap<>(REPORT.class));
             }
-            Resource sourceParent = res.getResource(sourcePage);
-            if (sourceParent != null && sourceParent.hasChildren()) {
-                for (Resource child : sourceParent.getChildren()) {
-                    res.move(child.getPath(), destination);
-                }
-            }
-        }).accept(rr);
+            reportData.get(page).put(col, value);
+        }
     }
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
-
+        GenericReport report = new GenericReport();
+        report.setRows(reportData, "Source", REPORT.class);
+        report.persist(rr, instance.getPath() + "/jcr:content/report");
     }
 
     //--- Utility functions
@@ -329,14 +312,67 @@ public class PageRelocator implements ProcessDefinition {
         Actions.setCurrentItem(path);
         Session session = res.adaptTo(Session.class);
         if (!session.getAccessControlManager().hasPrivileges(path, prvlgs)) {
+            note(path, REPORT.acl_check, "FAIL");
             throw new RepositoryException("Insufficient permissions to permit move operation");
+        } else {
+            note(path, REPORT.acl_check, "PASS");
         }
+    }
+
+    private void createTargetPage(ResourceResolver rr, String sourcePage) throws Exception {
+        String targetPage = convertSourceToDestination(sourcePage);
+        String targetParent = targetPage.substring(0, targetPage.lastIndexOf('/'));
+        Actions.retry(10, 500, res -> {
+            waitUntilResourceFound(res, targetParent);
+            Map<String, Object> props = new HashMap<>();
+            Resource parent = res.getResource(targetParent);
+            Resource source = res.getResource(sourcePage);
+            res.create(parent, source.getName(), source.getValueMap());
+            note(sourcePage, REPORT.target, targetPage);
+        }).accept(rr);
+    }
+
+    private void movePage(ResourceResolver rr, String sourcePage) throws Exception {
+        PageManager manager = pageManagerFactory.getPageManager(rr);
+        Field replicatorField = FieldUtils.getDeclaredField(manager.getClass(), "replicator", true);
+        FieldUtils.writeField(replicatorField, manager, replicatorQueue);
+        String destination = convertSourceToDestination(sourcePage);
+        String beforeName = "";
+        String[] adjustRefs = {};
+        long start = System.currentTimeMillis();
+        Actions.retry(10, 500, res -> {
+            String contentPath = sourcePage + "/jcr:content";
+            if (resourceExists(res, contentPath)) {
+                Resource sourceContent = rr.getResource(contentPath);
+                manager.move(sourceContent, destination, beforeName, true, true, adjustRefs);
+                res.commit();
+                res.refresh();
+            }
+            Resource sourceParent = res.getResource(sourcePage);
+            if (sourceParent != null && sourceParent.hasChildren()) {
+                for (Resource child : sourceParent.getChildren()) {
+                    res.move(child.getPath(), destination);
+                }
+                res.commit();
+            }
+        }).accept(rr);
+        long end = System.currentTimeMillis();
+        note(sourcePage, REPORT.move_time, end - start);
+
     }
 
     private String convertSourceToDestination(String path) {
         return path.replaceAll(Pattern.quote(sourcePath), destinationPath);
     }
-
+    
+    private String reversePathLookup(String path) {
+        if (path.startsWith(destinationPath)) {
+            return path.replaceAll(Pattern.quote(destinationPath), sourcePath);
+        } else {
+            return path;
+        }
+    }
+    
     private Stream<String> getAllReplicationPaths() {
         Stream s1 = replicatorQueue.activateOperations.keySet().stream();
         Stream s2 = replicatorQueue.deactivateOperations.keySet().stream();
@@ -348,8 +384,15 @@ public class PageRelocator implements ProcessDefinition {
         if (path.startsWith(sourcePath)) {
             action = ReplicationActionType.DEACTIVATE;
         } else {
-            action = ReplicationActionType.ACTIVATE;            
+            action = ReplicationActionType.ACTIVATE;
         }
+        long start = System.currentTimeMillis();
         replicator.replicate(rr.adaptTo(Session.class), action, path);
+        long end = System.currentTimeMillis();
+        if (path.startsWith(sourcePath)) {
+            note(path, REPORT.deactivate_time, end - start);
+        } else {
+            note(reversePathLookup(path), REPORT.activate_time, end - start);
+        }
     }
 }

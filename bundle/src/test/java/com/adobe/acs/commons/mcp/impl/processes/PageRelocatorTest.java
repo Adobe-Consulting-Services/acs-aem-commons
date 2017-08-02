@@ -125,6 +125,9 @@ public class PageRelocatorTest {
         values.put("sourcePath", "/content/pageA");
         values.put("destinationPath", "/content/pageB");
         values.put("mode", PageRelocator.Mode.MOVE.toString());
+        values.put("publishMethod", PageRelocator.PUBLISH_METHOD.SELF_MANAGED.toString());
+        values.put("createVerionsOnReplicate", "false");
+        values.put("updateStatus", "true");
         instance.init(rr, values);
 
         AbstractResourceImpl processNode = new AbstractResourceImpl(instance.getPath(), null, null, new ResourceMetadata());
