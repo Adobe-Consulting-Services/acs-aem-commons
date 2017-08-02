@@ -90,7 +90,13 @@ public class MockPageManager implements PageManager {
 
     @Override
     public Resource move(final Resource resource, final String destination, final String beforeName,
-            final boolean shallow, final boolean resolveConflict, final String[] adjustRefs) {
+            final boolean shallow, final boolean resolveConflict, final String[] adjustRefs) throws WCMException {
+        return move(resource, destination, beforeName, shallow, resolveConflict, adjustRefs, new String[]{});
+    }
+    
+    @Override
+    public Resource move(Resource resource, String destination, String beforeName, boolean shallow,
+            boolean resolveConflict, String[] adjustRefs, String[] publishRefs) throws WCMException {
         try {
             if (rr == null) {
                 throw new RuntimeException("Resource resolver was null");
@@ -105,18 +111,12 @@ public class MockPageManager implements PageManager {
             
             return resource;
         } catch (ReplicationException ex) {
-            throw new RuntimeException(ex);
+            throw new WCMException(ex);
         }
-    }
+    }    
 
     @Override
     public Page move(Page page, String destination, String beforeName, boolean shallow,
-            boolean resolveConflict, String[] adjustRefs, String[] publishRefs) throws WCMException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Resource move(Resource resource, String destination, String beforeName, boolean shallow,
             boolean resolveConflict, String[] adjustRefs, String[] publishRefs) throws WCMException {
         throw new UnsupportedOperationException("Not supported yet.");
     }

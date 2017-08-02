@@ -115,17 +115,17 @@ public class PageRelocator implements ProcessDefinition {
             component = CheckboxComponent.class,
             options = {"checked"})
     private boolean updateStatus;
-    
+
     @FormField(name = "Extensive ACL checks",
             description = "If checked, this evaluates ALL nodes.  If not checked, it only evaluates pages.",
             component = CheckboxComponent.class)
     private boolean extensiveACLChecks = false;
-    
+
     @FormField(name = "Dry run",
             description = "This runs the ACL checks but doesn't do any actual work.",
             component = CheckboxComponent.class,
             options = {"checked"})
-    private boolean dryRun = true;    
+    private boolean dryRun = true;
 
     transient private final String[] requiredPrivilegeNames = {
         Privilege.JCR_READ,
@@ -200,7 +200,6 @@ public class PageRelocator implements ProcessDefinition {
         instance.getInfo().setDescription(desc);
         requiredPrivileges = getPrivilegesFromNames(rr, requiredPrivilegeNames);
         instance.defineCriticalAction("Check ACLs", rr, this::validateAllAcls);
-        instance.defineCriticalAction("Build Target Structure", rr, this::buildTargetStructure);
         instance.defineAction("Move Pages", rr, this::movePages);
         if (publishMethod != PUBLISH_METHOD.NONE) {
             instance.defineAction("Activate New", rr, this::activateNew);
@@ -212,7 +211,7 @@ public class PageRelocator implements ProcessDefinition {
     protected void validateAllAcls(ActionManager step1) {
         SimpleFilteringResourceVisitor pageVisitor;
         if (extensiveACLChecks) {
-            pageVisitor = new SimpleFilteringResourceVisitor();            
+            pageVisitor = new SimpleFilteringResourceVisitor();
             pageVisitor.setLeafVisitor((resource, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, resource.getPath(), requiredPrivileges)));
         } else {
             pageVisitor = new TreeFilteringResourceVisitor(NameConstants.NT_PAGE);
@@ -222,23 +221,27 @@ public class PageRelocator implements ProcessDefinition {
         beginStep(step1, sourcePath, pageVisitor);
     }
 
-    protected void buildTargetStructure(ActionManager step2) {
+    protected void movePages(ActionManager step2) {
         TreeFilteringResourceVisitor pageVisitor = new TreeFilteringResourceVisitor(NameConstants.NT_PAGE);
         pageVisitor.setBreadthFirstMode();
-        pageVisitor.setResourceVisitor((resource, level) -> step2.deferredWithResolver(rr -> createTargetPage(rr, resource.getPath())));
+        pageVisitor.setResourceVisitor((resource, level) -> step2.deferredWithResolver(rr -> movePage(rr, resource.getPath())));
         beginStep(step2, sourcePath, pageVisitor);
     }
 
-    protected void movePages(ActionManager step3) {
-        TreeFilteringResourceVisitor pageVisitor = new TreeFilteringResourceVisitor(NameConstants.NT_PAGE);
-        pageVisitor.setBreadthFirstMode();
-        pageVisitor.setResourceVisitor((resource, level) -> step3.deferredWithResolver(rr -> movePage(rr, resource.getPath())));
-        beginStep(step3, sourcePath, pageVisitor);
+    protected void activateNew(ActionManager step3) {
+        step3.deferredWithResolver(rr -> {
+            getAllReplicationPaths().filter(p -> p.startsWith(destinationPath) && !p.startsWith(sourcePath))
+                    .forEach(path -> {
+                        step3.deferredWithResolver(rr2 -> {
+                            performNecessaryReplication(rr2, path);
+                        });
+                    });
+        });
     }
 
-    protected void activateNew(ActionManager step4) {
+    protected void activateReferences(ActionManager step4) {
         step4.deferredWithResolver(rr -> {
-            getAllReplicationPaths().filter(p -> p.startsWith(destinationPath) && !p.startsWith(sourcePath))
+            getAllReplicationPaths().filter(p -> !p.startsWith(destinationPath) && !p.startsWith(sourcePath))
                     .forEach(path -> {
                         step4.deferredWithResolver(rr2 -> {
                             performNecessaryReplication(rr2, path);
@@ -247,22 +250,11 @@ public class PageRelocator implements ProcessDefinition {
         });
     }
 
-    protected void activateReferences(ActionManager step5) {
+    protected void deactivateOld(ActionManager step5) {
         step5.deferredWithResolver(rr -> {
-            getAllReplicationPaths().filter(p -> !p.startsWith(destinationPath) && !p.startsWith(sourcePath))
-                    .forEach(path -> {
-                        step5.deferredWithResolver(rr2 -> {
-                            performNecessaryReplication(rr2, path);
-                        });
-                    });
-        });
-    }
-
-    protected void deactivateOld(ActionManager step6) {
-        step6.deferredWithResolver(rr -> {
             getAllReplicationPaths().filter(p -> p.startsWith(sourcePath))
                     .forEach(path -> {
-                        step6.deferredWithResolver(rr2 -> {
+                        step5.deferredWithResolver(rr2 -> {
                             performNecessaryReplication(rr2, path);
                         });
                     });
@@ -338,41 +330,35 @@ public class PageRelocator implements ProcessDefinition {
         }
     }
 
-    private void createTargetPage(ResourceResolver rr, String sourcePage) throws Exception {
-        String targetPage = convertSourceToDestination(sourcePage);
-        String targetParent = targetPage.substring(0, targetPage.lastIndexOf('/'));
-        if (!dryRun) {
-            Actions.retry(10, 500, res -> {
-                waitUntilResourceFound(res, targetParent);
-                Map<String, Object> props = new HashMap<>();
-                Resource parent = res.getResource(targetParent);
-                Resource source = res.getResource(sourcePage);
-                res.create(parent, source.getName(), source.getValueMap());
-            }).accept(rr);
-        }
-        note(sourcePage, REPORT.target, targetPage);
-    }
-
     private void movePage(ResourceResolver rr, String sourcePage) throws Exception {
         PageManager manager = pageManagerFactory.getPageManager(rr);
         Field replicatorField = FieldUtils.getDeclaredField(manager.getClass(), "replicator", true);
         FieldUtils.writeField(replicatorField, manager, replicatorQueue);
         String destination = convertSourceToDestination(sourcePage);
+        String destinationParent = destination.substring(0, destination.lastIndexOf('/'));
+        note(sourcePage, REPORT.target, destination);
         String beforeName = "";
         String[] adjustRefs = {};
+        String[] publishRefs = {};
         long start = System.currentTimeMillis();
         if (!dryRun) {
             Actions.retry(10, 500, res -> {
+                waitUntilResourceFound(res, destinationParent);
+                Resource source = rr.getResource(sourcePage);
                 String contentPath = sourcePage + "/jcr:content";
                 if (resourceExists(res, contentPath)) {
-                    Resource sourceContent = rr.getResource(contentPath);
-                    manager.move(sourceContent, destination, beforeName, true, true, adjustRefs);
-                    res.commit();
-                    res.refresh();
+                    manager.move(source, destination, beforeName, true, true, adjustRefs, publishRefs);
+                } else {
+                    Map<String, Object> props = new HashMap<>();
+                    Resource parent = res.getResource(destinationParent);
+                    res.create(parent, source.getName(), source.getValueMap());
                 }
-                Resource sourceParent = res.getResource(sourcePage);
-                if (sourceParent != null && sourceParent.hasChildren()) {
-                    for (Resource child : sourceParent.getChildren()) {
+                res.commit();
+                res.refresh();
+
+                source = rr.getResource(sourcePage);
+                if (source != null && source.hasChildren()) {
+                    for (Resource child : source.getChildren()) {
                         res.move(child.getPath(), destination);
                     }
                     res.commit();
@@ -387,7 +373,7 @@ public class PageRelocator implements ProcessDefinition {
     private String convertSourceToDestination(String path) {
         return path.replaceAll(Pattern.quote(sourcePath), destinationPath);
     }
-    
+
     private String reversePathLookup(String path) {
         if (path.startsWith(destinationPath)) {
             return path.replaceAll(Pattern.quote(destinationPath), sourcePath);
@@ -395,7 +381,7 @@ public class PageRelocator implements ProcessDefinition {
             return path;
         }
     }
-    
+
     private Stream<String> getAllReplicationPaths() {
         Stream s1 = replicatorQueue.activateOperations.keySet().stream();
         Stream s2 = replicatorQueue.deactivateOperations.keySet().stream();
