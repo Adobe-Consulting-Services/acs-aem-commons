@@ -115,6 +115,12 @@ public class PageRelocator implements ProcessDefinition {
             component = CheckboxComponent.class,
             options = {"checked"})
     private boolean updateStatus;
+    
+    @FormField(name = "Dry run",
+            description = "This runs the ACL checks but doesn't do any actual work.",
+            component = CheckboxComponent.class,
+            options = {"checked"})
+    private boolean dryRun = true;    
 
     transient private final String[] requiredPrivilegeNames = {
         Privilege.JCR_READ,
@@ -322,14 +328,16 @@ public class PageRelocator implements ProcessDefinition {
     private void createTargetPage(ResourceResolver rr, String sourcePage) throws Exception {
         String targetPage = convertSourceToDestination(sourcePage);
         String targetParent = targetPage.substring(0, targetPage.lastIndexOf('/'));
-        Actions.retry(10, 500, res -> {
-            waitUntilResourceFound(res, targetParent);
-            Map<String, Object> props = new HashMap<>();
-            Resource parent = res.getResource(targetParent);
-            Resource source = res.getResource(sourcePage);
-            res.create(parent, source.getName(), source.getValueMap());
-            note(sourcePage, REPORT.target, targetPage);
-        }).accept(rr);
+        if (!dryRun) {
+            Actions.retry(10, 500, res -> {
+                waitUntilResourceFound(res, targetParent);
+                Map<String, Object> props = new HashMap<>();
+                Resource parent = res.getResource(targetParent);
+                Resource source = res.getResource(sourcePage);
+                res.create(parent, source.getName(), source.getValueMap());
+            }).accept(rr);
+        }
+        note(sourcePage, REPORT.target, targetPage);
     }
 
     private void movePage(ResourceResolver rr, String sourcePage) throws Exception {
@@ -340,22 +348,24 @@ public class PageRelocator implements ProcessDefinition {
         String beforeName = "";
         String[] adjustRefs = {};
         long start = System.currentTimeMillis();
-        Actions.retry(10, 500, res -> {
-            String contentPath = sourcePage + "/jcr:content";
-            if (resourceExists(res, contentPath)) {
-                Resource sourceContent = rr.getResource(contentPath);
-                manager.move(sourceContent, destination, beforeName, true, true, adjustRefs);
-                res.commit();
-                res.refresh();
-            }
-            Resource sourceParent = res.getResource(sourcePage);
-            if (sourceParent != null && sourceParent.hasChildren()) {
-                for (Resource child : sourceParent.getChildren()) {
-                    res.move(child.getPath(), destination);
+        if (!dryRun) {
+            Actions.retry(10, 500, res -> {
+                String contentPath = sourcePage + "/jcr:content";
+                if (resourceExists(res, contentPath)) {
+                    Resource sourceContent = rr.getResource(contentPath);
+                    manager.move(sourceContent, destination, beforeName, true, true, adjustRefs);
+                    res.commit();
+                    res.refresh();
                 }
-                res.commit();
-            }
-        }).accept(rr);
+                Resource sourceParent = res.getResource(sourcePage);
+                if (sourceParent != null && sourceParent.hasChildren()) {
+                    for (Resource child : sourceParent.getChildren()) {
+                        res.move(child.getPath(), destination);
+                    }
+                    res.commit();
+                }
+            }).accept(rr);
+        }
         long end = System.currentTimeMillis();
         note(sourcePage, REPORT.move_time, end - start);
 
@@ -387,7 +397,9 @@ public class PageRelocator implements ProcessDefinition {
             action = ReplicationActionType.ACTIVATE;
         }
         long start = System.currentTimeMillis();
-        replicator.replicate(rr.adaptTo(Session.class), action, path);
+        if (!dryRun) {
+            replicator.replicate(rr.adaptTo(Session.class), action, path);
+        }
         long end = System.currentTimeMillis();
         if (path.startsWith(sourcePath)) {
             note(path, REPORT.deactivate_time, end - start);
