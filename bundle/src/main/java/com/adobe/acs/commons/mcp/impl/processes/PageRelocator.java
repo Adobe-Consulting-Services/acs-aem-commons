@@ -24,6 +24,7 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.replication.ReplicationActionType;
@@ -191,9 +192,11 @@ public class PageRelocator implements ProcessDefinition {
         }
     }
 
+    ManagedProcess instanceInfo;
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         validateInputs(rr);
+        instanceInfo = instance.getInfo();
         String desc = dryRun ? "DRY RUN: " : "";
         desc += mode.name().toLowerCase() + " " + sourcePath + " to " + destinationPath;
         desc += "; Publish mode " + publishMethod.name().toLowerCase();
@@ -206,6 +209,7 @@ public class PageRelocator implements ProcessDefinition {
             instance.defineAction("Activate References", rr, this::activateReferences);
             instance.defineAction("Deactivate Old", rr, this::deactivateOld);
         }
+        instance.defineAction("Remove old pages", rr, this::removeSource);
     }
 
     protected void validateAllAcls(ActionManager step1) {
@@ -260,6 +264,14 @@ public class PageRelocator implements ProcessDefinition {
                     });
         });
     }
+    
+    protected void removeSource(ActionManager step6) {
+        if (instanceInfo.getReportedErrors().isEmpty() && !dryRun) {
+            step6.deferredWithResolver(rr -> {
+                rr.delete(rr.getResource(sourcePath));
+            });
+        }
+    }    
 
     private void beginStep(ActionManager step, String startingNode, SimpleFilteringResourceVisitor visitor) {
         try {
