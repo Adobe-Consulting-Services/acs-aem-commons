@@ -189,6 +189,10 @@ public class PageRelocator implements ProcessDefinition {
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         validateInputs(rr);
+        String desc = dryRun ? "DRY RUN: " : "";
+        desc += mode.name().toLowerCase() + " " + sourcePath + " to " + destinationPath;
+        desc += "; Publish mode " + publishMethod.name().toLowerCase();
+        instance.getInfo().setDescription(desc);
         requiredPrivileges = getPrivilegesFromNames(rr, requiredPrivilegeNames);
         instance.defineCriticalAction("Check ACLs", rr, this::validateAllAcls);
         instance.defineCriticalAction("Build Target Structure", rr, this::buildTargetStructure);
@@ -201,7 +205,7 @@ public class PageRelocator implements ProcessDefinition {
     }
 
     protected void validateAllAcls(ActionManager step1) {
-        TreeFilteringResourceVisitor pageVisitor = new TreeFilteringResourceVisitor(NameConstants.NT_PAGE);
+        SimpleFilteringResourceVisitor pageVisitor = new SimpleFilteringResourceVisitor();
         pageVisitor.setBreadthFirstMode();
         pageVisitor.setResourceVisitor((resource, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, resource.getPath(), requiredPrivileges)));
         pageVisitor.setLeafVisitor((resource, level) -> step1.deferredWithResolver(rr -> checkNodeAcls(rr, resource.getPath(), requiredPrivileges)));
@@ -212,7 +216,6 @@ public class PageRelocator implements ProcessDefinition {
         TreeFilteringResourceVisitor pageVisitor = new TreeFilteringResourceVisitor(NameConstants.NT_PAGE);
         pageVisitor.setBreadthFirstMode();
         pageVisitor.setResourceVisitor((resource, level) -> step2.deferredWithResolver(rr -> createTargetPage(rr, resource.getPath())));
-        pageVisitor.setLeafVisitor((resource, level) -> step2.deferredWithResolver(rr -> createTargetPage(rr, resource.getPath())));
         beginStep(step2, sourcePath, pageVisitor);
     }
 
@@ -220,7 +223,6 @@ public class PageRelocator implements ProcessDefinition {
         TreeFilteringResourceVisitor pageVisitor = new TreeFilteringResourceVisitor(NameConstants.NT_PAGE);
         pageVisitor.setBreadthFirstMode();
         pageVisitor.setResourceVisitor((resource, level) -> step3.deferredWithResolver(rr -> movePage(rr, resource.getPath())));
-        pageVisitor.setLeafVisitor((resource, level) -> step3.deferredWithResolver(rr -> movePage(rr, resource.getPath())));
         beginStep(step3, sourcePath, pageVisitor);
     }
 
@@ -317,10 +319,11 @@ public class PageRelocator implements ProcessDefinition {
     private void checkNodeAcls(ResourceResolver res, String path, Privilege[] prvlgs) throws RepositoryException {
         Actions.setCurrentItem(path);
         Session session = res.adaptTo(Session.class);
+        boolean report = res.getResource(path).getResourceType().equals(NameConstants.NT_PAGE);
         if (!session.getAccessControlManager().hasPrivileges(path, prvlgs)) {
             note(path, REPORT.acl_check, "FAIL");
             throw new RepositoryException("Insufficient permissions to permit move operation");
-        } else {
+        } else if (report) {
             note(path, REPORT.acl_check, "PASS");
         }
     }
