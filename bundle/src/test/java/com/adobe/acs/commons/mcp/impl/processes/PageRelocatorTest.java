@@ -128,6 +128,7 @@ public class PageRelocatorTest {
         values.put("publishMethod", PageRelocator.PUBLISH_METHOD.SELF_MANAGED.toString());
         values.put("createVerionsOnReplicate", "false");
         values.put("updateStatus", "true");
+        values.put("dryRun", "false");
         instance.init(rr, values);
 
         AbstractResourceImpl processNode = new AbstractResourceImpl(instance.getPath(), null, null, new ResourceMetadata());
