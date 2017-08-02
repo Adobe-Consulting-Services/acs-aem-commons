@@ -34,6 +34,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #108: Email subject mangled for non-latin chars
 - #1043: JCR Package Replication now populates the replicated by properties of the packaged resources with the actual user that requested the replication of the package (with configurable override via OSGi config for backwards compat) 
 - #1044: JCR Package Replication fixes a resource leak where the JCR Packages were not closed after being opened 
+- #1059: ResourceServiceManager no longer users admin resource resolver
+- #1064: Fixed NPE in ResourceServiceManager when no serviceReferences exist
 - Fast Action Manager is much more efficient in how it gauges CPU usage, which makes it even faster than before.
 
 <!---
