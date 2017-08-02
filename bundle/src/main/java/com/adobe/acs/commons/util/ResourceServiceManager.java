@@ -152,17 +152,21 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
                     bctx.getServiceReferences(Runnable.class.getCanonicalName(), filter),
                     bctx.getServiceReferences(EventHandler.class.getCanonicalName(), filter));
 
-            log.debug("Found {} registered services", serviceReferences.length);
-            for (ServiceReference reference : serviceReferences) {
-                try {
-                    String configurationId = (String) reference.getProperty(CONFIGURATION_ID_KEY);
-                    if (!configuredIds.contains(configurationId)) {
-                        log.debug("Unregistering service for configuration {}", configurationId);
-                        this.unregisterService(configurationId);
+            if (serviceReferences != null && serviceReferences.length > 0) {
+                log.debug("Found {} registered services", serviceReferences.length);
+                for (ServiceReference reference : serviceReferences) {
+                    try {
+                        String configurationId = (String) reference.getProperty(CONFIGURATION_ID_KEY);
+                        if (!configuredIds.contains(configurationId)) {
+                            log.debug("Unregistering service for configuration {}", configurationId);
+                            this.unregisterService(configurationId);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Exception unregistering reference " + reference, e);
                     }
-                } catch (Exception e) {
-                    log.warn("Exception unregistering reference " + reference, e);
                 }
+            } else {
+                log.debug("Did not find any registered services.");
             }
 
         } catch (InvalidSyntaxException e) {
