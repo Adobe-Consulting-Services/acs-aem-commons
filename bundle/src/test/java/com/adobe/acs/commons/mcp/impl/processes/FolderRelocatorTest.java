@@ -75,7 +75,7 @@ public class FolderRelocatorTest {
         assertEquals(0.0, instance.updateProgress(), 0.00001);
         instance.run(rr);
         assertEquals(1.0, instance.updateProgress(), 0.00001);
-        verify(rr, times(3)).commit();
+        verify(rr, atLeast(3)).commit();
     }
     
     @Test
@@ -105,7 +105,7 @@ public class FolderRelocatorTest {
         });
         instance.run(rr);
         assertTrue(f.get());
-        verify(rr, times(1)).commit();
+        verify(rr, atLeastOnce()).commit();
     }
 
     private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
