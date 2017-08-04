@@ -23,6 +23,7 @@ import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
+import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor;
@@ -34,14 +35,18 @@ import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.PageManagerFactory;
+import com.day.cq.wcm.commons.ReferenceSearch;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -90,6 +95,22 @@ public class PageRelocator implements ProcessDefinition {
             component = PathfieldComponent.PageSelectComponent.class,
             options = {"base=/content"})
     private String destinationPath;
+    
+    @FormField(name = "Max References",
+            description = "Limit of how many page references to handle (max per page)",
+            hint = "-1 = All, 0 = None, etc.",
+            component = TextfieldComponent.class,
+            required = false,
+            options = {"default=-1"})
+    private int maxReferences = -1;        
+    
+    @FormField(name = "Reference Search Root",
+            description = "Root for reference searches.  /content is preferred for simple pages, but might miss stuff in other places like /var",
+            hint = "/content or / (same as blank)",
+            component = TextfieldComponent.class,
+            required = false,
+            options = {"default=/content"})
+    private String referenceSearchRoot = "/content";
 
     @FormField(name = "Mode",
             description = "Move relocates the page keeping the original name.  Rename changes the name, optionally moving the page.",
@@ -164,6 +185,9 @@ public class PageRelocator implements ProcessDefinition {
         replicationOptions.setSuppressVersions(!createVerionsOnReplicate);
         replicationOptions.setSuppressStatusUpdate(!updateStatus);
 
+        if (referenceSearchRoot == null || referenceSearchRoot.trim().isEmpty()) {
+            referenceSearchRoot = "/";
+        }
     }
 
     private void validateInputs(ResourceResolver res) throws RepositoryException {
@@ -283,7 +307,7 @@ public class PageRelocator implements ProcessDefinition {
     }
 
     enum REPORT {
-        target, acl_check, move_time, activate_time, deactivate_time
+        target, acl_check, all_references, published_references, move_time, activate_time, deactivate_time
     };
     final private Map<String, EnumMap<REPORT, Object>> reportData = new TreeMap<>();
 
@@ -350,20 +374,36 @@ public class PageRelocator implements ProcessDefinition {
         String destinationParent = destination.substring(0, destination.lastIndexOf('/'));
         note(sourcePage, REPORT.target, destination);
         String beforeName = "";
-        String[] adjustRefs = {};
-        String[] publishRefs = {};
         long start = System.currentTimeMillis();
+        
+        String contentPath = sourcePage + "/jcr:content";
+        List<String> refs = new ArrayList<>();
+        List<String> publishRefs = new ArrayList<>();
+        
+        if (maxReferences != 0 && resourceExists(rr, contentPath)) {
+            ReferenceSearch refSearch = new ReferenceSearch();
+            refSearch.setExact(true);
+            refSearch.setHollow(true);
+            refSearch.setMaxReferencesPerPage(maxReferences);
+            refSearch.setSearchRoot(referenceSearchRoot);
+            refSearch.search(rr, sourcePath).values().stream()
+                            .peek(p->refs.add(p.getPagePath()))
+                            .filter(this::needsToBePublished).map(ReferenceSearch.Info::getPagePath)
+                            .collect(Collectors.toCollection(()->publishRefs));
+        }
+        note(sourcePage, REPORT.all_references, refs.size());
+        note(sourcePage, REPORT.published_references, refs.size());        
+        
         if (!dryRun) {
             Actions.retry(10, 500, res -> {
                 waitUntilResourceFound(res, destinationParent);
                 Resource source = rr.getResource(sourcePage);
-                String contentPath = sourcePage + "/jcr:content";
                 if (resourceExists(res, contentPath)) {
-                    manager.move(source, destination, beforeName, true, true, adjustRefs, publishRefs);
+                    manager.move(source, destination, beforeName, true, true, listToStringArray(refs), listToStringArray(publishRefs));
                 } else {
                     Map<String, Object> props = new HashMap<>();
                     Resource parent = res.getResource(destinationParent);
-                    res.create(parent, source.getName(), source.getValueMap());
+                    res.create(parent, source.getName(), source.getValueMap());                    
                 }
                 res.commit();
                 res.refresh();
@@ -417,5 +457,13 @@ public class PageRelocator implements ProcessDefinition {
         } else {
             note(reversePathLookup(path), REPORT.activate_time, end - start);
         }
+    }
+    
+    private boolean needsToBePublished(ReferenceSearch.Info pageInfo) {
+        return false;
+    }
+    
+    private String[] listToStringArray(List<String> values) {
+        return values.toArray(new String[0]);
     }
 }
