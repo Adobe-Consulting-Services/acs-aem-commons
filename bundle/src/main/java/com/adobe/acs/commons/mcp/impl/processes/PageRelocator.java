@@ -31,6 +31,7 @@ import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
+import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManager;
@@ -388,7 +389,8 @@ public class PageRelocator implements ProcessDefinition {
             refSearch.setSearchRoot(referenceSearchRoot);
             refSearch.search(rr, sourcePath).values().stream()
                             .peek(p->refs.add(p.getPagePath()))
-                            .filter(this::needsToBePublished).map(ReferenceSearch.Info::getPagePath)
+                            .filter(p->isActivated(rr, p.getPagePath()))
+                            .map(ReferenceSearch.Info::getPagePath)
                             .collect(Collectors.toCollection(()->publishRefs));
         }
         note(sourcePage, REPORT.all_references, refs.size());
@@ -459,8 +461,9 @@ public class PageRelocator implements ProcessDefinition {
         }
     }
     
-    private boolean needsToBePublished(ReferenceSearch.Info pageInfo) {
-        return false;
+    private boolean isActivated(ResourceResolver rr, String path) {        
+        ReplicationStatus replicationStatus = rr.getResource(path).adaptTo(ReplicationStatus.class);
+        return replicationStatus.isActivated();
     }
     
     private String[] listToStringArray(List<String> values) {
