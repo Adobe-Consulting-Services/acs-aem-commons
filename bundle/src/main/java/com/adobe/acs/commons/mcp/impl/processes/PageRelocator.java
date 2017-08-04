@@ -106,12 +106,12 @@ public class PageRelocator implements ProcessDefinition {
     private int maxReferences = -1;        
     
     @FormField(name = "Reference Search Root",
-            description = "Root for reference searches.  /content is preferred for simple pages, but might miss stuff in other places like /var",
-            hint = "/content or / (same as blank)",
+            description = "Root for reference searches.  Depending on how indexes are set up, / might be the only working value on your system",
+            hint = "/ (all), /content, ...",
             component = TextfieldComponent.class,
             required = false,
-            options = {"default=/content"})
-    private String referenceSearchRoot = "/content";
+            options = {"default=/"})
+    private String referenceSearchRoot = "/";
 
     @FormField(name = "Mode",
             description = "Move relocates the page keeping the original name.  Rename changes the name, optionally moving the page.",
@@ -394,7 +394,7 @@ public class PageRelocator implements ProcessDefinition {
                             .collect(Collectors.toCollection(()->publishRefs));
         }
         note(sourcePage, REPORT.all_references, refs.size());
-        note(sourcePage, REPORT.published_references, refs.size());        
+        note(sourcePage, REPORT.published_references, publishRefs.size());        
         
         if (!dryRun) {
             Actions.retry(10, 500, res -> {
