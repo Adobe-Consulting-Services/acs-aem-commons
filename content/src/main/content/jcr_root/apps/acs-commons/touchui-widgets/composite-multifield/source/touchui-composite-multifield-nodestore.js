@@ -149,6 +149,10 @@
                         }
                     }
 
+                    if(!_.isEmpty($field) && $field.siblings( "input.autocomplete-has-suggestion-btn")) {
+                        cmf.setWidgetValue($field.siblings( "input.autocomplete-has-suggestion-btn"), fValue);
+                    }
+
                     cmf.setWidgetValue($field, fValue);
                 });
             });
@@ -208,7 +212,13 @@
             });
 
             function fillValue($form, fieldSetName, $field, counter){
-                var name = $field.attr("name"), value;
+                var name, value;
+                // for userpicker and richtext $field length is 2, excluding richtext
+                if($field.length > 1 && !$field.parent().hasClass("richtext-container")) {
+                    name = $($field[1]).attr("name");
+                } else {
+                    name = $field.attr("name");
+                }
 
                 if (!name) {
                     return;

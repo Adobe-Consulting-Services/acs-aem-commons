@@ -29,12 +29,15 @@ import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +68,7 @@ import java.util.Map;
  *      ...
  *      List<String> participantList = emailService.sendEmail(htmlEmailTemplatePath, emailParams, attachments, key);
  */
-@Component
+@Component(metatype = true, label = "ACS AEM Commons - Email Service", description = "ACS AEM Commons - Email Service")
 @Service
 public final class EmailServiceImpl implements EmailService {
 
@@ -77,7 +80,26 @@ public final class EmailServiceImpl implements EmailService {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
+    public static final int DEFAULT_CONNECT_TIMEOUT = 30000;
+
+    public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
+
+    @Property(label = "Socket Timeout", description = "Socket timeout in milliseconds", intValue = DEFAULT_SOCKET_TIMEOUT)
+    private static final String PROP_SO_TIMEOUT = "so.timeout";
+
+    @Property(label = "Connect Timeout", description = "Connect timeout in milliseconds", intValue = DEFAULT_CONNECT_TIMEOUT)
+    private static final String PROP_CONNECT_TIMEOUT = "conn.timeout";
+
     private static String SERVICE_NAME = "email-service";
+
+    private int connectTimeout;
+    private int soTimeout;
+
+    @Activate
+    protected void activate(Map<String, Object> config) {
+        connectTimeout = PropertiesUtil.toInteger(config.get(PROP_CONNECT_TIMEOUT), DEFAULT_CONNECT_TIMEOUT);
+        soTimeout = PropertiesUtil.toInteger(config.get(PROP_SO_TIMEOUT), DEFAULT_SOCKET_TIMEOUT);
+    }
 
     @Override
     public List<String> sendEmail(final String templatePath,
@@ -219,6 +241,17 @@ public final class EmailServiceImpl implements EmailService {
 
         } else if (params.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)) {
             email.setFrom(params.get(EmailServiceConstants.SENDER_EMAIL_ADDRESS));
+        }
+        if (connectTimeout > 0) {
+            email.setSocketConnectionTimeout(connectTimeout);
+        }
+        if (soTimeout > 0) {
+            email.setSocketTimeout(soTimeout);
+        }
+
+        // #1008 setting the subject via the setSubject(..) parameter.
+        if (params.containsKey(EmailServiceConstants.SUBJECT)) {
+            email.setSubject(params.get(EmailServiceConstants.SUBJECT));
         }
 
         return email;

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="deca910d-5895-3639-b549-c3a91ffaeed1"
+    rep:authorizableId="acs-commons-automatic-package-replicator-service"
+    rep:principalName="acs-commons-automatic-package-replicator-service"/>
