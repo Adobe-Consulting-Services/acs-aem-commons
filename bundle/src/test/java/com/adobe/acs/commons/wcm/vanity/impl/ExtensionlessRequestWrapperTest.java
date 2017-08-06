@@ -54,4 +54,20 @@ public class ExtensionlessRequestWrapperTest {
         ExtensionlessRequestWrapper wrapper = new ExtensionlessRequestWrapper(request);
         assertEquals("xyz", wrapper.getRequestPathInfo().getExtension());
     }
+
+    @Test
+    public void passThroughMethods() throws Exception {
+        context.requestPathInfo().setResourcePath("/content");
+        context.requestPathInfo().setSelectorString("bar");
+        context.requestPathInfo().setExtension("html");
+        context.requestPathInfo().setSuffix("/xyz");
+
+        context.request().setResource(context.resourceResolver().getResource("/content"));
+        ExtensionlessRequestWrapper wrapper = new ExtensionlessRequestWrapper(context.request());
+
+        assertEquals("/content", wrapper.getRequestPathInfo().getResourcePath());
+        assertEquals("bar", wrapper.getRequestPathInfo().getSelectorString());
+        assertEquals("html", wrapper.getRequestPathInfo().getExtension());
+        assertEquals("/xyz", wrapper.getRequestPathInfo().getSuffix());
+    }
 }

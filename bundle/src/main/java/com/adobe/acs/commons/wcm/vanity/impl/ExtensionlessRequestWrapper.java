@@ -35,7 +35,7 @@ public class ExtensionlessRequestWrapper extends SlingHttpServletRequestWrapper 
         }
 
         public String getExtension() {
-            final ValueMap properties = resource.adaptTo(ValueMap.class);
+            final ValueMap properties = resource.getValueMap();
             if (properties != null) {
                 if (properties.get(SLING_STATUS, -1) < 0) {
                     // Internal redirect; so keep extension

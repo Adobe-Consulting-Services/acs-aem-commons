@@ -15,6 +15,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.servlet.RequestDispatcher;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -60,5 +61,32 @@ public class VanityURLServiceImplTest {
 
         assertFalse(vanityURLService.dispatch(request, response));
         verify(requestDispatcher, times(0)).forward(any(ExtensionlessRequestWrapper.class), eq(response));
+    }
+
+    @Test
+    public void isVanityPath() throws Exception {
+        context.build().resource("/foo",
+                "jcr:primaryType", "sling:redirect",
+                            "sling:target", "/content/bar");
+
+        assertTrue(vanityURLService.isVanityPath("/content", "/foo", request));
+    }
+
+    @Test
+    public void isVanityPath_OutsideOfPathScope() throws Exception {
+        context.build().resource("/foo",
+                "jcr:primaryType", "sling:redirect",
+                "sling:target", "/bar");
+
+        assertFalse(vanityURLService.isVanityPath("/content", "/foo", request));
+    }
+
+    @Test
+    public void isVanityPath_NotRedirectResource() throws Exception {
+        // Redirect resources
+        context.build().resource("/foo",
+                "jcr:primaryType", "nt:unstructured");
+
+        assertFalse(vanityURLService.isVanityPath("/content", "/foo", request));
     }
 }
