@@ -22,6 +22,7 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.replication.Replicator;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +32,8 @@ import javax.jcr.Session;
  * Collect a list of replication events for later examination and/or replay.
  */
 public class ReplicatorQueue implements Replicator {
-    Map<String, ReplicationOptions> deactivateOperations = new LinkedHashMap<>();
-    Map<String, ReplicationOptions> activateOperations = new LinkedHashMap<>();
+    Map<String, ReplicationOptions> deactivateOperations = Collections.synchronizedMap(new LinkedHashMap<>());
+    Map<String, ReplicationOptions> activateOperations = Collections.synchronizedMap(new LinkedHashMap<>());
 
     @Override
     public void replicate(Session session, ReplicationActionType actionType, String path) throws ReplicationException {
