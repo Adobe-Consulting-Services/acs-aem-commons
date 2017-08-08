@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - Content Modification Framework API
 - Named Image Transform Servlet Sharpen transform 
 - AEM Assets Brand Portal workflow process and Agent filter
+- #1067: Added Vanity Path dispatcher mapping which allows mapped incoming requests to resolve to sling:vanityPaths.
 
 ### Changed
 

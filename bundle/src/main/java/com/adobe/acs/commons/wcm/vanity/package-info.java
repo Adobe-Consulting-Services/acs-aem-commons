@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Dynamic Error Page Handler.
+ * Vanity WCM Utilities.
  */
-@aQute.bnd.annotation.Version("1.3.0")
-package com.adobe.acs.commons.errorpagehandler;
+@aQute.bnd.annotation.Version("1.0.0")
+package com.adobe.acs.commons.wcm.vanity;
