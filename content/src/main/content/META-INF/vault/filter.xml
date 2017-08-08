@@ -57,5 +57,10 @@
         <include pattern="/etc/acs-commons/exporters/jcr:content" />
         <include pattern="/etc/acs-commons/audit-log-search(.*)?" />
     </filter>
+    <filter root="/etc/notification/email">
+        <include pattern="/etc/notification/email/rep:policy"/>
+        <include pattern="/etc/notification/email/acs-commons"/>
+        <include pattern="/etc/notification/email/acs-commons/(.*)?"/>
+    </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
 </workspaceFilter>
