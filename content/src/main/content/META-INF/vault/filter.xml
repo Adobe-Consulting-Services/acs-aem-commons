@@ -61,6 +61,10 @@
         <include pattern="/etc/acs-commons/exporters" />
         <include pattern="/etc/acs-commons/exporters/jcr:content" />
         <include pattern="/etc/acs-commons/audit-log-search(.*)?" />
+        <include pattern="/etc/acs-commons/qr-code" />
+        <include pattern="/etc/acs-commons/qr-code/jcr:content" />
+        <include pattern="/etc/acs-commons/qr-code/jcr:content/clientlib-author" mode="merge"/>
+        <exclude pattern="/etc/acs-commons/qr-code/jcr:content/config" mode="merge"/>
     </filter>
     <filter root="/var/acs-commons" mode="merge"/>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
