@@ -118,4 +118,13 @@ public interface ErrorPageHandlerService {
      * @param path the path
      */
     void includeUsingGET(SlingHttpServletRequest request, SlingHttpServletResponse response, String path);
+    
+    
+    /**
+     * Determines if Vanity-URL dispatch check is enabled. When enabled and current request URI is a valid vanity (after performing resource resolver mapping),
+     * request will be forwarded.
+     * 
+     * @return true if check is enabled else false
+     */
+    boolean isVanityDispatchCheckEnabled();
 }
