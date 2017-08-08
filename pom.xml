@@ -116,7 +116,7 @@
                         <rulesets>
                             <ruleset>acs/pmd/rules.xml</ruleset>
                         </rulesets>
-                        <targetJdk>1.6</targetJdk>
+                        <targetJdk>1.8</targetJdk>
                     </configuration>
                     <dependencies>
                         <dependency>
