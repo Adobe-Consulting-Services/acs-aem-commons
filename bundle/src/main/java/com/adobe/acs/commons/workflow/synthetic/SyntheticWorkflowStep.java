@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,17 @@
  * #L%
  */
 
-/**
- * Synthetic AEM Workflow APIs.
- */
-@aQute.bnd.annotation.Version("2.1.0")
 package com.adobe.acs.commons.workflow.synthetic;
+
+import aQute.bnd.annotation.ProviderType;
+
+import java.util.Map;
+
+@ProviderType
+public interface SyntheticWorkflowStep {
+    String getId();
+
+    Map<String, Object> getMetadataMap();
+
+    SyntheticWorkflowRunner.WorkflowProcessIdType getIdType();
+}
