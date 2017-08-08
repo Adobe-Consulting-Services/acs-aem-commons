@@ -103,6 +103,17 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             boolValue = DEFAULT_ENABLED)
     private static final String PROP_ENABLED = "enabled";
 
+    /* Enable/Disable Vanity Dispatch check*/
+    private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
+
+    private boolean vanityDispatchCheckEnabled = DEFAULT_VANITY_DISPATCH_ENABLED;
+
+    @Property(label = "Vanity Dispatch Check", description = "Enables/Disables Vanity Dispatch check, "
+    		+ "if this is enabled and current request URI is a valid vanity (after performing resource resolver mapping), "
+    		+ "request will be forwarded to it. [Optional... but recommended when using resource resolver based out-going mapping] [Default: false]",
+            boolValue = DEFAULT_VANITY_DISPATCH_ENABLED)
+    private static final String PROP_VANITY_DISPATCH_ENABLED = "vanity.dispatch.enabled";
+
     /* Error Page Extension */
     private static final String DEFAULT_ERROR_PAGE_EXTENSION = "html";
 
@@ -240,6 +251,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Reference
     private ComponentHelper componentHelper;
+
+    @Reference
+    private VanityURLService vanityURLService;
 
     private ErrorPageCache cache;
 
@@ -822,6 +836,10 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
                         DEFAULT_ENABLED));
 
+        this.vanityDispatchCheckEnabled = PropertiesUtil.toBoolean(config.get(PROP_VANITY_DISPATCH_ENABLED),
+                PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_VANITY_DISPATCH_ENABLED),
+                        DEFAULT_VANITY_DISPATCH_ENABLED));
+
         /** Error Pages **/
 
         this.systemErrorPagePath = PropertiesUtil.toString(config.get(PROP_ERROR_PAGE_PATH),
@@ -1015,6 +1033,10 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         public String getMethod() {
             return "GET";
         }
+    }
+
+    public boolean isVanityDispatchCheckEnabled(){
+    	return this.vanityDispatchCheckEnabled;
     }
 
 }
