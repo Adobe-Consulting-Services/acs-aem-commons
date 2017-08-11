@@ -98,7 +98,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.6.201602180812</version>
+                    <version>0.7.9</version>
                     <executions>
                         <execution>
                             <id>default-prepare-agent</id>
@@ -116,7 +116,7 @@
                         <rulesets>
                             <ruleset>acs/pmd/rules.xml</ruleset>
                         </rulesets>
-                        <targetJdk>1.6</targetJdk>
+                        <targetJdk>1.8</targetJdk>
                     </configuration>
                     <dependencies>
                         <dependency>

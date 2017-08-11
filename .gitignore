@@ -5,6 +5,7 @@
 .settings/
 target/
 .DS_Store
+lib/
 
 #Intellij
 .idea/
@@ -22,3 +23,4 @@ content/src/main/content/jcr_root/etc/designs/.content.xml
 content/src/main/content/jcr_root/etc/clientlibs/.content.xml
 .pmd
 .metadata
+

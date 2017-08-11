@@ -15,6 +15,7 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
@@ -77,6 +78,11 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS);
         workerPool.submit(r);
     }
+    
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler);
+        workerPool.submit(r);
+    }    
 
     RunningStatistic waitTime = new RunningStatistic("Queue wait time");
     RunningStatistic throttleTime = new RunningStatistic("Throttle time");
@@ -272,10 +278,11 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
     protected void activate(ComponentContext componentContext) {
         Dictionary<?, ?> properties = componentContext.getProperties();
+        int defaultThreadCount = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
 
         maxCpu = PropertiesUtil.toDouble(properties.get("max.cpu"), 0.85);
         maxHeap = PropertiesUtil.toDouble(properties.get("max.heap"), 0.85);
-        maxThreads = PropertiesUtil.toInteger(properties.get("max.threads"), 4);
+        maxThreads = PropertiesUtil.toInteger(properties.get("max.threads"), defaultThreadCount);
         cooldownWaitTime = PropertiesUtil.toInteger(properties.get("cooldown.wait.time"), 100);
         taskTimeout = PropertiesUtil.toInteger(properties.get("task.timeout"), 60000);
 

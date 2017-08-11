@@ -52,6 +52,7 @@
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list/item_\d+"/>
+        <include pattern="/etc/acs-commons/manage-controlled-processes"/>
         <include pattern="/etc/acs-commons/notifications"/>
         <include pattern="/etc/acs-commons/notifications/jcr:content"/>
         <include pattern="/etc/acs-commons/packagers"/>
@@ -60,15 +61,26 @@
         <include pattern="/etc/acs-commons/exporters" />
         <include pattern="/etc/acs-commons/exporters/jcr:content" />
         <include pattern="/etc/acs-commons/audit-log-search(.*)?" />
+        <include pattern="/etc/acs-commons/qr-code" />
+        <include pattern="/etc/acs-commons/qr-code/jcr:content" />
+        <include pattern="/etc/acs-commons/qr-code/jcr:content/clientlib-author" mode="merge"/>
+        <exclude pattern="/etc/acs-commons/qr-code/jcr:content/config" mode="merge"/>
     </filter>
+    <filter root="/var/acs-commons" mode="merge"/>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
+    <filter root="/etc/acs-commons/manage-controlled-processes/rep:policy"/>
     <filter root="/home/users/system/acs-commons"/>
     <filter root="/apps/rep:policy"/>
     <filter root="/oak:index/rep:policy"/>
     <filter root="/rep:policy"/>
-    <filter root="/etc/notification/email/rep:policy"/>
+    <filter root="/etc/notification/email">
+        <include pattern="/etc/notification/email/rep:policy"/>
+        <include pattern="/etc/notification/email/acs-commons"/>
+        <include pattern="/etc/notification/email/acs-commons/(.*)?"/>
+    </filter>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
     <filter root="/etc/workflow/instances/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
+    <filter root="/var/acs-commons/rep:policy"/>
 </workspaceFilter>

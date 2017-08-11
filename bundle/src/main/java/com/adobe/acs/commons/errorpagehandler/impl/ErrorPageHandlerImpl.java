@@ -24,6 +24,7 @@ import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
 import com.adobe.acs.commons.util.InfoWriter;
 import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
 import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
@@ -82,6 +83,17 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
             boolValue = DEFAULT_ENABLED)
     private static final String PROP_ENABLED = "enabled";
+    
+    /* Enable/Disable Vanity Dispatch check*/
+    private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
+
+    private boolean vanityDispatchCheckEnabled = DEFAULT_VANITY_DISPATCH_ENABLED;
+
+    @Property(label = "Vanity Dispatch Check", description = "Enables/Disables Vanity Dispatch check, "
+    		+ "if this is enabled and current request URI is a valid vanity (after performing resource resolver mapping), "
+    		+ "request will be forwarded to it. [Optional... but recommended when using resource resolver based out-going mapping] [Default: false]",
+            boolValue = DEFAULT_VANITY_DISPATCH_ENABLED)
+    private static final String PROP_VANITY_DISPATCH_ENABLED = "vanity.dispatch.enabled";
 
     /* Error Page Extension */
     private static final String DEFAULT_ERROR_PAGE_EXTENSION = "html";
@@ -139,7 +151,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             options = {
                     @PropertyOption(value = "Redirect to Login", name = REDIRECT_TO_LOGIN),
                     @PropertyOption(value = "Respond with 404", name = RESPOND_WITH_404)
-            })
+            },
+            value = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR)
     private static final String PROP_NOT_FOUND_DEFAULT_BEHAVIOR = "not-found.behavior";
 
 
@@ -221,6 +234,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Reference
     private ComponentHelper componentHelper;
+    
+    @Reference
+    private VanityURLService vanityURLService;
 
     private ErrorPageCache cache;
 
@@ -802,6 +818,10 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         this.enabled = PropertiesUtil.toBoolean(config.get(PROP_ENABLED),
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
                         DEFAULT_ENABLED));
+        
+        this.vanityDispatchCheckEnabled = PropertiesUtil.toBoolean(config.get(PROP_VANITY_DISPATCH_ENABLED),
+                PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_VANITY_DISPATCH_ENABLED),
+                        DEFAULT_VANITY_DISPATCH_ENABLED));
 
         /** Error Pages **/
 
@@ -997,6 +1017,10 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         public String getMethod() {
             return "GET";
         }
+    }
+    
+    public boolean isVanityDispatchCheckEnabled(){
+    	return this.vanityDispatchCheckEnabled;
     }
 
 }

@@ -37,10 +37,7 @@ import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.jackrabbit.vault.packaging.Version;
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -105,7 +102,7 @@ public final class PackageHelperImpl implements PackageHelper {
                 dstParentNode.getSession().save();
             }
         } catch (RepositoryException e) {
-            log.error("Could not add package thumbnail: {}", e.getMessage());
+            log.error("Could not add package thumbnail: {}", e);
         }
     }
 
@@ -399,7 +396,7 @@ public final class PackageHelperImpl implements PackageHelper {
             json.put("msg", msg);
             return json.toString();
         } catch (JSONException e) {
-            log.error("Error creating JSON Error response message: {}", e.getMessage());
+            log.error("Error creating JSON Error response message: {}", e);
             return JSON_EXCEPTION_MSG;
         }
     }

@@ -21,31 +21,30 @@
 package com.adobe.acs.commons.workflow.process.impl;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import com.adobe.acs.commons.replication.AgentIdsAgentFilter;
+import com.adobe.acs.commons.replication.BrandPortalAgentFilter;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.util.visitors.ContentVisitor;
 import com.adobe.acs.commons.util.visitors.ResourceRunnable;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
-import com.day.cq.replication.ReplicationActionType;
-import com.day.cq.replication.ReplicationOptions;
-import com.day.cq.replication.Replicator;
+import com.day.cq.replication.*;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,6 +71,9 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
     private static final String ARG_REPLICATION_SYNCHRONOUS = "synchronous";
     private static final String ARG_REPLICATION_SUPPRESS_VERSIONS = "suppressVersions";
     private static final String ARG_THROTTLE = "throttle";
+    private static final String ARG_AGENTS = "agents";
+
+    private static final String BRAND_PORTAL_AGENTS = "BRAND_PORTAL_AGENTS";
 
     @Reference
     private WorkflowPackageManager workflowPackageManager;
@@ -88,6 +90,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
         ResourceResolver resourceResolver = null;
+        final long start = System.currentTimeMillis();
 
         try {
             resourceResolver = workflowHelper.getResourceResolver(workflowSession);
@@ -107,7 +110,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
                     replicator.replicate(resource.getResourceResolver().adaptTo(Session.class),
                             processArgs.getReplicationActionType(),
                             resource.getPath(),
-                            processArgs.getReplicationOptions());
+                            processArgs.getReplicationOptions(resource));
                     count.incrementAndGet();
                 }
             };
@@ -126,7 +129,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
                 }
             }
 
-            log.info("Replicate with Options processed [ {} ] total payloads", count.get());
+            log.info("Replicate with Options processed [ {} ] total payloads in {} ms", count.get(), System.currentTimeMillis() - start);
         } catch (Exception e) {
             throw new WorkflowException(e);
         }
@@ -135,32 +138,40 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
     /**
      * ProcessArgs parsed from the WF metadata map
      */
-    private static class ProcessArgs {
+    protected static class ProcessArgs {
         private ReplicationActionType replicationActionType = null;
         private ReplicationOptions replicationOptions = new ReplicationOptions();
         private boolean traverseTree = false;
         private boolean throttle = false;
-
+        private List<String> agents = new ArrayList<String>();
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
             String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
-            Map<String, String> data = ParameterUtil.toMap(lines, "=");
+            final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));
             traverseTree = Boolean.parseBoolean(data.get(ARG_TRAVERSE_TREE));
             replicationActionType = ReplicationActionType.fromName(data.get(ARG_REPLICATION_ACTION_TYPE));
             if (replicationActionType == null) {
-                throw new WorkflowException("Unable to parse the replicationActionType from the Workflow Porcess Args");
+                throw new WorkflowException("Unable to parse the replicationActionType from the Workflow Process Args");
             }
             replicationOptions.setSynchronous(Boolean.parseBoolean(data.get(ARG_REPLICATION_SYNCHRONOUS)));
             replicationOptions.setSuppressVersions(Boolean.parseBoolean(data.get(ARG_REPLICATION_SUPPRESS_VERSIONS)));
+
+            agents = Arrays.asList(StringUtils.split(data.get(ARG_AGENTS), ","));
         }
 
         public ReplicationActionType getReplicationActionType() {
             return replicationActionType;
         }
 
-        public ReplicationOptions getReplicationOptions() {
+        public ReplicationOptions getReplicationOptions(Resource content) {
+            if (agents.size() == 1 && BRAND_PORTAL_AGENTS.equals(agents.get(0))) {
+                replicationOptions.setFilter(new BrandPortalAgentFilter(content));
+            } else {
+                replicationOptions.setFilter(new AgentIdsAgentFilter(agents));
+            }
+
             return replicationOptions;
         }
 
