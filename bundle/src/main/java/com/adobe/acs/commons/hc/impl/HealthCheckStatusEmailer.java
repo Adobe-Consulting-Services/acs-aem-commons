@@ -33,7 +33,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.apache.sling.hc.api.execution.HealthCheckExecutionOptions;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionResult;
 import org.apache.sling.hc.api.execution.HealthCheckExecutor;
 import org.apache.sling.settings.SlingSettingsService;
@@ -122,20 +121,6 @@ public class HealthCheckStatusEmailer implements Runnable {
             value = {"system"})
     public static final String PROP_HEALTH_CHECK_TAGS = "hc.tags";
 
-    private static final int DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE = -1;
-    private int healthCheckTimeoutOverride = DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE;
-    @Property(label = "Health Check Timeout Override",
-            description = "The AEM Health Check timeout override in milliseconds. Set < 1 to disable. [ Default: -1 ]",
-            intValue = DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE)
-    public static final String PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE = "hc.timeout.override";
-
-    private static final boolean DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR = true;
-    private boolean healthCheckTagsOptionsOr = DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR;
-    @Property(label = "'OR' Health Check Tags",
-            description = "When set to true, all Health Checks that are in any of the Health Check Tags (hc.tags) are executed. If false, then the Health Check must be in ALL of the Health Check tags (hc.tags). [ Default: true ]",
-            boolValue = DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR)
-    public static final String PROP_HEALTH_CHECK_TAGS_OPTIONS_OR = "hc.tags.options.or";
-
     private static final String DEFAULT_FALLBACK_HOSTNAME = "Unknown AEM Instance";
     private String fallbackHostname = DEFAULT_FALLBACK_HOSTNAME;
     @Property(label = "Hostname Fallback",
@@ -167,22 +152,15 @@ public class HealthCheckStatusEmailer implements Runnable {
     @Reference
     private HealthCheckExecutor healthCheckExecutor;
 
-    @Override
     public final void run() {
         log.trace("Executing ACS Commons Health Check E-mailer scheduled service");
 
-        final List<HealthCheckExecutionResult> success = new ArrayList<>();
-        final List<HealthCheckExecutionResult> failure = new ArrayList<>();
+        final List<HealthCheckExecutionResult> success = new ArrayList<HealthCheckExecutionResult>();
+        final List<HealthCheckExecutionResult> failure = new ArrayList<HealthCheckExecutionResult>();
 
         final long start = System.currentTimeMillis();
 
-        final HealthCheckExecutionOptions options = new HealthCheckExecutionOptions();
-        options.setForceInstantExecution(true);
-        options.setCombineTagsWithOr(healthCheckTagsOptionsOr);
-        if (healthCheckTimeoutOverride > 0) {
-            options.setOverrideGlobalTimeout(healthCheckTimeoutOverride);
-        }
-        final List<HealthCheckExecutionResult> results = healthCheckExecutor.execute(options, healthCheckTags);
+        final List<HealthCheckExecutionResult> results = healthCheckExecutor.execute(healthCheckTags);
 
         log.debug("Obtained [ {} ] results for Health Check tags [ {} ]", results.size(), StringUtils.join(healthCheckTags, ", "));
         for (HealthCheckExecutionResult result : results) {
@@ -222,7 +200,7 @@ public class HealthCheckStatusEmailer implements Runnable {
         final ProductInfo[] productInfos = productInfoService.getInfos();
         final String hostname = getHostname();
 
-        final Map<String, String> emailParams = new HashMap<>();
+        final Map<String, String> emailParams = new HashMap<String, String>();
         emailParams.put("subject", String.format("%s [ %d Failures ] [ %d Success ] [ %s ]", emailSubject, failure.size(), success.size(), hostname));
         emailParams.put("failure", resultToPlainText("Failing Health Checks", failure));
         emailParams.put("success", resultToPlainText("Successful Health Checks", success));
@@ -265,20 +243,20 @@ public class HealthCheckStatusEmailer implements Runnable {
         final StringBuilder sb = new StringBuilder();
 
         sb.append(title);
-        sb.append(System.lineSeparator());
+        sb.append(System.getProperty("line.separator"));
 
         if (results.size() == 0) {
             sb.append("No " + StringUtils.lowerCase(title) + " could be found!");
-            sb.append(System.lineSeparator());
+            sb.append(System.getProperty("line.separator"));
         } else {
             sb.append(StringUtils.repeat("-", NUM_DASHES));
-            sb.append(System.lineSeparator());
+            sb.append(System.getProperty("line.separator"));
 
             for (final HealthCheckExecutionResult result : results) {
                 sb.append(StringUtils.rightPad("[ " + result.getHealthCheckResult().getStatus().name() + " ]", HEALTH_CHECK_STATUS_PADDING));
                 sb.append("  ");
                 sb.append(result.getHealthCheckMetadata().getTitle());
-                sb.append(System.lineSeparator());
+                sb.append(System.getProperty("line.separator"));
             }
         }
 
@@ -297,13 +275,11 @@ public class HealthCheckStatusEmailer implements Runnable {
         fallbackHostname = PropertiesUtil.toString(config.get(PROP_FALLBACK_HOSTNAME), DEFAULT_FALLBACK_HOSTNAME);
         recipientEmailAddresses = PropertiesUtil.toStringArray(config.get(PROP_RECIPIENTS_EMAIL_ADDRESSES), DEFAULT_RECIPIENT_EMAIL_ADDRESSES);
         healthCheckTags = PropertiesUtil.toStringArray(config.get(PROP_HEALTH_CHECK_TAGS), DEFAULT_HEALTH_CHECK_TAGS);
-        healthCheckTagsOptionsOr = PropertiesUtil.toBoolean(config.get(PROP_HEALTH_CHECK_TAGS_OPTIONS_OR), DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR);
         sendEmailOnlyOnFailure = PropertiesUtil.toBoolean(config.get(PROP_SEND_EMAIL_ONLY_ON_FAILURE), DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE);
         throttleInMins = PropertiesUtil.toInteger(config.get(PROP_THROTTLE), DEFAULT_THROTTLE_IN_MINS);
         if (throttleInMins < 0) {
             throttleInMins = DEFAULT_THROTTLE_IN_MINS;
         }
-        healthCheckTimeoutOverride = PropertiesUtil.toInteger(config.get(PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE), DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE);
     }
 
     /**
@@ -372,11 +348,14 @@ public class HealthCheckStatusEmailer implements Runnable {
      * @throws IOException
      */
     private String execReadToString(String execCommand) throws IOException {
-        Process proc = Runtime.getRuntime().exec(execCommand);
-        try (InputStream stream = proc.getInputStream()) {
-            try (Scanner s = new Scanner(stream).useDelimiter("\\A")) {
-                return s.hasNext() ? s.next() : "";
-            }
+        try {
+            Process proc = Runtime.getRuntime().exec(execCommand);
+            InputStream stream = proc.getInputStream();
+            Scanner s = new Scanner(stream).useDelimiter("\\A");
+            return s.hasNext() ? s.next() : "";
+        } catch (Exception e) {
+            log.error("Could not execute a command and read the return response", e);
+            return "";
         }
     }
 }

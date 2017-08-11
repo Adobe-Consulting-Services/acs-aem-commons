@@ -67,7 +67,7 @@ public class SyntheticCqWorkflowRunnerImplTest {
 
     @Before
     public void setUp() {
-        workflowSteps = new ArrayList<>();
+        workflowSteps = new ArrayList<SyntheticWorkflowStep>();
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
     }
 

@@ -368,7 +368,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     private List<SyntheticWorkflowStep> convertToSyntheticWorkflowSteps(String[] workflowProcessIds,
                                                                         WorkflowProcessIdType idType,
                                                                         Map<String, Map<String, Object>> processArgs) {
-        final List<SyntheticWorkflowStep> workflowSteps = new ArrayList<>();
+        final List<SyntheticWorkflowStep> workflowSteps = new ArrayList<SyntheticWorkflowStep>();
 
         for (String workflowProcessId : workflowProcessIds) {
             workflowSteps.add(getSyntheticWorkflowStep(workflowProcessId, idType, processArgs.get(workflowProcessId)));

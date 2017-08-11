@@ -16,7 +16,7 @@ public class SyntheticWorkflowStepImplTest {
 
     @Test
     public void getMetadataMap() throws Exception {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<String, Object>();
         assertEquals(map, new SyntheticWorkflowStepImpl("test", map).getMetadataMap());
     }
 
