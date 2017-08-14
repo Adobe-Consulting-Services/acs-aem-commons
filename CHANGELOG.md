@@ -12,7 +12,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - #916: AEM Assets Brand Portal workflow process and Agent filter
-- #924: Content Modification Framework API
 - #958: Named Image Transform Servlet Sharpen transform 
 - #1005: Asset Folder Properties Support to allow custom fields/properties to be added to AEM Assets Folders in UI
 - #1039: Health Check Status E-mailer
