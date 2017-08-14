@@ -22,7 +22,7 @@ package com.adobe.acs.commons.cmf;
 import aQute.bnd.annotation.ProviderType;
 
 @ProviderType
-public class NoSuchContentModificationStepException extends Exception {
+public final class NoSuchContentModificationStepException extends Exception {
 
     private static final long serialVersionUID = 2040296153469265596L;
 
