@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.cmf.impl;
 
 import java.io.IOException;
@@ -20,7 +39,6 @@ import com.adobe.acs.commons.cmf.ContentModificationProcessor;
 import com.adobe.acs.commons.cmf.IdentifiedResources;
 import com.adobe.acs.commons.cmf.NoSuchContentModificationStepException;
 
-
 /**
  * The ContentModificationServlet should be set on a resource with these 2 properties for configuration
  * <ul>
@@ -32,97 +50,89 @@ import com.adobe.acs.commons.cmf.NoSuchContentModificationStepException;
  * If invoked via POST the change is performed as well.
  * 
  */
-
-
 @SlingServlet(
         methods = { "GET", "POST" },
         resourceTypes = { "acs-commons/components/cmf" },
         extensions = { "html" }
 )
+@SuppressWarnings("serial")
 public class ContentModificationServlet extends SlingAllMethodsServlet {
-	
-	private static Logger log = LoggerFactory.getLogger(ContentModificationServlet.class);
-	
-	private static final String PATH = "path";
-	private static final String MODIFICATION_STEP = "modificationStep";
+
+    private static Logger log = LoggerFactory.getLogger(ContentModificationServlet.class);
+
+    private static final String PATH = "path";
+    private static final String MODIFICATION_STEP = "modificationStep";
+
+    @Reference
+    ContentModificationProcessor cmp;
+
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+
+        ServletOutputStream out = response.getOutputStream();
+
+        Resource resource = request.adaptTo(Resource.class);
+        if (resource == null) {
+            response.sendError(500, "No resource");
+            log.error ("not invoked on a resource");
+            return;
+        }
+        ValueMap props = resource.adaptTo(ValueMap.class);
+        String usedModificationStep = props.get(MODIFICATION_STEP).toString();
+        String path = props.get(PATH).toString();
+
+        out.print(String.format("<p>Starting %s on path %s</p>", new Object[]{usedModificationStep,path}));
+
+        try {
+            IdentifiedResources id = cmp.identifyAffectedResources(usedModificationStep, path, request.getResourceResolver());
+            Iterator<String> resources = id.getPaths().iterator();
+            out.print("Found resources:<ul>");
+            while (resources.hasNext()) {
+                out.print (String.format("<li>%s</li>", resources.next()));
+            }
+            out.print("</ul>");
+
+        } catch (NoSuchContentModificationStepException e) {
+            out.print ("<p>Did not find modification step called " + usedModificationStep + "</p>");
+        }
+    }
 
 
-	@Reference
-	ContentModificationProcessor cmp;
-	
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
 
-	protected void doGet (SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-		
-		ServletOutputStream out = response.getOutputStream();
+        ServletOutputStream out = response.getOutputStream();
 
-		Resource resource = request.adaptTo(Resource.class);
-		if (resource == null) {
-			response.sendError(500, "No resource");
-			log.error ("not invoked on a resource");
-			return;
-		}
-		ValueMap props = resource.adaptTo(ValueMap.class);
-		String usedModificationStep = props.get(MODIFICATION_STEP).toString();
-		String path = props.get(PATH).toString();
-		
-		out.print(String.format("<p>Starting %s on path %s</p>", new Object[]{usedModificationStep,path}));
-		
-		try {
-			IdentifiedResources id = cmp.identifyAffectedResources(usedModificationStep, path, request.getResourceResolver());
-			Iterator<String> resources = id.getPaths().iterator();
-			out.print("Found resources:<ul>");
-			while (resources.hasNext()) {
-				out.print (String.format("<li>%s</li>", resources.next()));
-			}
-			out.print("</ul>");			
-			
-		} catch (NoSuchContentModificationStepException e) {
-			out.print ("<p>Did not find modification step called " + usedModificationStep + "</p>");
-		}
-	}
+        Resource resource = request.adaptTo(Resource.class);
+        if (resource == null) {
+            response.sendError(500, "No resource");
+            log.error ("not invoked on a resource");
+            return;
+        }
+        ValueMap props = resource.adaptTo(ValueMap.class);
+        String usedModificationStep = props.get(MODIFICATION_STEP).toString();
+        String path = props.get(PATH).toString();
 
-	
-	protected void doPost (SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-		
-		ServletOutputStream out = response.getOutputStream();
+        out.print(String.format("<p>Starting %s on path %s</p>", new Object[]{usedModificationStep,path}));
 
-		Resource resource = request.adaptTo(Resource.class);
-		if (resource == null) {
-			response.sendError(500, "No resource");
-			log.error ("not invoked on a resource");
-			return;
-		}
-		ValueMap props = resource.adaptTo(ValueMap.class);
-		String usedModificationStep = props.get(MODIFICATION_STEP).toString();
-		String path = props.get(PATH).toString();
-		
-		out.print(String.format("<p>Starting %s on path %s</p>", new Object[]{usedModificationStep,path}));
-		
-		try {
-			IdentifiedResources id = cmp.identifyAffectedResources(usedModificationStep, path, request.getResourceResolver());
-			Iterator<String> resources = id.getPaths().iterator();
-			out.print("Found resources:<ul>");
-			while (resources.hasNext()) {
-				out.print (String.format("<li>%s</li>", resources.next()));
-			}
-			out.print("</ul>");
-			
-			out.print("<p>Start modification</p>");
-			
-			cmp.modifyResources(id, request.getResourceResolver());
-			
-			out.print("<p>Modification completed</p>");
-			
-			
-		} catch (NoSuchContentModificationStepException e) {
-			out.print ("<p>Did not find modification step called " + usedModificationStep + "</p>");
-		}
-	}
-	
-	
+        try {
+            IdentifiedResources id = cmp.identifyAffectedResources(usedModificationStep, path, request.getResourceResolver());
+            Iterator<String> resources = id.getPaths().iterator();
+            out.print("Found resources:<ul>");
+            while (resources.hasNext()) {
+                out.print (String.format("<li>%s</li>", resources.next()));
+            }
+            out.print("</ul>");
+
+            out.print("<p>Start modification</p>");
+
+            cmp.modifyResources(id, request.getResourceResolver());
+
+            out.print("<p>Modification completed</p>");
+
+
+        } catch (NoSuchContentModificationStepException e) {
+            out.print ("<p>Did not find modification step called " + usedModificationStep + "</p>");
+        }
+    }
+
+
 }
