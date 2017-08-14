@@ -62,15 +62,21 @@ public class AnnotatedFieldDeserializer {
 
     private static void parseInput(Object target, ValueMap input, Field field) throws ReflectiveOperationException, ParseException {
         FormField inputAnnotation = field.getAnnotation(FormField.class);
+        Object value;
         if (input.get(field.getName()) == null) {
             if (inputAnnotation != null && inputAnnotation.required()) {
-                throw new NullPointerException("Required field missing: " + field.getName());
+                if (field.getType() == Boolean.class || field.getType() == Boolean.TYPE) {
+                    value = false;
+                } else {
+                    throw new NullPointerException("Required field missing: " + field.getName());
+                }
             } else {
                 return;
             }
+        } else {
+            value = input.get(field.getName());            
         }
 
-        Object value = input.get(field.getName());
         if (hasMultipleValues(field.getType())) {
             parseInputList(target, serializeToStringArray(value), field);
         } else {

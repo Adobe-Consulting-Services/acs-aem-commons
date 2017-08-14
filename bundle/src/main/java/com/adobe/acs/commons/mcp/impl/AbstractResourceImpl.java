@@ -19,10 +19,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.sling.api.resource.AbstractResource;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 /**
@@ -44,6 +46,15 @@ public class AbstractResourceImpl extends AbstractResource {
         this.type = resourceType;
         this.superType = resourceSuperType;
         this.meta = metadata;
+    }
+    
+    @Override
+    public <T> T adaptTo(Class<T> clazz) {
+        if (clazz.equals(ModifiableValueMap.class)) {
+            return (T) new ModifiableValueMapDecorator(this.getValueMap());
+        } else {
+            return null;
+        }
     }
 
     public void setResourceResolver(ResourceResolver rr) {

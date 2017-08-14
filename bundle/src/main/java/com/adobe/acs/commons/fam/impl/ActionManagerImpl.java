@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * Manages a pool of reusable resource resolvers and injects them into tasks
  */
 class ActionManagerImpl extends CancelHandler implements ActionManager, Serializable {
+
     private static final long serialVersionUID = 7526472295622776150L;
 
     transient private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
@@ -94,7 +95,6 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     public String getName() {
         return name;
     }
-
 
     @Override
     public int getAddedCount() {
@@ -172,7 +172,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         return withQueryResults(queryStatement, language, (CheckedBiConsumer<ResourceResolver, String>) callback,
                 Arrays.copyOf(filters, filters.length, CheckedBiFunction[].class));
     }
-    
+
     @Override
     public int withQueryResults(
             final String queryStatement,
@@ -204,18 +204,18 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                     });
                 }
             } catch (RepositoryException ex) {
-                LOG.error("Repository exception processing query "+queryStatement, ex);
+                LOG.error("Repository exception processing query " + queryStatement, ex);
             }
         });
-        
+
         return tasksAdded.get();
     }
-    
+
     @Override
     public void addCleanupTask() {
         // This is deprecated, only included for backwards-compatibility.
     }
-    
+
     @Override
     public void onSuccess(CheckedConsumer<ResourceResolver> successTask) {
         successHandlers.add(successTask);
@@ -225,33 +225,39 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     public void onFailure(CheckedBiConsumer<List<Failure>, ResourceResolver> failureTask) {
         errorHandlers.add(failureTask);
     }
-    
+
     @Override
     public void onFinish(Runnable finishHandler) {
         finishHandlers.add(finishHandler);
     }
-   
+
     private void runCompletionTasks() {
         if (getErrorCount() == 0) {
-            successHandlers.forEach(handler -> {
-                try {
-                    this.withResolver(handler);
-                } catch (Exception ex) {
-                    LOG.error("Error in success handler for action "+getName(), ex);
-                }
-            });
+            synchronized (successHandlers) {
+                successHandlers.forEach(handler -> {
+                    try {
+                        this.withResolver(handler);
+                    } catch (Exception ex) {
+                        LOG.error("Error in success handler for action " + getName(), ex);
+                    }
+                });
+            }
         } else {
-            errorHandlers.forEach(handler -> {
-                try {
-                    this.withResolver(res -> handler.accept(getFailureList(), res));
-                } catch (Exception ex) {
-                    LOG.error("Error in error handler for action "+getName(), ex);
-                }
-            });            
+            synchronized (errorHandlers) {
+                errorHandlers.forEach(handler -> {
+                    try {
+                        this.withResolver(res -> handler.accept(getFailureList(), res));
+                    } catch (Exception ex) {
+                        LOG.error("Error in error handler for action " + getName(), ex);
+                    }
+                });
+            }
         }
-        finishHandlers.forEach(Runnable::run);
+        synchronized (finishHandlers) {
+            finishHandlers.forEach(Runnable::run);
+        }
     }
-    
+
     private void performAutomaticCleanup() {
         if (!cleanupHandlerRegistered.getAndSet(true)) {
             taskRunner.scheduleWork(() -> {
@@ -264,7 +270,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                 }
                 runCompletionTasks();
                 closeAllResolvers();
-            });        
+            });
         }
     }
 
@@ -276,6 +282,9 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     private void deferredWithResolver(
             final CheckedConsumer<ResourceResolver> action,
             final boolean closesResolver) {
+        if (!closesResolver) {
+            tasksAdded.incrementAndGet();
+        }
         taskRunner.scheduleWork(() -> {
             started.compareAndSet(0, System.currentTimeMillis());
             try {
@@ -284,21 +293,19 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                     logCompletetion();
                 }
             } catch (Exception ex) {
-                LOG.error("Error in error handler for action "+getName(), ex);
+                LOG.error("Error in error handler for action " + getName(), ex);
                 if (!closesResolver) {
                     logError(ex);
                 }
             } catch (Throwable t) {
-                LOG.error("Fatal uncaught error in error handler for action "+getName(), t);
+                LOG.error("Fatal uncaught error in error handler for action " + getName(), t);
                 if (!closesResolver) {
                     logError(new RuntimeException(t));
                 }
                 throw t;
             }
         }, this);
-        if (!closesResolver) {
-            tasksAdded.incrementAndGet();
-        }
+
     }
 
     private ReusableResolver getResourceResolver() throws LoginException {
@@ -321,7 +328,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     private void logError(Exception ex) {
-        LOG.error("Caught exception in task: "+ex.getMessage(), ex);
+        LOG.error("Caught exception in task: " + ex.getMessage(), ex);
         Failure fail = new Failure();
         fail.setNodePath(currentPath.get());
         fail.setException(ex);
@@ -336,7 +343,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     private void logPersistenceException(List<String> items, PersistenceException ex) {
         StringBuilder itemList = new StringBuilder();
-        for (String item:items) {
+        for (String item : items) {
             itemList.append(item).append("; ");
             Failure fail = new Failure();
             fail.setNodePath(item);
@@ -344,8 +351,8 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             failures.add(fail);
             tasksError.incrementAndGet();
             tasksSuccessful.decrementAndGet();
-        }        
-        LOG.error("Persistence error prevented saving changes for: "+itemList, ex);
+        }
+        LOG.error("Persistence error prevented saving changes for: " + itemList, ex);
     }
 
     private void logFilteredOutItem(String path) {
@@ -382,14 +389,14 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     @Override
     public CompositeData getStatistics() throws OpenDataException {
-        return new CompositeDataSupport(statsCompositeType, statsItemNames, 
+        return new CompositeDataSupport(statsCompositeType, statsItemNames,
                 new Object[]{
-                    name, 
-                    tasksAdded.get(), 
-                    tasksCompleted.get(), 
-                    tasksFilteredOut.get(), 
-                    tasksSuccessful.get(), 
-                    tasksError.get(), 
+                    name,
+                    tasksAdded.get(),
+                    tasksCompleted.get(),
+                    tasksFilteredOut.get(),
+                    tasksSuccessful.get(),
+                    tasksError.get(),
                     getRuntime()
                 }
         );
@@ -416,7 +423,9 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         ArrayList<CompositeData> failureData = new ArrayList<>();
         int count = 0;
         for (Failure fail : failures) {
-            if (count > 5000) break;
+            if (count > 5000) {
+                break;
+            }
             failureData.add(new CompositeDataSupport(
                     failureCompositeType,
                     failureItemNames,

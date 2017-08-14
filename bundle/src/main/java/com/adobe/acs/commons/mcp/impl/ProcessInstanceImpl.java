@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
  * actions.
  */
 public class ProcessInstanceImpl implements ProcessInstance, Serializable {
+
     private static final long serialVersionUID = 7526472295622776151L;
 
     private final ManagedProcess infoBean;
@@ -197,12 +198,12 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
             if (action.critical) {
                 action.manager.onSuccess(rr -> runStep(step + 1));
                 action.manager.onFailure((failures, rr) -> {
-                    asServiceUser(service->recordErrors(step, failures, service));
+                    asServiceUser(service -> recordErrors(step, failures, service));
                     halt();
                 });
             } else {
                 action.manager.onFailure((failures, rr) -> {
-                    asServiceUser(service->recordErrors(step, failures, service));
+                    asServiceUser(service -> recordErrors(step, failures, service));
                 });
                 action.manager.onFinish(() -> runStep(step + 1));
             }
@@ -224,7 +225,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
             }
             for (int i = 0; i < failures.size(); i++) {
                 String errPath = errFolder + "/err" + i;
-                Map<String,Object> values = new HashMap<>();
+                Map<String, Object> values = new HashMap<>();
                 ValueMapSerializer.serializeToMap(values, failures.get(i));
                 ResourceUtil.getOrCreateResource(rr, errPath, values, null, false);
             }
@@ -273,20 +274,24 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
     }
 
     private void persistStatus(ResourceResolver rr) throws PersistenceException {
-        Map<String,Object> props = new HashMap<>();
-        props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FOLDER);
-        ResourceUtil.getOrCreateResource(rr, BASE_PATH, props, null, true);
-        props.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Page");
-        Resource r = ResourceUtil.getOrCreateResource(rr, getPath(), props, null, true);
-        ModifiableValueMap jcrContent = ResourceUtil.getOrCreateResource(rr, getPath() + "/jcr:content", ProcessInstance.RESOURCE_TYPE, null, false).adaptTo(ModifiableValueMap.class);
-        jcrContent.put("jcr:primaryType","cq:PageContent");
-        jcrContent.put("jcr:title", getName());
-        ValueMapSerializer.serializeToMap(jcrContent, infoBean);
-        ModifiableValueMap resultNode = ResourceUtil.getOrCreateResource(rr, getPath() + "/jcr:content/result", ProcessInstance.RESOURCE_TYPE+"/result", null, false).adaptTo(ModifiableValueMap.class);
-        resultNode.put("jcr:primaryType",JcrConstants.NT_UNSTRUCTURED);
-        ValueMapSerializer.serializeToMap(resultNode, infoBean.getResult());
-        rr.commit();
-        rr.refresh();
+        try {
+            Map<String, Object> props = new HashMap<>();
+            props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FOLDER);
+            ResourceUtil.getOrCreateResource(rr, BASE_PATH, props, null, true);
+            props.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Page");
+            Resource r = ResourceUtil.getOrCreateResource(rr, getPath(), props, null, true);
+            ModifiableValueMap jcrContent = ResourceUtil.getOrCreateResource(rr, getPath() + "/jcr:content", ProcessInstance.RESOURCE_TYPE, null, false).adaptTo(ModifiableValueMap.class);
+            jcrContent.put("jcr:primaryType", "cq:PageContent");
+            jcrContent.put("jcr:title", getName());
+            ValueMapSerializer.serializeToMap(jcrContent, infoBean);
+            ModifiableValueMap resultNode = ResourceUtil.getOrCreateResource(rr, getPath() + "/jcr:content/result", ProcessInstance.RESOURCE_TYPE + "/result", null, false).adaptTo(ModifiableValueMap.class);
+            resultNode.put("jcr:primaryType", JcrConstants.NT_UNSTRUCTURED);
+            ValueMapSerializer.serializeToMap(resultNode, infoBean.getResult());
+            rr.commit();
+            rr.refresh();
+        } catch (NullPointerException ex) {
+            throw new PersistenceException("Null encountered when persisting status", ex);
+        }
     }
 
     @Override
@@ -304,7 +309,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
             setStatusCompleted();
         } else {
             setStatusAborted();
-        }       
+        }
         asServiceUser(rr -> {
             persistStatus(rr);
             definition.storeReport(this, rr);

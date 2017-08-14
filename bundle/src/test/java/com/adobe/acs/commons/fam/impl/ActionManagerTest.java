@@ -159,6 +159,6 @@ public class ActionManagerTest {
         manager.deferredWithResolver(resolver -> {
         });
         manager.closeAllResolvers();
-        verify(rr, times(5)).close();
+        verify(rr, atLeast(5)).close();
     }
 }

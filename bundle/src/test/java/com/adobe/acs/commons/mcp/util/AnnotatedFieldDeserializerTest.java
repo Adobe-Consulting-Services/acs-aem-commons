@@ -114,4 +114,29 @@ public class AnnotatedFieldDeserializerTest {
         assertEquals(555.666F, target.floatValue.get(3), 0);
     }
 
+    /**
+     * Check if booleans are assumed false if missing.
+     *
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBooleanFalseByDefault() throws Exception {
+
+        System.out.println("processInput");
+        PrimitivesTest target = new PrimitivesTest();
+        Map<String, Object> params = new HashMap<>();
+        params.put("intValue", "123");
+        params.put("doubleValue", numberFormat.format(123.456));
+        params.put("floatValue",  numberFormat.format(234.567f));
+        params.put("longValue", "1234567890");
+        target.booleanValue = true;
+        AnnotatedFieldDeserializer.deserializeFormFields(target, new ModifiableValueMapDecorator(params));
+        assertEquals(123, target.intValue);
+        assertEquals(123.456D, target.doubleValue, 0);
+        assertEquals(234.567F, target.floatValue, 0);
+        assertEquals(1234567890L, target.longValue);
+        assertEquals(false, target.booleanValue);
+    }
+
+    
 }
