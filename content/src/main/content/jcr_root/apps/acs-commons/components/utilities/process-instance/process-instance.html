@@ -34,11 +34,11 @@ limitations under the License.
                 <label class="coral-Form-fieldlabel">Started</label>
                 <span class="process-dialog-field">${process.startTimeFormatted} by ${process.requester}</span>
             </section>
-            <section class="coral-Form-fieldset" data-sly-test="${process.isRunning}">
+            <section class="coral-Form-fieldset" data-sly-test="${!process.isRunning}">
                 <label class="coral-Form-fieldlabel">Ended</label>
                 <span class="process-dialog-field">${process.stopTimeFormatted}</span>
             </section>
-            <section class="coral-Form-fieldset" data-sly-test="${!process.isRunning}">
+            <section class="coral-Form-fieldset" data-sly-test="${process.isRunning}">
                 <label class="coral-Form-fieldlabel">Progress</label>
                 <span class="process-dialog-field">${process.progressPercent}</span>
             </section>
