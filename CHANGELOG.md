@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1039: Health Check Status E-mailer
 - #1041: QR Code to Publish in Page Editor
 - #1067: Vanity Path Web server re-writer mapping 
-- Managed Controlled Processes framework with 4 sample tools: Folder Re-locator, Asset Report (space usage), Deep Prune, Asset Ingestor (aka AntEater v2)
+- Managed Controlled Processes framework with 5 sample tools: Folder Relocator, Page Relocator, Asset Report (space usage), Deep Prune, Asset Ingestor (aka AntEater v2)
 - `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be retried if any of them fail and break the commit.
 - Fast Action Manager now has a halt feature in the API which instantly stops an action manager and any of its scheduled work
 
