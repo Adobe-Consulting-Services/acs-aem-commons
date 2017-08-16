@@ -256,7 +256,7 @@ var ScriptRunner = {
             dataType: "html",
             error: ScriptRunner.error,
             success: function(response) {
-                var halt = response.indexOf("Ended") > 0;
+                var ended = response.indexOf("Ended") > 0;
                 var diag = new Coral.Dialog().set({
                     id: 'viewProcess',
                     header: {
@@ -266,7 +266,7 @@ var ScriptRunner = {
                         innerHTML: response
                     },
                     footer: {
-                        innerHTML: (halt ? '<button id="haltButton" is="coral-button" variant="default">Halt</button>':'') +
+                        innerHTML: (!ended ? '<button id="haltButton" is="coral-button" variant="default">Halt</button>':'') +
                                 '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
                     },
                     closable: true,
