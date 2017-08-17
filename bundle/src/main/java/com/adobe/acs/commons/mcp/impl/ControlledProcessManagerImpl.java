@@ -133,7 +133,15 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     }
 
     private ProcessDefinition findDefinitionByName(String name) throws ReflectiveOperationException {
-        Class defClass = Class.forName(name);
+        Class clazz;
+        try {
+            clazz = Class.forName(name);
+        } catch (ClassNotFoundException ex) {
+            clazz = processDefinitions.stream().map(Object::getClass).filter(c -> c.getName().equals(name)).findFirst().orElseThrow(() -> ex);
+        }
+
+        final Class defClass = clazz;
+
         ProcessDefinition definition = (ProcessDefinition) defClass.newInstance();
         processDefinitions.stream().filter(d -> d.getClass().equals(defClass)).findFirst().ifPresent(svc -> copyReferences(svc, definition));
         return definition;
