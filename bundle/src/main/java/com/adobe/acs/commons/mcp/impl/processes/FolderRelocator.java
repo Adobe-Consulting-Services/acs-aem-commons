@@ -77,7 +77,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class FolderRelocator implements ProcessDefinition, Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
-    
+    public static final String NAME = "Folder Relocator";
+
     public static enum Mode {
         RENAME, MOVE
     };
@@ -181,7 +182,7 @@ public class FolderRelocator implements ProcessDefinition, Serializable {
     
     @Override
     public String getName() {
-        return "Folder relocator";
+        return NAME;
     }
     
     /**

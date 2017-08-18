@@ -29,8 +29,8 @@ import org.apache.felix.scr.annotations.Service;
 public class FolderRelocatorFactory implements ProcessDefinitionFactory {
 
     @Override
-    public String getProcessName() {
-        return FolderRelocator.class.getName();
+    public String getName() {
+        return FolderRelocator.NAME;
     }
 
     @Override

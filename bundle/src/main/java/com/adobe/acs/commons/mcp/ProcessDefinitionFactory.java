@@ -24,7 +24,9 @@ import aQute.bnd.annotation.ConsumerType;
 @ConsumerType
 public interface ProcessDefinitionFactory {
 
-    String getProcessName();
+    String getName();
+
+    default boolean getRequiresAdmin() { return false; };
 
     ProcessDefinition createProcessDefinition();
 }

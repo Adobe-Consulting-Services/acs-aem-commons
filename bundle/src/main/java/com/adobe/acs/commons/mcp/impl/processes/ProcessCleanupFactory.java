@@ -29,8 +29,13 @@ import org.apache.felix.scr.annotations.Service;
 public class ProcessCleanupFactory implements ProcessDefinitionFactory {
 
     @Override
-    public String getProcessName() {
-        return ProcessCleanup.class.getName();
+    public String getName() {
+        return ProcessCleanup.NAME;
+    }
+
+    @Override
+    public boolean getRequiresAdmin() {
+        return true;
     }
 
     @Override

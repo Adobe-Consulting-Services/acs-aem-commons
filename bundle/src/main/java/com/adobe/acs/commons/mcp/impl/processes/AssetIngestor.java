@@ -18,7 +18,6 @@ package com.adobe.acs.commons.mcp.impl.processes;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
@@ -50,7 +49,9 @@ import org.apache.sling.commons.mime.MimeTypeService;
 /**
  * Asset Ingestor reads a directory structure recursively and imports it as-is into AEM.
  */
-public class AssetIngestor implements ProcessDefinition, HiddenProcessDefinition {
+public class AssetIngestor implements ProcessDefinition {
+
+    public static final String NAME = "Asset Ingestor";
 
     private final MimeTypeService mimetypeService;
 
@@ -140,7 +141,7 @@ public class AssetIngestor implements ProcessDefinition, HiddenProcessDefinition
     
     @Override
     public String getName() {
-        return "Asset Ingestor";
+        return NAME;
     }
     
     @Override

@@ -51,7 +51,7 @@ public class FolderRelocatorTest {
         FolderRelocator tool = new FolderRelocator();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
-        assertEquals("Folder relocator: relocator test", instance.getName());
+        assertEquals("Folder Relocator: relocator test", instance.getName());
         try {
             instance.init(rr, Collections.EMPTY_MAP);
             fail("That should have thrown an error");
@@ -66,7 +66,7 @@ public class FolderRelocatorTest {
         FolderRelocator tool = new FolderRelocator();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
-        assertEquals("Folder relocator: relocator test", instance.getName());
+        assertEquals("Folder Relocator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourcePaths", "/content/folderA");
         values.put("destinationPath", "/content/folderB");
@@ -84,7 +84,7 @@ public class FolderRelocatorTest {
         FolderRelocator tool = new FolderRelocator();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
-        assertEquals("Folder relocator: relocator test", instance.getName());
+        assertEquals("Folder Relocator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourcePaths", "/content/folderA");
         values.put("destinationPath", "/content/folderB");

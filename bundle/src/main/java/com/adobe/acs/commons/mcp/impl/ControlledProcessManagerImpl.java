@@ -133,7 +133,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
 
     private ProcessDefinition findDefinitionByName(String name) throws ReflectiveOperationException {
         ProcessDefinitionFactory factory = processDefinitionFactories.stream().
-                filter(f -> name.equals(f.getProcessName())).findFirst()
+                filter(f -> name.equals(f.getName())).findFirst()
                 .orElseThrow(()->new IllegalArgumentException("Unable to find process " + name));
 
         return factory.createProcessDefinition();

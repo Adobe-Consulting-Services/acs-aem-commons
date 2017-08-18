@@ -38,8 +38,8 @@ public class PageRelocatorFactory implements ProcessDefinitionFactory {
     Replicator replicator;
 
     @Override
-    public String getProcessName() {
-        return PageRelocator.class.getName();
+    public String getName() {
+        return PageRelocator.NAME;
     }
 
     @Override

@@ -34,8 +34,13 @@ public class DeepPruneFactory implements ProcessDefinitionFactory {
     private JobManager jobManager;
 
     @Override
-    public String getProcessName() {
-        return DeepPrune.class.getName();
+    public String getName() {
+        return DeepPrune.NAME;
+    }
+
+    @Override
+    public boolean getRequiresAdmin() {
+        return true;
     }
 
     @Override

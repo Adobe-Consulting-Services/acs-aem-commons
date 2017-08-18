@@ -18,7 +18,6 @@ package com.adobe.acs.commons.mcp.impl.processes;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
@@ -34,9 +33,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -47,8 +43,9 @@ import org.apache.sling.event.jobs.Queue;
 /**
  * Stops all running sling jobs and empties the queue entirely.
  */
-public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition, Serializable {
+public class DeepPrune implements ProcessDefinition, Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
+    public static final String NAME = "Deep Prune";
 
     transient private final JobManager jobManager;
     
@@ -120,7 +117,7 @@ public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition, Se
 
     @Override
     public String getName() {
-        return "Deep Prune";
+        return NAME;
     }
 
     @Override

@@ -28,14 +28,19 @@ import org.apache.sling.commons.mime.MimeTypeService;
 
 @Component
 @Service
-public class AssetIngestorFactory implements ProcessDefinitionFactory{
+public class AssetIngestorFactory implements ProcessDefinitionFactory {
 
     @Reference
     MimeTypeService mimetypeService;
 
     @Override
-    public String getProcessName() {
-        return AssetIngestor.class.getName();
+    public String getName() {
+        return AssetIngestor.NAME;
+    }
+
+    @Override
+    public boolean getRequiresAdmin() {
+        return true;
     }
 
     @Override

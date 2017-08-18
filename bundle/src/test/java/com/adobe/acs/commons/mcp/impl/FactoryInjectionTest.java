@@ -66,35 +66,35 @@ public class FactoryInjectionTest {
 
     @Test
     public void testAssetIngestorFactory() throws Exception {
-        ProcessDefinition def = cpm.findDefinitionByNameOrPath(AssetIngestor.class.getName());
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath("Asset Ingestor");
         assertNotNull(def);
         assertTrue(def instanceof AssetIngestor);
     }
 
     @Test
     public void testAssetReportFactory() throws Exception {
-        ProcessDefinition def = cpm.findDefinitionByNameOrPath(AssetReport.class.getName());
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath("Asset Report");
         assertNotNull(def);
         assertTrue(def instanceof AssetReport);
     }
 
     @Test
     public void testDeepPruneFactory() throws Exception {
-        ProcessDefinition def = cpm.findDefinitionByNameOrPath(DeepPrune.class.getName());
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath("Deep Prune");
         assertNotNull(def);
         assertTrue(def instanceof DeepPrune);
     }
 
     @Test
     public void testFolderRelocatorFactory() throws Exception {
-        ProcessDefinition def = cpm.findDefinitionByNameOrPath(FolderRelocator.class.getName());
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath("Folder Relocator");
         assertNotNull(def);
         assertTrue(def instanceof FolderRelocator);
     }
 
     @Test
     public void testProcessCleanupFactory() throws Exception {
-        ProcessDefinition def = cpm.findDefinitionByNameOrPath(ProcessCleanup.class.getName());
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath("Process Cleanup");
         assertNotNull(def);
         assertTrue(def instanceof ProcessCleanup);
     }

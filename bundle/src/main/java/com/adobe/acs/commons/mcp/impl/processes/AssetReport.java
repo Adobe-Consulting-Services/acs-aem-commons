@@ -56,6 +56,7 @@ public class AssetReport implements ProcessDefinition, Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
 
     transient public static final String SHA1 = "dam:sha1";
+    public static final String NAME = "Asset Report";
 
     public static enum Column {
         level, asset_count, subfolder_count,
@@ -114,7 +115,7 @@ public class AssetReport implements ProcessDefinition, Serializable {
 
     @Override
     public String getName() {
-        return "Asset Report";
+        return NAME;
     }
 
     @Override

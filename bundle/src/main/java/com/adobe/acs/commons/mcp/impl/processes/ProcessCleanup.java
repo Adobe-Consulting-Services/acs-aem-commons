@@ -16,7 +16,6 @@
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
@@ -35,8 +34,9 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * Removes archived process instances.
  */
-public class ProcessCleanup implements ProcessDefinition, HiddenProcessDefinition {
+public class ProcessCleanup implements ProcessDefinition {
 
+    public static final String NAME = "Process Cleanup";
     @FormField(
             name = "Age",
             description = "Minimum age (in days) to be considered for removal.",
@@ -47,7 +47,7 @@ public class ProcessCleanup implements ProcessDefinition, HiddenProcessDefinitio
 
     @Override
     public String getName() {
-        return "Process cleanup";
+        return NAME;
     }
 
     @Override

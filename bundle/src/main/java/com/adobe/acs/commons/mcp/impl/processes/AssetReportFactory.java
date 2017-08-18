@@ -28,8 +28,8 @@ import org.apache.felix.scr.annotations.Service;
 @Service
 public class AssetReportFactory implements ProcessDefinitionFactory {
     @Override
-    public String getProcessName() {
-        return AssetReport.class.getName();
+    public String getName() {
+        return AssetReport.NAME;
     }
 
     @Override

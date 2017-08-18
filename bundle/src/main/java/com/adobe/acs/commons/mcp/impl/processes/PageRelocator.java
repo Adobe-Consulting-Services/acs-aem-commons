@@ -67,6 +67,8 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 public class PageRelocator implements ProcessDefinition {
 
+    public static final String NAME = "Page Relocator";
+
     public PageRelocator(PageManagerFactory pageManagerFactory, Replicator replicator) {
         this.pageManagerFactory = pageManagerFactory;
         this.replicator = replicator;
@@ -164,7 +166,7 @@ public class PageRelocator implements ProcessDefinition {
 
     @Override
     public String getName() {
-        return "Page Relocator";
+        return NAME;
     }
 
     @Override
