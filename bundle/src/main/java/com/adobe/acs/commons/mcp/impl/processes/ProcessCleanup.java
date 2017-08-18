@@ -34,9 +34,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * Removes archived process instances.
  */
-public class ProcessCleanup implements ProcessDefinition {
-
-    public static final String NAME = "Process Cleanup";
+public class ProcessCleanup extends ProcessDefinition {
     @FormField(
             name = "Age",
             description = "Minimum age (in days) to be considered for removal.",
@@ -44,11 +42,6 @@ public class ProcessCleanup implements ProcessDefinition {
             options = {"default=7"}
     )
     public int miniumumAge;
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
 
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {

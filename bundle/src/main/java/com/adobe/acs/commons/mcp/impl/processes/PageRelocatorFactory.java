@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
-import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.PageManagerFactory;
@@ -28,8 +27,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 
 @Component
-@Service
-public class PageRelocatorFactory implements ProcessDefinitionFactory {
+@Service(ProcessDefinitionFactory.class)
+public class PageRelocatorFactory extends ProcessDefinitionFactory<PageRelocator> {
 
     @Reference
     PageManagerFactory pageManagerFactory;
@@ -39,11 +38,11 @@ public class PageRelocatorFactory implements ProcessDefinitionFactory {
 
     @Override
     public String getName() {
-        return PageRelocator.NAME;
+        return "Page Relocator";
     }
 
     @Override
-    public PageRelocator createProcessDefinition() {
+    public PageRelocator createProcessDefinitionInstance() {
         return new PageRelocator(pageManagerFactory, replicator);
     }
 }

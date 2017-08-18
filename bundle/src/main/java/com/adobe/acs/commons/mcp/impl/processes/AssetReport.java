@@ -52,7 +52,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * Reports number and size of assets within a given folder structure.
  */
-public class AssetReport implements ProcessDefinition, Serializable {
+public class AssetReport extends ProcessDefinition implements Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
 
     transient public static final String SHA1 = "dam:sha1";
@@ -111,11 +111,6 @@ public class AssetReport implements ProcessDefinition, Serializable {
 
     public int getDepth(String path) {
         return (int) path.chars().filter(c -> c == '/').count();
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
     }
 
     @Override

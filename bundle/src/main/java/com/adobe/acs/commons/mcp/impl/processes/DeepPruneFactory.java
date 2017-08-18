@@ -20,26 +20,26 @@
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.AdminOnlyProcessDefinitionFactory;
-import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.event.jobs.JobManager;
 
 @Component
-@Service
-public class DeepPruneFactory implements AdminOnlyProcessDefinitionFactory {
+@Service(ProcessDefinitionFactory.class)
+public class DeepPruneFactory extends AdminOnlyProcessDefinitionFactory<DeepPrune> {
 
     @Reference
     private JobManager jobManager;
 
     @Override
     public String getName() {
-        return DeepPrune.NAME;
+        return "Deep Prune";
     }
 
     @Override
-    public ProcessDefinition createProcessDefinition() {
+    public DeepPrune createProcessDefinitionInstance() {
         return new DeepPrune(jobManager);
     }
 }

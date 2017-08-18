@@ -19,22 +19,21 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
-import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 
 @Component
-@Service
-public class FolderRelocatorFactory implements ProcessDefinitionFactory {
+@Service(ProcessDefinitionFactory.class)
+public class FolderRelocatorFactory extends ProcessDefinitionFactory<FolderRelocator> {
 
     @Override
     public String getName() {
-        return FolderRelocator.NAME;
+        return "Folder Relocator";
     }
 
     @Override
-    public ProcessDefinition createProcessDefinition() {
+    public FolderRelocator createProcessDefinitionInstance() {
         return new FolderRelocator();
     }
 }

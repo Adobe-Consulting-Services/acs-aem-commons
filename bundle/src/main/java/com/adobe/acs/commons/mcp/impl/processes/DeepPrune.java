@@ -43,9 +43,8 @@ import org.apache.sling.event.jobs.Queue;
 /**
  * Stops all running sling jobs and empties the queue entirely.
  */
-public class DeepPrune implements ProcessDefinition, Serializable {
+public class DeepPrune extends ProcessDefinition implements Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
-    public static final String NAME = "Deep Prune";
 
     transient private final JobManager jobManager;
     
@@ -113,11 +112,6 @@ public class DeepPrune implements ProcessDefinition, Serializable {
 
     public DeepPrune(JobManager jobManager) {
         this.jobManager = jobManager;
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
     }
 
     @Override

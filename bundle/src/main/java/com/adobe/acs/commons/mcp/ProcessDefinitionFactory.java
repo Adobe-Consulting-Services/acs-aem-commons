@@ -23,11 +23,19 @@ import aQute.bnd.annotation.ConsumerType;
 import org.apache.jackrabbit.api.security.user.User;
 
 @ConsumerType
-public interface ProcessDefinitionFactory {
+public abstract class ProcessDefinitionFactory<P extends ProcessDefinition> {
 
-    String getName();
+    abstract public String getName();
 
-    default boolean isAllowed(User user) { return true; };
+    public boolean isAllowed(User user) {
+        return true;
+    }
 
-    ProcessDefinition createProcessDefinition();
+    public final P createProcessDefinition() {
+        P processDefinition = createProcessDefinitionInstance();
+        processDefinition.setName(getName());
+        return processDefinition;
+    }
+
+    abstract protected P createProcessDefinitionInstance();
 }

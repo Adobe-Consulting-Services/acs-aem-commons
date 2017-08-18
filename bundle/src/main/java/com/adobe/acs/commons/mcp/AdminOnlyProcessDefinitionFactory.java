@@ -25,12 +25,13 @@ import org.apache.jackrabbit.api.security.user.User;
 
 /**
  * ProcessDefinitionFactory which limits availablity of a process to the literal 'admin' user.
+ * @param <P> Process definition class
  */
 @ConsumerType
-public interface AdminOnlyProcessDefinitionFactory extends ProcessDefinitionFactory {
+public abstract class AdminOnlyProcessDefinitionFactory<P extends ProcessDefinition> extends ProcessDefinitionFactory<P> {
 
     @Override
-    default boolean isAllowed(User user) {
+    public boolean isAllowed(User user) {
         return user.isAdmin();
     }
 }

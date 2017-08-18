@@ -20,26 +20,26 @@
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
-import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.mime.MimeTypeService;
 
 @Component
-@Service
-public class AssetIngestorFactory implements AdministratorsOnlyProcessDefinitionFactory {
+@Service(ProcessDefinitionFactory.class)
+public class AssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFactory<AssetIngestor> {
 
     @Reference
     MimeTypeService mimetypeService;
 
     @Override
     public String getName() {
-        return AssetIngestor.NAME;
+        return "Asset Ingestor";
     }
 
     @Override
-    public ProcessDefinition createProcessDefinition() {
+    public AssetIngestor createProcessDefinitionInstance() {
         return new AssetIngestor(mimetypeService);
     }
 }

@@ -75,9 +75,8 @@ import org.apache.commons.lang3.StringUtils;
  * separate process.</li>
  * </ul>
  */
-public class FolderRelocator implements ProcessDefinition, Serializable {
+public class FolderRelocator extends ProcessDefinition implements Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
-    public static final String NAME = "Folder Relocator";
 
     public static enum Mode {
         RENAME, MOVE
@@ -179,12 +178,7 @@ public class FolderRelocator implements ProcessDefinition, Serializable {
         }
         sourceToDestination.put(sourcePath, destination);        
     }
-    
-    @Override
-    public String getName() {
-        return NAME;
-    }
-    
+        
     /**
      * Batch size determines the number of operations (folder creation or node
      * moves) performed at a time.

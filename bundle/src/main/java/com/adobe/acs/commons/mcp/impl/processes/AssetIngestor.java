@@ -49,10 +49,7 @@ import org.apache.sling.commons.mime.MimeTypeService;
 /**
  * Asset Ingestor reads a directory structure recursively and imports it as-is into AEM.
  */
-public class AssetIngestor implements ProcessDefinition {
-
-    public static final String NAME = "Asset Ingestor";
-
+public class AssetIngestor extends ProcessDefinition {
     private final MimeTypeService mimetypeService;
 
     public AssetIngestor(MimeTypeService mimeTypeService) {
@@ -138,11 +135,6 @@ public class AssetIngestor implements ProcessDefinition {
     int assetCount = 0;
     int filesSkipped = 0;
     long totalImportedData = 0;
-    
-    @Override
-    public String getName() {
-        return NAME;
-    }
     
     @Override
     public void init() throws RepositoryException {

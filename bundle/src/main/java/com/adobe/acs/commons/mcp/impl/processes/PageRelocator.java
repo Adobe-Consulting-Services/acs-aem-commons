@@ -54,9 +54,6 @@ import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 import org.apache.commons.lang.reflect.FieldUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -65,9 +62,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * Relocate Pages and/or Sites using a parallelized move process
  */
-public class PageRelocator implements ProcessDefinition {
-
-    public static final String NAME = "Page Relocator";
+public class PageRelocator extends ProcessDefinition {
 
     public PageRelocator(PageManagerFactory pageManagerFactory, Replicator replicator) {
         this.pageManagerFactory = pageManagerFactory;
@@ -163,11 +158,6 @@ public class PageRelocator implements ProcessDefinition {
 
     ReplicatorQueue replicatorQueue = new ReplicatorQueue();
     ReplicationOptions replicationOptions;
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
 
     @Override
     public void init() throws RepositoryException {

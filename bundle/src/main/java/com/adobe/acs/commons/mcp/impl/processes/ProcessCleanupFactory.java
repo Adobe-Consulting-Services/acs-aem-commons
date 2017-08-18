@@ -20,21 +20,21 @@
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
-import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 
 @Component
-@Service
-public class ProcessCleanupFactory implements AdministratorsOnlyProcessDefinitionFactory {
+@Service(ProcessDefinitionFactory.class)
+public class ProcessCleanupFactory extends AdministratorsOnlyProcessDefinitionFactory<ProcessCleanup> {
 
     @Override
     public String getName() {
-        return ProcessCleanup.NAME;
+        return "Process Cleanup";
     }
 
     @Override
-    public ProcessDefinition createProcessDefinition() {
+    public ProcessCleanup createProcessDefinitionInstance() {
         return new ProcessCleanup();
     }
 }
