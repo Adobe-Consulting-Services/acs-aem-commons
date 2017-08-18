@@ -17,24 +17,20 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp;
 
-import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
-import com.adobe.acs.commons.mcp.ProcessDefinition;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
+import aQute.bnd.annotation.ConsumerType;
+import org.apache.jackrabbit.api.security.user.User;
 
-@Component
-@Service
-public class ProcessCleanupFactory implements AdministratorsOnlyProcessDefinitionFactory {
 
-    @Override
-    public String getName() {
-        return ProcessCleanup.NAME;
-    }
+/**
+ * ProcessDefinitionFactory which limits availablity of a process to the literal 'admin' user.
+ */
+@ConsumerType
+public interface AdminOnlyProcessDefinitionFactory extends ProcessDefinitionFactory {
 
     @Override
-    public ProcessDefinition createProcessDefinition() {
-        return new ProcessCleanup();
+    default boolean isAllowed(User user) {
+        return user.isAdmin();
     }
 }

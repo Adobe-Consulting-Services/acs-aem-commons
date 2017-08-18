@@ -20,13 +20,14 @@
 package com.adobe.acs.commons.mcp;
 
 import aQute.bnd.annotation.ConsumerType;
+import org.apache.jackrabbit.api.security.user.User;
 
 @ConsumerType
 public interface ProcessDefinitionFactory {
 
     String getName();
 
-    default boolean getRequiresAdmin() { return false; };
+    default boolean isAllowed(User user) { return true; };
 
     ProcessDefinition createProcessDefinition();
 }

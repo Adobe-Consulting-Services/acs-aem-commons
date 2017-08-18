@@ -26,6 +26,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
+import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,12 +45,10 @@ public class AvailableProcessDefinitions extends WCMUsePojo {
     @Override
     public void activate() throws Exception {
         SlingScriptHelper sling = getSlingScriptHelper();
-        boolean isAdminUser = sling.getRequest().getUserPrincipal().getName().equalsIgnoreCase("admin");
+        User user = sling.getRequest().getResourceResolver().adaptTo(User.class);
         ProcessDefinitionFactory[] allDefinitionFactories = sling.getServices(ProcessDefinitionFactory.class, null);
         definitions = Stream.of(allDefinitionFactories)
-                .filter(o->
-                    !(o.getRequiresAdmin()) || isAdminUser
-                )
+                .filter(o-> o.isAllowed(user))
                 .collect(Collectors.toMap(ProcessDefinitionFactory::getName, o -> o, (a,b)->a, TreeMap::new));
         String processDefinitionName = get("processDefinition", String.class);
         if (StringUtils.isEmpty(processDefinitionName)) {

@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
-import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -28,7 +28,7 @@ import org.apache.sling.commons.mime.MimeTypeService;
 
 @Component
 @Service
-public class AssetIngestorFactory implements ProcessDefinitionFactory {
+public class AssetIngestorFactory implements AdministratorsOnlyProcessDefinitionFactory {
 
     @Reference
     MimeTypeService mimetypeService;
@@ -36,11 +36,6 @@ public class AssetIngestorFactory implements ProcessDefinitionFactory {
     @Override
     public String getName() {
         return AssetIngestor.NAME;
-    }
-
-    @Override
-    public boolean getRequiresAdmin() {
-        return true;
     }
 
     @Override
