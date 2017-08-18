@@ -42,9 +42,6 @@ import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -53,11 +50,13 @@ import org.apache.sling.commons.mime.MimeTypeService;
 /**
  * Asset Ingestor reads a directory structure recursively and imports it as-is into AEM.
  */
-@Component
-@Service(ProcessDefinition.class)
 public class AssetIngestor implements ProcessDefinition, HiddenProcessDefinition {
-    @Reference
-    MimeTypeService mimetypeService;
+
+    private final MimeTypeService mimetypeService;
+
+    public AssetIngestor(MimeTypeService mimeTypeService) {
+        this.mimetypeService = mimeTypeService;
+    }
     
     public static enum AssetAction {
         skip, version, replace

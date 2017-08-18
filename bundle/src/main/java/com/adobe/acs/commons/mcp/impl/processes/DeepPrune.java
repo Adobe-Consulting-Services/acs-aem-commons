@@ -47,13 +47,10 @@ import org.apache.sling.event.jobs.Queue;
 /**
  * Stops all running sling jobs and empties the queue entirely.
  */
-@Component
-@Service(ProcessDefinition.class)
 public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition, Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
-    
-    @Reference
-    transient private JobManager jobManager;
+
+    transient private final JobManager jobManager;
     
     static enum FolderRule {all(s->true),numeric(StringUtils::isNumeric),hexadecimal(StringUtil::isHex),none(s->false);
         Function<String, Boolean> matcher;
@@ -117,7 +114,8 @@ public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition, Se
     public static final String JOB_TYPE = "slingevent:Job";
     transient private final List<String> suspendedQueues = new ArrayList<>();
 
-    public DeepPrune() {
+    public DeepPrune(JobManager jobManager) {
+        this.jobManager = jobManager;
     }
 
     @Override

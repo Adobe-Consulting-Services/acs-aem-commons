@@ -1,0 +1,122 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package com.adobe.acs.commons.mcp.impl;
+
+import com.adobe.acs.commons.fam.ActionManagerFactory;
+import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.impl.processes.AssetIngestor;
+import com.adobe.acs.commons.mcp.impl.processes.AssetIngestorFactory;
+import com.adobe.acs.commons.mcp.impl.processes.AssetReport;
+import com.adobe.acs.commons.mcp.impl.processes.AssetReportFactory;
+import com.adobe.acs.commons.mcp.impl.processes.DeepPrune;
+import com.adobe.acs.commons.mcp.impl.processes.DeepPruneFactory;
+import com.adobe.acs.commons.mcp.impl.processes.FolderRelocator;
+import com.adobe.acs.commons.mcp.impl.processes.FolderRelocatorFactory;
+import com.adobe.acs.commons.mcp.impl.processes.PageRelocatorFactory;
+import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanup;
+import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanupFactory;
+import com.day.cq.replication.Replicator;
+import com.day.cq.wcm.api.PageManagerFactory;
+import org.apache.sling.event.jobs.JobManager;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+public class FactoryInjectionTest {
+
+    private ControlledProcessManagerImpl cpm;
+
+    @Rule
+    public final SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
+
+    @Before
+    public void setup() {
+        // this just forces the creation of the ResourceResolverFactory service
+        slingContext.build().commit();
+
+        cpm = new ControlledProcessManagerImpl();
+        registerCommonServices();
+        registerFactories();
+
+        slingContext.registerInjectActivateService(cpm);
+
+    }
+
+    @Test
+    public void testAssetIngestorFactory() throws Exception {
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath(AssetIngestor.class.getName());
+        assertNotNull(def);
+        assertTrue(def instanceof AssetIngestor);
+    }
+
+    @Test
+    public void testAssetReportFactory() throws Exception {
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath(AssetReport.class.getName());
+        assertNotNull(def);
+        assertTrue(def instanceof AssetReport);
+    }
+
+    @Test
+    public void testDeepPruneFactory() throws Exception {
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath(DeepPrune.class.getName());
+        assertNotNull(def);
+        assertTrue(def instanceof DeepPrune);
+    }
+
+    @Test
+    public void testFolderRelocatorFactory() throws Exception {
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath(FolderRelocator.class.getName());
+        assertNotNull(def);
+        assertTrue(def instanceof FolderRelocator);
+    }
+
+    @Test
+    public void testProcessCleanupFactory() throws Exception {
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath(ProcessCleanup.class.getName());
+        assertNotNull(def);
+        assertTrue(def instanceof ProcessCleanup);
+    }
+
+    private void registerFactories() {
+        slingContext.registerInjectActivateService(new AssetIngestorFactory());
+        slingContext.registerInjectActivateService(new AssetReportFactory());
+        slingContext.registerInjectActivateService(new DeepPruneFactory());
+        slingContext.registerInjectActivateService(new FolderRelocatorFactory());
+        slingContext.registerInjectActivateService(new PageRelocatorFactory());
+        slingContext.registerInjectActivateService(new ProcessCleanupFactory());
+    }
+
+    private void registerCommonServices() {
+        registerMock(ActionManagerFactory.class);
+        registerMock(JobManager.class);
+        registerMock(PageManagerFactory.class);
+        registerMock(Replicator.class);
+    }
+
+    private <T> void registerMock(Class<T> clazz) {
+        slingContext.registerService(clazz, mock(clazz));
+    }
+
+}

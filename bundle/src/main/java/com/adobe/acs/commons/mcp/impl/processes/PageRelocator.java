@@ -65,15 +65,15 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * Relocate Pages and/or Sites using a parallelized move process
  */
-@Component
-@Service(ProcessDefinition.class)
 public class PageRelocator implements ProcessDefinition {
 
-    @Reference
-    PageManagerFactory pageManagerFactory;
+    public PageRelocator(PageManagerFactory pageManagerFactory, Replicator replicator) {
+        this.pageManagerFactory = pageManagerFactory;
+        this.replicator = replicator;
+    }
 
-    @Reference
-    Replicator replicator;
+    private final PageManagerFactory pageManagerFactory;
+    private final Replicator replicator;
 
     public static enum Mode {
         RENAME, MOVE

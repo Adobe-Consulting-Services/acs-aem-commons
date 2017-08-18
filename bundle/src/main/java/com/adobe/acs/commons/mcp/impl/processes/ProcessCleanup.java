@@ -26,8 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import javax.jcr.RepositoryException;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -37,8 +35,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * Removes archived process instances.
  */
-@Component
-@Service(ProcessDefinition.class)
 public class ProcessCleanup implements ProcessDefinition, HiddenProcessDefinition {
 
     @FormField(
