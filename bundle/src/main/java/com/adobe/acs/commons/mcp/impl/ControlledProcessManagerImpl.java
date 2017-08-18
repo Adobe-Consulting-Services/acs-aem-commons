@@ -18,10 +18,10 @@ package com.adobe.acs.commons.mcp.impl;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessInstance;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,11 +30,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -58,8 +56,9 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
 
     private static final String SERVICE_NAME = "manage-controlled-processes";
     private static final Map<String, Object> AUTH_INFO;
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, bind = "bindDefinition", unbind = "unbindDefinition", referenceInterface = ProcessDefinition.class, policy = ReferencePolicy.DYNAMIC)
-    private final List<ProcessDefinition> processDefinitions = Collections.synchronizedList(new ArrayList<>());
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, bind = "bindDefinitionFactory", unbind = "unbindDefinitionFactory", referenceInterface = ProcessDefinitionFactory.class, policy = ReferencePolicy.DYNAMIC)
+    private final List<ProcessDefinitionFactory> processDefinitionFactories = new CopyOnWriteArrayList<>();
 
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
@@ -77,12 +76,12 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
         return amf;
     }
 
-    protected void bindDefinition(ProcessDefinition def) {
-        processDefinitions.add(def);
+    protected void bindDefinitionFactory(ProcessDefinitionFactory fac) {
+        processDefinitionFactories.add(fac);
     }
 
-    protected void unbindDefinition(ProcessDefinition def) {
-        processDefinitions.remove(def);
+    protected void unbindDefinitionFactory(ProcessDefinitionFactory fac) {
+        processDefinitionFactories.remove(fac);
     }
 
     @Override
@@ -133,26 +132,11 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     }
 
     private ProcessDefinition findDefinitionByName(String name) throws ReflectiveOperationException {
-        Class defClass = processDefinitions.stream()
-                .map(Object::getClass).filter(c -> c.getName().equals(name)).findFirst()
-                .orElseThrow(()->new ClassNotFoundException("Unable to find class "+name));
+        ProcessDefinitionFactory factory = processDefinitionFactories.stream().
+                filter(f -> name.equals(f.getName())).findFirst()
+                .orElseThrow(()->new IllegalArgumentException("Unable to find process " + name));
 
-        ProcessDefinition definition = (ProcessDefinition) defClass.newInstance();
-        processDefinitions.stream().filter(d -> d.getClass().equals(defClass)).findFirst().ifPresent(svc -> copyReferences(svc, definition));
-        return definition;
-    }
-
-    private <T> void copyReferences(T src, T dest) {
-        for (Field f : src.getClass().getDeclaredFields()) {
-            try {
-                Object srcValue = FieldUtils.readField(f, src, true);
-                if (srcValue != null && FieldUtils.readField(f, dest, true) == null) {
-                    FieldUtils.writeField(f, dest, srcValue);
-                }
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(ControlledProcessManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        return factory.createProcessDefinition();
     }
 
     private ProcessDefinition findDefinitionByPath(String path) throws ReflectiveOperationException {

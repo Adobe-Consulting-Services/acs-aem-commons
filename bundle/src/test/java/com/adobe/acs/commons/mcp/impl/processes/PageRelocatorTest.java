@@ -20,13 +20,13 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
-import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
-import com.day.cq.wcm.api.PageManager;
+import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.PageManagerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import javax.jcr.RepositoryException;
@@ -40,6 +40,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import static org.junit.Assert.*;
+
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import static org.mockito.Matchers.any;
@@ -53,7 +55,12 @@ public class PageRelocatorTest {
     @Rule
     public final SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
-    PageRelocator tool = getPageRelocatorTool();
+    PageRelocator tool;
+
+    @Before
+    public void setup() {
+        tool = getPageRelocatorTool();
+    }
 
     @Test
     public void barebonesRun() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
@@ -99,12 +106,17 @@ public class PageRelocatorTest {
     }
     
     private PageRelocator getPageRelocatorTool() {
-        PageRelocator t = new PageRelocator();
-        slingContext.registerService(ProcessDefinition.class, t);
-        t.pageManagerFactory = mock(PageManagerFactory.class);
-        PageManager mockPageManager = mock(PageManager.class);
-        when(t.pageManagerFactory.getPageManager(any())).then(invocation->new MockPageManager(getMockResolver()));
-        return t;
+        PageManagerFactory mockPageManagerFactory = mock(PageManagerFactory.class);
+        when(mockPageManagerFactory.getPageManager(any())).then(invocation->new MockPageManager(getMockResolver()));
+        slingContext.registerService(PageManagerFactory.class, mockPageManagerFactory);
+
+        Replicator replicator = mock(Replicator.class);
+        slingContext.registerService(Replicator.class, replicator);
+
+        PageRelocatorFactory t = new PageRelocatorFactory();
+        slingContext.registerInjectActivateService(t);
+
+        return t.createProcessDefinition();
     }
 
     private void initInstance(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, DeserializeException {
