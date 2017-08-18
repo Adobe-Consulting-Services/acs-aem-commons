@@ -48,7 +48,7 @@ public class FolderRelocatorTest {
     @Test
     public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException {
         ResourceResolver rr = getEnhancedMockResolver();
-        FolderRelocator tool = new FolderRelocator();
+        FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
         assertEquals("Folder Relocator: relocator test", instance.getName());
@@ -63,7 +63,7 @@ public class FolderRelocatorTest {
     @Test
     public void barebonesRun() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
         ResourceResolver rr = getEnhancedMockResolver();
-        FolderRelocator tool = new FolderRelocator();
+        FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
         assertEquals("Folder Relocator: relocator test", instance.getName());
@@ -81,7 +81,7 @@ public class FolderRelocatorTest {
     @Test
     public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException {
         ResourceResolver rr = getEnhancedMockResolver();
-        FolderRelocator tool = new FolderRelocator();
+        FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
         assertEquals("Folder Relocator: relocator test", instance.getName());
