@@ -67,7 +67,7 @@ public class EmailServiceImplTest {
     private ResourceResolver resourceResolver;
 
     @Mock
-    private MessageGateway<SimpleEmail> messageGateway;
+    private MessageGateway<SimpleEmail> messageGatewaySimpleEmail;
 
     @Mock
     private MessageGateway<HtmlEmail> messageGatewayHtmlEmail;
@@ -90,7 +90,7 @@ public class EmailServiceImplTest {
 
         MockitoAnnotations.initMocks(this);
 
-        when(messageGatewayService.getGateway(SimpleEmail.class)).thenReturn(messageGateway);
+        when(messageGatewayService.getGateway(SimpleEmail.class)).thenReturn(messageGatewaySimpleEmail);
         when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGatewayHtmlEmail);
         when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(resourceResolver);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
@@ -132,7 +132,7 @@ public class EmailServiceImplTest {
 
         List<String> failureList = emailService.sendEmail(emailTemplatePath, params, recipients);
 
-        verify(messageGateway, times(recipients.length)).send(captor.capture());
+        verify(messageGatewaySimpleEmail, times(recipients.length)).send(captor.capture());
 
         assertEquals(expectedSenderEmailAddress, captor.getValue().getFromAddress().getAddress());
         assertEquals(expectedSenderName, captor.getValue().getFromAddress().getPersonal());
@@ -166,7 +166,7 @@ public class EmailServiceImplTest {
 
         List<String> failureList = emailService.sendEmail(emailTemplatePath, params, recipient);
 
-        verify(messageGateway, times(1)).send(captor.capture());
+        verify(messageGatewaySimpleEmail, times(1)).send(captor.capture());
 
         assertEquals(expectedSenderEmailAddress, captor.getValue().getFromAddress().getAddress());
         assertEquals(expectedSenderName, captor.getValue().getFromAddress().getPersonal());
@@ -252,6 +252,22 @@ public class EmailServiceImplTest {
         emailService.sendEmail(templatePath, params, recipient);
      }
 
+    @Test
+    public final void testSubjectSetting() throws Exception {
+        final String expectedSubject = "问候";
+
+        final Map<String, String> params = new HashMap<String, String>();
+        params.put("subject", expectedSubject);
+
+        final String recipient =  "upasanac@acs.com";
+
+        ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
+
+        emailService.sendEmail(emailTemplatePath, params, recipient);
+        verify(messageGatewaySimpleEmail, times(1)).send(captor.capture());
+
+        assertEquals(expectedSubject, captor.getValue().getSubject());
+    }
 
     @After
     public final void tearDown() {

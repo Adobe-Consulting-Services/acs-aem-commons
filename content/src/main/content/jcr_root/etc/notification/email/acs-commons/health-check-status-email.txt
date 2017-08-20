@@ -1,0 +1,20 @@
+From: aemdemosmtp@gmail.com
+Subject: ${subject}
+
+This is your automated AEM Health Check report.
+
+A total of ${totalCount} health checks were executed, with ${failureCount} failing and ${successCount} succeeding.
+
+====================================================================================================
+
+Hostname: ${hostname}
+Product: ${productName} ${productVersion} [ ${mode} ]
+Run modes: ${runModes}
+Executed at: ${executedAt}
+Health checks executed in: ${timeTaken} ms
+
+====================================================================================================
+
+${failure}
+
+${success}

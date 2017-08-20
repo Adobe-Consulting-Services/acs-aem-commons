@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
-import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
-import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowStep;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.ReadDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.SetDataWorkflowProcess;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -32,15 +30,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.Session;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SyntheticMixedWorkflowRunnerImplTest {
+public class DeprecatedSyntheticMixedWorkflowRunnerImplTest {
 
     @Mock
     ResourceResolver resourceResolver;
@@ -50,11 +46,8 @@ public class SyntheticMixedWorkflowRunnerImplTest {
 
     SyntheticWorkflowRunnerImpl swr = new SyntheticWorkflowRunnerImpl();
 
-    List<SyntheticWorkflowStep> workflowSteps;
-
     @Before
     public void setUp() {
-        workflowSteps = new ArrayList<SyntheticWorkflowStep>();
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
     }
 
@@ -68,14 +61,12 @@ public class SyntheticMixedWorkflowRunnerImplTest {
         map.put("process.label", "read");
         swr.bindGraniteWorkflowProcesses(new com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.ReadDataWorkflowProcess(), map);
 
-        workflowSteps.add(swr.getSyntheticWorkflowStep("set",
-                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
-        workflowSteps.add(swr.getSyntheticWorkflowStep("read",
-                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
+        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
         swr.execute(resourceResolver,
                 "/content/test",
-               workflowSteps, false, false);
+                new String[] {"set", "read"},
+                metadata, false, false);
     }
 
     @Test
@@ -88,13 +79,11 @@ public class SyntheticMixedWorkflowRunnerImplTest {
         map.put("process.label", "read");
         swr.bindCqWorkflowProcesses(new ReadDataWorkflowProcess(), map);
 
-        workflowSteps.add(swr.getSyntheticWorkflowStep("update",
-                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
-        workflowSteps.add(swr.getSyntheticWorkflowStep("read",
-                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
+        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
         swr.execute(resourceResolver,
                 "/content/test",
-                workflowSteps, false, false);
+                new String[] {"update", "read"},
+                metadata, false, false);
     }
 }

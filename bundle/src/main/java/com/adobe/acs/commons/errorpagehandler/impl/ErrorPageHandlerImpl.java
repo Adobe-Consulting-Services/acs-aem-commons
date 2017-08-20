@@ -19,26 +19,17 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-
+import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
+import com.adobe.acs.commons.util.InfoWriter;
+import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.day.cq.commons.PathInfo;
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
+import com.day.cq.commons.inherit.InheritanceValueMap;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -66,16 +57,24 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
-import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.day.cq.commons.PathInfo;
-import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
-import com.day.cq.commons.inherit.InheritanceValueMap;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.QueryBuilder;
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component(
         label = "ACS AEM Commons - Error Page Handler",
@@ -102,6 +101,17 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
             boolValue = DEFAULT_ENABLED)
     private static final String PROP_ENABLED = "enabled";
+
+    /* Enable/Disable Vanity Dispatch check*/
+    private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
+
+    private boolean vanityDispatchCheckEnabled = DEFAULT_VANITY_DISPATCH_ENABLED;
+
+    @Property(label = "Vanity Dispatch Check", description = "Enables/Disables Vanity Dispatch check, "
+    		+ "if this is enabled and current request URI is a valid vanity (after performing resource resolver mapping), "
+    		+ "request will be forwarded to it. [Optional... but recommended when using resource resolver based out-going mapping] [Default: false]",
+            boolValue = DEFAULT_VANITY_DISPATCH_ENABLED)
+    private static final String PROP_VANITY_DISPATCH_ENABLED = "vanity.dispatch.enabled";
 
     /* Error Page Extension */
     private static final String DEFAULT_ERROR_PAGE_EXTENSION = "html";
@@ -159,7 +169,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             options = {
                     @PropertyOption(value = "Redirect to Login", name = REDIRECT_TO_LOGIN),
                     @PropertyOption(value = "Respond with 404", name = RESPOND_WITH_404)
-            })
+            },
+            value = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR)
     private static final String PROP_NOT_FOUND_DEFAULT_BEHAVIOR = "not-found.behavior";
 
 
@@ -239,6 +250,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Reference
     private ComponentHelper componentHelper;
+
+    @Reference
+    private VanityURLService vanityURLService;
 
     private ErrorPageCache cache;
 
@@ -821,6 +835,10 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
                         DEFAULT_ENABLED));
 
+        this.vanityDispatchCheckEnabled = PropertiesUtil.toBoolean(config.get(PROP_VANITY_DISPATCH_ENABLED),
+                PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_VANITY_DISPATCH_ENABLED),
+                        DEFAULT_VANITY_DISPATCH_ENABLED));
+
         /** Error Pages **/
 
         this.systemErrorPagePath = PropertiesUtil.toString(config.get(PROP_ERROR_PAGE_PATH),
@@ -1014,6 +1032,10 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         public String getMethod() {
             return "GET";
         }
+    }
+
+    public boolean isVanityDispatchCheckEnabled(){
+    	return this.vanityDispatchCheckEnabled;
     }
 
 }
