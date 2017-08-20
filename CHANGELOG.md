@@ -7,7 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.9.0...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.10.0...HEAD
+
+
+## [3.10.0] - 2017-08-20
 
 ### Added
 
@@ -30,18 +33,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 
 - #982: Fixed issue with Touch UI Icon Picker was prefixing icon classes with 'fa' 
-- #1008: Email subject mangled for non-latin chars
+- #1008: E-mail subject mangled for non-latin chars
 - #1043: JCR Package Replication now populates the replicated by properties of the packaged resources with the actual user that requested the replication of the package (with configurable override via OSGi config for backwards compat) 
 - #1044: JCR Package Replication fixes a resource leak where the JCR Packages were not closed after being opened 
 - #1051: Emails sent via EmailService do not have connection/socket timeouts 
-- #1059: ResourceServiceManager no longer users admin resource resolver
 - #1064: Fixed NPE in ResourceServiceManager when no serviceReferences exist
 - Error page handler OSGi configuration missing web hint for 'not-found' behavior.
 - Touch UI Multi-field saved User-picker values were not populated in dialog 
 - Fast Action Manager is much more efficient in how it gauges CPU usage, which makes it even faster than before.
 
+### Security
+- #1059: ResourceServiceManager no longer users admin resource resolver
+
 <!---
  
+### Deprecated
 ### Removed
 
 ---->
