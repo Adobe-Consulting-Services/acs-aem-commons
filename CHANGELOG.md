@@ -7,11 +7,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-2.12.0...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-2.13.0...HEAD
+
+## [2.13.0] - 2017-08-20
 
 ### Added
 
-- #924: Content Modification Framework API
 - #958: Named Image Transform Servlet Sharpen transform 
 - #1039: Health Check Status E-mailer (with minor feature removals)
 - #1067: Vanity Path Web server re-writer mapping 
@@ -27,6 +28,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 <!---
  
+### Deprecated
 ### Removed
+### Security 
 
 ---->
