@@ -26,11 +26,19 @@ import org.apache.sling.api.resource.ResourceResolver;
  * Describes a process and provides a builder which creates the process
  */
 @ConsumerType
-public interface ProcessDefinition extends FormProcessor {
+public abstract class ProcessDefinition implements FormProcessor {
 
-    public String getName();
+    String name;
 
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
+    final public void setName(String n) {
+        name = n;
+    }
 
-    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException;
+    final public String getName() {
+        return name;
+    }
+
+    abstract public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
+
+    abstract public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException;
 }

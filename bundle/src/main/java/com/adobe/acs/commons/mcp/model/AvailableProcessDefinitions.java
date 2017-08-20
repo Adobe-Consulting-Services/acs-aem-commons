@@ -16,9 +16,8 @@
 package com.adobe.acs.commons.mcp.model;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
+import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.form.FieldComponent;
-import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import com.adobe.cq.sightly.WCMUsePojo;
 import java.util.Collections;
@@ -27,6 +26,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
+import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,30 +39,28 @@ import org.slf4j.LoggerFactory;
 public class AvailableProcessDefinitions extends WCMUsePojo {
     private static final Logger LOG = LoggerFactory.getLogger(AvailableProcessDefinitions.class);
 
-    Map<String, ProcessDefinition> definitions = Collections.EMPTY_MAP;
-    Map<String, FieldComponent> fieldComponents = Collections.EMPTY_MAP;
+    Map<String, ProcessDefinitionFactory> definitions = Collections.emptyMap();
+    Map<String, FieldComponent> fieldComponents = Collections.emptyMap();
 
     @Override
     public void activate() throws Exception {
         SlingScriptHelper sling = getSlingScriptHelper();
-        boolean isAdminUser = sling.getRequest().getUserPrincipal().getName().equalsIgnoreCase("admin");
-        ProcessDefinition[] allDefinitions = sling.getServices(ProcessDefinition.class, null);
-        definitions = Stream.of(allDefinitions)
-                .filter(o->
-                    !(o instanceof HiddenProcessDefinition) || isAdminUser
-                )
-                .collect(Collectors.toMap(o -> o.getClass().getName(), o -> o, (a,b)->a, TreeMap::new));
+        User user = sling.getRequest().getResourceResolver().adaptTo(User.class);
+        ProcessDefinitionFactory[] allDefinitionFactories = sling.getServices(ProcessDefinitionFactory.class, null);
+        definitions = Stream.of(allDefinitionFactories)
+                .filter(o-> o.isAllowed(user))
+                .collect(Collectors.toMap(ProcessDefinitionFactory::getName, o -> o, (a,b)->a, TreeMap::new));
         String processDefinitionName = get("processDefinition", String.class);
         if (StringUtils.isEmpty(processDefinitionName)) {
             processDefinitionName = getRequest().getParameter("processDefinition");
         }
         if (StringUtils.isNotEmpty(processDefinitionName) && definitions.containsKey(processDefinitionName)) {
-            Class clazz = definitions.get(processDefinitionName).getClass();
+            Class clazz = definitions.get(processDefinitionName).createProcessDefinition().getClass();
             fieldComponents = AnnotatedFieldDeserializer.getFormFields(clazz, sling);
         }
     }
 
-    public Map<String, ProcessDefinition> getDefinitions() {
+    public Map<String, ProcessDefinitionFactory> getDefinitions() {
         return definitions;
     }
 

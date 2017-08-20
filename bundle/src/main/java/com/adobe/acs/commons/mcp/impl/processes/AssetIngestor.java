@@ -18,7 +18,6 @@ package com.adobe.acs.commons.mcp.impl.processes;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
@@ -42,9 +41,6 @@ import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -53,11 +49,12 @@ import org.apache.sling.commons.mime.MimeTypeService;
 /**
  * Asset Ingestor reads a directory structure recursively and imports it as-is into AEM.
  */
-@Component
-@Service(ProcessDefinition.class)
-public class AssetIngestor implements ProcessDefinition, HiddenProcessDefinition {
-    @Reference
-    MimeTypeService mimetypeService;
+public class AssetIngestor extends ProcessDefinition {
+    private final MimeTypeService mimetypeService;
+
+    public AssetIngestor(MimeTypeService mimeTypeService) {
+        this.mimetypeService = mimeTypeService;
+    }
     
     public static enum AssetAction {
         skip, version, replace
@@ -138,11 +135,6 @@ public class AssetIngestor implements ProcessDefinition, HiddenProcessDefinition
     int assetCount = 0;
     int filesSkipped = 0;
     long totalImportedData = 0;
-    
-    @Override
-    public String getName() {
-        return "Asset Ingestor";
-    }
     
     @Override
     public void init() throws RepositoryException {

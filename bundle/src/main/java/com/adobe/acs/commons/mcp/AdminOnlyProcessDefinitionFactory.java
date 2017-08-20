@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +15,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp;
 
+import aQute.bnd.annotation.ConsumerType;
+import org.apache.jackrabbit.api.security.user.User;
+
+
 /**
- * Defines a process which only shows up in the UI in certain circumstances.
+ * ProcessDefinitionFactory which limits availablity of a process to the literal 'admin' user.
+ * @param <P> Process definition class
  */
-public interface HiddenProcessDefinition {
-    
+@ConsumerType
+public abstract class AdminOnlyProcessDefinitionFactory<P extends ProcessDefinition> extends ProcessDefinitionFactory<P> {
+
+    @Override
+    public boolean isAllowed(User user) {
+        return user.isAdmin();
+    }
 }

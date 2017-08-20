@@ -48,10 +48,10 @@ public class FolderRelocatorTest {
     @Test
     public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException {
         ResourceResolver rr = getEnhancedMockResolver();
-        FolderRelocator tool = new FolderRelocator();
+        FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
-        assertEquals("Folder relocator: relocator test", instance.getName());
+        assertEquals("Folder Relocator: relocator test", instance.getName());
         try {
             instance.init(rr, Collections.EMPTY_MAP);
             fail("That should have thrown an error");
@@ -63,10 +63,10 @@ public class FolderRelocatorTest {
     @Test
     public void barebonesRun() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
         ResourceResolver rr = getEnhancedMockResolver();
-        FolderRelocator tool = new FolderRelocator();
+        FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
-        assertEquals("Folder relocator: relocator test", instance.getName());
+        assertEquals("Folder Relocator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourcePaths", "/content/folderA");
         values.put("destinationPath", "/content/folderB");
@@ -81,10 +81,10 @@ public class FolderRelocatorTest {
     @Test
     public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException {
         ResourceResolver rr = getEnhancedMockResolver();
-        FolderRelocator tool = new FolderRelocator();
+        FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
-        assertEquals("Folder relocator: relocator test", instance.getName());
+        assertEquals("Folder Relocator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourcePaths", "/content/folderA");
         values.put("destinationPath", "/content/folderB");

@@ -18,7 +18,6 @@ package com.adobe.acs.commons.mcp.impl.processes;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.mcp.HiddenProcessDefinition;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
@@ -34,9 +33,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -47,13 +43,10 @@ import org.apache.sling.event.jobs.Queue;
 /**
  * Stops all running sling jobs and empties the queue entirely.
  */
-@Component
-@Service(ProcessDefinition.class)
-public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition, Serializable {
+public class DeepPrune extends ProcessDefinition implements Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
-    
-    @Reference
-    transient private JobManager jobManager;
+
+    transient private final JobManager jobManager;
     
     static enum FolderRule {all(s->true),numeric(StringUtils::isNumeric),hexadecimal(StringUtil::isHex),none(s->false);
         Function<String, Boolean> matcher;
@@ -117,12 +110,8 @@ public class DeepPrune implements ProcessDefinition, HiddenProcessDefinition, Se
     public static final String JOB_TYPE = "slingevent:Job";
     transient private final List<String> suspendedQueues = new ArrayList<>();
 
-    public DeepPrune() {
-    }
-
-    @Override
-    public String getName() {
-        return "Deep Prune";
+    public DeepPrune(JobManager jobManager) {
+        this.jobManager = jobManager;
     }
 
     @Override
