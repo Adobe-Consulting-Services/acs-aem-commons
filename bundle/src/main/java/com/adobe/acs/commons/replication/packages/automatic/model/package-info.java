@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Email Service.
+ * Automatic Package Replication.
  */
-@aQute.bnd.annotation.Version("1.2.0")
-package com.adobe.acs.commons.email;
+@aQute.bnd.annotation.Version("2.12.0")
+package com.adobe.acs.commons.replication.packages.automatic.model;
