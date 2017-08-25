@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,15 +44,15 @@ import com.day.cq.wcm.api.PageManager;
 /**
  * Service to fetch the site root page (i.e. home page) for a given resource.
  * Supports multiple (independent) configurations.
- * 
+ *
  * @see PageRootProviderConfig
  */
 public class PageRootProviderMultiImpl implements PageRootProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
-    
-   	@Reference(name = "config", referenceInterface = PageRootProviderConfig.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-	private List<PageRootProviderConfig> configList = new ArrayList<PageRootProviderConfig>();
+
+    @Reference(name = "config", referenceInterface = PageRootProviderConfig.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    private List<PageRootProviderConfig> configList = new ArrayList<PageRootProviderConfig>();
 
     @Override
     public Page getRootPage(Resource resource) {
@@ -76,38 +76,38 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
 
     @Override
     public String getRootPagePath(String resourcePath) {
-		for (PageRootProviderConfig config : this.configList) {
-			for (Pattern pattern : config.getPageRootPatterns()) {
-				final Matcher matcher = pattern.matcher(resourcePath);
+        for (PageRootProviderConfig config : this.configList) {
+            for (Pattern pattern : config.getPageRootPatterns()) {
+                final Matcher matcher = pattern.matcher(resourcePath);
 
-				if (matcher.find()) {
-					String rootPath = matcher.group(1);
-					LOG.debug("Page Root found at [ {} ]", rootPath);
-					return rootPath;
-				}
-			}
-		}
+                if (matcher.find()) {
+                    String rootPath = matcher.group(1);
+                    LOG.debug("Page Root found at [ {} ]", rootPath);
+                    return rootPath;
+                }
+            }
+        }
 
         LOG.debug("Resource path does not include the configured page root path.");
         return null;
     }
-    
-	@Activate
-	protected void activate() {
-		LOG.debug("Activating");
-	}
-	
-	@Deactivate
-	protected void deactivate() {
-		LOG.debug("Deactivating");
-	}
-   
-	protected void bindConfig(final PageRootProviderConfig config) {
-		this.configList.add(config);
-	}
 
-	protected void unbindConfig(final PageRootProviderConfig config) {
-		this.configList.remove(config);
-	}
-	
+    @Activate
+    protected void activate() {
+        LOG.debug("Activating");
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        LOG.debug("Deactivating");
+    }
+
+    protected void bindConfig(final PageRootProviderConfig config) {
+        this.configList.add(config);
+    }
+
+    protected void unbindConfig(final PageRootProviderConfig config) {
+        this.configList.remove(config);
+    }
+
 }

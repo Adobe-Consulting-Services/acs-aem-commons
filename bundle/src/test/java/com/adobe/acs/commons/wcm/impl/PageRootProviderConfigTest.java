@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ public class PageRootProviderConfigTest {
     PageRootProviderConfig config = null;
 
     Map<String, Object> properties = new HashMap<String, Object>();
-    
+
     @Before
     public final void setUp() throws Exception {
         config = new PageRootProviderConfig();
@@ -47,7 +47,7 @@ public class PageRootProviderConfigTest {
     public void getPageRootPatterns() throws Exception {
         properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content"});
         config.activate(properties);
-        
+
         assertEquals(Arrays.asList("^(/content)(|/.*)$"), toStringList(config.getPageRootPatterns()));
     }
 
@@ -82,29 +82,29 @@ public class PageRootProviderConfigTest {
 
         assertEquals(Arrays.asList("^(/content/a)(|/.*)$", "^(/content)(|/.*)$"), toStringList(config.getPageRootPatterns()));
     }
-    
-    
+
+
     @Test
     public void getPageRootPatterns_Deactivate() throws Exception {
-    	assertNull(config.getPageRootPatterns());
-    	
+        assertNull(config.getPageRootPatterns());
+
         properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/a", "/content"});
         config.activate(properties);
 
         assertEquals(Arrays.asList("^(/content/a)(|/.*)$", "^(/content)(|/.*)$"), toStringList(config.getPageRootPatterns()));
-        
+
         config.deactivate();
         assertNull(config.getPageRootPatterns());
     }
-    
-    
+
+
     static List<String> toStringList(final List<Pattern> patterns) {
-    	List<String> list = new ArrayList<String>();
-    	
-    	for (Pattern p : patterns) {
-    		list.add(p.toString());
-    	}
-    	
-    	return list;
+        List<String> list = new ArrayList<String>();
+
+        for (Pattern p : patterns) {
+                list.add(p.toString());
+        }
+
+        return list;
     }
 }

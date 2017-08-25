@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(
-		label = "ACS AEM Commons - Page Root Provider Configuration",
+        label = "ACS AEM Commons - Page Root Provider Configuration",
         description = "Configuration instance for Page Root Provider, a service to fetch the site root page for a given resource.",
         policy = ConfigurationPolicy.REQUIRE,
         metatype = true,
@@ -46,13 +46,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Configuration instance for Page Root Provider.
  * Use service.ranking to guarantee priority between conflicting configurations.
- * 
+ *
  * @see PageRootProviderMultiImpl
  */
 public class PageRootProviderConfig {
-	
-	/* Default root. */
-	static final String DEFAULT_PAGE_ROOT_PATH = "/content";
+
+    /* Default root. */
+    static final String DEFAULT_PAGE_ROOT_PATH = "/content";
 
     @Property(
             label = "Root page path pattern",
@@ -61,23 +61,23 @@ public class PageRootProviderConfig {
             value = { DEFAULT_PAGE_ROOT_PATH })
     /* Page root property. */
     static final String PAGE_ROOT_PATH = "page.root.path";
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(PageRootProviderConfig.class);
-    
+
     private List<Pattern> pageRootPatterns = null;
 
     /**
      * Retrieves the configured patterns.
-     * 
+     *
      * @return list of page root patterns.
      */
     public List<Pattern> getPageRootPatterns() {
-    	return this.pageRootPatterns;
+        return this.pageRootPatterns;
     }
-    
+
     @Activate
     protected void activate(Map<String, Object> props) {
-    	List<Pattern> pageRootPatterns = new ArrayList<Pattern>();
+        List<Pattern> pageRootPatterns = new ArrayList<Pattern>();
         String[] regexes = PropertiesUtil.toStringArray(props.get(PAGE_ROOT_PATH), new String[] { DEFAULT_PAGE_ROOT_PATH });
 
         for(String regex : regexes) {
@@ -89,19 +89,19 @@ public class PageRootProviderConfig {
                 LOG.error("Could not compile regex [ {} ] to pattern. Skipping...", regex, e);
             }
         }
-        
+
         this.pageRootPatterns = Collections.unmodifiableList(pageRootPatterns);
     }
-    
+
     @Deactivate
     protected void deactivate() {
-    	if (this.pageRootPatterns != null) {
-    		for (Pattern p : this.pageRootPatterns) {
-    			LOG.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p.toString());
-    		}
-    		
-    		this.pageRootPatterns = null;
-    	}
+        if (this.pageRootPatterns != null) {
+            for (Pattern p : this.pageRootPatterns) {
+                LOG.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p.toString());
+            }
+
+            this.pageRootPatterns = null;
+        }
     }
 
 }

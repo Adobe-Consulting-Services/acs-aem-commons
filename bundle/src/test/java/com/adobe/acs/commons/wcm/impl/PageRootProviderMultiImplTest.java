@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,13 +32,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class PageRootProviderMultiImplTest {
-	
+
     @Mock
     private PageRootProviderConfig config1;
-	
+
     @Mock
     private PageRootProviderConfig config2;
-    
+
     PageRootProviderMultiImpl provider = null;
 
     @Before
@@ -49,9 +49,9 @@ public class PageRootProviderMultiImplTest {
 
     @Test
     public void getRootPagePath() throws Exception {
-    	when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
-        provider.bindConfig(config1);    	
-    	provider.activate();        
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
+        provider.bindConfig(config1);
+        provider.activate();
 
         assertEquals("/content", provider.getRootPagePath("/content/site/en_us/products/product-x"));
         assertEquals("/content", provider.getRootPagePath("/content/site/en_us/products/product-x/jcr:content/my-component"));
@@ -65,9 +65,9 @@ public class PageRootProviderMultiImplTest {
 
     @Test
     public void getRootPagePath_Regex() throws Exception {
-    	when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/site/([a-z_-]+)")));
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/site/([a-z_-]+)")));
         provider.bindConfig(config1);
-    	provider.activate();       
+        provider.activate();
 
         assertEquals("/content/site/en_us", provider.getRootPagePath("/content/site/en_us/products/product-x"));
         assertEquals("/content/site/fr", provider.getRootPagePath("/content/site/fr/products/product-x/jcr:content/my-component"));
@@ -80,9 +80,9 @@ public class PageRootProviderMultiImplTest {
 
     @Test
     public void getRootPagePath_RegexEnd() throws Exception {
-    	when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/site/[a-z]{2}")));
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/site/[a-z]{2}")));
         provider.bindConfig(config1);
-        provider.activate();       
+        provider.activate();
 
         assertEquals("/content/site/en", provider.getRootPagePath("/content/site/en/products/product-x"));
         assertEquals("/content/site/de", provider.getRootPagePath("/content/site/de"));
@@ -93,39 +93,39 @@ public class PageRootProviderMultiImplTest {
 
     @Test
     public void getRootPagePath_Order1() throws Exception {
-    	when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content"), buildPattern("/content/a")));
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content"), buildPattern("/content/a")));
         provider.bindConfig(config1);
-    	provider.activate();
+        provider.activate();
 
         assertEquals("/content", provider.getRootPagePath("/content/a/b/c"));
     }
 
     @Test
     public void getRootPagePath_Order2() throws Exception {
-    	when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a"), buildPattern("/content")));
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a"), buildPattern("/content")));
         provider.bindConfig(config1);
         provider.activate();
 
         assertEquals("/content/a", provider.getRootPagePath("/content/a/b/c"));
         assertEquals("/content", provider.getRootPagePath("/content/b"));
     }
-    
+
     @Test
     public void getRootPagePath_MultiOrder1() throws Exception {
-    	when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
         provider.activate();
-    	when(config2.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
+        when(config2.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
         provider.bindConfig(config1);
-        provider.bindConfig(config2);        
+        provider.bindConfig(config2);
 
         assertEquals("/content", provider.getRootPagePath("/content/a/b/c"));
     }
 
     @Test
     public void getRootPagePath_MultiOrder2() throws Exception {
-    	when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
         provider.activate();
-    	when(config2.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));    	
+        when(config2.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
         provider.bindConfig(config1);
         provider.bindConfig(config2);
 
@@ -133,26 +133,26 @@ public class PageRootProviderMultiImplTest {
         assertEquals("/content", provider.getRootPagePath("/content/b"));
     }
 
-    
+
     @Test
     public void getRootPagePath_Unbind() throws Exception {
-    	when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
-        provider.activate();    	
-    	when(config2.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
+        provider.activate();
+        when(config2.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
         provider.bindConfig(config1);
         provider.bindConfig(config2);
 
         assertEquals("/content/a", provider.getRootPagePath("/content/a/b/c"));
         assertEquals("/content", provider.getRootPagePath("/content/b"));
-        
+
         provider.unbindConfig(config1);
-        
+
         assertEquals("/content", provider.getRootPagePath("/content/a/b/c"));
-        assertEquals("/content", provider.getRootPagePath("/content/b"));        
+        assertEquals("/content", provider.getRootPagePath("/content/b"));
     }
 
-    
+
     private Pattern buildPattern(final String regex) {
-    	return Pattern.compile("^(" + regex + ")(|/.*)$");
+        return Pattern.compile("^(" + regex + ")(|/.*)$");
     }
 }
