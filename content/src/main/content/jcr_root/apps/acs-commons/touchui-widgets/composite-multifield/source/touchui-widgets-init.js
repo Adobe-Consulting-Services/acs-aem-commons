@@ -61,6 +61,17 @@
             }
         },
 
+        isSelectMultiple: function ($field) {
+            return !_.isEmpty($field) && ($field.prop("type") === "select-multiple");
+        },
+
+        setSelectMultiple: function ($field, value) {
+            var select = $field.closest(".coral-Select").data("select");
+            if (select){
+                select.setValue(value);
+            }
+        },
+
         isCheckbox: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "checkbox");
         },
@@ -142,6 +153,8 @@
 
             if (this.isSelectOne($field)) {
                 this.setSelectOne($field, value);
+            } else if (this.isSelectMultiple($field)) {
+                this.setSelectMultiple($field, value);
             } else if (this.isCheckbox($field)) {
                 this.setCheckBox($field, value);
             } else if (this.isRichTextField($field)) {
