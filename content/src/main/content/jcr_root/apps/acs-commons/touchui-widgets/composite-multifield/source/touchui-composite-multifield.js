@@ -198,7 +198,7 @@
                                 cmf.setWidgetValue($field.siblings( "input.autocomplete-has-suggestion-btn"), rValue);
                             }
 
-                            if (_.isArray(rValue) && !_.isEmpty(rValue) && $field.prop("type") != "select-multiple") {
+                            if (_.isArray(rValue) && !_.isEmpty(rValue) && !cmf.isSelectMultiple($field)) {
                                 fillNestedFields($($fieldSets[i]).find("[data-init='multifield']"), rValue);
                             } else {
                                 cmf.setWidgetValue($field, rValue);
