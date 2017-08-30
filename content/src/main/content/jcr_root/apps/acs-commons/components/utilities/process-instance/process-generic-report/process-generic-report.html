@@ -19,19 +19,30 @@ limitations under the License.
         <title>${report.name}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+             data-sly-call="${clientlib.all @ categories='coralui3'}"/>
     </head>
     <body>
-        <table>
-            <thead>
-                <tr data-sly-list.column="${report.columnNames}">
-                    <th>${column}</th>
-                </tr>
-            </thead>
-            <tbody data-sly-list.row="${report.rows}">
-                <tr data-sly-list.column="${report.columns}">
-                    <td>${row[column]}</td>
-                </tr>
-            </tbody>
-        </table>
+        <div style="padding: 1rem 2rem;">
+            <table is="coral-table">
+                <colgroup data-sly-list.column="${report.columnNames}">
+                    <col is="coral-table-column" sortable orderable/>
+                </colgroup>
+                <thead is="coral-table-head" sticky>
+                    <tr is="coral-table-row"
+                        data-sly-list.column="${report.columnNames}">
+                        <th is="coral-table-headercell">${column}</th>
+                    </tr>
+                </thead>
+                <tbody is="coral-table-body"
+                       data-sly-list.row="${report.rows}">
+                    <tr is="coral-table-row"
+                        data-sly-list.column="${report.columns}">
+                        <td is="coral-table-cell">${row[column]}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </body>
 </html>
