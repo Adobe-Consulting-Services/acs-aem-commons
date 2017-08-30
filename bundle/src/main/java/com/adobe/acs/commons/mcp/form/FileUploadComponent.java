@@ -37,7 +37,7 @@ public class FileUploadComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/fileupload");
-        getComponentMetadata().put("text", "Upload!! " + getFieldDefinition().name());
+        getComponentMetadata().put("text", "Upload " + getFieldDefinition().name());
         getComponentMetadata().put("autoStart", false);
 
         if (hasOption("mimeTypes")) {
