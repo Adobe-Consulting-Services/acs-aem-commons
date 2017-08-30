@@ -1,0 +1,276 @@
+/*
+ * Copyright 2017 Adobe.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.adobe.acs.commons.mcp.impl.processes;
+
+import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.form.*;
+import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.util.StringUtil;
+import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
+import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
+import com.adobe.acs.commons.util.datadefinitions.impl.BasicResourceDefinition;
+import com.day.cq.tagging.Tag;
+import com.day.cq.tagging.TagConstants;
+import com.day.cq.tagging.TagManager;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.jcr.RepositoryException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.*;
+
+/**
+ * Creates cq:Tags based on a well defined Excel document.
+ */
+public class TagCreator extends ProcessDefinition implements Serializable {
+    private static final Logger log = LoggerFactory.getLogger(TagCreator.class);
+    private static final long serialVersionUID = 4325471295421747160L;
+
+    public static final String NAME = "Tag Creator";
+
+    private final Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders;
+
+    public enum TagBuilder {
+        TITLE_TO_NODE_NAME,
+        TITLE_AND_NODE_NAME,
+        LOWERCASE_WITH_DASHES,
+        LOCALIZED_TITLE
+    };
+
+    public TagCreator(Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders) {
+        this.resourceDefinitionBuilders = resourceDefinitionBuilders;
+    }
+
+    @FormField(
+            name = "Excel File",
+            description = "Provide the .xlsx file that defines the tag taxonomy",
+            component = FileUploadComponent.class,
+            options = {"mimeTypes=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "required"}
+    )
+    public InputStream tagDefinitionFile = null;
+
+    @FormField(
+            name = "Primary Converter",
+            description = "This will be used first and the Fallback will only be used if this fails to generate a valid Tag definition.",
+            component = SelectComponent.EnumerationSelector.class,
+            options = {"default=TITLE_AND_NODE_NAME", "required"}
+    )
+    public TagBuilder primary = TagBuilder.TITLE_AND_NODE_NAME;
+
+    @FormField(
+            name = "Fallback Converter",
+            description = "This is only invoked when the Primary cannot generate a valid Tag definition. If this can also not genreate a valid Tag definition then the row will be skipped.",
+            component = SelectComponent.EnumerationSelector.class,
+            options = {"default=LOWERCASE_WITH_DASHES", "required"}
+    )
+    public TagBuilder fallback = TagBuilder.LOWERCASE_WITH_DASHES;
+
+    @Override
+    public void init() throws RepositoryException {
+
+    }
+
+    @Override
+    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
+        report.setName(instance.getName());
+        instance.getInfo().setDescription(String.format("Create tags using [ %s -> %s ]", StringUtil.getFriendlyName(primary.name()), StringUtil.getFriendlyName(fallback.name())));
+
+        instance.defineCriticalAction("Parse tags", rr, this::parseTags);
+        instance.defineCriticalAction("Create tags", rr, this::importTags);
+    }
+
+    volatile HashMap<String, TagDefinition> tagDefinitions = new LinkedHashMap<>();
+
+    /**
+     * Parses the input Excel file and creates a list of TagDefinition objects to process.
+     *
+     * @param manager the action manager
+     * @throws IOException
+     */
+    public void parseTags(ActionManager manager) throws Exception {
+        manager.withResolver(rr -> {
+            final XSSFWorkbook workbook = new XSSFWorkbook(tagDefinitionFile);
+            final XSSFSheet sheet = workbook.getSheetAt(0);
+            final Iterator<Row> rows = sheet.rowIterator();
+
+            while(rows.hasNext()) {
+                final Row row = rows.next();
+                log.debug("Row #: {}", row.getRowNum());
+
+                final Iterator<Cell> cells = row.cellIterator();
+
+                int cellIndex = 0;
+                // The previousTagId is reset on each new row.
+                String previousTagId = null;
+
+                while (cells.hasNext()) {
+                    final Cell cell = cells.next();
+
+                    final String cellValue = StringUtils.trimToNull(cell.getStringCellValue());
+
+                    // Generate a tag definition that will in turn be used to drive the tag creation
+                    TagDefinition tagDefinition = getTagDefinition(primary, cellIndex, cellValue, previousTagId);
+
+                    if (tagDefinition == null) {
+                        tagDefinition = getTagDefinition(fallback, cellIndex, cellValue, previousTagId);
+                    }
+
+                    if (tagDefinition == null) {
+                        log.warn("Could not find a Tag Data Converter that accepts value [ {} ]; skipping...", cellValue);
+                        // Record parse failure
+                        record(ReportRowSatus.FAILURE_TO_PARSE, cellValue, "", "");
+                        // Break to next Row
+                        break;
+                    } else {
+                        /* Prepare for next Cell */
+                        cellIndex++;
+                        previousTagId = tagDefinition.getId();
+
+                        if (tagDefinitions.get(tagDefinition.getId()) == null) {
+                            tagDefinitions.put(tagDefinition.getId(), tagDefinition);
+                        }
+                    }
+                }
+            };
+            log.info("Finished Parsing and collected [ {} ] tags for import.", tagDefinitions.size());
+        });
+    }
+
+    /**
+     * Perform the tag creation based on the successfully parsed values in parseTags(..).
+     *
+     * @param manager the action manager
+     */
+    public void importTags(ActionManager manager) {
+        tagDefinitions.values().stream().forEach(tagDefinition -> {
+            try {
+                manager.withResolver(rr -> {
+                    final TagManager tagManager = rr.adaptTo(TagManager.class);
+                    try {
+                        final Tag tag = tagManager.createTag(
+                                tagDefinition.getId(),
+                                tagDefinition.getTitle(),
+                                tagDefinition.getDescription());
+                        record(ReportRowSatus.SUCCESS, tag.getTagID(), tag.getPath(), tag.getTitle());
+                        log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+                    } catch (Exception e) {
+                        record(ReportRowSatus.FAILURE_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
+                        log.error("Unable to create tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+                    }
+                });
+            } catch (Exception e) {
+                log.error("Unable to import tags via ACS Commons MCP - Tag Creator", e);
+            }
+        });
+    }
+
+    /**
+     * Generates the Tag Definition.
+     * @param tagBuilder The tag builder to use to construct the Tag definition.
+     * @param index The level of the tag hierarchy; 0 is the Tag namespace
+     * @param value The value to convert into a Tag definition.
+     * @param previousTagId The previous Tag Id to build up.
+     * @return a valid TagDefinition, or null if a valid TagDefinition cannot be generated.
+     */
+    private TagDefinition getTagDefinition(final TagBuilder tagBuilder, final int index, final String value, final String previousTagId) {
+        final ResourceDefinitionBuilder resourceDefinitionBuilder = resourceDefinitionBuilders.get(tagBuilder.name());
+
+        if (resourceDefinitionBuilder != null && resourceDefinitionBuilder.accepts(value)) {
+            final TagDefinition tagDefinition = new TagDefinition(resourceDefinitionBuilder.convert(value));
+
+            switch (index) {
+                case 0: tagDefinition.setId(tagDefinition.getName() + TagConstants.NAMESPACE_DELIMITER);
+                        break;
+                case 1: tagDefinition.setId(previousTagId + tagDefinition.getName());
+                        break;
+                default: tagDefinition.setId(previousTagId + "/" + tagDefinition.getName());
+            }
+
+            return tagDefinition;
+        }
+
+        return null;
+    }
+
+    /** Reporting **/
+
+    transient private final GenericReport report = new GenericReport();
+
+    private final ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
+
+    private enum ReportColumns {
+        STATUS,
+        TAG_ID,
+        TAG_PATH,
+        TAG_TITLE
+    }
+
+    public enum ReportRowSatus {
+        SUCCESS,
+        FAILURE_TO_PARSE,
+        FAILURE_TO_CREATE,
+    };
+
+    private void record(ReportRowSatus status, String tagId, String path, String title) {
+        final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
+
+        row.put(ReportColumns.STATUS, status.name());
+        row.put(ReportColumns.TAG_ID, tagId);
+        row.put(ReportColumns.TAG_PATH, path);
+        row.put(ReportColumns.TAG_TITLE, title);
+
+        reportRows.add(row);
+    }
+
+    @Override
+    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
+        report.setRows(reportRows, ReportColumns.class);
+        report.persist(rr, instance.getPath() + "/jcr:content/report");
+    }
+
+    /** Tag Definition Class **/
+
+    private final class TagDefinition extends BasicResourceDefinition {
+        public TagDefinition(ResourceDefinition resourceDefinition) {
+            super(resourceDefinition.getName());
+            super.setId(resourceDefinition.getId());
+            super.setDescription(resourceDefinition.getDescription());
+            super.setTitle(resourceDefinition.getTitle());
+            super.setLocalizedTitles(resourceDefinition.getLocalizedTitles());
+        }
+
+        @Override
+        public String getPath() {
+            if (getId() != null) {
+                return "/etc/tags/" + StringUtils.replace(getId(), ":", "/");
+            } else {
+                return null;
+            }
+        }
+    }
+}

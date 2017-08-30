@@ -133,7 +133,7 @@ public abstract class FieldComponent {
 
     public boolean hasOption(String optionName) {
         return Stream.of(formField.options())
-                .filter(s -> s.equalsIgnoreCase(optionName))
+                .filter(s -> s.equalsIgnoreCase(optionName) || s.startsWith(optionName + "="))
                 .findFirst().isPresent();
     }
     
