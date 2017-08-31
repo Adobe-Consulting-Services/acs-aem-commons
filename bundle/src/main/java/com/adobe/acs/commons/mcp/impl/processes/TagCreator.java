@@ -28,6 +28,7 @@ import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagConstants;
 import com.day.cq.tagging.TagManager;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -38,6 +39,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +61,8 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         TITLE_TO_NODE_NAME,
         TITLE_AND_NODE_NAME,
         LOWERCASE_WITH_DASHES,
-        LOCALIZED_TITLE
+        LOCALIZED_TITLE,
+        NONE
     };
 
     public TagCreator(Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders) {
@@ -120,8 +123,6 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
             while(rows.hasNext()) {
                 final Row row = rows.next();
-                log.debug("Row #: {}", row.getRowNum());
-
                 final Iterator<Cell> cells = row.cellIterator();
 
                 int cellIndex = 0;
@@ -132,6 +133,10 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                     final Cell cell = cells.next();
 
                     final String cellValue = StringUtils.trimToNull(cell.getStringCellValue());
+                    if (StringUtils.isBlank(cellValue)) {
+                        // Hitting a blank cell means its the end of this row; don't process anything past this
+                        break;
+                    }
 
                     // Generate a tag definition that will in turn be used to drive the tag creation
                     TagDefinition tagDefinition = getTagDefinition(primary, cellIndex, cellValue, previousTagId);
@@ -171,13 +176,28 @@ public class TagCreator extends ProcessDefinition implements Serializable {
             try {
                 manager.withResolver(rr -> {
                     final TagManager tagManager = rr.adaptTo(TagManager.class);
+                    ReportRowSatus status;
+
                     try {
-                        final Tag tag = tagManager.createTag(
-                                tagDefinition.getId(),
-                                tagDefinition.getTitle(),
-                                tagDefinition.getDescription());
-                        record(ReportRowSatus.SUCCESS, tag.getTagID(), tag.getPath(), tag.getTitle());
-                        log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+                        if (tagManager.canCreateTag(tagDefinition.getId())) {
+                            if (tagManager.resolve(tagDefinition.getId()) == null) {
+                                status = ReportRowSatus.SUCCESS_CREATE;
+                            } else {
+                                status = ReportRowSatus.SUCCESS_UPDATE;
+                            }
+
+                            final Tag tag = tagManager.createTag(
+                                    tagDefinition.getId(),
+                                    tagDefinition.getTitle(),
+                                    tagDefinition.getDescription(),
+                                    false);
+                            setTitles(tag, tagDefinition);
+                            record(status, tag.getTagID(), tag.getPath(), tag.getTitle());
+                            log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+                        } else {
+                            record(ReportRowSatus.FAILURE_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
+                            log.debug("Per tagManager.canCreateTag(..) the tagId [ {} ] cannot be created", tagDefinition.getId());
+                        }
                     } catch (Exception e) {
                         record(ReportRowSatus.FAILURE_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
                         log.error("Unable to create tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
@@ -217,6 +237,33 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         return null;
     }
 
+    private void setTitles(final Tag tag, final TagDefinition tagDefinition) throws RepositoryException {
+        if (tag == null) {
+            log.error("Tag [ {} ] is null", tagDefinition.getId());
+            return;
+        }
+
+        final Node node = tag.adaptTo(Node.class);
+
+        if (node == null) {
+            log.error("Tag [ {} ] could not be adapted to a Node", tagDefinition.getId());
+            return;
+        }
+
+        if (!StringUtils.equals(tag.getTitle(), tagDefinition.getTitle())) {
+            // Ensure if the tag already exists that the title is set properly
+            node.setProperty("jcr:title", tagDefinition.getTitle());
+        }
+
+        if (!tagDefinition.getLocalizedTitles().isEmpty()){
+            // If Localized titles are provides ensure they are set properly
+            final Map<String,String> translationsMap = tagDefinition.getLocalizedTitles();
+            for (final Map.Entry<String, String> entry : translationsMap.entrySet()) {
+                node.setProperty("jcr:title." + entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
     /** Reporting **/
 
     transient private final GenericReport report = new GenericReport();
@@ -231,7 +278,8 @@ public class TagCreator extends ProcessDefinition implements Serializable {
     }
 
     public enum ReportRowSatus {
-        SUCCESS,
+        SUCCESS_CREATE,
+        SUCCESS_UPDATE,
         FAILURE_TO_PARSE,
         FAILURE_TO_CREATE,
     };
