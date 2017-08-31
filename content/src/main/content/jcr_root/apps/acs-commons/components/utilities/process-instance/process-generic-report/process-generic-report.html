@@ -25,14 +25,18 @@ limitations under the License.
     </head>
     <body>
         <div style="padding: 1rem 2rem;">
-            <table is="coral-table">
+            <table is="coral-table" lockable>
                 <colgroup data-sly-list.column="${report.columnNames}">
                     <col is="coral-table-column" sortable orderable/>
+                    <col    data-sly-test="${columnList.last}"
+                            is="coral-table-column"/>
                 </colgroup>
                 <thead is="coral-table-head" sticky>
                     <tr is="coral-table-row"
                         data-sly-list.column="${report.columnNames}">
                         <th is="coral-table-headercell">${column}</th>
+                        <th is="coral-table-headercell"
+                            data-sly-test="${columnList.last}"></th>
                     </tr>
                 </thead>
                 <tbody is="coral-table-body"
@@ -40,6 +44,10 @@ limitations under the License.
                     <tr is="coral-table-row"
                         data-sly-list.column="${report.columns}">
                         <td is="coral-table-cell">${row[column]}</td>
+                        <td is="coral-table-cell"
+                            data-sly-test="${columnList.last}">
+                            <button is="coral-button" type="button" icon="lockOn" variant="minimal" coral-table-rowlock></button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
