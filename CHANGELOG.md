@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.10.0...HEAD
 
 
-## [3.10.0] - 2017-08-24
+## [3.10.0] - 2017-08-20
 
 ### Added
 
@@ -29,7 +29,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1033: Allow Resource Resolver Map Factory's re-write attributes to be passed in as an array
 - Updated Fast Action Manager retry logic to support more failure cases properly.
 - Updated Fast Action Manager retry logic to be savvy about interrupted exceptions thrown by the watchdog trying to kill the thread.
-- Updated PageRootProvider (Shared Component Properties) to support multiple/independent configurations
 
 ### Fixed
 
@@ -49,9 +48,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 <!---
  
 ### Deprecated
-
-- com.adobe.acs.commons.wcm.impl.PageRootProviderImpl has been deprecated. com.adobe.acs.commons.wcm.impl.PageRootProviderConfig should be used instead.
-
 ### Removed
 
 ---->
