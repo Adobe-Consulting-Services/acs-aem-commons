@@ -14,8 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#processListing {
+    padding: .5rem 1rem;
+}
+
 #processListing table {
-    width: 100%
+    width: 100%;
 }
 
 .coral-Form--aligned .process-dialog-field {

@@ -59,7 +59,7 @@ public class QrCodeServlet extends SlingSafeMethodsServlet {
         response.setCharacterEncoding("UTF-8");
 
         if (externalizer == null) {
-            log.error("Externalizer is not configured. This is required for QR Code servlet to work.");
+            log.warn("Externalizer is not configured. This is required for QR Code servlet to work.");
             response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
         } else if (request.getResource().getValueMap().get(PN_ENABLED, false)) {
@@ -82,11 +82,11 @@ public class QrCodeServlet extends SlingSafeMethodsServlet {
                 response.getWriter().write(json.toString());
                 response.getWriter().flush();
             } else {
-                log.error("Externalizer configuration for AEM Publish did not yield a valid URL");
+                log.warn("Externalizer configuration for AEM Publish did not yield a valid URL");
                 response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } else {
-            log.error("Externalizer configuration for AEM Publish did not yield a valid URL");
+            log.warn("Externalizer configuration for AEM Publish did not yield a valid URL");
             response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
