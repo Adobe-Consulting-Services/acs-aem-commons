@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.10.0...HEAD
 
+### Fixed
+
+- #1094: Fixed issue with QR Code where its on by default. This requires toggling QR Code on and off to reset the client lib category.  
 
 ## [3.10.0] - 2017-08-20
 
