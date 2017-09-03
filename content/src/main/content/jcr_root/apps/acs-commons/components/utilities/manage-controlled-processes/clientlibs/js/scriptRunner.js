@@ -147,18 +147,18 @@ var ScriptRunner = {
                     if (process.infoBean.isRunning) {
                         ScriptRunner.watchList.push(process.id);
                     }
-                    processDom = jQuery("<tr is='coral-tr' id='process-" + process.id + "'>" +
-                            "<td is='coral-td'>" + process.infoBean.name + "</td>" +
-                            "<td is='coral-td'>" + process.infoBean.description + "</td>" +
-                            "<td is='coral-td' value='"+process.infoBean.startTime+"'>" + ScriptRunner.formatTime(process.infoBean.startTime) + "</td>" +
-                            "<td is='coral-td' value='"+process.infoBean.stopTime+"' class='process-stop-time'>" +
+                    processDom = jQuery("<tr is='coral-table-row' id='process-" + process.id + "'>" +
+                            "<td is='coral-table-cell'>" + process.infoBean.name + "</td>" +
+                            "<td is='coral-table-cell'>" + process.infoBean.description + "</td>" +
+                            "<td is='coral-table-cell' value='"+process.infoBean.startTime+"'>" + ScriptRunner.formatTime(process.infoBean.startTime) + "</td>" +
+                            "<td is='coral-table-cell' value='"+process.infoBean.stopTime+"' class='process-stop-time'>" +
                             (process.infoBean.isRunning ?
                                     "<coral-progress class='process-progress'></coral-progress>" :
                                     ScriptRunner.formatTime(process.infoBean.stopTime)
                                     ) +
                             "</td>" +
-                            "<td is='coral-td' class='process-tasks-completed'>" + process.infoBean.result.tasksCompleted + "</td>" +
-                            "<td is='coral-td' class='process-reported-errors'>" + process.infoBean.reportedErrors.length + "</td>" +
+                            "<td is='coral-table-cell' class='process-tasks-completed'>" + process.infoBean.result.tasksCompleted + "</td>" +
+                            "<td is='coral-table-cell' class='process-reported-errors'>" + process.infoBean.reportedErrors.length + "</td>" +
                             "</tr>"
                             );
                     processDom.click(ScriptRunner.viewProcessCallback(process.id, process.path));
