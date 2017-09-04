@@ -28,7 +28,6 @@ import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagConstants;
 import com.day.cq.tagging.TagManager;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -148,7 +147,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                     if (tagDefinition == null) {
                         log.warn("Could not find a Tag Data Converter that accepts value [ {} ]; skipping...", cellValue);
                         // Record parse failure
-                        record(ReportRowSatus.FAILURE_TO_PARSE, cellValue, "", "");
+                        record(ReportRowSatus.FAILED_TO_PARSE, cellValue, "", "");
                         // Break to next Row
                         break;
                     } else {
@@ -179,27 +178,22 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                     ReportRowSatus status;
 
                     try {
-                        if (tagManager.canCreateTag(tagDefinition.getId())) {
-                            if (tagManager.resolve(tagDefinition.getId()) == null) {
-                                status = ReportRowSatus.SUCCESS_CREATE;
-                            } else {
-                                status = ReportRowSatus.SUCCESS_UPDATE;
-                            }
-
-                            final Tag tag = tagManager.createTag(
-                                    tagDefinition.getId(),
-                                    tagDefinition.getTitle(),
-                                    tagDefinition.getDescription(),
-                                    false);
-                            setTitles(tag, tagDefinition);
-                            record(status, tag.getTagID(), tag.getPath(), tag.getTitle());
-                            log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+                        if (tagManager.resolve(tagDefinition.getId()) == null) {
+                            status = ReportRowSatus.CREATED;
                         } else {
-                            record(ReportRowSatus.FAILURE_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
-                            log.debug("Per tagManager.canCreateTag(..) the tagId [ {} ] cannot be created", tagDefinition.getId());
+                            status = ReportRowSatus.UPDATED_EXISTING;
                         }
+
+                        final Tag tag = tagManager.createTag(
+                                tagDefinition.getId(),
+                                tagDefinition.getTitle(),
+                                tagDefinition.getDescription(),
+                                false);
+                        setTitles(tag, tagDefinition);
+                        record(status, tag.getTagID(), tag.getPath(), tag.getTitle());
+                        log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
                     } catch (Exception e) {
-                        record(ReportRowSatus.FAILURE_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
+                        record(ReportRowSatus.FAILED_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
                         log.error("Unable to create tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
                     }
                 });
@@ -278,16 +272,16 @@ public class TagCreator extends ProcessDefinition implements Serializable {
     }
 
     public enum ReportRowSatus {
-        SUCCESS_CREATE,
-        SUCCESS_UPDATE,
-        FAILURE_TO_PARSE,
-        FAILURE_TO_CREATE,
+        CREATED,
+        UPDATED_EXISTING,
+        FAILED_TO_PARSE,
+        FAILED_TO_CREATE,
     };
 
     private void record(ReportRowSatus status, String tagId, String path, String title) {
         final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
 
-        row.put(ReportColumns.STATUS, status.name());
+        row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(status.name()));
         row.put(ReportColumns.TAG_ID, tagId);
         row.put(ReportColumns.TAG_PATH, path);
         row.put(ReportColumns.TAG_TITLE, title);
