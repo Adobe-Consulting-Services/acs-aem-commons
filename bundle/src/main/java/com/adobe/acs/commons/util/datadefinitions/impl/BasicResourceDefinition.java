@@ -8,10 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BasicResourceDefinition implements ResourceDefinition {
-    protected String id;
-    protected String name;
-    protected String title;
-    protected String description;
+    protected String id = null;
+    protected String name = null;
+    protected String title = null;
+    protected String description = null;
+    protected  String path = null;
     protected Map<String, String> localizedTitles = new HashMap<>();
     private boolean ordered = false;
 
@@ -21,7 +22,7 @@ public class BasicResourceDefinition implements ResourceDefinition {
 
     @Override
     public String getPath() {
-        return null;
+        return path;
     }
 
     @Override
@@ -61,6 +62,8 @@ public class BasicResourceDefinition implements ResourceDefinition {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void setPath(String path) { this.path = path; }
 
     public void setTitle(String title) {
         this.title = title;
