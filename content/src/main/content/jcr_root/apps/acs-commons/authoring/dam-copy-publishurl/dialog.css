@@ -1,0 +1,12 @@
+.publish-url-button {
+	display: block;
+    text-align: center;
+    margin: auto;
+    margin-top: 5px;
+ }
+
+ .asset-publishurl-text-content {
+    min-width: 30rem;
+    min-height: 10rem;
+
+        }           
