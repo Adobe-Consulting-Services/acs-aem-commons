@@ -68,6 +68,13 @@
                             <target>/apps/acs-commons/install</target>
                         </embedded>
                     </embeddeds>
+                    <dependencies>
+                        <dependency>
+                            <group>day/cq60/product</group>
+                            <name>cq-content</name>
+                            <version>[6.3.64,)</version>
+                        </dependency>
+                    </dependencies>
                     <targetURL>http://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
             </plugin>
