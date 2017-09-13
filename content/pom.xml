@@ -72,7 +72,7 @@
                         <dependency>
                             <group>day/cq60/product</group>
                             <name>cq-content</name>
-                            <version>[6.3.64,)</version>
+                            <version>[6.2.136,)</version>
                         </dependency>
                     </dependencies>
                     <targetURL>http://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
