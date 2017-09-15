@@ -127,6 +127,9 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
     public void parseAssetFolderDefinition(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
             final XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
+            // Close the inputstream to prevent resource leakage
+            excelFile.close();
+
             final XSSFSheet sheet = workbook.getSheetAt(0);
             final Iterator<Row> rows = sheet.rowIterator();
 
@@ -300,7 +303,6 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
         public AssetFolderDefinition(ResourceDefinition resourceDefinition, String parentPath, FolderType folderType) {
             super(resourceDefinition.getName());
-            super.setId(resourceDefinition.getId());
             super.setTitle(resourceDefinition.getTitle());
             this.folderType = folderType;
             this.parentPath = StringUtils.defaultIfBlank(parentPath, ASSET_ROOT_PATH);
@@ -308,7 +310,8 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
         }
 
         public String getId() {
-            throw new UnsupportedOperationException();
+            // The Id of the Asset Folder Definition IS the path of the asset folder to create
+            return getPath();
         }
 
         public String getParentPath() {

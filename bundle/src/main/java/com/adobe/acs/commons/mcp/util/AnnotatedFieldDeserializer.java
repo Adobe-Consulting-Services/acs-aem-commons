@@ -17,6 +17,7 @@ package com.adobe.acs.commons.mcp.util;
 
 import com.adobe.acs.commons.mcp.form.FieldComponent;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.ValueMap;
 import com.adobe.acs.commons.mcp.form.FormField;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
@@ -56,13 +58,13 @@ public class AnnotatedFieldDeserializer {
         for (Field field : fields) {
             try {
                 parseInput(target, input, field);
-            } catch (ParseException | ReflectiveOperationException | NullPointerException ex) {
+            } catch (IOException | ParseException | ReflectiveOperationException | NullPointerException ex) {
                 throw new DeserializeException("Error when processing field " + field.getName(), ex);
             }
         }
     }
 
-    private static void parseInput(Object target, ValueMap input, Field field) throws ReflectiveOperationException, ParseException {
+    private static void parseInput(Object target, ValueMap input, Field field) throws ReflectiveOperationException, ParseException, IOException {
         FormField inputAnnotation = field.getAnnotation(FormField.class);
         Object value;
         if (input.get(field.getName()) == null) {
@@ -87,13 +89,42 @@ public class AnnotatedFieldDeserializer {
                 val = ((Object[]) value)[0];
             }
 
-            if (val instanceof InputStream) {
-                /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
-                FieldUtils.writeField(field, target, val, true);
-            } else{
+            /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
+            if (!parseFileValue(target, val, field)) {
                 parseInputValue(target, String.valueOf(val), field);
             }
         }
+    }
+
+    /**
+     * Tries to parse an inputstream (file) from the request parameter.
+     *
+     * @param target
+     * @param value
+     * @param field
+     * @return true is a inputs stream was parse-able, else false.
+     * @throws IllegalAccessException
+     * @throws IOException
+     */
+    private static boolean parseFileValue(Object target, Object value,  Field field) throws IllegalAccessException, IOException {
+        if (value instanceof InputStream) {
+            /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
+            FieldUtils.writeField(field, target, value, true);
+            return true;
+        }
+
+        if (value instanceof ArrayList) {
+            ArrayList<? extends RequestParameter> values = (ArrayList<? extends RequestParameter>) value;
+            if (values.size() > 0) {
+                final InputStream is = values.get(0).getInputStream();
+                if (is != null) {
+                    FieldUtils.writeField(field, target, is, true);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static void parseInputList(Object target, String[] values, Field field) throws ReflectiveOperationException, ParseException {
