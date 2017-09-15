@@ -74,7 +74,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
             component = FileUploadComponent.class,
             options = {"mimeTypes=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "required"}
     )
-    public InputStream tagDefinitionFile = null;
+    public InputStream excelFile = null;
 
     @FormField(
             name = "Primary Converter",
@@ -116,7 +116,10 @@ public class TagCreator extends ProcessDefinition implements Serializable {
      */
     public void parseTags(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
-            final XSSFWorkbook workbook = new XSSFWorkbook(tagDefinitionFile);
+            final XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
+            // Close the inputstream to prevent resource leakage
+            excelFile.close();
+
             final XSSFSheet sheet = workbook.getSheetAt(0);
             final Iterator<Row> rows = sheet.rowIterator();
 
