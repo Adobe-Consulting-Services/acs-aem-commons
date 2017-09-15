@@ -198,7 +198,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
                             status = ReportRowSatus.CREATED;
                         } else {
-                            status = ReportRowSatus.UPDATED_EXISTING;
+                            status = ReportRowSatus.UPDATED_FOLDER_TITLES;
                         }
 
                         Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
@@ -273,7 +273,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     public enum ReportRowSatus {
         CREATED,
-        UPDATED_EXISTING,
+        UPDATED_FOLDER_TITLES,
         FAILED_TO_PARSE,
         FAILED_TO_CREATE,
     };
