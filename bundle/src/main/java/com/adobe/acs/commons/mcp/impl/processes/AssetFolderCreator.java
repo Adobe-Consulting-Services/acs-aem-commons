@@ -110,9 +110,9 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         report.setName(instance.getName());
-        instance.getInfo().setDescription(String.format("Create Asset Folder using [ %s -> %s ]", StringUtil.getFriendlyName(primary.name()), StringUtil.getFriendlyName(fallback.name())));
+        instance.getInfo().setDescription(String.format("Create Asset Folders using [ %s / %s ]", StringUtil.getFriendlyName(primary.name()), StringUtil.getFriendlyName(fallback.name())));
 
-        instance.defineCriticalAction("Parse Asset Folder definitions", rr, this::parseAssetFolderDefinition);
+        instance.defineCriticalAction("Parse Asset Folder definitions", rr, this::parseAssetFolderDefinitions);
         instance.defineCriticalAction("Create Asset Folders", rr, this::createAssetFolders);
     }
 
@@ -124,7 +124,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
      * @param manager the action manager
      * @throws IOException
      */
-    public void parseAssetFolderDefinition(ActionManager manager) throws Exception {
+    public void parseAssetFolderDefinitions(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
             final XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
             // Close the inputstream to prevent resource leakage
@@ -177,7 +177,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
     }
 
     /**
-     * Perform the asset folder creation based on the successfully parsed values in parseAssetFolderDefinition(..).
+     * Perform the asset folder creation based on the successfully parsed values in parseAssetFolderDefinitions(..).
      *
      * @param manager the action manager
      */
@@ -241,7 +241,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     private void setTitles(final Resource folder, final AssetFolderDefinition assetFolderDefinition) throws RepositoryException {
         if (folder == null) {
-            log.error("Asset Folder [ {} ] is null", assetFolderDefinition.getPath());
+            log.error("Asset Folder resource [ {} ] is null", assetFolderDefinition.getPath());
             return;
         }
 

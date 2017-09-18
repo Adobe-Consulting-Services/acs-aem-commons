@@ -26,18 +26,21 @@ public class AssetFolderDefinitionTest {
     @Test(expected = UnsupportedOperationException.class)
     public void getId() throws Exception {
         AssetFolderCreator.AssetFolderDefinition definition = new AssetFolderCreator.AssetFolderDefinition(basic, "/content/dam/foo", AssetFolderCreator.FolderType.UNORDERED_FOLDER);
-        definition.getId();
+
+        assertEquals("/content/dam/foo/bar", definition.getId());
     }
 
     @Test
     public void getParentPath() throws Exception {
         AssetFolderCreator.AssetFolderDefinition definition = new AssetFolderCreator.AssetFolderDefinition(basic, "/content/dam/foo", AssetFolderCreator.FolderType.UNORDERED_FOLDER);
+
         assertEquals("/content/dam/foo", definition.getParentPath());
     }
 
     @Test
     public void getPath() throws Exception {
         AssetFolderCreator.AssetFolderDefinition definition = new AssetFolderCreator.AssetFolderDefinition(basic, "/content/dam/foo", AssetFolderCreator.FolderType.UNORDERED_FOLDER);
+
         assertEquals("/content/dam/foo/bar", definition.getPath());
     }
 
