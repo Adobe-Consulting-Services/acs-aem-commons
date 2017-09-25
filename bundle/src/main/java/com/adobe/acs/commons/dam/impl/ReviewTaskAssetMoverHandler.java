@@ -97,7 +97,9 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
     private static final String PATH_CONTENT_DAM = DamConstants.MOUNTPOINT_ASSETS;
     private static final String APPROVED = "approved";
+    private String approvedTerm = APPROVED;
     private static final String REJECTED = "rejected";
+    private String rejectedTerm = REJECTED;
     private static final String REL_ASSET_METADATA = "jcr:content/metadata";
     private static final String REL_ASSET_RENDITIONS = "jcr:content/renditions";
     private static final String REL_PN_DAM_STATUS = REL_ASSET_METADATA + "/dam:status";
@@ -160,7 +162,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
         ResourceResolver resourceResolver = null;
 
         try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            resourceResolver = getResourceResolverFactory().getServiceResourceResolver(AUTH_INFO);
             final String path = (String) event.getProperty("TaskId");
             final Resource taskResource = resourceResolver.getResource(path);
 
@@ -173,13 +175,13 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
                     log.debug("Handling event (creating a Job) for Assets Review Task @ [ {} ]", path);
 
-                    ScheduleOptions options = scheduler.NOW();
+                    ScheduleOptions options = getScheduler().NOW();
                     String jobName = this.getClass().getSimpleName().toString().replace(".", "/") + "/" + path;
                     options.name(jobName);
 
                     options.canRunConcurrently(false);
 
-                    scheduler.schedule(new ImmediateJob(path), options);
+                    getScheduler().schedule(new ImmediateJob(path), options);
                 }
             }
         } catch (LoginException e) {
@@ -192,7 +194,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
         }
     }
 
-    private class ImmediateJob implements Runnable {
+    protected class ImmediateJob implements Runnable {
         private final String path;
 
         public ImmediateJob(String path) {
@@ -204,7 +206,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             ResourceResolver resourceResolver = null;
             try {
                 // Always use service users; never admin resource resolvers for "real" code
-                resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+                resourceResolver = getResourceResolverFactory().getServiceResourceResolver(AUTH_INFO);
 
                 // Access data passed into the Job from the Event
                 Resource resource = resourceResolver.getResource(path);
@@ -250,16 +252,16 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          * @return the resources representing dam:Assets for which dam:status is set to approved or rejected
          */
         private Iterator<Resource> findAssets(ResourceResolver resourceResolver, String contentPath) {
-            Map<String, String> params = new HashMap<String, String>();
+        	Map<String, String> params = new HashMap<String, String>();
             params.put("type", DamConstants.NT_DAM_ASSET);
             params.put("path", contentPath);
             params.put("property", REL_PN_DAM_STATUS);
-            params.put("property.1_value", APPROVED);
-            params.put("property.2_value", REJECTED);
+            params.put("property.1_value", getApprovedTerm());
+            params.put("property.2_value", getRejectedTerm());
             params.put("p.offset", "0");
             params.put("p.limit", "-1");
 
-            Query query = queryBuilder.createQuery(PredicateGroup.create(params),
+            Query query = getQueryBuilder().createQuery(PredicateGroup.create(params),
                     resourceResolver.adaptTo(Session.class));
 
             if (log.isDebugEnabled()) {
@@ -337,7 +339,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                 JcrUtil.copy(newAssetRenditionsNode, originalAssetJcrContentNode, null);
 
                 JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LASTMODIFIED, new Date());
-                JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LAST_MODIFIED_BY, lastModifiedBy);
+                JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LAST_MODIFIED_BY, getLastModifiedBy());
 
                 assetManager.removeAsset(reviewedAsset.getPath());
             } catch (RepositoryException e) {
@@ -354,15 +356,15 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          */
         private void moveAsset(ResourceResolver resourceResolver, AssetManager assetManager, Asset asset, ValueMap taskProperties) throws Exception {
             final String status = asset.getValueMap().get(REL_PN_DAM_STATUS, String.class);
-            final String conflictResolution = taskProperties.get(PN_CONFLICT_RESOLUTION, defaultConflictResolution);
+            final String conflictResolution = taskProperties.get(PN_CONFLICT_RESOLUTION, getDefaultConflictResolution());
             final String onApprovePath = taskProperties.get(PN_ON_APPROVE, String.class);
             final String onRejectPath = taskProperties.get(PN_ON_REJECT, String.class);
 
             String destPath = null;
 
-            if (StringUtils.equals(APPROVED, status)) {
+            if (StringUtils.equals(getApprovedTerm(), status)) {
                 destPath = onApprovePath;
-            } else if (StringUtils.equals(REJECTED, status)) {
+            } else if (StringUtils.equals(getRejectedTerm(), status)) {
                 destPath = onRejectPath;
             }
 
@@ -409,4 +411,37 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             }
         }
     }
+    
+    public String getApprovedTerm() {
+		return approvedTerm;
+	}
+
+
+	public String getRejectedTerm() {
+		return rejectedTerm;
+	}
+
+	public ResourceResolverFactory getResourceResolverFactory() {
+		return resourceResolverFactory;
+	}
+
+	public Scheduler getScheduler() {
+		return scheduler;
+	}
+
+	public QueryBuilder getQueryBuilder() {
+		return queryBuilder;
+	}
+
+	public String getDefaultConflictResolution() {
+		return defaultConflictResolution;
+	}
+
+	public String getLastModifiedBy() {
+		return lastModifiedBy;
+	}
+	
+	
+	
+	
 }
