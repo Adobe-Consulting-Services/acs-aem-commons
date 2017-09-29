@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.social.linkedin;
 
-import org.apache.commons.lang.RandomStringUtils;
+import com.adobe.acs.commons.util.impl.SecureRandomStringUtils;
 import org.scribe.builder.api.DefaultApi20;
 import org.scribe.extractors.AccessTokenExtractor;
 import org.scribe.extractors.JsonTokenExtractor;
@@ -37,6 +37,8 @@ import org.scribe.utils.Preconditions;
 
 import aQute.bnd.annotation.ProviderType;
 
+import java.security.SecureRandom;
+
 /**
  * Scribe API class for the LinkedIn OAuth 2.0 endpoint.
  *
@@ -52,20 +54,21 @@ public final class LinkedInApi20 extends DefaultApi20 {
 
     private static final String SCOPED_AUTHORIZE_URL = AUTHORIZE_URL + "&scope=%s";
 
+    private static final int DEFAULT_STATE_LENGTH = 10;
+
     private final String state;
 
     /**
      * Create an API instance with a random state and no scopes.
      */
     public LinkedInApi20() {
-        this(RandomStringUtils.randomAlphanumeric(10));
+        this(SecureRandomStringUtils.randomAlphanumeric(DEFAULT_STATE_LENGTH));
     }
 
     /**
      * Create an API instance with the specified state and permissions.
      *
      * @param state the state to use for CSRF protection
-     * @param permissions the set of permissions to request.
      */
     public LinkedInApi20(String state) {
         this.state = state;
