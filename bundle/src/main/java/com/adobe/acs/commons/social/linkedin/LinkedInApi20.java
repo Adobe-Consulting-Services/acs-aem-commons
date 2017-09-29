@@ -37,8 +37,6 @@ import org.scribe.utils.Preconditions;
 
 import aQute.bnd.annotation.ProviderType;
 
-import java.security.SecureRandom;
-
 /**
  * Scribe API class for the LinkedIn OAuth 2.0 endpoint.
  *
