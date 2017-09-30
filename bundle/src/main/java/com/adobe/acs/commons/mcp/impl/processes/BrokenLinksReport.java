@@ -59,7 +59,6 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
         reference
     }
 
-    ;
     transient private final Map<String, EnumMap<REPORT, Object>> reportData = new TreeMap<>();
 
     @Override
@@ -111,5 +110,10 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
             stream = Stream.of(p.toString());
         }
         return stream.filter(val -> regex.matcher(val).matches());
+    }
+
+    // access from unit tsts
+    Map<String, EnumMap<REPORT, Object>> getReportData(){
+        return reportData;
     }
 }
