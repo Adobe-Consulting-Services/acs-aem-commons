@@ -312,6 +312,12 @@
             <artifactId>mockserver-netty</artifactId>
             <version>3.10.4</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>

@@ -18,147 +18,113 @@ package com.adobe.acs.commons.mcp.impl.processes;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
-import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
-import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import com.adobe.acs.commons.mcp.util.DeserializeException;
-import com.day.cq.replication.Replicator;
-import com.day.cq.wcm.api.PageManagerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.security.AccessControlManager;
-import javax.jcr.security.Privilege;
 import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import static org.junit.Assert.*;
-
+import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.REPORT;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.security.AccessControlManager;
+import javax.jcr.security.Privilege;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  *
  */
-public class PageRelocatorTest {
+public class BrokenLinksTest {
     @Rule
     public final SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
-    PageRelocator tool;
+    BrokenLinksReport tool;
 
     @Before
     public void setup() {
-        tool = getPageRelocatorTool();
+        tool = getBrokenLinksReport();
     }
 
     @Test
-    public void barebonesRun() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
-        ResourceResolver rr = getEnhancedMockResolver(true);
-        ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
+    public void reportBrokenReferences() throws Exception {
+        ResourceResolver rr = getEnhancedMockResolver();
 
-        assertEquals("Page Relocator: relocator test", instance.getName());
-        initInstance(instance, rr);
-        assertEquals(0.0, instance.updateProgress(), 0.00001);
+        AbstractResourceImpl content = new AbstractResourceImpl("/content", "cq:Page", "cq:Page", new ResourceMetadata());
+
+        AbstractResourceImpl pageA = new AbstractResourceImpl("/content/pageA", "cq:Page", "cq:Page", new ResourceMetadata());
+        content.addChild(pageA);
+        AbstractResourceImpl pageAcontent = new AbstractResourceImpl("/content/pageA/jcr:content", "cq:PageContent", "cq:PageContent", new ResourceMetadata() {{
+            put("ref1", "/content/pageA");
+            put("ref2", "/content/pageB");
+            put("ref3", "/content/pageC");
+        }});
+        pageA.addChild(pageAcontent);
+        AbstractResourceImpl pageB = new AbstractResourceImpl("/content/pageB", "cq:Page", "cq:Page", new ResourceMetadata());
+        content.addChild(pageB);
+        AbstractResourceImpl pageBcontent = new AbstractResourceImpl("/content/pageB/jcr:content", "cq:PageContent", "cq:PageContent", new ResourceMetadata() {{
+            put("ignoredRef", "/content/pageC");
+            put("ref2", "/content/pageD");
+            put("ref3", "/content/pageE");
+        }});
+        pageB.addChild(pageBcontent);
+        when(rr.getResource("/content")).thenReturn(content);
+
+        pageA.setResourceResolver(rr);
+        pageAcontent.setResourceResolver(rr);
+        pageB.setResourceResolver(rr);
+        pageBcontent.setResourceResolver(rr);
+
+        when(rr.resolve("/content/pageA")).thenReturn(pageA);
+        when(rr.resolve("/content/pageB")).thenReturn(pageB);
+        when(rr.resolve("/content/pageC")).thenReturn(new NonExistingResource(rr, "/content/pageC"));
+        when(rr.resolve("/content/pageD")).thenReturn(new NonExistingResource(rr, "/content/pageD"));
+        when(rr.resolve("/content/pageE")).thenReturn(new NonExistingResource(rr, "/content/pageE"));
+
+        Map<String, Object> values = new HashMap<>();
+        values.put("sourcePath", "/content");
+        values.put("propertyRegex", "^/(etc|content)/.+");
+        values.put("excludeProperties", "ignoredRef");
+
+        ProcessInstanceImpl instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "broken references");
+        instance.init(rr, values);
         instance.run(rr);
-        assertEquals(1.0, instance.updateProgress(), 0.00001);
-        verify(rr, atLeast(3)).commit();
+
+        Map<String, EnumMap<REPORT, Object>> reportData = tool.getReportData();
+        assertEquals(3, reportData.size());
+        assertEquals("/content/pageC", reportData.get("/content/pageA/jcr:content/ref3").get(REPORT.reference));
+        assertEquals("/content/pageD", reportData.get("/content/pageB/jcr:content/ref2").get(REPORT.reference));
+        assertEquals("/content/pageE", reportData.get("/content/pageB/jcr:content/ref3").get(REPORT.reference));
+
+        assertFalse("ignoredRef is in the exclude list", reportData.containsKey("/content/pageB/jcr:content/ignoredRef"));
     }
 
-    @Test
-    public void aclFail() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
-        ResourceResolver rr = getEnhancedMockResolver(false);
-        ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
+    private BrokenLinksReport getBrokenLinksReport() {
 
-        assertEquals("Page Relocator: relocator test", instance.getName());
-        initInstance(instance, rr);
-        instance.run(rr);
-        assertFalse("ACL issues should have been tracked", instance.getInfo().getReportedErrors().isEmpty());
-        assertEquals("Aborted", instance.getInfo().getStatus());
-    }
-
-    @Test
-    public void validateMoveOperation() throws RepositoryException, LoginException, DeserializeException, PersistenceException {
-        ResourceResolver rr = getEnhancedMockResolver(true);
-        ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
-        initInstance(instance, rr);
-
-        ActionManager manager = getActionManager();
-        tool.movePages(manager);
-        assertTrue("Should be no reported errors", manager.getErrorCount() == 0);
-        assertFalse("Should have captured activate requests", tool.replicatorQueue.activateOperations.isEmpty());
-        assertFalse("Should have captured deactivate requests", tool.replicatorQueue.deactivateOperations.isEmpty());
-
-// Our mock doesn't pretend to create target pages at the moment...        
-//        Resource pageB = rr.getResource("/content/pageB");
-//        verify(rr, times(1)).create(eq(pageB), eq("pageA"), any());
-        verify(rr, atLeastOnce()).commit();
-    }
-    
-    private PageRelocator getPageRelocatorTool() {
-        PageManagerFactory mockPageManagerFactory = mock(PageManagerFactory.class);
-        when(mockPageManagerFactory.getPageManager(any())).then(invocation->new MockPageManager(getMockResolver()));
-        slingContext.registerService(PageManagerFactory.class, mockPageManagerFactory);
-
-        Replicator replicator = mock(Replicator.class);
-        slingContext.registerService(Replicator.class, replicator);
-
-        PageRelocatorFactory t = new PageRelocatorFactory();
+        BrokenLinksReportFactory t = new BrokenLinksReportFactory();
         slingContext.registerInjectActivateService(t);
 
         return t.createProcessDefinition();
     }
 
-    private void initInstance(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, DeserializeException {
-        Map<String, Object> values = new HashMap<>();
-        values.put("sourcePath", "/content/pageA");
-        values.put("destinationPath", "/content/pageB");
-        values.put("maxReferences", "0");
-        values.put("mode", PageRelocator.Mode.MOVE.toString());
-        values.put("publishMethod", PageRelocator.PUBLISH_METHOD.SELF_MANAGED.toString());
-        values.put("createVerionsOnReplicate", "false");
-        values.put("updateStatus", "true");
-        values.put("dryRun", "false");
-        instance.init(rr, values);
-
-        AbstractResourceImpl processNode = new AbstractResourceImpl(instance.getPath(), null, null, new ResourceMetadata());
-        when(rr.getResource(instance.getPath())).thenReturn(processNode);
-        AbstractResourceImpl processContentNode = new AbstractResourceImpl(instance.getPath() + "/jcr:content", null, null, new ResourceMetadata());
-        when(rr.getResource(instance.getPath() + "/jcr:content")).thenReturn(processContentNode);
-        AbstractResourceImpl processResultNode = new AbstractResourceImpl(instance.getPath() + "/jcr:content/result", null, null, new ResourceMetadata());
-        when(rr.getResource(instance.getPath() + "/jcr:content/result")).thenReturn(processResultNode);
-        AbstractResourceImpl failuresNode = new AbstractResourceImpl(instance.getPath() + "/jcr:content/failures", null, null, new ResourceMetadata());
-        when(rr.getResource(instance.getPath() + "/jcr:content/failures")).thenReturn(processResultNode);
-        when(rr.getResource(instance.getPath() + "/jcr:content/failures/step1")).thenReturn(processResultNode);
-    }
-
-    private ResourceResolver getEnhancedMockResolver(final boolean aclChecksPass) throws RepositoryException, LoginException {
+    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
         ResourceResolver rr = getFreshMockResolver();
-
-        when(rr.hasChanges()).thenReturn(true);
-
-        AbstractResourceImpl pageA = new AbstractResourceImpl("/content/pageA", "cq:Page", "cq:Page", new ResourceMetadata());
-        when(rr.getResource("/content/pageA")).thenReturn(pageA);
-        AbstractResourceImpl pageAcontent = new AbstractResourceImpl("/content/pageA/jcr:content", "cq:PageContent", "cq:PageContent", new ResourceMetadata());
-        when(rr.getResource("/content/pageA/jcr:content")).thenReturn(pageAcontent);
-        AbstractResourceImpl pageB = new AbstractResourceImpl("/content/pageB", "cq:Page", "cq:Page", new ResourceMetadata());
-        when(rr.getResource("/content/pageB")).thenReturn(pageB);
-        AbstractResourceImpl content = new AbstractResourceImpl("/content", "cq:Page", "cq:Page", new ResourceMetadata());
-        AbstractResourceImpl pageBcontent = new AbstractResourceImpl("/content/pageB/jcr:content", "cq:PageContent", "cq:PageContent", new ResourceMetadata());
-        when(rr.getResource("/content/pageB/jcr:content")).thenReturn(pageBcontent);
-        when(rr.getResource("/content")).thenReturn(content);
-        content.addChild(pageA);
-        content.addChild(pageB);
 
         AbstractResourceImpl processes = new AbstractResourceImpl(ProcessInstanceImpl.BASE_PATH, null, null, new ResourceMetadata());
         when(rr.getResource(ProcessInstanceImpl.BASE_PATH)).thenReturn(processes);
@@ -168,10 +134,11 @@ public class PageRelocatorTest {
         AccessControlManager acm = mock(AccessControlManager.class);
         when(ses.getAccessControlManager()).thenReturn(acm);
         when(acm.privilegeFromName(any())).thenReturn(mock(Privilege.class));
-        when(acm.hasPrivileges(any(), any())).thenReturn(aclChecksPass);
+        when(acm.hasPrivileges(any(), any())).thenReturn(true);
 
         return rr;
     }
+
 
     private ControlledProcessManager getControlledProcessManager() throws LoginException {
         ActionManager am = getActionManager();
