@@ -11,7 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Fixed
 
-- #1094: Fixed issue with QR Code where its on by default. This requires toggling QR Code on and off to reset the client lib category.  
+- #1094: Fixed issue with QR Code where its on by default. This requires toggling QR Code on and off to reset the client lib category.
+- #1119: Fixed issue with timezone of on/off times on System Notifications  
+- #1110: Added package dependency on AEM 6.2 to ensure proper installation order.
+- #1128: Changed to SecureRandom for string generation in LinkedIn integration.
 
 ## [3.10.0] - 2017-08-20
 
