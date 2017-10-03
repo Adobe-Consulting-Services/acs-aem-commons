@@ -24,6 +24,7 @@ import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
+import com.adobe.acs.commons.mcp.form.PasswordComponent;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -63,13 +64,15 @@ public class S3AssetIngestor extends AssetIngestor {
 
     @FormField(
             name = "Secret Key",
-            description = "S3 Secret Key"
+            description = "S3 Secret Key",
+            component = PasswordComponent.class
     )
     String secretKey;
 
     @FormField(
             name = "S3 Base Path",
-            description = "S3 Base Path (Prefix)"
+            description = "S3 Base Path (Prefix)",
+            required = false
     )
     String s3BasePath;
 
@@ -133,7 +136,7 @@ public class S3AssetIngestor extends AssetIngestor {
     boolean canImportContainingFolder(S3ObjectSummary s3ObjectSummary) {
         String key = s3ObjectSummary.getKey();
         if (key.indexOf("/") >= 0) {
-            String parentPath = StringUtils.substringBeforeLast(key, "/");
+            String parentPath = beforeLastSlash(key);
             return canImportFolder(parentPath);
         } else {
             return true;
@@ -148,7 +151,7 @@ public class S3AssetIngestor extends AssetIngestor {
     private CheckedConsumer<ResourceResolver> importFile(final S3Source source, ActionManager actionManager) {
         return (ResourceResolver r) -> {
             String path = keyToNodePath(source.s3ObjectSummary.getKey());
-            createFolderNode(StringUtils.substringBeforeLast(path, "/"), StringUtils.substringBeforeLast(source.s3ObjectSummary.getKey(), "/"), r);
+            createFolderNode(beforeLastSlash(path), beforeLastSlash(source.s3ObjectSummary.getKey()), r);
             actionManager.setCurrentItem(bucket + ":" + source.s3ObjectSummary.getKey());
             handleExistingAsset(source, path, r);
         };
@@ -162,7 +165,7 @@ public class S3AssetIngestor extends AssetIngestor {
                 (key.equals(s3BasePath) || (key + "/").equals(s3BasePath))) {
             return jcrBasePath;
         } else if (key.indexOf("/") > -1) {
-            return keyToNodePath(StringUtils.substringBeforeLast(key, "/")) + "/" + JcrUtil.createValidName(getName(key));
+            return keyToNodePath(beforeLastSlash(key)) + "/" + JcrUtil.createValidName(getName(key));
         } else {
             return jcrBasePath + "/" + JcrUtil.createValidName(key);
         }
@@ -182,10 +185,10 @@ public class S3AssetIngestor extends AssetIngestor {
                 return true;
             }
         }
-        String parentNode = StringUtils.substringBeforeLast(folderPath, "/");
+        String parentNode = beforeLastSlash(folderPath);
         String childNode = StringUtils.substringAfterLast(folderPath, "/");
         if (!jcrBasePath.equals(parentNode)) {
-            String parentKey = StringUtils.substringBeforeLast(folderKey, "/");
+            String parentKey = beforeLastSlash(folderKey);
             createFolderNode(parentNode, parentKey, r);
         }
         Node child = s.getNode(parentNode).addNode(childNode, DEFAULT_FOLDER_TYPE);
@@ -221,7 +224,7 @@ public class S3AssetIngestor extends AssetIngestor {
         if (ignoreFolderList.contains(name.toLowerCase())) {
             return false;
         } else if (key.indexOf("/") >= 0) {
-            String parentPath = StringUtils.substringBeforeLast(key, "/");
+            String parentPath = beforeLastSlash(key);
             return canImportFolder(parentPath);
         } else {
             return true;
@@ -250,6 +253,10 @@ public class S3AssetIngestor extends AssetIngestor {
                 return name;
             }
         }
+    }
+
+    private String beforeLastSlash(String str) {
+        return StringUtils.substringBeforeLast(str, "/");
     }
 
     private class S3Source implements Source {
