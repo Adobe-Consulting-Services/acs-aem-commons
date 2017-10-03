@@ -20,15 +20,19 @@
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
+import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.commons.mime.MimeTypeService;
 
 @Component
 @Service(ProcessDefinitionFactory.class)
-public class S3AssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFactory<S3AssetIngestor> {
+public class S3AssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFactory<ProcessDefinition> {
 
     @Reference
     MimeTypeService mimetypeService;
@@ -39,7 +43,20 @@ public class S3AssetIngestorFactory extends AdministratorsOnlyProcessDefinitionF
     }
 
     @Override
-    public S3AssetIngestor createProcessDefinitionInstance() {
+    public ProcessDefinition createProcessDefinitionInstance() {
         return new S3AssetIngestor(mimetypeService);
+    }
+
+    @Override
+    public boolean isAllowed(User user) {
+        if (super.isAllowed(user)) {
+            // check if S3 SDK is available
+            try {
+                AmazonS3 s3Client = new AmazonS3Client();
+                return true;
+            } catch (NoClassDefFoundError e) {
+            }
+        }
+        return false;
     }
 }
