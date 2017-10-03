@@ -52,6 +52,7 @@ public class SharpenImageTransformerImpl implements ImageTransformer {
     static final String TYPE = "sharpen";
 
     private static final String KEY_UNSHARP_MASK = "op_usm";
+    private static final int NUM_SHARPEN_PARAMS = 2;
 
     @Override
     public final Layer transform(final Layer layer, final ValueMap properties) {
@@ -70,12 +71,12 @@ public class SharpenImageTransformerImpl implements ImageTransformer {
                 String[] param = unsharpenMask.split(",");
 
                 // Support is provided for amount and radius only.
-                if(param.length <= 4 && param.length >= 2) {
+                if(param.length == NUM_SHARPEN_PARAMS) {
                     float amount = Float.parseFloat(param[0]);
                     float radius = Float.parseFloat(param[1]);
                     layer.sharpen(amount, radius);
                 } else {
-                    log.warn("Transform [ {} ] requires 2 or 4 parameters.", TYPE);
+                    log.warn("Transform [ {} ] requires 2 parameters.", TYPE);
                 }
             }
         } catch (NumberFormatException exception) {
