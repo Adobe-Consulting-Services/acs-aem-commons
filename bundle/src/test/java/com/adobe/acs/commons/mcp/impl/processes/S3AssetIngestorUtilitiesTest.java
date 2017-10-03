@@ -51,10 +51,10 @@ public class S3AssetIngestorUtilitiesTest {
     public void testKeyToNodePathWithNullBasePath() {
         S3AssetIngestor ingestor = new S3AssetIngestor(null);
         ingestor.jcrBasePath = "/content/dam";
-        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1/"));
-        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1"));
-        assertEquals("/content/dam/folder1/folder2/folder3", ingestor.keyToNodePath("folder1/folder2/folder3/"));
-        assertEquals("/content/dam/folder1/folder2/folder_3", ingestor.keyToNodePath("folder1/folder2/folder 3/"));
+        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1/", false));
+        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1", false));
+        assertEquals("/content/dam/folder1/folder2/folder3", ingestor.keyToNodePath("folder1/folder2/folder3/", false));
+        assertEquals("/content/dam/folder1/folder2/folder_3", ingestor.keyToNodePath("folder1/folder2/folder 3/", false));
     }
 
     @Test
@@ -62,10 +62,11 @@ public class S3AssetIngestorUtilitiesTest {
         S3AssetIngestor ingestor = new S3AssetIngestor(null);
         ingestor.jcrBasePath = "/content/dam";
         ingestor.s3BasePath = "";
-        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1/"));
-        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1"));
-        assertEquals("/content/dam/folder1/folder2/folder3", ingestor.keyToNodePath("folder1/folder2/folder3/"));
-        assertEquals("/content/dam/folder1/folder2/folder_3", ingestor.keyToNodePath("folder1/folder2/folder 3/"));
+        assertEquals("/content/dam/first.jpg", ingestor.keyToNodePath("first.jpg", true));
+        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1/", false));
+        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1", false));
+        assertEquals("/content/dam/folder1/folder2/folder3", ingestor.keyToNodePath("folder1/folder2/folder3/", false));
+        assertEquals("/content/dam/folder1/folder2/folder_3", ingestor.keyToNodePath("folder1/folder2/folder 3/", false));
     }
 
     @Test
@@ -73,10 +74,12 @@ public class S3AssetIngestorUtilitiesTest {
         S3AssetIngestor ingestor = new S3AssetIngestor(null);
         ingestor.jcrBasePath = "/content/dam";
         ingestor.s3BasePath = "folder1/";
-        assertEquals("/content/dam", ingestor.keyToNodePath("folder1/"));
-        assertEquals("/content/dam", ingestor.keyToNodePath("folder1"));
-        assertEquals("/content/dam/folder2/folder3", ingestor.keyToNodePath("folder1/folder2/folder3/"));
-        assertEquals("/content/dam/folder2/folder_3", ingestor.keyToNodePath("folder1/folder2/folder 3/"));
+        assertEquals("/content/dam/first.jpg", ingestor.keyToNodePath("folder1/first.jpg", true));
+        assertEquals("/content/dam", ingestor.keyToNodePath("folder1/", false));
+        assertEquals("/content/dam", ingestor.keyToNodePath("folder1", false));
+        assertEquals("/content/dam/folder2/folder3", ingestor.keyToNodePath("folder1/folder2/folder3/", false));
+        assertEquals("/content/dam/folder2/folder_3", ingestor.keyToNodePath("folder1/folder2/folder 3/", false));
+        assertEquals("/content/dam/folder2/folder_3/foo.jpg", ingestor.keyToNodePath("folder1/folder2/folder 3/foo.jpg", true));
     }
 
     @Test

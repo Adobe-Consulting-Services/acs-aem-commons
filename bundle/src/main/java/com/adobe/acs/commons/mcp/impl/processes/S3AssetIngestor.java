@@ -103,7 +103,7 @@ public class S3AssetIngestor extends AssetIngestor {
                 manager.deferredWithResolver(Actions.retry(10, 100, rr-> {
                     String key = s.getKey();
                     manager.setCurrentItem(generateItemName(key));
-                    createFolderNode(keyToNodePath(key), key, rr);
+                    createFolderNode(keyToNodePath(key, false), key, rr);
                 }));
         });
         if (listing.isTruncated()) {
@@ -150,14 +150,14 @@ public class S3AssetIngestor extends AssetIngestor {
 
     private CheckedConsumer<ResourceResolver> importFile(final S3Source source, ActionManager actionManager) {
         return (ResourceResolver r) -> {
-            String path = keyToNodePath(source.s3ObjectSummary.getKey());
+            String path = keyToNodePath(source.s3ObjectSummary.getKey(), true);
             createFolderNode(beforeLastSlash(path), beforeLastSlash(source.s3ObjectSummary.getKey()), r);
             actionManager.setCurrentItem(bucket + ":" + source.s3ObjectSummary.getKey());
             handleExistingAsset(source, path, r);
         };
     }
 
-    String keyToNodePath(String key) {
+    String keyToNodePath(String key, boolean isFile) {
         if (key.endsWith("/")) {
             key = key.substring(0, key.length() - 1); // remove trailing slash
         }
@@ -165,9 +165,19 @@ public class S3AssetIngestor extends AssetIngestor {
                 (key.equals(s3BasePath) || (key + "/").equals(s3BasePath))) {
             return jcrBasePath;
         } else if (key.indexOf("/") > -1) {
-            return keyToNodePath(beforeLastSlash(key)) + "/" + JcrUtil.createValidName(getName(key));
+            return keyToNodePath(beforeLastSlash(key), isFile) + "/" + (isFile ? createValidFilename(getName(key)) : JcrUtil.createValidName(getName(key)));
         } else {
-            return jcrBasePath + "/" + JcrUtil.createValidName(key);
+            return jcrBasePath + "/" + (isFile ? createValidFilename(key) : JcrUtil.createValidName(key));
+        }
+    }
+
+    private String createValidFilename(String name) {
+        if (name.contains(".")) {
+            String baseName = StringUtils.substringBeforeLast(name, ".");
+            String extension = StringUtils.substringAfterLast(name, ".");
+            return JcrUtil.createValidName(baseName) + "." + JcrUtil.createValidName(extension);
+        } else {
+            return JcrUtil.createValidName(name);
         }
     }
 
