@@ -58,6 +58,7 @@
                             com.day.cq.wcm.workflow.process;version="[6.0,8)", <!-- using a wider version range for forward compatibility -->
                             com.day.cq.mailer;version="[5.9,7)", <!-- using a wider version range for forward compatibility -->
                             com.adobe.cq.sightly;version="[2.5,4)",
+                            javax.annotation;resolution:=optional, <!-- pulled by the tika-parsers dependency -->
                             *
                         </Import-Package>
                         <Embed-Dependency>guava</Embed-Dependency>
@@ -283,7 +284,16 @@
             <version>3.16</version>
             <type>jar</type>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>1.14</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <version>1.14</version>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>

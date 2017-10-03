@@ -1,18 +1,37 @@
+/*
+ * Copyright 2017 Adobe.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.*;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.html.HtmlParser;
+import org.apache.tika.sax.Link;
+import org.apache.tika.sax.LinkContentHandler;
 
 import javax.jcr.RepositoryException;
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -20,6 +39,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * Broken Links Checker MCP task
+ *
  * @author Yegor Kozlov
  */
 public class BrokenLinksReport extends ProcessDefinition implements Serializable {
@@ -44,12 +65,29 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
             options = {"default=cq:allowedTemplates"})
     private String excludeProperties;
 
+    @FormField(
+            name = "Deep check in html",
+            description = "If checked, links will be extracted from html field",
+            component = CheckboxComponent.class,
+            options = {"checked"}
+    )
+    private boolean deepCheck = false;
+
+    @FormField(name = "Fields containing html",
+            description = "Properties containing html to extract links",
+            required = false,
+            options = {"default=text"})
+    private String htmlFields;
+
     transient private Set<String> excludeList;
+    transient private Set<String> deepCheckList;
     transient private Pattern regex;
 
     @Override
     public void init() throws RepositoryException {
         excludeList = Arrays.stream(excludeProperties.split(",")).map(String::trim).collect(Collectors.toSet());
+        deepCheckList = deepCheck ? Arrays.stream(htmlFields.split(",")).map(String::trim).collect(Collectors.toSet())
+            : new HashSet<>();
         regex = Pattern.compile(propertyRegex);
     }
 
@@ -64,7 +102,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         report.setName(instance.getName());
-        instance.defineAction("Collect Broken References", rr, this::collectBrokenLinks);
+        instance.defineAction("Collect Broken References", rr, this::buildReport);
         instance.getInfo().setDescription(sourcePath);
 
     }
@@ -77,43 +115,97 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
 
     }
 
-    public void collectBrokenLinks(ActionManager manager) {
+    public void buildReport(ActionManager manager) {
         TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
         visitor.setBreadthFirstMode();
         visitor.setTraversalFilter(null);
         visitor.setResourceVisitor((resource, depth) -> {
-            ResourceResolver resolver = resource.getResourceResolver();
-            resource.getValueMap().entrySet().stream()
-                    .filter(entry -> !excludeList.contains(entry.getKey()))
-                    .filter(entry -> entry.getValue() instanceof String || entry.getValue() instanceof String[])
-                    .forEach(entry -> {
+            Map<String, List<String>> brokenRefs = collectBrokenReferences(resource, regex, excludeList, deepCheckList);
+            for(Map.Entry<String, List<String>> ref : brokenRefs.entrySet()){
+                String propertyPath = ref.getKey();
+                List<String> refs = ref.getValue();
+                reportData.put(propertyPath, new EnumMap<>(REPORT.class));
+                reportData.get(propertyPath).put(REPORT.reference, refs.stream().collect(Collectors.joining(",")));
 
-                        List<String> paths = collectPaths(entry.getValue())
-                                .filter(path -> ResourceUtil.isNonExistingResource(resolver.resolve(path)))
-                                .collect(Collectors.toList());
-                        if (!paths.isEmpty()) {
-                            String propertyPath = resource.getPath() + "/" + entry.getKey();
-                            reportData.put(propertyPath, new EnumMap<>(REPORT.class));
-                            reportData.get(propertyPath).put(REPORT.reference, paths.stream().collect(Collectors.joining(",")));
-                        }
-
-                    });
+            }
         });
         manager.deferredWithResolver(rr -> visitor.accept(rr.getResource(sourcePath)));
     }
 
-    Stream<String> collectPaths(Object p) {
+    /**
+     * Collect references from a JCR property.
+     * A property can be one of:
+     * <ol>
+     *     <li>A string containing a reference, e.g, fileReference=/content/dam/image.png. </li>
+     *     <li>An array of strings, e.g, fileReference=[/content/dam/image1.png, /content/dam/image2.png]</li>
+     *     <li>An html fragment containing links , e.g,
+     *     <pre>
+     *       &lt;p&gt;
+     *         &lt;a href="/content/site/page.html"&gt;hello&lt;/a&gt;
+     *         &lt;img src="/content/dam/image1.png"&gt;hello&lt;/a&gt;
+     *       &lt;/p&gt;
+     *     </pre>
+     *     </li>
+     * </ol>
+     *
+     * @param property an entry from a ValueMap
+     * @param htmlFields  lst of properties containing html
+     * @return stream containing extracted references
+     */
+    static Stream<String> collectPaths(Map.Entry<String, Object> property, Set<String> htmlFields) {
+        Object p = property.getValue();
+
         Stream<String> stream;
-        if (p.getClass().isArray()) {
+        if (p.getClass() == String[].class) {
             stream = Arrays.stream((String[]) p);
+        } else if (p.getClass() == String.class){
+            stream = Stream.of((String) p);
         } else {
-            stream = Stream.of(p.toString());
+            stream = Stream.empty();
         }
-        return stream.filter(val -> regex.matcher(val).matches());
+        if (htmlFields.contains(property.getKey())) {
+            stream = stream.flatMap(val -> {
+                try {
+                    // parse html and extract links via underlying tagsoup library
+                    LinkContentHandler linkHandler = new LinkContentHandler();
+                    HtmlParser parser = new HtmlParser();
+                    parser.parse(new ByteArrayInputStream(val.getBytes("utf-8")), linkHandler, new Metadata(), new ParseContext());
+                    return linkHandler.getLinks().stream().map(Link::getUri);
+                } catch (Exception e) {
+                    return Stream.empty();
+                }
+            });
+        }
+        return stream;
     }
 
-    // access from unit tsts
-    Map<String, EnumMap<REPORT, Object>> getReportData(){
+    /**
+     * Collect broken references from properties of the given resource
+     *
+     * @param resource      the resource to check
+     * @param regex         regex to to detect properties containing references. Set from @FormField
+     * @param skipList      properties to ignore. Set from @FormField
+     * @param htmlFields    field containing html .
+     * @return broken references keyed by property. The value is a List because a property can contain multiple links,
+     * e.g. if it is multivalued or it is html containing multiple links.
+     */
+    static Map<String, List<String>> collectBrokenReferences(Resource resource, Pattern regex, Set<String> skipList, Set<String> htmlFields) {
+
+        return resource.getValueMap().entrySet().stream()
+                .filter(entry -> !skipList.contains(entry.getKey()))
+                .collect(Collectors.toMap(
+                        entry -> resource.getPath() + "/" + entry.getKey(),
+                        entry -> {
+                            List<String> brokenPaths =  collectPaths(entry, htmlFields)
+                                    .filter(href -> regex.matcher(href).matches())
+                                    .filter(path -> ResourceUtil.isNonExistingResource(resource.getResourceResolver().resolve(path)))
+                                    .collect(Collectors.toList());
+                            return brokenPaths;
+                        })).entrySet().stream().filter(e -> !e.getValue().isEmpty())
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+     }
+        // access from unit tests
+    Map<String, EnumMap<REPORT, Object>> getReportData() {
         return reportData;
     }
 }

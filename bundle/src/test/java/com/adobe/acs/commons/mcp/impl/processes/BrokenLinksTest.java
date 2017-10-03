@@ -21,13 +21,12 @@ import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.NonExistingResource;
-import org.apache.sling.api.resource.ResourceMetadata;
-import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.REPORT;
+import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectBrokenReferences;
+import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectPaths;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,9 +35,9 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import static org.junit.Assert.assertEquals;
@@ -55,7 +54,7 @@ public class BrokenLinksTest {
     @Rule
     public final SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
-    BrokenLinksReport tool;
+    private BrokenLinksReport tool;
 
     @Before
     public void setup() {
@@ -151,4 +150,63 @@ public class BrokenLinksTest {
         when(cpm.getServiceResourceResolver()).thenReturn(getMockResolver());
         return cpm;
     }
+
+    @Test
+    public void testCollectPaths(){
+        Set<String> htmlFields = new HashSet<>();
+        htmlFields.add("text");
+
+        assertEquals(Arrays.asList("/ref1"), collectPaths(property("fileReference", "/ref1"), htmlFields).collect(Collectors.toList()));
+        assertEquals(Arrays.asList("/ref1", "/ref2"), collectPaths(property("fileReference", new String[]{"/ref1", "/ref2"}), htmlFields).collect(Collectors.toList()));
+        assertEquals(Arrays.asList("/ref1"), collectPaths(property("text", "<p><a href='/ref1'>hello</p>"), htmlFields).collect(Collectors.toList()));
+    }
+
+    private Map.Entry property(String key, Object value){
+        return new Map.Entry<String, Object>() {
+            @Override
+            public String getKey() {
+                return key;
+            }
+
+            @Override
+            public Object getValue() {
+                return value;
+            }
+
+            @Override
+            public Object setValue(Object value) {
+                return null;
+            }
+        };
+    }
+
+    @Test
+    public void testCollectBrokenReferences(){
+        Pattern ptrn = Pattern.compile("/content/.+");
+        Set<String> skipList = new HashSet<>(Arrays.asList("skip1", "skip2"));
+        Set<String> htmlFields = new HashSet<>(Arrays.asList("text"));
+        slingContext.build()
+                .resource("/test1",
+                        "p1", "/content/ref1",
+                        "p2", "/content/ref2",
+                        "p3", new String[]{"/content/ref1"},
+                        "p4", new String[]{"/content/ref1", "/content/ref2"},
+                        "skip1", "/content/ref2")
+                .resource("/test2",
+                        "text", "<p><a href='/content/ref2'>hello</a><img src='/content/ref3'>hello</img></p>",
+                        "skip2", "<p><a href='/content/ref2'>hello</a><img src='/content/ref3'>hello</img></p>")
+                .resource("/content/ref1")
+                .commit();
+
+        Map<String, List<String>> refs1 = collectBrokenReferences(slingContext.resourceResolver().getResource("/test1"), ptrn, skipList, htmlFields);
+        assertEquals(2, refs1.size());
+        assertEquals(Arrays.asList("/content/ref2"), refs1.get("/test1/p2"));
+        assertEquals(Arrays.asList("/content/ref2"), refs1.get("/test1/p4"));
+
+        Map<String, List<String>> refs2 = collectBrokenReferences(slingContext.resourceResolver().getResource("/test2"), ptrn, skipList, htmlFields);
+        assertEquals(1, refs2.size());
+        assertEquals(Arrays.asList("/content/ref2", "/content/ref3"), refs2.get("/test2/text"));
+    }
+
+
 }

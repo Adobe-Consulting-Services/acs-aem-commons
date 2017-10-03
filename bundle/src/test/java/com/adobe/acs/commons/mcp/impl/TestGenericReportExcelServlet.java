@@ -66,6 +66,7 @@ public class TestGenericReportExcelServlet {
         slingContext.addModelsForClasses(GenericReport.class);
 
         GenericReportExcelServlet servlet = new GenericReportExcelServlet();
+
         servlet.doGet(request, response);
 
         assertEquals("application/vnd.ms-excel", response.getContentType());
