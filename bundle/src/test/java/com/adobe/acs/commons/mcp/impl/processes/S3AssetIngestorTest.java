@@ -193,6 +193,46 @@ public class S3AssetIngestorTest {
     }
 
     @Test
+    public void testImportAssetsToNewRootFolder() throws Exception {
+        ingestor.jcrBasePath = "/content/dam/test";
+        s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+
+        ingestor.importAssets(actionManager);
+
+        assertFalse(context.resourceResolver().hasChanges());
+
+        assertNull(context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
+        assertEquals(1, ingestor.assetCount);
+        assertEquals(1, ingestor.folderCount);
+        assertEquals(57797, ingestor.totalImportedData);
+        verify(assetManager, times(1)).createAsset(any(), any(), any(), eq(false));
+
+        verify(actionManager, times(2)).setCurrentItem(currentItemCaptor.capture());
+        assertEquals(Arrays.asList("testbucket", "testbucket:image.png"), currentItemCaptor.getAllValues());
+    }
+
+
+    @Test
+    public void testImportAssetsToExistingRootFolder() throws Exception {
+        ingestor.jcrBasePath = "/content/dam/test";
+        context.create().resource("/content/dam/test", "jcr:primaryType", "sling:Folder", "jcr:title", "testTitle");
+        s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+
+        ingestor.importAssets(actionManager);
+
+        assertFalse(context.resourceResolver().hasChanges());
+
+        assertEquals("testTitle", context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
+        assertEquals(1, ingestor.assetCount);
+        assertEquals(0, ingestor.folderCount);
+        assertEquals(57797, ingestor.totalImportedData);
+        verify(assetManager, times(1)).createAsset(any(), any(), any(), eq(false));
+
+        verify(actionManager, times(2)).setCurrentItem(currentItemCaptor.capture());
+        assertEquals(Arrays.asList("testbucket", "testbucket:image.png"), currentItemCaptor.getAllValues());
+    }
+
+    @Test
     public void testImportAssetsWithBasePath() throws Exception {
         s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder1/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());

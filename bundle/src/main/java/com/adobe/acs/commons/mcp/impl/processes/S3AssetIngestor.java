@@ -186,7 +186,7 @@ public class S3AssetIngestor extends AssetIngestor {
         Session s = r.adaptTo(Session.class);
         if (s.nodeExists(folderPath)) {
             Node folderNode = s.getNode(folderPath);
-            if (folderNode.hasProperty(JcrConstants.JCR_TITLE) && folderNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name)) {
+            if (folderPath.equals(jcrBasePath) || (folderNode.hasProperty(JcrConstants.JCR_TITLE) && folderNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
             } else {
                 folderNode.setProperty(JcrConstants.JCR_TITLE, name);
@@ -203,7 +203,9 @@ public class S3AssetIngestor extends AssetIngestor {
         }
         Node child = s.getNode(parentNode).addNode(childNode, DEFAULT_FOLDER_TYPE);
         folderCount++;
-        child.setProperty(JcrConstants.JCR_TITLE, name);
+        if (!folderPath.equals(jcrBasePath)) {
+            child.setProperty(JcrConstants.JCR_TITLE, name);
+        }
         r.commit();
         r.refresh();
         return true;
