@@ -97,6 +97,12 @@ public interface ActionManager {
      * @throws java.lang.Exception
      */
     void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception;
+   
+    /**
+     * Cancel all work scheduled using this action manager.
+     * @param useForce If true, forces active work to be interrupted.
+     */
+    void cancel(boolean useForce);
     
     /**
      * After scheduling actions withQueryResults or deferredWithResolver, schedule

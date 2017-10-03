@@ -54,6 +54,7 @@ public class SharpenImageTransformerImpl implements ImageTransformer {
     private static final String KEY_UNSHARP_MASK = "op_usm";
     private static final int NUM_SHARPEN_PARAMS = 2;
 
+
     @Override
     public final Layer transform(final Layer layer, final ValueMap properties) {
 

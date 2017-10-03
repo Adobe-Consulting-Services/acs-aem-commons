@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>3.9.1-SNAPSHOT</version>
+    <version>3.10.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -25,10 +25,6 @@
         <name>Adobe</name>
         <url>http://www.adobe.com/</url>
     </organization>
-
-    <prerequisites>
-        <maven>3.0.2</maven>
-    </prerequisites>
 
     <!-- ====================================================================== -->
     <!-- P R O P E R T I E S -->
@@ -98,7 +94,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.6.201602180812</version>
+                    <version>0.7.9</version>
                     <executions>
                         <execution>
                             <id>default-prepare-agent</id>
@@ -116,7 +112,7 @@
                         <rulesets>
                             <ruleset>acs/pmd/rules.xml</ruleset>
                         </rulesets>
-                        <targetJdk>1.6</targetJdk>
+                        <targetJdk>1.8</targetJdk>
                     </configuration>
                     <dependencies>
                         <dependency>
@@ -210,8 +206,34 @@
                     <artifactId>coveralls-maven-plugin</artifactId>
                     <version>4.3.0</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.3.9</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <scm>

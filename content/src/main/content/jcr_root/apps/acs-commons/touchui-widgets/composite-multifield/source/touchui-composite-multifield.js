@@ -194,7 +194,11 @@
                                 $field = $($fieldSets[i]).find("ul[data-fieldname='./" + rKey + "']").last();
                             }
 
-                            if (_.isArray(rValue) && !_.isEmpty(rValue)) {
+                            if(!_.isEmpty($field) && $field.siblings( "input.autocomplete-has-suggestion-btn")) {
+                                cmf.setWidgetValue($field.siblings( "input.autocomplete-has-suggestion-btn"), rValue);
+                            }
+
+                            if (_.isArray(rValue) && !_.isEmpty(rValue) && !cmf.isSelectMultiple($field)) {
                                 fillNestedFields($($fieldSets[i]).find("[data-init='multifield']"), rValue);
                             } else {
                                 cmf.setWidgetValue($field, rValue);
@@ -213,7 +217,13 @@
         },
 
         fillValue: function ($field, record) {
-            var name = $field.attr("name"), value;
+            var name, value;
+            // for userpicker $field length is 2
+            if($field.length > 1 && !$field.parent().hasClass("richtext-container")) {
+                name = $($field[1]).attr("name");
+            } else {
+                name = $field.attr("name");
+            }
 
             if (!name) {
                 return;

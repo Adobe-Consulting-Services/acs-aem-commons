@@ -15,16 +15,7 @@
  */
 package com.adobe.acs.commons.util.visitors;
 
-import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import com.day.cq.commons.jcr.JcrConstants;
-import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.jcr.Item;
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.PropertyIterator;
-import javax.jcr.RepositoryException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 

@@ -20,6 +20,8 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
+import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
+import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowStep;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.NoNextWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.ReadDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.RestartWorkflowProcess;
@@ -39,7 +41,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.Session;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Matchers.any;
@@ -59,8 +63,11 @@ public class SyntheticCqWorkflowRunnerImplTest {
 
     SyntheticWorkflowRunnerImpl swr = new SyntheticWorkflowRunnerImpl();
 
+    List<SyntheticWorkflowStep> workflowSteps;
+
     @Before
     public void setUp() {
+        workflowSteps = new ArrayList<>();
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
     }
 
@@ -71,12 +78,12 @@ public class SyntheticCqWorkflowRunnerImplTest {
         map.put("process.label", "test");
         swr.bindCqWorkflowProcesses(new WFDataWorkflowProcess(), map);
 
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+        workflowSteps.add(swr.getSyntheticWorkflowStep("test",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[] {"test"},
-                null, false, false);
+                workflowSteps, false, false);
     }
 
     @Test
@@ -89,13 +96,14 @@ public class SyntheticCqWorkflowRunnerImplTest {
         map.put("process.label", "read");
         swr.bindCqWorkflowProcesses(new ReadDataWorkflowProcess(), map);
 
-
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+        workflowSteps.add(swr.getSyntheticWorkflowStep("set",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
+        workflowSteps.add(swr.getSyntheticWorkflowStep("read",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[] {"set", "read"},
-                metadata, false, false);
+               workflowSteps, false, false);
     }
 
     @Test
@@ -108,34 +116,33 @@ public class SyntheticCqWorkflowRunnerImplTest {
         map.put("process.label", "read");
         swr.bindCqWorkflowProcesses(new ReadDataWorkflowProcess(), map);
 
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+        workflowSteps.add(swr.getSyntheticWorkflowStep("update",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
+        workflowSteps.add(swr.getSyntheticWorkflowStep("read",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[] {"update", "read"},
-                metadata, false, false);
+                workflowSteps, false, false);
     }
 
     @Test
     public void testExecute_ProcessArgs() throws Exception {
-        Map<Object, Object> map = new HashMap<Object, Object>();
-
-        map.put("process.label", "wf-args");
-        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(), map);
-
         /** WF Process Metadata */
-
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
-
         Map<String, Object> wfArgs = new HashMap<String, Object>();
         wfArgs.put("hello", "world");
 
-        metadata.put("wf-args", wfArgs);
+        Map<Object, Object> map = new HashMap<Object, Object>();
+        map.put("process.label", "wf-args");
+        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs), map);
+
+        workflowSteps.add(swr.getSyntheticWorkflowStep("wf-args",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL,
+                wfArgs));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[]{ "wf-args" },
-                metadata, false, false);
+                workflowSteps, false, false);
     }
 
     @Test
@@ -147,16 +154,12 @@ public class SyntheticCqWorkflowRunnerImplTest {
         swr.bindCqWorkflowProcesses(restartWorkflowProcess, map);
 
         /** Restart */
-
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
-
-        Map<String, Object> wfArgs = new HashMap<String, Object>();
-        metadata.put("restart", wfArgs);
+        workflowSteps.add(swr.getSyntheticWorkflowStep("restart",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[]{ "restart" },
-                metadata, false, false);
+                workflowSteps, false, false);
 
         verify(restartWorkflowProcess, times(3)).execute(any(WorkItem.class), any(WorkflowSession.class),
                 any(MetaDataMap.class));
@@ -176,16 +179,14 @@ public class SyntheticCqWorkflowRunnerImplTest {
         map.put("process.label", "nonext");
         swr.bindCqWorkflowProcesses(new NoNextWorkflowProcess(), map);
 
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
-
-        Map<String, Object> wfArgs = new HashMap<String, Object>();
-        metadata.put("complete", wfArgs);
+        workflowSteps.add(swr.getSyntheticWorkflowStep("terminate",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
+        workflowSteps.add(swr.getSyntheticWorkflowStep("nonext",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[]{ "terminate", "nonext" },
-                metadata, true, false);
-
+                workflowSteps, true, false);
     }
 
 
@@ -199,21 +200,17 @@ public class SyntheticCqWorkflowRunnerImplTest {
         TerminateDataWorkflowProcess terminateDataWorkflowProcess = spy(new TerminateDataWorkflowProcess());
         swr.bindCqWorkflowProcesses(terminateDataWorkflowProcess, map);
 
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
-
-        Map<String, Object> wfArgs = new HashMap<String, Object>();
-        metadata.put("terminate", wfArgs);
+        workflowSteps.add(swr.getSyntheticWorkflowStep("terminate",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[]{ "terminate" },
-                metadata, false, true);
+                workflowSteps, false, true);
 
         verify(terminateDataWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
                 any(MetaDataMap.class));
 
         verify(session, times(1)).save();
-
     }
 
     @Test
@@ -226,20 +223,45 @@ public class SyntheticCqWorkflowRunnerImplTest {
         TerminateDataWorkflowProcess terminateDataWorkflowProcess = spy(new TerminateDataWorkflowProcess());
         swr.bindCqWorkflowProcesses(terminateDataWorkflowProcess, map);
 
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
-
-        Map<String, Object> wfArgs = new HashMap<String, Object>();
-        metadata.put("terminate", wfArgs);
+        workflowSteps.add(swr.getSyntheticWorkflowStep("terminate",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[]{ "terminate" },
-                metadata, false, false);
+                workflowSteps, false, false);
 
         verify(terminateDataWorkflowProcess, times(1)).execute(any(WorkItem.class), any(WorkflowSession.class),
                 any(MetaDataMap.class));
 
         verify(session, times(0)).save();
+    }
 
+    @Test
+    public void testExecute_MultipleProcesses() throws Exception {
+        Map<String, Object> wfArgs1 = new HashMap<String, Object>();
+        wfArgs1.put("hello", "world");
+
+        Map<String, Object> wfArgs2 = new HashMap<String, Object>();
+        wfArgs2.put("goodbye", "moon");
+
+        final Map<Object, Object> map = new HashMap<Object, Object>();
+        map.put("process.label", "multi1");
+        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs1), map);
+
+        map.put("process.label", "multi2");
+        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs2), map);
+
+        workflowSteps.add(swr.getSyntheticWorkflowStep("multi1",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL,
+                wfArgs1));
+        workflowSteps.add(swr.getSyntheticWorkflowStep("multi2",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL,
+                wfArgs2));
+
+        swr.execute(resourceResolver,
+                "/content/test",
+                workflowSteps,
+                false,
+                false);
     }
 }

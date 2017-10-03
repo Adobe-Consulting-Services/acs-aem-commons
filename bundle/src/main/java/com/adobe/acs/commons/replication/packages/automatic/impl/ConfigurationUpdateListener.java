@@ -19,7 +19,9 @@
  */
 package com.adobe.acs.commons.replication.packages.automatic.impl;
 
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.management.NotCompliantMBeanException;
 
@@ -70,6 +72,11 @@ public class ConfigurationUpdateListener extends ResourceServiceManager
 
 	private static final String TRIGGER_KEY = "trigger.name";
 
+	private static final String SERVICE_NAME = "automatic-package-replicator";
+
+	private static final Map<String, Object> AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE,
+			(Object) SERVICE_NAME);
+
 	/**
 	 * Creating this as a separate method to make migrating to service users
 	 * easier. Callers of this method must ensure the resource resolver is
@@ -81,11 +88,10 @@ public class ConfigurationUpdateListener extends ResourceServiceManager
 	 * @return the resource resolver or null if there is an exception allocating
 	 *         the resource resolver
 	 */
-	@SuppressWarnings("deprecation")
 	final static ResourceResolver getResourceResolver(ResourceResolverFactory factory) {
 		ResourceResolver resolver = null;
 		try {
-			resolver = factory.getAdministrativeResourceResolver(null);
+			resolver = factory.getServiceResourceResolver(AUTH_INFO);
 
 		} catch (LoginException e) {
 			log.error("Exception allocating resource resolver", e);

@@ -15,10 +15,13 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,14 +51,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages a pool of reusable resource resolvers and injects them into tasks
  */
-class ActionManagerImpl implements ActionManager {
+class ActionManagerImpl extends CancelHandler implements ActionManager, Serializable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
+    private static final long serialVersionUID = 7526472295622776150L;
+
+    transient private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
     // This is a delay of how long an action manager should wait before it can safely assume it really is done and no more work is being added
     // This helps prevent an action manager from closing itself down while the queue is warming up.
-    public static final int HESITATION_DELAY = 50;
+    transient public static final int HESITATION_DELAY = 50;
     // The cleanup task will wait this many milliseconds between its polling to see if the queue has been completely processed
-    public static final int COMPLETION_CHECK_INTERVAL = 100;
+    transient public static final int COMPLETION_CHECK_INTERVAL = 100;
     private final AtomicInteger tasksAdded = new AtomicInteger();
     private final AtomicInteger tasksCompleted = new AtomicInteger();
     private final AtomicInteger tasksFilteredOut = new AtomicInteger();
@@ -66,17 +71,16 @@ class ActionManagerImpl implements ActionManager {
     private long finished;
     private int saveInterval;
 
-    private final ResourceResolver baseResolver;
-    private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
-    private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
-    private final ThrottledTaskRunner taskRunner;
-    private final ThreadLocal<String> currentPath;
+    transient private final ResourceResolver baseResolver;
+    transient private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
+    transient private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
+    transient private final ThrottledTaskRunner taskRunner;
+    transient private final ThreadLocal<String> currentPath;
     private final List<Failure> failures;
-    private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
-    private final List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
-
+    transient private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
+    transient private final List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
+    transient private final List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
+    transient private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;
@@ -91,7 +95,6 @@ class ActionManagerImpl implements ActionManager {
     public String getName() {
         return name;
     }
-
 
     @Override
     public int getAddedCount() {
@@ -140,6 +143,7 @@ class ActionManagerImpl implements ActionManager {
 
     @Override
     public void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception {
+        Actions.setCurrentActionManager(this);
         ReusableResolver resolver = getResourceResolver();
         resolver.setCurrentItem(currentPath.get());
         try {
@@ -153,6 +157,7 @@ class ActionManagerImpl implements ActionManager {
                 logPersistenceException(resolver.getPendingItems(), ex);
                 throw ex;
             }
+            Actions.setCurrentActionManager(null);
         }
     }
 
@@ -167,7 +172,7 @@ class ActionManagerImpl implements ActionManager {
         return withQueryResults(queryStatement, language, (CheckedBiConsumer<ResourceResolver, String>) callback,
                 Arrays.copyOf(filters, filters.length, CheckedBiFunction[].class));
     }
-    
+
     @Override
     public int withQueryResults(
             final String queryStatement,
@@ -199,18 +204,18 @@ class ActionManagerImpl implements ActionManager {
                     });
                 }
             } catch (RepositoryException ex) {
-                LOG.error("Repository exception processing query "+queryStatement, ex);
+                LOG.error("Repository exception processing query " + queryStatement, ex);
             }
         });
-        
+
         return tasksAdded.get();
     }
-    
+
     @Override
     public void addCleanupTask() {
         // This is deprecated, only included for backwards-compatibility.
     }
-    
+
     @Override
     public void onSuccess(CheckedConsumer<ResourceResolver> successTask) {
         successHandlers.add(successTask);
@@ -220,33 +225,39 @@ class ActionManagerImpl implements ActionManager {
     public void onFailure(CheckedBiConsumer<List<Failure>, ResourceResolver> failureTask) {
         errorHandlers.add(failureTask);
     }
-    
+
     @Override
     public void onFinish(Runnable finishHandler) {
         finishHandlers.add(finishHandler);
     }
-   
+
     private void runCompletionTasks() {
         if (getErrorCount() == 0) {
-            successHandlers.forEach(handler -> {
-                try {
-                    this.withResolver(handler);
-                } catch (Exception ex) {
-                    LOG.error("Error in success handler for action "+getName(), ex);
-                }
-            });
+            synchronized (successHandlers) {
+                successHandlers.forEach(handler -> {
+                    try {
+                        this.withResolver(handler);
+                    } catch (Exception ex) {
+                        LOG.error("Error in success handler for action " + getName(), ex);
+                    }
+                });
+            }
         } else {
-            errorHandlers.forEach(handler -> {
-                try {
-                    this.withResolver(res -> handler.accept(getFailureList(), res));
-                } catch (Exception ex) {
-                    LOG.error("Error in error handler for action "+getName(), ex);
-                }
-            });            
+            synchronized (errorHandlers) {
+                errorHandlers.forEach(handler -> {
+                    try {
+                        this.withResolver(res -> handler.accept(getFailureList(), res));
+                    } catch (Exception ex) {
+                        LOG.error("Error in error handler for action " + getName(), ex);
+                    }
+                });
+            }
         }
-        finishHandlers.forEach(Runnable::run);
+        synchronized (finishHandlers) {
+            finishHandlers.forEach(Runnable::run);
+        }
     }
-    
+
     private void performAutomaticCleanup() {
         if (!cleanupHandlerRegistered.getAndSet(true)) {
             taskRunner.scheduleWork(() -> {
@@ -259,7 +270,7 @@ class ActionManagerImpl implements ActionManager {
                 }
                 runCompletionTasks();
                 closeAllResolvers();
-            });        
+            });
         }
     }
 
@@ -271,6 +282,9 @@ class ActionManagerImpl implements ActionManager {
     private void deferredWithResolver(
             final CheckedConsumer<ResourceResolver> action,
             final boolean closesResolver) {
+        if (!closesResolver) {
+            tasksAdded.incrementAndGet();
+        }
         taskRunner.scheduleWork(() -> {
             started.compareAndSet(0, System.currentTimeMillis());
             try {
@@ -279,21 +293,19 @@ class ActionManagerImpl implements ActionManager {
                     logCompletetion();
                 }
             } catch (Exception ex) {
-                LOG.error("Error in error handler for action "+getName(), ex);
+                LOG.error("Error in error handler for action " + getName(), ex);
                 if (!closesResolver) {
                     logError(ex);
                 }
             } catch (Throwable t) {
-                LOG.error("Fatal uncaught error in error handler for action "+getName(), t);
+                LOG.error("Fatal uncaught error in error handler for action " + getName(), t);
                 if (!closesResolver) {
                     logError(new RuntimeException(t));
                 }
                 throw t;
             }
-        });
-        if (!closesResolver) {
-            tasksAdded.incrementAndGet();
-        }
+        }, this);
+
     }
 
     private ReusableResolver getResourceResolver() throws LoginException {
@@ -316,7 +328,7 @@ class ActionManagerImpl implements ActionManager {
     }
 
     private void logError(Exception ex) {
-        LOG.error("Caught exception in task: "+ex.getMessage(), ex);
+        LOG.error("Caught exception in task: " + ex.getMessage(), ex);
         Failure fail = new Failure();
         fail.setNodePath(currentPath.get());
         fail.setException(ex);
@@ -331,7 +343,7 @@ class ActionManagerImpl implements ActionManager {
 
     private void logPersistenceException(List<String> items, PersistenceException ex) {
         StringBuilder itemList = new StringBuilder();
-        for (String item:items) {
+        for (String item : items) {
             itemList.append(item).append("; ");
             Failure fail = new Failure();
             fail.setNodePath(item);
@@ -339,8 +351,8 @@ class ActionManagerImpl implements ActionManager {
             failures.add(fail);
             tasksError.incrementAndGet();
             tasksSuccessful.decrementAndGet();
-        }        
-        LOG.error("Persistence error prevented saving changes for: "+itemList, ex);
+        }
+        LOG.error("Persistence error prevented saving changes for: " + itemList, ex);
     }
 
     private void logFilteredOutItem(String path) {
@@ -348,7 +360,7 @@ class ActionManagerImpl implements ActionManager {
         LOG.info("Filtered out " + path);
     }
 
-    private long getRuntime() {
+    public long getRuntime() {
         if (isComplete()) {
             return finished - started.get();
         } else if (tasksAdded.get() == 0) {
@@ -377,26 +389,26 @@ class ActionManagerImpl implements ActionManager {
 
     @Override
     public CompositeData getStatistics() throws OpenDataException {
-        return new CompositeDataSupport(statsCompositeType, statsItemNames, 
+        return new CompositeDataSupport(statsCompositeType, statsItemNames,
                 new Object[]{
-                    name, 
-                    tasksAdded.get(), 
-                    tasksCompleted.get(), 
-                    tasksFilteredOut.get(), 
-                    tasksSuccessful.get(), 
-                    tasksError.get(), 
+                    name,
+                    tasksAdded.get(),
+                    tasksCompleted.get(),
+                    tasksFilteredOut.get(),
+                    tasksSuccessful.get(),
+                    tasksError.get(),
                     getRuntime()
                 }
         );
     }
 
     @Override
-    public void closeAllResolvers() {
+    public synchronized void closeAllResolvers() {
         if (!resolvers.isEmpty()) {
             resolvers.stream()
                     .map(ReusableResolver::getResolver)
                     .filter(ResourceResolver::isLive)
-                    .forEachOrdered(ResourceResolver::close);
+                    .forEach(ResourceResolver::close);
             resolvers.clear();
         }
         baseResolver.close();
@@ -411,22 +423,23 @@ class ActionManagerImpl implements ActionManager {
         ArrayList<CompositeData> failureData = new ArrayList<>();
         int count = 0;
         for (Failure fail : failures) {
-            if (count > 5000) break;
+            if (count > 5000) {
+                break;
+            }
             failureData.add(new CompositeDataSupport(
                     failureCompositeType,
                     failureItemNames,
-                    new Object[]{name, ++count, fail.getNodePath(), fail.getException().getMessage()}));
-
+                    new Object[]{name, ++count, fail.getNodePath(), fail.getException() == null ? "Unknown" : fail.getException().getMessage()}));
         }
         return failureData;
     }
 
-    private static String[] statsItemNames;
-    private static CompositeType statsCompositeType;
-    private static TabularType statsTabularType;
-    private static String[] failureItemNames;
-    private static CompositeType failureCompositeType;
-    private static TabularType failureTabularType;
+    transient private static String[] statsItemNames;
+    transient private static CompositeType statsCompositeType;
+    transient private static TabularType statsTabularType;
+    transient private static String[] failureItemNames;
+    transient private static CompositeType failureCompositeType;
+    transient private static TabularType failureTabularType;
 
     static {
         try {

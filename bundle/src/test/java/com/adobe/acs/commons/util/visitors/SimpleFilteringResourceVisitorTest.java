@@ -43,7 +43,7 @@ public class SimpleFilteringResourceVisitorTest {
     };
 
     Resource[] depthFirstList = new Resource[]{
-        node1a1, node1a2, node1a, node1b1, node1b2, node1b, root
+        root, node1a, node1a1, node1a2, node1b, node1b1, node1b2
     };
    
     ValueMap properties = new ValueMapDecorator(new HashMap<>());
