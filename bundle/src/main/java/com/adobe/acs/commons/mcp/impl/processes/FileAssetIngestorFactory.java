@@ -28,7 +28,7 @@ import org.apache.sling.commons.mime.MimeTypeService;
 
 @Component
 @Service(ProcessDefinitionFactory.class)
-public class AssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFactory<AssetIngestor> {
+public class FileAssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFactory<FileAssetIngestor> {
 
     @Reference
     MimeTypeService mimetypeService;
@@ -39,7 +39,7 @@ public class AssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFac
     }
 
     @Override
-    public AssetIngestor createProcessDefinitionInstance() {
-        return new AssetIngestor(mimetypeService);
+    public FileAssetIngestor createProcessDefinitionInstance() {
+        return new FileAssetIngestor(mimetypeService);
     }
 }

@@ -283,6 +283,12 @@
             <version>3.6</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.10.76</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -333,8 +339,8 @@
         </dependency>
         <dependency>
             <groupId>org.apache.jackrabbit</groupId>
-            <artifactId>jackrabbit-core</artifactId>
-            <version>2.10.1</version>
+            <artifactId>jackrabbit-jcr-commons</artifactId>
+            <version>2.12.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -342,6 +348,10 @@
             <artifactId>commons-imaging</artifactId>
             <version>1.0-R1534292</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -371,7 +381,18 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>me.alexpanov</groupId>
+            <artifactId>free-port-finder</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.findify</groupId>
+            <artifactId>s3mock_2.11</artifactId>
+            <version>0.2.3</version>
+            <scope>test</scope>
+        </dependency>
         <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
             <groupId>com.adobe.aem</groupId>
