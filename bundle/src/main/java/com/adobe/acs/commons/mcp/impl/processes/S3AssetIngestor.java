@@ -89,7 +89,7 @@ public class S3AssetIngestor extends AssetIngestor {
         s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey));
     }
 
-    void createFolders(ActionManager manager) throws IOException {
+    void createFolders(ActionManager manager) {
         manager.deferredWithResolver(r->{
             manager.setCurrentItem(generateItemName(s3BasePath));
 
@@ -111,7 +111,7 @@ public class S3AssetIngestor extends AssetIngestor {
         }
     }
 
-    void importAssets(ActionManager manager) throws IOException {
+    void importAssets(ActionManager manager) {
         manager.deferredWithResolver(rr->{
             manager.setCurrentItem(generateItemName(s3BasePath));
             ObjectListing listing = s3Client.listObjects(bucket, s3BasePath);
@@ -135,7 +135,7 @@ public class S3AssetIngestor extends AssetIngestor {
 
     boolean canImportContainingFolder(S3ObjectSummary s3ObjectSummary) {
         String key = s3ObjectSummary.getKey();
-        if (key.indexOf("/") >= 0) {
+        if (key.contains("/")) {
             String parentPath = beforeLastSlash(key);
             return canImportFolder(parentPath);
         } else {
@@ -164,7 +164,7 @@ public class S3AssetIngestor extends AssetIngestor {
         if ((StringUtils.isBlank(key) && StringUtils.isBlank(s3BasePath)) ||
                 (key.equals(s3BasePath) || (key + "/").equals(s3BasePath))) {
             return jcrBasePath;
-        } else if (key.indexOf("/") > -1) {
+        } else if (key.contains("/")) {
             return keyToNodePath(beforeLastSlash(key), isFile) + "/" + (isFile ? createValidFilename(getName(key)) : JcrUtil.createValidName(getName(key)));
         } else {
             return jcrBasePath + "/" + (isFile ? createValidFilename(key) : JcrUtil.createValidName(key));
@@ -235,7 +235,7 @@ public class S3AssetIngestor extends AssetIngestor {
         String name = getName(key);
         if (ignoreFolderList.contains(name.toLowerCase())) {
             return false;
-        } else if (key.indexOf("/") >= 0) {
+        } else if (key.contains("/")) {
             String parentPath = beforeLastSlash(key);
             return canImportFolder(parentPath);
         } else {
