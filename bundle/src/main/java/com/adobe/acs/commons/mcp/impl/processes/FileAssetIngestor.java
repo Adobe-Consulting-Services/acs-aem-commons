@@ -120,7 +120,7 @@ public class FileAssetIngestor extends AssetIngestor {
 
         @Override
         public HierarchialElement getElement() {
-            return null;
+            return element;
         }
     }
 
@@ -153,6 +153,10 @@ public class FileAssetIngestor extends AssetIngestor {
 
         @Override
         public HierarchialElement getParent() {
+            File parent = file.getParentFile();
+            if (parent.equals(baseFolder)) {
+                return null;
+            }
             return new FileHierarchialElement(file.getParentFile());
         }
 
