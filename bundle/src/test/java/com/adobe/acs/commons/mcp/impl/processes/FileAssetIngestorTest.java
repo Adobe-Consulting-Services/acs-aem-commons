@@ -46,7 +46,6 @@ import org.mockito.stubbing.Answer;
 
 import javax.annotation.Nullable;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -55,6 +54,7 @@ import java.util.Collections;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileAssetIngestorTest {
@@ -150,7 +150,8 @@ public class FileAssetIngestorTest {
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2/folder3"));
 
         verify(actionManager, times(4)).setCurrentItem(currentItemCaptor.capture());
-        assertEquals(Arrays.asList(tempDirectory.getAbsolutePath(), folder1.getAbsolutePath(), folder2.getAbsolutePath(), folder3.getAbsolutePath()), currentItemCaptor.getAllValues());
+        assertThat(currentItemCaptor.getAllValues(),
+                containsInAnyOrder(tempDirectory.getAbsolutePath(), folder1.getAbsolutePath(), folder2.getAbsolutePath(), folder3.getAbsolutePath()));
     }
 
 
@@ -205,7 +206,8 @@ public class FileAssetIngestorTest {
         assertEquals(Arrays.asList("/content/dam/folder1/image.png", "/content/dam/folder2/folder3/image.png", "/content/dam/image.png"), assetPathCaptor.getAllValues());
 
         verify(actionManager, times(4)).setCurrentItem(currentItemCaptor.capture());
-        assertEquals(Arrays.asList(tempDirectory.getAbsolutePath(), folder1Image.getAbsolutePath(), folder3Image.getAbsolutePath(), rootImage.getAbsolutePath()), currentItemCaptor.getAllValues());
+        assertThat(currentItemCaptor.getAllValues(),
+                containsInAnyOrder(tempDirectory.getAbsolutePath(), folder1Image.getAbsolutePath(), folder3Image.getAbsolutePath(), rootImage.getAbsolutePath()));
     }
 
 
@@ -227,7 +229,8 @@ public class FileAssetIngestorTest {
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 
         verify(actionManager, times(2)).setCurrentItem(currentItemCaptor.capture());
-        assertEquals(Arrays.asList(tempDirectory.getAbsolutePath(), rootImage.getAbsolutePath()), currentItemCaptor.getAllValues());
+        assertThat(currentItemCaptor.getAllValues(),
+                containsInAnyOrder(tempDirectory.getAbsolutePath(), rootImage.getAbsolutePath()));
     }
 
 
