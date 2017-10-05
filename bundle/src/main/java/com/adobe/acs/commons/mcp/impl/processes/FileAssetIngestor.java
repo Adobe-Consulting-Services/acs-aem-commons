@@ -17,22 +17,19 @@ package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+
+import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 
@@ -71,56 +68,25 @@ public class FileAssetIngestor extends AssetIngestor {
     
     private void createFolders(ActionManager manager) throws IOException {
         manager.deferredWithResolver(r->{
+            JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             manager.setCurrentItem(fileBasePath);
-            Files.walk(baseFolder.toPath()).map(Path::toFile).filter(File::isDirectory).filter(this::canImportFolder).forEach(f->{
+            Files.walk(baseFolder.toPath()).map(FileHierarchialElement::new).filter(FileHierarchialElement::isFolder).filter(this::canImportFolder).forEach(f->{
                 manager.deferredWithResolver(Actions.retry(10, 100, rr-> {
-                    manager.setCurrentItem(f.getPath());
-                    createFolderNode(folderToNodePath(f), f, rr);
+                    manager.setCurrentItem(f.getItemName());
+                    createFolderNode(f, rr);
                 }));
             });
         });
     }
 
-    private String folderToNodePath(File current) {
-        if (baseFolder.equals(current)) {
-            return jcrBasePath;
-        } else {
-            return folderToNodePath(current.getParentFile()) + "/" + JcrUtil.createValidName(current.getName());
-        }
-    }
-    
-    private boolean createFolderNode(String node, File folder, ResourceResolver r) throws RepositoryException, PersistenceException {
-        Session s = r.adaptTo(Session.class);
-        if (s.nodeExists(node)) {
-            Node folderNode = s.getNode(node);
-            if (folderNode.hasProperty(JcrConstants.JCR_TITLE) && folderNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(folder.getName())) {
-                return false;
-            } else {
-                folderNode.setProperty(JcrConstants.JCR_TITLE, folder.getName());
-                r.commit();
-                r.refresh();
-                return true;
-            }
-        }
-        String parentNode = node.substring(0, node.lastIndexOf("/"));
-        String childNode = node.substring(node.lastIndexOf("/") + 1);
-        if (!folder.getParentFile().equals(baseFolder)) {
-            createFolderNode(parentNode, folder.getParentFile(), r);
-        }
-        Node child = s.getNode(parentNode).addNode(childNode, DEFAULT_FOLDER_TYPE);
-        folderCount++;
-        child.setProperty(JcrConstants.JCR_TITLE, folder.getName());
-        r.commit();
-        r.refresh();
-        return true;
-    }
-
     private void importAssets(ActionManager manager) throws IOException {
         manager.deferredWithResolver(rr->{
+            JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, rr.adaptTo(Session.class), true);
             Actions.setCurrentItem(fileBasePath);
-            Files.walk(baseFolder.toPath()).map(Path::toFile).filter(File::isFile).filter(f->canImportFolder(f.getParentFile())).map(FileSource::new).forEach(fs->{
+            Files.walk(baseFolder.toPath()).map(FileHierarchialElement::new).filter(FileHierarchialElement::isFile).
+                    filter(this::canImportContainingFolder).map(FileHierarchialElement::getSource).forEach(fs->{
                 if (canImportFile(fs)) {
-                    manager.deferredWithResolver(Actions.retry(5, 25, importFile(fs)));
+                    manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fs, manager)));
                 } else {
                     filesSkipped++;
                 }
@@ -128,31 +94,13 @@ public class FileAssetIngestor extends AssetIngestor {
         });
     }
 
-    private CheckedConsumer<ResourceResolver> importFile(final FileSource source) {
-        return (ResourceResolver r) -> {
-            String basePath = folderToNodePath(source.file.getParentFile());
-            createFolderNode(basePath, source.file.getParentFile(), r);
-            String destPath = basePath + "/" + source.file.getName();
-            Actions.setCurrentItem(destPath);
-            handleExistingAsset(source, destPath, r);
-        };
-    }
-
-    private boolean canImportFolder(File f) {
-        if (f.equals(baseFolder)) {
-            return true;
-        }
-        if (ignoreFolderList.contains(f.getName().toLowerCase())) {
-            return false;
-        }
-        return canImportFolder(f.getParentFile());
-    }
-
     private class FileSource implements Source {
         private final File file;
+        private final HierarchialElement element;
 
-        private FileSource(File f) {
+        private FileSource(File f, FileHierarchialElement el) {
             this.file = f;
+            this.element = el;
         }
 
         @Override
@@ -168,6 +116,59 @@ public class FileAssetIngestor extends AssetIngestor {
         @Override
         public long getLength() {
             return file.length();
+        }
+
+        @Override
+        public HierarchialElement getElement() {
+            return null;
+        }
+    }
+
+    private class FileHierarchialElement implements HierarchialElement {
+
+        private final File file;
+
+        private FileHierarchialElement(File f) {
+            this.file = f;
+        }
+
+        private FileHierarchialElement(Path p) {
+            this(p.toFile());
+        }
+
+        @Override
+        public Source getSource() {
+            return new FileSource(file, this);
+        }
+
+        @Override
+        public String getItemName() {
+            return file.getAbsolutePath();
+        }
+
+        @Override
+        public String getName() {
+            return file.getName();
+        }
+
+        @Override
+        public HierarchialElement getParent() {
+            return new FileHierarchialElement(file.getParentFile());
+        }
+
+        @Override
+        public boolean isFolder() {
+            return file.isDirectory();
+        }
+
+        @Override
+        public boolean isFile() {
+            return file.isFile();
+        }
+
+        @Override
+        public String getJcrBasePath() {
+            return jcrBasePath;
         }
     }
 

@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
@@ -27,12 +29,16 @@ import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.FieldFormat;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ValueFormat;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
@@ -175,10 +181,56 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
+    protected boolean createFolderNode(HierarchialElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
+        if (el == null || !el.isFolder()) {
+            return false;
+        }
+        String folderPath = el.getNodePath();
+        String name = el.getName();
+        Session s = r.adaptTo(Session.class);
+        if (s.nodeExists(folderPath)) {
+            Node folderNode = s.getNode(folderPath);
+            if (folderPath.equals(jcrBasePath) || (folderNode.hasProperty(JcrConstants.JCR_TITLE) && folderNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
+                return false;
+            } else {
+                folderNode.setProperty(JcrConstants.JCR_TITLE, name);
+                r.commit();
+                r.refresh();
+                return true;
+            }
+        }
+        HierarchialElement parent = el.getParent();
+        String parentPath;
+        if (parent == null) {
+            parentPath = jcrBasePath;
+        } else {
+            parentPath = parent.getNodePath();
+        }
+        if (!jcrBasePath.equals(parentPath)) {
+            createFolderNode(parent, r);
+        }
+        Node child = s.getNode(parentPath).addNode(el.getNodeName(), DEFAULT_FOLDER_TYPE);
+        folderCount++;
+        if (!folderPath.equals(jcrBasePath)) {
+            child.setProperty(JcrConstants.JCR_TITLE, name);
+        }
+        r.commit();
+        r.refresh();
+        return true;
+    }
+
     private void versionExistingAsset(Source source, String assetPath, ResourceResolver r) throws Exception {
         createAsset(source, assetPath, r, r.getResource(assetPath) != null);
     }
 
+    protected CheckedConsumer<ResourceResolver> importAsset(final Source source, ActionManager actionManager) {
+        return (ResourceResolver r) -> {
+            String path = source.getElement().getNodePath();
+            createFolderNode(source.getElement().getParent(), r);
+            actionManager.setCurrentItem(source.getElement().getItemName());
+            handleExistingAsset(source, path, r);
+        };
+    }
 
     protected boolean canImportFile(Source source) {
         String name = source.getName().toLowerCase();
@@ -201,6 +253,30 @@ public abstract class AssetIngestor extends ProcessDefinition {
         return true;
     }
 
+    protected boolean canImportFolder(HierarchialElement element) {
+        String name = element.getName();
+        if (ignoreFolderList.contains(name.toLowerCase())) {
+            return false;
+        } else {
+            HierarchialElement parent = element.getParent();
+            if (parent == null) {
+                return true;
+            } else {
+                return canImportFolder(parent);
+            }
+        }
+    }
+
+    protected boolean canImportContainingFolder(HierarchialElement element) {
+        HierarchialElement parent = element.getParent();
+        if (parent == null) {
+            return true;
+        } else {
+            return canImportFolder(parent);
+        }
+    }
+
+
     enum ReportColumns {folder_count, asset_count, files_skipped, @FieldFormat(ValueFormat.storageSize) data_imported};
     GenericReport report = new GenericReport();
     @Override
@@ -221,6 +297,32 @@ public abstract class AssetIngestor extends ProcessDefinition {
         String getName();
         InputStream getStream() throws IOException;
         long getLength();
+        HierarchialElement getElement();
 
+    }
+
+    protected interface HierarchialElement {
+        boolean isFile();
+        boolean isFolder();
+        HierarchialElement getParent();
+        String getName();
+        String getItemName();
+        Source getSource();
+        String getJcrBasePath();
+
+        default String getNodePath() {
+            HierarchialElement parent = getParent();
+            return (parent == null ? getJcrBasePath() : parent.getNodePath()) + "/" + getNodeName();
+        }
+        default String getNodeName() {
+            String name = getName();
+            if (isFile() && name.contains(".")) {
+                String baseName = StringUtils.substringBeforeLast(name, ".");
+                String extension = StringUtils.substringAfterLast(name, ".");
+                return JcrUtil.createValidName(baseName) + "." + JcrUtil.createValidName(extension);
+            } else {
+                return JcrUtil.createValidName(name);
+            }
+        }
     }
 }

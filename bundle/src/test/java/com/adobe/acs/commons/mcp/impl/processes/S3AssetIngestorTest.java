@@ -133,6 +133,7 @@ public class S3AssetIngestorTest {
 
     @Test
     public void testCreateFoldersWithEmptyBucket() throws Exception {
+        ingestor.init();
         ingestor.createFolders(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
@@ -146,6 +147,7 @@ public class S3AssetIngestorTest {
 
     @Test
     public void testImportAssetsWithEmptyBucket() throws Exception {
+        ingestor.init();
         ingestor.importAssets(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
@@ -159,6 +161,7 @@ public class S3AssetIngestorTest {
 
     @Test
     public void testImportAssetsWithBucketContainingJustFolders() throws Exception {
+        ingestor.init();
         s3Client.putObject(TEST_BUCKET, "folder1/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder2/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder2/folder3/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
@@ -176,6 +179,7 @@ public class S3AssetIngestorTest {
 
     @Test
     public void testImportAssets() throws Exception {
+        ingestor.init();
         s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder1/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder1/image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
@@ -199,6 +203,7 @@ public class S3AssetIngestorTest {
     @Test
     public void testImportAssetsToNewRootFolder() throws Exception {
         ingestor.jcrBasePath = "/content/dam/test";
+        ingestor.init();
         s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
 
         ingestor.importAssets(actionManager);
@@ -207,7 +212,7 @@ public class S3AssetIngestorTest {
 
         assertNull(context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
         assertEquals(1, ingestor.assetCount);
-        assertEquals(1, ingestor.folderCount);
+        assertEquals(0, ingestor.folderCount);
         assertEquals(FILE_SIZE, ingestor.totalImportedData);
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
@@ -220,6 +225,7 @@ public class S3AssetIngestorTest {
     @Test
     public void testImportAssetsToExistingRootFolder() throws Exception {
         ingestor.jcrBasePath = "/content/dam/test";
+        ingestor.init();
         context.create().resource("/content/dam/test", "jcr:primaryType", "sling:Folder", "jcr:title", "testTitle");
         s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
 
@@ -240,6 +246,9 @@ public class S3AssetIngestorTest {
 
     @Test
     public void testImportAssetsWithBasePath() throws Exception {
+        ingestor.s3BasePath = "folder2/";
+        ingestor.init();
+
         s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder1/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder1/image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
@@ -247,7 +256,6 @@ public class S3AssetIngestorTest {
         s3Client.putObject(TEST_BUCKET, "folder2/folder3/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder2/folder3/image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
 
-        ingestor.s3BasePath = "folder2/";
         ingestor.importAssets(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
@@ -263,6 +271,7 @@ public class S3AssetIngestorTest {
 
     @Test
     public void testCreateFolders() throws Exception {
+        ingestor.init();
         s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder1/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder1/image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
@@ -285,6 +294,7 @@ public class S3AssetIngestorTest {
     @Test
     public void testCreateFoldersWithBasePath() throws Exception {
         ingestor.s3BasePath = "a/";
+        ingestor.init();
         s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "a/image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "a/folder1/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());

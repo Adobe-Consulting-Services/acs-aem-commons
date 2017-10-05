@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -31,89 +32,155 @@ import static org.junit.Assert.*;
  */
 public class S3AssetIngestorUtilitiesTest {
 
-    @Test
-    public void testGetNameOnFolder() {
-        S3AssetIngestor ingestor = new S3AssetIngestor(null);
-        assertEquals("folder1", ingestor.getName(forKey("folder1/")));
-        assertEquals("folder2", ingestor.getName(forKey("folder1/folder2/")));
-        assertEquals("folder1", ingestor.getName(forKey("folder1")));
-        assertEquals("folder2", ingestor.getName(forKey("folder1/folder2")));
-    }
+    private S3AssetIngestor ingestor;
 
-    @Test
-    public void testGetNameOnFile() {
-        S3AssetIngestor ingestor = new S3AssetIngestor(null);
-        assertEquals("file1.jpg", ingestor.getName(forKey("file1.jpg")));
-        assertEquals("file2.jpg", ingestor.getName(forKey("folder1/folder2/file2.jpg")));
-    }
-
-    @Test
-    public void testKeyToNodePathWithNullBasePath() {
-        S3AssetIngestor ingestor = new S3AssetIngestor(null);
+    @Before
+    public void setup() {
+        ingestor = new S3AssetIngestor(null);
+        ingestor.bucket = "testbucket";
         ingestor.jcrBasePath = "/content/dam";
-        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1/", false));
-        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1", false));
-        assertEquals("/content/dam/folder1/folder2/folder3", ingestor.keyToNodePath("folder1/folder2/folder3/", false));
-        assertEquals("/content/dam/folder1/folder2/folder_3", ingestor.keyToNodePath("folder1/folder2/folder 3/", false));
     }
 
     @Test
-    public void testKeyToNodePathWithBlankBasePath() {
-        S3AssetIngestor ingestor = new S3AssetIngestor(null);
-        ingestor.jcrBasePath = "/content/dam";
-        ingestor.s3BasePath = "";
-        assertEquals("/content/dam/first.jpg", ingestor.keyToNodePath("first.jpg", true));
-        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1/", false));
-        assertEquals("/content/dam/folder1", ingestor.keyToNodePath("folder1", false));
-        assertEquals("/content/dam/folder1/folder2/folder3", ingestor.keyToNodePath("folder1/folder2/folder3/", false));
-        assertEquals("/content/dam/folder1/folder2/folder_3", ingestor.keyToNodePath("folder1/folder2/folder 3/", false));
+    public void testHierarchialElementForFolderNoBasePath() {
+        AssetIngestor.HierarchialElement el = ingestor.new S3HierarchialElement(forKey("folder1/folder2/"));
+        assertEquals("testbucket:folder1/folder2/", el.getItemName());
+        assertTrue(el.isFolder());
+        assertFalse(el.isFile());
+        assertEquals("/content/dam/folder1/folder2", el.getNodePath());
+        assertEquals("folder2", el.getName());
+
+        AssetIngestor.HierarchialElement parent = el.getParent();
+        assertEquals("testbucket:folder1/", parent.getItemName());
+        assertNotNull(parent);
+        assertTrue(parent.isFolder());
+        assertFalse(parent.isFile());
+        assertEquals("folder1", parent.getName());
+
+        assertNull(parent.getParent());
     }
 
     @Test
-    public void testKeyToNodePathWithBasePath() {
-        S3AssetIngestor ingestor = new S3AssetIngestor(null);
-        ingestor.jcrBasePath = "/content/dam";
+    public void testHierarchialElementForFolderWithBasePath() {
         ingestor.s3BasePath = "folder1/";
-        assertEquals("/content/dam/first.jpg", ingestor.keyToNodePath("folder1/first.jpg", true));
-        assertEquals("/content/dam", ingestor.keyToNodePath("folder1/", false));
-        assertEquals("/content/dam", ingestor.keyToNodePath("folder1", false));
-        assertEquals("/content/dam/folder2/folder3", ingestor.keyToNodePath("folder1/folder2/folder3/", false));
-        assertEquals("/content/dam/folder2/folder_3", ingestor.keyToNodePath("folder1/folder2/folder 3/", false));
-        assertEquals("/content/dam/folder2/folder_3/foo.jpg", ingestor.keyToNodePath("folder1/folder2/folder 3/foo.jpg", true));
+        AssetIngestor.HierarchialElement el = ingestor.new S3HierarchialElement(forKey("folder1/folder2/folder3/"));
+        assertEquals("testbucket:folder1/folder2/folder3/", el.getItemName());
+        assertTrue(el.isFolder());
+        assertFalse(el.isFile());
+        assertEquals("/content/dam/folder2/folder3", el.getNodePath());
+        assertEquals("folder3", el.getName());
+
+        AssetIngestor.HierarchialElement parent = el.getParent();
+        assertEquals("testbucket:folder1/folder2/", parent.getItemName());
+        assertNotNull(parent);
+        assertTrue(parent.isFolder());
+        assertFalse(parent.isFile());
+        assertEquals("/content/dam/folder2", parent.getNodePath());
+        assertEquals("folder2", parent.getName());
+
+        assertNull(parent.getParent());
     }
 
     @Test
-    public void testCanImportFolderWithNullBasePath() {
-        S3AssetIngestor ingestor = new S3AssetIngestor(null);
-        ingestor.ignoreFolderList = Arrays.asList(".ds_store");
-        assertTrue(ingestor.canImportFolder(forKey("folder1/")));
-        assertTrue(ingestor.canImportFolder(forKey("folder1/folder2/")));
-        assertFalse(ingestor.canImportFolder(forKey(".ds_store/folder2/")));
-        assertFalse(ingestor.canImportFolder(forKey("folder1/.ds_store/")));
+    public void testHierarchialElementForFileNoBasePath() {
+        AssetIngestor.HierarchialElement el = ingestor.new S3HierarchialElement(forKey("folder1/folder2/image.png"));
+        assertEquals("testbucket:folder1/folder2/image.png", el.getItemName());
+        assertFalse(el.isFolder());
+        assertTrue(el.isFile());
+        assertEquals("image.png", el.getName());
+
+        AssetIngestor.HierarchialElement parent = el.getParent();
+        assertEquals("testbucket:folder1/folder2/", parent.getItemName());
+        assertNotNull(parent);
+        assertTrue(parent.isFolder());
+        assertFalse(parent.isFile());
+        assertEquals("folder2", parent.getName());
+
+        parent = parent.getParent();
+        assertEquals("testbucket:folder1/", parent.getItemName());
+        assertNotNull(parent);
+        assertTrue(parent.isFolder());
+        assertFalse(parent.isFile());
+        assertEquals("folder1", parent.getName());
+
+        assertNull(parent.getParent());
     }
 
     @Test
-    public void testCanImportFolderWithBlankBasePath() {
-        S3AssetIngestor ingestor = new S3AssetIngestor(null);
-        ingestor.ignoreFolderList = Arrays.asList(".ds_store");
-        ingestor.s3BasePath = "";
-        assertTrue(ingestor.canImportFolder(forKey("folder1/")));
-        assertTrue(ingestor.canImportFolder(forKey("folder1/folder2/")));
-        assertFalse(ingestor.canImportFolder(forKey(".ds_store/folder2/")));
-        assertFalse(ingestor.canImportFolder(forKey("folder1/.ds_store/")));
-    }
-
-    @Test
-    public void testCanImportFolderWithBasePath() {
-        S3AssetIngestor ingestor = new S3AssetIngestor(null);
-        ingestor.ignoreFolderList = Arrays.asList(".ds_store");
-        ingestor.s3BasePath = "";
+    public void testHierarchialElementForFileWithBasePath() {
         ingestor.s3BasePath = "folder1/";
-        assertTrue(ingestor.canImportFolder(forKey("folder1/")));
-        assertTrue(ingestor.canImportFolder(forKey("folder1/folder2/")));
-        assertFalse(ingestor.canImportFolder(forKey("folder1/.ds_store/folder2/")));
-        assertFalse(ingestor.canImportFolder(forKey("folder1/.ds_store/")));
+        AssetIngestor.HierarchialElement el = ingestor.new S3HierarchialElement(forKey("folder1/folder2/folder3/image.png"));
+        assertEquals("testbucket:folder1/folder2/folder3/image.png", el.getItemName());
+        assertFalse(el.isFolder());
+        assertTrue(el.isFile());
+        assertEquals("image.png", el.getName());
+        assertEquals("/content/dam/folder2/folder3/image.png", el.getNodePath());
+
+        AssetIngestor.HierarchialElement parent = el.getParent();
+        assertEquals("testbucket:folder1/folder2/folder3/", parent.getItemName());
+        assertNotNull(parent);
+        assertTrue(parent.isFolder());
+        assertFalse(parent.isFile());
+        assertEquals("folder3", parent.getName());
+        assertEquals("/content/dam/folder2/folder3", parent.getNodePath());
+
+        parent = parent.getParent();
+        assertEquals("testbucket:folder1/folder2/", parent.getItemName());
+        assertNotNull(parent);
+        assertTrue(parent.isFolder());
+        assertFalse(parent.isFile());
+        assertEquals("folder2", parent.getName());
+        assertEquals("/content/dam/folder2", parent.getNodePath());
+
+        assertNull(parent.getParent());
     }
+
+    @Test
+    public void testHierarchialElementForFileInRootNoBasePath() {
+        S3AssetIngestor.S3HierarchialElement el = ingestor.new S3HierarchialElement(forKey("image.png"));
+        assertEquals("testbucket:image.png", el.getItemName());
+        assertFalse(el.isFolder());
+        assertTrue(el.isFile());
+        assertEquals("image.png", el.getName());
+
+        assertNull(el.getParent());
+    }
+
+    @Test
+    public void testHierarchialElementForFolderInRootNoBasePath() {
+        S3AssetIngestor.S3HierarchialElement el = ingestor.new S3HierarchialElement(forKey("folder1/"));
+        assertEquals("folder1/", el.effectiveKey);
+        assertTrue(el.isFolder());
+        assertFalse(el.isFile());
+        assertEquals("folder1", el.getName());
+
+        assertNull(el.getParent());
+    }
+
+    @Test
+    public void testHierarchialElementForFileInRootWithBasePath() {
+        ingestor.s3BasePath = "folder1/";
+        AssetIngestor.HierarchialElement el = ingestor.new S3HierarchialElement(forKey("folder1/image.png"));
+        assertEquals("testbucket:folder1/image.png", el.getItemName());
+        assertFalse(el.isFolder());
+        assertTrue(el.isFile());
+        assertEquals("image.png", el.getName());
+
+        assertNull(el.getParent());
+    }
+
+    @Test
+    public void testHierarchialElementForFolderInRootWithBasePath() {
+        ingestor.s3BasePath = "folder1/";
+        AssetIngestor.HierarchialElement el = ingestor.new S3HierarchialElement(forKey("folder1/folder2/"));
+        assertEquals("testbucket:folder1/folder2/", el.getItemName());
+        assertTrue(el.isFolder());
+        assertFalse(el.isFile());
+        assertEquals("folder2", el.getName());
+
+        assertNull(el.getParent());
+    }
+
 
     private S3ObjectSummary forKey(String key) {
         S3ObjectSummary s = new S3ObjectSummary();
