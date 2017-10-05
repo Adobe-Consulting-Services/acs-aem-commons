@@ -66,11 +66,12 @@ public class FileAssetIngestor extends AssetIngestor {
         instance.defineCriticalAction("Import Assets", rr, this::importAssets);
     }
     
-    private void createFolders(ActionManager manager) throws IOException {
+    void createFolders(ActionManager manager) throws IOException {
         manager.deferredWithResolver(r->{
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             manager.setCurrentItem(fileBasePath);
-            Files.walk(baseFolder.toPath()).map(FileHierarchialElement::new).filter(FileHierarchialElement::isFolder).filter(this::canImportFolder).forEach(f->{
+            Files.walk(baseFolder.toPath()).map(Path::toFile).filter(f -> !f.equals(baseFolder)).
+                    map(FileHierarchialElement::new).filter(FileHierarchialElement::isFolder).filter(this::canImportFolder).forEach(f->{
                 manager.deferredWithResolver(Actions.retry(10, 100, rr-> {
                     manager.setCurrentItem(f.getItemName());
                     createFolderNode(f, rr);
@@ -79,10 +80,10 @@ public class FileAssetIngestor extends AssetIngestor {
         });
     }
 
-    private void importAssets(ActionManager manager) throws IOException {
+    void importAssets(ActionManager manager) throws IOException {
         manager.deferredWithResolver(rr->{
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, rr.adaptTo(Session.class), true);
-            Actions.setCurrentItem(fileBasePath);
+            manager.setCurrentItem(fileBasePath);
             Files.walk(baseFolder.toPath()).map(FileHierarchialElement::new).filter(FileHierarchialElement::isFile).
                     filter(this::canImportContainingFolder).map(FileHierarchialElement::getSource).forEach(fs->{
                 if (canImportFile(fs)) {
