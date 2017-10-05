@@ -124,11 +124,11 @@ public class FileAssetIngestor extends AssetIngestor {
         }
     }
 
-    private class FileHierarchialElement implements HierarchialElement {
+    class FileHierarchialElement implements HierarchialElement {
 
         private final File file;
 
-        private FileHierarchialElement(File f) {
+        FileHierarchialElement(File f) {
             this.file = f;
         }
 

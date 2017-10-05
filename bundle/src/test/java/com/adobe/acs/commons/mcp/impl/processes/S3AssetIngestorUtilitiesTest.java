@@ -23,8 +23,6 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.*;
 
 /**
@@ -137,7 +135,7 @@ public class S3AssetIngestorUtilitiesTest {
 
     @Test
     public void testHierarchialElementForFileInRootNoBasePath() {
-        S3AssetIngestor.S3HierarchialElement el = ingestor.new S3HierarchialElement(forKey("image.png"));
+        AssetIngestor.HierarchialElement el = ingestor.new S3HierarchialElement(forKey("image.png"));
         assertEquals("testbucket:image.png", el.getItemName());
         assertFalse(el.isFolder());
         assertTrue(el.isFile());
@@ -148,8 +146,8 @@ public class S3AssetIngestorUtilitiesTest {
 
     @Test
     public void testHierarchialElementForFolderInRootNoBasePath() {
-        S3AssetIngestor.S3HierarchialElement el = ingestor.new S3HierarchialElement(forKey("folder1/"));
-        assertEquals("folder1/", el.effectiveKey);
+        AssetIngestor.HierarchialElement el = ingestor.new S3HierarchialElement(forKey("folder1/"));
+        assertEquals("testbucket:folder1/", el.getItemName());
         assertTrue(el.isFolder());
         assertFalse(el.isFile());
         assertEquals("folder1", el.getName());

@@ -173,16 +173,16 @@ public class S3AssetIngestor extends AssetIngestor {
         }
     }
 
-    public class S3HierarchialElement implements HierarchialElement {
+    class S3HierarchialElement implements HierarchialElement {
         private final S3ObjectSummary original;
         private final String negativePath;
         final String effectiveKey;
 
-        public S3HierarchialElement(S3ObjectSummary original) {
+        S3HierarchialElement(S3ObjectSummary original) {
             this(original, null);
         }
 
-        public S3HierarchialElement(S3ObjectSummary original, String negativePath) {
+        private S3HierarchialElement(S3ObjectSummary original, String negativePath) {
             this.original = original;
             this.negativePath = negativePath != null ? negativePath : "";
             this.effectiveKey = original.getKey().substring(0, original.getKey().length() - this.negativePath.length());
