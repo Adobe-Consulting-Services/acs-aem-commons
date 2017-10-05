@@ -203,7 +203,8 @@ public class FileAssetIngestorTest {
         assertEquals(3, ingestor.folderCount);
         assertEquals(FILE_SIZE * 3, ingestor.totalImportedData);
         verify(assetManager, times(3)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
-        assertEquals(Arrays.asList("/content/dam/folder1/image.png", "/content/dam/folder2/folder3/image.png", "/content/dam/image.png"), assetPathCaptor.getAllValues());
+        assertThat(assetPathCaptor.getAllValues(),
+                containsInAnyOrder("/content/dam/folder1/image.png", "/content/dam/folder2/folder3/image.png", "/content/dam/image.png"));
 
         verify(actionManager, times(4)).setCurrentItem(currentItemCaptor.capture());
         assertThat(currentItemCaptor.getAllValues(),
@@ -253,7 +254,8 @@ public class FileAssetIngestorTest {
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 
         verify(actionManager, times(2)).setCurrentItem(currentItemCaptor.capture());
-        assertEquals(Arrays.asList(tempDirectory.getAbsolutePath(), rootImage.getAbsolutePath()), currentItemCaptor.getAllValues());
+        assertThat(currentItemCaptor.getAllValues(),
+                containsInAnyOrder(tempDirectory.getAbsolutePath(), rootImage.getAbsolutePath()));
     }
 
     private File mkdir(File dir, String name) {
