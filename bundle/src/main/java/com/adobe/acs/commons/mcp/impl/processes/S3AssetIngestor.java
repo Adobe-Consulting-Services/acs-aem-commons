@@ -134,7 +134,7 @@ public class S3AssetIngestor extends AssetIngestor {
             if (canImportFile(ss)) {
                 manager.deferredWithResolver(Actions.retry(5, 25, importAsset(ss, manager)));
             } else {
-                filesSkipped++;
+                filesSkipped.incrementAndGet();
             }
         });
         if (listing.isTruncated()) {

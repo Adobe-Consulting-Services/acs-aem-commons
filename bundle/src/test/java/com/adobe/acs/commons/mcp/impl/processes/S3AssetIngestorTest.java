@@ -190,9 +190,9 @@ public class S3AssetIngestorTest {
         ingestor.importAssets(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
-        assertEquals(3, ingestor.assetCount);
-        assertEquals(3, ingestor.folderCount);
-        assertEquals(FILE_SIZE * 3, ingestor.totalImportedData);
+        assertEquals(3, ingestor.assetCount.get());
+        assertEquals(3, ingestor.folderCount.get());
+        assertEquals(FILE_SIZE * 3, ingestor.totalImportedData.get());
         verify(assetManager, times(3)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals(Arrays.asList("/content/dam/folder1/image.png", "/content/dam/folder2/folder3/image.png", "/content/dam/image.png"), assetPathCaptor.getAllValues());
 
@@ -211,9 +211,9 @@ public class S3AssetIngestorTest {
         assertFalse(context.resourceResolver().hasChanges());
 
         assertNull(context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
-        assertEquals(1, ingestor.assetCount);
-        assertEquals(0, ingestor.folderCount);
-        assertEquals(FILE_SIZE, ingestor.totalImportedData);
+        assertEquals(1, ingestor.assetCount.get());
+        assertEquals(0, ingestor.folderCount.get());
+        assertEquals(FILE_SIZE, ingestor.totalImportedData.get());
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 
@@ -234,9 +234,9 @@ public class S3AssetIngestorTest {
         assertFalse(context.resourceResolver().hasChanges());
 
         assertEquals("testTitle", context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
-        assertEquals(1, ingestor.assetCount);
-        assertEquals(0, ingestor.folderCount);
-        assertEquals(FILE_SIZE, ingestor.totalImportedData);
+        assertEquals(1, ingestor.assetCount.get());
+        assertEquals(0, ingestor.folderCount.get());
+        assertEquals(FILE_SIZE, ingestor.totalImportedData.get());
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 
@@ -259,9 +259,9 @@ public class S3AssetIngestorTest {
         ingestor.importAssets(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
-        assertEquals(1, ingestor.assetCount);
-        assertEquals(1, ingestor.folderCount);
-        assertEquals(FILE_SIZE, ingestor.totalImportedData);
+        assertEquals(1, ingestor.assetCount.get());
+        assertEquals(1, ingestor.folderCount.get());
+        assertEquals(FILE_SIZE, ingestor.totalImportedData.get());
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/folder3/image.png", assetPathCaptor.getValue());
 
@@ -282,7 +282,7 @@ public class S3AssetIngestorTest {
         ingestor.createFolders(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
-        assertEquals(3, ingestor.folderCount);
+        assertEquals(3, ingestor.folderCount.get());
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder1"));
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2"));
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2/folder3"));
@@ -307,7 +307,7 @@ public class S3AssetIngestorTest {
         ingestor.createFolders(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
-        assertEquals(3, ingestor.folderCount);
+        assertEquals(3, ingestor.folderCount.get());
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder1"));
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2"));
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2/folder3"));

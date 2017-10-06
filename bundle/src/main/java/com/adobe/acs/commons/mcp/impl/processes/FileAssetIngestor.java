@@ -89,7 +89,7 @@ public class FileAssetIngestor extends AssetIngestor {
                 if (canImportFile(fs)) {
                     manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fs, manager)));
                 } else {
-                    filesSkipped++;
+                    filesSkipped.incrementAndGet();
                 }
             });        
         });

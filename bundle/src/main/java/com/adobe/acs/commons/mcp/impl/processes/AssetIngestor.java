@@ -47,6 +47,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class AssetIngestor extends ProcessDefinition {
     private final MimeTypeService mimetypeService;
@@ -120,10 +122,10 @@ public abstract class AssetIngestor extends ProcessDefinition {
     protected static final String DEFAULT_FOLDER_TYPE = "sling:Folder";
     protected static final String CHANGED_BY_WORKFLOW = "changedByWorkflowProcess";
 
-    int folderCount = 0;
-    int assetCount = 0;
-    int filesSkipped = 0;
-    long totalImportedData = 0;
+    AtomicInteger folderCount = new AtomicInteger();
+    AtomicInteger assetCount = new AtomicInteger();
+    AtomicInteger filesSkipped = new AtomicInteger();
+    AtomicLong totalImportedData = new AtomicLong();
 
     @Override
     public void init() throws RepositoryException {
@@ -157,8 +159,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
         assetManager.createAsset(assetPath, source.getStream(), type, false);
         r.commit();
         r.refresh();
-        totalImportedData += source.getLength();
-        assetCount++;
+        totalImportedData.accumulateAndGet(source.getLength(), (p,x) -> p+x);
+        assetCount.incrementAndGet();
     }
 
     protected void handleExistingAsset(Source source, String assetPath, ResourceResolver r) throws Exception {
@@ -168,7 +170,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 if (r.getResource(assetPath) == null) {
                     createAsset(source, assetPath, r, false);
                 } else {
-                    filesSkipped++;
+                    filesSkipped.incrementAndGet();
                 }
                 break;
             case replace:
@@ -210,7 +212,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
             createFolderNode(parent, r);
         }
         Node child = s.getNode(parentPath).addNode(el.getNodeName(), DEFAULT_FOLDER_TYPE);
-        folderCount++;
+        folderCount.incrementAndGet();
         if (!folderPath.equals(jcrBasePath)) {
             child.setProperty(JcrConstants.JCR_TITLE, name);
         }
