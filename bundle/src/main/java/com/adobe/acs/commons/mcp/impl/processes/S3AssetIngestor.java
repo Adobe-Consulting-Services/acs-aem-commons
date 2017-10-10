@@ -120,7 +120,7 @@ public class S3AssetIngestor extends AssetIngestor {
         });
     }
     private void createFolders(ActionManager manager, ObjectListing listing) {
-        listing.getObjectSummaries().stream().map(S3HierarchialElement::new).
+        listing.getObjectSummaries().stream().filter(sum -> !sum.getKey().equals(s3BasePath)).map(S3HierarchialElement::new).
             filter(S3HierarchialElement::isFolder).filter(this::canImportFolder).forEach(el-> {
                 manager.deferredWithResolver(Actions.retry(10, 100, rr-> {
                     manager.setCurrentItem(el.getItemName());
