@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +15,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
@@ -26,49 +29,38 @@ import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.FieldFormat;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ValueFormat;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.List;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import org.apache.sling.api.resource.LoginException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 
-/**
- * Asset Ingestor reads a directory structure recursively and imports it as-is into AEM.
- */
-public class AssetIngestor extends ProcessDefinition {
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+public abstract class AssetIngestor extends ProcessDefinition {
     private final MimeTypeService mimetypeService;
+
+    public enum AssetAction {
+        skip, version, replace
+    }
 
     public AssetIngestor(MimeTypeService mimeTypeService) {
         this.mimetypeService = mimeTypeService;
     }
-    
-    public static enum AssetAction {
-        skip, version, replace
-    }
-    
-    @FormField(
-            name = "Source",
-            description = "Source folder for content ingestion",
-            hint = "/var/mycontent, /tmp, /mnt/all_the_things, ...",
-            required = true
-    )    
-    String fileBasePath;
-    File baseFolder;
-    
+
     @FormField(
             name = "Target JCR Folder",
             description = "Base folder for ingestion",
@@ -95,7 +87,7 @@ public class AssetIngestor extends ProcessDefinition {
     )
     String ignoreFiles;
     List<String> ignoreFileList;
-    
+
     @FormField(
             name = "Ignore extensions",
             description = "List of file extensions to ignore",
@@ -104,13 +96,13 @@ public class AssetIngestor extends ProcessDefinition {
     )
     String ignoreExtensions;
     List<String> ignoreExtensionList;
-    
+
     @FormField(
             name = "Existing action",
             description = "What to do if an asset exists",
             component = RadioComponent.EnumerationSelector.class,
             options={"default=skip","vertical"}
-    )    
+    )
     AssetAction existingAssetAction;
     @FormField(
             name = "Minimum size",
@@ -127,21 +119,16 @@ public class AssetIngestor extends ProcessDefinition {
     )
     long maximumSize;
 
-    private static final String DEFAULT_FOLDER_TYPE = "sling:Folder";
-    private static final String JCR_TITLE = "jcr:title";
-    private static final String CHANGED_BY_WORKFLOW = "changedByWorkflowProcess";
-    
-    int folderCount = 0;
-    int assetCount = 0;
-    int filesSkipped = 0;
-    long totalImportedData = 0;
-    
+    protected static final String DEFAULT_FOLDER_TYPE = "sling:Folder";
+    protected static final String CHANGED_BY_WORKFLOW = "changedByWorkflowProcess";
+
+    AtomicInteger folderCount = new AtomicInteger();
+    AtomicInteger assetCount = new AtomicInteger();
+    AtomicInteger filesSkipped = new AtomicInteger();
+    AtomicLong totalImportedData = new AtomicLong();
+
     @Override
     public void init() throws RepositoryException {
-        baseFolder = new File(fileBasePath);
-        if (!baseFolder.exists()) {
-            throw new RepositoryException("Source folder does not exist!");
-        }
         if (ignoreFolders == null) {
             ignoreFolders = "";
         }
@@ -156,88 +143,103 @@ public class AssetIngestor extends ProcessDefinition {
         ignoreExtensionList = Arrays.asList(ignoreExtensions.trim().toLowerCase().split(","));
     }
 
-    @Override
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
-        instance.getInfo().setDescription(fileBasePath + "->" + jcrBasePath);
-        instance.defineCriticalAction("Create Folders", rr, this::createFolders);
-        instance.defineCriticalAction("Import Assets", rr, this::importAssets);
-    }
-    
-    private void createFolders(ActionManager manager) throws IOException {
-        manager.deferredWithResolver(r->{
-            manager.setCurrentItem(fileBasePath);
-            Files.walk(baseFolder.toPath()).map(Path::toFile).filter(File::isDirectory).filter(this::canImportFolder).forEach(f->{
-                manager.deferredWithResolver(Actions.retry(10, 100, rr-> {
-                    manager.setCurrentItem(f.getPath());
-                    createFolderNode(folderToNodePath(f), f, rr);
-                }));
-            });
-        });
+    private void createAsset(Source source, String assetPath, ResourceResolver r, boolean versioning) throws Exception {
+        r.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(CHANGED_BY_WORKFLOW);
+        AssetManager assetManager = r.adaptTo(AssetManager.class);
+        String type = mimetypeService.getMimeType(source.getName());
+        if (versioning) {
+            //is asset is null, no version gets created
+            Asset asset = r.getResource(assetPath).adaptTo(Asset.class);
+            //once you are past this first version, default behavior is to start numbering 1.0, 1.1 and so on
+            assetManager.createRevision(asset, "initial version of asset", asset.getName());
+            r.commit();
+            r.refresh();
+            //once version is committed we are safe to create, which only replaces the original version
+        }
+        assetManager.createAsset(assetPath, source.getStream(), type, false);
+        r.commit();
+        r.refresh();
+        totalImportedData.accumulateAndGet(source.getLength(), (p,x) -> p+x);
+        assetCount.incrementAndGet();
     }
 
-    private String folderToNodePath(File current) {
-        if (baseFolder.equals(current)) {
-            return jcrBasePath;
-        } else {
-            return folderToNodePath(current.getParentFile()) + "/" + JcrUtil.createValidName(current.getName());
+    protected void handleExistingAsset(Source source, String assetPath, ResourceResolver r) throws Exception {
+        switch (existingAssetAction) {
+            case skip:
+                //if skip then we only create asset if it doesn't exist
+                if (r.getResource(assetPath) == null) {
+                    createAsset(source, assetPath, r, false);
+                } else {
+                    filesSkipped.incrementAndGet();
+                }
+                break;
+            case replace:
+                //if replace we just create a new one and the old one goes away
+                createAsset(source, assetPath, r, false);
+                break;
+            case version:
+                //only option left is replace, we'll save current version as a version and then replace it
+                versionExistingAsset(source, assetPath, r);
         }
     }
-    
-    private boolean createFolderNode(String node, File folder, ResourceResolver r) throws RepositoryException, PersistenceException {
+
+    protected boolean createFolderNode(HierarchialElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
+        if (el == null || !el.isFolder()) {
+            return false;
+        }
+        String folderPath = el.getNodePath();
+        String name = el.getName();
         Session s = r.adaptTo(Session.class);
-        if (s.nodeExists(node)) {
-            Node folderNode = s.getNode(node);
-            if (folderNode.hasProperty(JCR_TITLE) && folderNode.getProperty(JCR_TITLE).getString().equals(folder.getName())) {
+        if (s.nodeExists(folderPath)) {
+            Node folderNode = s.getNode(folderPath);
+            if (folderPath.equals(jcrBasePath) || (folderNode.hasProperty(JcrConstants.JCR_TITLE) && folderNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
             } else {
-                folderNode.setProperty(JCR_TITLE, folder.getName());
+                folderNode.setProperty(JcrConstants.JCR_TITLE, name);
                 r.commit();
                 r.refresh();
                 return true;
             }
         }
-        String parentNode = node.substring(0, node.lastIndexOf("/"));
-        String childNode = node.substring(node.lastIndexOf("/") + 1);
-        if (!folder.getParentFile().equals(baseFolder)) {
-            createFolderNode(parentNode, folder.getParentFile(), r);
+        HierarchialElement parent = el.getParent();
+        String parentPath;
+        if (parent == null) {
+            parentPath = jcrBasePath;
+        } else {
+            parentPath = parent.getNodePath();
         }
-        Node child = s.getNode(parentNode).addNode(childNode, DEFAULT_FOLDER_TYPE);
-        folderCount++;
-        child.setProperty(JCR_TITLE, folder.getName());
+        if (!jcrBasePath.equals(parentPath)) {
+            createFolderNode(parent, r);
+        }
+        Node child = s.getNode(parentPath).addNode(el.getNodeName(), DEFAULT_FOLDER_TYPE);
+        folderCount.incrementAndGet();
+        if (!folderPath.equals(jcrBasePath)) {
+            child.setProperty(JcrConstants.JCR_TITLE, name);
+        }
         r.commit();
         r.refresh();
         return true;
     }
 
-    private void importAssets(ActionManager manager) throws IOException {
-        manager.deferredWithResolver(rr->{
-            Actions.setCurrentItem(fileBasePath);
-            Files.walk(baseFolder.toPath()).map(Path::toFile).filter(File::isFile).filter(f->canImportFolder(f.getParentFile())).forEach(f->{
-                if (canImportFile(f)) {
-                    manager.deferredWithResolver(Actions.retry(5, 25, importFile(f)));
-                } else {
-                    filesSkipped++;
-                }
-            });        
-        });
+    private void versionExistingAsset(Source source, String assetPath, ResourceResolver r) throws Exception {
+        createAsset(source, assetPath, r, r.getResource(assetPath) != null);
     }
 
-    private boolean canImportFolder(File f) {
-        if (f.equals(baseFolder)) {
-            return true;
-        }
-        if (ignoreFolderList.contains(f.getName().toLowerCase())) {
-            return false;
-        }
-        return canImportFolder(f.getParentFile());
+    protected CheckedConsumer<ResourceResolver> importAsset(final Source source, ActionManager actionManager) {
+        return (ResourceResolver r) -> {
+            String path = source.getElement().getNodePath();
+            createFolderNode(source.getElement().getParent(), r);
+            actionManager.setCurrentItem(source.getElement().getItemName());
+            handleExistingAsset(source, path, r);
+        };
     }
-    
-    private boolean canImportFile(File f) {
-        String name = f.getName().toLowerCase();
-        if (minimumSize > 0 && f.length() < minimumSize) {
+
+    protected boolean canImportFile(Source source) {
+        String name = source.getName().toLowerCase();
+        if (minimumSize > 0 && source.getLength() < minimumSize) {
             return false;
         }
-        if (maximumSize > 0 && f.length() > maximumSize) {
+        if (maximumSize > 0 && source.getLength() > maximumSize) {
             return false;
         }
         if (name.startsWith(".") || ignoreFileList.contains(name)) {
@@ -252,60 +254,30 @@ public class AssetIngestor extends ProcessDefinition {
         }
         return true;
     }
-    
-    private CheckedConsumer<ResourceResolver> importFile(final File sourceFile) {
-        return (ResourceResolver r) -> {
-            String basePath = folderToNodePath(sourceFile.getParentFile());
-            createFolderNode(basePath, sourceFile.getParentFile(), r);
-            String destPath = basePath + "/" + sourceFile.getName();
-            Actions.setCurrentItem(destPath);
-            handleExistingAsset(sourceFile, destPath, r);
-        };
-    }
 
-    private void createAsset(File sourceFile, String assetPath, ResourceResolver r, boolean versioning) throws Exception {
-        r.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(CHANGED_BY_WORKFLOW);
-        AssetManager assetManager = r.adaptTo(AssetManager.class);
-        String type = mimetypeService.getMimeType(sourceFile.getName());
-        if (versioning) {
-            //is asset is null, no version gets created
-            Asset asset = r.getResource(assetPath).adaptTo(Asset.class);
-            //once you are past this first version, default behavior is to start numbering 1.0, 1.1 and so on
-            assetManager.createRevision(asset, "initial version of asset", asset.getName());
-            r.commit();
-            r.refresh();
-            //once version is committed we are safe to create, which only replaces the original version
-        }
-        assetManager.createAsset(assetPath, new FileInputStream(sourceFile), type, false);
-        r.commit();
-        r.refresh();
-        totalImportedData += sourceFile.length();
-        assetCount++;
-    }
-
-    private void handleExistingAsset(File sourceFile, String assetPath, ResourceResolver r) throws Exception {
-        switch (existingAssetAction) {
-            case skip:
-                //if skip then we only create asset if it doesn't exist
-                if (r.getResource(assetPath) == null) {
-                    createAsset(sourceFile, assetPath, r, false);
-                } else {
-                    filesSkipped++;
-                }
-                break;
-            case replace:
-                //if replace we just create a new one and the old one goes away
-                createAsset(sourceFile, assetPath, r, false);
-                break;
-            case version:
-                //only option left is replace, we'll save current version as a version and then replace it
-                versionExistingAsset(sourceFile, assetPath, r);
+    protected boolean canImportFolder(HierarchialElement element) {
+        String name = element.getName();
+        if (ignoreFolderList.contains(name.toLowerCase())) {
+            return false;
+        } else {
+            HierarchialElement parent = element.getParent();
+            if (parent == null) {
+                return true;
+            } else {
+                return canImportFolder(parent);
+            }
         }
     }
 
-    private void versionExistingAsset(File sourceFile, String assetPath, ResourceResolver r) throws Exception {
-        createAsset(sourceFile, assetPath, r, r.getResource(assetPath) != null);
-    }    
+    protected boolean canImportContainingFolder(HierarchialElement element) {
+        HierarchialElement parent = element.getParent();
+        if (parent == null) {
+            return true;
+        } else {
+            return canImportFolder(parent);
+        }
+    }
+
 
     enum ReportColumns {folder_count, asset_count, files_skipped, @FieldFormat(ValueFormat.storageSize) data_imported};
     GenericReport report = new GenericReport();
@@ -320,5 +292,39 @@ public class AssetIngestor extends ProcessDefinition {
         values.put(ReportColumns.data_imported, totalImportedData);
         report.setRows(rows, ReportColumns.class);
         report.persist(rr, instance.getPath() + "/jcr:content/report");
-    }    
+    }
+
+    protected interface Source {
+
+        String getName();
+        InputStream getStream() throws IOException;
+        long getLength();
+        HierarchialElement getElement();
+
+    }
+
+    protected interface HierarchialElement {
+        boolean isFile();
+        boolean isFolder();
+        HierarchialElement getParent();
+        String getName();
+        String getItemName();
+        Source getSource();
+        String getJcrBasePath();
+
+        default String getNodePath() {
+            HierarchialElement parent = getParent();
+            return (parent == null ? getJcrBasePath() : parent.getNodePath()) + "/" + getNodeName();
+        }
+        default String getNodeName() {
+            String name = getName();
+            if (isFile() && name.contains(".")) {
+                String baseName = StringUtils.substringBeforeLast(name, ".");
+                String extension = StringUtils.substringAfterLast(name, ".");
+                return JcrUtil.createValidName(baseName) + "." + JcrUtil.createValidName(extension);
+            } else {
+                return JcrUtil.createValidName(name);
+            }
+        }
+    }
 }

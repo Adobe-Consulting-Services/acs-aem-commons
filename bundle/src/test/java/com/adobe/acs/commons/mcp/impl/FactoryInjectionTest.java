@@ -21,8 +21,8 @@ package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
-import com.adobe.acs.commons.mcp.impl.processes.AssetIngestor;
-import com.adobe.acs.commons.mcp.impl.processes.AssetIngestorFactory;
+import com.adobe.acs.commons.mcp.impl.processes.FileAssetIngestor;
+import com.adobe.acs.commons.mcp.impl.processes.FileAssetIngestorFactory;
 import com.adobe.acs.commons.mcp.impl.processes.AssetReport;
 import com.adobe.acs.commons.mcp.impl.processes.AssetReportFactory;
 import com.adobe.acs.commons.mcp.impl.processes.DeepPrune;
@@ -32,6 +32,8 @@ import com.adobe.acs.commons.mcp.impl.processes.FolderRelocatorFactory;
 import com.adobe.acs.commons.mcp.impl.processes.PageRelocatorFactory;
 import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanup;
 import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanupFactory;
+import com.adobe.acs.commons.mcp.impl.processes.S3AssetIngestor;
+import com.adobe.acs.commons.mcp.impl.processes.S3AssetIngestorFactory;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.PageManagerFactory;
 import org.apache.sling.event.jobs.JobManager;
@@ -65,10 +67,17 @@ public class FactoryInjectionTest {
     }
 
     @Test
-    public void testAssetIngestorFactory() throws Exception {
+    public void testFileIngestorFactory() throws Exception {
         ProcessDefinition def = cpm.findDefinitionByNameOrPath("Asset Ingestor");
         assertNotNull(def);
-        assertTrue(def instanceof AssetIngestor);
+        assertTrue(def instanceof FileAssetIngestor);
+    }
+
+    @Test
+    public void testS3IngestorFactory() throws Exception {
+        ProcessDefinition def = cpm.findDefinitionByNameOrPath("S3 Asset Ingestor");
+        assertNotNull(def);
+        assertTrue(def instanceof S3AssetIngestor);
     }
 
     @Test
@@ -100,12 +109,13 @@ public class FactoryInjectionTest {
     }
 
     private void registerFactories() {
-        slingContext.registerInjectActivateService(new AssetIngestorFactory());
+        slingContext.registerInjectActivateService(new FileAssetIngestorFactory());
         slingContext.registerInjectActivateService(new AssetReportFactory());
         slingContext.registerInjectActivateService(new DeepPruneFactory());
         slingContext.registerInjectActivateService(new FolderRelocatorFactory());
         slingContext.registerInjectActivateService(new PageRelocatorFactory());
         slingContext.registerInjectActivateService(new ProcessCleanupFactory());
+        slingContext.registerInjectActivateService(new S3AssetIngestorFactory());
     }
 
     private void registerCommonServices() {
