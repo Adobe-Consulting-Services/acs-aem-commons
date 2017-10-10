@@ -47,6 +47,13 @@ public class S3AssetIngestor extends AssetIngestor {
     }
 
     @FormField(
+            name = "Endpoint URL",
+            description = "Endpoint URL, leave blank for default. Used primarily for S3-compatible object-storage solutions.",
+            required = false
+    )
+    String endpointUrl;
+
+    @FormField(
             name = "Bucket",
             description = "S3 Bucket Name"
     )
@@ -84,6 +91,9 @@ public class S3AssetIngestor extends AssetIngestor {
         } else {
             baseItemName = bucket;
         }
+        if (StringUtils.isNotBlank(endpointUrl)) {
+            baseItemName = endpointUrl + "/" + baseItemName;
+        }
     }
 
     @Override
@@ -95,6 +105,9 @@ public class S3AssetIngestor extends AssetIngestor {
         instance.defineCriticalAction("Create Folders", rr, this::createFolders);
         instance.defineCriticalAction("Import Assets", rr, this::importAssets);
         s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey));
+        if (StringUtils.isNotBlank(endpointUrl)) {
+            s3Client.setEndpoint(endpointUrl);
+        }
     }
 
     void createFolders(ActionManager manager) {
