@@ -47,13 +47,6 @@ public class S3AssetIngestor extends AssetIngestor {
     }
 
     @FormField(
-            name = "Endpoint URL",
-            description = "Endpoint URL, leave blank for default. Used primarily for S3-compatible object-storage solutions.",
-            required = false
-    )
-    String endpointUrl;
-
-    @FormField(
             name = "Bucket",
             description = "S3 Bucket Name"
     )
@@ -78,6 +71,13 @@ public class S3AssetIngestor extends AssetIngestor {
             required = false
     )
     String s3BasePath;
+
+    @FormField(
+            name = "Endpoint URL",
+            description = "Endpoint URL, leave blank for default. Used primarily for S3-compatible object-storage solutions.",
+            required = false
+    )
+    String endpointUrl;
 
     transient AmazonS3 s3Client;
 
