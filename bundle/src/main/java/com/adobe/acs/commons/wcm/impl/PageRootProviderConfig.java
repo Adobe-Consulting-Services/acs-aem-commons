@@ -62,7 +62,7 @@ public class PageRootProviderConfig {
     /* Page root property. */
     static final String PAGE_ROOT_PATH = "page.root.path";
 
-    private static final Logger LOG = LoggerFactory.getLogger(PageRootProviderConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(PageRootProviderConfig.class);
 
     private List<Pattern> pageRootPatterns = null;
 
@@ -84,9 +84,9 @@ public class PageRootProviderConfig {
             try {
                 Pattern p = Pattern.compile("^(" + regex + ")(|/.*)$");
                 pageRootPatterns.add(p);
-                LOG.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p.toString());
+                log.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p.toString());
             } catch (Exception e) {
-                LOG.error("Could not compile regex [ {} ] to pattern. Skipping...", regex, e);
+                log.error("Could not compile regex [ {} ] to pattern. Skipping...", regex, e);
             }
         }
 
@@ -97,7 +97,7 @@ public class PageRootProviderConfig {
     protected void deactivate() {
         if (this.pageRootPatterns != null) {
             for (Pattern p : this.pageRootPatterns) {
-                LOG.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p.toString());
+                log.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p.toString());
             }
 
             this.pageRootPatterns = null;

@@ -49,7 +49,7 @@ import com.day.cq.wcm.api.PageManager;
  */
 public class PageRootProviderMultiImpl implements PageRootProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
 
     @Reference(name = "config", referenceInterface = PageRootProviderConfig.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     private List<PageRootProviderConfig> configList = new ArrayList<PageRootProviderConfig>();
@@ -63,9 +63,9 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
             Page rootPage = pageManager.getPage(pagePath);
 
             if (rootPage == null) {
-                LOG.debug("Page Root not found at [ {} ]", pagePath);
+                log.debug("Page Root not found at [ {} ]", pagePath);
             } else if (!rootPage.isValid()) {
-                LOG.debug("Page Root invalid at [ {} ]", pagePath);
+                log.debug("Page Root invalid at [ {} ]", pagePath);
             } else {
                 return rootPage;
             }
@@ -82,24 +82,24 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
 
                 if (matcher.find()) {
                     String rootPath = matcher.group(1);
-                    LOG.debug("Page Root found at [ {} ]", rootPath);
+                    log.debug("Page Root found at [ {} ]", rootPath);
                     return rootPath;
                 }
             }
         }
 
-        LOG.debug("Resource path does not include the configured page root path.");
+        log.debug("Resource path does not include the configured page root path.");
         return null;
     }
 
     @Activate
     protected void activate() {
-        LOG.debug("Activating");
+        log.debug("Activating");
     }
 
     @Deactivate
     protected void deactivate() {
-        LOG.debug("Deactivating");
+        log.debug("Deactivating");
     }
 
     protected void bindConfig(final PageRootProviderConfig config) {
