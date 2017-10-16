@@ -53,7 +53,7 @@ public class PageRootProviderImpl extends PageRootProviderConfig {
             value = { DEFAULT_PAGE_ROOT_PATH })
     private static final String PAGE_ROOT_PATH = PageRootProviderConfig.PAGE_ROOT_PATH;
 
-    private static final Logger LOG = LoggerFactory.getLogger(PageRootProviderImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PageRootProviderImpl.class);
 
     @Activate
     protected void activate(Map<String, Object> props) {
@@ -68,7 +68,7 @@ public class PageRootProviderImpl extends PageRootProviderConfig {
     }
 
     private void warnDepreciation() {
-        LOG.warn("{} is deprecated. Please use {} instead!", getClass().getSimpleName(),
+        log.warn("{} is deprecated. Please use {} instead!", getClass().getSimpleName(),
                  PageRootProviderConfig.class.getName());
     }
 
