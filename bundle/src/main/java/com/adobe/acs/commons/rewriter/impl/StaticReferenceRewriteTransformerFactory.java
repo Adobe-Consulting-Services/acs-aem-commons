@@ -23,6 +23,8 @@ import java.util.Dictionary;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -71,6 +73,10 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     }
 
     private static final String ATTR_CLASS = "class";
+
+    private static final String ATTR_SRCSET_SEPARATOR = ",";
+
+    private static final String ATTR_SRCSET = "srcset";
 
     private static final String CLASS_NOSTATIC = "nostatic";
 
@@ -168,9 +174,15 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                     final String attrName = newAttrs.getLocalName(i);
                     if (ArrayUtils.contains(modifyableAttributes, attrName)) {
                         final String attrValue = newAttrs.getValue(i);
-                        for (String prefix : prefixes) {
-                            if (attrValue.startsWith(prefix)) {
-                                newAttrs.setValue(i, prependHostName(attrValue));
+
+                        if (ATTR_SRCSET.equals(attrName)) {
+                            // srcset special case
+                            newAttrs.setValue(i, handleSrcsetAttribute(attrValue));
+                        } else {
+                            for (String prefix : prefixes) {
+                                if (attrValue.startsWith(prefix)) {
+                                    newAttrs.setValue(i, prependHostName(attrValue));
+                                }
                             }
                         }
                     }
@@ -180,6 +192,24 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         } else {
             return attrs;
         }
+    }
+
+    private String handleSrcsetAttribute(String attrValue) {
+        // Split to get each display configuration
+        String[] displayConfigurations = StringUtils.split(attrValue, ATTR_SRCSET_SEPARATOR);
+
+        if (ArrayUtils.isNotEmpty(displayConfigurations)) {
+            for (int i = 0; i < displayConfigurations.length; i++) {
+                String displayConfiguration = StringEscapeUtils.unescapeHtml(displayConfigurations[i]);
+
+                for (String prefix : prefixes) {
+                    if (displayConfiguration.startsWith(prefix)) {
+                        displayConfigurations[i] = prependHostName(displayConfiguration);
+                    }
+                }
+            }
+        }
+        return StringUtils.join(displayConfigurations, ATTR_SRCSET_SEPARATOR);
     }
 
     @Activate
