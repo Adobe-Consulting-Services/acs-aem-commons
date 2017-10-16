@@ -90,6 +90,31 @@ public class StaticReferenceRewriteTransformerFactoryTest {
     }
 
     @Test
+    public void test_with_prefix_and_matching_pattern_and_single_host() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/content/dam" });
+        ctx.setProperty("attributes", new String[] { "img:srcset" });
+        ctx.setProperty("host.pattern", "static.host.com");
+        ctx.setProperty("matchingPatterns", "img:srcset;(\\/content\\/dam\\/.+?\\.(png|jpg))");
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "srcset", null, "CDATA", "/content/dam/flower.jpg 1280w,/content/dam/house.png 480w");
+        transformer.startElement(null, "img", null, in);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("//static.host.com/content/dam/flower.jpg 1280w,//static.host.com/content/dam/house.png 480w", out.getValue(0));
+    }
+
+    @Test
     public void test_with_nostatic_class() throws Exception {
         MockBundle bundle = new MockBundle(-1);
         MockComponentContext ctx = new MockComponentContext(bundle);
