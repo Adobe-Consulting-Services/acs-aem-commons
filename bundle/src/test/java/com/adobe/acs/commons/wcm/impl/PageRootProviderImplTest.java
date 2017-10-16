@@ -1,72 +1,56 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.wcm.impl;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.*;
 
+@Deprecated
 public class PageRootProviderImplTest {
     PageRootProviderImpl provider = new PageRootProviderImpl();
 
     Map<String, Object> config = new HashMap<String, Object>();
 
     @Test
-    public void getRootPagePath() throws Exception {
-        config.put("page.root.path", new String[]{"/content"});
+    public void getPageRootPatterns() throws Exception {
+        config.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content"});
         provider.activate(config);
 
-        assertEquals("/content", provider.getRootPagePath("/content/site/en_us/products/product-x"));
-        assertEquals("/content", provider.getRootPagePath("/content/site/en_us/products/product-x/jcr:content/my-component"));
-        assertEquals("/content", provider.getRootPagePath("/content/site/en_us"));
-        assertEquals("/content", provider.getRootPagePath("/content/"));
-        assertEquals("/content", provider.getRootPagePath("/content"));
-
-        assertNull("/content", provider.getRootPagePath("/etc/site"));
-        assertNull("/content", provider.getRootPagePath("/conf/site"));
+        assertEquals(Arrays.asList("^(/content)(|/.*)$"), PageRootProviderConfigTest.toStringList(provider.getPageRootPatterns()));
     }
 
     @Test
-    public void getRootPagePath_Regex() throws Exception {
-        config.put("page.root.path", new String[]{"/content/site/([a-z_-]+)"});
+    public void getPageRootPatterns_Deactivate() throws Exception {
+        assertNull(provider.getPageRootPatterns());
+
+        config.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/a", "/content"});
         provider.activate(config);
 
-        assertEquals("/content/site/en_us", provider.getRootPagePath("/content/site/en_us/products/product-x"));
-        assertEquals("/content/site/fr", provider.getRootPagePath("/content/site/fr/products/product-x/jcr:content/my-component"));
-        assertEquals("/content/site/de_de", provider.getRootPagePath("/content/site/de_de"));
+        assertEquals(Arrays.asList("^(/content/a)(|/.*)$", "^(/content)(|/.*)$"), PageRootProviderConfigTest.toStringList(provider.getPageRootPatterns()));
 
-        assertNull(provider.getRootPagePath("/content"));
-        assertNull(provider.getRootPagePath("/content/en_us/products"));
-        assertNull(provider.getRootPagePath("/content/123/site"));
-    }
-
-    @Test
-    public void getRootPagePath_RegexEnd() throws Exception {
-        config.put("page.root.path", new String[]{"/content/site/[a-z]{2}"});
-        provider.activate(config);
-
-        assertEquals("/content/site/en", provider.getRootPagePath("/content/site/en/products/product-x"));
-        assertEquals("/content/site/de", provider.getRootPagePath("/content/site/de"));
-
-        assertNull(provider.getRootPagePath("/content/site/en_us/products"));
-        assertNull(provider.getRootPagePath("/content/site/somewhereelse"));
-    }
-
-    @Test
-    public void getRootPagePath_Order1() throws Exception {
-        config.put("page.root.path", new String[]{"/content", "/content/a"});
-        provider.activate(config);
-
-        assertEquals("/content", provider.getRootPagePath("/content/a/b/c"));
-    }
-
-    @Test
-    public void getRootPagePath_Order2() throws Exception {
-        config.put("page.root.path", new String[]{"/content/a", "/content"});
-        provider.activate(config);
-
-        assertEquals("/content/a", provider.getRootPagePath("/content/a/b/c"));
-        assertEquals("/content", provider.getRootPagePath("/content/b"));
+        provider.deactivate();
+        assertNull(provider.getPageRootPatterns());
     }
 }
