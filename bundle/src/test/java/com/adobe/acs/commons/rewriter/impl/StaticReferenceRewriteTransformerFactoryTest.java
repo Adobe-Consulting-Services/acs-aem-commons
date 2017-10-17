@@ -36,6 +36,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
 
+import java.util.List;
+
 @RunWith(MockitoJUnitRunner.class)
 public class StaticReferenceRewriteTransformerFactoryTest {
 
@@ -94,7 +96,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         MockBundle bundle = new MockBundle(-1);
         MockComponentContext ctx = new MockComponentContext(bundle);
         ctx.setProperty("prefixes", new String[] { "/content/dam" });
-        ctx.setProperty("attributes", new String[] { "img:srcset" });
+        ctx.setProperty("attributes", new String[] { "img:srcset,src" });
         ctx.setProperty("host.pattern", "static.host.com");
         ctx.setProperty("matchingPatterns", "img:srcset;(\\/content\\/dam\\/.+?\\.(png|jpg))");
 
@@ -104,14 +106,19 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         Transformer transformer = factory.createTransformer();
         transformer.setContentHandler(handler);
 
-        AttributesImpl in = new AttributesImpl();
-        in.addAttribute(null, "srcset", null, "CDATA", "/content/dam/flower.jpg 1280w,/content/dam/house.png 480w");
-        transformer.startElement(null, "img", null, in);
+        AttributesImpl imageWithSrcSet = new AttributesImpl();
+        imageWithSrcSet.addAttribute(null, "srcset", null, "CDATA", "/content/dam/flower.jpg 1280w,/content/dam/house.png 480w");
+        transformer.startElement(null, "img", null, imageWithSrcSet);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+        AttributesImpl imageWithJustSrc = new AttributesImpl();
+        imageWithJustSrc.addAttribute(null, "src", null, "CDATA", "/content/dam/flower.jpg");
+        transformer.startElement(null, "img", null, imageWithJustSrc);
+
+        verify(handler, times(2)).startElement(isNull(String.class), eq("img"), isNull(String.class),
                 attributesCaptor.capture());
-        Attributes out = attributesCaptor.getValue();
-        assertEquals("//static.host.com/content/dam/flower.jpg 1280w,//static.host.com/content/dam/house.png 480w", out.getValue(0));
+        List<Attributes> values = attributesCaptor.getAllValues();
+        assertEquals("//static.host.com/content/dam/flower.jpg 1280w,//static.host.com/content/dam/house.png 480w", values.get(0).getValue(0));
+        assertEquals("//static.host.com/content/dam/flower.jpg", values.get(1).getValue(0));
     }
 
     @Test
