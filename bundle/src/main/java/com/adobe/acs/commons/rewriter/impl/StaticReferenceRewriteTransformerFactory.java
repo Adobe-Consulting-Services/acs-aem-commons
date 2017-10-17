@@ -77,7 +77,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(StaticReferenceRewriteTransformerFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(StaticReferenceRewriteTransformerFactory.class);
 
     private static final String ATTR_CLASS = "class";
 
@@ -190,7 +190,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                             try {
                                 newAttrs.setValue(i, handleMatchingPatternAttribute(matchingPattern, attrValue));
                             } catch (Exception e) {
-                                LOG.error("Could not perform replacement based on matching pattern", e);
+                                log.error("Could not perform replacement based on matching pattern", e);
                             }
                         } else {
                             for (String prefix : prefixes) {
@@ -247,7 +247,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
     }
 
-    private Map<String, Pattern> initializeMatchingPatterns(String[] matchingPatternsProp) {
+    private static Map<String, Pattern> initializeMatchingPatterns(String[] matchingPatternsProp) {
         Map<String, Pattern> result = new HashMap<String, Pattern>();
 
         Map<String, String> map = ParameterUtil.toMap(matchingPatternsProp, ";");
@@ -260,7 +260,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                 Pattern compiled = Pattern.compile(matchingPatternString);
                 result.put(key, compiled);
             } catch (Exception e) {
-                LOG.warn("Could not compile pattern {} for {}. Ignoring it", matchingPatternString, key);
+                log.warn("Could not compile pattern {} for {}. Ignoring it", matchingPatternString, key);
             }
         }
         return result;
