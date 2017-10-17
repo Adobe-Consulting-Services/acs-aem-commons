@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - #1133: Added S3 MCP Asset Ingestor
+- #1140: Add support in StaticReferenceRewriterTransformerFactory for complex values, e.g. `img:srcset`
 
 ### Fixed
 
