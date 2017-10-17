@@ -91,7 +91,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             "img:src", "link:href", "script:src" })
     private static final String PROP_ATTRIBUTES = "attributes";
 
-    @Property(label = "Matching Patterns", description = "List of patterns how to find url to pre-prend host to for more complex values. The url must be the first matching group within the pattern.")
+    @Property(label = "Matching Patterns", description = "List of patterns how to find url to prepend host to for more complex values. The url must be the first matching group within the pattern.")
     private static final String PROP_MATCHING_PATTERNS = "matchingPatterns";
 
     @Property(intValue = DEFAULT_HOST_COUNT, label = "Static Host Count",
