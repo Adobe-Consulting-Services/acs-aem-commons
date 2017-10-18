@@ -197,7 +197,7 @@ public class AssetReport extends ProcessDefinition implements Serializable {
         }
     }
 
-    private void tabulate(String path, Column counter, long amount) {
+    private synchronized void tabulate(String path, Column counter, long amount) {
         if (getDepth(path) < depthLimit && path.length() >= baseFolder.length()) {
             synchronized (report) {
                 EnumMap<Column, Long> row = getReportRow(path);
