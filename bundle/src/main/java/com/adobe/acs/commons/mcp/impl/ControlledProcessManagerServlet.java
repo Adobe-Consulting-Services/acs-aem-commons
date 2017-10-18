@@ -36,6 +36,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.request.RequestParameterMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +93,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
                     throw new Exception("Action not understood.");
             }
         } catch (Exception ex) {
-            result = "Exception occurred " + ex.getMessage();
+                result = "Exception occurred " + ex.getMessage();
             LOG.error(ex.getMessage() + " -- End of line.", ex);
         }
         Gson gson = new Gson();
@@ -103,7 +105,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
         String description = request.getParameter("description");
         ProcessDefinition definition = manager.findDefinitionByNameOrPath(def);
         ProcessInstance instance = manager.createManagedProcessInstance(definition, description);
-        instance.init(request.getResourceResolver(), convertRequestMap(request.getParameterMap()));
+        instance.init(request.getResourceResolver(), convertRequestMap(request.getRequestParameterMap()));
         instance.run(request.getResourceResolver());
         return instance;
     }
@@ -159,12 +161,29 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
 
     List<String> ignoredInputs = Arrays.asList("definition", "description", "action");
 
-    private Map<String, Object> convertRequestMap(Map<String, String[]> parameterMap) {
-        return parameterMap.entrySet().stream()
+    private Map<String, Object> convertRequestMap(RequestParameterMap requestParameterMap) {
+        return requestParameterMap.entrySet().stream()
                 .filter(entry -> !ignoredInputs.contains(entry.getKey()))
                 .collect(Collectors.toMap(
                         entry -> entry.getKey(),
-                        entry -> (Object) (entry.getValue().length == 1 ? entry.getValue()[0] : entry.getValue())
+                        entry -> {
+                            final RequestParameter[] values = entry.getValue();
+
+                            try {
+                                if (values.length == 1) {
+                                    if (values[0].getFileName() != null) {
+                                        return values[0].getInputStream();
+                                    } else {
+                                        return values[0].getString();
+                                    }
+                                } else {
+                                    return Arrays.stream(values).collect(Collectors.toList());
+                                }
+                            } catch (IOException e) {
+                                LOG.error("Unable to get InputStream for uploaded file [ {} ]", entry.getKey(), e);
+                                return null;
+                            }
+                        }
                 ));
     }
 
