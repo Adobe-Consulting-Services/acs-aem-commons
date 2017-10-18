@@ -109,17 +109,20 @@ var ScriptRunner = {
         });
     },
     startProcess: function () {
-        var data = {};
-        jQuery("#processDefinitionInput form", window.top.document).serializeArray().map(function (x) {
-            data[x.name] = x.value;
-        });
+        /* Use FormData object to support file uploads */
+        var data = new FormData($('#processDefinitionInput form', window.top.document)[0]);
+
         jQuery.ajax({
             url: ScriptRunner.SERVLET_URL + ".start.json",
             method: "POST",
             dataType: "json",
             success: ScriptRunner.startedSuccessfully,
             error: ScriptRunner.error,
-            data: data
+            data: data,
+            /* Requires to support Form Data uploads */
+            cache: false,
+            contentType: false,
+            processData: false
         });
     },
     startedSuccessfully: function (process) {
