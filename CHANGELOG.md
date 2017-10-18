@@ -9,14 +9,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.10.0...HEAD
 
+### Added
+
+- #1133: Added S3 MCP Asset Ingestor
+- #1140: Add support in StaticReferenceRewriterTransformerFactory for complex values, e.g. `img:srcset`
+
 ### Fixed
 
 - #1094: Fixed issue with QR Code where its on by default. This requires toggling QR Code on and off to reset the client lib category.
 - #1119: Fixed issue with timezone of on/off times on System Notifications  
 - #1110: Added package dependency on AEM 6.2 to ensure proper installation order.
 - #1128: Changed to SecureRandom for string generation in LinkedIn integration.
+- #1132: Fixed number of parameters in SharpenImageTransformerImpl
 
-## [3.10.0] - 2017-08-20
+## [3.10.0] - 2017-08-24
 
 ### Added
 
@@ -35,6 +41,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1033: Allow Resource Resolver Map Factory's re-write attributes to be passed in as an array
 - Updated Fast Action Manager retry logic to support more failure cases properly.
 - Updated Fast Action Manager retry logic to be savvy about interrupted exceptions thrown by the watchdog trying to kill the thread.
+- Updated PageRootProvider (Shared Component Properties) to support multiple/independent configurations.
 
 ### Fixed
 
@@ -51,9 +58,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Security
 - #1059: ResourceServiceManager no longer users admin resource resolver
 
+### Deprecated
+- com.adobe.acs.commons.wcm.impl.PageRootProviderImpl has been deprecated. com.adobe.acs.commons.wcm.impl.PageRootProviderConfig should be used instead.
+
 <!---
  
-### Deprecated
 ### Removed
 
 ---->
