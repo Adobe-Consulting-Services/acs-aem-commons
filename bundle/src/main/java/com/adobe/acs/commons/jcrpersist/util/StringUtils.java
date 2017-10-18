@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
  * Part of the code of this class has been borrowed from the open-source project
  * <code>jerry-core</code> from https://github.com/sangupta/jerry-core.
  * 
- * @author sangupta
- *
  */
 public class StringUtils {
 

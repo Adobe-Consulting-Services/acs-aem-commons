@@ -48,8 +48,6 @@ import com.day.cq.commons.jcr.JcrConstants;
 /**
  * Code to persist a given object instance to a JCR node.
  * 
- * @author sangupta
- *
  */
 class JcrWriter {
 

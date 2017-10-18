@@ -30,8 +30,6 @@ import java.lang.annotation.Target;
  * are direct descendants of this node and do not have an extra
  * wrapper child node around.
  * 
- * @author sangupta
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD, ElementType.METHOD })

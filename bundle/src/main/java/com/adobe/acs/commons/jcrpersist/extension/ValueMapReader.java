@@ -28,8 +28,6 @@ import org.apache.sling.api.resource.ValueMap;
  * via {@link ValueMap} for JCR objects that do not directly
  * provide that functionality.
  * 
- * @author sangupta
- *
  */
 public interface ValueMapReader {
 	

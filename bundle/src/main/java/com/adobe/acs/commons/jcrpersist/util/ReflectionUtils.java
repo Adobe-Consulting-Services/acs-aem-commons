@@ -33,8 +33,6 @@ import java.util.List;
  * Part of the code of this class has been borrowed from the open-source project
  * <code>jerry-core</code> from https://github.com/sangupta/jerry-core.
  *
- * @author sangupta
- *
  */
 public abstract class ReflectionUtils {
 

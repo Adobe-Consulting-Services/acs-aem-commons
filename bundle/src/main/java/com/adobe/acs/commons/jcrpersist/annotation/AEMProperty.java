@@ -28,8 +28,6 @@ import java.lang.annotation.Target;
 /**
  * Annotation to provide a custom name to a property.
  * 
- * @author sangupta
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD, ElementType.METHOD })

@@ -51,8 +51,6 @@ import com.day.cq.wcm.api.Page;
  * using the JCR without any intrusion. This also allows the system
  * to be more extensible.
  * 
- * @author sangupta
- *
  */
 public class JcrPersist {
 	

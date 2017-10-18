@@ -49,8 +49,6 @@ import com.day.cq.commons.jcr.JcrConstants;
 /**
  * Code to read a given object from a JCR node.
  * 
- * @author sangupta
- *
  */
 class JcrReader {
 	
