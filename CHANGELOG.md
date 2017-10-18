@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1133: Added S3 MCP Asset Ingestor
 - #1140: Add support in StaticReferenceRewriterTransformerFactory for complex values, e.g. `img:srcset`
+- #1095: Moved Tag Maker from ACS Tools and made executable via MCP
 
 ### Fixed
 
