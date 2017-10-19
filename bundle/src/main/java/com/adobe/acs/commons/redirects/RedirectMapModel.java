@@ -44,50 +44,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 @Model(adaptables = Resource.class)
 public class RedirectMapModel {
 
-	class MapEntry {
-		private final Resource resource;
-		private final String source;
-		private final String target;
-		private final boolean valid;
-
-		public MapEntry(Resource resource, String source, String target) {
-			source = source.trim();
-			if (source.matches(".*\\s.*")) {
-				log.warn("Source path {} for content {} contains whitespace", source, resource);
-				valid = false;
-			} else {
-				valid = true;
-			}
-			this.source = source;
-			this.target = target;
-			this.resource = resource;
-
-		}
-
-		public Resource getResource() {
-			return resource;
-		}
-
-		public String getSource() {
-			return source;
-		}
-
-		public String getTarget() {
-			return target;
-		}
-
-		public boolean isValid() {
-			return valid;
-		}
-
-		@Override
-		public String toString() {
-			return "MapEntry [resource=" + resource + ", source=" + source + ", target=" + target + ", valid=" + valid
-					+ "]";
-		}
-	}
-
-	private static final Logger log = LoggerFactory.getLogger(RedirectMapModel.class);
+	static final Logger log = LoggerFactory.getLogger(RedirectMapModel.class);
 
 	@Inject
 	@Named("redirectMap.txt")
@@ -108,8 +65,8 @@ public class RedirectMapModel {
 			Resource item = items.next();
 			String path = item.getPath();
 			ValueMap properties = item.getChild(JcrConstants.JCR_CONTENT).getValueMap();
-			FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver, config.getProtocol(),
-					config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
+			FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver,
+					config.getProtocol(), config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
 			String pageUrl = externializer.absoluteLink(mockRequest, config.getProtocol(), item.getPath() + suffix);
 			String[] sources = properties.get(config.getProperty(), String[].class);
 			for (String source : sources) {
@@ -131,19 +88,16 @@ public class RedirectMapModel {
 
 		sb.append("\n# Dynamic entries for " + config.getResource().getPath() + "\n");
 
-		log.debug("Finding pages under {} with the property {}", config.getPath(), config.getProperty());
-		invalidEntries.addAll(addItems(config,
-				resourceResolver.findResources("SELECT * FROM [cq:Page] WHERE [jcr:content/" + config.getProperty()
-						+ "] IS NOT NULL AND ISDESCENDANTNODE([" + config.getPath() + "])", Query.JCR_SQL2),
-				sb, ".html"));
-		log.debug("Finding assets under {} with the property {}", config.getPath(), config.getProperty());
-		invalidEntries
-				.addAll(addItems(config,
-						resourceResolver.findResources(
-								"SELECT * FROM [dam:Asset] WHERE [jcr:content/" + config.getProperty()
-										+ "] IS NOT NULL AND ISDESCENDANTNODE([" + config.getPath() + "])",
-								Query.JCR_SQL2),
-						sb, ""));
+		String pageQuery = "SELECT * FROM [cq:Page] WHERE [jcr:content/" + config.getProperty()
+				+ "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath()
+				+ "')";
+		log.debug("Finding pages with redirects with query: {}", pageQuery);
+		invalidEntries.addAll(addItems(config, resourceResolver.findResources(pageQuery, Query.JCR_SQL2), sb, ".html"));
+		String assetQuery = "SELECT * FROM [dam:Asset] WHERE [jcr:content/" + config.getProperty()
+				+ "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath()
+				+ "')";
+		log.debug("Finding assets with redirects with query: {}", assetQuery);
+		invalidEntries.addAll(addItems(config, resourceResolver.findResources(assetQuery, Query.JCR_SQL2), sb, ""));
 		return invalidEntries;
 	}
 

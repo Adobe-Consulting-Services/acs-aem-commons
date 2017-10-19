@@ -1,3 +1,11 @@
-.coral-Textfield, select {
-	width: 75%
+.coral-Heading {
+	padding: 1em 0;
+}
+
+pre {
+	max-height: 500px;
+}
+
+section {
+	padding: .5em;
 }
