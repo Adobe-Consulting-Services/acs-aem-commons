@@ -59,7 +59,6 @@
                             com.day.cq.wcm.workflow.process;version="[6.0,8)", <!-- using a wider version range for forward compatibility -->
                             com.day.cq.mailer;version="[5.9,7)", <!-- using a wider version range for forward compatibility -->
                             com.adobe.cq.sightly;version="[2.5,4)",
-                            javax.annotation;resolution:=optional, <!-- pulled by the tika-parsers dependency -->
                             *
                         </Import-Package>
                         <Embed-Dependency>guava</Embed-Dependency>
@@ -282,7 +281,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>3.16</version>
+            <version>3.11</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -294,6 +293,12 @@
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parsers</artifactId>
             <version>1.14</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.annotation</groupId>
+                    <artifactId>javax.annotation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>

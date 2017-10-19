@@ -23,7 +23,11 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
-import org.apache.sling.api.resource.*;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.HtmlParser;
@@ -33,7 +37,13 @@ import org.apache.tika.sax.LinkContentHandler;
 import javax.jcr.RepositoryException;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
+import java.util.EnumMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,7 +51,6 @@ import java.util.stream.Stream;
 /**
  * Broken Links Checker MCP task
  *
- * @author Yegor Kozlov
  */
 public class BrokenLinksReport extends ProcessDefinition implements Serializable {
 
@@ -67,14 +76,14 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
 
     @FormField(
             name = "Deep check in html",
-            description = "If checked, links will be extracted from html field",
+            description = "If checked, links will be extracted from html properties",
             component = CheckboxComponent.class,
             options = {"checked"}
     )
     private boolean deepCheck = false;
 
-    @FormField(name = "Fields containing html",
-            description = "Properties containing html to extract links",
+    @FormField(name = "Properties containing html",
+            description = "Comma-separate list of properties containing html to extract links",
             required = false,
             options = {"default=text"})
     private String htmlFields;
@@ -97,7 +106,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
         reference
     }
 
-    transient private final Map<String, EnumMap<REPORT, Object>> reportData = new TreeMap<>();
+    transient private final Map<String, EnumMap<REPORT, Object>> reportData = new ConcurrentHashMap<>();
 
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
@@ -120,14 +129,15 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
         visitor.setBreadthFirstMode();
         visitor.setTraversalFilter(null);
         visitor.setResourceVisitor((resource, depth) -> {
-            Map<String, List<String>> brokenRefs = collectBrokenReferences(resource, regex, excludeList, deepCheckList);
-            for(Map.Entry<String, List<String>> ref : brokenRefs.entrySet()){
-                String propertyPath = ref.getKey();
-                List<String> refs = ref.getValue();
-                reportData.put(propertyPath, new EnumMap<>(REPORT.class));
-                reportData.get(propertyPath).put(REPORT.reference, refs.stream().collect(Collectors.joining(",")));
-
-            }
+            manager.deferredWithResolver(rr -> {
+                Map<String, List<String>> brokenRefs = collectBrokenReferences(resource, regex, excludeList, deepCheckList);
+                for(Map.Entry<String, List<String>> ref : brokenRefs.entrySet()){
+                    String propertyPath = ref.getKey();
+                    List<String> refs = ref.getValue();
+                    reportData.put(propertyPath, new EnumMap<>(REPORT.class));
+                    reportData.get(propertyPath).put(REPORT.reference, refs.stream().collect(Collectors.joining(",")));
+                }
+            });
         });
         manager.deferredWithResolver(rr -> visitor.accept(rr.getResource(sourcePath)));
     }
