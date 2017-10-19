@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Template"
+    jcr:title="AEM Redirects / Vanities Configuration"
+    allowedPaths="[/etc/acs-commons/redirects(/.*)?]"
+    ranking="{Long}100">
+    <jcr:content
+        cq:designPath="/etc/designs/acs-commons"
+        jcr:primaryType="cq:PageContent"
+        sling:resourceType="acs-commons/components/utilities/redirectspage"/>
+</jcr:root>
