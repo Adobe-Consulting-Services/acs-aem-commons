@@ -16,6 +16,8 @@
 package com.adobe.acs.commons.mcp.util;
 
 import com.adobe.acs.commons.mcp.form.FieldComponent;
+
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -43,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AnnotatedFieldDeserializer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AnnotatedFieldDeserializer.class);
+    private static final Logger log = LoggerFactory.getLogger(AnnotatedFieldDeserializer.class);
 
     public static void deserializeFormFields(Object target, ValueMap input) throws DeserializeException {
         List<Field> fields = FieldUtils.getFieldsListWithAnnotation(target.getClass(), FormField.class);
@@ -84,7 +86,13 @@ public class AnnotatedFieldDeserializer {
             if (value.getClass().isArray()) {
                 val = ((Object[]) value)[0];
             }
-            parseInputValue(target, String.valueOf(val), field);
+
+            if (val instanceof InputStream) {
+                /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
+                FieldUtils.writeField(field, target, val, true);
+            } else{
+                parseInputValue(target, String.valueOf(val), field);
+            }
         }
     }
 
@@ -121,6 +129,7 @@ public class AnnotatedFieldDeserializer {
         } else if (clazz.isEnum()) {
             return Enum.valueOf((Class<Enum>) clazz, value);
         }
+
         return null;
     }
 
@@ -169,7 +178,7 @@ public class AnnotatedFieldDeserializer {
                         component.setup(f.getName(), f, fieldDefinition, sling);
                         return component;
                     } catch (InstantiationException | IllegalAccessException ex) {
-                        LOG.error("Unable to instantiate field component for " + f.getName(), ex);
+                        log.error("Unable to instantiate field component for " + f.getName(), ex);
                     }
                     return null;
                 }, (a, b) -> a, LinkedHashMap::new));

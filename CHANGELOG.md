@@ -7,12 +7,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.10.0...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.11.0...HEAD
+
+## [3.11.0] - 2017-10-18
 
 ### Added
 
 - #1133: Added S3 MCP Asset Ingestor
 - #1140: Add support in StaticReferenceRewriterTransformerFactory for complex values, e.g. `img:srcset`
+- #1095: Moved Tag Maker from ACS Tools and made executable via MCP
 
 ### Fixed
 
