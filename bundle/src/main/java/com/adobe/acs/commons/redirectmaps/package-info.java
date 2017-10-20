@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,5 @@
  * limitations under the License.
  * #L%
  */
+@aQute.bnd.annotation.Version("3.1.0")
 package com.adobe.acs.commons.redirectmaps;
-
-import javax.inject.Inject;
-
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.models.annotations.Model;
-import org.apache.sling.models.annotations.injectorspecific.Self;
-
-@Model(adaptables = Resource.class)
-public interface RedirectConfigModel {
-
-	@Inject
-	String getDomain();
-
-	@Inject
-	String getPath();
-
-	@Inject
-	String getProperty();
-
-	@Inject
-	String getProtocol();
-
-    @Self
-    Resource getResource();
-
-}

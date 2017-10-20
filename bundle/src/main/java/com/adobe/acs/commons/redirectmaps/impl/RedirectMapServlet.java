@@ -17,9 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.redirectmaps;
+package com.adobe.acs.commons.redirectmaps.impl;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 
@@ -30,8 +31,15 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SlingServlet(label = "ACS AEM Commons - RedirectMap Servlet", methods = { "GET" }, resourceTypes = {
-		"acs-commons/components/utilities/redirectmappage" }, selectors = { "redirectmap" }, extensions = { "txt" })
+import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
+import com.google.common.net.MediaType;
+
+/**
+ * Servlet for generating an Apache RedirectMap text file from an uploaded file
+ * and a list vanity properties in cq:Page and dam:Asset nodes.
+ */
+@SlingServlet(methods = { "GET" }, resourceTypes = { "acs-commons/components/utilities/redirectmappage" }, selectors = {
+		"redirectmap" }, extensions = { "txt" }, metatype = false)
 public class RedirectMapServlet extends SlingSafeMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(RedirectMapServlet.class);
@@ -41,7 +49,10 @@ public class RedirectMapServlet extends SlingSafeMethodsServlet {
 			throws ServletException, IOException {
 		log.trace("doGet");
 
+		log.debug("Requesting redirect maps from {}", request.getResource());
 		RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
-		response.getOutputStream().write(redirectMap.getRedirectMap().getBytes("UTF-8"));
+
+		response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
+		response.getOutputStream().write(redirectMap.getRedirectMap().getBytes(StandardCharsets.UTF_8));
 	}
 }

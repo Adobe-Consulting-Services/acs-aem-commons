@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.redirectmaps;
+package com.adobe.acs.commons.redirectmaps.models;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,22 +34,30 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.Optional;
 import org.apache.sling.models.annotations.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.redirectmaps.impl.FakeSlingHttpServletRequest;
 import com.day.cq.commons.jcr.JcrConstants;
 
+/**
+ * A Sling Model for serializing a RedirectMap configuration to a consolidated
+ * RedirectMap text file
+ */
 @Model(adaptables = Resource.class)
 public class RedirectMapModel {
 
 	static final Logger log = LoggerFactory.getLogger(RedirectMapModel.class);
 
 	@Inject
+	@Optional
 	@Named("redirectMap.txt")
 	private Resource redirectMap;
 
 	@Inject
+	@Optional
 	private List<RedirectConfigModel> redirects;
 
 	@Inject
@@ -83,6 +91,9 @@ public class RedirectMapModel {
 	}
 
 	private List<MapEntry> gatherEntries(RedirectConfigModel config, StringBuilder sb) {
+		log.trace("gatherEntries");
+
+		log.debug("Getting all of the entries for {}", config.getResource());
 
 		List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
 
@@ -101,26 +112,49 @@ public class RedirectMapModel {
 		return invalidEntries;
 	}
 
+	/**
+	 * Get all of the entries from the cq:Pages and dam:Assets which contain
+	 * whitespace in their vanity URL.
+	 * 
+	 * @return
+	 */
 	public List<MapEntry> getInvalidEntries() {
+		log.trace("getInvalidEntries");
 		List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
 		StringBuilder sb = new StringBuilder();
 		for (RedirectConfigModel config : redirects) {
 			invalidEntries.addAll(gatherEntries(config, sb));
 		}
+		log.debug("Found {} invalid entries", invalidEntries.size());
 		return invalidEntries;
 	}
 
+	/**
+	 * Get the contents of the RedirectMap as a String
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
 	public String getRedirectMap() throws IOException {
 		log.debug("Retrieving redirect map from {}", redirectMap);
 
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("# Redirect Map File\n");
-		InputStream is = redirectMap.adaptTo(InputStream.class);
-		sb.append(IOUtils.toString(is));
+		if (redirectMap != null) {
+			log.debug("Loading RedirectMap file from {}", redirectMap);
+			sb.append("# Redirect Map File\n");
+			InputStream is = redirectMap.adaptTo(InputStream.class);
+			sb.append(IOUtils.toString(is));
+		} else {
+			log.debug("No redirect map specified");
+		}
 
-		for (RedirectConfigModel config : redirects) {
-			gatherEntries(config, sb);
+		if (redirects != null) {
+			for (RedirectConfigModel config : redirects) {
+				gatherEntries(config, sb);
+			}
+		} else {
+			log.debug("No redirect configurations specified");
 		}
 		return sb.toString();
 	}
