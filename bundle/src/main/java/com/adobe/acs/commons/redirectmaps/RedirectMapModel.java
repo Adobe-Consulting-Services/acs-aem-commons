@@ -38,7 +38,6 @@ import org.apache.sling.models.annotations.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.day.cq.commons.Externalizer;
 import com.day.cq.commons.jcr.JcrConstants;
 
 @Model(adaptables = Resource.class)
@@ -60,14 +59,15 @@ public class RedirectMapModel {
 	private List<MapEntry> addItems(RedirectConfigModel config, Iterator<Resource> items, StringBuilder sb,
 			String suffix) {
 		List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
-		Externalizer externializer = resourceResolver.adaptTo(Externalizer.class);
 		while (items.hasNext()) {
 			Resource item = items.next();
 			String path = item.getPath();
 			ValueMap properties = item.getChild(JcrConstants.JCR_CONTENT).getValueMap();
 			FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver,
 					config.getProtocol(), config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
-			String pageUrl = externializer.absoluteLink(mockRequest, config.getProtocol(), item.getPath() + suffix);
+			String pageUrl = config.getProtocol() + "://" + config.getDomain()
+					+ resourceResolver.map(mockRequest, item.getPath() + suffix);
+
 			String[] sources = properties.get(config.getProperty(), String[].class);
 			for (String source : sources) {
 				MapEntry entry = new MapEntry(item, source, pageUrl);

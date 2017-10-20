@@ -17,6 +17,9 @@
 					<h2 class="coral-Heading coral-Heading--2">
 						<fmt:message key="Configure Redirect Map" />
 					</h2>
+					<p>
+						<fmt:message key="The redirect map file will be combined with the redirects configured in AEM to create the final set of redirects." />
+					</p>
 					<form action="${resource.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-update-redirect" ng-submit="updateRedirectMap()" enctype="multipart/form-data">
 						
 				    	<input type="hidden" name="./redirectMap.txt@TypeHint" value="nt:file" />
@@ -27,7 +30,6 @@
 							</label>
 							<input type="file" class="coral-Textfield" name="./redirectMap.txt" />
 						</div>
-								
 						<div class="coral-Form-fieldwrapper" >
 							<button class="coral-Button coral-Button--primary"><fmt:message key="Upload" /></button>
 						</div>
@@ -41,6 +43,9 @@
 				</section>
 				<section>
 					<h2 class="coral-Heading coral-Heading--2">Redirect Configuration</h2>
+					<p>
+						<fmt:message key="Redirect configurations are used to gather vanity redirects to AEM pages based on a multivalued property and the mapping configuration specified." />
+					</p>
 					<c:set var="redirectParent" value="${sling2:getRelativeResource(resource, 'redirects')}" />
 					<c:forEach var="redirects" items="${sling2:listChildren(redirectParent)}">
 				    	<cq:include path="${redirects.path}" resourceType="${redirects.resourceType}" />
