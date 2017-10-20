@@ -83,5 +83,5 @@
     <filter root="/etc/workflow/instances/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
     <filter root="/var/acs-commons/rep:policy"/>
-    <filter root="/apps/dam/gui/content/assets"/>
+    <filter root="/apps/dam/gui/content/assets/metadataeditor"/>
 </workspaceFilter>

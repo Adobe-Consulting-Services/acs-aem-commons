@@ -27,7 +27,7 @@
 
         var publishUrlFrag = '/apps/acs-commons/gui/content/copypublishurl.html';
 
-        var content = '<textarea class="asset-publishurl-text-content" readonly>';
+        var content = '<textarea class="acs-aem-commons__dam-copy-published-url__text" readonly>';
         var result =
             Granite.$.ajax({
                 type : "GET",
@@ -46,7 +46,7 @@
 
     $( document ).one('foundation-contentloaded', function(e) {
         $('#asset-publishurl-copy-cmd').on('click', function(e) {
-            var ecData = document.querySelector('.asset-publishurl-text-content');
+            var ecData = document.querySelector('.acs-aem-commons__dam-copy-published-url__text');
             ecData.select();
             try {
                 document.execCommand('copy');

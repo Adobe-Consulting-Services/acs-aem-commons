@@ -31,7 +31,7 @@
                 }
             }
         }
-    }
-    /* Display or hide the widget */
-    request.setAttribute(RenderCondition.class.getName(), new SimpleRenderCondition(vote));
+    }  /* Display or hide the widget */
+         request.setAttribute(RenderCondition.class.getName(), new SimpleRenderCondition(vote));
+
 %>

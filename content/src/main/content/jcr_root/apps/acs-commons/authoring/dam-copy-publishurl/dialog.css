@@ -1,12 +1,12 @@
-.publish-url-button {
+.acs-aem-commons__dam-copy-published-url__button {
 	display: block;
     text-align: center;
     margin: auto;
     margin-top: 5px;
  }
 
- .asset-publishurl-text-content {
+.acs-aem-commons__dam-copy-published-url__text {
     min-width: 30rem;
     min-height: 10rem;
 
-        }           
+ }

@@ -9,7 +9,7 @@
                         <copypublishurl
                             granite:class="foundation-toggleable-control"
                             granite:id="asset-publishurl-button"
-                            granite:rel="publish-url-button"
+                            granite:rel="acs-aem-commons__dam-copy-published-url__button"
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/button"
                             text="Copy Publish URL"
@@ -28,6 +28,10 @@
                                         jcr:primaryType="nt:unstructured"
                                         sling:resourceType="acs-commons/renderconditons/ispublished"
                                         resourcePath="${paramValues['item'][0]}"/>
+                                <condition3
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="acs-commons/renderconditons/isfeatureenabled"
+                                        featureFlag="com.adobe.acs.commons.dam.impl.assetsurl.feature.flag"/>
                             </granite:rendercondition>
 
                         </copypublishurl>
@@ -44,7 +48,7 @@
                         assetpath="${empty requestPathInfo.suffix ? paramValues[&quot;item&quot;][0] : requestPathInfo.suffix}"/>
                     <items jcr:primaryType="nt:unstructured">
                         <textarea
-                            granite:rel="asset-publishurl-text-content"
+                            granite:rel="acs-aem-commons__dam-copy-published-url__text"
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"/>
                     </items>
@@ -76,10 +80,5 @@
                 </dialogpublishurl>
             </items>
         </content>
-        <head jcr:primaryType="nt:unstructured">
-            <clientlibs
-                jcr:primaryType="nt:unstructured"
-                categories="[dam.gui.coral.metadataeditor,dam.gui.coral.assetinsights.embedcode,dam.gui.coral.assetinsights.metadata,dam.gui.actions.coral,dam.gui.admin.coral,dam.gui.components.admin.adhocassetshare.coral,cq.common.wcm,dam.gui.coral.backhref,dam.gui.admin.publishasset.coral,dam.gui.admin.unpublishasset.coral,dam.gui.coral.customthumb,dam.gui.coral.relateasset,dam.copy.publishurl]"/>
-        </head>
     </jcr:content>
 </jcr:root>
