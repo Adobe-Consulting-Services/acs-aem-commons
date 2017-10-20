@@ -19,7 +19,7 @@
 					</h2>
 					<form action="${resource.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-update-redirect" ng-submit="updateRedirectMap()" enctype="multipart/form-data">
 						
-				    	<input type="hidden" name="*@TypeHint" value="nt:file" />
+				    	<input type="hidden" name="./redirectMap.txt@TypeHint" value="nt:file" />
 						
 						<div class="coral-Form-fieldwrapper">
 							<label class="coral-Form-fieldlabel">

@@ -39,6 +39,7 @@ angular.module('acs-commons-redirectspage-app', ['acsCoral', 'ACS.Commons.notifi
                 	location.reload(true);
                 }
             });
+            return false;
         };
         
         $scope.postValues = function (id) {
@@ -50,19 +51,11 @@ angular.module('acs-commons-redirectspage-app', ['acsCoral', 'ACS.Commons.notifi
             $.post($form.attr('action'), $form.serialize(), function() {
                location.reload(true);
             });
+            return false;
         };
 
         $scope.init = function () {
-        	$('#trigger-select,#coral-bullshit-markup').change(function(){
-            	$('#event-container').hide();
-            	$('#cron-container').hide();
-            	if($('#trigger-select').val() == 'event'){
-            		$('#event-container').show();
-            	}
-            	if($('#trigger-select').val() == 'cron'){
-            		$('#cron-container').show();
-            	}
-            });
+        	
         };
     }]);
 
