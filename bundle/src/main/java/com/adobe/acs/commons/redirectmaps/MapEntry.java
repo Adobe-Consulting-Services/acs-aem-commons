@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.adobe.acs.commons.redirects;
+package com.adobe.acs.commons.redirectmaps;
 
 import org.apache.sling.api.resource.Resource;
 

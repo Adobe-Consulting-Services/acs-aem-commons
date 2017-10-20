@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.redirects;
+package com.adobe.acs.commons.redirectmaps;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -37,7 +37,7 @@
  * #L%
  */
 /*global angular: false */
-angular.module('acs-commons-redirectspage-app', ['acsCoral', 'ACS.Commons.notifications'])
+angular.module('acs-commons-automatic-package-replication-app', ['acsCoral', 'ACS.Commons.notifications'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
     function ($scope, $http, $timeout, NotificationsService) {
 

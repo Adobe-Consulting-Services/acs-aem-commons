@@ -18,7 +18,7 @@
  * #L%
  */
 /*global angular: false */
-angular.module('acs-commons-redirectspage-app', ['acsCoral', 'ACS.Commons.notifications'])
+angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.notifications'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
     function ($scope, $http, $timeout, NotificationsService) {
 
