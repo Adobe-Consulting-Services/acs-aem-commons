@@ -63,7 +63,7 @@
                         </Import-Package>
                         <Embed-Dependency>guava</Embed-Dependency>
                         <Sling-Model-Packages>
-                        	com.adobe.acs.commons.redirects,
+                        	com.adobe.acs.commons.redirectmaps,
                             com.adobe.acs.commons.version.model,
                             com.adobe.acs.commons.wcm.comparisons.model,
                             com.adobe.acs.commons.workflow.bulk.execution.model,

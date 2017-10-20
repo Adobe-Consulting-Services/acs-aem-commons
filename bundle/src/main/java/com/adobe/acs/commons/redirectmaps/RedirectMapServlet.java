@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SlingServlet(label = "ACS AEM Commons - RedirectMap Servlet", methods = { "GET" }, resourceTypes = {
-		"acs-commons/components/utilities/redirectspage" }, selectors = { "redirectmap" }, extensions = { "txt" })
+		"acs-commons/components/utilities/redirectmappage" }, selectors = { "redirectmap" }, extensions = { "txt" })
 public class RedirectMapServlet extends SlingSafeMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(RedirectMapServlet.class);
