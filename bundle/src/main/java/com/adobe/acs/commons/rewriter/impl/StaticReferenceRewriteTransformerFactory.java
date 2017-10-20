@@ -20,9 +20,14 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -34,6 +39,8 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -70,6 +77,8 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         }
     }
 
+    private static final Logger log = LoggerFactory.getLogger(StaticReferenceRewriteTransformerFactory.class);
+
     private static final String ATTR_CLASS = "class";
 
     private static final String CLASS_NOSTATIC = "nostatic";
@@ -81,6 +90,9 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     @Property(label = "Rewrite Attributes", description = "List of element/attribute pairs to rewrite", value = {
             "img:src", "link:href", "script:src" })
     private static final String PROP_ATTRIBUTES = "attributes";
+
+    @Property(label = "Matching Patterns", description = "List of patterns how to find url to prepend host to for more complex values. The url must be the first matching group within the pattern.")
+    private static final String PROP_MATCHING_PATTERNS = "matchingPatterns";
 
     @Property(intValue = DEFAULT_HOST_COUNT, label = "Static Host Count",
             description = "Number of static hosts available.")
@@ -95,6 +107,8 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     private static final String PROP_PREFIXES = "prefixes";
 
     private Map<String, String[]> attributes;
+
+    private Map<String, Pattern> matchingPatterns;
 
     private String[] prefixes;
 
@@ -168,9 +182,21 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                     final String attrName = newAttrs.getLocalName(i);
                     if (ArrayUtils.contains(modifyableAttributes, attrName)) {
                         final String attrValue = newAttrs.getValue(i);
-                        for (String prefix : prefixes) {
-                            if (attrValue.startsWith(prefix)) {
-                                newAttrs.setValue(i, prependHostName(attrValue));
+
+                        String key = elementName + ":" + attrName;
+                        if (matchingPatterns.containsKey(key)) {
+                            // Find value based on matching pattern
+                            Pattern matchingPattern = matchingPatterns.get(key);
+                            try {
+                                newAttrs.setValue(i, handleMatchingPatternAttribute(matchingPattern, attrValue));
+                            } catch (Exception e) {
+                                log.error("Could not perform replacement based on matching pattern", e);
+                            }
+                        } else {
+                            for (String prefix : prefixes) {
+                                if (attrValue.startsWith(prefix)) {
+                                    newAttrs.setValue(i, prependHostName(attrValue));
+                                }
                             }
                         }
                     }
@@ -182,6 +208,29 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         }
     }
 
+    private String handleMatchingPatternAttribute(Pattern pattern, String attrValue) {
+        String unescapedValue = StringEscapeUtils.unescapeHtml(attrValue);
+        Matcher m = pattern.matcher(unescapedValue);
+        StringBuffer sb = new StringBuffer(unescapedValue.length());
+
+        while (m.find()) {
+            String url = m.group(1);
+            for (String prefix : prefixes) {
+                if (url.startsWith(prefix)) {
+                    // prepend host
+                    url = prependHostName(url);
+                    m.appendReplacement(sb, Matcher.quoteReplacement(url));
+                    // First prefix match wins
+                    break;
+                }
+            }
+
+        }
+        m.appendTail(sb);
+
+        return sb.toString();
+    }
+
     @Activate
     protected void activate(final ComponentContext componentContext) {
         final Dictionary<?, ?> properties = componentContext.getProperties();
@@ -190,9 +239,31 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                 .toStringArray(properties.get(PROP_ATTRIBUTES), DEFAULT_ATTRIBUTES);
         this.attributes = ParameterUtil.toMap(attrProp, ":", ",");
 
+        final String[] matchingPatternsProp = PropertiesUtil.toStringArray(properties.get(PROP_MATCHING_PATTERNS));
+        this.matchingPatterns = initializeMatchingPatterns(matchingPatternsProp);
+
         this.prefixes = PropertiesUtil.toStringArray(properties.get(PROP_PREFIXES), new String[0]);
         this.staticHostPattern = PropertiesUtil.toStringArray(properties.get(PROP_HOST_NAME_PATTERN), null);
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
+    }
+
+    private static Map<String, Pattern> initializeMatchingPatterns(String[] matchingPatternsProp) {
+        Map<String, Pattern> result = new HashMap<String, Pattern>();
+
+        Map<String, String> map = ParameterUtil.toMap(matchingPatternsProp, ";");
+
+        Iterator<String> iterator = map.keySet().iterator();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            String matchingPatternString = map.get(key);
+            try {
+                Pattern compiled = Pattern.compile(matchingPatternString);
+                result.put(key, compiled);
+            } catch (Exception e) {
+                log.warn("Could not compile pattern {} for {}. Ignoring it", matchingPatternString, key);
+            }
+        }
+        return result;
     }
 
     private static interface ShardNameProvider {
