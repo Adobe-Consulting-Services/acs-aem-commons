@@ -121,7 +121,7 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
         }
         int lastColumnIndex = report.getColumnNames().size();
         autosize(sheet, lastColumnIndex);
-        sheet.setAutoFilter(new CellRangeAddress(0, 1 + rows.size(),0, lastColumnIndex));
+        sheet.setAutoFilter(new CellRangeAddress(0, 1 + rows.size(),0, lastColumnIndex - 1));
         return wb;
     }
 
