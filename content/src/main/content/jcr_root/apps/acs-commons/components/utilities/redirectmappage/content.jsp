@@ -61,7 +61,7 @@
 			<coral-panel class="coral-Well">
 				<section>
 					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="Redirect Preview" /></h2>
-					<sling2:adaptTo adaptable="${resource}" adaptTo="com.adobe.acs.commons.redirectmaps.RedirectMapModel" var="redirectMapModel" />
+					<sling2:adaptTo adaptable="${resource}" adaptTo="com.adobe.acs.commons.redirectmaps.models.RedirectMapModel" var="redirectMapModel" />
 					<c:if test="${fn:length(redirectMapModel.invalidEntries) > 0}">
 						<coral-alert size="L" variant="error">
 							<coral-alert-header><fmt:message key="Invalid Redirect Sources "/></coral-alert-header>
