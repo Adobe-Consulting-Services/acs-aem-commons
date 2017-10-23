@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 
 - #1148 - Properly handle blank character encoding in SiteMapServlet
-
+- #1122 - Add clientlib category to touchui-widgets to load in Create Page wizard.
 
 ## [3.11.0] - 2017-10-18
 
