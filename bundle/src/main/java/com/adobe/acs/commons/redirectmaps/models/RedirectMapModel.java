@@ -122,8 +122,10 @@ public class RedirectMapModel {
 		log.trace("getInvalidEntries");
 		List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
 		StringBuilder sb = new StringBuilder();
-		for (RedirectConfigModel config : redirects) {
-			invalidEntries.addAll(gatherEntries(config, sb));
+		if (redirects != null) {
+			for (RedirectConfigModel config : redirects) {
+				invalidEntries.addAll(gatherEntries(config, sb));
+			}
 		}
 		log.debug("Found {} invalid entries", invalidEntries.size());
 		return invalidEntries;
