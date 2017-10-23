@@ -36,14 +36,10 @@ import java.io.ByteArrayInputStream;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Yegor Kozlov
- */
 public class TestGenericReportExcelServlet {
     @Rule
     public final SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
-
-
+    
     @Test
     public void testReport() throws Exception {
         int numRows = 10;
