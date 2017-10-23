@@ -155,7 +155,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType(request.getResponseContentType());
-        if (characterEncoding != null) {
+        if (StringUtils.isNotEmpty(this.characterEncoding)) {
             response.setCharacterEncoding(characterEncoding);
         }
         ResourceResolver resourceResolver = request.getResourceResolver();
