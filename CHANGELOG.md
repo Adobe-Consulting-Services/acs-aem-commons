@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.11.0...HEAD
 
+### Fixed
+
+- #1148 - Properly handle blank character encoding in SiteMapServlet
+
+
 ## [3.11.0] - 2017-10-18
 
 ### Added
