@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-2.13.0...HEAD
 
+### Added
+
+- #1139: Add support in StaticReferenceRewriterTransformerFactory for complex values, e.g. `img:srcset`
+
 ## [2.13.0] - 2017-08-20
 
 ### Added
