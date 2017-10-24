@@ -30,10 +30,9 @@
                                         resourcePath="${paramValues['item'][0]}"/>
                                 <condition3
                                         jcr:primaryType="nt:unstructured"
-                                        sling:resourceType="acs-commons/renderconditons/isfeatureenabled"
-                                        featureFlag="com.adobe.acs.commons.dam.impl.assetsurl.feature.flag"/>
+                                        sling:resourceType="granite/ui/components/foundation/renderconditions/feature"
+                                        feature="com.adobe.acs.commons.dam.impl.assetsurl.feature.flag"/>
                             </granite:rendercondition>
-
                         </copypublishurl>
                     </items>
                 </col1>
