@@ -31,7 +31,7 @@
                                 <condition3
                                         jcr:primaryType="nt:unstructured"
                                         sling:resourceType="granite/ui/components/foundation/renderconditions/feature"
-                                        feature="com.adobe.acs.commons.dam.impl.assetsurl.feature.flag"/>
+                                        feature="com.adobe.acs.commons.dam.impl.assetsurl.feature.flag" />
                             </granite:rendercondition>
                         </copypublishurl>
                     </items>
