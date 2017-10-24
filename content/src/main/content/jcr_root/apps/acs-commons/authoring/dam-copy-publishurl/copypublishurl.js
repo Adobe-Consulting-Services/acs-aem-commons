@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Package
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
 (function(document, $) {
     "use strict";
 
@@ -25,7 +24,7 @@
         var modalBody = $(e.target).find('.coral-Dialog-content');
         var headingFailure = Granite.I18n.get('An error occured in fetching publish URL');
 
-        var publishUrlFrag = '/apps/acs-commons/gui/content/copypublishurl.html';
+        var publishUrlFrag = '/apps/acs-commons/gui/content/publishurl.html';
 
         var content = '<textarea class="acs-aem-commons__dam-copy-published-url__text" readonly>';
         var result =
@@ -45,6 +44,12 @@
     });
 
     $( document ).one('foundation-contentloaded', function(e) {
+        if (!document.execCommand && !document.queryCommandSupported) {
+            $('#asset-publishurl-copy-cmd').hide();
+        }
+        if (!document.queryCommandSupported('copy')) {
+            $('#asset-publishurl-copy-cmd').hide();
+        }
         $('#asset-publishurl-copy-cmd').on('click', function(e) {
             var ecData = document.querySelector('.acs-aem-commons__dam-copy-published-url__text');
             ecData.select();

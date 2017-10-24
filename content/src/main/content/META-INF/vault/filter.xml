@@ -83,5 +83,6 @@
     <filter root="/etc/workflow/instances/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
     <filter root="/var/acs-commons/rep:policy"/>
-    <filter root="/apps/dam/gui/content/assets/metadataeditor"/>
+    <filter root="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl"/>
+    <filter root="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/dialogpublishurl"/>
 </workspaceFilter>

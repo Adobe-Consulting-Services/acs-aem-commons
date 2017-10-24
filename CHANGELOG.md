@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - #1121 - New MCP Task to report broken references
+- #1101 - Add Dialog to Asset Metadata allowing easy access to the publish URL for an asset.
 
 ### Fixed
 
