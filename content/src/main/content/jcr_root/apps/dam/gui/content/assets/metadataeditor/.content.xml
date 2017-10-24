@@ -59,7 +59,12 @@
                             icon="attach"
                             iconSize="XS"
                             text="Copy"
-                            variant="minimal"/>
+                            variant="minimal">
+                            <granite:rendercondition
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"
+                                expression="${!granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPad&quot;) &amp;&amp; !granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPhone&quot;)}"/>
+                        </copytext>
                         <dismiss
                             granite:rel="foundation-toggleable"
                             jcr:primaryType="nt:unstructured"
