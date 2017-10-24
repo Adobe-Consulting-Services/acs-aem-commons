@@ -1,0 +1,12 @@
+.acs-aem-commons__dam-copy-published-url__button {
+	display: block;
+    text-align: center;
+    margin: auto;
+    margin-top: 5px;
+ }
+
+.acs-aem-commons__dam-copy-published-url__text {
+    min-width: 30rem;
+    min-height: 10rem;
+
+ }
