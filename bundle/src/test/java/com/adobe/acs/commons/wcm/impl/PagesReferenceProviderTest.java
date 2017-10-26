@@ -23,82 +23,62 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.google.common.base.Function;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
+import org.mockito.stubbing.Answer;
+
+import javax.annotation.Nullable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PagesReferenceProviderTest {
 
-    @InjectMocks
-    private PagesReferenceProvider instance = new PagesReferenceProvider();
+    @Rule
+    public SlingContext context = new SlingContext();
+
+    private PagesReferenceProvider instance;
 
     @Mock
-    private Resource resource;
-
-    @Mock
-    private ResourceResolver resolver;
-
-    @Mock
-    private Resource res;
-    @Mock
-    private Resource res1;
-
-    @Mock
-    private Page referredpage;
-
-    @Mock
-    private Page referredpage1;
-
-    @Mock
-    private PageManager manager;
-
-    @Mock
-    private Page page;
-
-    @Mock
-    private Iterator<Resource> iter;
+    private PageManager pageManager;
 
     @Before
     public void setUp() throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
-        String path = "/content/geometrixx/en";
-        map.put("path", path);
-        ValueMap vm = new ValueMapDecorator(map);
-        when(resource.getValueMap()).thenReturn(vm);
-        when(resource.getResourceResolver()).thenReturn(resolver);
-        when(resolver.adaptTo(PageManager.class)).thenReturn(manager);
-        when(manager.getContainingPage(path)).thenReturn(referredpage);
-        when(referredpage.getPath()).thenReturn(path);
-        when(resource.listChildren()).thenReturn(iter);
-        when(iter.hasNext()).thenReturn(false);
-        when(resolver.getResource(path)).thenReturn(res);
-        when(res.adaptTo(Page.class)).thenReturn(referredpage);
-        when(referredpage.getName()).thenReturn("geometrixx");
-        Calendar cal = GregorianCalendar.getInstance();
-        when(referredpage.getLastModified()).thenReturn(cal);
+        instance = new PagesReferenceProvider();
+        instance.activate(Collections.emptyMap());
+        context.registerAdapter(ResourceResolver.class, PageManager.class, new Function<ResourceResolver, PageManager>() {
+            @Nullable
+            @Override
+            public PageManager apply(@Nullable ResourceResolver input) {
+                return pageManager;
+            }
+        });
+
+        context.load().json(getClass().getResourceAsStream("PagesReferenceProviderTest.json"), "/content/geometrixx");
+
+        registerPage("/content/geometrixx/en", "geometrixx");
+        registerPage("/content/geometrixx/en/toolbar", "geometrixx1");
+        registerPage("/content/geometrixx/reftoself", "to self");
     }
 
     @Test
     public void testSingleReferenceToaPage() throws Exception {
-        List<Reference> actual = instance.findReferences(resource);
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/oneref/jcr:content"));
         assertNotNull(actual);
         assertEquals(1, actual.size());
         assertEquals("geometrixx (Page)", actual.get(0).getName());
@@ -107,86 +87,41 @@ public class PagesReferenceProviderTest {
 
     @Test
     public void testNoReferenceToAnyPage() throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
-        String path = "/content/ge1ometrixx/en";
-        map.put("path", path);
-        ValueMap vm = new ValueMapDecorator(map);
-        when(resource.getValueMap()).thenReturn(vm);
-        when(resource.getResourceResolver()).thenReturn(resolver);
-        when(resolver.getResource(path)).thenReturn(res);
-        when(res.adaptTo(Page.class)).thenReturn(null);
-        when(referredpage.getName()).thenReturn("geometrixx");
-        Calendar cal = GregorianCalendar.getInstance();
-        when(referredpage.getLastModified()).thenReturn(cal);
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/noref/jcr:content"));
+        assertNotNull(actual);
+        assertEquals(0, actual.size());
+    }
 
-        List<Reference> actual = instance.findReferences(resource);
+    @Test
+    public void testReferenceToMissingPage() throws Exception {
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/badref/jcr:content"));
         assertNotNull(actual);
         assertEquals(0, actual.size());
     }
 
     @Test
     public void testSingleReferenceToManyPages() throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
-        String path = "/content/geometrixx/en";
-        String path1 = "/content/geometrixx/en/toolbar";
-        map.put("path", path);
-        map.put("path1", path1);
-        ValueMap vm = new ValueMapDecorator(map);
-        when(resource.getValueMap()).thenReturn(vm);
-        when(resource.getResourceResolver()).thenReturn(resolver);
-        when(resolver.getResource(path)).thenReturn(res);
-        when(resolver.getResource(path1)).thenReturn(res1);
-        when(res.adaptTo(Page.class)).thenReturn(referredpage);
-        when(res1.adaptTo(Page.class)).thenReturn(referredpage1);
-        when(referredpage.getName()).thenReturn("geometrixx");
-        when(referredpage1.getName()).thenReturn("geometrixx1");
-        when(referredpage1.getPath()).thenReturn(path1);
-        when(manager.getContainingPage(path1)).thenReturn(referredpage1);
-        Calendar cal = GregorianCalendar.getInstance();
-        when(referredpage.getLastModified()).thenReturn(cal);
-        when(referredpage1.getLastModified()).thenReturn(cal);
-        List<Reference> actual = instance.findReferences(resource);
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/tworefs/jcr:content"));
 
         assertNotNull(actual);
         assertEquals(2, actual.size());
 
-        boolean geometrixxFound = false;
-        boolean geometrixxOneFound = false;
-        for (Reference ref : actual) {
-            if (ref.getName().equals("geometrixx (Page)")) {
-                geometrixxFound = true;
-            } else if (ref.getName().equals("geometrixx1 (Page)")) {
-                geometrixxOneFound = true;
-            }
-        }
+        assertArrayEquals(new String[] { "geometrixx (Page)", "geometrixx1 (Page)" }, toArrayOfNames(actual));
+    }
 
-        assertTrue(geometrixxFound);
-        assertTrue(geometrixxOneFound);
+    @Test
+    public void testReferenceOnChildNode() throws Exception {
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/tworefsChild/jcr:content"));
 
+        assertNotNull(actual);
+        assertEquals(2, actual.size());
+
+        assertArrayEquals(new String[] { "geometrixx (Page)", "geometrixx1 (Page)" }, toArrayOfNames(actual));
     }
 
     @Test
     public void testManyReferenceToSinglePages() throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
-        String path = "/content/geometrixx/en";
-        String path1 = "/content/geometrixx/en";
-        map.put("path", path);
-        map.put("path1", path1);
-        ValueMap vm = new ValueMapDecorator(map);
-        when(resource.getValueMap()).thenReturn(vm);
-        when(resource.getResourceResolver()).thenReturn(resolver);
-        when(resolver.getResource(path)).thenReturn(res);
-        when(resolver.getResource(path1)).thenReturn(res1);
-        when(res.adaptTo(Page.class)).thenReturn(referredpage);
-        when(res1.adaptTo(Page.class)).thenReturn(referredpage);
-        when(referredpage.getName()).thenReturn("geometrixx");
-        when(referredpage1.getName()).thenReturn("geometrixx");
-        when(referredpage1.getPath()).thenReturn(path1);
-        when(manager.getContainingPage(path1)).thenReturn(referredpage1);
-        Calendar cal = GregorianCalendar.getInstance();
-        when(referredpage.getLastModified()).thenReturn(cal);
-        when(referredpage1.getLastModified()).thenReturn(cal);
-        List<Reference> actual = instance.findReferences(resource);
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/tworefsSamePage/jcr:content"));
 
         assertNotNull(actual);
         assertEquals(1, actual.size());
@@ -195,43 +130,57 @@ public class PagesReferenceProviderTest {
     }
 
     @Test
-    public void testMultipleReferencesReferenceToPages() throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
-        String path = "\"/content/geometrixx/en\",\"/content/geometrixx/en/toolbar\"";
-        String path1 = "/content/geometrixx/en/toolbar";
-        map.put("path", path);
-        // map.put("path1", path1);
-        ValueMap vm = new ValueMapDecorator(map);
-        when(resource.getValueMap()).thenReturn(vm);
-        when(resource.getResourceResolver()).thenReturn(resolver);
-        when(resolver.getResource(path)).thenReturn(res);
-        when(resolver.getResource(path1)).thenReturn(res1);
-        when(res.adaptTo(Page.class)).thenReturn(referredpage);
-        when(res1.adaptTo(Page.class)).thenReturn(referredpage1);
-        when(referredpage.getName()).thenReturn("geometrixx");
-        when(referredpage1.getName()).thenReturn("geometrixx1");
-        when(referredpage1.getPath()).thenReturn(path1);
-        when(manager.getContainingPage(path1)).thenReturn(referredpage1);
-        Calendar cal = GregorianCalendar.getInstance();
-        when(referredpage.getLastModified()).thenReturn(cal);
-        when(referredpage1.getLastModified()).thenReturn(cal);
-        List<Reference> actual = instance.findReferences(resource);
+    public void testMultiValuedProp() throws Exception {
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/mvRef/jcr:content"));
 
         assertNotNull(actual);
         assertEquals(2, actual.size());
 
-        boolean geometrixxFound = false;
-        boolean geometrixxOneFound = false;
-        for (Reference ref : actual) {
-            if (ref.getName().equals("geometrixx (Page)")) {
-                geometrixxFound = true;
-            } else if (ref.getName().equals("geometrixx1 (Page)")) {
-                geometrixxOneFound = true;
-            }
-        }
+        assertArrayEquals(new String[] { "geometrixx (Page)", "geometrixx1 (Page)" }, toArrayOfNames(actual));
+    }
 
-        assertTrue(geometrixxFound);
-        assertTrue(geometrixxOneFound);
+    @Test
+    public void testMultiValuedPropWithOther() throws Exception {
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/mvRefSamePage/jcr:content"));
 
+        assertNotNull(actual);
+        assertEquals(2, actual.size());
+
+        assertArrayEquals(new String[] { "geometrixx (Page)", "geometrixx1 (Page)" }, toArrayOfNames(actual));
+    }
+
+    @Test
+    public void testMultipleReferencesReferenceToPages() throws Exception {
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/commaSeparated/jcr:content"));
+
+        assertNotNull(actual);
+        assertEquals(2, actual.size());
+
+        assertArrayEquals(new String[] { "geometrixx (Page)", "geometrixx1 (Page)" }, toArrayOfNames(actual));
+
+    }
+
+    @Test
+    public void testRefToSelf() throws Exception {
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/reftoself/jcr:content"));
+
+        assertNotNull(actual);
+        assertEquals(1, actual.size());
+        assertEquals("geometrixx (Page)", actual.get(0).getName());
+
+    }
+
+    private Page registerPage(String path, String name) {
+        Page result = mock(Page.class, path);
+        when(pageManager.getContainingPage(path)).thenReturn(result);
+        when(result.getPath()).thenReturn(path);
+        when(result.getName()).thenReturn(name);
+        when(result.getLastModified()).thenReturn(Calendar.getInstance());
+        when(result.getContentResource()).then(i -> context.resourceResolver().getResource(path + "/jcr:content"));
+        return result;
+    }
+
+    private Object[] toArrayOfNames(List<Reference> actual) {
+        return actual.stream().map(p -> p.getName()).sorted().collect(Collectors.toList()).toArray();
     }
 }
