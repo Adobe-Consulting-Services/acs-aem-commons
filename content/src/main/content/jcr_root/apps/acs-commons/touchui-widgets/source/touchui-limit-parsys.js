@@ -154,4 +154,4 @@
             extendComponentDrop();
         }
     });
-}(jQuery, jQuery(document), (window.Granite.author = window.Granite.author || {})));
+}(jQuery, jQuery(document), Granite.author));
