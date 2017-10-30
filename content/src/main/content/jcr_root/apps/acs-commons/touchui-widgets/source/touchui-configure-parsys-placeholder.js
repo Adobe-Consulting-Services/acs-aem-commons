@@ -24,7 +24,7 @@
  * acsParsysBackgroundColor - drop zone background color - eg.#9DB68C
  * acsParsysBorderColor - drop zone border color - eg. #E5E500
  */
-(function($, $document, gAuthor){
+(function($, $document){
     var ACS_PARSYS_PLACEHOLDER_TEXT = "acsParsysPlaceholderText",
         ACS_PARSYS_TEXT_COLOR = "acsParsysTextColor",
         ACS_PARSYS_BG_COLOR = "acsParsysBackgroundColor",
@@ -62,14 +62,15 @@
     }
 
     function getParsyses(){
-        var editables = gAuthor.edit.findEditables(),
-            parsys = [];
+        var parsys = [];
 
-        _.each(editables, function(editable){
-            if(isParsys(editable)){
-                parsys.push(editable);
-            }
-        });
+        if (Granite && Granite.author && Granite.author.edit) {
+            _.each(Granite.author.edit.findEditables(), function(editable){
+                if(isParsys(editable)){
+                    parsys.push(editable);
+                }
+            });
+        }
 
         return parsys;
     }
@@ -153,4 +154,4 @@
 
         configureParsys(event.inspectable, event.originalEvent.type);
     });
-}(jQuery, jQuery(document), Granite.author));
+}(jQuery, jQuery(document)));

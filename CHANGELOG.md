@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1150 - Fix the empty datetime value displayed as "invalid date" in the touchui dialog 
 - #842 - Fix issue with Environment Indicator title being reset
 - #1143 - Remove current page from result from PagesReferenceProvider
+- #1156 - Remove unnecessary initialization of `window.Granite.author`
 
 ## [3.11.0] - 2017-10-18
 
