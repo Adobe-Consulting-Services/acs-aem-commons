@@ -87,8 +87,14 @@
         setDateField: function ($field, value) {
             var date = moment(new Date(value));
             var $parent = $field.parent();
-            $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
-            $field.val(date.format($parent.attr("data-stored-format")));
+            if (date.isValid()) {
+                $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
+                $field.val(date.format($parent.attr("data-stored-format")));
+            }
+            else {
+                $parent.find("input.coral-Textfield").val(value);
+                $field.val(value);
+            }
         },
 
         isRichTextField: function ($field) {
