@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #842 - Fix issue with Environment Indicator title being reset
 - #1143 - Remove current page from result from PagesReferenceProvider
 - #1156 - Remove unnecessary initialization of `window.Granite.author`
+- #1158 - Corrected incorrect date parsing/formatting in AuditLogSearch
 
 ## [3.11.0] - 2017-10-18
 
