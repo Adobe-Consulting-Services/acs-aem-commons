@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1143 - Remove current page from result from PagesReferenceProvider
 - #1156 - Remove unnecessary initialization of `window.Granite.author`
 - #1158 - Corrected incorrect date parsing/formatting in AuditLogSearch
+- #1160 - Fix fieldset selector to allow custom class attribute for touchui composite multifield
 
 ## [3.11.0] - 2017-10-18
 
