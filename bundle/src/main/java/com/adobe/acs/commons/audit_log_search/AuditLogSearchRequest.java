@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.audit_log_search;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,6 +32,7 @@ import javax.jcr.UnsupportedRepositoryOperationException;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -48,16 +48,11 @@ import com.adobe.granite.security.user.UserPropertiesService;
  */
 public class AuditLogSearchRequest {
 
-	private static final SimpleDateFormat HTML5_DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm");
-	private static final SimpleDateFormat QUERY_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+	private static final FastDateFormat HTML5_DATETIME_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm", TimeZone.getTimeZone("GMT"));
+	private static final FastDateFormat QUERY_DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss", TimeZone.getTimeZone("GMT"));
 
 	private static String getJCRSQLDate(Date date) {
 		return QUERY_DATE_FORMAT.format(date) + ".000Z";
-	}
-
-	{
-		QUERY_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
-		HTML5_DATETIME_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
 	private final String contentRoot;
@@ -110,10 +105,12 @@ public class AuditLogSearchRequest {
 		if (!StringUtils.isEmpty(user)) {
 			expressions.add("[cq:userid]='" + StringEscapeUtils.escapeSql(user) + "'");
 		}
-		if (includeChildren) {
-			expressions.add("[cq:path] LIKE '" + StringEscapeUtils.escapeSql(contentRoot) + "%'");
-		} else {
-			expressions.add("[cq:path]='" + StringEscapeUtils.escapeSql(contentRoot) + "'");
+		if (StringUtils.isNotEmpty(contentRoot)) {
+			if (includeChildren) {
+				expressions.add("[cq:path] LIKE '" + StringEscapeUtils.escapeSql(contentRoot) + "%'");
+			} else {
+				expressions.add("[cq:path]='" + StringEscapeUtils.escapeSql(contentRoot) + "'");
+			}
 		}
 		if (startDate != null) {
 			expressions.add("[cq:time] > CAST('" + getJCRSQLDate(startDate) + "' AS DATE)");

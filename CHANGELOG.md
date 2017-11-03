@@ -12,12 +12,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - #1121 - New MCP Task to report broken references
+- #1101 - Add Dialog to Asset Metadata allowing easy access to the publish URL for an asset.
 
 ### Fixed
 
 - #1148 - Properly handle blank character encoding in SiteMapServlet
 - #1122 - Add clientlib category to touchui-widgets to load in Create Page wizard.
 - #1150 - Fix the empty datetime value displayed as "invalid date" in the touchui dialog 
+- #842 - Fix issue with Environment Indicator title being reset
+- #1143 - Remove current page from result from PagesReferenceProvider
+- #1156 - Remove unnecessary initialization of `window.Granite.author`
+- #1158 - Corrected incorrect date parsing/formatting in AuditLogSearch
+- #1160 - Fix fieldset selector to allow custom class attribute for touchui composite multifield
 
 ## [3.11.0] - 2017-10-18
 

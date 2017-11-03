@@ -56,6 +56,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             + "height: 5px;"
             + "z-index: 100000000000000;";
 
+    private static final String TITLE_UPDATE_SCRIPT = "<script>(function() { var c = 0; t = '%s' + ' | ' + document.title, " +
+            "i = setInterval(function() { if (document.title === t && c++ > 10) { clearInterval(i); } else { document.title = t; } }, 1500); " +
+            "document.title = t; })();</script>\n";
 
     @Reference
     private XSSAPI xss;
@@ -179,9 +182,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                 }
 
                 if (StringUtils.isNotBlank(titlePrefix)) {
-                    printWriter.write("<script>document.title = '"
-                            + titlePrefix
-                            + " | ' + document.title;</script>");
+                    printWriter.printf(TITLE_UPDATE_SCRIPT, titlePrefix);
                 }
 
                 printWriter.write(contents.substring(bodyIndex));
