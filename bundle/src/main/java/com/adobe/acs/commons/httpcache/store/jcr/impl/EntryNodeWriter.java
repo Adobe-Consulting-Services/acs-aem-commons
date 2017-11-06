@@ -1,5 +1,10 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +15,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.day.cq.commons.jcr.JcrConstants;
 
 public class EntryNodeWriter
@@ -17,11 +23,13 @@ public class EntryNodeWriter
 
     private final Session session;
     private final Node entryNode;
+    private final CacheKey cacheKey;
     private final CacheContent cacheContent;
 
-    public EntryNodeWriter(Session session, Node entryNode, CacheContent cacheContent){
+    public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent){
         this.session = session;
         this.entryNode = entryNode;
+        this.cacheKey = cacheKey;
         this.cacheContent = cacheContent;
     }
 
@@ -29,15 +37,22 @@ public class EntryNodeWriter
      * Populate the entry node with values
      * @throws RepositoryException
      */
-    public void write() throws RepositoryException
+    public void write() throws RepositoryException, IOException
     {
         populateMetaData();
         populateHeaders();
         populateBinaryContent();
+        setExpireTime();
 
-        //write the node
-        session.save();
+        if(!entryNode.hasProperty("cacheKeySerialized"))
+            populateCacheKey();
 
+    }
+
+    private void setExpireTime() throws RepositoryException
+    {
+        Calendar calendar = Calendar.getInstance();
+        entryNode.setProperty("expires-on",  calendar.getTimeInMillis() );
     }
 
     private void populateMetaData() throws RepositoryException
@@ -72,11 +87,23 @@ public class EntryNodeWriter
 
 
         for(Iterator<Map.Entry<String, List<String>>> entryIterator = cacheContent.getHeaders().entrySet().iterator(); entryIterator.hasNext();){
-
             Map.Entry<String, List<String>> entry = entryIterator.next();
             final String key = entry.getKey();
             final List<String> values = entry.getValue();
             headers.setProperty(key, values.toArray(new String[values.size()]));
         }
+    }
+
+    private void populateCacheKey() throws RepositoryException, IOException
+    {
+        final PipedInputStream pis = new PipedInputStream();
+        final PipedOutputStream pos = new PipedOutputStream(pis);
+
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(pos);
+        objectOutputStream.writeObject(cacheKey);
+        objectOutputStream.close();
+
+        Binary binary = session.getValueFactory().createBinary(pis);
+        entryNode.setProperty("cacheKeySerialized", binary);
     }
 }

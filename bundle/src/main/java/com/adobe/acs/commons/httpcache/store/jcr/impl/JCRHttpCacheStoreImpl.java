@@ -19,19 +19,30 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
+import static org.apache.jackrabbit.commons.JcrUtils.getOrCreateUniqueByPath;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.jcr.Binary;
 import javax.jcr.Credentials;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.SimpleCredentials;
+
+import org.apache.commons.lang.NotImplementedException;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
@@ -39,15 +50,9 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
-
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-
+import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodes;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodesCount;
+import com.day.cq.commons.jcr.JcrConstants;
 
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
@@ -57,62 +62,261 @@ import org.apache.felix.scr.annotations.Service;
 
 @Component
 @Service
-@Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-          value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
-          propertyPrivate = true)
-public class JCRHttpCacheStoreImpl implements HttpCacheStore {
+
+@Properties({
+        @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
+                value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
+                propertyPrivate = true),
+        @Property(
+            label = "Cron expression defining when this Scheduled Service will run",
+            description = "[every minute = 0 * * * * ?] Visit www.cronmaker.com to generate cron expressions.",
+            name = "scheduler.expression",
+            value = "0 1 0 ? * *"
+        ),
+        @Property(
+            label = "Allow concurrent executions",
+            description = "Allow concurrent executions of this Scheduled Service. This is almost always false.",
+            name = "scheduler.concurrent",
+            propertyPrivate = true,
+            boolValue = false
+        )
+})
+public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
 
     @Reference private Repository repository;
 
-    @Property private String cacheRootPath;
 
-    @Property  private int bucketDimensionDepth;
+    @Property  private String cacheRootPath;
 
-    private Session session;
+    @Property
+    private int     bucketDimensionDepth,
 
-    private Node cacheRoot;
+                    /**
+                     * The delta on which nodes are persisted to the repository with session.save().
+                     */
+                    deltaSaveThreshold;
+
+    private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
+
+    private final AtomicInteger deltaCounter = new AtomicInteger();
+
+    private Credentials credentials;
+
 
     @Activate protected void activate() throws RepositoryException
     {
-        Credentials credentials = null;
-        session = repository.login(credentials);
-        cacheRoot = session.getNode(cacheRootPath);
+        credentials = new SimpleCredentials("", "".toCharArray());
     }
 
     @Deactivate protected void deactivate(){
-        if(session != null && session.isLive())
-            session.logout();
+
+
     }
 
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
 
+        Session session = null;
+
         try {
-            final Node bucketNode = BucketNodeHandler.getBucketNode(cacheRoot, key, bucketDimensionDepth);
+            session = repository.login(credentials);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketDimensionDepth);
+            final Node bucketNode = factory.getBucketNode();
 
-            final Node entryNode = createOrRetrieveEntryNode(bucketNode, key, content);
+            final Node entryNode = createOrRetrieveEntryNode(bucketNode, key);
 
-            new EntryNodeWriter(session, entryNode, content).write();
-
+            new EntryNodeWriter(session, entryNode, key, content).write();
+            session.save();
 
         } catch (Exception e) {
+            log.error("Error persisting cache content in JCR", e);
             throw new HttpCacheDataStreamException(e);
+        } finally {
+            if(session != null && session.isLive())
+                session.logout();
         }
     }
 
 
-    private Node createOrRetrieveEntryNode(Node bucketNode, CacheKey key, CacheContent content)
+    @Override
+    public boolean contains(CacheKey key) {
+        Session session = null;
+
+        try {
+            session = repository.login(credentials);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketDimensionDepth);
+            final Node bucketNode = factory.getBucketNode();
+
+            if(bucketNode != null)
+                return (null != getEntryIfExists(bucketNode, key));
+        } catch (Exception e) {
+            log.error("Error checking if the entry node exists in the repository", e);
+        } finally {
+            if(session != null && session.isLive())
+                session.logout();
+        }
+        return false;
+    }
+
+    @Override
+    public CacheContent getIfPresent(CacheKey key) {
+
+        Session session = null;
+
+        try {
+            session = repository.login(credentials);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketDimensionDepth);
+            final Node bucketNode = factory.getBucketNode();
+
+            if(bucketNode != null) {
+                Node entryNode = getEntryIfExists(bucketNode, key);
+                return new EntryNodeToCacheContentBuilder(entryNode).build();
+            }
+
+
+        } catch (Exception e) {
+            log.error("Error retrieving the entry node", e);
+        } finally {
+            if(session != null && session.isLive())
+                session.logout();
+        }
+        return null;
+    }
+
+
+
+    @Override
+    public long size() {
+        Session session = null;
+
+        try {
+            session = repository.login(credentials);
+            return new AllEntryNodesCount(session).get();
+
+        } catch (Exception e) {
+            log.error("Error retrieving the node count of entries", e);
+        } finally {
+            if(session != null && session.isLive())
+                session.logout();
+        }
+        return 0;
+    }
+
+
+
+    @Override
+    public void invalidate(CacheKey key) {
+
+        Session session = null;
+
+        try {
+            session = repository.login(credentials);
+
+            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketDimensionDepth);
+            final Node bucketNode = factory.getBucketNode();
+
+            if(bucketNode != null){
+                Node entryNode = getEntryIfExists(bucketNode, key);
+                if(entryNode != null){
+                    entryNode.remove();
+                    session.save();
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("error invalidating cachekey: {}", key);
+        } finally {
+            if(session != null && session.isLive())
+                session.logout();
+        }
+    }
+
+    @Override public void invalidateAll()
+    {
+        Session session = null;
+        try {
+            session = repository.login(credentials);
+            NodeIterator nodeIterator = new AllEntryNodes(session).get();
+            int delta = 0;
+            while (nodeIterator.hasNext()) {
+                delta++;
+                Node node = nodeIterator.nextNode();
+                node.remove();
+                if(delta > deltaSaveThreshold || !nodeIterator.hasNext())
+                    session.save();
+            }
+
+        } catch (RepositoryException e) {
+            log.error("Error removing bucket nodes from JCRHttpCacheStore", e);
+        } finally {
+            if(session != null && session.isLive())
+                session.logout();
+        }
+    }
+
+    @Override
+    public void invalidate(HttpCacheConfig cacheConfig) {
+
+        Session session = null;
+        try {
+            session = repository.login(credentials);
+            NodeIterator nodeIterator = new AllEntryNodes(session).get();
+            int delta = 0;
+            while(nodeIterator.hasNext()){
+                delta++;
+                Node entryNode = nodeIterator.nextNode();
+                CacheKey key = getCacheKeyFromEntryNode(entryNode);
+                if(cacheConfig.knows(key)) {
+                    entryNode.remove();
+
+                    if(delta > deltaSaveThreshold || !nodeIterator.hasNext())
+                        session.save();
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Error removing bucket nodes from JCRHttpCacheStore.", e);
+        } finally {
+            if(session != null && session.isLive())
+                session.logout();
+        }
+    }
+
+    @Override
+    public TempSink createTempSink() {
+        throw new NotImplementedException();
+    }
+
+    @Override public void run()
+    {
+        Session session = null;
+        try {
+            session = repository.login(credentials);
+            NodeIterator nodeIterator = new AllEntryNodes(session).get();
+
+            while(nodeIterator.hasNext())
+                nodeIterator.nextNode().remove();
+
+            session.save();
+
+        } catch (Exception e) {
+            log.error("Error removing bucket nodes from JCRHttpCacheStore.", e);
+        } finally {
+            if(session != null && session.isLive())
+                session.logout();
+        }
+    }
+
+
+    private Node createOrRetrieveEntryNode(Node bucketNode, CacheKey key)
             throws RepositoryException, IOException, ClassNotFoundException
     {
-        final Node entryNode = getEntryIfExists(bucketNode, key);
+        final Node existingEntryNode = getEntryIfExists(bucketNode, key);
 
-        if(null != entryNode){
-            return entryNode;
-        }else{
-
-        }
-
-        return null;
+        if(null != existingEntryNode)
+            return existingEntryNode;
+        else
+            return getOrCreateUniqueByPath(bucketNode, "entry", JcrConstants.NT_UNSTRUCTURED);
     }
 
     private Node getEntryIfExists(Node bucketNode, CacheKey key)
@@ -139,53 +343,6 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore {
         return (CacheKey) objectInputStream.readObject();
     }
 
-    private void saveCacheKeyToEntryNode(Node entryNode, CacheKey key) throws RepositoryException, IOException
-    {
-        final PipedInputStream pis = new PipedInputStream();
-        final PipedOutputStream pos = new PipedOutputStream(pis);
-
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(pos);
-        objectOutputStream.writeObject(key);
-        objectOutputStream.close();
-
-        Binary binary = session.getValueFactory().createBinary(pis);
-        entryNode.setProperty("cacheKeySerialized", binary);
-        session.save();
-    }
 
 
-    @Override
-    public boolean contains(CacheKey key) {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public CacheContent getIfPresent(CacheKey key) {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public long size() {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public void invalidate(CacheKey key) {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public void invalidateAll() {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public void invalidate(HttpCacheConfig cacheConfig) {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public TempSink createTempSink() {
-        throw new NotImplementedException();
-    }
 }
