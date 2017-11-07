@@ -14,6 +14,8 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import org.apache.jackrabbit.commons.JcrUtils;
+
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.day.cq.commons.jcr.JcrConstants;
@@ -46,7 +48,6 @@ public class EntryNodeWriter
 
         if(!entryNode.hasProperty("cacheKeySerialized"))
             populateCacheKey();
-
     }
 
     private void setExpireTime() throws RepositoryException
@@ -68,12 +69,12 @@ public class EntryNodeWriter
      */
     private void populateBinaryContent() throws RepositoryException
     {
-        final Node contents = entryNode.addNode("contents");
-        contents.setPrimaryType(JcrConstants.NT_UNSTRUCTURED);
-
+        final Node contents = JcrUtils.getOrCreateByPath(entryNode, "contents", false, JcrConstants.NT_FILE, JcrConstants.NT_FILE, false);
+        final Node jcrContent = JcrUtils.getOrCreateByPath(contents, JcrConstants.JCR_CONTENT, false, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE, false);
         //save input stream to node
         Binary binary = session.getValueFactory().createBinary(cacheContent.getInputDataStream());
-        contents.setProperty("binary", binary);
+        jcrContent.setProperty(JcrConstants.JCR_DATA, binary);
+        jcrContent.setProperty(JcrConstants.JCR_MIMETYPE, "text/plain");
     }
 
     /**
@@ -96,14 +97,21 @@ public class EntryNodeWriter
 
     private void populateCacheKey() throws RepositoryException, IOException
     {
-        final PipedInputStream pis = new PipedInputStream();
-        final PipedOutputStream pos = new PipedOutputStream(pis);
+        PipedInputStream pis = null;
+        try{
+            pis = new PipedInputStream();
+            final PipedOutputStream pos = new PipedOutputStream(pis);
 
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(pos);
-        objectOutputStream.writeObject(cacheKey);
-        objectOutputStream.close();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(pos);
+            objectOutputStream.writeObject(cacheKey);
+            objectOutputStream.close();
 
-        Binary binary = session.getValueFactory().createBinary(pis);
-        entryNode.setProperty("cacheKeySerialized", binary);
+            Binary binary = session.getValueFactory().createBinary(pis);
+            entryNode.setProperty("cacheKeySerialized", binary);
+        }finally {
+            if(pis != null)
+                pis.close();
+        }
+
     }
 }

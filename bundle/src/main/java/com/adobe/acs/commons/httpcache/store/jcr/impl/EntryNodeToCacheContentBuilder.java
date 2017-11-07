@@ -12,6 +12,9 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 
+import org.apache.jackrabbit.JcrConstants;
+import org.apache.jackrabbit.commons.JcrUtils;
+
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 
 public class EntryNodeToCacheContentBuilder
@@ -86,8 +89,10 @@ public class EntryNodeToCacheContentBuilder
 
     private InputStream retrieveInputStream() throws RepositoryException
     {
-        Node contentsNode = entryNode.getNode("contents");
-        Property binaryProperty = contentsNode.getProperty("binary");
+        final Node contentsNode = entryNode.getNode("contents");
+        final Node jcrContent =   contentsNode.getNode(JcrConstants.JCR_CONTENT);
+
+        Property binaryProperty = jcrContent.getProperty(JcrConstants.JCR_DATA);
         return binaryProperty.getBinary().getStream();
     }
 

@@ -23,15 +23,13 @@ import static org.apache.jackrabbit.commons.JcrUtils.getOrCreateUniqueByPath;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.jcr.Credentials;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
-import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.SimpleCredentials;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularData;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.felix.scr.annotations.Activate;
@@ -41,6 +39,8 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,12 +57,8 @@ import com.day.cq.commons.jcr.JcrConstants;
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
  */
-
-// TODO - Placeholder component. To be implemented.
-
 @Component
 @Service
-
 @Properties({
         @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
                 value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
@@ -81,31 +77,28 @@ import com.day.cq.commons.jcr.JcrConstants;
             boolValue = false
         )
 })
-public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
+public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Runnable {
 
-    @Reference private Repository repository;
-
+    @Reference private ResourceResolverFactory resourceResolverFactory;
 
     @Property  private String cacheRootPath;
 
-    @Property
-    private int     bucketDimensionDepth,
+    /**
+     * The depth of the bucket node tree.
+     */
+    @Property private int bucketTreeDepth;
 
-                    /**
-                     * The delta on which nodes are persisted to the repository with session.save().
-                     */
-                    deltaSaveThreshold;
+    /**
+     * The delta on which nodes are persisted to the repository with session.save().
+     */
+    @Property private int deltaSaveThreshold;
 
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
 
-    private final AtomicInteger deltaCounter = new AtomicInteger();
 
-    private Credentials credentials;
-
-
-    @Activate protected void activate() throws RepositoryException
+    @Activate protected void activate()
     {
-        credentials = new SimpleCredentials("", "".toCharArray());
+
     }
 
     @Deactivate protected void deactivate(){
@@ -119,8 +112,9 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
         Session session = null;
 
         try {
-            session = repository.login(credentials);
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketDimensionDepth);
+            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            session = resourceResolver.adaptTo(Session.class);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
             final Node bucketNode = factory.getBucketNode();
 
             final Node entryNode = createOrRetrieveEntryNode(bucketNode, key);
@@ -143,8 +137,9 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
         Session session = null;
 
         try {
-            session = repository.login(credentials);
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketDimensionDepth);
+            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            session = resourceResolver.adaptTo(Session.class);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
             final Node bucketNode = factory.getBucketNode();
 
             if(bucketNode != null)
@@ -164,8 +159,9 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
         Session session = null;
 
         try {
-            session = repository.login(credentials);
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketDimensionDepth);
+            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            session = resourceResolver.adaptTo(Session.class);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
             final Node bucketNode = factory.getBucketNode();
 
             if(bucketNode != null) {
@@ -190,7 +186,8 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
         Session session = null;
 
         try {
-            session = repository.login(credentials);
+            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            session = resourceResolver.adaptTo(Session.class);
             return new AllEntryNodesCount(session).get();
 
         } catch (Exception e) {
@@ -206,13 +203,13 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
 
     @Override
     public void invalidate(CacheKey key) {
-
         Session session = null;
 
         try {
-            session = repository.login(credentials);
+            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            session = resourceResolver.adaptTo(Session.class);
 
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketDimensionDepth);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
             final Node bucketNode = factory.getBucketNode();
 
             if(bucketNode != null){
@@ -235,7 +232,9 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
     {
         Session session = null;
         try {
-            session = repository.login(credentials);
+            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            session = resourceResolver.adaptTo(Session.class);
+
             NodeIterator nodeIterator = new AllEntryNodes(session).get();
             int delta = 0;
             while (nodeIterator.hasNext()) {
@@ -246,7 +245,7 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
                     session.save();
             }
 
-        } catch (RepositoryException e) {
+        } catch (Exception e) {
             log.error("Error removing bucket nodes from JCRHttpCacheStore", e);
         } finally {
             if(session != null && session.isLive())
@@ -259,7 +258,9 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
 
         Session session = null;
         try {
-            session = repository.login(credentials);
+            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            session = resourceResolver.adaptTo(Session.class);
+
             NodeIterator nodeIterator = new AllEntryNodes(session).get();
             int delta = 0;
             while(nodeIterator.hasNext()){
@@ -291,7 +292,9 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
     {
         Session session = null;
         try {
-            session = repository.login(credentials);
+            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            session = resourceResolver.adaptTo(Session.class);
+
             NodeIterator nodeIterator = new AllEntryNodes(session).get();
 
             while(nodeIterator.hasNext())
@@ -343,6 +346,38 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, Runnable {
         return (CacheKey) objectInputStream.readObject();
     }
 
+    @Override public long getTtl()
+    {
+        return 0;
+    }
 
+    @Override public void clearCache()
+    {
+        invalidateAll();
+    }
 
+    @Override public long getCacheEntriesCount()
+    {
+        return size();
+    }
+
+    @Override public String getCacheSize()
+    {
+        return null;
+    }
+
+    @Override public TabularData getCacheStats() throws OpenDataException
+    {
+        return null;
+    }
+
+    @Override public String getCacheEntry(String cacheKeyStr) throws Exception
+    {
+        return null;
+    }
+
+    @Override public TabularData getCacheContents() throws OpenDataException
+    {
+        return null;
+    }
 }
