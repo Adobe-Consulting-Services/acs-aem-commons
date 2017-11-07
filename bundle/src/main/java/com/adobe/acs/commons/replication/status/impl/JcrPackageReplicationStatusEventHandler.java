@@ -229,7 +229,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobProcessor, Ev
                     log.error("IOException occurred updating replication status for contents of package", e);
                     return false;
                 } catch (PackageException e) {
-                    log.error("Could not retrieve the Packages contents.", e);
+                    log.error("Could not build the Packages contents.", e);
                     return false;
                 }
             }

@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.httpcache.keys;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -29,6 +32,17 @@ import org.apache.sling.api.SlingHttpServletRequest;
  * This project will provide a GroupBased CacheKey factory.
  */
 public interface CacheKeyFactory {
+
+    /**
+     * Unserialize the cache key. Needed for disk / jcr storage
+     * Can be left unimplemented for inmem storage.
+     * @param stream
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    CacheKey unserialize(InputStream stream) throws IOException, ClassNotFoundException;
+
     /**
      * Build a cache key.
      *

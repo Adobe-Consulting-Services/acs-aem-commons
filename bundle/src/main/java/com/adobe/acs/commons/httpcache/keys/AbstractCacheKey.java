@@ -80,6 +80,10 @@ public abstract class AbstractCacheKey {
         return hierarchyResourcePath;
     }
 
+    public String getResourcePath(){
+        return resourcePath;
+    }
+
     public boolean isInvalidatedBy(CacheKey cacheKey) {
         return StringUtils.equals(hierarchyResourcePath, cacheKey.getHierarchyResourcePath());
     }
@@ -92,4 +96,6 @@ public abstract class AbstractCacheKey {
         str = StringUtils.replace(str, "jcr%3acontent", JcrConstants.JCR_CONTENT);
         return StringUtils.replace(str, "_jcr_content", JcrConstants.JCR_CONTENT);
     }
+
+
 }

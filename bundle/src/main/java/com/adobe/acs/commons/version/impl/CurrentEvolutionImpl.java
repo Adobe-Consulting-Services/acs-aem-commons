@@ -52,7 +52,7 @@ public class CurrentEvolutionImpl implements Evolution {
         try {
             populate(this.resource, 0);
         } catch (RepositoryException e) {
-            log.warn("Could not populate Evolution", e);
+            log.warn("Could not write Evolution", e);
         }
     }
 

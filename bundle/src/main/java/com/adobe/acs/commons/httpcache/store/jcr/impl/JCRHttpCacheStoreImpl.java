@@ -22,7 +22,10 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl;
 import static org.apache.jackrabbit.commons.JcrUtils.getOrCreateUniqueByPath;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.util.Dictionary;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -38,9 +41,14 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +56,14 @@ import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodes;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodesCount;
+import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.workflow.exec.WorkflowProcess;
 
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
@@ -75,30 +86,63 @@ import com.day.cq.commons.jcr.JcrConstants;
             name = "scheduler.concurrent",
             propertyPrivate = true,
             boolValue = false
+        ),
+        @Property(
+            label = "Cache Root Path location",
+            description = "Points to the location cache root node in the JCR repository",
+            name = JCRHttpCacheStoreImpl.PROP_ROOTPATH,
+            value = JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH
+        ),
+        @Property(
+            label = "Bucket Tree depth",
+            description = "The depth the bucket tree goes. Minimum value is 1.",
+            name = JCRHttpCacheStoreImpl.PROP_BUCKETDEPTH,
+            intValue = JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH
+        ),
+        @Property(
+            label = "Delta save threshold",
+            description = "The threshold to remove nodes when invalidating the cache",
+            name = JCRHttpCacheStoreImpl.PROP_SAVEDELTA,
+            intValue = JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA
+        )
+})
+@References({
+        @Reference(
+            referenceInterface = CacheKeyFactory.class,
+            policy = ReferencePolicy.DYNAMIC,
+            name = "cacheKeyFactory",
+            cardinality = ReferenceCardinality.MANDATORY_MULTIPLE
         )
 })
 public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Runnable {
 
-    @Reference private ResourceResolverFactory resourceResolverFactory;
+    public static final String PROP_ROOTPATH = "httpcache.config.jcr.roothpath",
+                                PROP_BUCKETDEPTH = "httpcache.config.jcr.bucketdepth",
+                                PROP_SAVEDELTA = "httpcache.config.jcr.savedelta";
 
-    @Property  private String cacheRootPath;
-
-    /**
-     * The depth of the bucket node tree.
-     */
-    @Property private int bucketTreeDepth;
-
-    /**
-     * The delta on which nodes are persisted to the repository with session.save().
-     */
-    @Property private int deltaSaveThreshold;
+    public static final String DEFAULT_ROOTPATH = "/etc/acs-commons/httpcacheroot";
+    public static final int    DEFAULT_BUCKETDEPTH = 3,
+                                DEFAULT_SAVEDELTA = 500;
 
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
 
+    @Reference private ResourceResolverFactory resourceResolverFactory;
 
-    @Activate protected void activate()
+
+    private final CopyOnWriteArrayList<CacheKeyFactory> cacheKeyFactories = new CopyOnWriteArrayList<>();
+
+    private String cacheRootPath;
+    private int bucketTreeDepth;
+    private int deltaSaveThreshold;
+
+
+
+    @Activate protected void activate(ComponentContext context)
     {
-
+        Dictionary<?, ?> properties = context.getProperties();
+        cacheRootPath = PropertiesUtil.toString(properties.get(PROP_ROOTPATH), DEFAULT_ROOTPATH);
+        bucketTreeDepth = PropertiesUtil.toInteger(properties.get(PROP_BUCKETDEPTH), DEFAULT_BUCKETDEPTH);
+        deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(PROP_SAVEDELTA), DEFAULT_SAVEDELTA);
     }
 
     @Deactivate protected void deactivate(){
@@ -285,7 +329,7 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
 
     @Override
     public TempSink createTempSink() {
-        throw new NotImplementedException();
+        return new MemTempSinkImpl();
     }
 
     @Override public void run()
@@ -341,9 +385,23 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
             throws RepositoryException, IOException, ClassNotFoundException
     {
         final javax.jcr.Property cacheKeyProperty = entryNode.getProperty("cacheKeySerialized");
+        InputStream inputStream = cacheKeyProperty.getBinary().getStream();
 
-        ObjectInputStream objectInputStream = new ObjectInputStream(cacheKeyProperty.getBinary().getStream());
-        return (CacheKey) objectInputStream.readObject();
+        for(CacheKeyFactory cacheKeyFactory : cacheKeyFactories){
+            CacheKey cacheKey = cacheKeyFactory.unserialize(inputStream);
+            if(cacheKey != null)
+                return cacheKey;
+        }
+        return null;
+    }
+
+    protected void bindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
+        cacheKeyFactories.add(cacheKeyFactory);
+    }
+
+    protected void unbindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
+        if(cacheKeyFactories.contains(cacheKeyFactory))
+            cacheKeyFactories.remove(cacheKeyFactory);
     }
 
     @Override public long getTtl()

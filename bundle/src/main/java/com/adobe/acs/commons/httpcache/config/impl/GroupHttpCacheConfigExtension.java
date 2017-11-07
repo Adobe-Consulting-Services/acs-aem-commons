@@ -46,6 +46,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -121,6 +125,12 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     }
 
     //-------------------------<CacheKeyFactory methods>
+
+    public CacheKey unserialize(InputStream stream) throws IOException, ClassNotFoundException
+    {
+        ObjectInputStream objectInputStream = new ObjectInputStream(stream);
+        return (GroupCacheKey) objectInputStream.readObject();
+    }
 
     @Override
     public CacheKey build(final SlingHttpServletRequest slingHttpServletRequest, final HttpCacheConfig cacheConfig)

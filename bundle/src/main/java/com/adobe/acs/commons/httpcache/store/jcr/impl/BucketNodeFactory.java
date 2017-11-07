@@ -40,7 +40,7 @@ public class BucketNodeFactory
         Node targetNode = cacheRoot;
 
         for(String path : pathArray){
-            Node childNode = JcrUtils.getOrCreateByPath(targetNode, path,false,JcrConstants.NT_FOLDER, JcrConstants.NT_FOLDER,false);
+            Node childNode = JcrUtils.getOrCreateByPath(targetNode, path,false,"sling:Folder", "sling:Folder",false);
             targetNode = childNode;
         }
 
