@@ -100,7 +100,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
 
     @Activate
     protected void activate(Map<String, Object> configs) {
-        // Read config and populate values.
+        // Read config and write values.
         ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
         maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
 

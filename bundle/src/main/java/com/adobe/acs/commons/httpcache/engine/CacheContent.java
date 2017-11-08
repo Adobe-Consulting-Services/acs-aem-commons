@@ -100,7 +100,7 @@ public class CacheContent {
     public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
         this.status = responseWrapper.getStatus();
 
-        // Extract information from response and populate state of the instance.
+        // Extract information from response and write state of the instance.
         this.charEncoding = responseWrapper.getCharacterEncoding();
         this.contentType = responseWrapper.getContentType();
 

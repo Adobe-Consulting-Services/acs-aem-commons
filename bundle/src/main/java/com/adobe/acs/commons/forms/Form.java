@@ -40,7 +40,7 @@ public interface Form {
      * <p>
      * Typically this setter is not used and Form names are set in constructor.
      * <p>
-     * This can be helpful for changing the flow or using Form X to populate Form Y
+     * This can be helpful for changing the flow or using Form X to write Form Y
      *
      * @param name
      */

@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
@@ -83,9 +85,7 @@ public class EntryNodeWriter
      */
     private void populateHeaders() throws RepositoryException
     {
-        Node headers = entryNode.addNode("headers");
-        headers.setPrimaryType(JcrConstants.NT_UNSTRUCTURED);
-
+        Node headers = JcrUtils.getOrCreateByPath(entryNode, "headers", false, JcrConstants.NT_UNSTRUCTURED, JcrConstants.NT_UNSTRUCTURED, false);
 
         for(Iterator<Map.Entry<String, List<String>>> entryIterator = cacheContent.getHeaders().entrySet().iterator(); entryIterator.hasNext();){
             Map.Entry<String, List<String>> entry = entryIterator.next();
@@ -97,21 +97,19 @@ public class EntryNodeWriter
 
     private void populateCacheKey() throws RepositoryException, IOException
     {
-        PipedInputStream pis = null;
-        try{
-            pis = new PipedInputStream();
-            final PipedOutputStream pos = new PipedOutputStream(pis);
+        ByteArrayInputStream inputStream = null;
 
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(pos);
+        try{
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
             objectOutputStream.writeObject(cacheKey);
             objectOutputStream.close();
-
-            Binary binary = session.getValueFactory().createBinary(pis);
+            inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            final Binary binary = session.getValueFactory().createBinary(inputStream);
             entryNode.setProperty("cacheKeySerialized", binary);
         }finally {
-            if(pis != null)
-                pis.close();
+            if(inputStream != null)
+                inputStream.close();
         }
-
     }
 }

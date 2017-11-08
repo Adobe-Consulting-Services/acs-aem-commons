@@ -107,7 +107,7 @@ public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 				log.warn("Encountered exception parsing start / end date", e);
 				succeeded = false;
 			} catch (RepositoryException e) {
-				log.warn("Encountered respository exception attempting to retrieve audit events", e);
+				log.warn("Encountered respository exception attempting to build audit events", e);
 				succeeded = false;
 			} catch (ClassNotFoundException e) {
 				log.warn("Encountered exception deserializing attributes", e);

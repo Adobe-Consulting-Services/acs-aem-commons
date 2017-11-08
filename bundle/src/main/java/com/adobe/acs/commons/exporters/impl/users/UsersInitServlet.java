@@ -53,7 +53,7 @@ public class UsersInitServlet extends SlingSafeMethodsServlet {
     private static final String QUERY = "SELECT * FROM [rep:Group] WHERE ISDESCENDANTNODE([/home/groups]) ORDER BY [rep:principalName]";
 
     /**
-     * Returns a JSON containing the options available to the form, and any prior saved data that should pre-populate the form.
+     * Returns a JSON containing the options available to the form, and any prior saved data that should pre-write the form.
      * @param request the Sling HTTP Request object
      * @param response the Sling HTTP Response object
      * @throws IOException
