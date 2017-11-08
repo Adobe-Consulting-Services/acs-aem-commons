@@ -20,6 +20,10 @@
 
 package com.adobe.acs.commons.httpcache.keys;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.day.cq.commons.PathInfo;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -34,6 +38,10 @@ public abstract class AbstractCacheKey {
     protected String resourcePath;
     protected String hierarchyResourcePath;
 
+    public AbstractCacheKey(){
+
+    }
+
     public AbstractCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
         this.authenticationRequirement = cacheConfig.getAuthenticationRequirement();
         this.uri = request.getRequestURI();
@@ -46,6 +54,23 @@ public abstract class AbstractCacheKey {
         this.uri = uri;
         this.resourcePath = unmangle(new PathInfo(uri).getResourcePath());
         this.hierarchyResourcePath = makeHierarchyResourcePath(this.resourcePath);
+    }
+
+    protected void parentWriteObject(ObjectOutputStream o) throws IOException
+    {
+        o.writeObject(authenticationRequirement);
+        o.writeObject(uri);
+        o.writeObject(resourcePath);
+        o.writeObject(hierarchyResourcePath);
+    }
+
+    protected void parentReadObject(ObjectInputStream o)
+            throws IOException, ClassNotFoundException {
+
+        authenticationRequirement = (String) o.readObject();
+        uri = (String) o.readObject();
+        resourcePath = (String) o.readObject();
+        hierarchyResourcePath = (String) o.readObject();
     }
 
     @Override

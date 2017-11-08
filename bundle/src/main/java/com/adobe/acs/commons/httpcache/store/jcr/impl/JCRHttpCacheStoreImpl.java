@@ -47,6 +47,8 @@ import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.classloader.DynamicClassLoader;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -62,6 +64,7 @@ import com.adobe.acs.commons.httpcache.store.TempSink;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodes;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodesCount;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
+import com.adobe.acs.commons.util.DynamicObjectInputStream;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.workflow.exec.WorkflowProcess;
 
@@ -106,14 +109,6 @@ import com.day.cq.workflow.exec.WorkflowProcess;
             intValue = JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA
         )
 })
-@References({
-        @Reference(
-            referenceInterface = CacheKeyFactory.class,
-            policy = ReferencePolicy.DYNAMIC,
-            name = "cacheKeyFactory",
-            cardinality = ReferenceCardinality.MANDATORY_MULTIPLE
-        )
-})
 public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Runnable {
 
     public static final String PROP_ROOTPATH = "httpcache.config.jcr.roothpath",
@@ -127,9 +122,9 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
 
     @Reference private ResourceResolverFactory resourceResolverFactory;
+    @Reference private DynamicClassLoaderManager dynamicClassLoaderManager;
 
-
-    private final CopyOnWriteArrayList<CacheKeyFactory> cacheKeyFactories = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<CacheKeyFactory> cacheKeyFactories = new CopyOnWriteArrayList<CacheKeyFactory>();
 
     private String cacheRootPath;
     private int bucketTreeDepth;
@@ -387,12 +382,10 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
         final javax.jcr.Property cacheKeyProperty = entryNode.getProperty("cacheKeySerialized");
         InputStream inputStream = cacheKeyProperty.getBinary().getStream();
 
-        for(CacheKeyFactory cacheKeyFactory : cacheKeyFactories){
-            CacheKey cacheKey = cacheKeyFactory.unserialize(inputStream);
-            if(cacheKey != null)
-                return cacheKey;
-        }
-        return null;
+        ClassLoader dynamicClassLoader = dynamicClassLoaderManager.getDynamicClassLoader();
+
+        DynamicObjectInputStream dynamicObjectInputStream = new DynamicObjectInputStream(inputStream, dynamicClassLoader);
+        return (CacheKey) dynamicObjectInputStream.readObject();
     }
 
     protected void bindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){

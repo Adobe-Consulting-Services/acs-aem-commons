@@ -32,17 +32,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
  * This project will provide a GroupBased CacheKey factory.
  */
 public interface CacheKeyFactory {
-
-    /**
-     * Unserialize the cache key. Needed for disk / jcr storage
-     * Can be left unimplemented for inmem storage.
-     * @param stream
-     * @return
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    CacheKey unserialize(InputStream stream) throws IOException, ClassNotFoundException;
-
     /**
      * Build a cache key.
      *

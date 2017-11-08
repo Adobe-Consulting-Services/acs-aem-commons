@@ -50,6 +50,7 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -126,12 +127,6 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
 
     //-------------------------<CacheKeyFactory methods>
 
-    public CacheKey unserialize(InputStream stream) throws IOException, ClassNotFoundException
-    {
-        ObjectInputStream objectInputStream = new ObjectInputStream(stream);
-        return (GroupCacheKey) objectInputStream.readObject();
-    }
-
     @Override
     public CacheKey build(final SlingHttpServletRequest slingHttpServletRequest, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
@@ -162,6 +157,10 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
 
         /* This key is composed of uri, list of user groups and authentication requirement details */
         private List<String> cacheKeyUserGroups;
+
+        public GroupCacheKey(){
+            super();
+        }
 
         public GroupCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
                 HttpCacheKeyCreationException {
@@ -204,6 +203,17 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
             formattedString.append(StringUtils.join(cacheKeyUserGroups, "|"));
             formattedString.append("] [AUTH_REQ:" + getAuthenticationRequirement() + "]");
             return formattedString.toString();
+        }
+
+        private void writeObject(ObjectOutputStream o) throws IOException
+        {
+            super.parentWriteObject(o);
+        }
+
+        private void readObject(ObjectInputStream o)
+                throws IOException, ClassNotFoundException {
+
+            super.parentReadObject(o);
         }
     }
 
