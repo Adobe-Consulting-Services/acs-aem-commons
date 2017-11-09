@@ -213,8 +213,8 @@
 
             function fillValue($form, fieldSetName, $field, counter){
                 var name, value;
-                // for userpicker and richtext $field length is 2, excluding richtext
-                if($field.length > 1 && !$field.parent().hasClass("richtext-container")) {
+                // for userpicker, richtext and datepicker, $field length is 2 but only userpicker use the second name value
+                if($field.length > 1 && !$field.parent().hasClass("richtext-container") && !$field.parent().hasClass("coral-DatePicker")) {
                     name = $($field[1]).attr("name");
                 } else {
                     name = $field.attr("name");
