@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1121 - New MCP Task to report broken references
 - #1101 - Add Dialog to Asset Metadata allowing easy access to the publish URL for an asset.
 
+### Changed
+
+- #1169 - Use Granite-packaged POI to ensure compatibility with AEM 6.2's included POI.
+
 ### Fixed
 
 - #1148 - Properly handle blank character encoding in SiteMapServlet
