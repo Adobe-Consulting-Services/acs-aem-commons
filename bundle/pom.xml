@@ -279,9 +279,9 @@
         </dependency>
         <!-- MCP: Apache POI used for exporting Excel spreadsheets -->
         <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>3.11</version>
+            <groupId>com.adobe.granite</groupId>
+            <artifactId>com.adobe.granite.poi</artifactId>
+            <version>2.0.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
