@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Changed
 
 - #1169 - Use Granite-packaged POI to ensure compatibility with AEM 6.2's included POI.
+- #1170 - Improve exception handling in Workflow Process - DAM Metadata Property Reset
 
 ### Fixed
 
