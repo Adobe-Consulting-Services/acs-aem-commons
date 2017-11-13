@@ -8,7 +8,7 @@ env:
 - MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=512m -Duser.language=hi -Duser.country=IN" POST_COVERAGE=false
 script: mvn verify -B
 after_success:
-  - if [ "$DO_COVERAGE" == "true" ]; then mvn clean jacoco:prepare-agent test jacoco:report coveralls:report; fi
+  - if [ "$POST_COVERAGE" == "true" ]; then mvn clean jacoco:prepare-agent test jacoco:report coveralls:report; fi
 sudo: false
 notifications:
   slack:
