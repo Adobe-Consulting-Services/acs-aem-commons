@@ -81,8 +81,8 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
         String wfPayload = null;
 
         try {
-        	resourceResolver = this.getResourceResolver(workflowSession.getSession());
-        	wfPayload = (String) workItem.getWorkflowData().getPayload();
+            resourceResolver = this.getResourceResolver(workflowSession.getSession());
+            wfPayload = (String) workItem.getWorkflowData().getPayload();
 
             final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, wfPayload);
             final Map<String, String> srcDestMap = this.getProcessArgsMap(metaDataMap);
@@ -96,7 +96,7 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
                     continue;
                 }
 
-                String metadataPath = String.format("%s/%s/%s",asset.getPath(),JcrConstants.JCR_CONTENT,DamConstants.METADATA_FOLDER);
+                String metadataPath = String.format("%s/%s/%s",asset.getPath(), JcrConstants.JCR_CONTENT, DamConstants.METADATA_FOLDER);
                 Resource metadataResource = resourceResolver.getResource(metadataPath);
 
                 if (metadataResource == null) {
@@ -129,7 +129,7 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
         } catch (LoginException e) {
             throw new WorkflowException("Could not get a ResourceResolver object from the WorkflowSession", e);
         } catch (RepositoryException e) {
-            throw new WorkflowException(String.format("Could not find the payload for '%s'",wfPayload),e);
+            throw new WorkflowException(String.format("Could not find the payload for '%s'", wfPayload), e);
         } finally {
             if (resourceResolver != null) {
                 resourceResolver.close();
