@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.12.0...HEAD
 
+### Fixed
+
+- #1171 - Reduce duplicate coverage comments in pull requests.
+
 ## [3.12.0] - 2017-11-13
 
 ### Added
