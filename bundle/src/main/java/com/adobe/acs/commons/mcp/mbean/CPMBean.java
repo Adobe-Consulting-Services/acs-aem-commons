@@ -26,6 +26,7 @@ import javax.management.openmbean.TabularDataSupport;
  */
 @Description("Controlled Process Management")
 @ProviderType
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public interface CPMBean {
     @Description("Processes")
     public TabularDataSupport getStatistics() throws OpenDataException;

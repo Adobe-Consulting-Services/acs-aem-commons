@@ -49,28 +49,28 @@ public class Parameters {
     public Parameters(SlingHttpServletRequest request) throws IOException, JSONException {
         final JSONObject json = new JSONObject(request.getParameter("params"));
 
-        final List<String> customProperties = new ArrayList<String>();
-        final List<String> groups = new ArrayList<String>();
+        final List<String> tmpCustomProperties = new ArrayList<String>();
+        final List<String> tmpGroups = new ArrayList<String>();
 
         groupFilter = json.getString(GROUP_FILTER);
 
         JSONArray groupsJSON = json.getJSONArray(GROUPS);
         for (int i = 0; i < groupsJSON.length(); i++) {
-            groups.add(groupsJSON.getString(i));
+            tmpGroups.add(groupsJSON.getString(i));
         }
 
-        this.groups = groups.toArray(new String[groups.size()]);
+        this.groups = tmpGroups.toArray(new String[tmpGroups.size()]);
 
         JSONArray customPropertiesJSON = json.getJSONArray(CUSTOM_PROPERTIES);
         for (int i = 0; i < customPropertiesJSON.length(); i++) {
             JSONObject tmp = customPropertiesJSON.getJSONObject(i);
             String relativePropertyPath = tmp.optString(RELATIVE_PROPERTY_PATH);
             if (StringUtils.isNotBlank(relativePropertyPath)) {
-                customProperties.add(relativePropertyPath);
+                tmpCustomProperties.add(relativePropertyPath);
             }
         }
 
-        this.customProperties = customProperties.toArray(new String[customProperties.size()]);
+        this.customProperties = tmpCustomProperties.toArray(new String[tmpCustomProperties.size()]);
     }
 
     public String[] getCustomProperties() {

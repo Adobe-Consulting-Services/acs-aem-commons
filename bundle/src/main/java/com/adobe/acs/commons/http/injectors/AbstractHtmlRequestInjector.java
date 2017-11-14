@@ -143,6 +143,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         return true;
     }
 
+    @SuppressWarnings("squid:S1149")
     protected final void registerAsFilter(ComponentContext ctx, int ranking, String pattern) {
         Dictionary<String, String> filterProps = new Hashtable<String, String>();
 
@@ -152,6 +153,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
     }
 
+    @SuppressWarnings("squid:S1149")
     protected final void registerAsSlingFilter(ComponentContext ctx, int ranking, String pattern) {
         Dictionary<String, String> filterProps = new Hashtable<String, String>();
 

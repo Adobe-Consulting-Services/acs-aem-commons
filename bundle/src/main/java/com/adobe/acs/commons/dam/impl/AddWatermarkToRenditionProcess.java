@@ -70,6 +70,7 @@ public final class AddWatermarkToRenditionProcess extends AbstractRenditionModif
             log.warn("Watermark path {} is not found.", path);
         }
     }
+
     private static void logInvalidWatermark(final String path) {
         if (watermarkLogCache.putIfAbsent(path, new Object()) == null) {
             log.warn("Watermark path {} is not valid.", path);

@@ -15,20 +15,23 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
-import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.functions.*;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import com.adobe.acs.commons.functions.BiConsumer;
+import com.adobe.acs.commons.functions.BiFunction;
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
+import com.adobe.acs.commons.functions.CheckedBiFunction;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.functions.Consumer;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -42,11 +45,14 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Manages a pool of reusable resource resolvers and injects them into tasks
@@ -55,12 +61,12 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     private static final long serialVersionUID = 7526472295622776150L;
 
-    transient private static final Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
+    private static final transient Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
     // This is a delay of how long an action manager should wait before it can safely assume it really is done and no more work is being added
     // This helps prevent an action manager from closing itself down while the queue is warming up.
-    transient public static final int HESITATION_DELAY = 50;
+    public static final transient int HESITATION_DELAY = 50;
     // The cleanup task will wait this many milliseconds between its polling to see if the queue has been completely processed
-    transient public static final int COMPLETION_CHECK_INTERVAL = 100;
+    public static final transient int COMPLETION_CHECK_INTERVAL = 100;
     private final AtomicInteger tasksAdded = new AtomicInteger();
     private final AtomicInteger tasksCompleted = new AtomicInteger();
     private final AtomicInteger tasksFilteredOut = new AtomicInteger();
@@ -71,16 +77,16 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     private long finished;
     private int saveInterval;
 
-    transient private final ResourceResolver baseResolver;
-    transient private final List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
-    transient private final ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
-    transient private final ThrottledTaskRunner taskRunner;
-    transient private final ThreadLocal<String> currentPath;
+    private final transient ResourceResolver baseResolver;
+    private final transient List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
+    private final transient ThreadLocal<ReusableResolver> currentResolver = new ThreadLocal<>();
+    private final transient ThrottledTaskRunner taskRunner;
+    private final transient ThreadLocal<String> currentPath;
     private final List<Failure> failures;
-    transient private final AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
-    transient private final List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
-    transient private final List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
-    transient private final List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final transient AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
+    private final transient List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final transient List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final transient List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;
@@ -134,6 +140,35 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     @Override
     public void deferredWithResolver(final CheckedConsumer<ResourceResolver> action) {
         deferredWithResolver(action, false);
+    }
+
+    private void deferredWithResolver(
+            final CheckedConsumer<ResourceResolver> action,
+            final boolean closesResolver) {
+        if (!closesResolver) {
+            tasksAdded.incrementAndGet();
+        }
+        taskRunner.scheduleWork(() -> {
+            started.compareAndSet(0, System.currentTimeMillis());
+            try {
+                withResolver(action);
+                if (!closesResolver) {
+                    logCompletetion();
+                }
+            } catch (Exception ex) {
+                LOG.error("Error in error handler for action " + getName(), ex);
+                if (!closesResolver) {
+                    logError(ex);
+                }
+            } catch (Throwable t) {
+                LOG.error("Fatal uncaught error in error handler for action " + getName(), t);
+                if (!closesResolver) {
+                    logError(new RuntimeException(t));
+                }
+                throw t;
+            }
+        }, this);
+
     }
 
     @Override
@@ -279,35 +314,6 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         currentPath.set(item);
     }
 
-    private void deferredWithResolver(
-            final CheckedConsumer<ResourceResolver> action,
-            final boolean closesResolver) {
-        if (!closesResolver) {
-            tasksAdded.incrementAndGet();
-        }
-        taskRunner.scheduleWork(() -> {
-            started.compareAndSet(0, System.currentTimeMillis());
-            try {
-                withResolver(action);
-                if (!closesResolver) {
-                    logCompletetion();
-                }
-            } catch (Exception ex) {
-                LOG.error("Error in error handler for action " + getName(), ex);
-                if (!closesResolver) {
-                    logError(ex);
-                }
-            } catch (Throwable t) {
-                LOG.error("Fatal uncaught error in error handler for action " + getName(), t);
-                if (!closesResolver) {
-                    logError(new RuntimeException(t));
-                }
-                throw t;
-            }
-        }, this);
-
-    }
-
     private ReusableResolver getResourceResolver() throws LoginException {
         ReusableResolver resolver = currentResolver.get();
         if (resolver == null || !resolver.getResolver().isLive()) {
@@ -380,6 +386,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             try {
                 Thread.sleep(HESITATION_DELAY);
             } catch (InterruptedException ex) {
+                // no-op
             }
             return tasksCompleted.get() == tasksAdded.get();
         } else {
@@ -414,7 +421,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         baseResolver.close();
     }
 
-    static public TabularType getFailuresTableType() {
+    public static TabularType getFailuresTableType() {
         return failureTabularType;
     }
 
@@ -434,12 +441,12 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         return failureData;
     }
 
-    transient private static String[] statsItemNames;
-    transient private static CompositeType statsCompositeType;
-    transient private static TabularType statsTabularType;
-    transient private static String[] failureItemNames;
-    transient private static CompositeType failureCompositeType;
-    transient private static TabularType failureTabularType;
+    private static transient String[] statsItemNames;
+    private static transient CompositeType statsCompositeType;
+    private static transient TabularType statsTabularType;
+    private static transient String[] failureItemNames;
+    private static transient CompositeType failureCompositeType;
+    private static transient TabularType failureTabularType;
 
     static {
         try {

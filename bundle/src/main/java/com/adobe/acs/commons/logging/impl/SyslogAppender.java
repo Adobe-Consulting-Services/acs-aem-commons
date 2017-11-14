@@ -73,18 +73,18 @@ public final class SyslogAppender {
     private static final String PROP_SUFFIX_PATTERN = "suffix.pattern";
 
     @Property(label = "Syslog Facility", value = DEFAULT_FACILITY, propertyPrivate = true,
-            description = "The Syslog Facility is meant to identify the source of a message, separately from any context " +
-            "included in the Suffix Pattern. The facility option must be set to one of the strings KERN, USER, MAIL, DAEMON, " + 
-            "AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, NTP, AUDIT, ALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, " + 
-            "LOCAL5, LOCAL6, LOCAL7. Case is not important.")
+            description = "The Syslog Facility is meant to identify the source of a message, separately from any context "
+            + "included in the Suffix Pattern. The facility option must be set to one of the strings KERN, USER, MAIL, DAEMON, "
+            + "AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, NTP, AUDIT, ALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, "
+            + "LOCAL5, LOCAL6, LOCAL7. Case is not important.")
     private static final String PROP_FACILITY = "facility";
 
-    @Property(label = "Stack Trace Pattern", description = "Logback Pattern for customizing the string appearing just before each stack " +
-             "trace line. The default value for this property is a single tab character.")
+    @Property(label = "Stack Trace Pattern", description = "Logback Pattern for customizing the string appearing just before each stack "
+             + "trace line. The default value for this property is a single tab character.")
     private static final String PROP_STACK_TRACE_PATTERN = "stack.trace.pattern";
 
-    @Property(label = "Exclude Throwables", description = "Set to true to cause stack trace data associated with a Throwable to be omitted. " +
-              "By default, this is set to false so that stack trace data is sent to the syslog server.", boolValue = DEFAULT_THROWABLE_EXCLUDED)
+    @Property(label = "Exclude Throwables", description = "Set to true to cause stack trace data associated with a Throwable to be omitted. "
+            + "By default, this is set to false so that stack trace data is sent to the syslog server.", boolValue = DEFAULT_THROWABLE_EXCLUDED)
     private static final String PROP_THROWABLE_EXCLUDED = "throwable.excluded";
 
     private ch.qos.logback.classic.net.SyslogAppender appender;
@@ -94,14 +94,14 @@ public final class SyslogAppender {
     @Activate
     protected void activate(ComponentContext ctx) {
         final Dictionary<?, ?> properties = ctx.getProperties();
-        String[] loggers = PropertiesUtil.toStringArray(properties.get(PROP_LOGGERS), new String[] {ROOT});
-        String suffixPattern = PropertiesUtil
+        final String[] loggers = PropertiesUtil.toStringArray(properties.get(PROP_LOGGERS), new String[] {ROOT});
+        final String suffixPattern = PropertiesUtil
                 .toString(properties.get(PROP_SUFFIX_PATTERN), DEFAULT_SUFFIX_PATTERN);
-        int port = PropertiesUtil.toInteger(properties.get(PROP_PORT), DEFAULT_PORT);
-        String host = PropertiesUtil.toString(properties.get(PROP_HOST), null);
-        String facility = PropertiesUtil.toString(properties.get(PROP_FACILITY), DEFAULT_FACILITY);
-        String stackTracePattern = PropertiesUtil.toString(properties.get(PROP_STACK_TRACE_PATTERN), null);
-        boolean throwableExcluded = PropertiesUtil.toBoolean(properties.get(PROP_THROWABLE_EXCLUDED), DEFAULT_THROWABLE_EXCLUDED);
+        final int port = PropertiesUtil.toInteger(properties.get(PROP_PORT), DEFAULT_PORT);
+        final String host = PropertiesUtil.toString(properties.get(PROP_HOST), null);
+        final String facility = PropertiesUtil.toString(properties.get(PROP_FACILITY), DEFAULT_FACILITY);
+        final String stackTracePattern = PropertiesUtil.toString(properties.get(PROP_STACK_TRACE_PATTERN), null);
+        final boolean throwableExcluded = PropertiesUtil.toBoolean(properties.get(PROP_THROWABLE_EXCLUDED), DEFAULT_THROWABLE_EXCLUDED);
 
         if (host == null || port == -1) {
             throw new IllegalArgumentException(

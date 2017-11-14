@@ -17,6 +17,7 @@ package com.adobe.acs.commons.fam;
 
 import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
+
 /**
  * In addition to MBean operations, a ThrottledTaskRunner lets the caller schedule work and provides a throttle method.
  * The logCompletion method should also allow a runnable action provide appropriate notification of success/failure
@@ -30,14 +31,14 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
      * Only call this BEFORE starting a critical section.
      * @throws InterruptedException If the thread was interrupted
      */
-    public void waitForLowCpuAndLowMemory() throws InterruptedException;
+    void waitForLowCpuAndLowMemory() throws InterruptedException;
 
     /**
      * Schedule some kind of work to run in the future using the internal thread pool.
      * The work will be throttled according to the CPU/Memory settings
      * @param work 
      */
-    public void scheduleWork(Runnable work);
+    void scheduleWork(Runnable work);
 
     /**
      * Schedule some kind of work to run in the future using the internal thread pool.
@@ -45,7 +46,7 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
      * @param work 
      * @param cancelHandler
      */
-    public void scheduleWork(Runnable work, CancelHandler cancelHandler);
+    void scheduleWork(Runnable work, CancelHandler cancelHandler);
     
     /**
      * Record statistics
@@ -56,11 +57,11 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
      * @param successful If true, action concluded normally
      * @param error Exception caught, if any.
      */
-    public void logCompletion(long created, long started, long executed, long finished, boolean successful, Throwable error);    
+    void logCompletion(long created, long started, long executed, long finished, boolean successful, Throwable error);
     
     /**
      * Get number of maximum threads supported by this thread manager
      * @return Thread pool maximum size
      */
-    public int getMaxThreads();
+    int getMaxThreads();
 }

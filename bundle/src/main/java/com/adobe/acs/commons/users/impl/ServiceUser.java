@@ -17,7 +17,7 @@ import java.util.Map;
 public final class ServiceUser {
     private static final Logger log = LoggerFactory.getLogger(ServiceUser.class);
 
-    private final String PATH_SYSTEM_USERS = "/home/users/system";
+    private static final String PATH_SYSTEM_USERS = "/home/users/system";
     private final String principalName;
     private final String intermediatePath;
     private final List<Ace> aces = new ArrayList<Ace>();

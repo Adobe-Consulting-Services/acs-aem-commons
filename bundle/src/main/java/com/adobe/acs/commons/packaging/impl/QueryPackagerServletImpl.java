@@ -87,10 +87,6 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
     private static final String QUERY_PACKAGE_THUMBNAIL_RESOURCE_PATH =
             "/apps/acs-commons/components/utilities/packager/query-packager/definition/package-thumbnail.png";
 
-    private static final String QUERY_BUILDER = "queryBuilder";
-
-    private static final String LIST = "list";
-
     @Reference
     private Packaging packaging;
 

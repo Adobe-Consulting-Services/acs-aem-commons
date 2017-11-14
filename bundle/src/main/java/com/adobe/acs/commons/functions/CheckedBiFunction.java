@@ -30,6 +30,7 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @FunctionalInterface
+@SuppressWarnings("squid:S00112")
 public interface CheckedBiFunction<T, U, R> {
 
     /**

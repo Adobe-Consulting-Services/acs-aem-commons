@@ -37,18 +37,18 @@ public class TeeServletOutputStream extends ServletOutputStream {
     }
 
     @Override
-    public void write(int arg0) throws IOException {
-        this.teeOutputStream.write(arg0);
+    public void write(int character) throws IOException {
+        this.teeOutputStream.write(character);
     }
 
     @Override
-    public void write(byte b[], int off, int len) throws IOException {
-        this.teeOutputStream.write(b, off, len);
+    public void write(byte[] oneByte, int off, int len) throws IOException {
+        this.teeOutputStream.write(oneByte, off, len);
     }
 
     @Override
-    public void write(byte b[]) throws IOException {
-        this.teeOutputStream.write(b);
+    public void write(byte[] oneByte) throws IOException {
+        this.teeOutputStream.write(oneByte);
     }
 
     @Override

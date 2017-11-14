@@ -124,6 +124,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
     private static final String SERVICE_NAME = "dispatcher-flush";
     protected static final Map<String, Object> AUTH_INFO;
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -315,5 +316,5 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         public DispatcherFlushRulesFilter(final FlushType flushType) {
             super(flushType);
         }
-    };
+    }
 }

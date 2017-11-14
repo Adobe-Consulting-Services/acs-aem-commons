@@ -24,7 +24,7 @@ import org.xml.sax.Attributes;
 
 import com.adobe.granite.ui.clientlibs.LibraryType;
 
-public class SAXElementUtils {
+public class SaxElementUtils {
 
     public static final String CSS_TYPE = "text/css";
     public static final String JS_TYPE = "text/javascript";

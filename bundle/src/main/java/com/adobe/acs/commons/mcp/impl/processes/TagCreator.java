@@ -18,7 +18,9 @@ package com.adobe.acs.commons.mcp.impl.processes;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
-import com.adobe.acs.commons.mcp.form.*;
+import com.adobe.acs.commons.mcp.form.FileUploadComponent;
+import com.adobe.acs.commons.mcp.form.FormField;
+import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
@@ -43,7 +45,12 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Creates cq:Tags based on a well defined Excel document.
@@ -62,7 +69,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         LOWERCASE_WITH_DASHES,
         LOCALIZED_TITLE,
         NONE
-    };
+    }
 
     public TagCreator(Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders) {
         this.resourceDefinitionBuilders = resourceDefinitionBuilders;
@@ -74,7 +81,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
             component = FileUploadComponent.class,
             options = {"mimeTypes=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "required"}
     )
-    public InputStream tagDefinitionFile = null;
+    public transient InputStream tagDefinitionFile = null;
 
     @FormField(
             name = "Primary Converter",
@@ -94,7 +101,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
     @Override
     public void init() throws RepositoryException {
-
+        // nothing to do here
     }
 
     @Override
@@ -160,7 +167,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                         }
                     }
                 }
-            };
+            }
             log.info("Finished Parsing and collected [ {} ] tags for import.", tagDefinitions.size());
         });
     }
@@ -260,7 +267,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
     /** Reporting **/
 
-    transient private final GenericReport report = new GenericReport();
+    private final transient GenericReport report = new GenericReport();
 
     private final ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
@@ -276,7 +283,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         UPDATED_EXISTING,
         FAILED_TO_PARSE,
         FAILED_TO_CREATE,
-    };
+    }
 
     private void record(ReportRowSatus status, String tagId, String path, String title) {
         final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);

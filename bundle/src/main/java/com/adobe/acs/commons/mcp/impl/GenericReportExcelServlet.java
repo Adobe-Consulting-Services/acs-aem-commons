@@ -146,8 +146,11 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
             }
             int cw = sheet.getColumnWidth(i);
             // increase width to accommodate drop-down arrow in the header
-            if(cw/256 < 20) sheet.setColumnWidth(i, 256*12);
-            else if(cw/256 > 120) sheet.setColumnWidth(i, 256*120);
+            if (cw/256 < 20) {
+                sheet.setColumnWidth(i, 256*12);
+            } else if (cw/256 > 120) {
+                sheet.setColumnWidth(i, 256*120);
+            }
         }
     }
 }

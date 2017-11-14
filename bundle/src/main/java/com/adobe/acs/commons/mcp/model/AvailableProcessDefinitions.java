@@ -28,8 +28,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.scripting.SlingScriptHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Produce a list of available process definitions that can be started by the
@@ -37,12 +35,12 @@ import org.slf4j.LoggerFactory;
  */
 @ProviderType
 public class AvailableProcessDefinitions extends WCMUsePojo {
-    private static final Logger LOG = LoggerFactory.getLogger(AvailableProcessDefinitions.class);
 
     Map<String, ProcessDefinitionFactory> definitions = Collections.emptyMap();
     Map<String, FieldComponent> fieldComponents = Collections.emptyMap();
 
     @Override
+    @SuppressWarnings("checkstyle:parametername")
     public void activate() throws Exception {
         SlingScriptHelper sling = getSlingScriptHelper();
         User user = sling.getRequest().getResourceResolver().adaptTo(User.class);

@@ -55,8 +55,8 @@ public abstract class RadioComponent extends FieldComponent {
         String defaultValue = getOption("default").orElse(null);
         
         getOptions().forEach((value, name)->{
-            ResourceMetadata meta = new ResourceMetadata();
-            String nodeName = JcrUtil.escapeIllegalJcrChars(value);
+            final ResourceMetadata meta = new ResourceMetadata();
+            final String nodeName = JcrUtil.escapeIllegalJcrChars(value);
             
             if (value.equals(defaultValue)) {
                 meta.put("checked", true);

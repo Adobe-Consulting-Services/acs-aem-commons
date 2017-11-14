@@ -99,6 +99,7 @@ public class PlainXMLSerializer implements Serializer {
 
     @Override
     public void dispose() {
+        // no-op
     }
 
 }

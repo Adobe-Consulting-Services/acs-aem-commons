@@ -28,6 +28,8 @@ import java.util.List;
 
 public class DevConsoleResults {
 
+    private DevConsoleResults() {}
+
     public static final List<Result> getResults() {
         List<Result> results = new ArrayList<Result>();
 

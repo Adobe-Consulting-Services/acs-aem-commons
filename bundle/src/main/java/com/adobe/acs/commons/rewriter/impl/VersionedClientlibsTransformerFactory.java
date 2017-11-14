@@ -45,9 +45,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.turbo.TurboFilter;
-import ch.qos.logback.core.spi.FilterReply;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -74,7 +71,6 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -184,11 +180,11 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private Attributes versionClientLibs(final String elementName, final Attributes attrs, final SlingHttpServletRequest request) {
-        if (SAXElementUtils.isCSS(elementName, attrs)) {
+        if (SaxElementUtils.isCss(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_CSS_PATH),
                     attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS, request);
 
-        } else if (SAXElementUtils.isJavaScript(elementName, attrs)) {
+        } else if (SaxElementUtils.isJavaScript(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_JS_PATH),
                     attrs.getValue("", ATTR_JS_PATH), LibraryType.JS, request);
 

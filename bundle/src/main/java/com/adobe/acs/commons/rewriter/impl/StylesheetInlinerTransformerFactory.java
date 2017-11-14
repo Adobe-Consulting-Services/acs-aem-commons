@@ -91,7 +91,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
         public void startElement(final String namespaceURI, final String localName, final String qName,
                 final Attributes attrs) throws SAXException {
             try {
-                if (SAXElementUtils.isCSS(localName, attrs)) {
+                if (SaxElementUtils.isCss(localName, attrs)) {
                     String sheet = attrs.getValue("", "href");
                     if (!afterHeadElement) {
                         stylesheetsInHead.add(sheet);

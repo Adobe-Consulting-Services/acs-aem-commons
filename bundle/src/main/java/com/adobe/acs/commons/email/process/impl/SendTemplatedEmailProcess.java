@@ -110,7 +110,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
      * Service used to generate a link to the payload on author environment
      */
     @Reference
-    private AuthorUIHelper authorUIHelper;
+    private AuthorUIHelper authorUiHelper;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -203,16 +203,12 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
             }
 
             // Get Url params
-            Map<String, String> urlParams = getURLs(payloadRes);
-            if (urlParams != null) {
-                emailParams.putAll(urlParams);
-            }
+            Map<String, String> urlParams = getUrls(payloadRes);
+            emailParams.putAll(urlParams);
 
             // Get Additional Parameters to add
             Map<String, String> wfParams = getAdditionalParams(workItem, workflowSession, payloadRes);
-            if (wfParams != null) {
-                emailParams.putAll(wfParams);
-            }
+            emailParams.putAll(wfParams);
 
             // get email addresses based on CQ user or group
             String[] emailTo = getEmailAddrs(workItem, payloadRes, args);
@@ -292,7 +288,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
      * @param arguments
      * @return String of the argument value or null if not found
      */
-    protected String getValueFromArgs(String key, String arguments[]) {
+    protected String getValueFromArgs(String key, String[] arguments) {
         for (String str : arguments) {
             String trimmedStr = str.trim();
             if (trimmedStr.startsWith(key + ":")) {
@@ -309,7 +305,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
      * @param payloadRes
      * @return
      */
-    private Map<String, String> getURLs(Resource payloadRes) {
+    private Map<String, String> getUrls(Resource payloadRes) {
 
         Map<String, String> urlParams = new HashMap<String, String>();
         if (payloadRes == null) {
@@ -321,7 +317,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
 
         if (DamUtil.isAsset(payloadRes)) {
             // add author url
-            String assetDetailsUrl = authorUIHelper.generateEditAssetLink(payloadPath, true, resolver);
+            String assetDetailsUrl = authorUiHelper.generateEditAssetLink(payloadPath, true, resolver);
             urlParams.put(SendTemplatedEmailConstants.AUTHOR_LINK, assetDetailsUrl);
 
             // add publish url
@@ -331,7 +327,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
         } else {
 
             // add absolute author url
-            String assetDetailsUrl = authorUIHelper.generateEditPageLink(payloadPath, true, resolver);
+            String assetDetailsUrl = authorUiHelper.generateEditPageLink(payloadPath, true, resolver);
             urlParams.put(SendTemplatedEmailConstants.AUTHOR_LINK, assetDetailsUrl);
 
             // add publish url

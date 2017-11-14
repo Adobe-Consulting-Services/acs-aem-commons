@@ -38,6 +38,12 @@ public final class ContentFinderConstants {
     public static final String CF_OFFSET = "offset";
     public static final String CF_NAME = "name";
     public static final String CF_TAGS = "tags";
+    public static final String CF_TITLE = "title";
+    public static final String CF_EXCERPT = "excerpt";
+    public static final String CF_DD_GROUPS = "ddGroups";
+    public static final String CF_LAST_MODIFIED = "lastModified";
+    public static final String CF_SIZE = "size";
+    public static final String CF_CACHE_KILLER = "ck";
 
     public static final int GROUP_PATH = 1;
     public static final int GROUP_TYPE = 2;

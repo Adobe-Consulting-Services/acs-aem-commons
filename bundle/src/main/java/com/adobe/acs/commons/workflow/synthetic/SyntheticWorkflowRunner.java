@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface SyntheticWorkflowRunner extends WorkflowService {
     String PROCESS_ARGS = "PROCESS_ARGS";
 

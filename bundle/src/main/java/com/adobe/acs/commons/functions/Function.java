@@ -23,6 +23,7 @@ import aQute.bnd.annotation.ConsumerType;
  *
  * @param <T> the type of the input to the function
  * @param <R> the type of the result of the function
+ * @deprecated Use CheckedFunction instead
  */
 @ConsumerType
 @Deprecated
@@ -81,7 +82,7 @@ public abstract class Function<T, R> implements CheckedFunction<T, R> {
 
     private static class Adapter<T, R> extends Function<T, R> {
 
-        final private CheckedFunction<T, R> delegate;
+        private final CheckedFunction<T, R> delegate;
 
         public Adapter(CheckedFunction<T, R> delegate) {
             this.delegate = delegate;

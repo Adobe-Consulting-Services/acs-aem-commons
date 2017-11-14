@@ -75,7 +75,7 @@ public class WorkflowDelegationStep implements WorkflowProcess {
     private static final String DEFAULT_WORKFLOW_MODEL = "defaultWorkflowModel";
 
     // When set to true, this Workflow will terminate after successful delegation. This is useful if there is a use-case when this step has WF steps behind it.
-    private String TERMINATE_ON_DELEGATION = "terminateWorkflowOnDelegation";
+    private static final String TERMINATE_ON_DELEGATION = "terminateWorkflowOnDelegation";
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metadata)
@@ -179,8 +179,8 @@ public class WorkflowDelegationStep implements WorkflowProcess {
             if (!workflowModelId.endsWith("/jcr:content/model")) {
                 ResourceResolver resourceResolver = workflowHelper.getResourceResolver(workflowSession);
                 Resource resource = resourceResolver.getResource(workflowModelId + "/jcr:content/model");
-                if (resource != null &&
-                        StringUtils.equals(resource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class),"cq:WorkflowModel")) {
+                if (resource != null
+                        && StringUtils.equals(resource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class),"cq:WorkflowModel")) {
                     workflowModelId = resource.getPath();
                 }
             }

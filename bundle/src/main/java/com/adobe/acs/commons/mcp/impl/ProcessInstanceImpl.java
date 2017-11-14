@@ -15,34 +15,19 @@
  */
 package com.adobe.acs.commons.mcp.impl;
 
-import com.adobe.acs.commons.mcp.*;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
+import com.adobe.acs.commons.mcp.ControlledProcessManager;
+import com.adobe.acs.commons.mcp.ProcessDefinition;
+import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.mcp.model.Result;
+import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.adobe.acs.commons.mcp.util.ValueMapSerializer;
 import com.day.cq.commons.jcr.JcrUtil;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularType;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -53,6 +38,24 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.slf4j.LoggerFactory;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularType;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Abstraction of a Process which runs using FAM and consists of one or more
@@ -65,13 +68,13 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
     private final ManagedProcess infoBean;
     private final String id;
     private final String path;
-    transient private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ProcessInstanceImpl.class);
-    transient private final List<ActivityDefinition> actions;
-    transient public static final String BASE_PATH = "/var/acs-commons/mcp/instances";
-    transient private ControlledProcessManager manager = null;
-    transient private final ProcessDefinition definition;
-    transient private boolean completedNormally = false;
-    transient private static final Random RANDOM = new Random();
+    private static final transient org.slf4j.Logger LOG = LoggerFactory.getLogger(ProcessInstanceImpl.class);
+    private final transient List<ActivityDefinition> actions;
+    public static final transient String BASE_PATH = "/var/acs-commons/mcp/instances";
+    private transient ControlledProcessManager manager = null;
+    private final transient ProcessDefinition definition;
+    private transient boolean completedNormally = false;
+    private static final transient Random RANDOM = new Random();
 
     @Override
     public String getId() {

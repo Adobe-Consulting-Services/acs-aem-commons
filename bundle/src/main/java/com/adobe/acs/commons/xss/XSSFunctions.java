@@ -29,20 +29,8 @@ import java.util.regex.Pattern;
  * XSSAPI JSP Function wrappers.
  */
 @ProviderType
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public final class XSSFunctions {
-
-    private static final String LINK_PREFIX = "<a href='";
-    private static final String LINK_SUFFIX = "'></a>";
-
-    private static final String MANGLE_NAMESPACE_IN_PREFIX = "/_";
-
-    private static final String MANGLE_NAMESPACE_IN_SUFFIX = "_";
-
-    private static final String MANGLE_NAMESPACE_OUT = "/([^:/]+):";
-
-    private static final String MANGLE_NAMESPACE_OUT_SUFFIX = ":";
-
-    private static final Pattern MANGLE_NAMESPACE_PATTERN = Pattern.compile(MANGLE_NAMESPACE_OUT);
 
     /**
      * Encode a string for HTML.

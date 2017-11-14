@@ -52,9 +52,10 @@ public class S3AssetIngestorFactory extends AdministratorsOnlyProcessDefinitionF
         if (super.isAllowed(user)) {
             // check if S3 SDK is available
             try {
-                AmazonS3 s3Client = new AmazonS3Client();
+                new AmazonS3Client();
                 return true;
             } catch (NoClassDefFoundError e) {
+                // ignore
             }
         }
         return false;

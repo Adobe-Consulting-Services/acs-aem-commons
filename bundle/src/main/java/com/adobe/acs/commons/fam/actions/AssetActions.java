@@ -35,7 +35,8 @@ public class AssetActions {
     private AssetActions() {
         // Utility class cannot be instantiated directly.
     }
-    
+
+    @SuppressWarnings("squid:S3776")
     public static final CheckedBiConsumer<ResourceResolver, String> withAllRenditions(
             final CheckedBiConsumer<ResourceResolver, String> action,
             final CheckedBiFunction<ResourceResolver, String, Boolean>... filters) {

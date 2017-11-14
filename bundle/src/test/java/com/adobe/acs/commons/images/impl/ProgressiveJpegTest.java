@@ -33,7 +33,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertArrayEquals;
 
-public class ProgressiveJPEGTest {
+public class ProgressiveJpegTest {
 
     private BufferedImage simpleImage;
 
@@ -56,7 +56,7 @@ public class ProgressiveJPEGTest {
     private static byte[] writeProgressiveImage(BufferedImage image) throws IOException {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         Layer layer = new Layer(image);
-        ProgressiveJPEG.write(layer, 1, byteOut);
+        ProgressiveJpeg.write(layer, 1, byteOut);
         return byteOut.toByteArray();
     }
 

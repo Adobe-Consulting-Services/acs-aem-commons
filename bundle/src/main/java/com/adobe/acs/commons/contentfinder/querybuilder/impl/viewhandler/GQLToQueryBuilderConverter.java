@@ -32,42 +32,23 @@ import org.apache.sling.api.request.RequestParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler.ContentFinderConstants.*;
+
 import java.util.Map;
 
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public final class GQLToQueryBuilderConverter {
+
+    private static final String SUFFIX_ORDERBY = "_orderby";
+    private static final String SUFFIX_ORDERBY_SORT = "_orderby.sort";
+    private static final String AT = "@";
+    private static final String SUFFIX_GROUP = "_group";
+    private static final String SUFFIX_P_OR = ".p.or";
 
     private GQLToQueryBuilderConverter() {
     }
 
     private static final Logger log = LoggerFactory.getLogger(GQLToQueryBuilderConverter.class);
-
-    public static final String DELIMITER = ContentFinderConstants.DELIMITER;
-
-    public static final String CF_TYPE = ContentFinderConstants.CF_TYPE;
-    public static final String CF_PATH = ContentFinderConstants.CF_PATH;
-    public static final String CF_FULLTEXT = ContentFinderConstants.CF_FULLTEXT;
-    public static final String CF_MIMETYPE = ContentFinderConstants.CF_MIMETYPE;
-    public static final String CF_ORDER = ContentFinderConstants.CF_ORDER;
-    public static final String CF_LIMIT = ContentFinderConstants.CF_LIMIT;
-    public static final String CF_OFFSET = ContentFinderConstants.CF_OFFSET;
-    public static final String CF_NAME = ContentFinderConstants.CF_NAME;
-    public static final String CF_TAGS = ContentFinderConstants.CF_TAGS;
-
-    public static final int GROUP_PATH = ContentFinderConstants.GROUP_PATH;
-    public static final int GROUP_TYPE = ContentFinderConstants.GROUP_TYPE;
-    public static final int GROUP_NAME = ContentFinderConstants.GROUP_NAME;
-    public static final int GROUP_MIMETYPE = ContentFinderConstants.GROUP_MIMETYPE;
-    public static final int GROUP_TAGS = ContentFinderConstants.GROUP_TAGS;
-    public static final int GROUP_FULLTEXT = ContentFinderConstants.GROUP_FULLTEXT;
-
-    public static final int GROUP_PROPERTY_USERDEFINED = ContentFinderConstants.GROUP_PROPERTY_USERDEFINED;
-
-    public static final int GROUP_ORDERBY_USERDEFINED = ContentFinderConstants.GROUP_ORDERBY_USERDEFINED;
-    public static final int GROUP_ORDERBY_SCORE = ContentFinderConstants.GROUP_ORDERBY_SCORE;
-    public static final int GROUP_ORDERBY_MODIFIED = ContentFinderConstants.GROUP_ORDERBY_MODIFIED;
-
-    public static final int DEFAULT_OFFSET = ContentFinderConstants.DEFAULT_OFFSET;
-    public static final int DEFAULT_LIMIT = ContentFinderConstants.DEFAULT_LIMIT;
 
     /**
      * Checks if request forces QueryBuilder mode
@@ -106,6 +87,7 @@ public final class GQLToQueryBuilderConverter {
         return map;
     }
 
+    @SuppressWarnings("squid:S3776")
     public static Map<String, String> addOrder(final SlingHttpServletRequest request, Map<String, String> map,
             final String queryString) {
         if (has(request, CF_ORDER)) {
@@ -113,11 +95,10 @@ public final class GQLToQueryBuilderConverter {
             int count = 1;
             for (String value : getAll(request, CF_ORDER)) {
                 value = StringUtils.trim(value);
-                final String orderGroupId = String.valueOf(GROUP_ORDERBY_USERDEFINED + count) + "_orderby";
+                final String orderGroupId = String.valueOf(GROUP_ORDERBY_USERDEFINED + count) + SUFFIX_ORDERBY;
                 boolean sortAsc = false;
 
                 if (StringUtils.startsWith(value, "-")) {
-                    sortAsc = false;
                     value = StringUtils.removeStart(value, "-");
                 } else if (StringUtils.startsWith(value, "+")) {
                     sortAsc = true;
@@ -137,19 +118,19 @@ public final class GQLToQueryBuilderConverter {
             final String prefix = getPropertyPrefix(request);
 
             if (StringUtils.isNotBlank(queryString)) {
-                map.put(GROUP_ORDERBY_SCORE + "_orderby", "@" + JcrConstants.JCR_SCORE);
-                map.put(GROUP_ORDERBY_SCORE + "_orderby.sort", Predicate.SORT_DESCENDING);
+                map.put(GROUP_ORDERBY_SCORE + SUFFIX_ORDERBY, AT + JcrConstants.JCR_SCORE);
+                map.put(GROUP_ORDERBY_SCORE + SUFFIX_ORDERBY_SORT, Predicate.SORT_DESCENDING);
             }
 
-            String modifiedOrderProperty = "@" + JcrConstants.JCR_LASTMODIFIED;
+            String modifiedOrderProperty = AT + JcrConstants.JCR_LASTMODIFIED;
             if (isPage) {
-                modifiedOrderProperty = "@" + prefix + NameConstants.PN_PAGE_LAST_MOD;
+                modifiedOrderProperty = AT + prefix + NameConstants.PN_PAGE_LAST_MOD;
             } else if (isAsset) {
-                modifiedOrderProperty = "@" + prefix + JcrConstants.JCR_LASTMODIFIED;
+                modifiedOrderProperty = AT + prefix + JcrConstants.JCR_LASTMODIFIED;
             }
 
-            map.put(GROUP_ORDERBY_MODIFIED + "_orderby", modifiedOrderProperty);
-            map.put(GROUP_ORDERBY_MODIFIED + "_orderby.sort", Predicate.SORT_DESCENDING);
+            map.put(GROUP_ORDERBY_MODIFIED + SUFFIX_ORDERBY, modifiedOrderProperty);
+            map.put(GROUP_ORDERBY_MODIFIED + SUFFIX_ORDERBY_SORT, Predicate.SORT_DESCENDING);
         }
 
         return map;
@@ -172,20 +153,20 @@ public final class GQLToQueryBuilderConverter {
         if (has(request, CF_TAGS)) {
             final String prefix = getPropertyPrefix(request);
 
-            final String groupId = GROUP_TAGS + "_group";
+            final String groupId = GROUP_TAGS + SUFFIX_GROUP;
             final String tagProperty = prefix + NameConstants.PN_TAGS;
 
-            map.put(groupId + ".p.or", "true");
+            map.put(groupId + SUFFIX_P_OR, "true");
 
             if (hasMany(request, CF_TAGS)) {
                 final String[] tags = getAll(request, CF_TAGS);
 
-                int i = 1;
+                int counter = 1;
                 for (final String tag : tags) {
-                    map.put(groupId + "." + i + "_tagid.property", tagProperty);
-                    map.put(groupId + "." + i + "_tagid", tag);
+                    map.put(groupId + "." + counter + "_tagid.property", tagProperty);
+                    map.put(groupId + "." + counter + "_tagid", tag);
 
-                    i++;
+                    counter++;
                 }
             } else {
                 map.put(groupId + ".1_tagid.property", tagProperty);
@@ -196,13 +177,14 @@ public final class GQLToQueryBuilderConverter {
         return map;
     }
 
+    @SuppressWarnings("squid:S1172")
     public static Map<String, String> addFulltext(final SlingHttpServletRequest request, Map<String, String> map,
             final String queryString) {
         if (StringUtils.isNotBlank(queryString)) {
-            final String groupId = GROUP_FULLTEXT + "_group";
+            final String groupId = GROUP_FULLTEXT + SUFFIX_GROUP;
 
             map.put(groupId + "." + FulltextPredicateEvaluator.FULLTEXT, queryString);
-            map.put(groupId + ".p.or", "true");
+            map.put(groupId + SUFFIX_P_OR, "true");
         }
         return map;
     }
@@ -340,7 +322,7 @@ public final class GQLToQueryBuilderConverter {
      */
     public static Map<String, String> putAll(Map<String, String> map, String predicate, String[] values,
             int group, boolean or) {
-        final String groupId = String.valueOf(group) + "_group";
+        final String groupId = String.valueOf(group) + SUFFIX_GROUP;
         int count = 1;
 
         for (final String value : values) {
@@ -350,7 +332,7 @@ public final class GQLToQueryBuilderConverter {
             count++;
         }
 
-        map.put(groupId + ".p.or", String.valueOf(or));
+        map.put(groupId + SUFFIX_P_OR, String.valueOf(or));
 
         return map;
     }
@@ -367,7 +349,7 @@ public final class GQLToQueryBuilderConverter {
      */
     public static Map<String, String> putAll(Map<String, String> map, String predicate, String predicateValue,
             String predicateSuffix, String[] values, int group, boolean or) {
-        final String groupId = String.valueOf(group) + "_group";
+        final String groupId = String.valueOf(group) + SUFFIX_GROUP;
 
         map.put(groupId + "." + predicate, predicateValue);
 
@@ -379,7 +361,7 @@ public final class GQLToQueryBuilderConverter {
             count++;
         }
 
-        map.put(groupId + ".p.or", String.valueOf(or));
+        map.put(groupId + SUFFIX_P_OR, String.valueOf(or));
 
         return map;
     }
@@ -467,14 +449,9 @@ public final class GQLToQueryBuilderConverter {
             final String value = get(request, CF_LIMIT);
             final String[] offsets = StringUtils.split(value, "..");
 
-            if (value.matches("^(\\d)+\\.\\.(\\d)+$")) {
-                // 10..20
-                return Integer.parseInt(offsets[0]);
-            } else if (value.matches("^\\.\\.(\\d)+$")) {
-                // ..20
-                return Integer.parseInt(offsets[0]);
-            } else if (value.matches("^(\\d)+\\.\\.$")) {
-                // 20..
+            if (value.matches("^(\\d)+\\.\\.(\\d)+$") // 10..20
+                    || value.matches("^\\.\\.(\\d)+$") // ..20
+                    || value.matches("^(\\d)+\\.\\.$") ) { // 20..
                 return Integer.parseInt(offsets[0]);
             }
             log.info("Could not find valid OFFSET for QueryBuilder-based ContentFinder: {}", value);

@@ -29,15 +29,15 @@ import java.util.Calendar;
 
 public final class WorkflowRemovalStatus {
 
-    String KEY_CHECKED_COUNT = "checkedCount";
-    String KEY_COMPLETED_AT = "completedAt";
-    String KEY_DURATION = "duration";
-    String KEY_FORCE_QUIT_AT = "forceQuitAt";
-    String KEY_ERRED_AT = "erredAt";
-    String KEY_INITIATED_BY = "initiatedBy";
-    String KEY_REMOVED_COUNT = "removedCount";
-    String KEY_RUNNING = "running";
-    String KEY_STARTED_AT = "startedAt";
+    private static final String KEY_CHECKED_COUNT = "checkedCount";
+    private static final String KEY_COMPLETED_AT = "completedAt";
+    private static final String KEY_DURATION = "duration";
+    private static final String KEY_FORCE_QUIT_AT = "forceQuitAt";
+    private static final String KEY_ERRED_AT = "erredAt";
+    private static final String KEY_INITIATED_BY = "initiatedBy";
+    private static final String KEY_REMOVED_COUNT = "removedCount";
+    private static final String KEY_RUNNING = "running";
+    private static final String KEY_STARTED_AT = "startedAt";
 
     private static final String DATE_FORMAT = "yyyy/MM/dd 'at' hh:mm:ss a z";
     private static final long MS_IN_SECOND = 1000L;

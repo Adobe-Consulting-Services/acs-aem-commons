@@ -73,6 +73,7 @@ import java.util.Map;
 public final class EmailServiceImpl implements EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
+    private static final String MSG_INVALID_RECIPIENTS = "Invalid Recipients";
 
     @Reference
     private MessageGatewayService messageGatewayService;
@@ -109,7 +110,7 @@ public final class EmailServiceImpl implements EmailService {
         List<String> failureList = new ArrayList<String>();
 
         if (recipients == null || recipients.length <= 0) {
-            throw new IllegalArgumentException("Invalid Recipients");
+            throw new IllegalArgumentException(MSG_INVALID_RECIPIENTS);
         }
 
         List<InternetAddress> addresses = new ArrayList<InternetAddress>(recipients.length);
@@ -138,7 +139,7 @@ public final class EmailServiceImpl implements EmailService {
         List<InternetAddress> failureList = new ArrayList<InternetAddress>();
 
         if (recipients == null || recipients.length <= 0) {
-            throw new IllegalArgumentException("Invalid Recipients");
+            throw new IllegalArgumentException(MSG_INVALID_RECIPIENTS);
         }
 
         final MailTemplate mailTemplate = this.getMailTemplate(templatePath);
@@ -166,7 +167,7 @@ public final class EmailServiceImpl implements EmailService {
         List<InternetAddress> failureList = new ArrayList<InternetAddress>();
 
         if (recipients == null || recipients.length <= 0) {
-            throw new IllegalArgumentException("Invalid Recipients");
+            throw new IllegalArgumentException(MSG_INVALID_RECIPIENTS);
         }
 
         final MailTemplate mailTemplate = this.getMailTemplate(templatePath);
@@ -205,7 +206,7 @@ public final class EmailServiceImpl implements EmailService {
         List<String> failureList = new ArrayList<String>();
 
         if (recipients == null || recipients.length <= 0) {
-            throw new IllegalArgumentException("Invalid Recipients");
+            throw new IllegalArgumentException(MSG_INVALID_RECIPIENTS);
         }
 
         List<InternetAddress> addresses = new ArrayList<InternetAddress>(recipients.length);

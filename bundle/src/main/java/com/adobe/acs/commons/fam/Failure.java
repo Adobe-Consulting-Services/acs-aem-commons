@@ -32,7 +32,7 @@ public final class Failure implements Serializable {
     private String error;
     private String stackTrace;
     private Long time;
-    transient private Exception exception;
+    private transient Exception exception;
     private final Calendar failedAt;
 
     public Failure() {

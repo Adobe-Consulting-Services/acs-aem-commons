@@ -35,7 +35,9 @@ import java.io.OutputStream;
 /**
  * Extension for {@link Layer} with progressive JPEG support.
  */
-public class ProgressiveJPEG {
+public class ProgressiveJpeg {
+
+    private ProgressiveJpeg() {}
 
     /**
      * For JPEG images, this method behaves similar to {@link Layer#write(String, double, OutputStream)}. The major
