@@ -22,7 +22,6 @@
 						<fmt:message key="The redirect map file will be combined with the redirects configured in AEM to create the final set of redirects." />
 					</p>
 					<form action="${resource.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-update-redirect" ng-submit="updateRedirectMap()" enctype="multipart/form-data">
-						
 				    	<input type="hidden" name="./redirectMap.txt@TypeHint" value="nt:file" />
 						
 						<div class="coral-Form-fieldwrapper">
@@ -59,7 +58,9 @@
 				    	<cq:include path="${redirects.path}" resourceType="${redirects.resourceType}" />
 					</c:forEach>
 					<form action="${resource.path}/redirects/*" method="post" class="coral-Form--aligned" id="fn-acsCommons-add-redirectconfig" ng-submit="postValues('fn-acsCommons-add-redirectconfig')">
-						<input type="hidden"  name="sling:resourceType" value="acs-commons/components/utilities/redirects" />
+						<input type="hidden" name="sling:resourceType" value="acs-commons/components/utilities/redirects" />
+						<input type="hidden" name="jcr:created" />
+						<input type="hidden" name="jcr:createdBy" />
 						<div class="coral-Form-fieldwrapper" >
 							<button class="coral-Button coral-Button--primary">+ <fmt:message key="Redirect Configuration" /></button>
 						</div>
