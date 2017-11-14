@@ -194,7 +194,7 @@ public class JsonEventLogger implements EventHandler {
      * @return {@code val} if not handled, or return a converted JSONObject, JSONArray, or String
      * @throws JSONException
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "squid:S3776"})
     protected static Object convertValue(Object val) throws JSONException {
         if (val.getClass().isArray()) {
             Object[] vals = (Object[]) val;

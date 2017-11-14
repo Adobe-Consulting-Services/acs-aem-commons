@@ -65,7 +65,7 @@ public class QuicklyFilter implements Filter {
 
     private static final String HTML_FILE = "/quickly/inject.html";
 
-    private static String appHTML = "";
+    private String appHTML = "";
 
     @Reference
     private QuicklyEngine quicklyEngine;

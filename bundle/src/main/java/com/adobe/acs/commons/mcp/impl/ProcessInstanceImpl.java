@@ -288,7 +288,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
             props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FOLDER);
             ResourceUtil.getOrCreateResource(rr, BASE_PATH, props, null, true);
             props.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Page");
-            Resource r = ResourceUtil.getOrCreateResource(rr, getPath(), props, null, true);
+            ResourceUtil.getOrCreateResource(rr, getPath(), props, null, true);
             ModifiableValueMap jcrContent = ResourceUtil.getOrCreateResource(rr, getPath() + "/jcr:content", ProcessInstance.RESOURCE_TYPE, null, false).adaptTo(ModifiableValueMap.class);
             jcrContent.put("jcr:primaryType", "cq:PageContent");
             jcrContent.put("jcr:title", getName());
@@ -309,7 +309,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
     }
 
     @Override
-    final public void halt() {
+    public final void halt() {
         updateProgress();
         infoBean.setStopTime(System.currentTimeMillis());
         infoBean.getResult().setRuntime(infoBean.getStopTime() - infoBean.getStartTime());

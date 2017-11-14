@@ -21,7 +21,7 @@ import java.util.function.Function;
 /**
  * Describes the desired output format of a value within a report
  */
-@SuppressWarnings("checkstyle:constantname")
+@SuppressWarnings({"checkstyle:constantname", "squid:S00115"})
 public enum ValueFormat {
     plain, storageSize("_short", ValueFormat::getHumanSize);
     int columnCount = 1;

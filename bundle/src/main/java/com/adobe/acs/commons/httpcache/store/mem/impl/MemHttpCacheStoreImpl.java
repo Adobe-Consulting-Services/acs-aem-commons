@@ -260,6 +260,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     protected void addCacheData(Map<String, Object> data, MemCachePersistenceObject cacheObj) {
         int hitCount = cacheObj.getHitCount();
         long size = cacheObj.getBytes().length;

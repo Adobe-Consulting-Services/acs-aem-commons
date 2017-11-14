@@ -180,25 +180,4 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
             return request.getResource().getChild("configuration").adaptTo(ValueMap.class);
         }
     }
-
-
-    /**
-     * Get the relative resource of the given resource if it resolves otherwise
-     * the provided resource.
-     *
-     * @param resource         the resource
-     * @param relPath          the relative path to resolve against the resource
-     * @return the relative resource if it resolves otherwise the resource
-     */
-    private Resource getRelativeAwareResource(final Resource resource, final String relPath) {
-        if (resource != null && StringUtils.isNotBlank(relPath)) {
-            final Resource relResource = resource.getChild(relPath);
-
-            if (relResource != null) {
-                return relResource;
-            }
-        }
-
-        return resource;
-    }
 }

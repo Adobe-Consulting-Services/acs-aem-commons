@@ -181,6 +181,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     private long lastCheck = -1;
     private boolean wasRecentlyBusy = false;
 
+    @SuppressWarnings("squid:S3776")
     private boolean isTooBusy() throws InterruptedException {
         if (maxCpu <= 0 && maxHeap <= 0) {
             return false;

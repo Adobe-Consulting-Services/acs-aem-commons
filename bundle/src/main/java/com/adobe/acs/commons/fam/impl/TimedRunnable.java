@@ -57,6 +57,7 @@ public class TimedRunnable implements Runnable {
      * throwing an interruption
      */
     @Override
+    @SuppressWarnings("squid:S1181")
     public void run() {
         if (cancelHandler.isPresent() && cancelHandler.get().isCancelled()) {
             return;

@@ -57,6 +57,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Manages a pool of reusable resource resolvers and injects them into tasks
  */
+@SuppressWarnings("squid:S1192")
 class ActionManagerImpl extends CancelHandler implements ActionManager, Serializable {
 
     private static final long serialVersionUID = 7526472295622776150L;
@@ -178,7 +179,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
-    @SuppressWarnings("squid:S1181")
+    @SuppressWarnings({"squid:S1181", "squid:S1163", "squid:S1143"})
     public void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception {
         Actions.setCurrentActionManager(this);
         ReusableResolver resolver = getResourceResolver();

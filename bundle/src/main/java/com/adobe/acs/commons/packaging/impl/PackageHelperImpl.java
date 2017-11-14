@@ -67,6 +67,12 @@ public final class PackageHelperImpl implements PackageHelper {
 
     private static final String JSON_EXCEPTION_MSG =
             "{\"status\": \"error\", \"msg\": \"Error creating JSON response.\"}";
+    private static final String KEY_STATUS = "status";
+    private static final String KEY_MSG = "msg";
+    private static final String KEY_PATH = "path";
+    private static final String KEY_FILTER_SETS = "filterSets";
+    private static final String KEY_IMPORT_MODE = "importMode";
+    private static final String KEY_ROOT_PATH = "rootPath";
 
     @Reference
     private Packaging packaging;
@@ -106,9 +112,7 @@ public final class PackageHelperImpl implements PackageHelper {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @SuppressWarnings("squid:S3776")
     public Version getNextVersion(final JcrPackageManager jcrPackageManager,
                                   final String groupName, final String name,
                                   final String version) throws RepositoryException {
@@ -322,17 +326,17 @@ public final class PackageHelperImpl implements PackageHelper {
     public String getSuccessJSON(final JcrPackage jcrPackage) throws JSONException, RepositoryException {
         final JSONObject json = new JSONObject();
 
-        json.put("status", "success");
-        json.put("path", jcrPackage.getNode().getPath());
-        json.put("filterSets", new JSONArray());
+        json.put(KEY_STATUS, "success");
+        json.put(KEY_PATH, jcrPackage.getNode().getPath());
+        json.put(KEY_FILTER_SETS, new JSONArray());
 
         final List<PathFilterSet> filterSets = jcrPackage.getDefinition().getMetaInf().getFilter().getFilterSets();
         for (final PathFilterSet filterSet : filterSets) {
             final JSONObject jsonFilterSet = new JSONObject();
-            jsonFilterSet.put("importMode", filterSet.getImportMode().name());
-            jsonFilterSet.put("rootPath", filterSet.getRoot());
+            jsonFilterSet.put(KEY_IMPORT_MODE, filterSet.getImportMode().name());
+            jsonFilterSet.put(KEY_ROOT_PATH, filterSet.getRoot());
 
-            json.accumulate("filterSets", jsonFilterSet);
+            json.accumulate(KEY_FILTER_SETS, jsonFilterSet);
         }
 
         return json.toString();
@@ -370,14 +374,14 @@ public final class PackageHelperImpl implements PackageHelper {
     public String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets) throws JSONException {
         final JSONObject json = new JSONObject();
 
-        json.put("status", "preview");
-        json.put("path", "Not applicable (Preview)");
-        json.put("filterSets", new JSONArray());
+        json.put(KEY_STATUS, "preview");
+        json.put(KEY_PATH, "Not applicable (Preview)");
+        json.put(KEY_FILTER_SETS, new JSONArray());
 
         for (final PathFilterSet pathFilterSet : pathFilterSets) {
             final JSONObject tmp = new JSONObject();
-            tmp.put("importMode", "Not applicable (Preview)");
-            tmp.put("rootPath", pathFilterSet.getRoot());
+            tmp.put(KEY_IMPORT_MODE, "Not applicable (Preview)");
+            tmp.put(KEY_ROOT_PATH, pathFilterSet.getRoot());
 
             json.accumulate("filterSets", tmp);
         }
@@ -392,8 +396,8 @@ public final class PackageHelperImpl implements PackageHelper {
     public String getErrorJSON(final String msg) {
         final JSONObject json = new JSONObject();
         try {
-            json.put("status", "error");
-            json.put("msg", msg);
+            json.put(KEY_STATUS, "error");
+            json.put(KEY_MSG, msg);
             return json.toString();
         } catch (JSONException e) {
             log.error("Error creating JSON Error response message: {}", e);

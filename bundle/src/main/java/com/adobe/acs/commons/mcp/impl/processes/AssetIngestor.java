@@ -144,6 +144,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         ignoreExtensionList = Arrays.asList(ignoreExtensions.trim().toLowerCase().split(","));
     }
 
+    @SuppressWarnings("squid:S00112")
     private void createAsset(Source source, String assetPath, ResourceResolver r, boolean versioning) throws Exception {
         r.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(CHANGED_BY_WORKFLOW);
         AssetManager assetManager = r.adaptTo(AssetManager.class);
@@ -222,6 +223,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         return true;
     }
 
+    @SuppressWarnings("squid:S00112")
     private void versionExistingAsset(Source source, String assetPath, ResourceResolver r) throws Exception {
         createAsset(source, assetPath, r, r.getResource(assetPath) != null);
     }
@@ -300,19 +302,29 @@ public abstract class AssetIngestor extends ProcessDefinition {
     protected interface Source {
 
         String getName();
+
         InputStream getStream() throws IOException;
+
         long getLength();
+
         HierarchialElement getElement();
 
     }
 
     protected interface HierarchialElement {
+
         boolean isFile();
+
         boolean isFolder();
+
         HierarchialElement getParent();
+
         String getName();
+
         String getItemName();
+
         Source getSource();
+
         String getJcrBasePath();
 
         default String getNodePath() {

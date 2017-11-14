@@ -58,8 +58,8 @@ public class ProcessCleanup extends ProcessDefinition {
         // No init needed, do nothing.
     }
 
+    @SuppressWarnings("squid:S00112")
     private void performCleanupActivity(ActionManager manager) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Calendar c = Calendar.getInstance();
         c.clear(Calendar.HOUR_OF_DAY);
         c.clear(Calendar.MINUTE);

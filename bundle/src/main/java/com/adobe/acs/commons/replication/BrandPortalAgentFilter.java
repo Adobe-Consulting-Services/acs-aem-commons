@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BrandPortalAgentFilter implements AgentFilter {
@@ -54,10 +55,10 @@ public class BrandPortalAgentFilter implements AgentFilter {
             }
 
             final ValueMap properties = config.getValueMap();
-            final String tenantURL = StringUtils.stripToNull(properties.get(PROP_TENTANT_URL, String.class));
+            final String tenantUrl = StringUtils.stripToNull(properties.get(PROP_TENTANT_URL, String.class));
 
-            if (StringUtils.isNotBlank(tenantURL)) {
-                boolean included = StringUtils.startsWith(transportURI, tenantURL + "/");
+            if (StringUtils.isNotBlank(tenantUrl)) {
+                boolean included = StringUtils.startsWith(transportURI, tenantUrl + "/");
 
                 if (included) {
                     log.debug("Including replication agent [ {} ]", agent.getId());
@@ -71,7 +72,7 @@ public class BrandPortalAgentFilter implements AgentFilter {
 
     protected List<Resource> getBrandPortalConfigs(Resource content) {
         if (content == null) {
-            return null;
+            return Collections.emptyList();
         } else if (JcrConstants.JCR_CONTENT.equals(content.getName())) {
             content = content.getParent();
         }

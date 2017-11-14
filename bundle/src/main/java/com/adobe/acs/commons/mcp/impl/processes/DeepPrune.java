@@ -46,14 +46,15 @@ import org.apache.sling.event.jobs.Queue;
 public class DeepPrune extends ProcessDefinition implements Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
 
-    transient private final JobManager jobManager;
-    
-    static enum FolderRule {all(s->true),numeric(StringUtils::isNumeric),hexadecimal(StringUtil::isHex),none(s->false);
+    private final transient JobManager jobManager;
+
+    @SuppressWarnings("squid:S00115")
+    enum FolderRule {all(s->true),numeric(StringUtils::isNumeric),hexadecimal(StringUtil::isHex),none(s->false);
         Function<String, Boolean> matcher;
         FolderRule(Function<String, Boolean> m) {
             matcher = m;
         }    
-    };
+    }
     
     @FormField(name="Starting folder", 
         description="Starting point for event removal",
@@ -108,7 +109,7 @@ public class DeepPrune extends ProcessDefinition implements Serializable {
     private boolean stopJobs = true;
 
     public static final String JOB_TYPE = "slingevent:Job";
-    transient private final List<String> suspendedQueues = new ArrayList<>();
+    private final transient List<String> suspendedQueues = new ArrayList<>();
 
     public DeepPrune(JobManager jobManager) {
         this.jobManager = jobManager;
@@ -205,5 +206,6 @@ public class DeepPrune extends ProcessDefinition implements Serializable {
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) {
+        // no-op
     }
 }

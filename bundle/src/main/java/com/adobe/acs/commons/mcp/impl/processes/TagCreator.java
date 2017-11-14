@@ -121,6 +121,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
      * @param manager the action manager
      * @throws IOException
      */
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public void parseTags(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
             final XSSFWorkbook workbook = new XSSFWorkbook(tagDefinitionFile);

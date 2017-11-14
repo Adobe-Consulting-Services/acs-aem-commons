@@ -24,7 +24,7 @@ import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
 import org.apache.sling.api.resource.*;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.REPORT;
+import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.Report;
 import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectBrokenReferences;
 import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectPaths;
 import org.junit.Before;
@@ -105,11 +105,11 @@ public class BrokenLinksTest {
         instance.init(rr, values);
         instance.run(rr);
 
-        Map<String, EnumMap<REPORT, Object>> reportData = tool.getReportData();
+        Map<String, EnumMap<Report, Object>> reportData = tool.getReportData();
         assertEquals(3, reportData.size());
-        assertEquals("/content/pageC", reportData.get("/content/pageA/jcr:content/ref3").get(REPORT.reference));
-        assertEquals("/content/pageD", reportData.get("/content/pageB/jcr:content/ref2").get(REPORT.reference));
-        assertEquals("/content/pageE", reportData.get("/content/pageB/jcr:content/ref3").get(REPORT.reference));
+        assertEquals("/content/pageC", reportData.get("/content/pageA/jcr:content/ref3").get(Report.reference));
+        assertEquals("/content/pageD", reportData.get("/content/pageB/jcr:content/ref2").get(Report.reference));
+        assertEquals("/content/pageE", reportData.get("/content/pageB/jcr:content/ref3").get(Report.reference));
 
         assertFalse("ignoredRef is in the exclude list", reportData.containsKey("/content/pageB/jcr:content/ignoredRef"));
     }

@@ -28,6 +28,7 @@ import org.apache.sling.commons.json.JSONObject;
 import aQute.bnd.annotation.ProviderType;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface QuicklyEngine {
     String CONFIG_RESULTS = "results";
 

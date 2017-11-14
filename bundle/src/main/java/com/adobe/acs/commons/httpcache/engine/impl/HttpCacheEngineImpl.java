@@ -564,6 +564,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredHttpCacheConfigs() throws OpenDataException {
         // @formatter:off
         // Exposing all google guava stats.
@@ -598,6 +599,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredPersistenceStores() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(

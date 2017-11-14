@@ -55,7 +55,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 public class AssetReport extends ProcessDefinition implements Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
 
-    public static transient final String SHA1 = "dam:sha1";
+    public static final transient String SHA1 = "dam:sha1";
     public static final String NAME = "Asset Report";
 
     @SuppressWarnings("squid:S00115")
@@ -220,6 +220,7 @@ public class AssetReport extends ProcessDefinition implements Serializable {
         }
     }
 
+    @SuppressWarnings("squid:S00112")
     private void examineAsset(ResourceResolver rr, String assetPath) throws RepositoryException, Exception {
         Actions.setCurrentItem(assetPath);
         String folderPath = getParentPath(assetPath);

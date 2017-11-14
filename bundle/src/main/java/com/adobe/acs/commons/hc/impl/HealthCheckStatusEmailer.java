@@ -318,6 +318,7 @@ public class HealthCheckStatusEmailer implements Runnable {
      *
      * @return the AEM Instance's hostname.
      */
+    @SuppressWarnings({"squid:S3776", "squid:S1192"})
     private String getHostname() {
         String hostname = null;
         final String os = System.getProperty("os.name").toLowerCase();
