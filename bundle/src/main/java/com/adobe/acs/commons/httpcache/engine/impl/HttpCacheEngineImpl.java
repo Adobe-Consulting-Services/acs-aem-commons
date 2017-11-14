@@ -362,6 +362,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public boolean deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                        HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException,
             HttpCacheDataStreamException, HttpCachePersistenceException {
@@ -486,6 +487,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public void invalidateCache(String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
 
         // Find out all the cache config which has this path applicable for invalidation.
@@ -533,6 +535,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredHttpCacheRules() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(

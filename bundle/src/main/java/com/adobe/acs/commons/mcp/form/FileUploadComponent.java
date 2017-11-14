@@ -23,14 +23,16 @@ import aQute.bnd.annotation.ProviderType;
 @ProviderType
 public class FileUploadComponent extends FieldComponent {
 
+    private static final String OPTION_MIME_TYPES = "mimeTypes";
+
     @Override
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/fileupload");
         getComponentMetadata().put("text", "Upload " + getFieldDefinition().name());
         getComponentMetadata().put("autoStart", false);
 
-        if (hasOption("mimeTypes")) {
-            getComponentMetadata().put("mimeTypes", getOption("mimeTypes").get());
+        if (hasOption(OPTION_MIME_TYPES)) {
+            getComponentMetadata().put(OPTION_MIME_TYPES, getOption(OPTION_MIME_TYPES).get());
         }
     }
 }

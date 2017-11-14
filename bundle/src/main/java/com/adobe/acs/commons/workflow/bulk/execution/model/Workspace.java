@@ -33,8 +33,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Default;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -46,7 +44,6 @@ import java.util.List;
 
 @Model(adaptables = Resource.class)
 public class Workspace {
-    private static final Logger log = LoggerFactory.getLogger(Workspace.class);
 
     public static final String NT_UNORDERED = "oak:Unstructured";
 

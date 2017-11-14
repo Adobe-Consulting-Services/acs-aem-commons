@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class AssetIngestor extends ProcessDefinition {
     private final MimeTypeService mimetypeService;
 
+    @SuppressWarnings("squid:S00115")
     public enum AssetAction {
         skip, version, replace
     }
@@ -177,7 +178,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 //if replace we just create a new one and the old one goes away
                 createAsset(source, assetPath, r, false);
                 break;
-            case version:
+            default:
                 //only option left is replace, we'll save current version as a version and then replace it
                 versionExistingAsset(source, assetPath, r);
         }
@@ -278,9 +279,11 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
+    @SuppressWarnings("squid:S00115")
+    enum ReportColumns {folder_count, asset_count, files_skipped, @FieldFormat(ValueFormat.storageSize) data_imported}
 
-    enum ReportColumns {folder_count, asset_count, files_skipped, @FieldFormat(ValueFormat.storageSize) data_imported};
     GenericReport report = new GenericReport();
+
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
         EnumMap<ReportColumns, Object> values = new EnumMap<>(ReportColumns.class);
@@ -316,6 +319,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
             HierarchialElement parent = getParent();
             return (parent == null ? getJcrBasePath() : parent.getNodePath()) + "/" + getNodeName();
         }
+
         default String getNodeName() {
             String name = getName();
             if (isFile() && name.contains(".")) {

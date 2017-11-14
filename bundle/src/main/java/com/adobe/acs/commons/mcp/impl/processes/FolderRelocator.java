@@ -78,9 +78,10 @@ import org.apache.commons.lang3.StringUtils;
 public class FolderRelocator extends ProcessDefinition implements Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
 
-    public static enum Mode {
+    public enum Mode {
         RENAME, MOVE
-    };
+    }
+
     private Map<String, String> sourceToDestination;
     @FormField(name="Source folder(s)", 
             description="One or more source folders must be provided.  Multiple folders implies a move operation.",
@@ -101,19 +102,19 @@ public class FolderRelocator extends ProcessDefinition implements Serializable {
             options={"horizontal","default=MOVE"})
     private Mode mode;
     
-    transient private final String[] requiredFolderPrivilegeNames = {
+    private final transient String[] requiredFolderPrivilegeNames = {
         Privilege.JCR_READ,
         Privilege.JCR_WRITE,
         Privilege.JCR_REMOVE_CHILD_NODES,
         Privilege.JCR_REMOVE_NODE
     };
 
-    transient private final String[] requiredNodePrivilegeNames = {
+    private final transient String[] requiredNodePrivilegeNames = {
         Privilege.JCR_ALL
     };
 
-    transient private Privilege[] requiredFolderPrivileges;
-    transient private Privilege[] requiredNodePrivileges;
+    private transient Privilege[] requiredFolderPrivileges;
+    private transient Privilege[] requiredNodePrivileges;
 
     private int batchSize = 5;
 
@@ -208,32 +209,33 @@ public class FolderRelocator extends ProcessDefinition implements Serializable {
         }
     }
 
+    @SuppressWarnings("squid:S3776")
     private void validateInputs(ResourceResolver res) throws RepositoryException {
         Optional<RepositoryException> error
                 = sourceToDestination.entrySet().stream().map((pair) -> {
-                    String sourcePath = pair.getKey();
-                    String destinationPath = pair.getValue();
-                    if (sourcePath == null) {
+                    String entrySourcePath = pair.getKey();
+                    String entryDestinationPath = pair.getValue();
+                    if (entrySourcePath == null) {
                         return new RepositoryException("Source path should not be null");
                     }
-                    if (destinationPath == null) {
+                    if (entryDestinationPath == null) {
                         return new RepositoryException("Destination path should not be null");
                     }
-                    if (destinationPath.contains(sourcePath + "/")) {
+                    if (entryDestinationPath.contains(entrySourcePath + "/")) {
                         return new RepositoryException("Destination must be outside of source folder");
                     }
-                    if (!resourceExists(res, sourcePath)) {
-                        if (!sourcePath.startsWith("/")) {
-                            return new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + sourcePath);                            
+                    if (!resourceExists(res, entrySourcePath)) {
+                        if (!entrySourcePath.startsWith("/")) {
+                            return new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + entrySourcePath);
                         } else {
-                            return new RepositoryException("Unable to find source " + sourcePath);
+                            return new RepositoryException("Unable to find source " + entrySourcePath);
                         }
                     }
-                    if (!resourceExists(res, destinationPath.substring(0, destinationPath.lastIndexOf('/')))) {
-                        if (!destinationPath.startsWith("/")) {
-                            return new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + destinationPath);
+                    if (!resourceExists(res, entryDestinationPath.substring(0, entryDestinationPath.lastIndexOf('/')))) {
+                        if (!entryDestinationPath.startsWith("/")) {
+                            return new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + entryDestinationPath);
                         } else {
-                            return new RepositoryException("Unable to find destination " + destinationPath);
+                            return new RepositoryException("Unable to find destination " + entryDestinationPath);
                         }
                     }
                     return null;
@@ -313,11 +315,12 @@ public class FolderRelocator extends ProcessDefinition implements Serializable {
             rr.commit();
             rr.refresh();
         }
-        if (resourceExists(rr, sourceFolder + "/jcr:content")) {
+        String sourceJcrContent = sourceFolder + "/jcr:content";
+        if (resourceExists(rr, sourceJcrContent)) {
             Actions.getCurrentActionManager().deferredWithResolver(Actions.retry(5,50,(rrr)->{
                 if (!resourceExists(rrr, targetPath + "/jcr:content")) {
                     waitUntilResourceFound(rrr, targetPath);
-                    rrr.copy(sourceFolder + "/jcr:content", targetPath);
+                    rrr.copy(sourceJcrContent, targetPath);
                     rrr.commit();
                     rrr.refresh();
                 }
@@ -390,5 +393,6 @@ public class FolderRelocator extends ProcessDefinition implements Serializable {
     
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) {
+        // no-op
     }
 }

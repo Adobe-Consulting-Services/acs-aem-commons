@@ -30,11 +30,11 @@ public abstract class ProcessDefinition implements FormProcessor {
 
     String name;
 
-    final public void setName(String n) {
+    public final void setName(String n) {
         name = n;
     }
 
-    final public String getName() {
+    public final String getName() {
         return name;
     }
 

@@ -29,7 +29,7 @@ public class SaxElementUtils {
     public static final String CSS_TYPE = "text/css";
     public static final String JS_TYPE = "text/javascript";
     
-    public static boolean isCSS(final String elementName, final Attributes attrs) {
+    public static boolean isCss(final String elementName, final Attributes attrs) {
         final String type = attrs.getValue("", "type");
         final String href = attrs.getValue("", "href");
 

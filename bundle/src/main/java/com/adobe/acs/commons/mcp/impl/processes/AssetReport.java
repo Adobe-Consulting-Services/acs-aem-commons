@@ -55,10 +55,11 @@ import org.apache.sling.api.resource.ResourceResolver;
 public class AssetReport extends ProcessDefinition implements Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
 
-    transient public static final String SHA1 = "dam:sha1";
+    public static transient final String SHA1 = "dam:sha1";
     public static final String NAME = "Asset Report";
 
-    public static enum Column {
+    @SuppressWarnings("squid:S00115")
+    public enum Column {
         level, asset_count, subfolder_count,
         rendition_count, version_count, subasset_count,
         @FieldFormat(ValueFormat.storageSize)
@@ -102,7 +103,7 @@ public class AssetReport extends ProcessDefinition implements Serializable {
             options = {"checked"}
     )
     private boolean includeVersions = false;
-    transient private int depthLimit;
+    private transient int depthLimit;
 
     @Override
     public void init() throws RepositoryException {
@@ -120,16 +121,22 @@ public class AssetReport extends ProcessDefinition implements Serializable {
         instance.defineAction("First pass", rr, this::examineAssets);
         instance.defineAction("Deep scan", rr, this::evaluateDeepStructure);
         instance.defineAction("Final pass", rr, this::examineAssets);
-        String detail = includeSubassets && includeVersions ? "full" 
-                : includeSubassets || includeVersions ? "partial" : "light";
+        String detail;
+        if (includeSubassets && includeVersions) {
+            detail = "full";
+        } else if (includeSubassets || includeVersions) {
+            detail = "partial";
+        } else {
+            detail = "light";
+        }
         instance.getInfo().setDescription(baseFolder + " - " + detail);        
     }
 
-    transient private final GenericReport report = new GenericReport();
-    transient private final Map<String, EnumMap<Column, Long>> reportData = new TreeMap<>();
+    private final transient GenericReport report = new GenericReport();
+    private final transient Map<String, EnumMap<Column, Long>> reportData = new TreeMap<>();
 
-    transient private final Queue<String> assetList = new ConcurrentLinkedQueue<>();
-    transient private final Queue<String> folderList = new ConcurrentLinkedQueue<>();
+    private final transient Queue<String> assetList = new ConcurrentLinkedQueue<>();
+    private final transient Queue<String> folderList = new ConcurrentLinkedQueue<>();
 
     public void evaluateStructure(ActionManager manager) {
         TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();

@@ -34,38 +34,38 @@ public class SaxElementUtilsTest {
     @Test
     public void testIsCSS() throws Exception {
         assertTrue("CSS Happy Path", 
-                SaxElementUtils.isCSS("link",
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "/css.css",
                                 "type", "text/css")));
         
         assertFalse("CSS - not a link", 
-                SaxElementUtils.isCSS("notlink",
+                SaxElementUtils.isCss("notlink",
                         makeAtts(
                                 "href", "/css.css",
                                 "type", "text/css")));
         
         assertFalse("CSS - not a path to css file", 
-                SaxElementUtils.isCSS("link",
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "/css.notcss",
                                 "type", "text/css")));
 
         assertFalse("CSS - relative path", 
-                SaxElementUtils.isCSS("link",
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "css.css",
                                 "type", "text/css")));
 
         assertFalse("CSS - external path", 
-                SaxElementUtils.isCSS("link",
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "http://www.adobe.com/css.css",
                                 "type", "text/css")));
 
         
         assertFalse("CSS - wrongtype", 
-                SaxElementUtils.isCSS("link",
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "/css.css",
                                 "type", "text/notcss")));

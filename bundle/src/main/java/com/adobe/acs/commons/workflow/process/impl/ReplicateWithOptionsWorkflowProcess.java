@@ -28,15 +28,20 @@ import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.util.visitors.ContentVisitor;
 import com.adobe.acs.commons.util.visitors.ResourceRunnable;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
-import com.day.cq.replication.*;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationOptions;
+import com.day.cq.replication.Replicator;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -178,7 +183,10 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
         public boolean isTraverseTree() {
             return traverseTree;
         }
-        public boolean isThrottle() { return throttle; }
+
+        public boolean isThrottle() {
+            return throttle;
+        }
 
     }
 }

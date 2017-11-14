@@ -142,6 +142,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         deferredWithResolver(action, false);
     }
 
+    @SuppressWarnings("squid:S1181")
     private void deferredWithResolver(
             final CheckedConsumer<ResourceResolver> action,
             final boolean closesResolver) {
@@ -177,6 +178,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
+    @SuppressWarnings("squid:S1181")
     public void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception {
         Actions.setCurrentActionManager(this);
         ReusableResolver resolver = getResourceResolver();
@@ -209,6 +211,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public int withQueryResults(
             final String queryStatement,
             final String language,

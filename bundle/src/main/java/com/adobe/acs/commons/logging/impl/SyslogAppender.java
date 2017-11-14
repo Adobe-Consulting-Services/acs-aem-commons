@@ -92,6 +92,7 @@ public final class SyslogAppender {
     private ServiceRegistration appenderRegistration;
 
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected void activate(ComponentContext ctx) {
         final Dictionary<?, ?> properties = ctx.getProperties();
         final String[] loggers = PropertiesUtil.toStringArray(properties.get(PROP_LOGGERS), new String[] {ROOT});
@@ -111,7 +112,7 @@ public final class SyslogAppender {
         // throws a descriptive IllegalArgumentException if facility is not valid.
         SyslogAppenderBase.facilityStringToint(facility);
 
-        BundleContext bundleContext = ctx.getBundleContext();
+        final BundleContext bundleContext = ctx.getBundleContext();
 
         appender = new ch.qos.logback.classic.net.SyslogAppender();
 

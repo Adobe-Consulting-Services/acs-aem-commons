@@ -130,13 +130,19 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
 
     @Override
     public String getName() {
-        return definition.getName() != null
-                ? (infoBean.getDescription() != null
-                ? definition.getName() + ": " + infoBean.getDescription()
-                : definition.getName())
-                : (infoBean.getDescription() != null
-                ? infoBean.getDescription()
-                : "No idea");
+        if (definition.getName() != null) {
+            if (infoBean.getDescription() != null) {
+                return definition.getName() + ": " + infoBean.getDescription();
+            } else {
+                return definition.getName();
+            }
+        } else {
+            if (infoBean.getDescription() != null) {
+                return infoBean.getDescription();
+            } else {
+                return "No idea";
+            }
+        }
     }
 
     @Override
@@ -152,12 +158,12 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
     }
 
     @Override
-    final public ActionManager defineCriticalAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
+    public final ActionManager defineCriticalAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
         return defineAction(name, rr, builder, true);
     }
 
     @Override
-    final public ActionManager defineAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
+    public final ActionManager defineAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
         return defineAction(name, rr, builder, false);
     }
 
@@ -172,7 +178,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
     }
 
     @Override
-    final public void run(ResourceResolver rr) {
+    public final void run(ResourceResolver rr) {
         try {
             infoBean.setRequester(rr.getUserID());
             infoBean.setStartTime(System.currentTimeMillis());

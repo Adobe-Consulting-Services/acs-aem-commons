@@ -33,7 +33,14 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkflowProcess;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -46,7 +53,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -94,18 +108,12 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     private ServiceRegistration accessorReg;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final void execute(final ResourceResolver resourceResolver, final String payloadPath,
                               final String[] workflowProcessLabels) throws WorkflowException {
         this.execute(resourceResolver, payloadPath, workflowProcessLabels, null, false, false);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final void execute(final ResourceResolver resourceResolver,
                               final String payloadPath,
@@ -160,11 +168,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @Deprecated
     public final void execute(final ResourceResolver resourceResolver,
                               final String payloadPath,
                               final WorkflowProcessIdType workflowProcessIdType,
@@ -427,7 +431,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
      * @param session the JCR Session to create the Synthetic Workflow Session from
      * @return the Synthetic Workflow Session
      */
-    @Deprecated
+    @Override
     public final WorkflowSession getWorkflowSession(final Session session) {
         return getCqWorkflowSession(session);
     }

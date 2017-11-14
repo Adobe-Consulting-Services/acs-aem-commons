@@ -138,8 +138,8 @@ public class Payload {
 
     /** Setters **/
 
-    public void setStatus(Status status) {
-        this.status = status.toString();
+    public void setStatus(Status newStatus) {
+        this.status = newStatus.toString();
         properties.put(PN_STATUS, this.status);
     }
 

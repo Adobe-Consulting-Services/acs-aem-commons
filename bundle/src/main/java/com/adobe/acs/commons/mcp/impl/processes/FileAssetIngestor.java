@@ -41,6 +41,7 @@ public class FileAssetIngestor extends AssetIngestor {
     public FileAssetIngestor(MimeTypeService mimeTypeService) {
         super(mimeTypeService);
     }
+
     @FormField(
             name = "Source",
             description = "Source folder for content ingestion",
@@ -70,8 +71,8 @@ public class FileAssetIngestor extends AssetIngestor {
         manager.deferredWithResolver(r->{
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             manager.setCurrentItem(fileBasePath);
-            Files.walk(baseFolder.toPath()).map(Path::toFile).filter(f -> !f.equals(baseFolder)).
-                    map(FileHierarchialElement::new).filter(FileHierarchialElement::isFolder).filter(this::canImportFolder).forEach(f->{
+            Files.walk(baseFolder.toPath()).map(Path::toFile).filter(f -> !f.equals(baseFolder))
+                    .map(FileHierarchialElement::new).filter(FileHierarchialElement::isFolder).filter(this::canImportFolder).forEach(f->{
                 manager.deferredWithResolver(Actions.retry(10, 100, rr-> {
                     manager.setCurrentItem(f.getItemName());
                     createFolderNode(f, rr);
@@ -84,8 +85,8 @@ public class FileAssetIngestor extends AssetIngestor {
         manager.deferredWithResolver(rr->{
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, rr.adaptTo(Session.class), true);
             manager.setCurrentItem(fileBasePath);
-            Files.walk(baseFolder.toPath()).map(FileHierarchialElement::new).filter(FileHierarchialElement::isFile).
-                    filter(this::canImportContainingFolder).map(FileHierarchialElement::getSource).forEach(fs->{
+            Files.walk(baseFolder.toPath()).map(FileHierarchialElement::new).filter(FileHierarchialElement::isFile)
+                    .filter(this::canImportContainingFolder).map(FileHierarchialElement::getSource).forEach(fs->{
                 if (canImportFile(fs)) {
                     manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fs, manager)));
                 } else {

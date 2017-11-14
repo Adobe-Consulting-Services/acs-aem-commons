@@ -64,16 +64,16 @@ public class QrCodeServlet extends SlingSafeMethodsServlet {
 
         } else if (request.getResource().getValueMap().get(PN_ENABLED, false)) {
             final JSONObject json = new JSONObject();
-            final String publishURL = externalizer.publishLink(request.getResourceResolver(), request.getRequestPathInfo().getSuffix());
+            final String publishUrl = externalizer.publishLink(request.getResourceResolver(), request.getRequestPathInfo().getSuffix());
 
             log.debug("Externalized path [ {} ] for QR Code generation to [ {} ]",
                     request.getRequestPathInfo().getSuffix(),
-                    publishURL);
+                    publishUrl);
 
-            if (StringUtils.isNotBlank(publishURL)) {
+            if (StringUtils.isNotBlank(publishUrl)) {
                 try {
                     json.put(JSON_KEY_ENABLED, true);
-                    json.put(JSON_KEY_PUBLISH_URL, publishURL);
+                    json.put(JSON_KEY_PUBLISH_URL, publishUrl);
                 } catch (JSONException e) {
                     log.error("Could not construct the QR Code Servlet JSON response", e);
                     throw new ServletException(e);

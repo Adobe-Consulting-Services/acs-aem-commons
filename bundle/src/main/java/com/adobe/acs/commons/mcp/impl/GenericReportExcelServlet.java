@@ -75,6 +75,7 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
         }
     }
 
+    @SuppressWarnings("squid:S3776")
     private Workbook createSpreadsheet(GenericReport report) {
         Workbook wb = new XSSFWorkbook();
 

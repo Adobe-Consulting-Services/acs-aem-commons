@@ -70,5 +70,5 @@ public abstract class RadioComponent extends FieldComponent {
         return component;
     }
     
-    abstract public Map<String, String> getOptions();
+    public abstract Map<String, String> getOptions();
 }

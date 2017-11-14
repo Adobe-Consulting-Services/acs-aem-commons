@@ -37,6 +37,7 @@ public class SimpleFilteringResourceVisitor {
     LinkedList<Resource> stack = new LinkedList<>();
     Function<String, Boolean> propertyFilter = s -> true;
     Function<Resource, Boolean> traversalFilter = r -> true;
+
     public void setPropertyFilter(Function<String, Boolean> filter) {
         propertyFilter = filter;
     }

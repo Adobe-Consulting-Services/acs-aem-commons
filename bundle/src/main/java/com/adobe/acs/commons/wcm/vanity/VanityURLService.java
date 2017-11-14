@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 @ProviderType
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public interface VanityURLService {
 
     /**
