@@ -177,6 +177,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
     private static final String SERVICE_NAME = "package-replication-status-event-listener";
     private static final Map<String, Object> AUTH_INFO;
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -248,7 +249,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                     if (resources.size() > 0) {
                         replicationStatusManager.setReplicationStatus(resourceResolver,
                                 replicatedBy,
-                                getJcrPackageLastModified(resourceResolver, jcrPackage),
+                                getJcrPackageLastModified(jcrPackage),
                                 ReplicationStatusManager.Status.ACTIVATED,
                                 resources.toArray(new Resource[resources.size()]));
 
@@ -408,13 +409,11 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     /**
      * Gets the last build time of the package.
      *
-     * @param resourceResolver the resource resolver to access the package properties
      * @param jcrPackage the package obj
      * @return the package's last build time or null if none can be found
      * @throws RepositoryException
      */
-    private Calendar getJcrPackageLastModified(final ResourceResolver resourceResolver,
-                                               final JcrPackage jcrPackage) throws RepositoryException, IOException {
+    private Calendar getJcrPackageLastModified(final JcrPackage jcrPackage) throws RepositoryException, IOException {
         if (ReplicatedAt.CURRENT_TIME.equals(this.replicatedAt)) {
             return Calendar.getInstance();
         } else {

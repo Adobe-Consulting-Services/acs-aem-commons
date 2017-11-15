@@ -297,6 +297,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         }
     }
 
+    @SuppressWarnings("squid:S2142")
     private void performAutomaticCleanup() {
         if (!cleanupHandlerRegistered.getAndSet(true)) {
             taskRunner.scheduleWork(() -> {
@@ -385,6 +386,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
+    @SuppressWarnings("squid:S2142")
     public boolean isComplete() {
         if (tasksCompleted.get() == tasksAdded.get()) {
             try {

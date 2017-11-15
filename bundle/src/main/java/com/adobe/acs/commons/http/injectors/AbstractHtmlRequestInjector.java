@@ -108,6 +108,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
 
     }
 
+    @SuppressWarnings("squid:S3923")
     protected boolean accepts(final ServletRequest servletRequest,
                             final ServletResponse servletResponse) {
 

@@ -220,6 +220,7 @@ public class HealthCheckStatusEmailer implements Runnable {
      * @param failure the list of unsuccessful Health Check Execution Results
      * @param timeTaken the time taken to execute all Health Checks
      */
+    @SuppressWarnings("squid:S1192")
     protected final void sendEmail(final List<HealthCheckExecutionResult> success, final List<HealthCheckExecutionResult> failure, final long timeTaken) {
         final ProductInfo[] productInfos = productInfoService.getInfos();
         final String hostname = getHostname();

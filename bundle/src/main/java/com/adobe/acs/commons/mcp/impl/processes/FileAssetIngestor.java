@@ -134,6 +134,7 @@ public class FileAssetIngestor extends AssetIngestor {
             this.file = f;
         }
 
+        @SuppressWarnings("squid:S1144")
         private FileHierarchialElement(Path p) {
             this(p.toFile());
         }

@@ -150,6 +150,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     public static final String PROP_MAX_DURATION = "max-duration";
 
     @Override
+    @SuppressWarnings("squid:S2142")
     public final void run() {
 
         ResourceResolver adminResourceResolver = null;

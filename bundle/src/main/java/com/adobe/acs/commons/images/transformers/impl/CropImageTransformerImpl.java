@@ -99,6 +99,7 @@ public class CropImageTransformerImpl implements ImageTransformer {
         return layer;
     }
 
+    @SuppressWarnings("squid:S2589")
     private Rectangle getSmartBounds(int x, int y, int width, int height, int layerWidth, int layerHeight) {
         final Rectangle rectangle = new Rectangle();
 

@@ -182,6 +182,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
         }
     }
 
+    @SuppressWarnings("squid:S1149")
     private ServiceRegistration registerService(String id, Resource config) {
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put(SERVICE_OWNER_KEY, getClass().getCanonicalName());
@@ -204,6 +205,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
      *            the default properties
      * @return the ServiceRegistration from registering the service
      */
+    @SuppressWarnings("squid:S1149")
     protected abstract ServiceRegistration registerServiceObject(Resource config, Hashtable<String, Object> props);
 
     private void unregisterService(String id) {

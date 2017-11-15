@@ -33,6 +33,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import java.util.List;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface WorkflowHelper {
     String PROCESS_ARGS = "PROCESS_ARGS";
     String TYPE_JCR_PATH = "JCR_PATH";
@@ -87,7 +88,7 @@ public interface WorkflowHelper {
      * @param args the arguments array
      * @return the values list
      */
-    List<String> getValuesFromArgs(String name, String args[]);
+    List<String> getValuesFromArgs(String name, String[] args);
 
     /**
      * Parse the provided quality string, from 1 to 100, and

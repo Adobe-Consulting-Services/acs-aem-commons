@@ -46,86 +46,86 @@ import com.day.cq.replication.Replicator;
  * Simple Job Runnable for automatically replicating a package.
  */
 public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
-	private static final Logger log = LoggerFactory.getLogger(AutomaticPackageReplicatorJob.class);
-	public static final String SERVICE_USER_NAME = "acs-commons-automatic-package-replication-service";
-	public static final String OSGI_EVENT_REPLICATED_TOPIC = "com/adobe/acs/commons/automatic_page_replicator/REPLICATED";
-	public static final String OSGI_EVENT_FAILED_TOPIC = "com/adobe/acs/commons/automatic_page_replicator/REPLICATION_FAILED";
-	public static final String OSGI_EVENT_PACKAGE_PATH_PARAM = "packagePath";
+    private static final Logger log = LoggerFactory.getLogger(AutomaticPackageReplicatorJob.class);
+    public static final String SERVICE_USER_NAME = "acs-commons-automatic-package-replication-service";
+    public static final String OSGI_EVENT_REPLICATED_TOPIC = "com/adobe/acs/commons/automatic_page_replicator/REPLICATED";
+    public static final String OSGI_EVENT_FAILED_TOPIC = "com/adobe/acs/commons/automatic_page_replicator/REPLICATION_FAILED";
+    public static final String OSGI_EVENT_PACKAGE_PATH_PARAM = "packagePath";
 
-	private final Replicator replicator;
-	private final String packagePath;
-	private final ResourceResolverFactory resolverFactory;
-	private final EventAdmin eventAdmin;
+    private final Replicator replicator;
+    private final String packagePath;
+    private final ResourceResolverFactory resolverFactory;
+    private final EventAdmin eventAdmin;
 
-	public AutomaticPackageReplicatorJob(final ResourceResolverFactory resolverFactory, final Replicator replicator,
-			final EventAdmin eventAdmin, final String packagePath) {
-		this.replicator = replicator;
-		this.packagePath = packagePath;
-		this.resolverFactory = resolverFactory;
-		this.eventAdmin = eventAdmin;
-	}
+    public AutomaticPackageReplicatorJob(final ResourceResolverFactory resolverFactory, final Replicator replicator,
+            final EventAdmin eventAdmin, final String packagePath) {
+        this.replicator = replicator;
+        this.packagePath = packagePath;
+        this.resolverFactory = resolverFactory;
+        this.eventAdmin = eventAdmin;
+    }
 
-	public void excute() throws RepositoryException, PackageException, IOException, ReplicationException {
+    public void excute() throws RepositoryException, PackageException, IOException, ReplicationException {
 
-		boolean succeeded = false;
-		ResourceResolver resolver = null;
-		try {
-			resolver = ConfigurationUpdateListener.getResourceResolver(resolverFactory);
+        boolean succeeded = false;
+        ResourceResolver resolver = null;
+        try {
+            resolver = ConfigurationUpdateListener.getResourceResolver(resolverFactory);
 
-			Session session = resolver.adaptTo(Session.class);
+            Session session = resolver.adaptTo(Session.class);
 
-			JcrPackageManager pkgMgr = PackagingService.getPackageManager(session);
-			PackageId packageId = new PackageId(packagePath);
+            JcrPackageManager pkgMgr = PackagingService.getPackageManager(session);
+            PackageId packageId = new PackageId(packagePath);
 
-			// check if the package exists
-			JcrPackage jcrPackage = pkgMgr.open(packageId);
-			if (jcrPackage == null || jcrPackage.getNode() == null) {
-				log.warn("Package at path " + packagePath + " does not exist");
-				throw new IllegalArgumentException("Package at path " + packagePath + " does not exist");
-			}
+            // check if the package exists
+            JcrPackage jcrPackage = pkgMgr.open(packageId);
+            if (jcrPackage == null || jcrPackage.getNode() == null) {
+                log.warn("Package at path " + packagePath + " does not exist");
+                throw new IllegalArgumentException("Package at path " + packagePath + " does not exist");
+            }
 
-			log.debug("Assembling package {}", packagePath);
-			pkgMgr.assemble(jcrPackage, null);
+            log.debug("Assembling package {}", packagePath);
+            pkgMgr.assemble(jcrPackage, null);
 
-			log.debug("Replicating package {}", packagePath);
-			replicator.replicate(session, ReplicationActionType.ACTIVATE, jcrPackage.getNode().getPath());
+            log.debug("Replicating package {}", packagePath);
+            replicator.replicate(session, ReplicationActionType.ACTIVATE, jcrPackage.getNode().getPath());
 
-			log.debug("Package {} replicated successfully!", packagePath);
-			fireEvent(OSGI_EVENT_REPLICATED_TOPIC);
-			succeeded = true;
-		} finally {
-			if(resolver != null){
-				resolver.close();
-			}
-			if(!succeeded){
-				fireEvent(OSGI_EVENT_FAILED_TOPIC);
-			}
-		}
-	}
+            log.debug("Package {} replicated successfully!", packagePath);
+            fireEvent(OSGI_EVENT_REPLICATED_TOPIC);
+            succeeded = true;
+        } finally {
+            if(resolver != null){
+                resolver.close();
+            }
+            if(!succeeded){
+                fireEvent(OSGI_EVENT_FAILED_TOPIC);
+            }
+        }
+    }
 
-	private void fireEvent(String topic) {
-		final Event event = new Event(topic, new HashMap<String, String>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put(OSGI_EVENT_PACKAGE_PATH_PARAM, packagePath);
-			}
-		});
-		eventAdmin.postEvent(event);
-	}
+    private void fireEvent(String topic) {
+        final Event event = new Event(topic, new HashMap<String, String>() {
+            private static final long serialVersionUID = 1L;
+            {
+                put(OSGI_EVENT_PACKAGE_PATH_PARAM, packagePath);
+            }
+        });
+        eventAdmin.postEvent(event);
+    }
 
-	@Override
-	public void run() {
-		log.trace("run");
-		try {
-			excute();
-		} catch (Exception e) {
-			log.error("Excepting running Automatic Package Replication task", e);
-		}
-	}
+    @Override
+    public void run() {
+        log.trace("run");
+        try {
+            excute();
+        } catch (Exception e) {
+            log.error("Excepting running Automatic Package Replication task", e);
+        }
+    }
 
-	@Override
-	public void handleEvent(Event event) {
-		run();
-	}
+    @Override
+    public void handleEvent(Event event) {
+        run();
+    }
 
 }

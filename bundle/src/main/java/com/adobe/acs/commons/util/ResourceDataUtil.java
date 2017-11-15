@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @ProviderType
+@SuppressWarnings("checkstyle:abbreviationaswordinnameR")
 public class ResourceDataUtil {
     public static final String ENCODING_UTF_8 = "UTF-8";
     private static final Logger log = LoggerFactory.getLogger(ResourceDataUtil.class);

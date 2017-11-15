@@ -21,6 +21,8 @@ package com.adobe.acs.commons.replication.impl;
 
 import com.adobe.acs.commons.replication.ReplicateVersion;
 import com.adobe.acs.commons.replication.ReplicationResult;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
@@ -28,9 +30,6 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,107 +65,83 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
 
         log.debug("Entering ReplicatePageVersionServlet.doPost(..)");
 
-        JSONObject obj = null;
+        String[] rootPaths = req.getParameterValues("rootPaths");
+        Date date = getDate(req.getParameter("datetimecal"));
+        String[] agents = req.getParameterValues("cmbAgent");
 
-        try {
-            String[] rootPaths = req.getParameterValues("rootPaths");
-            Date date = getDate(req.getParameter("datetimecal"));
-            String[] agents = req.getParameterValues("cmbAgent");
+        JsonObject obj = validate(rootPaths, agents, date);
 
-            obj = validate(rootPaths, agents, date);
+        if (!obj.has("error")) {
+            log.debug("Initiating version replication");
 
-            if (!obj.has("error")) {
-                log.debug("Initiating version replication");
+            List<ReplicationResult> response = replicateVersion.replicate(
+                    req.getResourceResolver(), rootPaths, agents, date);
 
-                List<ReplicationResult> response = replicateVersion.replicate(
-                        req.getResourceResolver(), rootPaths, agents, date);
-
-                if (log.isDebugEnabled()) {
-                    for (final ReplicationResult replicationResult : response) {
-                        log.debug("Replication result: {} -- {}",
-                                replicationResult.getPath(),
-                                replicationResult.getStatus());
-                    }
-                }
-
-                JSONArray arr = convertResponseToJson(response);
-                obj = new JSONObject();
-                obj.put("result", arr);
-
-            } else {
-                log.debug("Did not attempt to replicate version due to issue with input params");
-
-                try {
-                    res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    obj.put("status", "error");
-                } catch (JSONException e) {
-                    log.error("exception occurred", e);
+            if (log.isDebugEnabled()) {
+                for (final ReplicationResult replicationResult : response) {
+                    log.debug("Replication result: {} -- {}",
+                            replicationResult.getPath(),
+                            replicationResult.getStatus());
                 }
             }
-        } catch (JSONException ex) {
-            try {
-                if (obj == null) {
-                    obj = new JSONObject();
-                }
-                res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                obj.put("error", "System Error.");
-                obj.put("status", "error");
-            } catch (JSONException e) {
-                log.error("exception occurred", e);
-            }
+
+            JsonArray arr = convertResponseToJson(response);
+            obj = new JsonObject();
+            obj.add("result", arr);
+
+        } else {
+            log.debug("Did not attempt to replicate version due to issue with input params");
+
+            res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            obj.addProperty("status", "error");
         }
 
-        try {
-            res.setContentType("application/json");
-            obj.write(res.getWriter());
-        } catch (JSONException e) {
-            log.error("exception occurred", e);
-        }
+        res.setContentType("application/json");
+        res.getWriter().print(obj.toString());
     }
 
-    private JSONArray convertResponseToJson(List<ReplicationResult> list) throws JSONException {
-        JSONArray arr = new JSONArray();
+    private JsonArray convertResponseToJson(List<ReplicationResult> list) {
+        JsonArray arr = new JsonArray();
 
         for (ReplicationResult result : list) {
-            JSONObject resultObject = new JSONObject();
+            JsonObject resultObject = new JsonObject();
 
-            resultObject.put("path", result.getPath());
-            resultObject.put("status", result.getStatus().name());
-            resultObject.put("version", result.getVersion());
+            resultObject.addProperty("path", result.getPath());
+            resultObject.addProperty("status", result.getStatus().name());
+            resultObject.addProperty("version", result.getVersion());
 
-            arr.put(resultObject);
+            arr.add(resultObject);
         }
         return arr;
     }
 
 
-    private JSONObject validate(String[] rootPaths, String[] agents, Date date)
-            throws JSONException {
+    private JsonObject validate(String[] rootPaths, String[] agents, Date date) {
 
-        final JSONObject obj = new JSONObject();
+        final JsonObject obj = new JsonObject();
 
         if (ArrayUtils.isEmpty(rootPaths)) {
-            obj.put("error", "Select at least 1 root path.");
+            obj.addProperty("error", "Select at least 1 root path.");
             log.debug("Error validating root paths (they're empty)");
             return obj;
         }
 
         for (final String rootPath : rootPaths) {
             if (StringUtils.isBlank(rootPath)) {
-                obj.put("error", "Root paths cannot be empty.");
+                obj.addProperty("error", "Root paths cannot be empty.");
                 log.debug("Error validating a root path");
                 return obj;
             }
         }
 
         if (date == null) {
-            obj.put("error", "Specify the date and time to select the appropriate resource versions for replication.");
+            obj.addProperty("error", "Specify the date and time to select the appropriate resource versions for replication.");
             log.debug("Error validating date");
             return obj;
         }
 
         if (ArrayUtils.isEmpty(agents)) {
-            obj.put("error", "Select at least 1 replication agent.");
+            obj.addProperty("error", "Select at least 1 replication agent.");
             log.debug("Error validating agents");
             return obj;
         }

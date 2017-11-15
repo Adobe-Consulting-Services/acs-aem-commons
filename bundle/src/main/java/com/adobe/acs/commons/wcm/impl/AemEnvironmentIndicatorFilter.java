@@ -109,8 +109,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     private static final String[] DEFAULT_EXCLUDED_WCMMODES = {"DISABLED"};
     @Property (label = "Excluded WCM modes",
-    		description = "Do not display the indicator when these WCM modes",
-    		cardinality = Integer.MAX_VALUE)
+            description = "Do not display the indicator when these WCM modes",
+            cardinality = Integer.MAX_VALUE)
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
 
@@ -122,7 +122,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
-
+        // no-op
     }
 
     @Override
@@ -149,10 +149,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
         boolean doInclude = true;
         if (ArrayUtils.isNotEmpty(excludedWCMModes)) {
-        	// Test for configured WCM modes, where the indicators are not displayed
-        	WCMMode wcmmode = extractFromRequest(request);
+            // Test for configured WCM modes, where the indicators are not displayed
+            WCMMode wcmmode = extractFromRequest(request);
 
-        	if (wcmmode != null) {
+            if (wcmmode != null) {
                 for (String m : excludedWCMModes) {
                     if (StringUtils.equalsIgnoreCase(wcmmode.name(), m)) {
                         doInclude = false;
@@ -197,9 +197,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        // no-op
     }
 
+    @SuppressWarnings("squid:S3923")
     private boolean accepts(final HttpServletRequest request) {
         if (StringUtils.isBlank(css) && StringUtils.isBlank(titlePrefix)) {
             // Only accept is properly configured

@@ -90,6 +90,7 @@ public class TimedRunnable implements Runnable {
         runner.logCompletion(created, started, executed, finished, successful, error);
     }
 
+    @SuppressWarnings("squid:S2142")
     private Runnable watchThread(Thread workThread, Semaphore timerSemaphore) {
         return () -> {
             boolean finished1 = false;

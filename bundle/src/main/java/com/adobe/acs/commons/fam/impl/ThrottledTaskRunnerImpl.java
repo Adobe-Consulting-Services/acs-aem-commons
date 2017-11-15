@@ -263,6 +263,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         initThreadPool();
     }
 
+    @SuppressWarnings("squid:S2142")
     private void initThreadPool() {
         if (workQueue == null) {
             workQueue = new LinkedBlockingDeque<>();

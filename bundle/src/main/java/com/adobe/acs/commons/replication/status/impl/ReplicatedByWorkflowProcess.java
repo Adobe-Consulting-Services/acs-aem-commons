@@ -107,7 +107,7 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
             for (final String path : paths) {
                 // For each item in the WF Package, or if not a WF Package, path = payloadPath
 
-            	Resource resource = replStatusManager.getReplicationStatusResource(path, resourceResolver);
+                Resource resource = replStatusManager.getReplicationStatusResource(path, resourceResolver);
 
                 final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 
