@@ -8,15 +8,15 @@ engines:
     enabled: true
     config:
       file: ".codeclimate/checkstyle.xml"
-  csslint:
-    enabled: true
-  duplication:
-    enabled: true
-    config:
-      languages:
-      - javascript
-  eslint:
-    enabled: true
+#  csslint:
+#    enabled: true
+#  duplication:
+#    enabled: true
+#    config:
+#      languages:
+#      - javascript
+#  eslint:
+#    enabled: true
 #  fixme:
 #    enabled: true
   pmd:
@@ -44,5 +44,6 @@ exclude_paths:
 # squid:S2095 - close stream
 # squid:S1172 - unused method param
 # squid:S00115 - constant name
+# squid:1144 - unused private method
 #
 # checkstyle:abbreviationaswordinname - abbreviation
