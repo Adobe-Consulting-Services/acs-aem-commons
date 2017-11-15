@@ -57,6 +57,8 @@
         <include pattern="/etc/acs-commons/notifications/jcr:content"/>
         <include pattern="/etc/acs-commons/packagers"/>
         <include pattern="/etc/acs-commons/packagers/jcr:content"/>
+        <include pattern="/etc/acs-commons/redirect-maps"/>
+        <include pattern="/etc/acs-commons/redirect-maps/jcr:content"/>
         <include pattern="/etc/acs-commons/workflow-remover(.*)"/>
         <include pattern="/etc/acs-commons/exporters" />
         <include pattern="/etc/acs-commons/exporters/jcr:content" />

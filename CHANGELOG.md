@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.12.0...HEAD
 
+### Added
+
+- #1145 - New Redirect Map Manager feature
+
 ### Changed
 
 - #1174 - Introduced CodeClimate quality checks. Resulted in lots of miscellaneous non-API changes.

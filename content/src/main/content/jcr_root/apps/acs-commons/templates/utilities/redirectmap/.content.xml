@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:Template"
+    jcr:description="Console for configuring Redirect Maps which allow updating lists of redirects in AEM"
+    jcr:title="Redirect Map Configuration"
+    allowedPaths="[/etc/acs-commons/redirect-maps(/.*)?]"
+    ranking="{Long}100">
+    <jcr:content
+        cq:designPath="/etc/designs/acs-commons"
+        jcr:primaryType="cq:PageContent"
+        sling:resourceType="acs-commons/components/utilities/redirectmappage"/>
+</jcr:root>
