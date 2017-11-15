@@ -49,7 +49,7 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
             var $form = $('#'+id);
 
             $.post($form.attr('action'), $form.serialize(), function() {
-               location.reload(true);
+            	location.reload(true);
             });
             return false;
         };
