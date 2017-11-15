@@ -126,6 +126,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public final void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
                                final FilterChain filterChain) throws IOException, ServletException {
 

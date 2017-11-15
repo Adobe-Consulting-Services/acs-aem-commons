@@ -185,14 +185,14 @@ public class WCMViewsFilter implements Filter {
      * @param request the request
      * @return true is the filter should attempt to process
      */
+    @SuppressWarnings("squid:S3776")
     private boolean accepts(final SlingHttpServletRequest request) {
         final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
         final Resource resource = request.getResource();
 
         // Only process requests that match the include path prefixes if any are provided
-        if (ArrayUtils.isEmpty(this.includePathPrefixes)) {
-            return false;
-        } else if (!StringUtils.startsWithAny(request.getResource().getPath(), this.includePathPrefixes)) {
+        if (ArrayUtils.isEmpty(this.includePathPrefixes)
+                || (!StringUtils.startsWithAny(request.getResource().getPath(), this.includePathPrefixes))) {
             return false;
         }
 

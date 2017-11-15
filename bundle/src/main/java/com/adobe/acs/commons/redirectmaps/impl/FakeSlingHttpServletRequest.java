@@ -74,6 +74,7 @@ import org.apache.sling.api.resource.SyntheticResource;
  * Fake request object, used to support mapping requests without using a "real"
  * request. Based on the Apache Sling Testing Mock Servlet Request.
  */
+@SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S1149", "squid:S1168"})
 public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
 
     private Resource resource;
@@ -128,6 +129,11 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
 
     @Override
     public RequestDispatcher getRequestDispatcher(Resource resource) {
+        return null;
+    }
+
+    @Override
+    public RequestDispatcher getRequestDispatcher(String path) {
         return null;
     }
 
@@ -257,7 +263,6 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    @SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S1149"})
     public StringBuffer getRequestURL() {
         return null;
     }
@@ -293,7 +298,6 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    @SuppressWarnings("checkstyle:abbreviationaswordinname")
     public boolean isRequestedSessionIdFromURL() {
         return false;
     }
@@ -419,11 +423,6 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public RequestDispatcher getRequestDispatcher(String path) {
-        return null;
-    }
-
-    @Override
     public String getScheme() {
         return scheme;
     }
@@ -445,17 +444,17 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
 
     @Override
     public void removeAttribute(String name) {
-
+        // no-op
     }
 
     @Override
     public void setAttribute(String name, Object o) {
-
+        // no-op
     }
 
     @Override
     public void setCharacterEncoding(String env) {
-
+        // no-op
     }
 
     @Override
@@ -470,12 +469,12 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
 
     @Override
     public void login(String username, String password) throws ServletException {
-
+        // no-op
     }
 
     @Override
     public void logout() throws ServletException {
-
+        // no-op
     }
 
     @Override

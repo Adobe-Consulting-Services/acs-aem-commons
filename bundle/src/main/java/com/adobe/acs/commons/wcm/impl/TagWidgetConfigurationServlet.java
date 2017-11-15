@@ -99,15 +99,13 @@ public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationSe
             while (children.hasNext()) {
                 Resource child = children.next();
                 if (matches(componentPath, child)) {
-                    boolean isDefault = false;
                     Resource config = child.getChild(configName);
                     if (config == null) {
                         config = child.getChild(DEFAULT_CONFIG_NAME);
-                        isDefault = true;
                     }
                     if (config != null) {
                         try {
-                            writeConfigResource(config, propertyName, isDefault, request, response);
+                            writeConfigResource(config, propertyName, request, response);
                         } catch (JSONException e) {
                             throw new ServletException(e);
                         }
@@ -142,21 +140,16 @@ public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationSe
                 return;
             }
 
-            writeConfigResource(root, propertyName, true, request, response);
+            writeConfigResource(root, propertyName,  request, response);
         } catch (JSONException e) {
             throw new ServletException(e);
         }
     }
 
-    private void writeConfigResource(Resource resource, String propertyName, boolean isDefault,
+    private void writeConfigResource(Resource resource, String propertyName,
             SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, JSONException,
             ServletException {
         JSONObject widget = createEmptyWidget(propertyName);
-
-        // these two size properties seem to be necessary to get the size correct
-        // in a component dialog
-        //widget.put("width", WIDGET_WIDTH);
-        //widget.put("height", WIDGET_HEIGHT);
 
         RequestParameterMap map = request.getRequestParameterMap();
         for (Map.Entry<String, RequestParameter[]> entry : map.entrySet()) {

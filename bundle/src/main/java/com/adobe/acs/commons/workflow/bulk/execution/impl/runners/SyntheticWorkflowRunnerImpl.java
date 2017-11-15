@@ -117,6 +117,8 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
             this.scheduler = scheduler;
         }
 
+        @Override
+        @SuppressWarnings({"squid:S3776", "squid:S1141"})
         public void run() {
             ResourceResolver serviceResourceResolver = null;
             Resource configResource;

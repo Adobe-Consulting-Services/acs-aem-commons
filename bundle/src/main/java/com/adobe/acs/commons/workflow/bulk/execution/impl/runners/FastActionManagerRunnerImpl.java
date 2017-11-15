@@ -146,15 +146,15 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
     }
 
     @Override
+    public void complete(Workspace workspace, Payload payload) throws Exception {
+        throw new UnsupportedOperationException("FAM payloads cannot be completed as they are not tracked");
+    }
+
+    @Override
     public void run(Workspace workspace, Payload payload) {
         if (!throttledTaskRunner.isRunning()) {
             throttledTaskRunner.resumeExecution();
         }
-    }
-
-    @Override
-    public void complete(Workspace workspace, Payload payload) throws Exception {
-        throw new UnsupportedOperationException("FAM payloads cannot be completed as they are not tracked");
     }
 
     @Override
@@ -186,6 +186,9 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
             this.actions = actions;
             this.syntheticWorkflowRunner = syntheticWorkflowRunner;
         }
+
+        @Override
+        @SuppressWarnings({"squid:S3776", "squid:S1141", "squid:S1854"})
         public void run() {
             ResourceResolver resourceResolver;
             Resource configResource;

@@ -182,11 +182,9 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
             while (children.hasNext()) {
                 Resource child = children.next();
                 if (matches(componentPath, child)) {
-                    boolean isDefault = false;
                     Resource config = child.getChild(configName);
                     if (config == null) {
                         config = child.getChild(DEFAULT_CONFIG_NAME);
-                        isDefault = true;
                     }
                     if (config != null) {
                         try {

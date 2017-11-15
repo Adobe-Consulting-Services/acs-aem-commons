@@ -133,6 +133,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     protected abstract boolean isServiceUpdated(Resource config, ServiceReference reference);
 
     @Override
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public synchronized void refreshCache() {
         log.trace("refreshCache");
 

@@ -174,7 +174,7 @@ public final class EnsureServiceUser {
      * @throws RepositoryException
      * @throws EnsureServiceUserException
      */
-    @SuppressWarnings("squid:S2589")
+    @SuppressWarnings("squid:S2583")
     protected void ensureExistance(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
         final User systemUser = ensureSystemUser(resourceResolver, serviceUser);
 
@@ -391,7 +391,7 @@ public final class EnsureServiceUser {
                     throw new EnsureServiceUserException(String.format("User [ %s ] ensureExistance at [ %s ] but is NOT a system user", principalName, user.getPath()));
                 }
             } else {
-                throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a user", principalName, user.getPath()));
+                throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a user", principalName, authorizable.getPath()));
             }
         }
 
