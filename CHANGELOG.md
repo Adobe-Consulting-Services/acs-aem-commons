@@ -7,7 +7,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.11.0...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.12.0...HEAD
+
+### Fixed
+
+- #1171 - Reduce duplicate coverage comments in pull requests.
+
+## [3.12.0] - 2017-11-13
 
 ### Added
 
@@ -17,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Changed
 
 - #1169 - Use Granite-packaged POI to ensure compatibility with AEM 6.2's included POI.
+- #1170 - Improve exception handling in Workflow Process - DAM Metadata Property Reset
 
 ### Fixed
 
