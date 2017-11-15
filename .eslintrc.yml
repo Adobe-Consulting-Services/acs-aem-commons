@@ -212,7 +212,7 @@ rules:
   no-plusplus: off
   no-restricted-syntax: off
   no-spaced-func: off
-  no-tabs: off
+  no-tabs: error
   no-ternary: off
   no-trailing-spaces: off
   no-underscore-dangle: off
