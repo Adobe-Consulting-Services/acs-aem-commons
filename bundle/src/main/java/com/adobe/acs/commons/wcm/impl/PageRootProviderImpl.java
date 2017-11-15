@@ -30,6 +30,12 @@ import org.apache.felix.scr.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Backward compatible configuration for Page Root Provider.
+ *
+ * @see PageRootProviderConfig
+ * @deprecated use PageRootProviderConfig instead
+ */
 @Component(
         label = "ACS AEM Commons - Page Root Provider (deprecated)",
         description = "Deprecated configuration for Page Root Provider. Please use PageRootProviderConfig instead.",
@@ -39,11 +45,6 @@ import org.slf4j.LoggerFactory;
 )
 @Service(PageRootProviderConfig.class)
 @Deprecated
-/**
- * Backward compatible configuration for Page Root Provider.
- *
- * @see PageRootProviderConfig
- */
 public class PageRootProviderImpl extends PageRootProviderConfig {
 
     @Property(

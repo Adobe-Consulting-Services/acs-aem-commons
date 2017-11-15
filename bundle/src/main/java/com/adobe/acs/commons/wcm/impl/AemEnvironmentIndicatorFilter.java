@@ -56,9 +56,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             + "height: 5px;"
             + "z-index: 100000000000000;";
 
-    private static final String TITLE_UPDATE_SCRIPT = "<script>(function() { var c = 0; t = '%s' + ' | ' + document.title, " +
-            "i = setInterval(function() { if (document.title === t && c++ > 10) { clearInterval(i); } else { document.title = t; } }, 1500); " +
-            "document.title = t; })();</script>\n";
+    private static final String TITLE_UPDATE_SCRIPT = "<script>(function() { var c = 0; t = '%s' + ' | ' + document.title, "
+            + "i = setInterval(function() { if (document.title === t && c++ > 10) { clearInterval(i); } else { document.title = t; } }, 1500); "
+            + "document.title = t; })();</script>\n";
 
     @Reference
     private XSSAPI xss;
@@ -226,13 +226,14 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         return true;
     }
 
-    private String createCSS(final String providedColor) {
+    private String createCss(final String providedColor) {
         return "#" + DIV_ID + " { "
                 + "background-color:" + providedColor + BASE_DEFAULT_STYLE
                 + " }";
     }
 
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected final void activate(ComponentContext ctx) {
         Dictionary<?, ?> config = ctx.getProperties();
 
@@ -245,7 +246,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         if (StringUtils.isNotBlank(cssOverride)) {
             css = cssOverride;
         } else if (StringUtils.isNotBlank(color)) {
-            css = createCSS(color);
+            css = createCss(color);
         }
 
         titlePrefix = xss.encodeForJSString(
@@ -275,7 +276,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     // extract the WCMMode from the request; we cannot use
     // WCMMode.fromRequest(), because this is not a SlingHttpServletRequest
-    private WCMMode extractFromRequest (HttpServletRequest request) {
+    private WCMMode extractFromRequest(HttpServletRequest request) {
 
         return (WCMMode) request.getAttribute(
                 WCMMode.REQUEST_ATTRIBUTE_NAME);

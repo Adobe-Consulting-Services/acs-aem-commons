@@ -49,116 +49,116 @@ import com.day.cq.commons.jcr.JcrConstants;
 @Model(adaptables = Resource.class)
 public class RedirectMapModel {
 
-	static final Logger log = LoggerFactory.getLogger(RedirectMapModel.class);
+    static final Logger log = LoggerFactory.getLogger(RedirectMapModel.class);
 
-	@Inject
-	@Optional
-	@Named("redirectMap.txt")
-	private Resource redirectMap;
+    @Inject
+    @Optional
+    @Named("redirectMap.txt")
+    private Resource redirectMap;
 
-	@Inject
-	@Optional
-	private List<RedirectConfigModel> redirects;
+    @Inject
+    @Optional
+    private List<RedirectConfigModel> redirects;
 
-	@Inject
-	@Source("sling-object")
-	private ResourceResolver resourceResolver;
+    @Inject
+    @Source("sling-object")
+    private ResourceResolver resourceResolver;
 
-	private List<MapEntry> addItems(RedirectConfigModel config, Iterator<Resource> items, StringBuilder sb,
-			String suffix) {
-		List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
-		while (items.hasNext()) {
-			Resource item = items.next();
-			String path = item.getPath();
-			ValueMap properties = item.getChild(JcrConstants.JCR_CONTENT).getValueMap();
-			FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver,
-					config.getProtocol(), config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
-			String pageUrl = config.getProtocol() + "://" + config.getDomain()
-					+ resourceResolver.map(mockRequest, item.getPath() + suffix);
+    private List<MapEntry> addItems(RedirectConfigModel config, Iterator<Resource> items, StringBuilder sb,
+            String suffix) {
+        List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
+        while (items.hasNext()) {
+            Resource item = items.next();
+            String path = item.getPath();
+            ValueMap properties = item.getChild(JcrConstants.JCR_CONTENT).getValueMap();
+            FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver,
+                    config.getProtocol(), config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
+            String pageUrl = config.getProtocol() + "://" + config.getDomain()
+                    + resourceResolver.map(mockRequest, item.getPath() + suffix);
 
-			String[] sources = properties.get(config.getProperty(), String[].class);
-			for (String source : sources) {
-				MapEntry entry = new MapEntry(item, source, pageUrl);
-				if (!entry.isValid()) {
-					log.warn("Source path {} for content {} contains whitespace", entry.getSource(), path);
-					invalidEntries.add(entry);
-				} else {
-					sb.append(entry.getSource() + " " + entry.getTarget() + "\n");
-				}
-			}
-		}
-		return invalidEntries;
-	}
+            String[] sources = properties.get(config.getProperty(), String[].class);
+            for (String source : sources) {
+                MapEntry entry = new MapEntry(item, source, pageUrl);
+                if (!entry.isValid()) {
+                    log.warn("Source path {} for content {} contains whitespace", entry.getSource(), path);
+                    invalidEntries.add(entry);
+                } else {
+                    sb.append(entry.getSource() + " " + entry.getTarget() + "\n");
+                }
+            }
+        }
+        return invalidEntries;
+    }
 
-	private List<MapEntry> gatherEntries(RedirectConfigModel config, StringBuilder sb) {
-		log.trace("gatherEntries");
+    private List<MapEntry> gatherEntries(RedirectConfigModel config, StringBuilder sb) {
+        log.trace("gatherEntries");
 
-		log.debug("Getting all of the entries for {}", config.getResource());
+        log.debug("Getting all of the entries for {}", config.getResource());
 
-		List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
+        List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
 
-		sb.append("\n# Dynamic entries for " + config.getResource().getPath() + "\n");
+        sb.append("\n# Dynamic entries for " + config.getResource().getPath() + "\n");
 
-		String pageQuery = "SELECT * FROM [cq:Page] WHERE [jcr:content/" + config.getProperty()
-				+ "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath()
-				+ "')";
-		log.debug("Finding pages with redirects with query: {}", pageQuery);
-		invalidEntries.addAll(addItems(config, resourceResolver.findResources(pageQuery, Query.JCR_SQL2), sb, ".html"));
-		String assetQuery = "SELECT * FROM [dam:Asset] WHERE [jcr:content/" + config.getProperty()
-				+ "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath()
-				+ "')";
-		log.debug("Finding assets with redirects with query: {}", assetQuery);
-		invalidEntries.addAll(addItems(config, resourceResolver.findResources(assetQuery, Query.JCR_SQL2), sb, ""));
-		return invalidEntries;
-	}
+        String pageQuery = "SELECT * FROM [cq:Page] WHERE [jcr:content/" + config.getProperty()
+                + "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath()
+                + "')";
+        log.debug("Finding pages with redirects with query: {}", pageQuery);
+        invalidEntries.addAll(addItems(config, resourceResolver.findResources(pageQuery, Query.JCR_SQL2), sb, ".html"));
+        String assetQuery = "SELECT * FROM [dam:Asset] WHERE [jcr:content/" + config.getProperty()
+                + "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath()
+                + "')";
+        log.debug("Finding assets with redirects with query: {}", assetQuery);
+        invalidEntries.addAll(addItems(config, resourceResolver.findResources(assetQuery, Query.JCR_SQL2), sb, ""));
+        return invalidEntries;
+    }
 
-	/**
-	 * Get all of the entries from the cq:Pages and dam:Assets which contain
-	 * whitespace in their vanity URL.
-	 * 
-	 * @return
-	 */
-	public List<MapEntry> getInvalidEntries() {
-		log.trace("getInvalidEntries");
-		List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
-		StringBuilder sb = new StringBuilder();
-		if (redirects != null) {
-			for (RedirectConfigModel config : redirects) {
-				invalidEntries.addAll(gatherEntries(config, sb));
-			}
-		}
-		log.debug("Found {} invalid entries", invalidEntries.size());
-		return invalidEntries;
-	}
+    /**
+     * Get all of the entries from the cq:Pages and dam:Assets which contain
+     * whitespace in their vanity URL.
+     *
+     * @return
+     */
+    public List<MapEntry> getInvalidEntries() {
+        log.trace("getInvalidEntries");
+        List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
+        StringBuilder sb = new StringBuilder();
+        if (redirects != null) {
+            for (RedirectConfigModel config : redirects) {
+                invalidEntries.addAll(gatherEntries(config, sb));
+            }
+        }
+        log.debug("Found {} invalid entries", invalidEntries.size());
+        return invalidEntries;
+    }
 
-	/**
-	 * Get the contents of the RedirectMap as a String
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	public String getRedirectMap() throws IOException {
-		log.debug("Retrieving redirect map from {}", redirectMap);
+    /**
+     * Get the contents of the RedirectMap as a String
+     *
+     * @return
+     * @throws IOException
+     */
+    public String getRedirectMap() throws IOException {
+        log.debug("Retrieving redirect map from {}", redirectMap);
 
-		StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-		if (redirectMap != null) {
-			log.debug("Loading RedirectMap file from {}", redirectMap);
-			sb.append("# Redirect Map File\n");
-			InputStream is = redirectMap.adaptTo(InputStream.class);
-			sb.append(IOUtils.toString(is));
-		} else {
-			log.debug("No redirect map specified");
-		}
+        if (redirectMap != null) {
+            log.debug("Loading RedirectMap file from {}", redirectMap);
+            sb.append("# Redirect Map File\n");
+            InputStream is = redirectMap.adaptTo(InputStream.class);
+            sb.append(IOUtils.toString(is));
+        } else {
+            log.debug("No redirect map specified");
+        }
 
-		if (redirects != null) {
-			for (RedirectConfigModel config : redirects) {
-				gatherEntries(config, sb);
-			}
-		} else {
-			log.debug("No redirect configurations specified");
-		}
-		return sb.toString();
-	}
+        if (redirects != null) {
+            for (RedirectConfigModel config : redirects) {
+                gatherEntries(config, sb);
+            }
+        } else {
+            log.debug("No redirect configurations specified");
+        }
+        return sb.toString();
+    }
 
 }

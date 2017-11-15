@@ -32,6 +32,7 @@ import aQute.bnd.annotation.ProviderType;
  * }
  */
 @ProviderType
+@SuppressWarnings("squid:S1118")
 public final class ComponentEditType {
     public static final Type CHART = new Type("CHART");
     public static final Type IMAGE = new Type("IMAGE");

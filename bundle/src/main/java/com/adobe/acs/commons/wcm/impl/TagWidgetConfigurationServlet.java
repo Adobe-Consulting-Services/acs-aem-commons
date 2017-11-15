@@ -83,6 +83,7 @@ public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationSe
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException,
             IOException {
         String componentPath = request.getResource().getPath();

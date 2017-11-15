@@ -29,6 +29,7 @@ import com.adobe.acs.commons.util.ModeUtil;
 import aQute.bnd.annotation.ProviderType;
 
 @ProviderType
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public interface ComponentHelper {
     /**
      * Checks if Page equals in WCM Mode DESIGN.

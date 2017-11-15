@@ -67,6 +67,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
      * @param requestParameterMap the Request Param Map
      * @return a list of the PropertyMerge directives by Destination
      */
+    @SuppressWarnings("squid:S3776")
     private List<PropertyMerge> getPropertyMerges(final RequestParameterMap requestParameterMap) {
         final HashMap<String, List<String>> mapping = new HashMap<String, List<String>>();
 

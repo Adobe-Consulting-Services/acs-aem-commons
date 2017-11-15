@@ -92,6 +92,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private static final String SERVICE_NAME = "system-notifications";
     private static final Map<String, Object> AUTH_INFO;
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -122,8 +123,8 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     protected boolean accepts(final ServletRequest servletRequest,
                               final ServletResponse servletResponse) {
 
-        if (!(servletRequest instanceof SlingHttpServletRequest) ||
-                !(servletResponse instanceof SlingHttpServletResponse)) {
+        if (!(servletRequest instanceof SlingHttpServletRequest)
+                || !(servletResponse instanceof SlingHttpServletResponse)) {
             return false;
         }
 
@@ -204,8 +205,8 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private boolean isActiveNotification(final SlingHttpServletRequest request,
                                          final Resource resource) {
-        if (JcrConstants.JCR_CONTENT.equals(resource.getName()) ||
-                REP_POLICY.equals(resource.getName())) {
+        if (JcrConstants.JCR_CONTENT.equals(resource.getName())
+                || REP_POLICY.equals(resource.getName())) {
             return false;
         }
 
@@ -274,8 +275,8 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
                 while (resources.hasNext()) {
                     final Resource resource = resources.next();
-                    if (!JcrConstants.JCR_CONTENT.equals(resource.getName()) &&
-                            !REP_POLICY.equals(resource.getName())) {
+                    if (!JcrConstants.JCR_CONTENT.equals(resource.getName())
+                            && !REP_POLICY.equals(resource.getName())) {
                         return true;
                     }
                 }
@@ -296,6 +297,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             log.debug("Registered System Notifications as Sling Filter");
     }
 
+    @SuppressWarnings("squid:S1149")
     private void registerAsEventHandler() {
             final Hashtable filterProps = new Hashtable<String, String>();
 
@@ -319,7 +321,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     @Override
     public void handleEvent(final Event event) {
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
 
         if (!this.isAuthor()) {
             log.warn("This event handler should ONLY run on AEM Author.");

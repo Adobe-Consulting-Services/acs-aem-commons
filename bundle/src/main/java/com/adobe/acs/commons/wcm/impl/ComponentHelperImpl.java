@@ -160,6 +160,8 @@ public final class ComponentHelperImpl implements ComponentHelper {
         return true;
     }
 
+
+    @SuppressWarnings("squid:S3776")
     public String getEditBlock(SlingHttpServletRequest request,
                                       ComponentEditType.Type editType,
                                       boolean... isConfigured) {
@@ -234,6 +236,7 @@ public final class ComponentHelperImpl implements ComponentHelper {
         return getDDEditBlock(request, name, null, isConfigured);
     }
 
+    @SuppressWarnings("squid:S3776")
     public String getDDEditBlock(SlingHttpServletRequest request, String name,
             ComponentEditType.Type editType, boolean... isConfigured) {
         if (!isAuthoringMode(request) || conditionAndCheck(isConfigured)) {

@@ -77,20 +77,20 @@ public class PageRootProviderConfig {
 
     @Activate
     protected void activate(Map<String, Object> props) {
-        List<Pattern> pageRootPatterns = new ArrayList<Pattern>();
+        List<Pattern> patterns = new ArrayList<Pattern>();
         String[] regexes = PropertiesUtil.toStringArray(props.get(PAGE_ROOT_PATH), new String[] { DEFAULT_PAGE_ROOT_PATH });
 
         for(String regex : regexes) {
             try {
                 Pattern p = Pattern.compile("^(" + regex + ")(|/.*)$");
-                pageRootPatterns.add(p);
+                patterns.add(p);
                 log.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p.toString());
             } catch (Exception e) {
                 log.error("Could not compile regex [ {} ] to pattern. Skipping...", regex, e);
             }
         }
 
-        this.pageRootPatterns = Collections.unmodifiableList(pageRootPatterns);
+        this.pageRootPatterns = Collections.unmodifiableList(patterns);
     }
 
     @Deactivate

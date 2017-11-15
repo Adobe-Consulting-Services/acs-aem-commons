@@ -31,45 +31,45 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 @Model(adaptables = Resource.class)
 public interface RedirectConfigModel {
 
-	/**
-	 * Gets the domain for mapping the request
-	 * 
-	 * @return
-	 */
-	@Inject
-	String getDomain();
+    /**
+     * Gets the domain for mapping the request
+     *
+     * @return
+     */
+    @Inject
+    String getDomain();
 
-	/**
-	 * Gets the path under which to search for items to check for the vanity
-	 * property
-	 * 
-	 * @return
-	 */
-	@Inject
-	String getPath();
+    /**
+     * Gets the path under which to search for items to check for the vanity
+     * property
+     *
+     * @return
+     */
+    @Inject
+    String getPath();
 
-	/**
-	 * Gets the property to use for the vanity paths
-	 * 
-	 * @return
-	 */
-	@Inject
-	String getProperty();
+    /**
+     * Gets the property to use for the vanity paths
+     *
+     * @return
+     */
+    @Inject
+    String getProperty();
 
-	/**
-	 * Gets the protocol (http or https) for mapping the request
-	 * 
-	 * @return
-	 */
-	@Inject
-	String getProtocol();
+    /**
+     * Gets the protocol (http or https) for mapping the request
+     *
+     * @return
+     */
+    @Inject
+    String getProtocol();
 
-	/**
-	 * The resource for this configurations
-	 * 
-	 * @return
-	 */
-	@Self
-	Resource getResource();
+    /**
+     * The resource for this configurations
+     *
+     * @return
+     */
+    @Self
+    Resource getResource();
 
 }

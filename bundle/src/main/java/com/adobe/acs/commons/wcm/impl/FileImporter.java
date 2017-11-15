@@ -73,6 +73,7 @@ public final class FileImporter implements Importer {
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public void importData(String schemeValue, String dataSource, Resource target) {
         if (scheme.equals(schemeValue)) {
             File file = new File(dataSource);
