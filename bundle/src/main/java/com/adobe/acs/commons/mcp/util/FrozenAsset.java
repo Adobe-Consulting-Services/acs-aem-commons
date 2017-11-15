@@ -72,6 +72,7 @@ public class FrozenAsset implements InvocationHandler {
         return (Asset) Proxy.newProxyInstance(FrozenAsset.class.getClassLoader(), new Class[] { Asset.class }, handler);
     }
 
+    @SuppressWarnings("squid:S1144")
     private static Asset createFrozenAsset(ResourceResolver resourceResolver, String path) throws RepositoryException {
         InvocationHandler handler = new FrozenAsset(resourceResolver, path);
         return (Asset) Proxy.newProxyInstance(FrozenAsset.class.getClassLoader(), new Class[] { Asset.class }, handler);

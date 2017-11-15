@@ -146,6 +146,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("squid:S3776")
     public final void preprocess(final ReplicationAction replicationAction,
                                  final ReplicationOptions replicationOptions) throws ReplicationException {
         if (!this.accepts(replicationAction, replicationOptions)) {

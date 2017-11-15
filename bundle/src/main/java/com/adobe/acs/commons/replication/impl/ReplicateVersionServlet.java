@@ -55,6 +55,11 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
 
     private static final Logger log = LoggerFactory
             .getLogger(ReplicateVersionServlet.class);
+    private static final String KEY_ERROR = "error";
+    private static final String KEY_RESULT = "result";
+    private static final String KEY_STATUS = "status";
+    private static final String KEY_PATH = "path";
+    private static final String KEY_VERSION = "version";
 
     @Reference
     private ReplicateVersion replicateVersion;
@@ -71,7 +76,7 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
 
         JsonObject obj = validate(rootPaths, agents, date);
 
-        if (!obj.has("error")) {
+        if (!obj.has(KEY_ERROR)) {
             log.debug("Initiating version replication");
 
             List<ReplicationResult> response = replicateVersion.replicate(
@@ -87,13 +92,13 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
 
             JsonArray arr = convertResponseToJson(response);
             obj = new JsonObject();
-            obj.add("result", arr);
+            obj.add(KEY_RESULT, arr);
 
         } else {
             log.debug("Did not attempt to replicate version due to issue with input params");
 
             res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            obj.addProperty("status", "error");
+            obj.addProperty(KEY_STATUS, KEY_ERROR);
         }
 
         res.setContentType("application/json");
@@ -106,9 +111,9 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
         for (ReplicationResult result : list) {
             JsonObject resultObject = new JsonObject();
 
-            resultObject.addProperty("path", result.getPath());
-            resultObject.addProperty("status", result.getStatus().name());
-            resultObject.addProperty("version", result.getVersion());
+            resultObject.addProperty(KEY_PATH, result.getPath());
+            resultObject.addProperty(KEY_STATUS, result.getStatus().name());
+            resultObject.addProperty(KEY_VERSION, result.getVersion());
 
             arr.add(resultObject);
         }
@@ -121,27 +126,27 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
         final JsonObject obj = new JsonObject();
 
         if (ArrayUtils.isEmpty(rootPaths)) {
-            obj.addProperty("error", "Select at least 1 root path.");
+            obj.addProperty(KEY_ERROR, "Select at least 1 root path.");
             log.debug("Error validating root paths (they're empty)");
             return obj;
         }
 
         for (final String rootPath : rootPaths) {
             if (StringUtils.isBlank(rootPath)) {
-                obj.addProperty("error", "Root paths cannot be empty.");
+                obj.addProperty(KEY_ERROR, "Root paths cannot be empty.");
                 log.debug("Error validating a root path");
                 return obj;
             }
         }
 
         if (date == null) {
-            obj.addProperty("error", "Specify the date and time to select the appropriate resource versions for replication.");
+            obj.addProperty(KEY_ERROR, "Specify the date and time to select the appropriate resource versions for replication.");
             log.debug("Error validating date");
             return obj;
         }
 
         if (ArrayUtils.isEmpty(agents)) {
-            obj.addProperty("error", "Select at least 1 replication agent.");
+            obj.addProperty(KEY_ERROR, "Select at least 1 replication agent.");
             log.debug("Error validating agents");
             return obj;
         }

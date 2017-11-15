@@ -210,6 +210,7 @@ public interface ComponentHelper {
      */
     String getDDEditBlock(SlingHttpServletRequest request, String name,
                                         ComponentEditType.Type editType, boolean... isConfigured);
+
     /**
      * Get the edit icon HTML img tag (&gt;img ...&lt;) for the specified
      * EditType

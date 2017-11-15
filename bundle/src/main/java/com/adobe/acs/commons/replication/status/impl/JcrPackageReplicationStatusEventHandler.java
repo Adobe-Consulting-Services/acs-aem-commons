@@ -183,6 +183,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public final void handleEvent(final Event event) {
         if (this.isMaster) {
             // Only run on master
@@ -236,39 +237,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             }
 
             for (final JcrPackage jcrPackage : jcrPackages) {
-                try {
-                    final List<Resource> resources = new ArrayList<Resource>();
-
-                    for (final String packagePath : packageHelper.getContents(jcrPackage)) {
-                        final Resource resource = resourceResolver.getResource(packagePath);
-                        if (this.accept(resource))  {
-                            resources.add(resource);
-                        }
-                    }
-
-                    if (resources.size() > 0) {
-                        replicationStatusManager.setReplicationStatus(resourceResolver,
-                                replicatedBy,
-                                getJcrPackageLastModified(jcrPackage),
-                                ReplicationStatusManager.Status.ACTIVATED,
-                                resources.toArray(new Resource[resources.size()]));
-
-                        log.info("Updated Replication Status for JCR Package: {}", jcrPackage.getDefinition().getId());
-                    } else {
-                        log.info("Could not find any resources in JCR Package [ {} ] that are candidates to have their Replication Status updated",
-                                jcrPackage.getDefinition().getId());
-                    }
-                } catch (RepositoryException e) {
-                    log.error("RepositoryException occurred updating replication status for contents of package", e);
-                } catch (IOException e) {
-                    log.error("IOException occurred updating replication status for contents of package", e);
-
-                } catch (PackageException e) {
-                    log.error("Could not retrieve the Packages contents.", e);
-                } finally {
-                    // Close each package when we are done.
-                    jcrPackage.close();
-                }
+                setReplicationStatus(jcrPackage, replicatedBy, resourceResolver);
             }
         } catch (LoginException e) {
             log.error("Could not obtain a resource resolver for applying replication status updates", e);
@@ -280,6 +249,42 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         }
 
         return JobResult.OK;
+    }
+
+    private void setReplicationStatus(JcrPackage jcrPackage, String replicatedBy, ResourceResolver resourceResolver) {
+        try {
+            final List<Resource> resources = new ArrayList<Resource>();
+
+            for (final String packagePath : packageHelper.getContents(jcrPackage)) {
+                final Resource resource = resourceResolver.getResource(packagePath);
+                if (this.accept(resource))  {
+                    resources.add(resource);
+                }
+            }
+
+            if (resources.size() > 0) {
+                replicationStatusManager.setReplicationStatus(resourceResolver,
+                        replicatedBy,
+                        getJcrPackageLastModified(jcrPackage),
+                        ReplicationStatusManager.Status.ACTIVATED,
+                        resources.toArray(new Resource[resources.size()]));
+
+                log.info("Updated Replication Status for JCR Package: {}", jcrPackage.getDefinition().getId());
+            } else {
+                log.info("Could not find any resources in JCR Package [ {} ] that are candidates to have their Replication Status updated",
+                        jcrPackage.getDefinition().getId());
+            }
+        } catch (RepositoryException e) {
+            log.error("RepositoryException occurred updating replication status for contents of package", e);
+        } catch (IOException e) {
+            log.error("IOException occurred updating replication status for contents of package", e);
+
+        } catch (PackageException e) {
+            log.error("Could not retrieve the Packages contents.", e);
+        } finally {
+            // Close each package when we are done.
+            jcrPackage.close();
+        }
     }
 
     /**
@@ -370,6 +375,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
      * @return true is the resource is markable resource
      * @throws RepositoryException
      */
+    @SuppressWarnings("squid:S3776")
     private boolean accept(final Resource resource) throws RepositoryException {
         if (resource == null || ResourceUtil.isNonExistingResource(resource)) {
             return false;

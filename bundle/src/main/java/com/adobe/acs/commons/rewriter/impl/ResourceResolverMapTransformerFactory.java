@@ -108,10 +108,8 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
 
         String[] normalizedValue = PropertiesUtil.toStringArray(config.get(PROP_ATTRIBUTES), DEFAULT_ATTRIBUTES);
 
-        if (test.length == 1) {
-            if (StringUtils.contains(test[0], ",")) {
-                normalizedValue = StringUtils.split(test[0], ",");
-            }
+        if (test.length == 1 && StringUtils.contains(test[0], ",")) {
+            normalizedValue = StringUtils.split(test[0], ",");
         }
 
         this.attributes = ParameterUtil.toMap(normalizedValue, ":", ",");

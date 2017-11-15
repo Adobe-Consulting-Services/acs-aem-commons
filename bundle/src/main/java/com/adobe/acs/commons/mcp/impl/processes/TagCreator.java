@@ -185,30 +185,39 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                     final TagManager tagManager = rr.adaptTo(TagManager.class);
                     ReportRowSatus status;
 
-                    try {
-                        if (tagManager.resolve(tagDefinition.getId()) == null) {
-                            status = ReportRowSatus.CREATED;
-                        } else {
-                            status = ReportRowSatus.UPDATED_EXISTING;
-                        }
-
-                        final Tag tag = tagManager.createTag(
-                                tagDefinition.getId(),
-                                tagDefinition.getTitle(),
-                                tagDefinition.getDescription(),
-                                false);
-                        setTitles(tag, tagDefinition);
-                        record(status, tag.getTagID(), tag.getPath(), tag.getTitle());
-                        log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
-                    } catch (Exception e) {
-                        record(ReportRowSatus.FAILED_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
-                        log.error("Unable to create tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
-                    }
+                    createTag(tagDefinition, tagManager);
                 });
             } catch (Exception e) {
                 log.error("Unable to import tags via ACS Commons MCP - Tag Creator", e);
             }
         });
+    }
+
+    private void createTag(TagDefinition tagDefinition, TagManager tagManager) {
+        ReportRowSatus status;
+        try {
+            if (tagManager.resolve(tagDefinition.getId()) == null) {
+                status = ReportRowSatus.CREATED;
+            } else {
+                status = ReportRowSatus.UPDATED_EXISTING;
+            }
+
+            final Tag tag = tagManager.createTag(
+                    tagDefinition.getId(),
+                    tagDefinition.getTitle(),
+                    tagDefinition.getDescription(),
+                    false);
+            if (tag != null) {
+                setTitles(tag, tagDefinition);
+                record(status, tag.getTagID(), tag.getPath(), tag.getTitle());
+                log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+            } else {
+                log.error("Tag [ {} ] is null", tagDefinition.getId());
+            }
+        } catch (Exception e) {
+            record(ReportRowSatus.FAILED_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
+            log.error("Unable to create tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+        }
     }
 
     /**
@@ -240,11 +249,6 @@ public class TagCreator extends ProcessDefinition implements Serializable {
     }
 
     private void setTitles(final Tag tag, final TagDefinition tagDefinition) throws RepositoryException {
-        if (tag == null) {
-            log.error("Tag [ {} ] is null", tagDefinition.getId());
-            return;
-        }
-
         final Node node = tag.adaptTo(Node.class);
 
         if (node == null) {

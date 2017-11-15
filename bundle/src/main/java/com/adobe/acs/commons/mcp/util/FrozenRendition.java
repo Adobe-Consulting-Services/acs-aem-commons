@@ -47,6 +47,7 @@ public class FrozenRendition implements InvocationHandler {
         this.renditionData = container.getChild(JcrConstants.JCR_CONTENT);
     }
 
+    @SuppressWarnings("squid:S1172")
     public static Rendition createFrozenRendition(Asset asset, Resource resource) {
         InvocationHandler handler = new FrozenRendition(resource);
         return (Rendition) Proxy.newProxyInstance(FrozenRendition.class.getClassLoader(), new Class[] { Rendition.class }, handler);

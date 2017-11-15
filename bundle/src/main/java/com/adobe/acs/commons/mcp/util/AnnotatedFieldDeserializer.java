@@ -135,6 +135,7 @@ public class AnnotatedFieldDeserializer {
         return null;
     }
 
+    @SuppressWarnings("squid:S3776")
     private static Object convertPrimitiveValue(String value, Class<?> type) throws ParseException {
         if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
             return value.toLowerCase().trim().equals("true");

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.replication.packages.automatic.impl;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 
 import javax.jcr.RepositoryException;
@@ -104,12 +105,7 @@ public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
     }
 
     private void fireEvent(String topic) {
-        final Event event = new Event(topic, new HashMap<String, String>() {
-            private static final long serialVersionUID = 1L;
-            {
-                put(OSGI_EVENT_PACKAGE_PATH_PARAM, packagePath);
-            }
-        });
+        final Event event = new Event(topic, Collections.singletonMap(OSGI_EVENT_PACKAGE_PATH_PARAM, packagePath));
         eventAdmin.postEvent(event);
     }
 

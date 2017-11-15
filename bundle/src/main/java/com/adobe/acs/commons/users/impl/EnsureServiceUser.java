@@ -174,11 +174,12 @@ public final class EnsureServiceUser {
      * @throws RepositoryException
      * @throws EnsureServiceUserException
      */
+    @SuppressWarnings("squid:S2589")
     protected void ensureExistance(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
         final User systemUser = ensureSystemUser(resourceResolver, serviceUser);
 
         if (systemUser != null) {
-            ensureACEs(resourceResolver, systemUser, serviceUser);
+            ensureAces(resourceResolver, systemUser, serviceUser);
         } else {
             log.error("Could not create or locate System User with principal name [ {} ]", serviceUser.getPrincipalName());
         }
@@ -195,7 +196,7 @@ public final class EnsureServiceUser {
     private void ensureRemoval(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
         final User systemUser = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
 
-        removeACEs(resourceResolver, systemUser, serviceUser);
+        removeAces(resourceResolver, systemUser, serviceUser);
 
         if (systemUser != null) {
             systemUser.remove();
@@ -235,12 +236,13 @@ public final class EnsureServiceUser {
      * return                  # of ace entries that could not be processed
      * @throws RepositoryException
      */
-    private int ensureACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
+    @SuppressWarnings("squid:S3776")
+    private int ensureAces(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
         int failures = 0;
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager = (JackrabbitAccessControlManager) session.getAccessControlManager();
-        final List<JackrabbitAccessControlList> acls = findACLs(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
+        final List<JackrabbitAccessControlList> acls = findAcls(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
 
         // For each rep:policy (ACL) this service user participates in ...
         for (final JackrabbitAccessControlList acl : acls) {
@@ -339,11 +341,11 @@ public final class EnsureServiceUser {
      * @param serviceUser      the Service User
      * @throws RepositoryException
      */
-    private void removeACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
+    private void removeAces(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager = (JackrabbitAccessControlManager) session.getAccessControlManager();
-        final List<JackrabbitAccessControlList> acls = findACLs(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
+        final List<JackrabbitAccessControlList> acls = findAcls(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
 
         for (final JackrabbitAccessControlList acl : acls) {
             final JackrabbitAccessControlEntry[] aces = (JackrabbitAccessControlEntry[]) acl.getAccessControlEntries();
@@ -405,7 +407,7 @@ public final class EnsureServiceUser {
      * @return a list of ACLs that principal participates in.
      * @throws RepositoryException
      */
-    private List<JackrabbitAccessControlList> findACLs(ResourceResolver resourceResolver, String principalName, JackrabbitAccessControlManager accessControlManager) throws RepositoryException {
+    private List<JackrabbitAccessControlList> findAcls(ResourceResolver resourceResolver, String principalName, JackrabbitAccessControlManager accessControlManager) throws RepositoryException {
         final Set<String> paths = new HashSet<String>();
         final List<JackrabbitAccessControlList> acls = new ArrayList<JackrabbitAccessControlList>();
 

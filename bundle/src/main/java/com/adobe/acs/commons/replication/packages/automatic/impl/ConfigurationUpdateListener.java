@@ -132,6 +132,7 @@ public class ConfigurationUpdateListener extends ResourceServiceManager
     }
 
     @Override
+    @SuppressWarnings("squid:S3923")
     protected boolean isServiceUpdated(Resource config, ServiceReference reference) {
         boolean updated = false;
         AutomaticPackageReplicatorModel model = new AutomaticPackageReplicatorModel(config);

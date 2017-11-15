@@ -149,6 +149,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected void activate(ComponentContext componentContext) {
         final BundleContext bundleContext = componentContext.getBundleContext();
         final Dictionary<?, ?> props = componentContext.getProperties();
@@ -328,6 +329,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     protected void addCacheData(Map<String, Object> data, String cacheObj) {
         data.put("Value", cacheObj);
     }
@@ -338,6 +340,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     protected CompositeType getCacheEntryType() throws OpenDataException {
         return new CompositeType("Cache Entry", "Cache Entry",
                 new String[] { "Cache Key", "Value" },
@@ -371,6 +374,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     class BadMd5VersionedClientLibsFilter implements Filter {
 
         @Override
+        @SuppressWarnings("squid:S3776")
         public void doFilter(final ServletRequest request,
                              final ServletResponse response,
                              final FilterChain filterChain) throws IOException, ServletException {
@@ -423,23 +427,25 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         }
 
         @Override
-        public void init(final FilterConfig filterConfig) throws ServletException {}
+        public void init(final FilterConfig filterConfig) throws ServletException {
+            // no-op
+        }
 
         @Override
-        public void destroy() {}
+        public void destroy() {
+            // no-op
+        }
     }
 
     static class UriInfo {
         private final String cleanedUri;
         private final String md5;
-        private final LibraryType libraryType;
         private final HtmlLibrary htmlLibrary;
         private final String cacheKey;
 
         UriInfo(String cleanedUri, String md5, LibraryType libraryType, HtmlLibrary htmlLibrary) {
             this.cleanedUri = cleanedUri;
             this.md5 = md5;
-            this.libraryType = libraryType;
             this.htmlLibrary = htmlLibrary;
             if (libraryType != null && htmlLibrary != null) {
                 cacheKey = htmlLibrary.getLibraryPath() + libraryType.extension;

@@ -70,6 +70,7 @@ public class BrandPortalAgentFilter implements AgentFilter {
         return false;
     }
 
+    @SuppressWarnings("squid:S3776")
     protected List<Resource> getBrandPortalConfigs(Resource content) {
         if (content == null) {
             return Collections.emptyList();
