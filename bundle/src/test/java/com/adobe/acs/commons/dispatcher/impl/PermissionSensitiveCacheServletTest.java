@@ -56,8 +56,6 @@ public class PermissionSensitiveCacheServletTest {
         config.put( "removable-extensions", "html");
         servlet.activate( config );
 
-        context.create().resource( "/content/test" );
-
     }
 
     @Test
@@ -83,6 +81,8 @@ public class PermissionSensitiveCacheServletTest {
     @Test
     public void doHeadShouldAllowAccess() throws Exception {
 
+        context.create().resource( "/content/test" );
+
         request = context.request();
 
         Map<String,Object> requestMap = new HashMap<>();
@@ -101,6 +101,19 @@ public class PermissionSensitiveCacheServletTest {
 
     @Test
     public void doHeadShouldNotAllowAccess() throws Exception {
+
+        request = context.request();
+
+        Map<String,Object> requestMap = new HashMap<>();
+        requestMap.put( "uri", TEST_PAGE );
+
+        request.setParameterMap( requestMap );
+
+        MockSlingHttpServletResponse response = context.response();
+
+        servlet.doHeadRequest( request, response );
+
+        assertEquals( HttpServletResponse.SC_UNAUTHORIZED, response.getStatus() );
 
     }
 
