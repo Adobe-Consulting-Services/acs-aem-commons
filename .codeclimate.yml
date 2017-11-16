@@ -1,0 +1,49 @@
+---
+engines:
+  sonar-java:
+    enabled: true
+    config:
+      sonar.java.source: 8
+  checkstyle:
+    enabled: true
+    config:
+      file: ".codeclimate/checkstyle.xml"
+#  csslint:
+#    enabled: true
+#  duplication:
+#    enabled: true
+#    config:
+#      languages:
+#      - javascript
+#  eslint:
+#    enabled: true
+#  fixme:
+#    enabled: true
+  pmd:
+    enabled: true
+ratings:
+  paths:
+  - "**.java"
+  - "**.css"
+  - "**.js"
+exclude_paths:
+- ".idea/"
+- "**/vendor/"
+- "**/extensions/contentfinder/"
+- "**/src/test/"
+- "*/target/"
+
+
+# Common exclusions
+# squid:S3776 - Cognitive Complexity
+# squid:S1214 - constants in interface
+# squid:S1141 - nested try
+# squid:S1192 - literals
+# squid:S1149 - Hashtable
+# squid:S00112 - specific exceptions
+# squid:S2095 - close stream
+# squid:S1172 - unused method param
+# squid:S00115 - constant name
+# squid:S1144 - unused private method
+#
+# checkstyle:abbreviationaswordinname - abbreviation

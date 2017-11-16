@@ -71,6 +71,7 @@ public class StatusServlet extends SlingAllMethodsServlet {
     private ActionManagerFactory actionManagerFactory;
 
     @Override
+    @SuppressWarnings({"squid:S3776","squid:S1192"})
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
@@ -188,6 +189,7 @@ public class StatusServlet extends SlingAllMethodsServlet {
         json.put("percentComplete", Math.round(((workspace.getTotalCount() - remainingCount) / (workspace.getTotalCount() * 1F)) * DECIMAL_TO_PERCENT));
     }
 
+    @SuppressWarnings("squid:S1192")
     private JSONObject getSystemStats() throws JSONException {
         JSONObject json = new JSONObject();
         try {

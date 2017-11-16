@@ -57,6 +57,7 @@ public class TimedRunnable implements Runnable {
      * throwing an interruption
      */
     @Override
+    @SuppressWarnings("squid:S1181")
     public void run() {
         if (cancelHandler.isPresent() && cancelHandler.get().isCancelled()) {
             return;
@@ -89,6 +90,7 @@ public class TimedRunnable implements Runnable {
         runner.logCompletion(created, started, executed, finished, successful, error);
     }
 
+    @SuppressWarnings("squid:S2142")
     private Runnable watchThread(Thread workThread, Semaphore timerSemaphore) {
         return () -> {
             boolean finished1 = false;

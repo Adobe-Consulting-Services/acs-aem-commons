@@ -33,7 +33,14 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkflowProcess;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -46,7 +53,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -94,18 +108,12 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     private ServiceRegistration accessorReg;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final void execute(final ResourceResolver resourceResolver, final String payloadPath,
                               final String[] workflowProcessLabels) throws WorkflowException {
         this.execute(resourceResolver, payloadPath, workflowProcessLabels, null, false, false);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final void execute(final ResourceResolver resourceResolver,
                               final String payloadPath,
@@ -160,11 +168,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @Deprecated
     public final void execute(final ResourceResolver resourceResolver,
                               final String payloadPath,
                               final WorkflowProcessIdType workflowProcessIdType,
@@ -182,7 +186,26 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         execute(resourceResolver, payloadPath, workflowSteps, autoSaveAfterEachWorkflowProcess, autoSaveAtEnd);
     }
 
+    @Override
+    public final void execute(final ResourceResolver resourceResolver,
+                              final String payloadPath,
+                              final SyntheticWorkflowModel syntheticWorkflowModel,
+                              final boolean autoSaveAfterEachWorkflowProcess,
+                              final boolean autoSaveAtEnd) throws WorkflowException {
 
+        final String[] processNames = syntheticWorkflowModel.getWorkflowProcessNames();
+        final Map<String, Map<String, Object>> processConfigs = syntheticWorkflowModel.getSyntheticWorkflowModelData();
+
+        execute(resourceResolver,
+                payloadPath,
+                WorkflowProcessIdType.PROCESS_NAME,
+                processNames,
+                processConfigs,
+                autoSaveAfterEachWorkflowProcess,
+                autoSaveAtEnd);
+    }
+
+    @SuppressWarnings({"squid:S3776", "squid:S1163", "squid:S1143"})
     private void run(final ResourceResolver resourceResolver,
                      final String payloadPath,
                      final List<SyntheticWorkflowStep> workflowSteps,
@@ -364,25 +387,6 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     }
 
     @Override
-    public final void execute(final ResourceResolver resourceResolver,
-                              final String payloadPath,
-                              final SyntheticWorkflowModel syntheticWorkflowModel,
-                              final boolean autoSaveAfterEachWorkflowProcess,
-                              final boolean autoSaveAtEnd) throws WorkflowException {
-
-        final String[] processNames = syntheticWorkflowModel.getWorkflowProcessNames();
-        final Map<String, Map<String, Object>> processConfigs = syntheticWorkflowModel.getSyntheticWorkflowModelData();
-
-        execute(resourceResolver,
-                payloadPath,
-                WorkflowProcessIdType.PROCESS_NAME,
-                processNames,
-                processConfigs,
-                autoSaveAfterEachWorkflowProcess,
-                autoSaveAtEnd);
-    }
-
-    @Override
     public final SyntheticWorkflowModel getSyntheticWorkflowModel(final ResourceResolver resourceResolver,
                                                                   final String workflowModelId,
                                                                   final boolean ignoreIncompatibleTypes)
@@ -427,7 +431,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
      * @param session the JCR Session to create the Synthetic Workflow Session from
      * @return the Synthetic Workflow Session
      */
-    @Deprecated
+    @Override
     public final WorkflowSession getWorkflowSession(final Session session) {
         return getCqWorkflowSession(session);
     }
@@ -471,8 +475,6 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         return resourceResolverFactory.getResourceResolver(authInfo);
     }
 
-
-    @Deprecated
     @Override
     public final Dictionary<String, Object> getConfig() {
         return new Hashtable<String, Object>();

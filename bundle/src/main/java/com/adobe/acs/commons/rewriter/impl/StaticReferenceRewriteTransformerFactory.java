@@ -54,8 +54,8 @@ import com.adobe.acs.commons.util.ParameterUtil;
  */
 @Component(
         label = "ACS AEM Commons - Static Reference Rewriter",
-        description = "Rewriter pipeline component which rewrites host name on static references " +
-                "for cookie-less domain support",
+        description = "Rewriter pipeline component which rewrites host name on static references "
+                + "for cookie-less domain support",
         metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
@@ -161,16 +161,12 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         if (attributes.containsKey(elementName)) {
             final String[] modifyableAttributes = attributes.get(elementName);
 
-            // clone the attributes
-            final AttributesImpl newAttrs = new AttributesImpl(attrs);
-            final int len = newAttrs.getLength();
-
             // first - check for the nostatic class
             boolean rewriteStatic = true;
-            for (int i = 0; i < len; i++) {
-                final String attrName = newAttrs.getLocalName(i);
+            for (int i = 0; i < attrs.getLength(); i++) {
+                final String attrName = attrs.getLocalName(i);
                 if (ATTR_CLASS.equals(attrName)) {
-                    String attrValue = newAttrs.getValue(i);
+                    String attrValue = attrs.getValue(i);
                     if (attrValue.contains(CLASS_NOSTATIC)) {
                         rewriteStatic = false;
                     }
@@ -178,34 +174,43 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             }
 
             if (rewriteStatic) {
-                for (int i = 0; i < len; i++) {
-                    final String attrName = newAttrs.getLocalName(i);
-                    if (ArrayUtils.contains(modifyableAttributes, attrName)) {
-                        final String attrValue = newAttrs.getValue(i);
+                return rebuildAttributes(elementName, attrs, modifyableAttributes);
+            }
+        }
 
-                        String key = elementName + ":" + attrName;
-                        if (matchingPatterns.containsKey(key)) {
-                            // Find value based on matching pattern
-                            Pattern matchingPattern = matchingPatterns.get(key);
-                            try {
-                                newAttrs.setValue(i, handleMatchingPatternAttribute(matchingPattern, attrValue));
-                            } catch (Exception e) {
-                                log.error("Could not perform replacement based on matching pattern", e);
-                            }
-                        } else {
-                            for (String prefix : prefixes) {
-                                if (attrValue.startsWith(prefix)) {
-                                    newAttrs.setValue(i, prependHostName(attrValue));
-                                }
-                            }
+        return attrs;
+    }
+
+    @SuppressWarnings("squid:S3776")
+    private Attributes rebuildAttributes(String elementName, Attributes attrs, String[] modifyableAttributes) {
+        // clone the attributes
+        final AttributesImpl newAttrs = new AttributesImpl(attrs);
+
+        for (int i = 0; i < newAttrs.getLength(); i++) {
+            final String attrName = newAttrs.getLocalName(i);
+            if (ArrayUtils.contains(modifyableAttributes, attrName)) {
+                final String attrValue = newAttrs.getValue(i);
+
+                String key = elementName + ":" + attrName;
+                if (matchingPatterns.containsKey(key)) {
+                    // Find value based on matching pattern
+                    Pattern matchingPattern = matchingPatterns.get(key);
+                    try {
+                        newAttrs.setValue(i, handleMatchingPatternAttribute(matchingPattern, attrValue));
+                    } catch (Exception e) {
+                        log.error("Could not perform replacement based on matching pattern", e);
+                    }
+                } else {
+                    for (String prefix : prefixes) {
+                        if (attrValue.startsWith(prefix)) {
+                            newAttrs.setValue(i, prependHostName(attrValue));
                         }
                     }
                 }
             }
-            return newAttrs;
-        } else {
-            return attrs;
         }
+
+        return newAttrs;
     }
 
     private String handleMatchingPatternAttribute(Pattern pattern, String attrValue) {
@@ -266,10 +271,11 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         return result;
     }
 
-    private static interface ShardNameProvider {
+    private interface ShardNameProvider {
         String lookup(int idx);
     }
 
+    @SuppressWarnings("squid:S1604")
     private static final ShardNameProvider toStringShardNameProvider = new ShardNameProvider() {
 
         @Override
@@ -278,6 +284,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         }
     };
 
+    @SuppressWarnings("squid:S1604")
     private ShardNameProvider lookupShardNameProvider = new ShardNameProvider() {
 
         @Override

@@ -216,6 +216,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         return allAssetFolders;
     }
 
+    @SuppressWarnings("squid:S1192")
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
         if (isHidden(page)) {
             return;
@@ -306,6 +307,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         }
     }
 
+    @SuppressWarnings("squid:S1144")
     private void writeFirstPropertyValue(final XMLStreamWriter stream, final String elementName,
             final String[] propertyNames, final InheritanceValueMap properties) throws XMLStreamException {
         for (String prop : propertyNames) {

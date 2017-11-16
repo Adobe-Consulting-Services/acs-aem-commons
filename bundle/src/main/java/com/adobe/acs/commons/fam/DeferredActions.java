@@ -18,14 +18,16 @@ package com.adobe.acs.commons.fam;
 import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.fam.actions.AssetActions;
-import com.adobe.acs.commons.fam.actions.ReplicationActions;
 import com.adobe.acs.commons.fam.actions.Filters;
-import com.adobe.acs.commons.functions.*;
+import com.adobe.acs.commons.fam.actions.ReplicationActions;
+import com.adobe.acs.commons.functions.BiConsumer;
+import com.adobe.acs.commons.functions.BiFunction;
+import com.adobe.acs.commons.functions.Consumer;
+import com.adobe.acs.commons.functions.Function;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -38,6 +40,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 @Component
 @Service(DeferredActions.class)
 @ProviderType
+@Deprecated
 public final class DeferredActions {
 
     public static final String ORIGINAL_RENDITION = Filters.ORIGINAL_RENDITION;
@@ -227,7 +230,7 @@ public final class DeferredActions {
      * @param path
      * @return
      */
-    final public Consumer<ResourceResolver> startSyntheticWorkflow(SyntheticWorkflowModel model, String path) {
+    public final Consumer<ResourceResolver> startSyntheticWorkflow(SyntheticWorkflowModel model, String path) {
         return Consumer.adapt(Actions.startSyntheticWorkflow(model, path, workflowRunner));
     }
 
@@ -237,7 +240,7 @@ public final class DeferredActions {
      * @param path
      * @return
      */
-    final public Consumer<ResourceResolver> removeRenditions(String path) {
+    public final Consumer<ResourceResolver> removeRenditions(String path) {
         return Consumer.adapt(AssetActions.removeRenditions(path));
     }
 
@@ -248,7 +251,7 @@ public final class DeferredActions {
      * @param name
      * @return
      */
-    final public Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
+    public final Consumer<ResourceResolver> removeRenditionsNamed(String path, String name) {
         return Consumer.adapt(AssetActions.removeRenditionsNamed(path, name));
     }
 
@@ -258,7 +261,7 @@ public final class DeferredActions {
      * @param path
      * @return
      */
-    final public Consumer<ResourceResolver> activate(String path) {
+    public final Consumer<ResourceResolver> activate(String path) {
         return Consumer.adapt(ReplicationActions.activate(replicator, path));
     }
 
@@ -269,7 +272,7 @@ public final class DeferredActions {
      * @param options
      * @return
      */
-    final public Consumer<ResourceResolver> activateWithOptions(String path, ReplicationOptions options) {
+    public final Consumer<ResourceResolver> activateWithOptions(String path, ReplicationOptions options) {
         return Consumer.adapt(ReplicationActions.activateWithOptions(replicator, path, options));
     }
 
@@ -279,7 +282,7 @@ public final class DeferredActions {
      * @param path
      * @return
      */
-    final public Consumer<ResourceResolver> deactivate(String path) {
+    public final Consumer<ResourceResolver> deactivate(String path) {
         return Consumer.adapt(ReplicationActions.deactivate(replicator, path));
     }
 
@@ -290,7 +293,7 @@ public final class DeferredActions {
      * @param options
      * @return
      */
-    final public Consumer<ResourceResolver> deactivateWithOptions(String path, ReplicationOptions options) {
+    public final Consumer<ResourceResolver> deactivateWithOptions(String path, ReplicationOptions options) {
         return Consumer.adapt(ReplicationActions.deactivateWithOptions(replicator, path, options));
     }
 }

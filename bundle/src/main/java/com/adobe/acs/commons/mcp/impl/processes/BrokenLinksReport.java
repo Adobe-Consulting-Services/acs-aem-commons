@@ -88,9 +88,9 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
             options = {"default=text"})
     private String htmlFields;
 
-    transient private Set<String> excludeList;
-    transient private Set<String> deepCheckList;
-    transient private Pattern regex;
+    private transient Set<String> excludeList;
+    private transient Set<String> deepCheckList;
+    private transient Pattern regex;
 
     @Override
     public void init() throws RepositoryException {
@@ -100,13 +100,14 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
         regex = Pattern.compile(propertyRegex);
     }
 
-    transient private final GenericReport report = new GenericReport();
+    private final transient GenericReport report = new GenericReport();
 
-    enum REPORT {
+    @SuppressWarnings("squid:S00115")
+    enum Report {
         reference
     }
 
-    transient private final Map<String, EnumMap<REPORT, Object>> reportData = new ConcurrentHashMap<>();
+    private final transient Map<String, EnumMap<Report, Object>> reportData = new ConcurrentHashMap<>();
 
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
@@ -118,9 +119,9 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
-        GenericReport report = new GenericReport();
-        report.setRows(reportData, "Source", REPORT.class);
-        report.persist(rr, instance.getPath() + "/jcr:content/report");
+        GenericReport genericReport = new GenericReport();
+        genericReport.setRows(reportData, "Source", Report.class);
+        genericReport.persist(rr, instance.getPath() + "/jcr:content/report");
 
     }
 
@@ -134,8 +135,8 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
                 for(Map.Entry<String, List<String>> ref : brokenRefs.entrySet()){
                     String propertyPath = ref.getKey();
                     List<String> refs = ref.getValue();
-                    reportData.put(propertyPath, new EnumMap<>(REPORT.class));
-                    reportData.get(propertyPath).put(REPORT.reference, refs.stream().collect(Collectors.joining(",")));
+                    reportData.put(propertyPath, new EnumMap<>(Report.class));
+                    reportData.get(propertyPath).put(Report.reference, refs.stream().collect(Collectors.joining(",")));
                 }
             });
         });
@@ -214,8 +215,9 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
                         })).entrySet().stream().filter(e -> !e.getValue().isEmpty())
                 .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
      }
-        // access from unit tests
-    Map<String, EnumMap<REPORT, Object>> getReportData() {
+
+    // access from unit tests
+    Map<String, EnumMap<Report, Object>> getReportData() {
         return reportData;
     }
 }

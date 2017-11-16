@@ -33,8 +33,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Default;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -46,7 +44,6 @@ import java.util.List;
 
 @Model(adaptables = Resource.class)
 public class Workspace {
-    private static final Logger log = LoggerFactory.getLogger(Workspace.class);
 
     public static final String NT_UNORDERED = "oak:Unstructured";
 
@@ -149,7 +146,7 @@ public class Workspace {
     }
 
     @PostConstruct
-    protected void activate() throws Exception {
+    protected void activate() {
         this.config = resource.getParent().adaptTo(Config.class);
 
         for (BulkWorkflowRunner candidate : runners) {
@@ -274,6 +271,14 @@ public class Workspace {
         properties.remove(PN_SUB_STATUS);
     }
 
+    public void setStatus(Status status, SubStatus subStatus) {
+        setStatus(status);
+        if (subStatus != null) {
+            this.subStatus = subStatus.toString();
+            properties.put(PN_SUB_STATUS, this.subStatus);
+        }
+    }
+
     public SubStatus getSubStatus() {
         // Refresh state before getting the status.
         // Note, this gets the value from the session state, and not the cached Sling Model value as this value can change over the life of the SlingModel.
@@ -296,14 +301,6 @@ public class Workspace {
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
         properties.put(PN_INITIALIZED, this.initialized);
-    }
-
-    public void setStatus(Status status, SubStatus subStatus) {
-        setStatus(status);
-        if (subStatus != null) {
-            this.subStatus = subStatus.toString();
-            properties.put(PN_SUB_STATUS, this.subStatus);
-        }
     }
 
     public int incrementCompleteCount() {

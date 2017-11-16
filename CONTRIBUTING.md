@@ -37,7 +37,7 @@ There's a good guide to performing pull requests at [https://help.github.com/art
 
 The best pull request are small and focused. Don't try to change the world in one pull request. And while the focus of this project is reusability, that doesn't mean that every option under the sun needs to be available. Stick to the 80/20 rule and provide a way to extend for that extra 20% on a project.
 
-* Run Maven build by running `mvn -Panalysis clean install` to run the static analysis checks.
+* Check code quality proactively by using [https://github.com/codeclimate/codeclimate](CodeClimate CLI).
 * Ensure license is applied correctly by running `mvn license:update-file-header`
 * Add JUnit test for Java code. Our coverage ratio isn't great, but we don't want it to get worse.
 * Until explicitly enabled, features should be invisible to AEM users and excluded from any execution stack.

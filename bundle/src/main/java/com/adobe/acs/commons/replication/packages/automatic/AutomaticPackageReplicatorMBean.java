@@ -28,6 +28,6 @@ import com.adobe.granite.jmx.annotation.Description;
 @Description("MBean for managing the Automatic Package Replicator.")
 public interface AutomaticPackageReplicatorMBean extends ResourceServiceManagerMBean {
 
-	@Description("Executes the automatic package replication configuration with the specified id")
-	void execute(String id);
+    @Description("Executes the automatic package replication configuration with the specified id")
+    void execute(String id);
 }

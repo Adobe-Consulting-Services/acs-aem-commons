@@ -25,44 +25,44 @@ import org.apache.sling.api.resource.Resource;
  * Simple POJO for map entry items based on Vanity paths for Redirect Maps.
  */
 public class MapEntry {
-	private final Resource resource;
-	private final String source;
-	private final String target;
-	private final boolean valid;
+    private final Resource resource;
+    private final String source;
+    private final String target;
+    private final boolean valid;
 
-	public MapEntry(Resource resource, String source, String target) {
-		source = source.trim();
-		if (source.matches(".*\\s.*")) {
-			RedirectMapModel.log.warn("Source path {} for content {} contains whitespace", source, resource);
-			valid = false;
-		} else {
-			valid = true;
-		}
-		this.source = source;
-		this.target = target;
-		this.resource = resource;
+    public MapEntry(Resource resource, String source, String target) {
+        source = source.trim();
+        if (source.matches(".*\\s.*")) {
+            RedirectMapModel.log.warn("Source path {} for content {} contains whitespace", source, resource);
+            valid = false;
+        } else {
+            valid = true;
+        }
+        this.source = source;
+        this.target = target;
+        this.resource = resource;
 
-	}
+    }
 
-	public Resource getResource() {
-		return resource;
-	}
+    public Resource getResource() {
+        return resource;
+    }
 
-	public String getSource() {
-		return source;
-	}
+    public String getSource() {
+        return source;
+    }
 
-	public String getTarget() {
-		return target;
-	}
+    public String getTarget() {
+        return target;
+    }
 
-	public boolean isValid() {
-		return valid;
-	}
+    public boolean isValid() {
+        return valid;
+    }
 
-	@Override
-	public String toString() {
-		return "MapEntry [resource=" + resource + ", source=" + source + ", target=" + target + ", valid=" + valid
-				+ "]";
-	}
+    @Override
+    public String toString() {
+        return "MapEntry [resource=" + resource + ", source=" + source + ", target=" + target + ", valid=" + valid
+                + "]";
+    }
 }

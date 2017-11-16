@@ -35,6 +35,10 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 @ProviderType
 public class ReplicationActions {
+
+    private static final String PREFIX_ACTIVATE = "activate-";
+    private static final String PREFIX_DEACTIVATE = "deactivate-";
+
     private ReplicationActions() {
         // Utility class cannot be instantiated directly.
     }
@@ -46,7 +50,7 @@ public class ReplicationActions {
      */
     public static final CheckedBiConsumer<ResourceResolver, String> activateAll(Replicator replicator) {
         return (ResourceResolver r, String path) -> {
-            nameThread("activate-" + path);
+            nameThread(PREFIX_ACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path);
         };
     }
@@ -61,7 +65,7 @@ public class ReplicationActions {
      */
     public static final CheckedBiConsumer<ResourceResolver, String> activateAllWithOptions(Replicator replicator, final ReplicationOptions options) {
         return (ResourceResolver r, String path) -> {
-            nameThread("activate-" + path);
+            nameThread(PREFIX_ACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path, options);
         };
     }
@@ -78,7 +82,7 @@ public class ReplicationActions {
         final List<ReplicationOptions> allTheOptions = Arrays.asList(options);
         final Iterator<ReplicationOptions> roundRobin = new RoundRobin(allTheOptions).iterator();
         return (ResourceResolver r, String path) -> {
-            nameThread("activate-" + path);
+            nameThread(PREFIX_ACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path, roundRobin.next());
         };
     }
@@ -90,7 +94,7 @@ public class ReplicationActions {
      */
     public static final CheckedBiConsumer<ResourceResolver, String> deactivateAll(final Replicator replicator) {
         return (ResourceResolver r, String path) -> {
-            nameThread("deactivate-" + path);
+            nameThread(PREFIX_DEACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.DEACTIVATE, path);
         };
     }
@@ -103,7 +107,7 @@ public class ReplicationActions {
      */
     public static final CheckedBiConsumer<ResourceResolver, String> deactivateAllWithOptions(final Replicator replicator, final ReplicationOptions options) {
         return (ResourceResolver r, String path) -> {
-            nameThread("deactivate-" + path);
+            nameThread(PREFIX_DEACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.DEACTIVATE, path, options);
         };
     }

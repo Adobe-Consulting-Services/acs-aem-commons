@@ -32,9 +32,10 @@ import org.apache.sling.api.resource.ResourceResolver;
  * actions.
  */
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface ProcessInstance {
 
-    public static final String RESOURCE_TYPE = "acs-commons/components/utilities/process-instance";
+    String RESOURCE_TYPE = "acs-commons/components/utilities/process-instance";
 
     String getName();
 

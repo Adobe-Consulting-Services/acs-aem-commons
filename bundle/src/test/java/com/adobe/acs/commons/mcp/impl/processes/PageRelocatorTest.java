@@ -125,7 +125,7 @@ public class PageRelocatorTest {
         values.put("destinationPath", "/content/pageB");
         values.put("maxReferences", "0");
         values.put("mode", PageRelocator.Mode.MOVE.toString());
-        values.put("publishMethod", PageRelocator.PUBLISH_METHOD.SELF_MANAGED.toString());
+        values.put("publishMethod", PageRelocator.PublishMethod.SELF_MANAGED.toString());
         values.put("createVerionsOnReplicate", "false");
         values.put("updateStatus", "true");
         values.put("dryRun", "false");

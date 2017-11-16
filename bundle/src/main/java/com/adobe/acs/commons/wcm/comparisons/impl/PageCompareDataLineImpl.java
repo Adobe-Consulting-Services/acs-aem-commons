@@ -55,10 +55,12 @@ class PageCompareDataLineImpl implements PageCompareDataLine {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof PageCompareDataLineImpl))
+        if (!(obj instanceof PageCompareDataLineImpl)) {
             return false;
-        if (obj == this)
+        }
+        if (obj == this) {
             return true;
+        }
         PageCompareDataLineImpl other = (PageCompareDataLineImpl) obj;
         return new EqualsBuilder()
                 .append(path, other.getPath())

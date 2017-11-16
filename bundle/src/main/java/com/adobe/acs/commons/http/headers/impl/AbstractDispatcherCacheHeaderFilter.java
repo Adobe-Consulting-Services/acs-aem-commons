@@ -123,9 +123,9 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
         // - GET request
         // - No Params
         // - From Dispatcher
-        if (StringUtils.equalsIgnoreCase("get", request.getMethod()) && 
-            request.getParameterMap().isEmpty() && 
-            serverAgents.contains(DISPATCHER_AGENT_HEADER_VALUE)) {
+        if (StringUtils.equalsIgnoreCase("get", request.getMethod())
+                && request.getParameterMap().isEmpty()
+                && serverAgents.contains(DISPATCHER_AGENT_HEADER_VALUE)) {
 
             return true;
         }
@@ -133,6 +133,7 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
     }
 
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected final void activate(ComponentContext context) throws Exception {
         Dictionary<?, ?> properties = context.getProperties();
 

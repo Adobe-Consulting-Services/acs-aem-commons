@@ -124,6 +124,7 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
             this.jobManager = jobManager;
         }
 
+        @SuppressWarnings("squid:S3776")
         public void run() {
             log.debug("Running Bulk AEM Transient Workflow job [ {} ]", jobName);
 
@@ -213,12 +214,13 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
                     workspace.commit();
                 }
             } catch (Exception e) {
-                log.error("Error processing periodic execution for job [ {} ] for workspace [ {} ]", new String[]{ jobName, workspace.getPath() }, e);
+                String workspacePath = workspace != null ? workspace.getPath() : "unknown";
+                log.error("Error processing periodic execution for job [ {} ] for workspace [ {} ]", new String[]{ jobName, workspacePath }, e);
                 unscheduleJob(scheduler, jobName, configResource, workspace);
                 try {
                     stop(workspace);
                 } catch (PersistenceException e1) {
-                    log.error("Unable to mark this workspace [ {} ] as stopped.", workspace.getPath(), e1);
+                    log.error("Unable to mark this workspace [ {} ] as stopped.", workspacePath, e1);
                 }
             } finally {
                 if (serviceResourceResolver != null) {

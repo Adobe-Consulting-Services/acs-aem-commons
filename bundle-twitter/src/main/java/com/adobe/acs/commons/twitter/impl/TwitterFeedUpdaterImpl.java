@@ -84,6 +84,7 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public void updateTwitterFeedComponents(ResourceResolver resourceResolver) {
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
@@ -120,7 +121,7 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
                                     map.put("tweetsJson", jsonList.toArray(new String[jsonList.size()]));
                                     twitterResource.getResourceResolver().commit();
 
-                                    handleReplication(pageManager, twitterResource);
+                                    handleReplication(twitterResource);
                                 }
                             }
 
@@ -150,9 +151,9 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
         predicateMap.put("path", "/content");
         predicateMap.put("property", "sling:resourceType");
 
-        int i = 1;
+        int counter = 1;
         for (String path : twitterComponentPaths) {
-            predicateMap.put("property." + (i++) + "_value", path.toString());
+            predicateMap.put("property." + (counter++) + "_value", path.toString());
 
         }
 
@@ -182,7 +183,7 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     }
 
-    private void handleReplication(PageManager pageManager, Resource twitterResource) throws ReplicationException {
+    private void handleReplication(Resource twitterResource) throws ReplicationException {
         if (isReplicationEnabled(twitterResource)) {
             Session session = twitterResource.getResourceResolver().adaptTo(Session.class);
             replicator.replicate(session, ReplicationActionType.ACTIVATE, twitterResource.getPath());

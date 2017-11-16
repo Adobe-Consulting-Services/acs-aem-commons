@@ -28,6 +28,8 @@ import java.util.Date;
 
 class Properties {
 
+    private Properties() {}
+
     static Date lastModified(Resource resource) {
         if (resource != null) {
             return resource.getValueMap().get(NameConstants.PN_LAST_MOD, new Date());

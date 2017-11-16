@@ -22,7 +22,7 @@ public class LowercaseWithDashesDefinitionBuilderImpl implements ResourceDefinit
 
     @Override
     public final ResourceDefinition convert(final String data) {
-        String title = data;
+        final String title = data;
 
         String name = data;
         name = StringUtils.stripToEmpty(name);

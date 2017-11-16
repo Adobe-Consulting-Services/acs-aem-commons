@@ -23,7 +23,12 @@ import com.adobe.acs.commons.rewriter.AbstractTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
@@ -103,10 +108,8 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
 
         String[] normalizedValue = PropertiesUtil.toStringArray(config.get(PROP_ATTRIBUTES), DEFAULT_ATTRIBUTES);
 
-        if (test.length == 1) {
-            if (StringUtils.contains(test[0], ",")) {
-                normalizedValue = StringUtils.split(test[0], ",");
-            }
+        if (test.length == 1 && StringUtils.contains(test[0], ",")) {
+            normalizedValue = StringUtils.split(test[0], ",");
         }
 
         this.attributes = ParameterUtil.toMap(normalizedValue, ":", ",");

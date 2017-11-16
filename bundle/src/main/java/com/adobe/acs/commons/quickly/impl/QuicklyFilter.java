@@ -65,14 +65,14 @@ public class QuicklyFilter implements Filter {
 
     private static final String HTML_FILE = "/quickly/inject.html";
 
-    private static String appHTML = "";
+    private String appHTML = "";
 
     @Reference
     private QuicklyEngine quicklyEngine;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
-
+        // no-op
     }
 
     @Override
@@ -117,9 +117,10 @@ public class QuicklyFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        // no-op
     }
 
+    @SuppressWarnings("squid:S3923")
     private boolean accepts(final HttpServletRequest request) {
         if (!StringUtils.equalsIgnoreCase("get", request.getMethod())) {
             // Only inject on GET requests

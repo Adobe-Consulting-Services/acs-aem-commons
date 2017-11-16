@@ -86,9 +86,9 @@ public class TwitterAdapterFactory implements AdapterFactory {
     public <AdapterType> AdapterType getAdapter(Object adaptable, Class<AdapterType> type) {
         TwitterClient client = null;
         if (adaptable instanceof Page) {
-            client = createTwitterClient((Page) adaptable);
+            client = createTwitterClientFromPage((Page) adaptable);
         } else if (adaptable instanceof com.day.cq.wcm.webservicesupport.Configuration) {
-            client = createTwitterClient((com.day.cq.wcm.webservicesupport.Configuration) adaptable);
+            client = createTwitterClientFromConfiguration((com.day.cq.wcm.webservicesupport.Configuration) adaptable);
         }
 
         if (client != null) {
@@ -114,19 +114,19 @@ public class TwitterAdapterFactory implements AdapterFactory {
         return builder.build();
     }
 
-    private TwitterClient createTwitterClient(com.day.cq.wcm.webservicesupport.Configuration config) {
+    private TwitterClient createTwitterClientFromConfiguration(com.day.cq.wcm.webservicesupport.Configuration config) {
         Resource oauthConfig = config.getContentResource().listChildren().next();
         ValueMap oauthProps = oauthConfig.getValueMap();
         String consumerKey = oauthProps.get("oauth.client.id", String.class);
         String consumerSecret = oauthProps.get("oauth.client.secret", String.class);
 
         if (consumerKey != null && consumerSecret != null) {
-            Twitter t = getInstance();
+            Twitter twitter = getInstance();
             log.debug("Creating client for key {}.", consumerKey);
-            t.setOAuthConsumer(consumerKey, consumerSecret);
+            twitter.setOAuthConsumer(consumerKey, consumerSecret);
             try {
-                t.getOAuth2Token();
-                return new TwitterClientImpl(t, config);
+                twitter.getOAuth2Token();
+                return new TwitterClientImpl(twitter, config);
             } catch (TwitterException e) {
                 log.error("Unable to create Twitter client.", e);
                 return null;
@@ -143,10 +143,10 @@ public class TwitterAdapterFactory implements AdapterFactory {
         return factory.getInstance();
     }
 
-    private TwitterClient createTwitterClient(Page page) {
+    private TwitterClient createTwitterClientFromPage(Page page) {
         com.day.cq.wcm.webservicesupport.Configuration config = findTwitterConfiguration(page);
         if (config != null) {
-            return createTwitterClient(config);
+            return createTwitterClientFromConfiguration(config);
         }
         return null;
     }

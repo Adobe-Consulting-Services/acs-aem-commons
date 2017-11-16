@@ -28,6 +28,7 @@ import org.apache.sling.api.resource.ValueMap;
 import java.util.Map;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface NamedImageTransformer {
     /**
      * The OSGi config property used to identify the named transform.

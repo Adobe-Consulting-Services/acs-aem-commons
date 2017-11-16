@@ -42,7 +42,7 @@ public class ReplicatorQueue implements Replicator {
 
     @Override
     public void replicate(Session session, ReplicationActionType actionType, String path, ReplicationOptions replicationOptions) throws ReplicationException {
-        Map<String, ReplicationOptions> queue = null;
+        Map<String, ReplicationOptions> queue;
         switch (actionType) {
             case ACTIVATE:
                 queue = activateOperations;
@@ -50,6 +50,9 @@ public class ReplicatorQueue implements Replicator {
             case DEACTIVATE:
             case DELETE:
                 queue = deactivateOperations;
+                break;
+            default:
+                queue = null;
         }
         if (queue != null) {
             queue.put(path, replicationOptions);
@@ -58,6 +61,7 @@ public class ReplicatorQueue implements Replicator {
 
     @Override
     public void checkPermission(Session sn, ReplicationActionType rat, String string) throws ReplicationException {
+        // no-op
     }
 
     @Override

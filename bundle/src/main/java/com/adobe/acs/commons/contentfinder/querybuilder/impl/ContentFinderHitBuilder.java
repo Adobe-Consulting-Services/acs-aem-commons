@@ -36,6 +36,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler.ContentFinderConstants.*;
+
 public final class ContentFinderHitBuilder {
     private static final Long ONE_MILLION = 1000000L;
 
@@ -116,13 +118,13 @@ public final class ContentFinderHitBuilder {
             }
         }
 
-        map.put("path", page.getPath());
-        map.put("name", page.getName());
-        map.put("title", title);
-        map.put("excerpt", excerpt);
-        map.put("ddGroups", "page");
-        map.put("type", "Page");
-        map.put("lastModified", getLastModified(page));
+        map.put(CF_PATH, page.getPath());
+        map.put(CF_NAME, page.getName());
+        map.put(CF_TITLE, title);
+        map.put(CF_EXCERPT, excerpt);
+        map.put(CF_DD_GROUPS, "page");
+        map.put(CF_TYPE, "Page");
+        map.put(CF_LAST_MODIFIED, getLastModified(page));
 
         return map;
     }
@@ -153,15 +155,15 @@ public final class ContentFinderHitBuilder {
             }
         }
 
-        map.put("path", asset.getPath());
-        map.put("name", asset.getName());
-        map.put("title", title);
-        map.put("excerpt", excerpt);
-        map.put("mimeType", asset.getMimeType());
-        map.put("size", getSize(asset));
-        map.put("ck", getCK(asset));
-        map.put("type", "Asset");
-        map.put("lastModified", getLastModified(asset));
+        map.put(CF_PATH, asset.getPath());
+        map.put(CF_NAME, asset.getName());
+        map.put(CF_TITLE, title);
+        map.put(CF_EXCERPT, excerpt);
+        map.put(CF_MIMETYPE, asset.getMimeType());
+        map.put(CF_SIZE, getSize(asset));
+        map.put(CF_CACHE_KILLER, getCacheKiller(asset));
+        map.put(CF_TYPE, "Asset");
+        map.put(CF_LAST_MODIFIED, getLastModified(asset));
 
         return map;
     }
@@ -179,12 +181,12 @@ public final class ContentFinderHitBuilder {
         final Resource resource = hit.getResource();
         final ValueMap properties = resource.adaptTo(ValueMap.class);
 
-        map.put("path", resource.getPath());
-        map.put("name", resource.getName());
-        map.put("title", properties.get("jcr:title", resource.getName()));
-        map.put("excerpt", hit.getExcerpt());
-        map.put("lastModified", getLastModified(resource));
-        map.put("type", "Data");
+        map.put(CF_PATH, resource.getPath());
+        map.put(CF_NAME, resource.getName());
+        map.put(CF_TITLE, properties.get("jcr:title", resource.getName()));
+        map.put(CF_EXCERPT, hit.getExcerpt());
+        map.put(CF_LAST_MODIFIED, getLastModified(resource));
+        map.put(CF_TYPE, "Data");
 
         return map;
     }
@@ -271,7 +273,7 @@ public final class ContentFinderHitBuilder {
      * @param asset
      * @return
      */
-    private static long getCK(final Asset asset) {
+    private static long getCacheKiller(final Asset asset) {
         try {
             Resource resource = asset.getRendition(DAM_THUMBNAIL);
             Resource contentResource = resource.getChild(JcrConstants.JCR_CONTENT);

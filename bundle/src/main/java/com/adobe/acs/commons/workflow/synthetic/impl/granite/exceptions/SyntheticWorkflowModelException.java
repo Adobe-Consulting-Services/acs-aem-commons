@@ -22,6 +22,7 @@ package com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions;
 
 import com.adobe.granite.workflow.WorkflowException;
 
+@SuppressWarnings({"serial", "squid:S2166"})
 public class SyntheticWorkflowModelException extends WorkflowException {
     public SyntheticWorkflowModelException(String message) {
         super(message);

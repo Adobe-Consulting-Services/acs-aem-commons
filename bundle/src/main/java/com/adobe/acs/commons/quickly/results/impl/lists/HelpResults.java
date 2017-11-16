@@ -68,8 +68,8 @@ public class HelpResults extends AbstractAccessibleResults {
                 .build());
 
         results.add(new Result.Builder("*")
-                .description("Self managed favorites. " +
-                        "'Add Favorite' adds the current page as a favorite. '* rm' removes favorite'd pages.")
+                .description("Self managed favorites. "
+                        + "'Add Favorite' adds the current page as a favorite. '* rm' removes favorite'd pages.")
                 .action(new Action.Builder().method(Action.Method.NOOP).build())
                 .build());
 

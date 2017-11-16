@@ -28,6 +28,7 @@ import aQute.bnd.annotation.ConsumerType;
  * @param <U> the type of the second argument to the operation
  *
  * @see Consumer
+ * @deprecated Use CheckedBiConsumer instead
  */
 @ConsumerType
 @Deprecated
@@ -54,7 +55,7 @@ public abstract class BiConsumer<T, U> implements CheckedBiConsumer<T, U> {
     
     private static class Adapter<T, R> extends BiConsumer<T, R> {
 
-        final private CheckedBiConsumer<T, R> delegate;
+        private final CheckedBiConsumer<T, R> delegate;
 
         public Adapter(CheckedBiConsumer<T, R> delegate) {
             this.delegate = delegate;

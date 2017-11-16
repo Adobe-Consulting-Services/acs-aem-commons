@@ -21,6 +21,7 @@ import java.util.function.Function;
 /**
  * Describes the desired output format of a value within a report
  */
+@SuppressWarnings({"checkstyle:constantname", "squid:S00115"})
 public enum ValueFormat {
     plain, storageSize("_short", ValueFormat::getHumanSize);
     int columnCount = 1;
@@ -36,13 +37,13 @@ public enum ValueFormat {
         altFunction = altFunc;
     }
 
-    public static ValueFormat forField(Enum e) {
+    public static ValueFormat forField(Enum anEnum) {
         try {
-            Field f = e.getDeclaringClass().getField(e.name());
-            if (!f.isAnnotationPresent(FieldFormat.class)) {
+            Field field = anEnum.getDeclaringClass().getField(anEnum.name());
+            if (!field.isAnnotationPresent(FieldFormat.class)) {
                 return ValueFormat.plain;
             } else {
-                FieldFormat rf = f.getAnnotation(FieldFormat.class);
+                FieldFormat rf = field.getAnnotation(FieldFormat.class);
                 return rf.value();
             }
         } catch (IllegalArgumentException | NoSuchFieldException | SecurityException ex) {

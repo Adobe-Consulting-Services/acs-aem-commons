@@ -119,9 +119,10 @@ public class S3AssetIngestor extends AssetIngestor {
             createFolders(manager, listing);
         });
     }
+
     private void createFolders(ActionManager manager, ObjectListing listing) {
-        listing.getObjectSummaries().stream().filter(sum -> !sum.getKey().equals(s3BasePath)).map(S3HierarchialElement::new).
-            filter(S3HierarchialElement::isFolder).filter(this::canImportFolder).forEach(el-> {
+        listing.getObjectSummaries().stream().filter(sum -> !sum.getKey().equals(s3BasePath)).map(S3HierarchialElement::new)
+            .filter(S3HierarchialElement::isFolder).filter(this::canImportFolder).forEach(el-> {
                 manager.deferredWithResolver(Actions.retry(10, 100, rr-> {
                     manager.setCurrentItem(el.getItemName());
                     createFolderNode(el, rr);
@@ -142,8 +143,9 @@ public class S3AssetIngestor extends AssetIngestor {
     }
 
     private void importAssets(ActionManager manager, ObjectListing listing) {
-        listing.getObjectSummaries().stream().map(S3HierarchialElement::new).
-                filter(S3HierarchialElement::isFile).filter(this::canImportContainingFolder).map(S3HierarchialElement::getSource).forEach(ss-> {
+        listing.getObjectSummaries().stream().map(S3HierarchialElement::new)
+                .filter(S3HierarchialElement::isFile).filter(this::canImportContainingFolder)
+                .map(S3HierarchialElement::getSource).forEach(ss-> {
             if (canImportFile(ss)) {
                 manager.deferredWithResolver(Actions.retry(5, 25, importAsset(ss, manager)));
             } else {

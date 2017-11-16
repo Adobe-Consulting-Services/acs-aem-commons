@@ -192,7 +192,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
 
     public final String toString() {
         return String.format("EnsureOakIndex( %s => %s )",
-                new Object[]{ensureDefinitionsPath, oakIndexesPath});
+                ensureDefinitionsPath, oakIndexesPath);
     }
 
     ChecksumGenerator getChecksumGenerator() {

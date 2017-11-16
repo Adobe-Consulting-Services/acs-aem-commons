@@ -31,7 +31,7 @@ public class Filters {
         // Utility class cannot be instantiated directly.
     }
     
-    static final public String ORIGINAL_RENDITION = "original";
+    public static final String ORIGINAL_RENDITION = "original";
 
     //--- Filters (for using withQueryResults)
     /**

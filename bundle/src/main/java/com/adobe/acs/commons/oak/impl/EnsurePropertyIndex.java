@@ -40,6 +40,10 @@ import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import java.util.Map;
 
+
+/**
+ * @deprecated use EnsureOakIndex instead
+ */
 @Deprecated
 @Component(configurationFactory = true,
         metatype = true,
@@ -143,11 +147,12 @@ public class EnsurePropertyIndex {
     }
 
     @Activate
+    @SuppressWarnings("squid:S3776")
     protected void activate(Map<String, Object> properties) throws RepositoryException {
         log.warn("EnsurePropertyIndex is deprecated. Please switch to EnsureOakIndex immediately.");
 
         if (capabilityHelper.isOak()) {
-            String name = PropertiesUtil.toString(properties.get(PROP_INDEX_NAME), null);
+            final String name = PropertiesUtil.toString(properties.get(PROP_INDEX_NAME), null);
 
             IndexDefinition def = new IndexDefinition();
             def.propertyName = PropertiesUtil.toString(properties.get(PROP_PROPERTY_NAME), null);

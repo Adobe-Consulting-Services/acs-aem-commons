@@ -39,20 +39,20 @@ import com.google.common.net.MediaType;
  * and a list vanity properties in cq:Page and dam:Asset nodes.
  */
 @SlingServlet(methods = { "GET" }, resourceTypes = { "acs-commons/components/utilities/redirectmappage" }, selectors = {
-		"redirectmap" }, extensions = { "txt" }, metatype = false)
+        "redirectmap" }, extensions = { "txt" }, metatype = false)
 public class RedirectMapServlet extends SlingSafeMethodsServlet {
 
-	private static final Logger log = LoggerFactory.getLogger(RedirectMapServlet.class);
-	private static final long serialVersionUID = -3564475196678277711L;
+    private static final Logger log = LoggerFactory.getLogger(RedirectMapServlet.class);
+    private static final long serialVersionUID = -3564475196678277711L;
 
-	protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
-			throws ServletException, IOException {
-		log.trace("doGet");
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
+        log.trace("doGet");
 
-		log.debug("Requesting redirect maps from {}", request.getResource());
-		RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
+        log.debug("Requesting redirect maps from {}", request.getResource());
+        RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
 
-		response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
-		response.getOutputStream().write(redirectMap.getRedirectMap().getBytes(StandardCharsets.UTF_8));
-	}
+        response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
+        response.getOutputStream().write(redirectMap.getRedirectMap().getBytes(StandardCharsets.UTF_8));
+    }
 }

@@ -132,14 +132,14 @@ public class Payload {
     }
 
     public boolean isOnboarded() {
-        Status status = getStatus();
-        return (status != null && !Status.NOT_STARTED.equals(status));
+        Status tmpStatus = getStatus();
+        return (tmpStatus != null && !Status.NOT_STARTED.equals(tmpStatus));
     }
 
     /** Setters **/
 
-    public void setStatus(Status status) {
-        this.status = status.toString();
+    public void setStatus(Status newStatus) {
+        this.status = newStatus.toString();
         properties.put(PN_STATUS, this.status);
     }
 

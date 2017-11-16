@@ -124,6 +124,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
     }
 
     @Override
+    @SuppressWarnings("squid:S1141")
     public void run() {
         ResourceResolver resourceResolver = null;
 
@@ -372,6 +373,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws IOException
      */
+    @SuppressWarnings("squid:S3776")
     public Resource update(final @Nonnull Resource ensureDefinition, final @Nonnull Resource oakIndexes, boolean forceReindex)
             throws RepositoryException, IOException {
 

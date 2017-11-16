@@ -34,6 +34,7 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
  *
  */
 @ProviderType
+@SuppressWarnings("squid:S00112")
 public interface ActionManager {
 
     /**
@@ -48,7 +49,8 @@ public interface ActionManager {
      * @return Count of items found in query
      * @throws RepositoryException
      * @throws PersistenceException
-     * @throws Exception 
+     * @throws Exception
+     * @deprecated Use the method which supports CheckedBiConsumer instead
      */
     @Deprecated
     int withQueryResults(final String queryStatement, final String language, final BiConsumer<ResourceResolver, String> callback, final BiFunction<ResourceResolver, String, Boolean>... filters) throws RepositoryException, PersistenceException, Exception;
@@ -73,6 +75,7 @@ public interface ActionManager {
     /**
      * Perform action at some later time using a provided pooled resolver
      * @param action Action to perform
+     * @deprecated Use the method which supports CheckedConsumer instead
      */
     @Deprecated
     void deferredWithResolver(final Consumer<ResourceResolver> action);
@@ -87,6 +90,7 @@ public interface ActionManager {
      * Perform action right now using a provided pooled resolver
      * @param action Action to perform
      * @throws java.lang.Exception
+     * @deprecated Use the method which supports CheckedConsumer instead
      */
     @Deprecated
     void withResolver(Consumer<ResourceResolver> action) throws Exception;
@@ -110,26 +114,27 @@ public interface ActionManager {
      * NOTE: This is automatic now -- only included for backwards compatibility.
      * @deprecated No need to use this, cleanup is automatic.
      */
-     void addCleanupTask();
+    @Deprecated
+    void addCleanupTask();
     
     /**
      * Register a handler to be fired when the work has completed with no errors.
      * @param successTask 
      */
-     void onSuccess(CheckedConsumer<ResourceResolver> successTask);
+    void onSuccess(CheckedConsumer<ResourceResolver> successTask);
 
     /**
      * Register a handler to be fired when the work has completed and there was at least one error.
      * @param failureTask 
      */
-     void onFailure(CheckedBiConsumer<List<Failure>, ResourceResolver> failureTask);
+    void onFailure(CheckedBiConsumer<List<Failure>, ResourceResolver> failureTask);
     
     /**
      * Register a handler to be fired when the work is completed, successfully or not.  
      * Note: These handlers are called after the success/fail handlers.
      * @param finishHandler 
      */
-     void onFinish(Runnable finishHandler);
+    void onFinish(Runnable finishHandler);
 
     /**
      * Have all actions completed?

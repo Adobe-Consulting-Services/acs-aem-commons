@@ -72,13 +72,13 @@ public class PageRelocator extends ProcessDefinition {
     private final PageManagerFactory pageManagerFactory;
     private final Replicator replicator;
 
-    public static enum Mode {
+    public enum Mode {
         RENAME, MOVE
-    };
+    }
 
-    public enum PUBLISH_METHOD {
+    public enum PublishMethod {
         NONE, SELF_MANAGED, QUEUE
-    };
+    }
 
     @FormField(name = "Source page",
             description = "Select page/site to be moved",
@@ -122,7 +122,7 @@ public class PageRelocator extends ProcessDefinition {
             required = false,
             component = RadioComponent.EnumerationSelector.class,
             options = {"horizontal", "default=SELF_MANAGED"})
-    public PUBLISH_METHOD publishMethod;
+    public PublishMethod publishMethod;
 
     @FormField(name = "Create versions",
             description = "Create versions for anything being replicated",
@@ -147,7 +147,7 @@ public class PageRelocator extends ProcessDefinition {
             options = {"checked"})
     private boolean dryRun = true;
 
-    transient private final String[] requiredPrivilegeNames = {
+    private final transient String[] requiredPrivilegeNames = {
         Privilege.JCR_READ,
         Privilege.JCR_WRITE,
         Privilege.JCR_REMOVE_CHILD_NODES,
@@ -171,7 +171,7 @@ public class PageRelocator extends ProcessDefinition {
             case SELF_MANAGED:
                 replicationOptions.setSynchronous(true);
                 break;
-            case QUEUE:
+            default:
                 replicationOptions.setSynchronous(false);
                 break;
         }
@@ -210,6 +210,7 @@ public class PageRelocator extends ProcessDefinition {
     }
 
     ManagedProcess instanceInfo;
+
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         validateInputs(rr);
@@ -221,7 +222,7 @@ public class PageRelocator extends ProcessDefinition {
         requiredPrivileges = getPrivilegesFromNames(rr, requiredPrivilegeNames);
         instance.defineCriticalAction("Check ACLs", rr, this::validateAllAcls);
         instance.defineAction("Move Pages", rr, this::movePages);
-        if (publishMethod != PUBLISH_METHOD.NONE) {
+        if (publishMethod != PublishMethod.NONE) {
             instance.defineAction("Activate New", rr, this::activateNew);
             instance.defineAction("Activate References", rr, this::activateReferences);
             instance.defineAction("Deactivate Old", rr, this::deactivateOld);
@@ -299,15 +300,17 @@ public class PageRelocator extends ProcessDefinition {
         }
     }
 
-    enum REPORT {
+    @SuppressWarnings("squid:S00115")
+    enum Report {
         target, acl_check, all_references, published_references, move_time, activate_time, deactivate_time
-    };
-    final private Map<String, EnumMap<REPORT, Object>> reportData = new TreeMap<>();
+    }
 
-    private void note(String page, REPORT col, Object value) {
+    private final Map<String, EnumMap<Report, Object>> reportData = new TreeMap<>();
+
+    private void note(String page, Report col, Object value) {
         synchronized (reportData) {
             if (!reportData.containsKey(page)) {
-                reportData.put(page, new EnumMap<>(REPORT.class));
+                reportData.put(page, new EnumMap<>(Report.class));
             }
             reportData.get(page).put(col, value);
         }
@@ -316,7 +319,7 @@ public class PageRelocator extends ProcessDefinition {
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
         GenericReport report = new GenericReport();
-        report.setRows(reportData, "Source", REPORT.class);
+        report.setRows(reportData, "Source", Report.class);
         report.persist(rr, instance.getPath() + "/jcr:content/report");
     }
 
@@ -352,22 +355,23 @@ public class PageRelocator extends ProcessDefinition {
         Session session = res.adaptTo(Session.class);
         boolean report = res.getResource(path).getResourceType().equals(NameConstants.NT_PAGE);
         if (!session.getAccessControlManager().hasPrivileges(path, prvlgs)) {
-            note(path, REPORT.acl_check, "FAIL");
+            note(path, Report.acl_check, "FAIL");
             throw new RepositoryException("Insufficient permissions to permit move operation");
         } else if (report) {
-            note(path, REPORT.acl_check, "PASS");
+            note(path, Report.acl_check, "PASS");
         }
     }
 
+    @SuppressWarnings("squid:S00112")
     private void movePage(ResourceResolver rr, String sourcePage) throws Exception {
         PageManager manager = pageManagerFactory.getPageManager(rr);
         Field replicatorField = FieldUtils.getDeclaredField(manager.getClass(), "replicator", true);
         FieldUtils.writeField(replicatorField, manager, replicatorQueue);
         String destination = convertSourceToDestination(sourcePage);
         String destinationParent = destination.substring(0, destination.lastIndexOf('/'));
-        note(sourcePage, REPORT.target, destination);
+        note(sourcePage, Report.target, destination);
         String beforeName = "";
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         
         String contentPath = sourcePage + "/jcr:content";
         List<String> refs = new ArrayList<>();
@@ -385,8 +389,8 @@ public class PageRelocator extends ProcessDefinition {
                             .map(ReferenceSearch.Info::getPagePath)
                             .collect(Collectors.toCollection(()->publishRefs));
         }
-        note(sourcePage, REPORT.all_references, refs.size());
-        note(sourcePage, REPORT.published_references, publishRefs.size());        
+        note(sourcePage, Report.all_references, refs.size());
+        note(sourcePage, Report.published_references, publishRefs.size());
         
         if (!dryRun) {
             Actions.retry(10, 500, res -> {
@@ -412,7 +416,7 @@ public class PageRelocator extends ProcessDefinition {
             }).accept(rr);
         }
         long end = System.currentTimeMillis();
-        note(sourcePage, REPORT.move_time, end - start);
+        note(sourcePage, Report.move_time, end - start);
 
     }
 
@@ -447,9 +451,9 @@ public class PageRelocator extends ProcessDefinition {
         }
         long end = System.currentTimeMillis();
         if (path.startsWith(sourcePath)) {
-            note(path, REPORT.deactivate_time, end - start);
+            note(path, Report.deactivate_time, end - start);
         } else {
-            note(reversePathLookup(path), REPORT.activate_time, end - start);
+            note(reversePathLookup(path), Report.activate_time, end - start);
         }
     }
     

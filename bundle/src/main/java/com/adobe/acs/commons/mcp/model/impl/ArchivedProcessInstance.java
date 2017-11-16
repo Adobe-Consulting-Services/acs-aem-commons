@@ -41,9 +41,10 @@ import org.apache.sling.models.annotations.Via;
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class ArchivedProcessInstance implements ProcessInstance, Serializable {
     private static final long serialVersionUID = 7526472295622776155L;
+    private static final String MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS = "Archived processes have no actions";
 
     @Inject
-    transient private Resource resource;
+    private transient Resource resource;
 
     @Inject
     @Via("path")
@@ -93,41 +94,41 @@ public class ArchivedProcessInstance implements ProcessInstance, Serializable {
 
     @Override
     public void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws DeserializeException, RepositoryException {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public ActionManagerFactory getActionManagerFactory() {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public ActionManager defineCriticalAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public ActionManager defineAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public double updateProgress() {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public void run(ResourceResolver rr) {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public void halt() {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public CompositeData getStatistics() {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 }

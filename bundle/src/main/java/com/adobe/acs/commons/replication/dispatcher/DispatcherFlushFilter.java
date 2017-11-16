@@ -40,7 +40,8 @@ public class DispatcherFlushFilter implements AgentFilter {
      * Hierarchical: "Normal" flush invalidation that effects entire content hierarchies.
      * ResourceOnly: Targets agents with a CQ-Action-Scope of "Resource Only" defined.
      */
-    public static enum FlushType {
+    @SuppressWarnings("squid:S00115")
+    public enum FlushType {
         All,
         Hierarchical,
         ResourceOnly

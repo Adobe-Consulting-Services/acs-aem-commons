@@ -25,6 +25,8 @@ import org.apache.commons.lang.StringUtils;
 
 public class EvolutionPathUtil {
 
+    private EvolutionPathUtil() {}
+
     public static int getDepthForPath(String path) {
         return StringUtils.countMatches(StringUtils.substringAfterLast(path, "jcr:frozenNode"), "/");
     }

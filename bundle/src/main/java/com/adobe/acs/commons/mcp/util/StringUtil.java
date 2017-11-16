@@ -25,7 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 public class StringUtil {
 
     public static String getFriendlyName(String orig) {
-        String parts[] = org.apache.commons.lang.StringUtils.split(orig, "._-");
+        String[] parts = org.apache.commons.lang.StringUtils.split(orig, "._-");
         if (parts.length == 1) {
             parts = org.apache.commons.lang.StringUtils.splitByCharacterTypeCamelCase(orig);
         }

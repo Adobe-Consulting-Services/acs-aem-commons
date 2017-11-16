@@ -54,6 +54,7 @@ import com.day.cq.wcm.api.components.ComponentManager;
  */
 @org.apache.felix.scr.annotations.Component(policy = ConfigurationPolicy.REQUIRE)
 @SlingFilter(scope = SlingFilterScope.REQUEST, order = Integer.MIN_VALUE, generateComponent = false)
+@SuppressWarnings("squid:S3776")
 public class UrlFilter implements Filter {
 
     /**

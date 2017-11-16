@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1145 - New Redirect Map Manager feature
 
+### Changed
+
+- #1174 - Introduced CodeClimate quality checks. Resulted in lots of miscellaneous non-API changes.
+
 ### Fixed
 
 - #1171 - Reduce duplicate coverage comments in pull requests.

@@ -16,29 +16,30 @@
 package com.adobe.acs.commons.mcp.util;
 
 import com.adobe.acs.commons.mcp.form.FieldComponent;
+import com.adobe.acs.commons.mcp.form.FormField;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.sling.api.resource.ValueMap;
-import com.adobe.acs.commons.mcp.form.FormField;
-import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
-import java.lang.reflect.Array;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
 import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.sling.api.scripting.SlingScriptHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
@@ -62,6 +63,7 @@ public class AnnotatedFieldDeserializer {
         }
     }
 
+    @SuppressWarnings("squid:S3776")
     private static void parseInput(Object target, ValueMap input, Field field) throws ReflectiveOperationException, ParseException {
         FormField inputAnnotation = field.getAnnotation(FormField.class);
         Object value;
@@ -133,6 +135,7 @@ public class AnnotatedFieldDeserializer {
         return null;
     }
 
+    @SuppressWarnings("squid:S3776")
     private static Object convertPrimitiveValue(String value, Class<?> type) throws ParseException {
         if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
             return value.toLowerCase().trim().equals("true");

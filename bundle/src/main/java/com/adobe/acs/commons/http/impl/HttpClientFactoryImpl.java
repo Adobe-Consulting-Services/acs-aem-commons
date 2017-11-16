@@ -20,7 +20,13 @@
 package com.adobe.acs.commons.http.impl;
 
 import com.adobe.acs.commons.http.HttpClientFactory;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.fluent.Executor;
@@ -73,6 +79,7 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
     private static final String PROP_USERNAME = "username";
 
     @Property(label = "Password", description = "Password for requests (using basic authentication)")
+    @SuppressWarnings("squid:S2068")
     private static final String PROP_PASSWORD = "password";
 
     @Property(label = "Socket Timeout", description = "Socket timeout in milliseconds", intValue = DEFAULT_SOCKET_TIMEOUT)
@@ -91,7 +98,6 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
     @Activate
     protected void activate(Map<String, Object> config) throws Exception {
         boolean useSSL = PropertiesUtil.toBoolean(config.get(PROP_USE_SSL), DEFAULT_USE_SSL);
-        boolean disableCertCheck = PropertiesUtil.toBoolean(config.get(PROP_DISABLE_CERT_CHECK), DEFAULT_DISABLE_CERT_CHECK);
 
         String scheme = useSSL ? "https" : "http";
         String hostname = PropertiesUtil.toString(config.get(PROP_HOST_DOMAIN), null);
@@ -113,6 +119,8 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
                 .setSocketTimeout(soTimeout)
                 .build();
         builder.setDefaultRequestConfig(requestConfig);
+
+        boolean disableCertCheck = PropertiesUtil.toBoolean(config.get(PROP_DISABLE_CERT_CHECK), DEFAULT_DISABLE_CERT_CHECK);
 
         if (useSSL && disableCertCheck) {
             SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {

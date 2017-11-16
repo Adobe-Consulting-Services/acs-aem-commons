@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CancelHandler implements Serializable {
     private static final long serialVersionUID = 7526472295622776147L;
     
-    transient private final Set<Thread> activeWork = ConcurrentHashMap.newKeySet();
+    private final transient Set<Thread> activeWork = ConcurrentHashMap.newKeySet();
     private boolean cancelled = false;
     private boolean force = false;
   

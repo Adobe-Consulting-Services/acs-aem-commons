@@ -50,6 +50,8 @@ public class SendTemplatedEmailUtils {
 
     private static final String PN_USER_EMAIL = "profile/email";
 
+    private SendTemplatedEmailUtils() {}
+
     /***
      * Tests whether the payload is a DAM asset or a cq:Page for DAM asset
      * returns all properties at the metadata node for DAM assets for cq:Page
@@ -63,7 +65,7 @@ public class SendTemplatedEmailUtils {
      *            used by the method to transform Date properties into Strings
      * @return Map<String, String> String representation of jcr properties
      */
-    protected final static Map<String, String> getPayloadProperties(Resource payloadRes, SimpleDateFormat sdf) {
+    protected static final Map<String, String> getPayloadProperties(Resource payloadRes, SimpleDateFormat sdf) {
 
         Map<String, String> emailParams = new HashMap<String, String>();
 
@@ -103,7 +105,8 @@ public class SendTemplatedEmailUtils {
      *            path to a CQ user or group
      * @return String[] of email(s) associated with account
      */
-    protected final static String[] getEmailAddrsFromUserPath(ResourceResolver resourceResolver, String principlePath) {
+    @SuppressWarnings({"squid:S3776"})
+    protected static final String[] getEmailAddrsFromUserPath(ResourceResolver resourceResolver, String principlePath) {
         List<String> emailList = new LinkedList<String>();
 
         try {
@@ -120,14 +123,16 @@ public class SendTemplatedEmailUtils {
                         Iterator<Authorizable> memberIt = authGroup.getMembers();
                         while (memberIt.hasNext()) {
                             String currEmail = getAuthorizableEmail(memberIt.next());
-                            if (currEmail != null)
+                            if (currEmail != null) {
                                 emailList.add(currEmail);
+                            }
                         }
                     } else {
                         // otherwise is an individual user
                         String authEmail = getAuthorizableEmail(authorizable);
-                        if (authEmail != null)
+                        if (authEmail != null) {
                             emailList.add(authEmail);
+                        }
                     }
                 }
             }

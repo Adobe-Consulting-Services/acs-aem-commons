@@ -31,6 +31,7 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
  * Various deferred actions to be used with the ActionManager
  */
 @ProviderType
+@SuppressWarnings({"squid:S1181", "squid:S1193"})
 public final class Actions {
     private Actions() {
     }
@@ -38,6 +39,7 @@ public final class Actions {
     private static final Logger LOG = LoggerFactory.getLogger(Actions.class);
 
     private static ThreadLocal<ActionManager> currentActionManager = new ThreadLocal<>();
+
     /**
      * Obtain the current action manager -- this is necessary for additional tracking such as current item
      * @return current action manager
@@ -126,6 +128,7 @@ public final class Actions {
      * @param action Action to attempt
      * @return New retry wrapper around provided action
      */
+    @SuppressWarnings("squid:S3776")
     public static final CheckedConsumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final CheckedConsumer<ResourceResolver> action) {
         return (ResourceResolver r) -> {
             int remaining = retries;

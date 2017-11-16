@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class AssetIngestor extends ProcessDefinition {
     private final MimeTypeService mimetypeService;
 
+    @SuppressWarnings("squid:S00115")
     public enum AssetAction {
         skip, version, replace
     }
@@ -143,6 +144,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         ignoreExtensionList = Arrays.asList(ignoreExtensions.trim().toLowerCase().split(","));
     }
 
+    @SuppressWarnings("squid:S00112")
     private void createAsset(Source source, String assetPath, ResourceResolver r, boolean versioning) throws Exception {
         r.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(CHANGED_BY_WORKFLOW);
         AssetManager assetManager = r.adaptTo(AssetManager.class);
@@ -177,7 +179,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 //if replace we just create a new one and the old one goes away
                 createAsset(source, assetPath, r, false);
                 break;
-            case version:
+            default:
                 //only option left is replace, we'll save current version as a version and then replace it
                 versionExistingAsset(source, assetPath, r);
         }
@@ -221,6 +223,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         return true;
     }
 
+    @SuppressWarnings("squid:S00112")
     private void versionExistingAsset(Source source, String assetPath, ResourceResolver r) throws Exception {
         createAsset(source, assetPath, r, r.getResource(assetPath) != null);
     }
@@ -278,9 +281,11 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
+    @SuppressWarnings("squid:S00115")
+    enum ReportColumns {folder_count, asset_count, files_skipped, @FieldFormat(ValueFormat.storageSize) data_imported}
 
-    enum ReportColumns {folder_count, asset_count, files_skipped, @FieldFormat(ValueFormat.storageSize) data_imported};
     GenericReport report = new GenericReport();
+
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
         EnumMap<ReportColumns, Object> values = new EnumMap<>(ReportColumns.class);
@@ -297,25 +302,36 @@ public abstract class AssetIngestor extends ProcessDefinition {
     protected interface Source {
 
         String getName();
+
         InputStream getStream() throws IOException;
+
         long getLength();
+
         HierarchialElement getElement();
 
     }
 
     protected interface HierarchialElement {
+
         boolean isFile();
+
         boolean isFolder();
+
         HierarchialElement getParent();
+
         String getName();
+
         String getItemName();
+
         Source getSource();
+
         String getJcrBasePath();
 
         default String getNodePath() {
             HierarchialElement parent = getParent();
             return (parent == null ? getJcrBasePath() : parent.getNodePath()) + "/" + getNodeName();
         }
+
         default String getNodeName() {
             String name = getName();
             if (isFile() && name.contains(".")) {

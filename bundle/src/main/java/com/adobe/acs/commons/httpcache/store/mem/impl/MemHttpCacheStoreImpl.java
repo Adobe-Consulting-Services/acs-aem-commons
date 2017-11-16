@@ -69,8 +69,8 @@ import java.util.concurrent.TimeUnit;
                     value = "com.adobe.acs.httpcache:type=In Memory HTTP Cache Store",
                     propertyPrivate = true),
         @Property(name = "webconsole.configurationFactory.nameHint",
-                    value = "TTL: {httpcache.cachestore.memcache.ttl}, " +
-                            "Max size in MB: {httpcache.cachestore.memcache.maxsize}",
+                    value = "TTL: {httpcache.cachestore.memcache.ttl}, "
+                            + "Max size in MB: {httpcache.cachestore.memcache.maxsize}",
                     propertyPrivate = true)
 })
 @Service(value = {DynamicMBean.class, HttpCacheStore.class})
@@ -88,8 +88,8 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     private long ttl;
 
     @Property(label = "Maximum size of this store in MB",
-              description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted " +
-                      "" + "from the cache",
+              description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
+                      + "from the cache",
               longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
     private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.memcache.maxsize";
     private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
@@ -211,11 +211,6 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     }
 
     @Override
-    public void invalidateAll() {
-        cache.invalidateAll();
-    }
-
-    @Override
     public void invalidate(HttpCacheConfig cacheConfig) {
         ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
         for (CacheKey key : cacheAsMap.keySet()) {
@@ -230,6 +225,11 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
                 this.invalidateAll();
             }
         }
+    }
+
+    @Override
+    public void invalidateAll() {
+        cache.invalidateAll();
     }
 
     @Override
@@ -260,6 +260,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     protected void addCacheData(Map<String, Object> data, MemCachePersistenceObject cacheObj) {
         int hitCount = cacheObj.getHitCount();
         long size = cacheObj.getBytes().length;
@@ -280,6 +281,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     protected CompositeType getCacheEntryType() throws OpenDataException {
        return new CompositeType("Cache Entry", "Cache Entry",
                 new String[] { "Cache Key", "Status", "Size", "Content Type", "Character Encoding", "Hits", "Total Size Served from Cache" },

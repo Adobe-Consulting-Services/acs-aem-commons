@@ -29,43 +29,43 @@ import org.xml.sax.Attributes;
 import org.xml.sax.helpers.AttributesImpl;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SAXElementUtilsTest {
+public class SaxElementUtilsTest {
 
     @Test
     public void testIsCSS() throws Exception {
         assertTrue("CSS Happy Path", 
-                SAXElementUtils.isCSS("link", 
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "/css.css",
                                 "type", "text/css")));
         
         assertFalse("CSS - not a link", 
-                SAXElementUtils.isCSS("notlink", 
+                SaxElementUtils.isCss("notlink",
                         makeAtts(
                                 "href", "/css.css",
                                 "type", "text/css")));
         
         assertFalse("CSS - not a path to css file", 
-                SAXElementUtils.isCSS("link", 
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "/css.notcss",
                                 "type", "text/css")));
 
         assertFalse("CSS - relative path", 
-                SAXElementUtils.isCSS("link", 
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "css.css",
                                 "type", "text/css")));
 
         assertFalse("CSS - external path", 
-                SAXElementUtils.isCSS("link", 
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "http://www.adobe.com/css.css",
                                 "type", "text/css")));
 
         
         assertFalse("CSS - wrongtype", 
-                SAXElementUtils.isCSS("link", 
+                SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "/css.css",
                                 "type", "text/notcss")));
@@ -74,41 +74,41 @@ public class SAXElementUtilsTest {
     @Test
     public void testIsJavascript() throws Exception {
         assertTrue("JS Happy Path", 
-                SAXElementUtils.isJavaScript("script", 
+                SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "/js.js",
-                                "type", SAXElementUtils.JS_TYPE)));
+                                "type", SaxElementUtils.JS_TYPE)));
         
         assertFalse("JS - not a link", 
-                SAXElementUtils.isJavaScript("notscript", 
+                SaxElementUtils.isJavaScript("notscript",
                         makeAtts(
                                 "src", "/js.js",
-                                "type", SAXElementUtils.JS_TYPE)));
+                                "type", SaxElementUtils.JS_TYPE)));
         
         assertFalse("JS - not a path to js file", 
-                SAXElementUtils.isJavaScript("script", 
+                SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "/js.notjs",
-                                "type", SAXElementUtils.JS_TYPE)));
+                                "type", SaxElementUtils.JS_TYPE)));
 
         assertFalse("JS - relative path", 
-                SAXElementUtils.isJavaScript("script", 
+                SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "js.js",
-                                "type", SAXElementUtils.JS_TYPE)));
+                                "type", SaxElementUtils.JS_TYPE)));
 
         assertFalse("JS - external path", 
-                SAXElementUtils.isJavaScript("script", 
+                SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "http://www.adobe.com/js.js",
-                                "type", SAXElementUtils.JS_TYPE)));
+                                "type", SaxElementUtils.JS_TYPE)));
 
         
         assertFalse("JS - wrongtype", 
-                SAXElementUtils.isJavaScript("script", 
+                SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "/js.js",
-                                "type", "not" + SAXElementUtils.JS_TYPE)));
+                                "type", "not" + SaxElementUtils.JS_TYPE)));
     }
     
     private Attributes makeAtts( String... strings ) {

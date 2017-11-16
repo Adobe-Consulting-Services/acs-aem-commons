@@ -90,7 +90,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
                     result = doPurgeCompleted(request);
                     break;
                 default:
-                    throw new Exception("Action not understood.");
+                    throw new IllegalArgumentException("Action not understood.");
             }
         } catch (Exception ex) {
                 result = "Exception occurred " + ex.getMessage();
@@ -127,11 +127,13 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
         return instance;
     }
 
+    @SuppressWarnings("squid:S1172")
     private boolean doHaltAllProcesses(SlingHttpServletRequest request) {
         manager.haltActiveProcesses();
         return true;
     }
 
+    @SuppressWarnings("squid:S1172")
     private boolean doPurgeCompleted(SlingHttpServletRequest request) {
         manager.purgeCompletedProcesses();
         return true;

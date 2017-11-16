@@ -25,6 +25,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
  * Represents a failure on a specific node
  */
 @ProviderType
+@SuppressWarnings("squid:S1068")
 public final class Failure implements Serializable {
     private static final long serialVersionUID = 7526472295622776148L;
 
@@ -32,7 +33,7 @@ public final class Failure implements Serializable {
     private String error;
     private String stackTrace;
     private Long time;
-    transient private Exception exception;
+    private transient Exception exception;
     private final Calendar failedAt;
 
     public Failure() {
