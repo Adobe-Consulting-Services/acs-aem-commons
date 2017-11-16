@@ -22,6 +22,7 @@ package com.adobe.acs.commons.wcm.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -76,7 +77,7 @@ public final class FileImporter implements Importer {
     @SuppressWarnings("squid:S3776")
     public void importData(String schemeValue, String dataSource, Resource target) {
         if (scheme.equals(schemeValue)) {
-            File file = new File(dataSource);
+            final File file = new File(dataSource);
             if (file.exists()) {
                 Calendar fileLastMod = Calendar.getInstance();
                 fileLastMod.setTimeInMillis(file.lastModified());
@@ -86,11 +87,9 @@ public final class FileImporter implements Importer {
                 final Node targetParent;
                 final String targetName;
 
-                FileInputStream stream = null;
-
                 Node node = target.adaptTo(Node.class);
                 if (node != null) {
-                    try {
+                    try (FileInputStream stream = new FileInputStream(file)) {
                         if (node.isNodeType(JcrConstants.NT_FILE)) {
                             // assume that we are intending to replace this file
                             targetParent = node.getParent();
@@ -116,18 +115,13 @@ public final class FileImporter implements Importer {
                             }
                         }
 
-                        stream = new FileInputStream(file);
                         JcrUtils.putFile(targetParent, targetName, mimeType, stream);
                         node.getSession().save();
                     } catch (RepositoryException e) {
                         throw new ImportException("Unable to import from file '" + dataSource + "' to '"
                                 + target.getPath() + "'", e);
-                    } catch (FileNotFoundException e) {
-                        throw new ImportException("Unexpected FileNotFoundException while importing", e);
-                    } finally {
-                        if (stream != null) {
-                            IOUtils.closeQuietly(stream);
-                        }
+                    } catch (IOException e) {
+                        throw new ImportException("Unexpected IOException while importing", e);
                     }
                 } else {
                     log.warn("Target '{}' is not a JCR node. Skipping import from '{}'.", target.getPath(), dataSource);

@@ -111,8 +111,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             RequestParameter allowDuplicatesParam = requestParameterMap.getValue(IGNORE_PREFIX + destination
                     + ALLOW_DUPLICATES_SUFFIX);
 
-            final boolean allowDuplicates =
-                    allowDuplicatesParam != null ? Boolean.valueOf(allowDuplicatesParam.getString()) : false;
+            final boolean allowDuplicates = allowDuplicatesParam != null && Boolean.valueOf(allowDuplicatesParam.getString());
 
             RequestParameter typeHintParam = requestParameterMap.getValue(IGNORE_PREFIX + destination
                     + TYPE_HINT_SUFFIX);

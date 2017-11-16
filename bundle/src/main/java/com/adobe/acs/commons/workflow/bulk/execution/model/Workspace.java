@@ -146,7 +146,7 @@ public class Workspace {
     }
 
     @PostConstruct
-    protected void activate() throws Exception {
+    protected void activate() {
         this.config = resource.getParent().adaptTo(Config.class);
 
         for (BulkWorkflowRunner candidate : runners) {
@@ -271,6 +271,14 @@ public class Workspace {
         properties.remove(PN_SUB_STATUS);
     }
 
+    public void setStatus(Status status, SubStatus subStatus) {
+        setStatus(status);
+        if (subStatus != null) {
+            this.subStatus = subStatus.toString();
+            properties.put(PN_SUB_STATUS, this.subStatus);
+        }
+    }
+
     public SubStatus getSubStatus() {
         // Refresh state before getting the status.
         // Note, this gets the value from the session state, and not the cached Sling Model value as this value can change over the life of the SlingModel.
@@ -293,14 +301,6 @@ public class Workspace {
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
         properties.put(PN_INITIALIZED, this.initialized);
-    }
-
-    public void setStatus(Status status, SubStatus subStatus) {
-        setStatus(status);
-        if (subStatus != null) {
-            this.subStatus = subStatus.toString();
-            properties.put(PN_SUB_STATUS, this.subStatus);
-        }
     }
 
     public int incrementCompleteCount() {

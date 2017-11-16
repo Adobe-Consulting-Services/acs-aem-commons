@@ -95,6 +95,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     private static final int MAX_SAVE_RETRIES = 5;
 
     private static final long MS_IN_ONE_MINUTE = 60000;
+    private static final String STATUS_RUNNING = "RUNNING";
 
     private final AtomicReference<WorkflowRemovalStatus> status
             = new AtomicReference<WorkflowRemovalStatus>();
@@ -113,6 +114,67 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     @Override
     public WorkflowRemovalStatus getStatus() {
         return this.status.get();
+    }
+
+    private String getStatus(Resource workflowInstanceResource) {
+        String instanceStatus = workflowInstanceResource.getValueMap().get(PN_STATUS, "UNKNOWN");
+
+        if (!STATUS_RUNNING.equalsIgnoreCase(instanceStatus)) {
+            log.debug("Status of [ {} ] is not RUNNING, so we can take it at face value", instanceStatus);
+            return instanceStatus;
+        }
+
+        // Else check if its RUNNING or STALE
+        log.debug("Status is [ {} ] so we have to determine if its RUNNING or STALE", instanceStatus);
+
+        Resource metadataResource = workflowInstanceResource.getChild("data/metaData");
+        if (metadataResource == null) {
+            log.debug("Workflow instance data/metaData does not exist for [ {} ]", workflowInstanceResource.getPath());
+            return instanceStatus;
+        }
+
+        final ValueMap properties = metadataResource.getValueMap();
+        final String[] jobIds = StringUtils.splitByWholeSeparator(properties.get("currentJobs", ""), JOB_SEPARATOR);
+
+        if (jobIds.length == 0) {
+            log.debug("No jobs found for [ {} ] so assuming status as [ {} ]", workflowInstanceResource.getPath(), instanceStatus);
+        }
+
+        // Make sure there are no JOBS that match to this jobs name
+        for (final String jobId : jobIds) {
+            if (jobManager.getJobById(jobId) != null) {
+                // Found a job for this jobID; so this is a RUNNING job
+                log.debug("JobManager found a job for jobId [ {} ] so marking workflow instances [ {} ] as RUNNING", jobId, workflowInstanceResource.getPath());
+                return STATUS_RUNNING;
+            }
+        }
+        log.debug("JobManager could not find any jobs for jobIds [ {} ] so  workflow instance [ {} ] is potentially STALE", StringUtils.join(jobIds, ", "), workflowInstanceResource.getPath());
+
+        final WorkflowSession workflowSession = workflowInstanceResource.getResourceResolver().adaptTo(WorkflowSession.class);
+        Workflow workflow = null;
+        try {
+            workflow = workflowSession.getWorkflow(workflowInstanceResource.getPath());
+            if (workflow == null) {
+                throw new WorkflowException(String.format("Workflow instance object is null for [ %s]", workflowInstanceResource.getPath()));
+            }
+        } catch (WorkflowException e) {
+            log.warn("Unable to locate Workflow Instance for [ {} ] So it cannot be RUNNING and must be STALE. ", workflowInstanceResource.getPath(), e);
+            return "STALE";
+        }
+
+        final List<WorkItem> workItems = workflow.getWorkItems(new WorkItemFilter() {
+            public boolean doInclude(WorkItem workItem) {
+                // Only include active Workflow instances (ones without an End Time) in this list
+                return workItem.getTimeEnded() == null;
+            }
+        });
+
+        if (!workItems.isEmpty()) {
+            // If at least 1 work item exists that does not have an end time (meaning its still active), then its RUNNING
+            return STATUS_RUNNING;
+        }
+
+        return "STALE";
     }
 
     /**
@@ -151,6 +213,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public int removeWorkflowInstances(final ResourceResolver resourceResolver,
                                        final Collection<String> modelIds,
                                        final Collection<String> statuses,
@@ -211,7 +274,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                         checkedCount++;
 
-                        final String status = getStatus(instance);
+                        final String instanceStatus = getStatus(instance);
                         final String model = properties.get(PN_MODEL_ID, String.class);
                         final Calendar startTime = properties.get(PN_STARTED_AT, Calendar.class);
                         final String payload = properties.get(PAYLOAD_PATH, String.class);
@@ -220,8 +283,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                             log.warn("Unable to find payload for Workflow instance [ {} ]", instance.getPath());
                             remaining++;
                             continue;
-                        } else if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(status)) {
-                            log.trace("Workflow instance [ {} ] has non-matching status of [ {} ]", instance.getPath(), status);
+                        } else if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(instanceStatus)) {
+                            log.trace("Workflow instance [ {} ] has non-matching status of [ {} ]", instance.getPath(), instanceStatus);
                             remaining++;
                             continue;
                         } else if (CollectionUtils.isNotEmpty(modelIds) && !modelIds.contains(model)) {
@@ -303,23 +366,23 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         } catch (PersistenceException e) {
             this.forceQuit.set(false);
             log.error("Error persisting changes with Workflow Removal", e);
-            this.error(resourceResolver);
+            this.error();
             throw e;
         } catch (WorkflowRemovalException e) {
             this.forceQuit.set(false);
             log.error("Error with Workflow Removal", e);
-            this.error(resourceResolver);
+            this.error();
             throw e;
         } catch (InterruptedException e) {
             this.forceQuit.set(false);
             log.error("Errors in persistence retries during Workflow Removal", e);
-            this.error(resourceResolver);
+            this.error();
             throw e;
         }  catch (WorkflowRemovalForceQuitException e) {
             this.forceQuit.set(false);
             // Uncommon instance of using Exception to control flow; Force quitting is an extreme condition.
             log.warn("Workflow removal was force quit. The removal state is unknown.");
-            this.forceQuit(resourceResolver);
+            this.internalForceQuit();
             throw e;
         }  catch (WorkflowRemovalMaxDurationExceededException e) {
             // Uncommon instance of using Exception to control flow; Exceeding max duration extreme condition.
@@ -347,69 +410,6 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         }
 
         return sortedCollection;
-    }
-
-    private String getStatus(Resource workflowInstanceResource) {
-        String status = workflowInstanceResource.getValueMap().get(PN_STATUS, "UNKNOWN");
-
-        if (!"RUNNING".equalsIgnoreCase(status)) {
-            log.debug("Status of [ {} ] is not RUNNING, so we can take it at face value", status);
-            return status;
-        }
-
-        // Else check if its RUNNING or STALE
-        log.debug("Status is [ {} ] so we have to determine if its RUNNING or STALE", status);
-
-        Resource metadataResource = workflowInstanceResource.getChild("data/metaData");
-        if (metadataResource == null) {
-            log.debug("Workflow instance data/metaData does not exist for [ {} ]", workflowInstanceResource.getPath());
-            return status;
-        }
-
-        final ValueMap properties = metadataResource.getValueMap();
-        final String[] jobIds = StringUtils.splitByWholeSeparator(properties.get("currentJobs", ""), JOB_SEPARATOR);
-
-        if (jobIds.length == 0) {
-            log.debug("No jobs found for [ {} ] so assuming status as [ {} ]", workflowInstanceResource.getPath(), status);
-        }
-
-        // Make sure there are no JOBS that match to this jobs name
-        for (final String jobId : jobIds) {
-            if (jobManager.getJobById(jobId) != null) {
-                // Found a job for this jobID; so this is a RUNNING job
-                log.debug("JobManager found a job for jobId [ {} ] so marking workflow instances [ {} ] as RUNNING", jobId, workflowInstanceResource.getPath());
-                return "RUNNING";
-            }
-        }
-        log.debug("JobManager could not find any jobs for jobIds [ {} ] so  workflow instance [ {} ] is potentially STALE", StringUtils.join(jobIds, ", "), workflowInstanceResource.getPath());
-
-        final WorkflowSession workflowSession = workflowInstanceResource.getResourceResolver().adaptTo(WorkflowSession.class);
-        Workflow workflow = null;
-        try {
-            workflow = workflowSession.getWorkflow(workflowInstanceResource.getPath());
-            if (workflow == null) {
-                throw new WorkflowException(String.format("Workflow instance object is null for [ %s]", workflowInstanceResource.getPath()));
-            }
-        } catch (WorkflowException e) {
-            log.warn("Unable to locate Workflow Instance for [ {} ] So it cannot be RUNNING and must be STALE. ", workflowInstanceResource.getPath(), e);
-            return "STALE";
-        }
-
-        if (workflow != null) {
-            final List<WorkItem> workItems = workflow.getWorkItems(new WorkItemFilter() {
-                public boolean doInclude(WorkItem workItem) {
-                    // Only include active Workflow instances (ones without an End Time) in this list
-                    return workItem.getTimeEnded() == null;
-                }
-            });
-
-            if (!workItems.isEmpty()) {
-                // If at least 1 work item exists that does not have an end time (meaning its still active), then its RUNNING
-               return "RUNNING";
-            }
-        }
-
-        return "STALE";
     }
 
     private void save(ResourceResolver resourceResolver) throws PersistenceException, InterruptedException {
@@ -467,12 +467,12 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
         this.save(resourceResolver);
         
-        WorkflowRemovalStatus status = this.status.get();
+        WorkflowRemovalStatus removalStatus = this.status.get();
         
-        status.setChecked(checked);
-        status.setRemoved(count);
+        removalStatus.setChecked(checked);
+        removalStatus.setRemoved(count);
         
-        this.status.set(status);
+        this.status.set(removalStatus);
     }
 
     private void complete(final ResourceResolver resourceResolver, final int checked, final int count) throws
@@ -480,39 +480,38 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
         this.save(resourceResolver);
 
-        WorkflowRemovalStatus status = this.status.get();
+        WorkflowRemovalStatus removalStatus = this.status.get();
 
-        status.setRunning(false);
-        status.setChecked(checked);
-        status.setRemoved(count);
-        status.setCompletedAt(Calendar.getInstance());
+        removalStatus.setRunning(false);
+        removalStatus.setChecked(checked);
+        removalStatus.setRemoved(count);
+        removalStatus.setCompletedAt(Calendar.getInstance());
         
-        this.status.set(status);
+        this.status.set(removalStatus);
     }
 
-    private void error(final ResourceResolver resourceResolver) throws
+    private void error() throws
             PersistenceException, InterruptedException {
 
-        WorkflowRemovalStatus status = this.status.get();
+        WorkflowRemovalStatus removalStatus = this.status.get();
 
-        status.setRunning(false);
-        status.setErredAt(Calendar.getInstance());
+        removalStatus.setRunning(false);
+        removalStatus.setErredAt(Calendar.getInstance());
         
-        this.status.set(status);
+        this.status.set(removalStatus);
     }
 
-    private void forceQuit(final ResourceResolver resourceResolver) {
-        WorkflowRemovalStatus status = this.status.get();
+    private void internalForceQuit() {
+        WorkflowRemovalStatus removalStatus = this.status.get();
 
-        status.setRunning(false);
-        status.setForceQuitAt(Calendar.getInstance());
+        removalStatus.setRunning(false);
+        removalStatus.setForceQuitAt(Calendar.getInstance());
 
-        this.status.set(status);
+        this.status.set(removalStatus);
 
         // Reset force quit flag
         this.forceQuit.set(false);
     }
-
 
     private List<Resource> getWorkflowInstanceFolders(final ResourceResolver resourceResolver) {
         final List<Resource> folders = new ArrayList<Resource>();

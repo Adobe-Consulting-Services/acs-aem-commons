@@ -52,9 +52,8 @@ public class ConfigResourceVisitor extends AbstractResourceVisitor {
             final ValueMap properties = resource.adaptTo(ValueMap.class);
             final String primaryType = properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class);
 
-            if (BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH.equals(resource.getPath())) {
-                super.accept(resource);
-            } else if (ArrayUtils.contains(ACCEPTED_PRIMARY_TYPES, primaryType)) {
+            if (BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH.equals(resource.getPath())
+                    || ArrayUtils.contains(ACCEPTED_PRIMARY_TYPES, primaryType)) {
                 super.accept(resource);
             }
         }

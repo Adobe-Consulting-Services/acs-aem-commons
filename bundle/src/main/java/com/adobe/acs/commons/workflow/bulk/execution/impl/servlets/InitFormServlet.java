@@ -28,6 +28,9 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.model.WorkflowModel;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -35,8 +38,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,11 @@ import java.io.IOException;
 )
 public class InitFormServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(InitFormServlet.class);
+    private static final String KEY_RUNNER_TYPES = "runnerTypes";
+    private static final String KEY_LABEL = "label";
+    private static final String KEY_QUERY_TYPES = "queryTypes";
+    private static final String KEY_VALUE = "value";
+    private static final String KEY_USER_EVENT_DATA = "userEventData";
 
     @Reference
     private WorkflowService workflowService;
@@ -67,43 +73,24 @@ public class InitFormServlet extends SlingAllMethodsServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
         // Runners
-        try {
-            json.accumulate("runnerTypes", new JSONObject().put("label", "AEM Workflow").put("value",
-                    AEMWorkflowRunnerImpl.class.getName()));
-            json.accumulate("runnerTypes", new JSONObject().put("label", "Synthetic Workflow (Single-threaded)").put("value",
-                    SyntheticWorkflowRunnerImpl.class.getName()));
-            json.accumulate("runnerTypes", new JSONObject().put("label", "Synthetic Workflow (Multi-threaded)").put("value",
-                    FastActionManagerRunnerImpl.class.getName()));
-        } catch (JSONException e) {
-            log.error("Could not create JSON for Bulk Workflow Runner options");
-            throw new ServletException(e);
-        }
+        accumulate(json, KEY_RUNNER_TYPES, withLabelValue("AEM Workflow", AEMWorkflowRunnerImpl.class.getName()));
+        accumulate(json, KEY_RUNNER_TYPES, withLabelValue("Synthetic Workflow (Single-threaded)", SyntheticWorkflowRunnerImpl.class.getName()));
+        accumulate(json, KEY_RUNNER_TYPES, withLabelValue("Synthetic Workflow (Multi-threaded)", FastActionManagerRunnerImpl.class.getName()));
 
         // Query Types
-        try {
-            json.accumulate("queryTypes", new JSONObject().put("label", "QueryBuilder").put("value", "queryBuilder"));
-            json.accumulate("queryTypes", new JSONObject().put("label", "List").put("value", "list"));
-            json.accumulate("queryTypes", new JSONObject().put("label", "xPath").put("value", "xpath"));
-            json.accumulate("queryTypes", new JSONObject().put("label", "JCR-SQL2").put("value", "JCR-SQL2"));
-            json.accumulate("queryTypes", new JSONObject().put("label", "JCR-SQL").put("value", "JCR-SQL"));
-        } catch (JSONException e) {
-            log.error("Could not create JSON for QueryType options", e);
-            throw new ServletException(e);
-        }
+        accumulate(json, KEY_QUERY_TYPES, withLabelValue("QueryBuilder", "queryBuilder"));
+        accumulate(json, KEY_QUERY_TYPES, withLabelValue("List", "list"));
+        accumulate(json, KEY_QUERY_TYPES, withLabelValue("xPath", "xpath"));
+        accumulate(json, KEY_QUERY_TYPES, withLabelValue("JCR-SQL2", "JCR-SQL2"));
+        accumulate(json, KEY_QUERY_TYPES, withLabelValue("JCR-SQL", "JCR-SQL"));
 
         // User Event Data
-        try {
-            json.accumulate("userEventData", new JSONObject().put("label", "Custom user-event-data").put("value", ""));
-            json.accumulate("userEventData", new JSONObject().put("label", "changedByWorkflowProcess").put("value", "changedByWorkflowProcess"));
-            json.accumulate("userEventData", new JSONObject().put("label", "acs-aem-commons.bulk-workflow-manager").put("value", "acs-aem-commons.bulk-workflow-manager"));
-
-        } catch (JSONException e) {
-            log.error("Could not create JSON for userEventData options", e);
-            throw new ServletException(e);
-        }
+        accumulate(json, KEY_USER_EVENT_DATA, withLabelValue("Custom user-event-data", ""));
+        accumulate(json, KEY_USER_EVENT_DATA, withLabelValue("changedByWorkflowProcess", "changedByWorkflowProcess"));
+        accumulate(json, KEY_USER_EVENT_DATA, withLabelValue("acs-aem-commons.bulk-workflow-manager", "acs-aem-commons.bulk-workflow-manager"));
 
         // Workflow Models
         final WorkflowSession workflowSession = workflowService.getWorkflowSession(
@@ -113,22 +100,14 @@ public class InitFormServlet extends SlingAllMethodsServlet {
             final WorkflowModel[] workflowModels = workflowSession.getModels();
 
             for (final WorkflowModel workflowModel : workflowModels) {
-                JSONObject jsonWorkflow = new JSONObject();
-                try {
-                    boolean transientWorkflow = isTransient(request.getResourceResolver(), workflowModel.getId());
-                    String workflowLabel = workflowModel.getTitle();
-                    if (transientWorkflow) {
-                        workflowLabel += " ( Transient )";
-                    }
-                    jsonWorkflow.put("label", workflowLabel);
-                    jsonWorkflow.put("value", workflowModel.getId());
-                    jsonWorkflow.put("transient", transientWorkflow);
-                    json.accumulate("workflowModels", jsonWorkflow);
-                } catch (JSONException e) {
-                    log.error("Could not add workflow [ {} - {} ] to Workflow Models drop-down JSON object",
-                            workflowModel.getTitle(), workflowModel.getId());
-                    throw new ServletException(e);
+                boolean transientWorkflow = isTransient(request.getResourceResolver(), workflowModel.getId());
+                String workflowLabel = workflowModel.getTitle();
+                if (transientWorkflow) {
+                    workflowLabel += " ( Transient )";
                 }
+                JsonObject jsonWorkflow = withLabelValue(workflowLabel, workflowModel.getId());
+                jsonWorkflow.addProperty("transient", transientWorkflow);
+                accumulate(json, "workflowModels", jsonWorkflow);
             }
 
             response.getWriter().write(json.toString());
@@ -144,6 +123,31 @@ public class InitFormServlet extends SlingAllMethodsServlet {
     protected boolean isTransient(ResourceResolver resourceResolver, String workflowModelId) {
         Resource resource = resourceResolver.getResource(workflowModelId).getParent();
         return resource.getValueMap().get("transient", false);
+    }
+
+    private JsonObject withLabelValue(String label, String value) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty(KEY_LABEL, label);
+        obj.addProperty(KEY_VALUE, value);
+        return obj;
+    }
+
+    private JsonObject accumulate(JsonObject obj, String key, JsonElement value) {
+        if (obj.has(key)) {
+            JsonElement existingValue = obj.get(key);
+            if (existingValue instanceof JsonArray) {
+                ((JsonArray) existingValue).add(value);
+            } else {
+                JsonArray array = new JsonArray();
+                array.add(existingValue);
+                obj.add(key, array);
+            }
+        } else {
+            JsonArray array = new JsonArray();
+            array.add(value);
+            obj.add(key, array);
+        }
+        return obj;
     }
 
 }

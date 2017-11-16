@@ -143,9 +143,7 @@ public final class WorkflowRemovalStatus {
     }
 
     private long getDuration(Calendar start, Calendar end) {
-        if (start == null || end == null) {
-            return 0;
-        } else if (end.before(start)) {
+        if (start == null || end == null || end.before(start)) {
             return 0;
         }
 

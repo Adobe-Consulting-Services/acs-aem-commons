@@ -132,8 +132,8 @@ public class Payload {
     }
 
     public boolean isOnboarded() {
-        Status status = getStatus();
-        return (status != null && !Status.NOT_STARTED.equals(status));
+        Status tmpStatus = getStatus();
+        return (tmpStatus != null && !Status.NOT_STARTED.equals(tmpStatus));
     }
 
     /** Setters **/

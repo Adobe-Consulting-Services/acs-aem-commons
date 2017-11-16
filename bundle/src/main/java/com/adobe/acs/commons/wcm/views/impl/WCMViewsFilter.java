@@ -212,11 +212,8 @@ public class WCMViewsFilter implements Filter {
             try {
                 // Do not process cq:Page or cq:PageContent nodes as this will break all sorts of things,
                 // and they dont have dropzone of their own
-                if (node.isNodeType(NameConstants.NT_PAGE) || node.isNodeType("cq:PageContent")) {
-                    // Do not process Page node inclusions
-                    return false;
-                } else if (JcrConstants.JCR_CONTENT.equals(node.getName())) {
-                    // Do not process Page jcr:content nodes (that may not have the cq:PageContent jcr:primaryType)
+                if (node.isNodeType(NameConstants.NT_PAGE) || node.isNodeType("cq:PageContent")  // Do not process Page node inclusions
+                        || JcrConstants.JCR_CONTENT.equals(node.getName())) { // Do not process Page jcr:content nodes (that may not have the cq:PageContent jcr:primaryType)
                     return false;
                 }
             } catch (RepositoryException e) {

@@ -118,6 +118,7 @@ public abstract class AbstractAEMWorkflowRunner extends AbstractWorkflowRunner {
         }
     }
 
+    @SuppressWarnings("squid:S2583")
     protected void unscheduleJob(Scheduler scheduler, String jobName, Resource configResource, Workspace workspace) {
         try {
             if (configResource != null) {
