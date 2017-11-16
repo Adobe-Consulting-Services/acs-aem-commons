@@ -63,7 +63,7 @@ public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
             Resource requestedResource = resourceResolver.resolve( request, requestUri );
 
             if( !ResourceUtil.isNonExistingResource( requestedResource ) ){
-                log.info("Current Session has access to {}", requestUri );
+                log.debug("Current Session has access to {}", requestUri );
                 response.setStatus(SlingHttpServletResponse.SC_OK);
             } else {
                 log.info("Current Session does not have access to {}", requestUri );
