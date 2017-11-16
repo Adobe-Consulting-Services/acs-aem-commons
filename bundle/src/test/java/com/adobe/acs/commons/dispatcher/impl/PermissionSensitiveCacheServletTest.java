@@ -50,35 +50,6 @@ public class PermissionSensitiveCacheServletTest {
 
     MockSlingHttpServletRequest request;
 
-    @Before
-    public void setup() throws Exception {
-
-        Map<String, String> config = new HashMap<>();
-        config.put( "removable-extensions", "html");
-        servlet.activate( config );
-
-    }
-
-    @Test
-    public void getUriShouldRemoveExtension() throws Exception {
-
-        String requestUri = TEST_PAGE;
-        String uri = servlet.getUri( requestUri );
-
-        assertEquals( "/content/test", uri );
-
-    }
-
-    @Test
-    public void getUriShouldNotRemoveExtension() throws Exception {
-
-        String requestUri = "/content/dam/test.jpg";
-        String uri = servlet.getUri( requestUri );
-
-        assertEquals( requestUri, uri );
-
-    }
-
     @Test
     public void doHeadShouldAllowAccess() throws Exception {
 
@@ -93,12 +64,11 @@ public class PermissionSensitiveCacheServletTest {
 
         MockSlingHttpServletResponse response = context.response();
 
-        servlet.doHeadRequest( request, response );
+        servlet.doHead( request, response );
 
         assertEquals( HttpServletResponse.SC_OK, response.getStatus() );
 
     }
-
 
     @Test
     public void doHeadShouldNotAllowAccess() throws Exception {
@@ -112,7 +82,7 @@ public class PermissionSensitiveCacheServletTest {
 
         MockSlingHttpServletResponse response = context.response();
 
-        servlet.doHeadRequest( request, response );
+        servlet.doHead( request, response );
 
         assertEquals( HttpServletResponse.SC_UNAUTHORIZED, response.getStatus() );
 

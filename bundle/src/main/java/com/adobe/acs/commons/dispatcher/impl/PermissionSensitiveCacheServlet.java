@@ -19,23 +19,18 @@
  */
 package com.adobe.acs.commons.dispatcher.impl;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static com.adobe.acs.commons.dispatcher.impl.PermissionSensitiveCacheServlet.REMOVEABLE_EXTENSIONS;
 
 @Component(
         label = "ACS AEM Commons - Permission Sensitive Cache Servlet",
@@ -43,13 +38,6 @@ import static com.adobe.acs.commons.dispatcher.impl.PermissionSensitiveCacheServ
         metatype = true, immediate = true
 )
 @Properties({
-        @Property(
-                label = "File extensions to be removed from the URI",
-                name = REMOVEABLE_EXTENSIONS,
-                description = "Extensions that can be removed from the URI. For example, .html",
-                cardinality = Integer.MAX_VALUE,
-                value = {"html"}
-        ),
         @Property(
                 name = "sling.servlet.paths",
                 cardinality = Integer.MAX_VALUE,
@@ -61,61 +49,30 @@ import static com.adobe.acs.commons.dispatcher.impl.PermissionSensitiveCacheServ
 public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
     private final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);
-    public static final String REMOVEABLE_EXTENSIONS = "removable-extensions";
 
-    private List<String> removableExtensions = new ArrayList<String>();
-
-    @Activate
-    public final void activate(final Map<String, String> config) {
-
-        String[] propertyArray = PropertiesUtil.toStringArray(config.get(REMOVEABLE_EXTENSIONS),
-                new String[]{"html"});
-        removableExtensions = Arrays.asList( propertyArray );
-    }
 
     public void doHead(SlingHttpServletRequest request, SlingHttpServletResponse response) {
-        doHeadRequest(request, response);
-    }
-
-    public void doHeadRequest(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         try{
+
             //retrieve the requested URL
+            ResourceResolver resourceResolver = request.getResourceResolver();
             String requestUri = request.getParameter( "uri" );
-            log.debug( "Request URI {}", requestUri );
 
-            if(StringUtils.isNotEmpty( requestUri ) ){
+            log.debug( "Checking access for URI {}", requestUri );
 
-                String uri = getUri( requestUri );
+            Resource requestedResource = resourceResolver.resolve( request, requestUri );
 
-                log.info( "Checking permissions for {}", uri );
-
-                Resource requestedResource = request.getResourceResolver().getResource( uri );
-
-                if (requestedResource != null) {
-                    log.debug("Current Session has access to {}", uri );
-                    response.setStatus(SlingHttpServletResponse.SC_OK);
-                } else {
-                    log.debug("Current Session does not have access to {}", uri );
-                    response.setStatus(SlingHttpServletResponse.SC_UNAUTHORIZED);
-                }
+            if( !ResourceUtil.isNonExistingResource( requestedResource ) ){
+                log.info("Current Session has access to {}", requestUri );
+                response.setStatus(SlingHttpServletResponse.SC_OK);
             } else {
+                log.info("Current Session does not have access to {}", requestUri );
                 response.setStatus(SlingHttpServletResponse.SC_UNAUTHORIZED);
             }
-        } catch(Exception e){
+
+        } catch(Exception e) {
             log.error("authchecker servlet exception: " + e.getMessage());
+            response.setStatus( SlingHttpServletResponse.SC_UNAUTHORIZED );
         }
     }
-
-    public String getUri(String requestUri){
-
-        String extension = FilenameUtils.getExtension( requestUri );
-
-        String uri = requestUri;
-
-        if( removableExtensions.contains( extension ) ){
-            uri = FilenameUtils.removeExtension( requestUri );
-        }
-        return uri;
-    }
-
 }
