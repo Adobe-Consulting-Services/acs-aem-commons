@@ -59,7 +59,7 @@ public class JSONDumpServletTest {
     @Test
     public void testWithNoPath() throws Exception {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource(SERVLET_PATH));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString(SERVLET_SELECTORS);

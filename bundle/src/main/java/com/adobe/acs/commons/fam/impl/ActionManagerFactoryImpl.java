@@ -20,10 +20,11 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
@@ -43,11 +44,11 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
     @Reference
     ThrottledTaskRunner taskRunner;
     
-    private final Map<String, ActionManagerImpl> tasks;
+    private final Map<String, ActionManager> tasks;
     
     public ActionManagerFactoryImpl() throws NotCompliantMBeanException {
         super(ActionManagerMBean.class);
-        tasks = new ConcurrentHashMap<>();
+        tasks = Collections.synchronizedMap(new LinkedHashMap<>());
     }
     
     @Override
@@ -76,7 +77,7 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
     @Override
     public TabularDataSupport getStatistics() throws OpenDataException {
         TabularDataSupport stats = new TabularDataSupport(ActionManagerImpl.getStaticsTableType());
-        for (ActionManagerImpl task : tasks.values()) {
+        for (ActionManager task : tasks.values()) {
             stats.put(task.getStatistics());
         }
         return stats;
@@ -85,7 +86,7 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
     @Override
     public TabularDataSupport getFailures() throws OpenDataException {
         TabularDataSupport stats = new TabularDataSupport(ActionManagerImpl.getFailuresTableType());
-        for (ActionManagerImpl task : tasks.values()) {
+        for (ActionManager task : tasks.values()) {
             stats.putAll(task.getFailures().toArray(new CompositeData[0]));
         }
         return stats;
@@ -93,12 +94,21 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
     
     @Override
     public void purgeCompletedTasks() {
-        for (Iterator<ActionManagerImpl> taskIterator = tasks.values().iterator(); taskIterator.hasNext();) {
-            ActionManagerImpl task = taskIterator.next();
+        for (Iterator<ActionManager> taskIterator = tasks.values().iterator(); taskIterator.hasNext();) {
+            ActionManager task = taskIterator.next();
             if (task.isComplete() || taskRunner.getActiveCount() == 0) {
                 task.closeAllResolvers();
                 taskIterator.remove();
             }
         }
+    }
+
+    @Override
+    public void purge(ActionManager manager) {
+        if (!manager.isComplete()) {
+            manager.cancel(true);
+        }
+        manager.closeAllResolvers();
+        tasks.values().remove(manager);
     }
 }

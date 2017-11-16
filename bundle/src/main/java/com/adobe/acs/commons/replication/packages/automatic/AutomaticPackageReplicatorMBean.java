@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.replication.packages.automatic;
 
-import com.adobe.acs.commons.util.impl.ResourceServiceManagerMBean;
+import com.adobe.acs.commons.util.mbeans.ResourceServiceManagerMBean;
 import com.adobe.granite.jmx.annotation.Description;
 
 /**

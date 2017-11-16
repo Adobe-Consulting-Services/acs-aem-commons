@@ -1,0 +1,55 @@
+/*
+Copyright 2017 Adobe.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#processListing {
+    padding: .5rem 1rem;
+}
+
+#processListing table {
+    width: 100%;
+}
+
+.coral-Form--aligned .process-dialog-field {
+    float: left;
+    margin: 0.6rem 0 .9375rem 0;
+}
+
+.coral--dark .coral-Dialog-wrapper, .coral--dark .coral-Dialog-header, .coral--dark coral-Dialog-content {
+    background-color: #333 !important
+}
+
+coral-Dialog-content .coral-Form-field {
+    width: 55%;
+    text-align: left;
+} 
+
+coral-Dialog-content .coral-Form-fieldlabel {
+    min-width:10em
+}
+
+.coral-Form--aligned .coral-Form-fieldwrapper .coral-Form-fieldwrapper {
+    margin: 0;
+    clear: none;
+}
+
+.coral-Form--aligned .coral-Form-fieldwrapper--singleline {
+    margin-left: 8.65em !important;
+}
+
+.coral-Form--aligned .coral-Form-fieldwrapper--singleline label.coral-Checkbox {
+    width: 20%;
+    min-width: 140px;
+}

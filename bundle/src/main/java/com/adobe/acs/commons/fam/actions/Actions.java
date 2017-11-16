@@ -16,6 +16,7 @@
 package com.adobe.acs.commons.fam.actions;
 
 import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -36,6 +37,32 @@ public final class Actions {
 
     private static final Logger LOG = LoggerFactory.getLogger(Actions.class);
 
+    private static ThreadLocal<ActionManager> currentActionManager = new ThreadLocal<>();
+    /**
+     * Obtain the current action manager -- this is necessary for additional tracking such as current item
+     * @return current action manager
+     */
+    public static ActionManager getCurrentActionManager() {
+        return currentActionManager.get();
+    }
+
+    public static void setCurrentActionManager(ActionManager a) {
+        if (a == null) {
+            currentActionManager.remove();
+        } else {
+            currentActionManager.set(a);
+        }
+    }
+    
+    public static void setCurrentItem(String item) {
+        ActionManager manager = getCurrentActionManager();
+        if (manager != null) {
+            manager.setCurrentItem(item);
+        } else {
+            LOG.error("Could not identify current action manager.", new IllegalStateException());
+        }
+    }
+
     //-- Query Result consumers (for using withQueryResults)
     /**
      * Retry provided action a given number of times before giving up and
@@ -55,7 +82,12 @@ public final class Actions {
                 try {
                     action.accept(r, s);
                     return;
-                } catch (Exception e) {
+                } catch (InterruptedException e) {
+                    r.revert();
+                    r.refresh();
+                    LOG.info("Timeout reached, aborting work", e);
+                    throw e;
+                } catch (Throwable e) {
                     r.revert();
                     r.refresh();
                     if (remaining-- <= 0) {
@@ -101,14 +133,23 @@ public final class Actions {
                 try {
                     action.accept(r);
                     return;
-                } catch (Exception e) {
+                } catch (InterruptedException e) {
+                    r.revert();
+                    r.refresh();
+                    LOG.info("Timeout reached, aborting work", e);
+                    throw e;
+                } catch (Throwable e) {
                     r.revert();
                     r.refresh();
                     LOG.info("Error commit, retry count is " + remaining, e);
-                    if (remaining-- <= 0) {
-                        throw e;
+                    if (e instanceof Exception) {
+                        if (remaining-- <= 0) {
+                            throw e;
+                        } else {
+                            Thread.sleep(pausePerRetry);
+                        }
                     } else {
-                        Thread.sleep(pausePerRetry);
+                        throw e;
                     }
                 }
             }

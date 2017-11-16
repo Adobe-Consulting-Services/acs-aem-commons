@@ -105,7 +105,7 @@
         //reads multifield data from server, creates the nested composite multifields and fills them
         addDataInFields: function () {
             var cmf = this, mNames = [],
-                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
+                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class~='coral-Form-fieldset']"),
                 $form = $fieldSets.closest("form.foundation-form"),
                 actionUrl = $form.attr("action") + ".json",
                 mValues, $field, name, $multifield;
@@ -194,7 +194,11 @@
                                 $field = $($fieldSets[i]).find("ul[data-fieldname='./" + rKey + "']").last();
                             }
 
-                            if (_.isArray(rValue) && !_.isEmpty(rValue)) {
+                            if(!_.isEmpty($field) && $field.siblings( "input.autocomplete-has-suggestion-btn")) {
+                                cmf.setWidgetValue($field.siblings( "input.autocomplete-has-suggestion-btn"), rValue);
+                            }
+
+                            if (_.isArray(rValue) && !_.isEmpty(rValue) && !cmf.isSelectMultiple($field)) {
                                 fillNestedFields($($fieldSets[i]).find("[data-init='multifield']"), rValue);
                             } else {
                                 cmf.setWidgetValue($field, rValue);
@@ -213,7 +217,13 @@
         },
 
         fillValue: function ($field, record) {
-            var name = $field.attr("name"), value;
+            var name, value;
+            // for userpicker, richtext and datepicker, $field length is 2 but only userpicker use the second name value
+            if($field.length > 1 && !$field.parent().hasClass("richtext-container") && !$field.parent().hasClass("coral-DatePicker")) {
+                name = $($field[1]).attr("name");
+            } else {
+                name = $field.attr("name");
+            }
 
             if (!name) {
                 return;

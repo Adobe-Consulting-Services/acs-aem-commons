@@ -166,14 +166,16 @@ public class WeeklyExpiresHeaderFilterTest {
         Calendar actual = Calendar.getInstance();
         actual.set(Calendar.SECOND, 0);
         actual.set(Calendar.MILLISECOND, 0);
+        actual.set(Calendar.HOUR_OF_DAY, 1);
+        actual.set(Calendar.MINUTE, 29);
 
         filter.doActivate(componentContext);
         filter.adjustExpires(actual);
 
         assertEquals(Calendar.SUNDAY, actual.get(Calendar.DAY_OF_WEEK));
         // Abstract class will pass expires, this checks we aren't messing with the time.
-        assertNotEquals(2, actual.get(Calendar.HOUR_OF_DAY));
-        assertNotEquals(30, actual.get(Calendar.MINUTE));
+        assertEquals(1, actual.get(Calendar.HOUR_OF_DAY));
+        assertEquals(29, actual.get(Calendar.MINUTE));
     }
 
     @Test(expected = ConfigurationException.class)

@@ -56,7 +56,7 @@ public class ResourceDataUtil {
 
             return StringUtils.stripToNull(responseWrapper.getString());
         } catch (Exception ex) {
-            log.error("Error creating the String representation for: {} -- {}", path, ex);
+            log.error("Error creating the String representation for: " + path, ex);
         } finally {
             if (responseWrapper != null) {
                 responseWrapper.clearWriter();

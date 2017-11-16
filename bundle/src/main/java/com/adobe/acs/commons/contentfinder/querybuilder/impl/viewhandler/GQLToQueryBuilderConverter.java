@@ -113,7 +113,7 @@ public final class GQLToQueryBuilderConverter {
             int count = 1;
             for (String value : getAll(request, CF_ORDER)) {
                 value = StringUtils.trim(value);
-                final String orderGroupId = String.valueOf(GROUP_ORDERBY_USERDEFINED + count) + "_group";
+                final String orderGroupId = String.valueOf(GROUP_ORDERBY_USERDEFINED + count) + "_orderby";
                 boolean sortAsc = false;
 
                 if (StringUtils.startsWith(value, "-")) {
@@ -132,8 +132,8 @@ public final class GQLToQueryBuilderConverter {
 
         } else {
 
-            final boolean isPage = isPage(get(request, CF_TYPE));
-            final boolean isAsset = isAsset(get(request, CF_TYPE));
+            final boolean isPage = isPage(request);
+            final boolean isAsset = isAsset(request);
             final String prefix = getPropertyPrefix(request);
 
             if (StringUtils.isNotBlank(queryString)) {
@@ -156,7 +156,7 @@ public final class GQLToQueryBuilderConverter {
     }
 
     public static Map<String, String> addMimeType(final SlingHttpServletRequest request, Map<String, String> map) {
-        final boolean isAsset = isAsset(get(request, CF_TYPE));
+        final boolean isAsset = isAsset(request);
         final String prefix = getPropertyPrefix(request);
 
         if (isAsset && has(request, CF_MIMETYPE)) {
@@ -182,13 +182,13 @@ public final class GQLToQueryBuilderConverter {
 
                 int i = 1;
                 for (final String tag : tags) {
-                    map.put(groupId + "." + i + "_property", tagProperty);
+                    map.put(groupId + "." + i + "_tagid.property", tagProperty);
                     map.put(groupId + "." + i + "_tagid", tag);
 
                     i++;
                 }
             } else {
-                map.put(groupId + ".1_property", tagProperty);
+                map.put(groupId + ".1_tagid.property", tagProperty);
                 map.put(groupId + ".1_tagid", get(request, CF_TAGS));
             }
         }
@@ -387,26 +387,34 @@ public final class GQLToQueryBuilderConverter {
     /**
      * Checks of the query param node type is that of a CQ Page
      *
-     * @param nodeType
+     * @param request
      * @return
      */
-    public static boolean isPage(String nodeType) {
-        return StringUtils.equals(nodeType, "cq:Page");
+    public static boolean isPage(final SlingHttpServletRequest request) {
+        if (has(request, CF_TYPE)) {
+            String nodeType = get(request, CF_TYPE);
+            return StringUtils.equals(nodeType, NameConstants.NT_PAGE);
+        }
+        return false;
     }
 
     /**
      * Checks of the query param node type is that of a DAM Asset
      *
-     * @param nodeType
+     * @param request
      * @return
      */
-    public static boolean isAsset(String nodeType) {
-        return StringUtils.equals(nodeType, "dam:Asset");
+    public static boolean isAsset(final SlingHttpServletRequest request) {
+        if (has(request, CF_TYPE)) {
+            String nodeType = get(request, CF_TYPE);
+            return StringUtils.equals(nodeType, DamConstants.NT_DAM_ASSET);
+        }
+        return false;
     }
 
     public static String getPropertyPrefix(final SlingHttpServletRequest request) {
-        final boolean isPage = isPage(get(request, CF_TYPE));
-        final boolean isAsset = isAsset(get(request, CF_TYPE));
+        final boolean isPage = isPage(request);
+        final boolean isAsset = isAsset(request);
 
         String prefix = "";
         if (isPage) {

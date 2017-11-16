@@ -78,11 +78,13 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
     @Override
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
         ResourceResolver resourceResolver = null;
+        String wfPayload = null;
 
         try {
             resourceResolver = this.getResourceResolver(workflowSession.getSession());
+            wfPayload = (String) workItem.getWorkflowData().getPayload();
 
-            final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, (String) workItem.getWorkflowData().getPayload());
+            final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, wfPayload);
             final Map<String, String> srcDestMap = this.getProcessArgsMap(metaDataMap);
 
             for (final String payload : payloads) {
@@ -94,7 +96,8 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
                     continue;
                 }
 
-                Resource metadataResource = resourceResolver.getResource(asset.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + DamConstants.METADATA_FOLDER);
+                String metadataPath = String.format("%s/%s/%s",asset.getPath(), JcrConstants.JCR_CONTENT, DamConstants.METADATA_FOLDER);
+                Resource metadataResource = resourceResolver.getResource(metadataPath);
 
                 if (metadataResource == null) {
                     log.error("Could not find the metadata node for Asset [ " + asset.getPath() + " ]");
@@ -124,11 +127,9 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
                 }
             }
         } catch (LoginException e) {
-            log.error("Could not get a ResourceResolver object from the WorkflowSession", e);
-            throw new WorkflowException("Could not get a ResourceResolver object from the WorkflowSession");
+            throw new WorkflowException("Could not get a ResourceResolver object from the WorkflowSession", e);
         } catch (RepositoryException e) {
-            log.error("Could not find the payload", e);
-            throw new WorkflowException("Could not find the payload");
+            throw new WorkflowException(String.format("Could not find the payload for '%s'", wfPayload), e);
         } finally {
             if (resourceResolver != null) {
                 resourceResolver.close();

@@ -233,11 +233,8 @@ Select
         opAttrs.addClass(optionCfg.get("class", String.class));
         opAttrs.addRel(optionCfg.get("rel", String.class));
         opAttrs.add("title", i18n.getVar(optionCfg.get("title", String.class)));
-        if(value.trim().startsWith("fa") || value.equalsIgnoreCase("")){
-          opAttrs.add("value", value);
-        }else{
-            opAttrs.add("value", "fa " +value);
-        }
+        opAttrs.add("value", value);
+
         opAttrs.addDisabled(optionCfg.get("disabled", false));
         opAttrs.addOthers(optionCfg.getProperties(), "id", "class", "rel", "title", "value", "text", "disabled", "selected", "group");
 

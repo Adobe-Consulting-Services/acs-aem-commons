@@ -80,20 +80,28 @@ public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 				req = new AuditLogSearchRequest(request);
 				log.debug("Loaded search request: {}", req);
 
-				int limit = -1;
-				if (StringUtils.isNotEmpty(request.getParameter("limit"))) {
-					limit = Integer.parseInt(request.getParameter("limit"), 10);
-					log.debug("Limiting to {} results", limit);
-				}
-
 				JSONArray results = new JSONArray();
 				long count = 0;
-				String queryStr = "SELECT * FROM [cq:AuditEvent] AS s WHERE " + req.getQueryParameters();
+				String whereClause = req.getQueryParameters();
+				StringBuilder queryBuilder = new StringBuilder("SELECT * FROM [cq:AuditEvent] AS s");
+				if (StringUtils.isNotEmpty(whereClause)) {
+					queryBuilder.append(" WHERE ").append(whereClause);
+				}
+				String queryStr = queryBuilder.toString();
 				log.debug("Finding audit events with: {}", queryStr);
 				ResourceResolver resolver = request.getResourceResolver();
 				QueryManager queryManager = resolver.adaptTo(Session.class).getWorkspace().getQueryManager();
 				Query query = queryManager.createQuery(queryStr, Query.JCR_SQL2);
-				query.setLimit(limit);
+
+				int limit = -1;
+				if (StringUtils.isNotEmpty(request.getParameter("limit"))) {
+					limit = Integer.parseInt(request.getParameter("limit"), 10);
+					if (limit > 0) {
+						log.debug("Limiting to {} results", limit);
+						query.setLimit(limit);
+					}
+				}
+
 				NodeIterator nodes = query.execute().getNodes();
 				log.debug("Query execution complete!");
 				while (nodes.hasNext()) {

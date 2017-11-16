@@ -29,6 +29,8 @@ In many cases, it is worth having a discussion with the community before investi
 
 If you already have commit rights, bug fixes and minor updates should just be made in the shared repository itself.
 
+When making any change, either directly or via a pull request, please be sure to add an entry to the CHANGELOG file.
+
 There's a good guide to performing pull requests at [https://help.github.com/articles/using-pull-requests](https://help.github.com/articles/using-pull-requests). In the terms used in that article, we use both the **Fork & Pull** and the **Shared Repository Model**.
 
 ### Before Contributing Code
@@ -44,9 +46,9 @@ The best pull request are small and focused. Don't try to change the world in on
 
 ## Version Compatibility
 
-The _master_ branch of ACS AEM Commons (2.x) is expected to be installable on AEM 6.0 and AEM 6.1. This means that all *required* OSGi dependencies must be available on 6.0. It is acceptable for some features to require AEM 6.1, but contributors are strongly encouraged to be thoughtful about requiring 6.1.
+The _master_ branch of ACS AEM Commons (3.x) is expected to be installable on AEM 6.2 and AEM 6.3. This means that all *required* OSGi dependencies must be available on 6.2. It is acceptable for some features to require AEM 6.3, but contributors are strongly encouraged to be thoughtful about requiring 6.3.
 
-The _feature/6.2-compaitibility_ branch (3.x) is expected to be installable on AEM 6.2 and (when availalble) AEM 6.3.
+The _compat/6.0_ branch (2.x) is expected to be installable on AEM 6.0 and AEM 6.1.
 
 ## Participating in Code Reviews
 

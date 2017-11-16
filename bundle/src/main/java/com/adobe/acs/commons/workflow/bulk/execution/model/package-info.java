@@ -21,5 +21,5 @@
 /**
  * Bulk Execution Model API
  */
-@aQute.bnd.annotation.Version("3.2.12")
+@aQute.bnd.annotation.Version("3.3.00")
 package com.adobe.acs.commons.workflow.bulk.execution.model;

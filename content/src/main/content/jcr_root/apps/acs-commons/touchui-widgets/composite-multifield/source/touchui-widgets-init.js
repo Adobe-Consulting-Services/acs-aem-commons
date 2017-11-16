@@ -61,6 +61,17 @@
             }
         },
 
+        isSelectMultiple: function ($field) {
+            return !_.isEmpty($field) && ($field.prop("type") === "select-multiple");
+        },
+
+        setSelectMultiple: function ($field, value) {
+            var select = $field.closest(".coral-Select").data("select");
+            if (select){
+                select.setValue(value);
+            }
+        },
+
         isCheckbox: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "checkbox");
         },
@@ -76,8 +87,14 @@
         setDateField: function ($field, value) {
             var date = moment(new Date(value));
             var $parent = $field.parent();
-            $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
-            $field.val(date.format($parent.attr("data-stored-format")));
+            if (date.isValid()) {
+                $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
+                $field.val(date.format($parent.attr("data-stored-format")));
+            }
+            else {
+                $parent.find("input.coral-Textfield").val(value);
+                $field.val(value);
+            }
         },
 
         isRichTextField: function ($field) {
@@ -142,6 +159,8 @@
 
             if (this.isSelectOne($field)) {
                 this.setSelectOne($field, value);
+            } else if (this.isSelectMultiple($field)) {
+                this.setSelectMultiple($field, value);
             } else if (this.isCheckbox($field)) {
                 this.setCheckBox($field, value);
             } else if (this.isRichTextField($field)) {

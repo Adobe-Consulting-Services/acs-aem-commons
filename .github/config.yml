@@ -1,0 +1,4 @@
+updateChangelogComment: >
+  Thanks for opening this pull request! The maintainers of this repository would appreciate it if you would update the CHANGELOG.md file with this pull request.
+updateChangelogWhiteList:
+  - task

@@ -80,6 +80,7 @@ public class StartServlet extends SlingAllMethodsServlet {
             properties.put("throttle", params.optInt("throttle", 10));
             properties.put("retryCount", params.optInt("retryCount", 0));
             properties.put("batchSize", params.optInt("batchSize", 10));
+            properties.put("userEventData", params.optString("userEventData", null));
 
             properties.put("purgeWorkflow", params.optBoolean("purgeWorkflow", false));
             properties.put("autoThrottle", params.optBoolean("autoThrottle", true));
