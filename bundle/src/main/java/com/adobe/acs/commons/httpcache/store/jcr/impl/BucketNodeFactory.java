@@ -35,7 +35,7 @@ public class BucketNodeFactory
 
     public Node getBucketNode() throws RepositoryException
     {
-        String[] pathArray = getPathArray();
+        final String[] pathArray = getPathArray();
 
         Node targetNode = cacheRoot;
 

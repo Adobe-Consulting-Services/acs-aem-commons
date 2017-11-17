@@ -8,4 +8,7 @@ public interface JcrCacheMBean extends GenericCacheMBean
 {
     @Description("Cache TTL in Seconds. -1 value represent no TTL.")
     long getTtl();
+
+    @Description("Force scheduled purge run")
+    void purgeExpiredEntries();
 }

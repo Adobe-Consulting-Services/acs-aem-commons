@@ -25,7 +25,7 @@ public class EntryNodeToCacheContentBuilder
     private String contentType, charEncoding;
     private int status;
     private final InputStream inputStream;
-    private final Map<String, List<String>> headers = new HashMap<>();
+    private final Map<String, List<String>> headers = new HashMap<String, List<String>>();
 
     public EntryNodeToCacheContentBuilder(Node entryNode) throws RepositoryException
     {
@@ -76,7 +76,7 @@ public class EntryNodeToCacheContentBuilder
            final String name = property.getName();
            if(! name.contains("jcr:") && !name.contains("sling:")){
                Value[] values = property.getValues();
-               List<String> stringValues = new ArrayList<>(values.length);
+               List<String> stringValues = new ArrayList<String>(values.length);
 
                for(Value value : values)
                    stringValues.add(value.getString());
@@ -92,7 +92,7 @@ public class EntryNodeToCacheContentBuilder
         final Node contentsNode = entryNode.getNode("contents");
         final Node jcrContent =   contentsNode.getNode(JcrConstants.JCR_CONTENT);
 
-        Property binaryProperty = jcrContent.getProperty(JcrConstants.JCR_DATA);
+        final Property binaryProperty = jcrContent.getProperty(JcrConstants.JCR_DATA);
         return binaryProperty.getBinary().getStream();
     }
 

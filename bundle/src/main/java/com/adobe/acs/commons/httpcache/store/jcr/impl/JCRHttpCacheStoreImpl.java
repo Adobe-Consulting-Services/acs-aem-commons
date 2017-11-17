@@ -23,7 +23,6 @@ import static org.apache.jackrabbit.commons.JcrUtils.getOrCreateUniqueByPath;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.util.Dictionary;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -34,20 +33,15 @@ import javax.jcr.Session;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.classloader.DynamicClassLoader;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
@@ -63,25 +57,31 @@ import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodes;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodesCount;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllExpiredEntries;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.adobe.acs.commons.util.DynamicObjectInputStream;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.workflow.exec.WorkflowProcess;
 
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
  */
-@Component
+@Component( label = "ACS AEM Commons - JCR Cache - Java Content Repository cache store.",
+            description = "Cache data store implementation for JCR storage.",
+            metatype = true)
 @Service
 @Properties({
-        @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-                value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
-                propertyPrivate = true),
+        @Property(
+            name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
+            value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
+            propertyPrivate = true),
+        @Property(name = "jmx.objectname",
+            value = "com.adobe.acs.httpcache:type=JCR HTTP Cache Store",
+            propertyPrivate = true),
         @Property(
             label = "Cron expression defining when this Scheduled Service will run",
             description = "[every minute = 0 * * * * ?] Visit www.cronmaker.com to generate cron expressions.",
             name = "scheduler.expression",
-            value = "0 1 0 ? * *"
+            value = "0 0 12 1/1 * ? *"
         ),
         @Property(
             label = "Allow concurrent executions",
@@ -107,29 +107,40 @@ import com.day.cq.workflow.exec.WorkflowProcess;
             description = "The threshold to remove nodes when invalidating the cache",
             name = JCRHttpCacheStoreImpl.PROP_SAVEDELTA,
             intValue = JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA
+        ),
+        @Property(
+            label = "Expiretime in ms",
+            description = "The time seconds after which nodes will be removed by the scheduled cleanup service. ",
+            name = JCRHttpCacheStoreImpl.PROP_EXPIRETIMEINSECONDS,
+            intValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS
         )
 })
 public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Runnable {
 
-    public static final String PROP_ROOTPATH = "httpcache.config.jcr.roothpath",
-                                PROP_BUCKETDEPTH = "httpcache.config.jcr.bucketdepth",
-                                PROP_SAVEDELTA = "httpcache.config.jcr.savedelta";
+    //property keys
+    public static final String  PROP_ROOTPATH            = "httpcache.config.jcr.roothpath",
+                                PROP_BUCKETDEPTH         = "httpcache.config.jcr.bucketdepth",
+                                PROP_SAVEDELTA           = "httpcache.config.jcr.savedelta",
+                                PROP_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinms";
 
-    public static final String DEFAULT_ROOTPATH = "/etc/acs-commons/httpcacheroot";
-    public static final int    DEFAULT_BUCKETDEPTH = 3,
-                                DEFAULT_SAVEDELTA = 500;
+    //defaults
+    public static final String  DEFAULT_ROOTPATH            = "/etc/acs-commons/httpcacheroot";
+    public static final int     DEFAULT_BUCKETDEPTH         = 3,
+                                DEFAULT_SAVEDELTA           = 500,
+                                DEFAULT_EXPIRETIMEINSECONDS = 6000;
 
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
+
+    //fields
+    private String              cacheRootPath;
+    private int                 bucketTreeDepth,
+                                deltaSaveThreshold,
+                                expireTimeInSeconds;
 
     @Reference private ResourceResolverFactory resourceResolverFactory;
     @Reference private DynamicClassLoaderManager dynamicClassLoaderManager;
 
     private final CopyOnWriteArrayList<CacheKeyFactory> cacheKeyFactories = new CopyOnWriteArrayList<CacheKeyFactory>();
-
-    private String cacheRootPath;
-    private int bucketTreeDepth;
-    private int deltaSaveThreshold;
-
 
 
     @Activate protected void activate(ComponentContext context)
@@ -138,11 +149,10 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
         cacheRootPath = PropertiesUtil.toString(properties.get(PROP_ROOTPATH), DEFAULT_ROOTPATH);
         bucketTreeDepth = PropertiesUtil.toInteger(properties.get(PROP_BUCKETDEPTH), DEFAULT_BUCKETDEPTH);
         deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(PROP_SAVEDELTA), DEFAULT_SAVEDELTA);
+        expireTimeInSeconds = PropertiesUtil.toInteger(properties.get(PROP_EXPIRETIMEINSECONDS), DEFAULT_EXPIRETIMEINSECONDS);
     }
 
     @Deactivate protected void deactivate(){
-
-
     }
 
     @Override
@@ -151,14 +161,14 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
         Session session = null;
 
         try {
-            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
             session = resourceResolver.adaptTo(Session.class);
             final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
             final Node bucketNode = factory.getBucketNode();
 
             final Node entryNode = createOrRetrieveEntryNode(bucketNode, key);
 
-            new EntryNodeWriter(session, entryNode, key, content).write();
+            new EntryNodeWriter(session, entryNode, key, content, expireTimeInSeconds).write();
             session.save();
 
         } catch (Exception e) {
@@ -176,7 +186,7 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
         Session session = null;
 
         try {
-            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
             session = resourceResolver.adaptTo(Session.class);
             final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
             final Node bucketNode = factory.getBucketNode();
@@ -198,7 +208,7 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
         Session session = null;
 
         try {
-            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
             session = resourceResolver.adaptTo(Session.class);
             final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
             final Node bucketNode = factory.getBucketNode();
@@ -225,9 +235,9 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
         Session session = null;
 
         try {
-            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
             session = resourceResolver.adaptTo(Session.class);
-            return new AllEntryNodesCount(session).get();
+            return new AllEntryNodesCount(session,cacheRootPath).get();
 
         } catch (Exception e) {
             log.error("Error retrieving the node count of entries", e);
@@ -245,7 +255,7 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
         Session session = null;
 
         try {
-            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
             session = resourceResolver.adaptTo(Session.class);
 
             final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
@@ -271,10 +281,10 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
     {
         Session session = null;
         try {
-            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
             session = resourceResolver.adaptTo(Session.class);
 
-            NodeIterator nodeIterator = new AllEntryNodes(session).get();
+            final NodeIterator nodeIterator = new AllEntryNodes(session,cacheRootPath).get();
             int delta = 0;
             while (nodeIterator.hasNext()) {
                 delta++;
@@ -283,6 +293,7 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
                 if(delta > deltaSaveThreshold || !nodeIterator.hasNext())
                     session.save();
             }
+            session.save();
 
         } catch (Exception e) {
             log.error("Error removing bucket nodes from JCRHttpCacheStore", e);
@@ -297,10 +308,10 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
 
         Session session = null;
         try {
-            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
             session = resourceResolver.adaptTo(Session.class);
 
-            NodeIterator nodeIterator = new AllEntryNodes(session).get();
+            final NodeIterator nodeIterator = new AllEntryNodes(session, cacheRootPath).get();
             int delta = 0;
             while(nodeIterator.hasNext()){
                 delta++;
@@ -329,12 +340,16 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
 
     @Override public void run()
     {
+        purgeExpiredEntries();
+    }
+
+    @Override public void purgeExpiredEntries(){
         Session session = null;
         try {
-            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
             session = resourceResolver.adaptTo(Session.class);
 
-            NodeIterator nodeIterator = new AllEntryNodes(session).get();
+            final NodeIterator nodeIterator = new AllExpiredEntries(session, cacheRootPath).get();
 
             while(nodeIterator.hasNext())
                 nodeIterator.nextNode().remove();
@@ -349,57 +364,9 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
         }
     }
 
-
-    private Node createOrRetrieveEntryNode(Node bucketNode, CacheKey key)
-            throws RepositoryException, IOException, ClassNotFoundException
-    {
-        final Node existingEntryNode = getEntryIfExists(bucketNode, key);
-
-        if(null != existingEntryNode)
-            return existingEntryNode;
-        else
-            return getOrCreateUniqueByPath(bucketNode, "entry", JcrConstants.NT_UNSTRUCTURED);
-    }
-
-    private Node getEntryIfExists(Node bucketNode, CacheKey key)
-            throws RepositoryException, IOException, ClassNotFoundException
-    {
-        NodeIterator entryNodeIterator  = bucketNode.getNodes();
-
-        while(entryNodeIterator.hasNext()){
-            Node entryNode = entryNodeIterator.nextNode();
-            CacheKey entryKey = getCacheKeyFromEntryNode(entryNode);
-            if(key.equals(entryKey))
-                return entryNode;
-        }
-
-        return null;
-    }
-
-    private CacheKey getCacheKeyFromEntryNode(Node entryNode)
-            throws RepositoryException, IOException, ClassNotFoundException
-    {
-        final javax.jcr.Property cacheKeyProperty = entryNode.getProperty("cacheKeySerialized");
-        InputStream inputStream = cacheKeyProperty.getBinary().getStream();
-
-        ClassLoader dynamicClassLoader = dynamicClassLoaderManager.getDynamicClassLoader();
-
-        DynamicObjectInputStream dynamicObjectInputStream = new DynamicObjectInputStream(inputStream, dynamicClassLoader);
-        return (CacheKey) dynamicObjectInputStream.readObject();
-    }
-
-    protected void bindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
-        cacheKeyFactories.add(cacheKeyFactory);
-    }
-
-    protected void unbindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
-        if(cacheKeyFactories.contains(cacheKeyFactory))
-            cacheKeyFactories.remove(cacheKeyFactory);
-    }
-
     @Override public long getTtl()
     {
-        return 0;
+        return expireTimeInSeconds;
     }
 
     @Override public void clearCache()
@@ -430,5 +397,52 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
     @Override public TabularData getCacheContents() throws OpenDataException
     {
         return null;
+    }
+
+    protected void bindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
+        cacheKeyFactories.add(cacheKeyFactory);
+    }
+
+    protected void unbindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
+        if(cacheKeyFactories.contains(cacheKeyFactory))
+            cacheKeyFactories.remove(cacheKeyFactory);
+    }
+
+    private Node createOrRetrieveEntryNode(Node bucketNode, CacheKey key)
+            throws RepositoryException, IOException, ClassNotFoundException
+    {
+        final Node existingEntryNode = getEntryIfExists(bucketNode, key);
+
+        if(null != existingEntryNode)
+            return existingEntryNode;
+        else
+            return getOrCreateUniqueByPath(bucketNode, "entry", JcrConstants.NT_UNSTRUCTURED);
+    }
+
+    private Node getEntryIfExists(Node bucketNode, CacheKey key)
+            throws RepositoryException, IOException, ClassNotFoundException
+    {
+        final NodeIterator entryNodeIterator  = bucketNode.getNodes();
+
+        while(entryNodeIterator.hasNext()){
+            Node entryNode = entryNodeIterator.nextNode();
+            CacheKey entryKey = getCacheKeyFromEntryNode(entryNode);
+            if(key.equals(entryKey))
+                return entryNode;
+        }
+
+        return null;
+    }
+
+    private CacheKey getCacheKeyFromEntryNode(Node entryNode)
+            throws RepositoryException, IOException, ClassNotFoundException
+    {
+        final javax.jcr.Property cacheKeyProperty = entryNode.getProperty("cacheKeySerialized");
+        final InputStream inputStream = cacheKeyProperty.getBinary().getStream();
+
+        final ClassLoader dynamicClassLoader = dynamicClassLoaderManager.getDynamicClassLoader();
+
+        final DynamicObjectInputStream dynamicObjectInputStream = new DynamicObjectInputStream(inputStream, dynamicClassLoader);
+        return (CacheKey) dynamicObjectInputStream.readObject();
     }
 }
