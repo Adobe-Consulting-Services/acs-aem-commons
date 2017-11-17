@@ -27,7 +27,6 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
@@ -158,9 +157,8 @@ public class TwitterAdapterFactory implements AdapterFactory {
                 page.getContentResource());
         final String[] services = pageProperties.getInherited(ConfigurationConstants.PN_CONFIGURATIONS,
                 new String[0]);
-        final com.day.cq.wcm.webservicesupport.Configuration cfg = configurationManager.getConfiguration(
+        return configurationManager.getConfiguration(
                 CLOUD_SERVICE_NAME, services);
-        return cfg;
     }
 
     @Activate
