@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Fixed
 
+- #1166 - Fixed issue with various ClientLib dependency errors, and fixed Quickly Filter registration.
 - #1171 - Reduce duplicate coverage comments in pull requests.
 
 ## [3.12.0] - 2017-11-13
