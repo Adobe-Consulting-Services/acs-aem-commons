@@ -71,7 +71,7 @@ public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
             }
 
         } catch(Exception e) {
-            log.error("authchecker servlet exception: " + e.getMessage());
+            log.error("Authchecker servlet exception", e);
             response.setStatus( SlingHttpServletResponse.SC_UNAUTHORIZED );
         }
     }
