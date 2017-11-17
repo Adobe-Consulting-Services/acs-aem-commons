@@ -180,7 +180,7 @@
 
             function postProcess(data){
                 _.each(mNames, function($multifield, mName){
-                    cmf.buildMultiField(data[mName], $multifield, mName);
+                    cmf.buildMultiField(cmf.nestedPluck(data,mName), $multifield, mName);
                 });
 
                 $document.trigger("touchui-composite-multifield-nodestore-ready", mNames);
