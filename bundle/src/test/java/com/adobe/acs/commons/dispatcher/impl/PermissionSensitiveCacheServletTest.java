@@ -23,7 +23,6 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +34,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static junitx.framework.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -85,6 +86,35 @@ public class PermissionSensitiveCacheServletTest {
         servlet.doHead( request, response );
 
         assertEquals( HttpServletResponse.SC_UNAUTHORIZED, response.getStatus() );
+
+    }
+
+    @Test
+    public void testRequestUriNull(){
+
+        String requestUri = null;
+
+        boolean isValidUri = servlet.isUriValid( requestUri );
+
+        assertFalse( isValidUri );
+
+    }
+
+    @Test
+    public void testRequestUriRelative(){
+        String requestUri = "dam/test.jpg";
+
+        boolean isValidUri = servlet.isUriValid( requestUri );
+
+        assertFalse( isValidUri );
+    }
+
+    @Test
+    public void testRequestUriAbsolute(){
+
+        boolean isValidUri = servlet.isUriValid( TEST_PAGE );
+
+        assertTrue( isValidUri );
 
     }
 

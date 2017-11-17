@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.dispatcher.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -60,19 +61,34 @@ public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
             log.debug( "Checking access for URI {}", requestUri );
 
-            Resource requestedResource = resourceResolver.resolve( request, requestUri );
+            if( isUriValid( requestUri ) ){
+                Resource requestedResource = resourceResolver.resolve( request, requestUri );
 
-            if( !ResourceUtil.isNonExistingResource( requestedResource ) ){
-                log.debug("Current Session has access to {}", requestUri );
-                response.setStatus(SlingHttpServletResponse.SC_OK);
+                if( !ResourceUtil.isNonExistingResource( requestedResource ) ){
+                    log.debug("Current Session has access to {}", requestUri );
+                    response.setStatus(SlingHttpServletResponse.SC_OK);
+                } else {
+                    log.info("Current Session does not have access to {}", requestUri );
+                    response.setStatus(SlingHttpServletResponse.SC_UNAUTHORIZED);
+                }
+
             } else {
-                log.info("Current Session does not have access to {}", requestUri );
-                response.setStatus(SlingHttpServletResponse.SC_UNAUTHORIZED);
+                log.debug( "Invalid URI {}", requestUri );
+                response.setStatus( SlingHttpServletResponse.SC_UNAUTHORIZED );
             }
-
         } catch(Exception e) {
             log.error("Authchecker servlet exception", e);
             response.setStatus( SlingHttpServletResponse.SC_UNAUTHORIZED );
         }
+    }
+
+    public boolean isUriValid( String requestUri ){
+        boolean isValidUri = true;
+
+        if(!StringUtils.startsWith( requestUri, "/" ) ){
+            isValidUri = false;
+        }
+
+        return isValidUri;
     }
 }
