@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1166 - Fixed issue with various ClientLib dependency errors, and fixed Quickly Filter registration.
 - #1171 - Reduce duplicate coverage comments in pull requests.
+- #1176 - Composite MultiField in case of NodeStore cannot restore value from deep property
 
 ## [3.12.0] - 2017-11-13
 
