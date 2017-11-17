@@ -25,15 +25,11 @@ import com.adobe.acs.commons.util.BufferingResponse;
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.Filter;
@@ -54,10 +50,13 @@ import java.util.Map;
  * Injects the necessary HTML into the Request page.
  */
 @Component(policy = ConfigurationPolicy.OPTIONAL)
-@Property(name = "pattern",
-          value = ".*")
+@Properties({
+                @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN,
+                          value = "/"),
+                @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+                          value = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)")
+            })
 @Service
-
 public class QuicklyFilter implements Filter {
     private static final String[] REJECT_PATH_PREFIXES = new String[]{
             "/libs/granite/core/content/login",
