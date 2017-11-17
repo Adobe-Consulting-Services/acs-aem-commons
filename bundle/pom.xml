@@ -299,6 +299,12 @@
             <artifactId>tika-parsers</artifactId>
             <version>1.5</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.drewnoakes</groupId>
+                    <artifactId>metadata-extractor</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>

@@ -24,7 +24,13 @@ import com.adobe.acs.commons.quickly.QuicklyEngine;
 import com.adobe.acs.commons.util.BufferingResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import javax.servlet.Filter;
