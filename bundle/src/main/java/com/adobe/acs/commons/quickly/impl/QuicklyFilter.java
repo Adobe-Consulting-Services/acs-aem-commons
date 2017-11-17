@@ -22,16 +22,11 @@ package com.adobe.acs.commons.quickly.impl;
 
 import com.adobe.acs.commons.quickly.QuicklyEngine;
 import com.adobe.acs.commons.util.BufferingResponse;
-import com.adobe.acs.commons.util.ResourceDataUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-import javax.jcr.RepositoryException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
