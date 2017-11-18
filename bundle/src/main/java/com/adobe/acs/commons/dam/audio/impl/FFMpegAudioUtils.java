@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class FFMpegAudioUtils {
 
@@ -65,18 +67,11 @@ public class FFMpegAudioUtils {
     }
 
     public static final File createTempDir(File parentDir) throws IOException {
-        File tempDir = null;
-        try {
-            tempDir = File.createTempFile("cqdam", null, parentDir);
-            if (!tempDir.delete()) {
-                throw new IOException("Unable to delete temp directory.");
-            }
-            if (!tempDir.mkdir()) {
-                throw new IOException("Unable to create temp directory.");
-            }
-        } catch (IOException e) {
-            log.warn("could not create temp directory in the [{}] with the exception", parentDir, e);
+        Path tempPath = Files.createTempDirectory(parentDir.toPath(),"cqdam");
+        File tmpDir = tempPath.toFile();
+        if (!tmpDir.mkdir()) {
+            throw new IOException(String.format("Unable to create temp directory in directory [%s]", parentDir));
         }
-        return tempDir;
+        return tmpDir;
     }
 }
