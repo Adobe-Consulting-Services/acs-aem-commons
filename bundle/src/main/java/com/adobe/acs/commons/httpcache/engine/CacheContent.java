@@ -51,7 +51,7 @@ public class CacheContent {
     private TempSink tempSink;
 
     /**
-     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>get</code>
      * method.
      *
      * @param charEncoding
@@ -66,7 +66,7 @@ public class CacheContent {
     }
 
     /**
-     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>get</code>
      * method.
      *
      * @param status
@@ -86,7 +86,7 @@ public class CacheContent {
     }
 
     /**
-     * No argument constructor for the build method.
+     * No argument constructor for the get method.
      */
     public CacheContent() {
     }

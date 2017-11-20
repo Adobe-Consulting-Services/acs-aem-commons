@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.httpcache.store.jcr.impl;
+package com.adobe.acs.commons.httpcache.store.jcr.impl.handler;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.jcr.Binary;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.PropertyIterator;
@@ -17,7 +18,7 @@ import org.apache.jackrabbit.commons.JcrUtils;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 
-public class EntryNodeToCacheContentBuilder
+public class EntryNodeToCacheContentHandler
 {
     private final Node entryNode;
 
@@ -26,8 +27,9 @@ public class EntryNodeToCacheContentBuilder
     private int status;
     private final InputStream inputStream;
     private final Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    private Binary binary;
 
-    public EntryNodeToCacheContentBuilder(Node entryNode) throws RepositoryException
+    public EntryNodeToCacheContentHandler(Node entryNode) throws RepositoryException
     {
         this.entryNode = entryNode;
 
@@ -54,7 +56,7 @@ public class EntryNodeToCacheContentBuilder
         }
     }
 
-    public CacheContent build() throws RepositoryException
+    public CacheContent get() throws RepositoryException
     {
         return new CacheContent(
             status,
@@ -63,6 +65,10 @@ public class EntryNodeToCacheContentBuilder
             headers,
             inputStream
         );
+    }
+
+    public Binary getBinary(){
+        return binary;
     }
 
     private void retrieveHeaders() throws RepositoryException
@@ -93,7 +99,9 @@ public class EntryNodeToCacheContentBuilder
         final Node jcrContent =   contentsNode.getNode(JcrConstants.JCR_CONTENT);
 
         final Property binaryProperty = jcrContent.getProperty(JcrConstants.JCR_DATA);
-        return binaryProperty.getBinary().getStream();
+        binary =  binaryProperty.getBinary();
+
+        return binary.getStream();
     }
 
 }

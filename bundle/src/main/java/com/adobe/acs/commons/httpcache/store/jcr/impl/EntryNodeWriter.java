@@ -110,6 +110,7 @@ public class EntryNodeWriter
             objectOutputStream.close();
             inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             final Binary binary = session.getValueFactory().createBinary(inputStream);
+
             entryNode.setProperty("cacheKeySerialized", binary);
         }finally {
             if(inputStream != null)
