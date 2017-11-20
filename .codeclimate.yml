@@ -44,12 +44,7 @@ plugins:
 #    enabled: true
   pmd:
     enabled: true
-ratings:
-  paths:
-  - "**.java"
-  - "**.css"
-  - "**.js"
-exclude_paths:
+exclude_patterns:
 - ".idea/"
 - "**/vendor/"
 - "**/extensions/contentfinder/"
