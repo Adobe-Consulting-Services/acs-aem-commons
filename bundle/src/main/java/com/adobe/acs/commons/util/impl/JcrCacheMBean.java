@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.httpcache.store.jcr.impl;
+package com.adobe.acs.commons.util.impl;
 
 import com.adobe.acs.commons.util.impl.GenericCacheMBean;
 import com.adobe.granite.jmx.annotation.Description;
@@ -11,4 +11,7 @@ public interface JcrCacheMBean extends GenericCacheMBean
 
     @Description("Force scheduled purge run")
     void purgeExpiredEntries();
+
+    @Description("Reset to cache statistics to 0")
+    void resetCacheStats();
 }

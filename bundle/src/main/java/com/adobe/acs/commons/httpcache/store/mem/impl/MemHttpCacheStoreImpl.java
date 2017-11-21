@@ -254,6 +254,8 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         return cache;
     }
 
+
+
     @Override
     protected long getBytesLength(MemCachePersistenceObject cacheObj) {
         return cacheObj.getBytes().length;

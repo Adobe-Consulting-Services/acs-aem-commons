@@ -21,14 +21,18 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
 import static org.apache.jackrabbit.commons.JcrUtils.getOrCreateUniqueByPath;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
+import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
@@ -38,6 +42,7 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -54,6 +59,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.functions.Consumer;
+import com.adobe.acs.commons.functions.Function;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
@@ -70,6 +77,10 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllExpiredEntries;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.EntryNodeByStringKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.TotalCacheSize;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
+import com.adobe.acs.commons.util.impl.AbstractJCRCacheMBean;
+import com.adobe.acs.commons.util.impl.JcrCacheMBean;
+
+import ch.qos.logback.core.util.FileUtil;
 
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
@@ -124,7 +135,7 @@ import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
             intValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS
         )
 })
-public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Runnable {
+public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, CacheContent> implements HttpCacheStore, JcrCacheMBean, Runnable {
 
     //property keys
     public static final String  PROP_ROOTPATH            = "httpcache.config.jcr.roothpath",
@@ -151,6 +162,10 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
 
     private final CopyOnWriteArrayList<CacheKeyFactory> cacheKeyFactories = new CopyOnWriteArrayList<CacheKeyFactory>();
 
+    public JCRHttpCacheStoreImpl() throws NotCompliantMBeanException
+    {
+        super(JcrCacheMBean.class);
+    }
 
     @Activate protected void activate(ComponentContext context)
     {
@@ -165,177 +180,178 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
     }
 
     @Override
-    public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
+    public void put(final CacheKey key, final CacheContent content) throws HttpCacheDataStreamException {
+        final long currentTime = System.currentTimeMillis();
+        incrementLoadCount();
 
-        Session session = null;
+        withSession(
+            new Consumer<Session>(){
+                @Override public void accept(Session session) throws Exception{
+                    final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+                    final Node bucketNode = factory.getBucketNode();
 
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
+                    final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key);
 
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
-            final Node bucketNode = factory.getBucketNode();
+                    new EntryNodeWriter(session, entryNode, key, content, expireTimeInSeconds).write();
+                    session.save();
 
-            final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key);
-
-            new EntryNodeWriter(session, entryNode, key, content, expireTimeInSeconds).write();
-            session.save();
-
-        } catch (Exception e) {
-            log.error("Error persisting cache content in JCR", e);
-            throw new HttpCacheDataStreamException(e);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
-    }
-
-    @Override
-    public boolean contains(CacheKey key) {
-        Session session = null;
-
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
-            final Node bucketNode = factory.getBucketNode();
-
-            if(bucketNode != null)
-                return (null != new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key));
-        } catch (Exception e) {
-            log.error("Error checking if the entry node exists in the repository", e);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
-        return false;
-    }
-
-    @Override
-    public CacheContent getIfPresent(CacheKey key) {
-
-        Session session = null;
-
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
-            final Node bucketNode = factory.getBucketNode();
-
-            if(bucketNode != null) {
-                final Node entryNode = new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key);
-                return new EntryNodeToCacheContentHandler(entryNode).get();
+                    incrementLoadSuccessCount();
+                    incrementTotalLoadTime(System.currentTimeMillis() - currentTime);
+                }
+            },
+            new Consumer<Exception>(){
+                @Override public void accept(Exception e) throws Exception
+                {
+                    incrementLoadExceptionCount();
+                }
             }
+        );
+    }
 
+    @Override
+    public boolean contains(final CacheKey key) {
+        final long currentTime = System.currentTimeMillis();
+        incrementRequestCount();
 
-        } catch (Exception e) {
-            log.error("Error retrieving the entry node", e);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
-        return null;
+        return withSession(new Function<Session, Boolean>()
+        {
+            @Override public Boolean apply(Session session) throws Exception
+            {
+                final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+                final Node bucketNode = factory.getBucketNode();
+
+                if(bucketNode != null) {
+                    Node entryNode = new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key);
+                    if(entryNode != null){
+                        incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
+                        incrementHitCount();
+
+                        return true;
+                    }
+                }
+
+                incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
+                incrementMissCount();
+
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public CacheContent getIfPresent(final CacheKey key) {
+        final long currentTime = System.currentTimeMillis();
+        incrementRequestCount();
+
+        return withSession(new Function<Session, CacheContent>()
+        {
+            @Override public CacheContent apply(Session session) throws Exception
+            {
+                final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+                final Node bucketNode = factory.getBucketNode();
+
+                if(bucketNode != null) {
+                    final Node entryNode = new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key);
+                    CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
+
+                    if(content != null){
+                        incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
+                        incrementHitCount();
+                        return content;
+                    }
+                }
+
+                incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
+                incrementMissCount();
+
+                return null;
+            }
+        });
     }
 
     @Override
     public long size() {
-        Session session = null;
-
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
-            return new AllEntryNodesCount(session,cacheRootPath).get();
-
-        } catch (Exception e) {
-            log.error("Error retrieving the node count of entries", e);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
-        return 0;
+        return withSession(new Function<Session, Long>()
+        {
+            @Override public Long apply(Session session) throws Exception
+            {
+                return new AllEntryNodesCount(session,cacheRootPath).get();
+            }
+        });
     }
 
     @Override
-    public void invalidate(CacheKey key) {
-        Session session = null;
+    public void invalidate(final CacheKey key) {
+        withSession(new Consumer<Session>()
+        {
+            @Override public void accept(Session session) throws Exception
+            {
+                final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+                final Node bucketNode = factory.getBucketNode();
 
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
-
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
-            final Node bucketNode = factory.getBucketNode();
-
-            if(bucketNode != null){
-                final Node entryNode = new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key);
-                if(entryNode != null){
-                    entryNode.remove();
-                    session.save();
+                if(bucketNode != null){
+                    final Node entryNode = new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key);
+                    if(entryNode != null){
+                        entryNode.remove();
+                        session.save();
+                        incrementEvictionCount(1);
+                    }
                 }
             }
-
-        } catch (Exception e) {
-            log.error("error invalidating cachekey: {}", key);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
+        });
     }
 
     @Override
     public void invalidateAll(){
-        Session session = null;
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
-
-            final NodeIterator nodeIterator = new AllEntryNodes(session,cacheRootPath).get();
-            int delta = 0;
-            while (nodeIterator.hasNext()) {
-                delta++;
-                Node node = nodeIterator.nextNode();
-                node.remove();
-                if(delta > deltaSaveThreshold || !nodeIterator.hasNext())
-                    session.save();
+        withSession(new Consumer<Session>()
+        {
+            @Override public void accept(Session session) throws Exception
+            {
+                final NodeIterator nodeIterator = new AllEntryNodes(session,cacheRootPath).get();
+                int delta = 0;
+                while (nodeIterator.hasNext()) {
+                    delta++;
+                    Node node = nodeIterator.nextNode();
+                    node.remove();
+                    if(delta > deltaSaveThreshold || !nodeIterator.hasNext()) {
+                        session.save();
+                        incrementEvictionCount(delta);
+                        delta = 0;
+                    }
+                }
+                incrementEvictionCount(delta);
+                session.save();
             }
-            session.save();
-
-        } catch (Exception e) {
-            log.error("Error removing bucket nodes from JCRHttpCacheStore", e);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
+        });
     }
 
     @Override
-    public void invalidate(HttpCacheConfig cacheConfig) {
+    public void invalidate(final HttpCacheConfig cacheConfig) {
+        withSession(new Consumer<Session>()
+        {
+            @Override public void accept(Session session) throws Exception
+            {
+                final NodeIterator nodeIterator = new AllEntryNodes(session, cacheRootPath).get();
+                int delta = 0;
+                while(nodeIterator.hasNext()){
+                    delta++;
+                    final Node entryNode = nodeIterator.nextNode();
+                    final CacheKey key = new EntryNodeToCacheKeyHandler(entryNode, dclm).get();
+                    if(cacheConfig.knows(key)) {
+                        entryNode.remove();
 
-        Session session = null;
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
-
-            final NodeIterator nodeIterator = new AllEntryNodes(session, cacheRootPath).get();
-            int delta = 0;
-            while(nodeIterator.hasNext()){
-                delta++;
-                final Node entryNode = nodeIterator.nextNode();
-                final CacheKey key = new EntryNodeToCacheKeyHandler(entryNode, dclm).get();
-                if(cacheConfig.knows(key)) {
-                    entryNode.remove();
-
-                    if(delta > deltaSaveThreshold || !nodeIterator.hasNext())
-                        session.save();
+                        if(delta > deltaSaveThreshold || !nodeIterator.hasNext()){
+                            session.save();
+                            incrementEvictionCount(delta);
+                            delta = 0;
+                        }
+                    }
                 }
-            }
 
-        } catch (Exception e) {
-            log.error("Error removing bucket nodes from JCRHttpCacheStore.", e);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
+                session.save();
+                incrementEvictionCount(delta);
+            }
+        });
     }
 
     @Override
@@ -349,24 +365,27 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
     }
 
     @Override public void purgeExpiredEntries(){
-        Session session = null;
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
+        withSession(new Consumer<Session>()
+        {
+            @Override public void accept(Session session) throws Exception
+            {
+                final NodeIterator nodeIterator = new AllExpiredEntries(session, cacheRootPath).get();
 
-            final NodeIterator nodeIterator = new AllExpiredEntries(session, cacheRootPath).get();
+                int delta = 0;
 
-            while(nodeIterator.hasNext())
-                nodeIterator.nextNode().remove();
+                while(nodeIterator.hasNext()){
+                    delta++;
 
-            session.save();
-
-        } catch (Exception e) {
-            log.error("Error removing bucket nodes from JCRHttpCacheStore.", e);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
+                    if(delta > deltaSaveThreshold || !nodeIterator.hasNext()){
+                        session.save();
+                        incrementEvictionCount(delta);
+                        delta = 0;
+                    }
+                }
+                session.save();
+                incrementEvictionCount(delta);
+            }
+        });
     }
 
     @Override public long getTtl()
@@ -379,97 +398,19 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
         invalidateAll();
     }
 
-    @Override public long getCacheEntriesCount()
+    @Override public String getCacheEntry(final String cacheKeyStr) throws Exception
     {
-        return size();
-    }
-
-    @Override public String getCacheSize(){
-        Session session = null;
-        String total;
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
-            total = new TotalCacheSize(session,cacheRootPath).get();
-
-        } catch (Exception e) {
-            log.error("Error retrieving the node count of entries", e);
-            total = e.getMessage();
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
-        return total;
-
-    }
-
-    @Override public TabularData getCacheStats() throws OpenDataException
-    {
-        return null;
-    }
-
-    @Override public String getCacheEntry(String cacheKeyStr) throws Exception
-    {
-
-        Session session = null;
-
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
-            Node entryNode = new EntryNodeByStringKey(session,cacheRootPath, dclm, cacheKeyStr).get();
-            EntryNodeToCacheContentHandler builder = new EntryNodeToCacheContentHandler(entryNode);
-            return IOUtils.toString(builder.get().getInputDataStream());
-
-        } catch (Exception e) {
-            log.error("Error retrieving the node count of entries", e);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
-
-        return "No entry found!";
-
-    }
-
-    @Override public TabularData getCacheContents() throws OpenDataException
-    {
-        final CompositeType cacheEntryType = getCacheEntryType();
-
-        final TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType("Cache Entries", "Cache Entries", cacheEntryType, new String[] { "Cache Key" }));
-
-        Session session = null;
-
-        try {
-            final ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            session = resourceResolver.adaptTo(Session.class);
-            final NodeIterator nodeIterator = new AllEntryNodes(session, cacheRootPath).get();
-
-            while(nodeIterator.hasNext()){
-                final Node node = nodeIterator.nextNode();
-                final CacheKey cacheKey = new EntryNodeToCacheKeyHandler(node, dclm).get();
-                EntryNodeToCacheContentHandler entryNodeToCacheContentHandler = new EntryNodeToCacheContentHandler(node);
-                final CacheContent cacheContent = entryNodeToCacheContentHandler.get();
-
-                final Map<String, Object> data = new HashMap<String, Object>();
-                data.put("Cache Key", cacheKey.toString());
-                data.put("Status", cacheContent.getStatus());
-                data.put("Size",entryNodeToCacheContentHandler.getBinary().getSize() + "b" );
-                data.put("Content Type", cacheContent.getContentType());
-                data.put("Character Encoding", cacheContent.getCharEncoding());
-
-                tabularData.put(new CompositeDataSupport(cacheEntryType, data));
+        return withSession(new Function<Session, String>()
+        {
+            @Override public String apply(Session session) throws Exception
+            {
+                Node entryNode = new EntryNodeByStringKey(session,cacheRootPath, dclm, cacheKeyStr).get();
+                EntryNodeToCacheContentHandler builder = new EntryNodeToCacheContentHandler(entryNode);
+                return IOUtils.toString(builder.get().getInputDataStream());
             }
-
-        } catch (Exception e) {
-            log.error("Error retrieving the node count of entries", e);
-        } finally {
-            if(session != null && session.isLive())
-                session.logout();
-        }
-
-        return tabularData;
+        });
     }
+
 
     protected void bindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
         cacheKeyFactories.add(cacheKeyFactory);
@@ -480,6 +421,57 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
             cacheKeyFactories.remove(cacheKeyFactory);
     }
 
+    @Override protected Map<CacheKey, CacheContent> getCacheAsMap()
+    {
+        final Map<CacheKey, CacheContent> cache = new HashMap<CacheKey, CacheContent>();
+
+        withSession(new Consumer<Session>()
+        {
+            @Override public void accept(Session session) throws Exception
+            {
+                NodeIterator nodeIterator = new AllEntryNodes(session, cacheRootPath).get();
+
+                while(nodeIterator.hasNext()){
+                    Node entryNode = nodeIterator.nextNode();
+                    CacheKey cacheKey = new EntryNodeToCacheKeyHandler(entryNode, dclm).get();
+                    CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
+                    cache.put(cacheKey, content);
+                }
+            }
+        });
+
+        return cache;
+    }
+
+    @Override protected long getBytesLength(CacheContent cacheObj)
+    {
+        try {
+            return IOUtils.toByteArray(cacheObj.getInputDataStream()).length;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override protected void addCacheData(Map<String, Object> data, CacheContent cacheObj)
+    {
+        data.put("Status", cacheObj.getStatus());
+        data.put("Content Type", cacheObj.getContentType());
+        data.put("Character Encoding", cacheObj.getCharEncoding());
+
+        try {
+            data.put("Size", FileUtils.byteCountToDisplaySize(IOUtils.toByteArray(cacheObj.getInputDataStream()).length));
+        } catch (IOException e) {
+            data.put("Size", "0");
+        }
+    }
+
+    @Override protected String toString(CacheContent cacheObj) throws Exception
+    {
+        return IOUtils.toString(
+                cacheObj.getInputDataStream(),
+                cacheObj.getCharEncoding());
+    }
 
     protected CompositeType getCacheEntryType() throws OpenDataException {
         return new CompositeType("Cache Entry", "Cache Entry",
@@ -487,5 +479,49 @@ public class JCRHttpCacheStoreImpl implements HttpCacheStore, JcrCacheMBean, Run
                 new String[] { "Cache Key", "Status", "Size", "Content Type", "Character Encoding" },
                 new OpenType[] { SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
 
+    }
+
+    private void withSession(final Consumer<Session> onSuccess){
+        withSession(onSuccess, null);
+    }
+
+    private void withSession(final Consumer<Session> onSuccess, final Consumer<Exception> onError)
+    {
+        withSession(new Function<Session, Object>()
+        {
+            @Override public Object apply(Session session) throws Exception
+            {
+                onSuccess.accept(session);
+                return null;
+            }
+        },
+        onError);
+    }
+
+    private <T> T withSession(final Function<Session, T> onSuccess){
+        return withSession(onSuccess, null);
+    }
+
+    private <T> T withSession(final Function<Session, T> onSuccess, final Consumer<Exception> onError){
+        ResourceResolver resourceResolver = null;
+        try {
+            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            final Session session = resourceResolver.adaptTo(Session.class);
+            return onSuccess.apply(session);
+
+        } catch (Exception e) {
+            log.error("Error in executing the session", e);
+            try {
+                if(onError != null) {
+                    onError.accept(e);
+                }
+            } catch (Exception subException) {
+                log.error("Error in handling the exception");
+            }
+        } finally {
+            if(resourceResolver != null && resourceResolver.isLive())
+                resourceResolver.close();
+        }
+        return null;
     }
 }
