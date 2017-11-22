@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.httpcache.store.jcr.impl;
+package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;

@@ -1,6 +1,6 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
-import static com.adobe.acs.commons.httpcache.store.jcr.impl.BucketNodeFactory.HASHCODE_LENGTH;
+import static com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory.HASHCODE_LENGTH;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,6 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.exceptions.BucketNodeFactoryException;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BucketNodeFactoryTest

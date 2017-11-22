@@ -17,15 +17,15 @@ import javax.management.openmbean.TabularType;
 public abstract class AbstractJCRCacheMBean<K,V> extends AbstractCacheMBean<K,V> implements JcrCacheMBean
 {
     //statistics
-    private final AtomicLong totalLoadTime         = new AtomicLong(),
-            loadCount          = new AtomicLong(),
-            loadSuccessCount   = new AtomicLong(),
-            loadExceptionCount = new AtomicLong(),
-            hitCount           = new AtomicLong(),
-            missCount          = new AtomicLong(),
-            requestCount       = new AtomicLong(),
-            evictionCount      = new AtomicLong(),
-            totalLookupTime    = new AtomicLong();
+    private final AtomicLong    totalLoadTime      = new AtomicLong(),
+                                loadCount          = new AtomicLong(),
+                                loadSuccessCount   = new AtomicLong(),
+                                loadExceptionCount = new AtomicLong(),
+                                hitCount           = new AtomicLong(),
+                                missCount          = new AtomicLong(),
+                                requestCount       = new AtomicLong(),
+                                evictionCount      = new AtomicLong(),
+                                totalLookupTime    = new AtomicLong();
 
     public <T> AbstractJCRCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException
     {

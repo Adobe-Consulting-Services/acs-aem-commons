@@ -21,26 +21,20 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
 import static org.apache.jackrabbit.commons.JcrUtils.getOrCreateUniqueByPath;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -75,12 +69,11 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodes;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodesCount;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllExpiredEntries;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.query.EntryNodeByStringKey;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.query.TotalCacheSize;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.adobe.acs.commons.util.impl.AbstractJCRCacheMBean;
 import com.adobe.acs.commons.util.impl.JcrCacheMBean;
-
-import ch.qos.logback.core.util.FileUtil;
 
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
@@ -118,9 +111,10 @@ import ch.qos.logback.core.util.FileUtil;
         ),
         @Property(
             label = "Bucket Tree depth",
-            description = "The depth the bucket tree goes. Minimum value is 1.",
+            description = "The depth the bucket tree goes. Minimum value is 1. This should be between 8 and 10.",
             name = JCRHttpCacheStoreImpl.PROP_BUCKETDEPTH,
-            intValue = JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH
+            intValue = JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH,
+            propertyPrivate = true
         ),
         @Property(
             label = "Delta save threshold",
@@ -252,7 +246,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
                 if(bucketNode != null) {
                     final Node entryNode = new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key);
-                    CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
+                    final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
 
                     if(content != null){
                         incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
