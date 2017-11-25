@@ -26,6 +26,7 @@ import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
 import com.adobe.acs.commons.util.datadefinitions.impl.BasicResourceDefinition;
+import com.day.cq.dam.api.DamConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.poi.ss.usermodel.Cell;
@@ -52,7 +53,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     public static final String NAME = "Asset Folder Creator";
 
-    private final Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders;
+    protected Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders;
 
     public enum AssetFolderBuilder {
         TITLE_TO_NODE_NAME,
@@ -297,7 +298,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
     /** Asset Folder Definition Class **/
 
     protected static final class AssetFolderDefinition extends BasicResourceDefinition {
-        private static final String ASSET_ROOT_PATH = "/content/dam";
+        private static final String ASSET_ROOT_PATH = DamConstants.MOUNTPOINT_ASSETS;
         private String parentPath = null;
         private FolderType folderType;
 
