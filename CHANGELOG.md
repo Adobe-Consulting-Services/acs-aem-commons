@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Added
 
+- #1108 - Added MCP Process for creating Asset Folders (with Titles) using an Excel file to define the structure.
 - #1145 - New Redirect Map Manager feature
 
 ### Changed
