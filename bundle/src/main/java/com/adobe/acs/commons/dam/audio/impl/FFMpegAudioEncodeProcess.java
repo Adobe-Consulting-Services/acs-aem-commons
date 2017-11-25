@@ -22,6 +22,7 @@ package com.adobe.acs.commons.dam.audio.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 import javax.jcr.Node;
@@ -61,6 +62,7 @@ import static com.day.cq.dam.api.DamConstants.METADATA_FOLDER;
 @Component
 @Service(WorkflowProcess.class)
 @Properties({ @Property(name = "process.label", value = "Encode Audio") })
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHelper.AudioProcessor<MetaDataMap, Void> {
 
     @Reference
@@ -71,7 +73,7 @@ public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHel
 
     private static final Logger log = LoggerFactory.getLogger(FFMpegAudioEncodeProcess.class);
 
-    @SuppressWarnings("PMD.CollapsibleIfStatements")
+    @SuppressWarnings({"PMD.CollapsibleIfStatements", "squid:S1066"})
     @Override
     public final void execute(WorkItem workItem, WorkflowSession wfSession, MetaDataMap metaData)
             throws WorkflowException {
@@ -86,7 +88,7 @@ public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHel
         }
 
         final String assetMimeType = pair.asset.getMimeType();
-        if (assetMimeType == null || !assetMimeType.startsWith("audio/")) {
+        if ((assetMimeType == null || !assetMimeType.startsWith("audio/"))) {
             if (!pair.asset.getName().endsWith(".wav") || !pair.asset.getName().endsWith(".mp3")
                     || !pair.asset.getName().endsWith(".ogg")) {
                 log.info("execute: asset [{}] is not of a audio mime type, asset ignored.", pair.asset.getPath());
@@ -104,6 +106,7 @@ public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHel
     }
 
     @Override
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public Void processAudio(final Asset asset, final ResourceResolver resourceResolver, final File tempFile,
                         final ExecutableLocator locator, final File workingDir, final MetaDataMap metaData) throws AudioException {
 
@@ -125,8 +128,10 @@ public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHel
                     final File transcodedAudio = ffmpegWrapper.transcode();
                     fis = new FileInputStream(transcodedAudio);
                     asset.addRendition(renditionName, fis, ffmpegWrapper.getOutputMimetype());
-                    if (!transcodedAudio.delete()) {
-                        log.error("Transcoded audio file @ {} coud not be deleted");
+                    try {
+                        Files.delete(transcodedAudio.toPath());
+                    } catch (Exception e) {
+                        log.error("Transcoded audio file @ " + transcodedAudio.getAbsolutePath() +" coud not be deleted", e);
                     }
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);

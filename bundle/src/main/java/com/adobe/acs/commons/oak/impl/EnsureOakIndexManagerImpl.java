@@ -178,6 +178,7 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
      * @throws OpenDataException
      */
     @Override
+    @SuppressWarnings("squid:S1192")
     public final TabularData getEnsureOakIndexes() throws OpenDataException {
 
         final CompositeType configType = new CompositeType(

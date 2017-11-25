@@ -28,7 +28,11 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -129,6 +133,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     protected abstract boolean isServiceUpdated(Resource config, ServiceReference reference);
 
     @Override
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public synchronized void refreshCache() {
         log.trace("refreshCache");
 
@@ -178,6 +183,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
         }
     }
 
+    @SuppressWarnings("squid:S1149")
     private ServiceRegistration registerService(String id, Resource config) {
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put(SERVICE_OWNER_KEY, getClass().getCanonicalName());
@@ -200,6 +206,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
      *            the default properties
      * @return the ServiceRegistration from registering the service
      */
+    @SuppressWarnings("squid:S1149")
     protected abstract ServiceRegistration registerServiceObject(Resource config, Hashtable<String, Object> props);
 
     private void unregisterService(String id) {

@@ -43,6 +43,7 @@ public interface ErrorPageCacheMBean {
     int getCacheEntriesCount();
 
     @Description("Total cache size in KB")
+    @SuppressWarnings("checkstyle:abbreviationaswordinname")
     long getCacheSizeInKB();
 
     @Description("Details for each cache entry")

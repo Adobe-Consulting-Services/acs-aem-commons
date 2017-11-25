@@ -105,7 +105,7 @@
         //reads multifield data from server, creates the nested composite multifields and fills them
         addDataInFields: function () {
             var cmf = this, mNames = [],
-                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
+                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class~='coral-Form-fieldset']"),
                 $form = $fieldSets.closest("form.foundation-form"),
                 actionUrl = $form.attr("action") + ".json",
                 mValues, $field, name, $multifield;
@@ -218,8 +218,8 @@
 
         fillValue: function ($field, record) {
             var name, value;
-            // for userpicker $field length is 2
-            if($field.length > 1 && !$field.parent().hasClass("richtext-container")) {
+            // for userpicker, richtext and datepicker, $field length is 2 but only userpicker use the second name value
+            if($field.length > 1 && !$field.parent().hasClass("richtext-container") && !$field.parent().hasClass("coral-DatePicker")) {
                 name = $($field[1]).attr("name");
             } else {
                 name = $field.attr("name");

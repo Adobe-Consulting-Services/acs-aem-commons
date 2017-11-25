@@ -75,7 +75,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public String getName() {
-        return path.substring(path.lastIndexOf("/")+1);
+        return path.substring(path.lastIndexOf('/')+1);
     }
 
     @Override

@@ -62,6 +62,25 @@ public final class JSONModifiableValueMapDecorator extends ModifiableValueMapDec
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T get(String name, T defaultValue) {
+        if (defaultValue == null) {
+            return (T) this.get(name);
+        }
+
+        Class<T> type = (Class<T>) defaultValue.getClass();
+
+        T value = get(name, type);
+        if (value == null) {
+            value = defaultValue;
+        }
+
+        return value;
+    }
+
+    /**
      * Coerces the value at {@param name} to a Calendar object.
      *
      * @param name the property name
@@ -154,24 +173,5 @@ public final class JSONModifiableValueMapDecorator extends ModifiableValueMapDec
             String tmp = super.get(name, String.class);
             return new BigDecimal(tmp);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T get(String name, T defaultValue) {
-        if (defaultValue == null) {
-            return (T) this.get(name);
-        }
-
-        Class<T> type = (Class<T>) defaultValue.getClass();
-
-        T value = get(name, type);
-        if (value == null) {
-            value = defaultValue;
-        }
-
-        return value;
     }
 }

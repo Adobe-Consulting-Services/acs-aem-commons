@@ -42,6 +42,7 @@ import java.util.Map;
  * Helper interface for dynamic package creation.
  */
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface PackageHelper {
     /**
      * JCR Path to default ACS thumbnail resource.
@@ -54,6 +55,7 @@ public interface PackageHelper {
      *  Replace: If a conflicting package exists; remove that package and create a new w updated params.
      *  IncrementVersion: If a conflict package exists; increment the package minor version to the next free minor.
      */
+    @SuppressWarnings("squid:S00115")
     enum ConflictResolution {
         None,
         Replace,

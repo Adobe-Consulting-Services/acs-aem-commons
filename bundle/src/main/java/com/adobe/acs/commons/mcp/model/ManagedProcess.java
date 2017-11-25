@@ -65,7 +65,7 @@ public class ManagedProcess implements Serializable {
     private Collection<ArchivedProcessFailure> reportedErrors;
 
     @Inject
-    transient private Resource resource;
+    private transient Resource resource;
         
     /**
      * @return the reportedErrors
@@ -255,10 +255,10 @@ public class ManagedProcess implements Serializable {
         today.clear(Calendar.HOUR_OF_DAY);
         today.clear(Calendar.MINUTE);
         today.clear(Calendar.SECOND);
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(time);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(time);
         DateFormat format;
-        if (c.after(today)) {
+        if (cal.after(today)) {
             format = SimpleDateFormat.getTimeInstance();        
         } else {
             format = SimpleDateFormat.getDateTimeInstance();

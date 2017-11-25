@@ -63,6 +63,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
+
     Map<String, ProcessInstance> activeProcesses = Collections.synchronizedMap(new LinkedHashMap<>());
 
     @Reference
@@ -132,13 +133,14 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     }
 
     private ProcessDefinition findDefinitionByName(String name) throws ReflectiveOperationException {
-        ProcessDefinitionFactory factory = processDefinitionFactories.stream().
-                filter(f -> name.equals(f.getName())).findFirst()
+        ProcessDefinitionFactory factory = processDefinitionFactories.stream()
+                .filter(f -> name.equals(f.getName())).findFirst()
                 .orElseThrow(()->new IllegalArgumentException("Unable to find process " + name));
 
         return factory.createProcessDefinition();
     }
 
+    @SuppressWarnings("squid:S1172")
     private ProcessDefinition findDefinitionByPath(String path) throws ReflectiveOperationException {
         throw new UnsupportedOperationException("Not supported yet.");
     }

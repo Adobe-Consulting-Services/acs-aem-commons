@@ -85,7 +85,7 @@ ACS.CQ.NodeMultiFieldPanel = CQ.Ext.extend(ACS.CQ.MultiFieldPanel, {
             multi = this.findParentByType("multifield"),
             multiPanels = multi.findByType("nodemultifieldpanel");
 
-        if(multiPanels.length == 1){
+        if(multiPanels.length === 1){
             item = value[counter];
         }else{
             item = value;
@@ -101,7 +101,7 @@ ACS.CQ.NodeMultiFieldPanel = CQ.Ext.extend(ACS.CQ.MultiFieldPanel, {
             i.fireEvent('loadcontent', this);
         });
 
-        if(multiPanels.length == 1){
+        if(multiPanels.length === 1){
             while(true){
                 item = value[++counter];
 

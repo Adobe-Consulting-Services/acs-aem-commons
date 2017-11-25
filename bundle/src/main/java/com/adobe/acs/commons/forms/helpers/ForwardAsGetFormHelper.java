@@ -37,6 +37,7 @@ import java.io.IOException;
  * Interface used for working with ACS-AEM-Commons forms.
  */
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface ForwardAsGetFormHelper extends FormHelper {
     public final String REQUEST_ATTR_FORM_KEY = ForwardAsGetFormHelper.class.getName() + "__Form_";
 

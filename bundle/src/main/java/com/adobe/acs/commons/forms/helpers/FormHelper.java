@@ -34,6 +34,7 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface FormHelper {
     String EXTENSION = ".html";
 

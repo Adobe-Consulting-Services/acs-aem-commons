@@ -65,7 +65,7 @@ public class IntrospectionUtil {
      */
     public static boolean isPrimitive(Field field) {
         Class basicType = getCollectionComponentType(field);
-        return basicType.isPrimitive() || Number.class.isAssignableFrom(basicType) || basicType == String.class;
+        return basicType != null && (basicType.isPrimitive() || Number.class.isAssignableFrom(basicType) || basicType == String.class);
     }
     
     /**
@@ -75,7 +75,7 @@ public class IntrospectionUtil {
      */
     public static boolean isSimple(Field field) {
         Class basicType = getCollectionComponentType(field);
-        return isPrimitive(field) || basicType.isEnum() || basicType == String.class;
+        return basicType != null && (isPrimitive(field) || basicType.isEnum() || basicType == String.class);
     }
     
     private IntrospectionUtil() {

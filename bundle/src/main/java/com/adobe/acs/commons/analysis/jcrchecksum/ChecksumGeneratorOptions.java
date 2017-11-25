@@ -25,6 +25,7 @@ import aQute.bnd.annotation.ProviderType;
 import java.util.Set;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface ChecksumGeneratorOptions {
     String DATA = "data";
 

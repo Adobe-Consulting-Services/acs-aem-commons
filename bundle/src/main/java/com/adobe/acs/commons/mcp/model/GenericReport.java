@@ -91,18 +91,18 @@ public class GenericReport {
         }
         getRows().clear();
         reportData.forEach((path, row) -> {
-            Map<String, Object> r = new LinkedHashMap<>();
-            r.put(keyName, path);
+            Map<String, Object> rowData = new LinkedHashMap<>();
+            rowData.put(keyName, path);
             for (Enum<E> c : enumClass.getEnumConstants()) {
                 if (row.containsKey(c)) {
                     ValueFormat format = ValueFormat.forField(c);
-                    r.put(c.toString(), row.get(c));
+                    rowData.put(c.toString(), row.get(c));
                     if (format.columnCount > 1) {
-                        r.put(c.toString()+format.suffix, format.getAlternateValue(row.get(c)));
+                        rowData.put(c.toString()+format.suffix, format.getAlternateValue(row.get(c)));
                     }
                 }
             }
-            getRows().add(new ValueMapDecorator(r));
+            getRows().add(new ValueMapDecorator(rowData));
         });
     }
     
@@ -118,17 +118,17 @@ public class GenericReport {
         }
         getRows().clear();
         reportData.forEach(row -> {
-            Map<String, Object> r = new LinkedHashMap<>();
+            Map<String, Object> rowData = new LinkedHashMap<>();
             for (Enum<E> c : enumClass.getEnumConstants()) {
                 if (row.containsKey(c)) {
                     ValueFormat format = ValueFormat.forField(c);
-                    r.put(c.toString(), row.get(c));
+                    rowData.put(c.toString(), row.get(c));
                     if (format.columnCount > 1) {
-                        r.put(c.toString()+format.suffix, format.getAlternateValue(row.get(c)));
+                        rowData.put(c.toString()+format.suffix, format.getAlternateValue(row.get(c)));
                     }
                 }
             }
-            getRows().add(new ValueMapDecorator(r));
+            getRows().add(new ValueMapDecorator(rowData));
         });
     }    
 

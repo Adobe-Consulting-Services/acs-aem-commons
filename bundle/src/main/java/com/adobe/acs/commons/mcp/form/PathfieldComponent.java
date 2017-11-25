@@ -25,12 +25,14 @@ import aQute.bnd.annotation.ProviderType;
 @ProviderType
 public abstract class PathfieldComponent extends FieldComponent {
 
+    private static final String OPTION_PREDICATE = "predicate";
+
     @Override
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/pathbrowser");
         getComponentMetadata().put("pickerMultiselect", hasOption("multiple"));
         getOption("base").ifPresent(path->getComponentMetadata().put("rootPath", path));
-        getComponentMetadata().put("predicate", "nosystem");
+        getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
     }
 
     public static class AssetSelectComponent extends PathfieldComponent {
@@ -38,7 +40,7 @@ public abstract class PathfieldComponent extends FieldComponent {
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put("predicate", "hierarchy");
+            getComponentMetadata().put(OPTION_PREDICATE, "hierarchy");
         }
     }
 
@@ -47,7 +49,7 @@ public abstract class PathfieldComponent extends FieldComponent {
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put("predicate", "hierarchyNotFile");
+            getComponentMetadata().put(OPTION_PREDICATE, "hierarchyNotFile");
         }
     }
 
@@ -56,7 +58,7 @@ public abstract class PathfieldComponent extends FieldComponent {
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put("predicate", "folder");
+            getComponentMetadata().put(OPTION_PREDICATE, "folder");
         }
     }
 }

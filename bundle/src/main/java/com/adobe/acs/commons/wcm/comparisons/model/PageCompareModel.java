@@ -77,12 +77,12 @@ public class PageCompareModel {
 
     public PageCompareModel(SlingHttpServletRequest request) {
         this.pathA = request.getParameter("path");
-        String versionA = request.getParameter("a");
+        String paramVersionA = request.getParameter("a");
         this.pathB = request.getParameter("pathB");
-        String versionB = request.getParameter("b");
+        String paramVersionB = request.getParameter("b");
 
-        this.versionA = isNullOrEmpty(versionA) ? LATEST : versionA;
-        this.versionB = isNullOrEmpty(versionB) ? LATEST : versionB;
+        this.versionA = isNullOrEmpty(paramVersionA) ? LATEST : paramVersionA;
+        this.versionB = isNullOrEmpty(paramVersionB) ? LATEST : paramVersionB;
     }
 
     @PostConstruct
@@ -93,9 +93,6 @@ public class PageCompareModel {
         Resource resource = resolver.resolve(pathA);
 
         improveDefaultVersionCompare(resource);
-
-        final String versionA = getVersionA();
-        final String versionB = getVersionB();
 
         this.a = load(resource, versionA);
 

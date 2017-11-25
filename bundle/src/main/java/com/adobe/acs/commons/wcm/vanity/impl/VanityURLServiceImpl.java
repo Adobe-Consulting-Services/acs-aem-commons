@@ -19,55 +19,56 @@ import java.io.IOException;
 
 @Component
 @Service
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public class VanityURLServiceImpl implements VanityURLService {
 
-	private static final Logger log = LoggerFactory.getLogger(VanityURLServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(VanityURLServiceImpl.class);
 
     private static final String VANITY_DISPATCH_CHECK_ATTR = "acs-aem-commons__vanity-check-loop-detection";
     private static final String DEFAULT_PATH_SCOPE = "/content";
 
-	public boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException, RepositoryException {
-		if (request.getAttribute(VANITY_DISPATCH_CHECK_ATTR) != null) {
-			log.trace("Processing a previously vanity dispatched request. Skipping...");
-			return false;
-		}
+    public boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException, RepositoryException {
+        if (request.getAttribute(VANITY_DISPATCH_CHECK_ATTR) != null) {
+            log.trace("Processing a previously vanity dispatched request. Skipping...");
+            return false;
+        }
 
-		request.setAttribute(VANITY_DISPATCH_CHECK_ATTR, true);
+        request.setAttribute(VANITY_DISPATCH_CHECK_ATTR, true);
 
-		final String requestURI = request.getRequestURI();
+        final String requestURI = request.getRequestURI();
         final RequestPathInfo mappedPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
         final String candidateVanity = mappedPathInfo.getResourcePath();
-		final String pathScope = StringUtils.removeEnd(requestURI, candidateVanity);
+        final String pathScope = StringUtils.removeEnd(requestURI, candidateVanity);
 
-		log.debug("Candidate vanity URL to check and dispatch: [ {} ]", candidateVanity);
+        log.debug("Candidate vanity URL to check and dispatch: [ {} ]", candidateVanity);
 
-		// Check if...
-		// 1) the candidateVanity and the requestURI are the same; If they are it means the request has already
-		// gone through resource resolution and failed so there is no sense in sending it through again.
-		// 2) the candidate is in at least 1 sling:vanityPath under /content
-		if (!StringUtils.equals(candidateVanity, requestURI) && isVanityPath(pathScope, candidateVanity, request)) {
-			log.debug("Forwarding request to vanity resource [ {} ]", candidateVanity);
+        // Check if...
+        // 1) the candidateVanity and the requestURI are the same; If they are it means the request has already
+        // gone through resource resolution and failed so there is no sense in sending it through again.
+        // 2) the candidate is in at least 1 sling:vanityPath under /content
+        if (!StringUtils.equals(candidateVanity, requestURI) && isVanityPath(pathScope, candidateVanity, request)) {
+            log.debug("Forwarding request to vanity resource [ {} ]", candidateVanity);
 
-			final RequestDispatcher requestDispatcher = request.getRequestDispatcher(candidateVanity);
-			requestDispatcher.forward(new ExtensionlessRequestWrapper(request), response);
-			return true;
-		}
+            final RequestDispatcher requestDispatcher = request.getRequestDispatcher(candidateVanity);
+            requestDispatcher.forward(new ExtensionlessRequestWrapper(request), response);
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Checks if the provided vanity path is a valid redirect
-	 *
-	 * @param pathScope The content path to scope the vanity path too.
-	 * @param vanityPath Vanity path that needs to be validated.
-	 * @param request SlingHttpServletRequest object used for performing query/lookup
-	 * @return return true if the vanityPath is a registered sling:vanityPath under /content
-	 */
-	protected boolean isVanityPath(String pathScope, String vanityPath, SlingHttpServletRequest request) throws RepositoryException {
-		final Resource vanityResource = request.getResourceResolver().resolve(vanityPath);
+    /**
+     * Checks if the provided vanity path is a valid redirect
+     *
+     * @param pathScope The content path to scope the vanity path too.
+     * @param vanityPath Vanity path that needs to be validated.
+     * @param request SlingHttpServletRequest object used for performing query/lookup
+     * @return return true if the vanityPath is a registered sling:vanityPath under /content
+     */
+    protected boolean isVanityPath(String pathScope, String vanityPath, SlingHttpServletRequest request) throws RepositoryException {
+        final Resource vanityResource = request.getResourceResolver().resolve(vanityPath);
 
-		if (vanityResource != null) {
+        if (vanityResource != null) {
             String targetPath = null;
 
             if (vanityResource.isResourceType("sling:redirect")) {
@@ -76,14 +77,14 @@ public class VanityURLServiceImpl implements VanityURLService {
                 targetPath = vanityResource.getPath();
             }
 
-			if (targetPath != null && StringUtils.startsWith(targetPath, StringUtils.defaultIfEmpty(pathScope, DEFAULT_PATH_SCOPE))) {
-				log.debug("Found vanity resource at [ {} ] for sling:vanityPath [ {} ]", targetPath, vanityPath);
-				return true;
-			}
-		}
+            if (targetPath != null && StringUtils.startsWith(targetPath, StringUtils.defaultIfEmpty(pathScope, DEFAULT_PATH_SCOPE))) {
+                log.debug("Found vanity resource at [ {} ] for sling:vanityPath [ {} ]", targetPath, vanityPath);
+                return true;
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
 
 }

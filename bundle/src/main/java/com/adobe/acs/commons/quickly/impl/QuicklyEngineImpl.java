@@ -56,7 +56,8 @@ import java.util.concurrent.ConcurrentHashMap;
         label = "ACS AEM Commons - Quickly",
         metatype = true,
         policy = ConfigurationPolicy.REQUIRE
-)@Reference(
+)
+@Reference(
         name = "operations",
         referenceInterface = Operation.class,
         policy = ReferencePolicy.DYNAMIC,

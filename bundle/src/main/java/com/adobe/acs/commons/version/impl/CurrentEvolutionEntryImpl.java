@@ -90,11 +90,11 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public String getValueStringShort() {
-        String value = getValueString();
-        if (value.length() > MAX_CHARS) {
-            return value.substring(0, MAX_CHARS) + "...";
+        String tmpValue = getValueString();
+        if (tmpValue.length() > MAX_CHARS) {
+            return tmpValue.substring(0, MAX_CHARS) + "...";
         }
-        return value;
+        return tmpValue;
     }
 
     @Override

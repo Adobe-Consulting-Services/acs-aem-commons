@@ -23,7 +23,7 @@
  * eg. to limit the components to 4 on rightpar of /content/geometrixx/en.html
  * set acsComponentsLimit=4 on /etc/designs/geometrixx/jcr:content/homepage/rightpar
  */
-(function ($, $document, gAuthor) {
+(function ($, $document) {
     "use strict";
 
     var ACS_COMPONENTS_LIMIT = "acsComponentsLimit";
@@ -64,7 +64,7 @@
     }
 
     function getChildEditables(parsys){
-        var editables = gAuthor.edit.findEditables(),
+        var editables = Granite.author.edit.findEditables(),
             children = [], parent;
 
         _.each(editables, function(editable){
@@ -103,11 +103,11 @@
     }
 
     function extendComponentDrop(){
-        var dropController = gAuthor.ui.dropController,
+        var dropController = Granite.author.ui.dropController,
             compDragDrop;
 
         if (dropController !== undefined) {
-            compDragDrop = dropController.get(gAuthor.Component.prototype.getTypeName());
+            compDragDrop = dropController.get(Granite.author.Component.prototype.getTypeName());
 
             //handle drop action
             if (compDragDrop !== undefined) {
@@ -124,7 +124,7 @@
             }
 
             //handle insert action
-            gAuthor.edit.actions.openInsertDialog = function(openDlgFn){
+            Granite.author.edit.actions.openInsertDialog = function(openDlgFn){
                 return function (editable) {
                     if(!isWithinLimit(editable)){
                         return;
@@ -132,10 +132,10 @@
 
                     return openDlgFn.call(this, editable);
                 };
-            }(gAuthor.edit.actions.openInsertDialog);
+            }(Granite.author.edit.actions.openInsertDialog);
 
             //handle paste action
-            var insertAction = gAuthor.edit.Toolbar.defaultActions.INSERT;
+            var insertAction = Granite.author.edit.Toolbar.defaultActions.INSERT;
 
             insertAction.handler = function(insertHandlerFn){
                 return function(editableBefore, param, target){
@@ -150,8 +150,9 @@
     }
 
     $(function() {
-        if (gAuthor && gAuthor.ui && gAuthor.ui.dropController) {
+        if (Granite && Granite.author && Granite.author.edit && Granite.author.Component &&
+                Granite.author.ui && Granite.author.ui.dropController) {
             extendComponentDrop();
         }
     });
-}(jQuery, jQuery(document), (window.Granite.author = window.Granite.author || {})));
+}(jQuery, jQuery(document)));

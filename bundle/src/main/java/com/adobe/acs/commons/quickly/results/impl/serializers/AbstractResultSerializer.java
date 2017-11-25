@@ -28,7 +28,7 @@ import org.apache.sling.commons.json.JSONObject;
 
 public abstract class AbstractResultSerializer {
 
-    public JSONObject toJSON(final Result result, final ValueMap config) throws JSONException {
+    public JSONObject toJSON(final Result result) throws JSONException {
         final JSONObject json = new JSONObject();
 
         json.put("title", result.getTitle());

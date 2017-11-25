@@ -61,6 +61,7 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
 
     private static final String SERVICE_NAME = "wcm-inbox-cleanup";
     private static final Map<String, Object> AUTH_INFO;
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }

@@ -18,7 +18,9 @@ package com.adobe.acs.commons.mcp.impl.processes;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
-import com.adobe.acs.commons.mcp.form.*;
+import com.adobe.acs.commons.mcp.form.FileUploadComponent;
+import com.adobe.acs.commons.mcp.form.FormField;
+import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
@@ -43,7 +45,12 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Creates cq:Tags based on a well defined Excel document.
@@ -62,7 +69,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         LOWERCASE_WITH_DASHES,
         LOCALIZED_TITLE,
         NONE
-    };
+    }
 
     public TagCreator(Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders) {
         this.resourceDefinitionBuilders = resourceDefinitionBuilders;
@@ -74,7 +81,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
             component = FileUploadComponent.class,
             options = {"mimeTypes=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "required"}
     )
-    public InputStream excelFile = null;
+    public transient InputStream tagDefinitionFile = null;
 
     @FormField(
             name = "Primary Converter",
@@ -94,7 +101,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
     @Override
     public void init() throws RepositoryException {
-
+        // nothing to do here
     }
 
     @Override
@@ -114,12 +121,10 @@ public class TagCreator extends ProcessDefinition implements Serializable {
      * @param manager the action manager
      * @throws IOException
      */
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public void parseTags(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
-            final XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
-            // Close the inputstream to prevent resource leakage
-            excelFile.close();
-
+            final XSSFWorkbook workbook = new XSSFWorkbook(tagDefinitionFile);
             final XSSFSheet sheet = workbook.getSheetAt(0);
             final Iterator<Row> rows = sheet.rowIterator();
 
@@ -163,7 +168,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                         }
                     }
                 }
-            };
+            }
             log.info("Finished Parsing and collected [ {} ] tags for import.", tagDefinitions.size());
         });
     }
@@ -180,30 +185,39 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                     final TagManager tagManager = rr.adaptTo(TagManager.class);
                     ReportRowSatus status;
 
-                    try {
-                        if (tagManager.resolve(tagDefinition.getId()) == null) {
-                            status = ReportRowSatus.CREATED;
-                        } else {
-                            status = ReportRowSatus.UPDATED_EXISTING;
-                        }
-
-                        final Tag tag = tagManager.createTag(
-                                tagDefinition.getId(),
-                                tagDefinition.getTitle(),
-                                tagDefinition.getDescription(),
-                                false);
-                        setTitles(tag, tagDefinition);
-                        record(status, tag.getTagID(), tag.getPath(), tag.getTitle());
-                        log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
-                    } catch (Exception e) {
-                        record(ReportRowSatus.FAILED_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
-                        log.error("Unable to create tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
-                    }
+                    createTag(tagDefinition, tagManager);
                 });
             } catch (Exception e) {
                 log.error("Unable to import tags via ACS Commons MCP - Tag Creator", e);
             }
         });
+    }
+
+    private void createTag(TagDefinition tagDefinition, TagManager tagManager) {
+        ReportRowSatus status;
+        try {
+            if (tagManager.resolve(tagDefinition.getId()) == null) {
+                status = ReportRowSatus.CREATED;
+            } else {
+                status = ReportRowSatus.UPDATED_EXISTING;
+            }
+
+            final Tag tag = tagManager.createTag(
+                    tagDefinition.getId(),
+                    tagDefinition.getTitle(),
+                    tagDefinition.getDescription(),
+                    false);
+            if (tag != null) {
+                setTitles(tag, tagDefinition);
+                record(status, tag.getTagID(), tag.getPath(), tag.getTitle());
+                log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+            } else {
+                log.error("Tag [ {} ] is null", tagDefinition.getId());
+            }
+        } catch (Exception e) {
+            record(ReportRowSatus.FAILED_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
+            log.error("Unable to create tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+        }
     }
 
     /**
@@ -235,11 +249,6 @@ public class TagCreator extends ProcessDefinition implements Serializable {
     }
 
     private void setTitles(final Tag tag, final TagDefinition tagDefinition) throws RepositoryException {
-        if (tag == null) {
-            log.error("Tag [ {} ] is null", tagDefinition.getId());
-            return;
-        }
-
         final Node node = tag.adaptTo(Node.class);
 
         if (node == null) {
@@ -263,7 +272,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
     /** Reporting **/
 
-    transient private final GenericReport report = new GenericReport();
+    private final transient GenericReport report = new GenericReport();
 
     private final ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
@@ -279,7 +288,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         UPDATED_EXISTING,
         FAILED_TO_PARSE,
         FAILED_TO_CREATE,
-    };
+    }
 
     private void record(ReportRowSatus status, String tagId, String path, String title) {
         final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);

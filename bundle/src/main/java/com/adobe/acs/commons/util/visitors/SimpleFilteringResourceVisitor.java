@@ -26,9 +26,10 @@ import org.apache.sling.api.resource.Resource;
 
 public class SimpleFilteringResourceVisitor {
 
-    public static enum TraversalMode {
+    public enum TraversalMode {
         DEPTH, BREADTH
-    };
+    }
+
     TraversalMode mode = TraversalMode.BREADTH;
     BiConsumer<Map.Entry<String, Object>, Integer> propertyVisitor = null;
     BiConsumer<Resource, Integer> resourceVisitor = null;
@@ -36,9 +37,6 @@ public class SimpleFilteringResourceVisitor {
     LinkedList<Resource> stack = new LinkedList<>();
     Function<String, Boolean> propertyFilter = s -> true;
     Function<Resource, Boolean> traversalFilter = r -> true;
-
-    public SimpleFilteringResourceVisitor() {
-    }
 
     public void setPropertyFilter(Function<String, Boolean> filter) {
         propertyFilter = filter;
@@ -97,9 +95,8 @@ public class SimpleFilteringResourceVisitor {
                     case BREADTH:
                         stack.addAll(toList(res.getChildren()));
                         break;
-                    case DEPTH:
+                    default:
                         stack.addAll(0, toList(res.getChildren()));
-                        break;
                 }
             } else if (leafVisitor != null) {
                 leafVisitor.accept(res, level);

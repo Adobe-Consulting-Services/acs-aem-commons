@@ -38,20 +38,18 @@ public class FrozenRendition implements InvocationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(FrozenRendition.class);
 
-    private final Asset asset;
-
     private final Resource container;
 
     private final Resource renditionData;
 
-    private FrozenRendition(Asset asset, Resource container) {
-        this.asset = asset;
+    private FrozenRendition(Resource container) {
         this.container = container;
         this.renditionData = container.getChild(JcrConstants.JCR_CONTENT);
     }
 
+    @SuppressWarnings("squid:S1172")
     public static Rendition createFrozenRendition(Asset asset, Resource resource) {
-        InvocationHandler handler = new FrozenRendition(asset, resource);
+        InvocationHandler handler = new FrozenRendition(resource);
         return (Rendition) Proxy.newProxyInstance(FrozenRendition.class.getClassLoader(), new Class[] { Rendition.class }, handler);
     }
 

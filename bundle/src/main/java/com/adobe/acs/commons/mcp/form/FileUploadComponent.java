@@ -16,23 +16,14 @@
 package com.adobe.acs.commons.mcp.form;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
-import com.adobe.acs.commons.mcp.util.StringUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * File upload component
  */
 @ProviderType
 public class FileUploadComponent extends FieldComponent {
-    private static final Logger log = LoggerFactory.getLogger(FileUploadComponent.class);
+
+    private static final String OPTION_MIME_TYPES = "mimeTypes";
 
     @Override
     public void init() {
@@ -40,8 +31,8 @@ public class FileUploadComponent extends FieldComponent {
         getComponentMetadata().put("text", "Upload " + getFieldDefinition().name());
         getComponentMetadata().put("autoStart", false);
 
-        if (hasOption("mimeTypes")) {
-            getComponentMetadata().put("mimeTypes", getOption("mimeTypes").get());
+        if (hasOption(OPTION_MIME_TYPES)) {
+            getComponentMetadata().put(OPTION_MIME_TYPES, getOption(OPTION_MIME_TYPES).get());
         }
     }
 }

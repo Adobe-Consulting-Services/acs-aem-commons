@@ -19,10 +19,15 @@ import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import java.lang.management.ManagementFactory;
-import java.util.Dictionary;
-import java.util.List;
-import java.util.concurrent.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -36,14 +41,14 @@ import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.lang.management.ManagementFactory;
+import java.util.Dictionary;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Component(metatype = true, immediate = true, label = "ACS AEM Commons - Throttled Task Runner Service")
 @Service({ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class})
@@ -176,6 +181,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     private long lastCheck = -1;
     private boolean wasRecentlyBusy = false;
 
+    @SuppressWarnings("squid:S3776")
     private boolean isTooBusy() throws InterruptedException {
         if (maxCpu <= 0 && maxHeap <= 0) {
             return false;
@@ -257,6 +263,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         initThreadPool();
     }
 
+    @SuppressWarnings("squid:S2142")
     private void initThreadPool() {
         if (workQueue == null) {
             workQueue = new LinkedBlockingDeque<>();

@@ -47,6 +47,6 @@ public class GenericResultSerializerImpl extends AbstractResultSerializer implem
 
     public JSONObject toJSON(final Result result, final ValueMap config) throws JSONException {
         log.trace("Entering Generic Result Serializer for {}", result.getPath());
-        return super.toJSON(result, config);
+        return super.toJSON(result);
     }
 }

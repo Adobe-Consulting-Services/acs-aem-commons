@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface SyntheticWorkflowRunner extends WorkflowService {
     String PROCESS_ARGS = "PROCESS_ARGS";
 
@@ -47,6 +48,7 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
      * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
      * @param autoSaveAtEnd                    persist changes to JCR after all Workflow Process complete
      * @throws com.day.cq.workflow.WorkflowException
+     * @deprecated use alternate method
      */
     @Deprecated
     void execute(ResourceResolver resourceResolver,
@@ -69,6 +71,7 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
      * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
      * @param autoSaveAtEnd                    persist changes to JCR after all Workflow Process complete
      * @throws com.day.cq.workflow.WorkflowException
+     * @deprecated use alternate method
      */
     @Deprecated
     void execute(ResourceResolver resourceResolver,
@@ -92,6 +95,7 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
      * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
      * @param autoSaveAtEnd                    persist changes to JCR after all Workflow Process complete
      * @throws com.day.cq.workflow.WorkflowException
+     * @deprecated use alternate method
      */
     @Deprecated
     void execute(ResourceResolver resourceResolver,

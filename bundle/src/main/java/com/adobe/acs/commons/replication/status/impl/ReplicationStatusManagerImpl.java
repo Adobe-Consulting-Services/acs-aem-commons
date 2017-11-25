@@ -61,28 +61,28 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
      * {@inheritDoc}
      */
     @Override
-	public Resource getReplicationStatusResource(String path, ResourceResolver resourceResolver) {
-		final Page page = resourceResolver.adaptTo(PageManager.class).getContainingPage(path);
-		final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(path));
+    public Resource getReplicationStatusResource(String path, ResourceResolver resourceResolver) {
+        final Page page = resourceResolver.adaptTo(PageManager.class).getContainingPage(path);
+        final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(path));
 
-		Resource resource;
-		String type;
+        Resource resource;
+        String type;
 
-		if (page != null) {
-			type = "Page";
-		    resource = page.getContentResource();
-		} else if (asset != null) {
-			type = "Asset";
-		    Resource assetResource = resourceResolver.getResource(asset.getPath());
-		    resource = assetResource.getChild(JcrConstants.JCR_CONTENT);
-		} else {
-			type = "Resource";
-		    resource = resourceResolver.getResource(path);
-		}
-		
-		log.trace(type + "'s resource that tracks replication status is " + resource.getPath());
-		return resource;
-	}
+        if (page != null) {
+            type = "Page";
+            resource = page.getContentResource();
+        } else if (asset != null) {
+            type = "Asset";
+            Resource assetResource = resourceResolver.getResource(asset.getPath());
+            resource = assetResource.getChild(JcrConstants.JCR_CONTENT);
+        } else {
+            type = "Resource";
+            resource = resourceResolver.getResource(path);
+        }
+
+        log.trace(type + "'s resource that tracks replication status is " + resource.getPath());
+        return resource;
+    }
     
     /**
      * {@inheritDoc}
@@ -107,6 +107,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("squid:S3776")
     public final void setReplicationStatus(final ResourceResolver resourceResolver,
                                            final String replicatedBy,
                                            final Calendar replicatedAt,
@@ -179,8 +180,8 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
      * @throws RepositoryException
      */
     private void addReplicationStatusMixin(final Node node) throws RepositoryException {
-        if (!this.hasMixin(node, ReplicationStatus.NODE_TYPE) &&
-                node.canAddMixin(ReplicationStatus.NODE_TYPE)) {
+        if (!this.hasMixin(node, ReplicationStatus.NODE_TYPE)
+                && node.canAddMixin(ReplicationStatus.NODE_TYPE)) {
             node.addMixin(ReplicationStatus.NODE_TYPE);
         }
     }

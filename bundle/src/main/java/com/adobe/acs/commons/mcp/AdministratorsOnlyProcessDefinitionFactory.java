@@ -35,11 +35,12 @@ import java.util.stream.StreamSupport;
 public abstract class AdministratorsOnlyProcessDefinitionFactory<P extends ProcessDefinition> extends ProcessDefinitionFactory<P> {
 
     @Override
+    @SuppressWarnings("squid:S1141")
     public boolean isAllowed(User user) {
         try {
-            return user.isAdmin() ||
-                    StreamSupport.stream(Spliterators.spliteratorUnknownSize(user.memberOf(), Spliterator.ORDERED),false).
-                    anyMatch(g -> {
+            return user.isAdmin()
+                    || StreamSupport.stream(Spliterators.spliteratorUnknownSize(user.memberOf(), Spliterator.ORDERED),false)
+                    .anyMatch(g -> {
                         try {
                             return g.getID().equals("administrators");
                         } catch (RepositoryException e) {
@@ -52,5 +53,5 @@ public abstract class AdministratorsOnlyProcessDefinitionFactory<P extends Proce
     }
     
     @Override
-    abstract protected P createProcessDefinitionInstance();    
+    protected abstract P createProcessDefinitionInstance();
 }

@@ -16,31 +16,30 @@
 package com.adobe.acs.commons.mcp.util;
 
 import com.adobe.acs.commons.mcp.form.FieldComponent;
+import com.adobe.acs.commons.mcp.form.FormField;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.sling.api.request.RequestParameter;
-import org.apache.sling.api.resource.ValueMap;
-import com.adobe.acs.commons.mcp.form.FormField;
-import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
-import java.lang.reflect.Array;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
 import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.sling.api.scripting.SlingScriptHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
@@ -58,13 +57,14 @@ public class AnnotatedFieldDeserializer {
         for (Field field : fields) {
             try {
                 parseInput(target, input, field);
-            } catch (IOException | ParseException | ReflectiveOperationException | NullPointerException ex) {
+            } catch (ParseException | ReflectiveOperationException | NullPointerException ex) {
                 throw new DeserializeException("Error when processing field " + field.getName(), ex);
             }
         }
     }
 
-    private static void parseInput(Object target, ValueMap input, Field field) throws ReflectiveOperationException, ParseException, IOException {
+    @SuppressWarnings("squid:S3776")
+    private static void parseInput(Object target, ValueMap input, Field field) throws ReflectiveOperationException, ParseException {
         FormField inputAnnotation = field.getAnnotation(FormField.class);
         Object value;
         if (input.get(field.getName()) == null) {
@@ -89,42 +89,13 @@ public class AnnotatedFieldDeserializer {
                 val = ((Object[]) value)[0];
             }
 
-            /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
-            if (!parseFileValue(target, val, field)) {
+            if (val instanceof InputStream) {
+                /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
+                FieldUtils.writeField(field, target, val, true);
+            } else{
                 parseInputValue(target, String.valueOf(val), field);
             }
         }
-    }
-
-    /**
-     * Tries to parse an inputstream (file) from the request parameter.
-     *
-     * @param target
-     * @param value
-     * @param field
-     * @return true is a inputs stream was parse-able, else false.
-     * @throws IllegalAccessException
-     * @throws IOException
-     */
-    private static boolean parseFileValue(Object target, Object value,  Field field) throws IllegalAccessException, IOException {
-        if (value instanceof InputStream) {
-            /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
-            FieldUtils.writeField(field, target, value, true);
-            return true;
-        }
-
-        if (value instanceof ArrayList) {
-            ArrayList<? extends RequestParameter> values = (ArrayList<? extends RequestParameter>) value;
-            if (values.size() > 0) {
-                final InputStream is = values.get(0).getInputStream();
-                if (is != null) {
-                    FieldUtils.writeField(field, target, is, true);
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     private static void parseInputList(Object target, String[] values, Field field) throws ReflectiveOperationException, ParseException {
@@ -164,6 +135,7 @@ public class AnnotatedFieldDeserializer {
         return null;
     }
 
+    @SuppressWarnings("squid:S3776")
     private static Object convertPrimitiveValue(String value, Class<?> type) throws ParseException {
         if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
             return value.toLowerCase().trim().equals("true");

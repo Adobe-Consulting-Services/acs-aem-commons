@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("squid:S1214")
 public interface WorkflowInstanceRemover {
 
     String WORKFLOW_INSTANCES_PATH = "/etc/workflow/instances";

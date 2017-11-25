@@ -43,6 +43,34 @@
         SELECTOR_FORM_CREATE_PAGE: "form.cq-siteadmin-admin-createpage",
         SELECTOR_FORM_PROPERTIES_PAGE: "form#propertiesform",
 
+        nestedPluck: function(object, key) {
+            if (!_.isObject(object) || _.isEmpty(object) || _.isEmpty(key)) {
+                return [];
+            }
+
+            if (key.indexOf("/") === -1) {
+                return object[key];
+            }
+
+            var nestedKeys = _.reject(key.split("/"), function(token) {
+                return token.trim() === "";
+            }), nestedObjectOrValue = object;
+
+            _.each(nestedKeys, function(nKey) {
+                if(_.isUndefined(nestedObjectOrValue)){
+                    return;
+                }
+
+                if(_.isUndefined(nestedObjectOrValue[nKey])){
+                    nestedObjectOrValue = undefined;
+                    return;
+                }
+
+                nestedObjectOrValue = nestedObjectOrValue[nKey];
+            });
+
+            return nestedObjectOrValue;
+        },
 
         isSelectOne: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "select-one");
@@ -87,8 +115,14 @@
         setDateField: function ($field, value) {
             var date = moment(new Date(value));
             var $parent = $field.parent();
-            $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
-            $field.val(date.format($parent.attr("data-stored-format")));
+            if (date.isValid()) {
+                $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
+                $field.val(date.format($parent.attr("data-stored-format")));
+            }
+            else {
+                $parent.find("input.coral-Textfield").val(value);
+                $field.val(value);
+            }
         },
 
         isRichTextField: function ($field) {

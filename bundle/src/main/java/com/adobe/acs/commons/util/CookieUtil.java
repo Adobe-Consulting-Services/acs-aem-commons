@@ -169,6 +169,34 @@ public class CookieUtil {
     }
 
     /**
+     * Internal method used for dropping cookies
+     *
+     * @param response
+     * @param cookies
+     * @param cookiePath
+     * @return
+     */
+    private static int dropCookies(final HttpServletResponse response, final Cookie[] cookies, final String cookiePath) {
+        int count = 0;
+
+        for (final Cookie cookie : cookies) {
+            if (cookie == null) {
+                continue;
+            }
+
+            final Cookie responseCookie = (Cookie) cookie.clone();
+            responseCookie.setMaxAge(0);
+            responseCookie.setPath(cookiePath);
+            responseCookie.setValue("");
+
+            addCookie(responseCookie, response);
+            count++;
+        }
+
+        return count;
+    }
+
+    /**
      * Remove the Cookies whose names match the provided Regex from Response
      *
      * @param request  Request to get the Cookies to drop
@@ -216,33 +244,5 @@ public class CookieUtil {
         }
 
         return dropCookies(response, cookies, cookiePath);
-    }
-
-    /**
-     * Internal method used for dropping cookies
-     *
-     * @param response
-     * @param cookies
-     * @param cookiePath
-     * @return
-     */
-    private static int dropCookies(final HttpServletResponse response, final Cookie[] cookies, final String cookiePath) {
-        int count = 0;
-
-        for (final Cookie cookie : cookies) {
-            if (cookie == null) {
-                continue;
-            }
-
-            final Cookie responseCookie = (Cookie) cookie.clone();
-            responseCookie.setMaxAge(0);
-            responseCookie.setPath(cookiePath);
-            responseCookie.setValue("");
-
-            addCookie(responseCookie, response);
-            count++;
-        }
-
-        return count;
     }
 }

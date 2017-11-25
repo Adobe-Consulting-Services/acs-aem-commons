@@ -81,6 +81,8 @@ public class HealthCheckStatusEmailer implements Runnable {
     private static final int HEALTH_CHECK_STATUS_PADDING = 20;
     private static final int NUM_DASHES = 100;
 
+    private static final Object LOCK = new Object();
+
     private Calendar nextEmailTime = Calendar.getInstance();
 
     /* OSGi Properties */
@@ -196,10 +198,10 @@ public class HealthCheckStatusEmailer implements Runnable {
         final long timeTaken = System.currentTimeMillis() - start;
         log.info("Executed ACS Commons Health Check E-mailer scheduled service in [ {} ms ]", timeTaken);
 
-        if (!sendEmailOnlyOnFailure || (sendEmailOnlyOnFailure && failure.size() > 0)) {
+        if (!sendEmailOnlyOnFailure || failure.size() > 0) {
             if (nextEmailTime == null || Calendar.getInstance().after(nextEmailTime)) {
                 sendEmail(success, failure, timeTaken);
-                synchronized (nextEmailTime) {
+                synchronized (LOCK) {
                     nextEmailTime = Calendar.getInstance();
                     nextEmailTime.add(Calendar.MINUTE, throttleInMins);
                 }
@@ -218,6 +220,7 @@ public class HealthCheckStatusEmailer implements Runnable {
      * @param failure the list of unsuccessful Health Check Execution Results
      * @param timeTaken the time taken to execute all Health Checks
      */
+    @SuppressWarnings("squid:S1192")
     protected final void sendEmail(final List<HealthCheckExecutionResult> success, final List<HealthCheckExecutionResult> failure, final long timeTaken) {
         final ProductInfo[] productInfos = productInfoService.getInfos();
         final String hostname = getHostname();
@@ -316,13 +319,14 @@ public class HealthCheckStatusEmailer implements Runnable {
      *
      * @return the AEM Instance's hostname.
      */
+    @SuppressWarnings({"squid:S3776", "squid:S1192"})
     private String getHostname() {
         String hostname = null;
-        final String OS = System.getProperty("os.name").toLowerCase();
+        final String os = System.getProperty("os.name").toLowerCase();
 
         // Unpleasant 'if structure' to avoid making unnecessary Runtime calls; only call Runtime.
 
-        if (OS.indexOf("win") >= 0) {
+        if (os.indexOf("win") >= 0) {
             hostname = System.getenv("COMPUTERNAME");
             if (StringUtils.isBlank(hostname)) {
                 try {
@@ -331,7 +335,7 @@ public class HealthCheckStatusEmailer implements Runnable {
                     log.warn("Unable to collect hostname from Windows via 'hostname' command.", ex);
                 }
             }
-        } else if (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("mac") >= 0) {
+        } else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("mac") >= 0) {
             hostname = System.getenv("HOSTNAME");
 
             if (StringUtils.isBlank(hostname)) {
@@ -350,7 +354,7 @@ public class HealthCheckStatusEmailer implements Runnable {
                 }
             }
         } else {
-            log.warn("Unidentifiable OS [ {} ]. Could not collect hostname.", OS);
+            log.warn("Unidentifiable OS [ {} ]. Could not collect hostname.", os);
         }
 
         hostname = StringUtils.trimToNull(hostname);

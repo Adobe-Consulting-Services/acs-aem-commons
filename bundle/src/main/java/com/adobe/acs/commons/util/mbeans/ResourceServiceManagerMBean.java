@@ -27,15 +27,13 @@ import java.util.List;
 
 /**
  * Base methods for the JMX Interface for a ResourceServiceManager
- * 
- * @author danklco
  */
 @ProviderType
 public interface ResourceServiceManagerMBean {
 
-	@Description("Gets the configurations currently registered")
-	List<String> getRegisteredConfigurations();
+    @Description("Gets the configurations currently registered")
+    List<String> getRegisteredConfigurations();
 
-	@Description("Refreshes the cache of registered configurations")
-	void refreshCache() throws LoginException;
+    @Description("Refreshes the cache of registered configurations")
+    void refreshCache() throws LoginException;
 }

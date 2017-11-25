@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>3.10.1-SNAPSHOT</version>
+        <version>3.12.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -68,6 +68,13 @@
                             <target>/apps/acs-commons/install</target>
                         </embedded>
                     </embeddeds>
+                    <dependencies>
+                        <dependency>
+                            <group>day/cq60/product</group>
+                            <name>cq-content</name>
+                            <version>[6.2.136,)</version>
+                        </dependency>
+                    </dependencies>
                     <targetURL>http://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
             </plugin>

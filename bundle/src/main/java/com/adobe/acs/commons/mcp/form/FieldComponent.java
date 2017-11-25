@@ -52,7 +52,7 @@ public abstract class FieldComponent {
         init();
     }
     
-    abstract public void init();
+    public abstract void init();
     
     public SlingScriptHelper getHelper() {
         return sling;

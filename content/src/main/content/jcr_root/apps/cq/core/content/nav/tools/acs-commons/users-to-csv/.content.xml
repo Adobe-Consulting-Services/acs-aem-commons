@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:description="Export AEM Users and their Groups to CSV"
-    jcr:primaryType="nt:unstructured"
-    jcr:title="Users to CSV"
-    href="/etc/acs-commons/users-to-csv.html"
-    id="acs-commons-uses-to-csv"
-    target="_blank"/>

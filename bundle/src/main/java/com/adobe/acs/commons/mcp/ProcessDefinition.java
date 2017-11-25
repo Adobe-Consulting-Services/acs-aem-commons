@@ -30,15 +30,15 @@ public abstract class ProcessDefinition implements FormProcessor {
 
     String name;
 
-    final public void setName(String n) {
+    public final void setName(String n) {
         name = n;
     }
 
-    final public String getName() {
+    public final String getName() {
         return name;
     }
 
-    abstract public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
+    public abstract void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException;
 
-    abstract public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException;
+    public abstract void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException;
 }

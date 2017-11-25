@@ -98,8 +98,8 @@ public class BasicResourceDefinition implements ResourceDefinition {
     public int hashCode() {
         // you pick a hard-coded, randomly chosen, non-zero, odd number
         // ideally different for each class
-        return new HashCodeBuilder(3748317, 3479337).
-                append(getId()).
-                toHashCode();
+        return new HashCodeBuilder(3748317, 3479337)
+                .append(getId())
+                .toHashCode();
     }
 }
