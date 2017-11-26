@@ -179,6 +179,10 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
                 return false;
             }
 
+            if (o == null) {
+                return false;
+            }
+
             ResourceTypeCacheKey that = (ResourceTypeCacheKey) o;
             return new EqualsBuilder()
                     .append(getUri(), that.getUri())

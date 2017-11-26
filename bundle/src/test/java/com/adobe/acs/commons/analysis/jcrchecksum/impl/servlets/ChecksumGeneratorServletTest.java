@@ -53,7 +53,7 @@ public class ChecksumGeneratorServletTest {
     private static final String SERVLET_EXTENSION = "txt";
 
     @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_JACKRABBIT);
+    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Spy
     private ChecksumGenerator checksumGenerator = new ChecksumGeneratorImpl();
@@ -72,7 +72,7 @@ public class ChecksumGeneratorServletTest {
     @Test
     public void testWithNoPath() throws Exception {
         ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver);
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
         request.setResource(resourceResolver.getResource(SERVLET_PATH));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString(SERVLET_SELECTORS);

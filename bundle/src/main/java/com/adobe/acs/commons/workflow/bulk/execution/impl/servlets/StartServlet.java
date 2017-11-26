@@ -60,6 +60,7 @@ public class StartServlet extends SlingAllMethodsServlet {
     private BulkWorkflowEngine bulkWorkflowEngine;
 
     @Override
+    @SuppressWarnings("squid:S1192")
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 

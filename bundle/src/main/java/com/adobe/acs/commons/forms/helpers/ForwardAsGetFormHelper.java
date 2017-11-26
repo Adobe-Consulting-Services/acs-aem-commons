@@ -37,6 +37,7 @@ import java.io.IOException;
  * Interface used for working with ACS-AEM-Commons forms.
  */
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface ForwardAsGetFormHelper extends FormHelper {
     public final String REQUEST_ATTR_FORM_KEY = ForwardAsGetFormHelper.class.getName() + "__Form_";
 
@@ -50,7 +51,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
 
     /**
      * Creates a synthetic GET request that can be used in the context of a real
-     * POST request to build GET renditions of resources.
+     * POST request to retrieve GET renditions of resources.
      *
      * This method is best used for AJAX-based forms, as the result on error is
      * only the markup associated with the error-ing form (not the whole page)
@@ -70,7 +71,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
 
     /**
      * Creates a synthetic GET request that can be used in the context of a real
-     * POST request to build GET renditions of resources.
+     * POST request to retrieve GET renditions of resources.
      *
      * This method is best used for AJAX-based forms, as the result on error is
      * only the markup associated with the error-ing form (not the whole page)
@@ -90,7 +91,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
 
     /**
      * Creates a synthetic GET request that can be used in the context of a real
-     * POST request to build GET renditions of resources.
+     * POST request to retrieve GET renditions of resources.
      *
      * This method is best used for full POST-back forms that perform a full synchronous POST
      * on submission.
@@ -131,7 +132,7 @@ public interface ForwardAsGetFormHelper extends FormHelper {
     /**
      /**
      * Creates a synthetic GET request that can be used in the context of a real
-     * POST request to build GET renditions of resources.
+     * POST request to retrieve GET renditions of resources.
      *
      * This method is best used for a customized scenarios where the current resource or currentPage do not suffice.
      *

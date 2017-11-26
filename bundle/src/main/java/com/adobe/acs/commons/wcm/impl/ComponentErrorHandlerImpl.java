@@ -51,6 +51,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 @Component(
@@ -85,6 +86,16 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     static final String REQ_ATTR_PREVIOUSLY_PROCESSED =
             ComponentErrorHandlerImpl.class.getName() + "_previouslyProcessed";
+
+
+    private static final String SERVICE_NAME = "component-error-handler";
+    private static final Map<String, Object> AUTH_INFO;
+    private static final String DISABLED = "Disabled";
+    private static final String ENABLED = "Enabled";
+
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -170,6 +181,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // no-op
     }
 
     @Override
@@ -278,8 +290,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         try {
             // Component error renditions are typically stored under /apps as part of the application; and thus
             // requires elevated ACLs to work on Publish instances.
-            // ONLY use this admin resource resolver to get the component error HTML and then immediately close.
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             return ResourceDataUtil.getNTFileAsString(path, resourceResolver);
         } catch (final Exception e) {
@@ -295,21 +306,16 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     protected final boolean accepts(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
 
-        if (!StringUtils.endsWith(request.getRequestURI(), ".html") ||
-                !StringUtils.contains(response.getContentType(), "html")) {
+        if (!StringUtils.endsWith(request.getRequestURI(), ".html")
+                || !StringUtils.contains(response.getContentType(), "html")) {
             // Do not inject around non-HTML requests
             return false;
         }
 
         final ComponentContext componentContext = WCMUtils.getComponentContext(request);
-        if (componentContext == null) {
-            // ComponentContext is null
-            return false;
-        } else if (componentContext.getComponent() == null) {
-            // Component is null
-            return false;
-        } else if (componentContext.isRoot()) {
-            // Suppress on root context
+        if (componentContext == null // ComponentContext is null
+                || componentContext.getComponent() == null // Component is null
+                || componentContext.isRoot()) { // Suppress on root context
             return false;
         }
 
@@ -378,15 +384,15 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
 
         log.info("Component Error Handling for Edit Modes: {} ~> {}",
-                editModeEnabled ? "Enabled" : "Disabled",
+                editModeEnabled ? ENABLED : DISABLED,
                 editErrorHTMLPath);
 
         log.info("Component Error Handling for Preview Modes: {} ~> {}",
-                previewModeEnabled ? "Enabled" : "Disabled",
+                previewModeEnabled ? ENABLED : DISABLED,
                 previewErrorHTMLPath);
 
         log.info("Component Error Handling for Publish Modes: {} ~> {}",
-                publishModeEnabled ? "Enabled" : "Disabled",
+                publishModeEnabled ? ENABLED : DISABLED,
                 publishErrorHTMLPath);
 
         suppressedResourceTypes = PropertiesUtil.toStringArray(config.get(PROP_SUPPRESSED_RESOURCE_TYPES),

@@ -26,8 +26,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.CharEncoding;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.mail.SimpleEmail;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
@@ -36,7 +43,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.mail.internet.InternetAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Component(metatype = true,
         label = "ACS AEM Commons - Health Check - SMTP E-Mail Service",
@@ -59,6 +69,7 @@ import java.util.*;
                 value = "smtpMailService",
                 propertyPrivate = true)})
 @Service
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public class SMTPMailServiceHealthCheck implements HealthCheck {
     private static final Logger log = LoggerFactory.getLogger(SMTPMailServiceHealthCheck.class);
 
@@ -66,8 +77,8 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
     private static final int TIMEOUT = 1000 * 10;
 
     private static String MAIL_TEMPLATE =
-            System.getProperty("line.separator") +
-                    "Sling Health Check for AEM E-mail Service connectivity";
+            System.getProperty("line.separator")
+                    + "Sling Health Check for AEM E-mail Service connectivity";
 
     private static final String DEFAULT_EMAIL = "healthcheck@example.com";
     @Property(
@@ -75,17 +86,18 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
             description = "E-mail address to send test message to.",
             value = DEFAULT_EMAIL)
     private static final String PROP_EMAIL = "email";
-    private String email;
+    private String toEmail;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private MessageGatewayService messageGatewayService;
 
     @Activate
     protected void activate(Map<String, Object> properties) {
-        this.email = PropertiesUtil.toString(properties.get(PROP_EMAIL), DEFAULT_EMAIL);
+        this.toEmail = PropertiesUtil.toString(properties.get(PROP_EMAIL), DEFAULT_EMAIL);
     }
 
     @Override
+    @SuppressWarnings("squid:S1141")
     public Result execute() {
         final FormattingResultLog resultLog = new FormattingResultLog();
 
@@ -102,7 +114,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
             } else {
                 try {
                     List<InternetAddress> emailAddresses = new ArrayList<InternetAddress>();
-                    emailAddresses.add(new InternetAddress(this.email));
+                    emailAddresses.add(new InternetAddress(this.toEmail));
                     MailTemplate mailTemplate = new MailTemplate(IOUtils.toInputStream(MAIL_TEMPLATE), CharEncoding.UTF_8);
                     SimpleEmail email = mailTemplate.getEmail(StrLookup.mapLookup(Collections.emptyMap()), SimpleEmail.class);
 
@@ -113,15 +125,15 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
                     email.setSocketTimeout(TIMEOUT);
                     try {
                         messageGateway.send(email);
-                        resultLog.info("The E-mail Service appears to be working properly. Verify the health check e-mail was sent to [ {} ]", this.email);
+                        resultLog.info("The E-mail Service appears to be working properly. Verify the health check e-mail was sent to [ {} ]", this.toEmail);
                     } catch (Exception e) {
-                        resultLog.critical("Failed sending e-mail. Unable to send a test email via the configured E-mail server: " + e.getMessage(), e);
+                        resultLog.critical("Failed sending e-mail. Unable to send a test toEmail via the configured E-mail server: " + e.getMessage(), e);
                         log.warn("Failed to send E-mail for E-mail Service health check", e);
                     }
 
                     logMailServiceConfig(resultLog, email);
                 } catch (Exception e) {
-                    resultLog.healthCheckError("Sling Health check could not formulate a test email: " + e.getMessage(), e);
+                    resultLog.healthCheckError("Sling Health check could not formulate a test toEmail: " + e.getMessage(), e);
                     log.error("Unable to execute E-mail health check", e);
                 }
             }

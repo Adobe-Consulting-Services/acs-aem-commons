@@ -21,12 +21,12 @@ package com.adobe.acs.commons.twitter.impl;
 
 import java.util.Map;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
@@ -55,7 +55,7 @@ import com.day.cq.wcm.webservicesupport.ConfigurationManager;
                 "com.day.cq.wcm.webservicesupport.Configuration" }, propertyPrivate = true),
         @Property(name = AdapterFactory.ADAPTER_CLASSES, value = { "twitter4j.Twitter",
                 "com.adobe.acs.commons.twitter.TwitterClient" }, propertyPrivate = true) })
-public final class TwitterAdapterFactory implements AdapterFactory {
+public class TwitterAdapterFactory implements AdapterFactory {
 
     private static final String CLOUD_SERVICE_NAME = "twitterconnect";
 
@@ -72,9 +72,6 @@ public final class TwitterAdapterFactory implements AdapterFactory {
     @Property(label = "Use SSL", description = "Use SSL Connections", boolValue = DEFAULT_USE_SSL)
     private static final String PROP_USE_SSL = "use.ssl";
 
-    @Reference
-    private ConfigurationManager configurationManager;
-
     private TwitterFactory factory;
 
     private String httpProxyHost;
@@ -88,9 +85,9 @@ public final class TwitterAdapterFactory implements AdapterFactory {
     public <AdapterType> AdapterType getAdapter(Object adaptable, Class<AdapterType> type) {
         TwitterClient client = null;
         if (adaptable instanceof Page) {
-            client = createTwitterClient((Page) adaptable);
+            client = createTwitterClientFromPage((Page) adaptable);
         } else if (adaptable instanceof com.day.cq.wcm.webservicesupport.Configuration) {
-            client = createTwitterClient((com.day.cq.wcm.webservicesupport.Configuration) adaptable);
+            client = createTwitterClientFromConfiguration((com.day.cq.wcm.webservicesupport.Configuration) adaptable);
         }
 
         if (client != null) {
@@ -116,19 +113,19 @@ public final class TwitterAdapterFactory implements AdapterFactory {
         return builder.build();
     }
 
-    private TwitterClient createTwitterClient(com.day.cq.wcm.webservicesupport.Configuration config) {
+    private TwitterClient createTwitterClientFromConfiguration(com.day.cq.wcm.webservicesupport.Configuration config) {
         Resource oauthConfig = config.getContentResource().listChildren().next();
         ValueMap oauthProps = oauthConfig.getValueMap();
         String consumerKey = oauthProps.get("oauth.client.id", String.class);
         String consumerSecret = oauthProps.get("oauth.client.secret", String.class);
 
         if (consumerKey != null && consumerSecret != null) {
-            Twitter t = factory.getInstance();
+            Twitter twitter = getInstance();
             log.debug("Creating client for key {}.", consumerKey);
-            t.setOAuthConsumer(consumerKey, consumerSecret);
+            twitter.setOAuthConsumer(consumerKey, consumerSecret);
             try {
-                t.getOAuth2Token();
-                return new TwitterClientImpl(t, config);
+                twitter.getOAuth2Token();
+                return new TwitterClientImpl(twitter, config);
             } catch (TwitterException e) {
                 log.error("Unable to create Twitter client.", e);
                 return null;
@@ -140,22 +137,28 @@ public final class TwitterAdapterFactory implements AdapterFactory {
         return null;
     }
 
-    private TwitterClient createTwitterClient(Page page) {
+    @VisibleForTesting
+    Twitter getInstance() {
+        return factory.getInstance();
+    }
+
+    private TwitterClient createTwitterClientFromPage(Page page) {
         com.day.cq.wcm.webservicesupport.Configuration config = findTwitterConfiguration(page);
         if (config != null) {
-            return createTwitterClient(config);
+            return createTwitterClientFromConfiguration(config);
         }
         return null;
     }
 
     private com.day.cq.wcm.webservicesupport.Configuration findTwitterConfiguration(Page page) {
+        ConfigurationManager configurationManager = page.getContentResource().getResourceResolver().adaptTo(ConfigurationManager.class);
+
         final HierarchyNodeInheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(
                 page.getContentResource());
         final String[] services = pageProperties.getInherited(ConfigurationConstants.PN_CONFIGURATIONS,
                 new String[0]);
-        final com.day.cq.wcm.webservicesupport.Configuration cfg = configurationManager.getConfiguration(
+        return configurationManager.getConfiguration(
                 CLOUD_SERVICE_NAME, services);
-        return cfg;
     }
 
     @Activate

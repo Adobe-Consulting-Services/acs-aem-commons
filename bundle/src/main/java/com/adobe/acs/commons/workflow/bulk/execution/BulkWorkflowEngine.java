@@ -27,6 +27,7 @@ import org.apache.sling.api.resource.PersistenceException;
 import javax.jcr.RepositoryException;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface BulkWorkflowEngine {
     String SLING_RESOURCE_TYPE = "acs-commons/components/utilities/bulk-workflow-manager";
 

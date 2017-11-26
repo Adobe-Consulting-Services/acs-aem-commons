@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="6a14e71d-f983-35e6-8353-cdfa7c15284d"
+    rep:authorizableId="acs-commons-package-replication-status-event-service"
+    rep:principalName="acs-commons-package-replication-status-event-service"/>

@@ -24,11 +24,11 @@ import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
-import com.day.jcr.vault.util.Text;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.vault.util.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +113,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
             RepositoryException,
             IOException {
 
-        final Map<String, String> checksums = new LinkedHashMap<String, String>();
+        final Map<String, String> checksums = new LinkedHashMap<>();
 
         if (isChecksumable(node, options)) {
             // Tree-traversal has found a node to checksum (checksum will include all valid sub-tree nodes)
@@ -236,7 +236,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
                                                       final ChecksumGeneratorOptions options)
             throws RepositoryException, IOException {
 
-        SortedMap<String, String> propertyChecksums = new TreeMap<String, String>();
+        SortedMap<String, String> propertyChecksums = new TreeMap<>();
         PropertyIterator properties = node.getProperties();
 
         while (properties.hasNext()) {
@@ -306,7 +306,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
      * @throws RepositoryException
      */
     private List<Value> getPropertyValues(final Property property) throws RepositoryException {
-        final List<Value> values = new ArrayList<Value>();
+        final List<Value> values = new ArrayList<>();
 
         if (property.isMultiple()) {
             values.addAll(Arrays.asList(property.getValues()));

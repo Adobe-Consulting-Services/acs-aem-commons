@@ -22,7 +22,7 @@ package com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions;
 
 import com.day.cq.workflow.WorkflowException;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "squid:S2166"})
 public class SyntheticRestartWorkflowException extends WorkflowException {
     public SyntheticRestartWorkflowException(String message) {
         super(message);

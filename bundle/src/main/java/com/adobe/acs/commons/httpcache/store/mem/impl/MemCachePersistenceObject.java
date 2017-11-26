@@ -101,6 +101,7 @@ class MemCachePersistenceObject {
     public int getStatus() {
         return status;
     }
+
     /**
      * Get char encoding.
      *
@@ -157,5 +158,7 @@ class MemCachePersistenceObject {
     /**
      * @return the number of times this cache entry has been requested
      */
-    public int getHitCount() { return count.get(); }
+    public int getHitCount() {
+        return count.get();
+    }
 }

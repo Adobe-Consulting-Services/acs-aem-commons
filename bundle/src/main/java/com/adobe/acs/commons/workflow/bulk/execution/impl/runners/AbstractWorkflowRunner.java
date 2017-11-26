@@ -33,18 +33,28 @@ import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(AbstractWorkflowRunner.class);
     private static final int SAVE_THRESHOLD = 1000;
+
+    protected static final String SERVICE_NAME = "bulk-workflow-runner";
+    protected static final Map<String, Object> AUTH_INFO;
+
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     /**
      * {@inheritDoc}
@@ -110,6 +120,7 @@ public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
         workspace.commit();
     }
 
+    @Override
     public void start(Workspace workspace) throws PersistenceException {
         workspace.setStatus(Status.RUNNING);
         if (workspace.getStartedAt() == null) {
@@ -118,17 +129,20 @@ public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
         workspace.commit();
     }
 
+    @Override
     public void stopping(Workspace workspace) throws PersistenceException {
         workspace.setStatus(Status.RUNNING, SubStatus.STOPPING);
         workspace.commit();
     }
 
+    @Override
     public void stop(Workspace workspace) throws PersistenceException {
         workspace.setStatus(Status.STOPPED);
         workspace.setStoppedAt(Calendar.getInstance());
         workspace.commit();
     }
 
+    @Override
     public void stop(Workspace workspace, SubStatus subStatus) throws PersistenceException {
         if (subStatus != null) {
             workspace.setStatus(Status.STOPPED, subStatus);
@@ -139,22 +153,21 @@ public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
         workspace.commit();
     }
 
+    @Override
     public void stopWithError(Workspace workspace) throws PersistenceException {
         workspace.setStatus(Status.STOPPED, SubStatus.ERROR);
         workspace.setStoppedAt(Calendar.getInstance());
         workspace.commit();
     }
 
+    @Override
     public void complete(Workspace workspace) throws PersistenceException {
         workspace.setStatus(Status.COMPLETED);
         workspace.setCompletedAt(Calendar.getInstance());
         workspace.commit();
     }
 
-    public void run(Workspace workspace, Payload payload) {
-        payload.setStatus(Status.RUNNING);
-    }
-
+    @Override
     public void complete(Workspace workspace, Payload payload) throws Exception {
         // Remove active payload
         if (workspace != null) {
@@ -165,6 +178,11 @@ public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
         } else {
             log.warn("Unable to processing complete for payload [ {} ~> {} ]", payload.getPath(), payload.getPayloadPath());
         }
+    }
+
+    @Override
+    public void run(Workspace workspace, Payload payload) {
+        payload.setStatus(Status.RUNNING);
     }
 
     public void fail(Workspace workspace, Payload payload) throws Exception {
@@ -178,5 +196,6 @@ public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
         workspace.addFailure(payload);
     }
 
+    @Override
     public abstract void forceTerminate(Workspace workspace, Payload payload) throws Exception;
 }

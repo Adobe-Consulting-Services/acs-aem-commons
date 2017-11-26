@@ -63,8 +63,8 @@ import java.util.Map;
  * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
  */
 @Component(label = "ACS AEM Commons - HTTP Cache - Group based extension for HttpCacheConfig and CacheKeyFactory.",
-           description = "HttpCacheConfig custom extension for group based configuration and associated cache key " +
-                   "creation.",
+           description = "HttpCacheConfig custom extension for group based configuration and associated cache key "
+                   + "creation.",
            metatype = true,
            configurationFactory = true,
            policy = ConfigurationPolicy.REQUIRE
@@ -177,6 +177,10 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
         @Override
         public boolean equals(Object o) {
             if (!super.equals(o)) {
+                return false;
+            }
+
+            if (o == null) {
                 return false;
             }
 

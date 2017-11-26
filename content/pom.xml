@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>2.12.0</version>
+        <version>3.12.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -31,6 +31,10 @@
                 <directory>src/main/content/META-INF/vault/definition</directory>
                 <targetPath>../vault-work/META-INF/vault/definition</targetPath>
             </resource>
+            <resource>
+                <directory>src/main/resources/META-INF</directory>
+                <targetPath>../vault-work/META-INF</targetPath>
+            </resource>
         </resources>
 
         <plugins>
@@ -49,6 +53,9 @@
                 <configuration>
                     <group>adobe/consulting</group>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+                    <properties>
+                        <acHandling>merge_preserve</acHandling>
+                    </properties>
                     <embeddeds>
                         <embedded>
                             <groupId>${project.groupId}</groupId>
@@ -61,6 +68,13 @@
                             <target>/apps/acs-commons/install</target>
                         </embedded>
                     </embeddeds>
+                    <dependencies>
+                        <dependency>
+                            <group>day/cq60/product</group>
+                            <name>cq-content</name>
+                            <version>[6.2.136,)</version>
+                        </dependency>
+                    </dependencies>
                     <targetURL>http://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
             </plugin>
@@ -86,9 +100,10 @@
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/components/content/base/ajax/loading-indicator-clientlibs/js/vendor/spin.min.js</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/extensions/contentfinder/audio.js</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/jquery.fonticonpicker/jquery.fonticonpicker.js</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/js/vendor</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js</exclude>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/page-compare/clientlibs/js/vendor/diff.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/leaflet/js/leaflet.js</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -185,7 +200,8 @@
         </dependency>
         <dependency>
             <groupId>com.adobe.aem</groupId>
-            <artifactId>aem-api</artifactId>
+            <artifactId>uber-jar</artifactId>
+            <classifier>apis</classifier>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>

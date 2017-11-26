@@ -66,6 +66,7 @@ public class FormsPostFilterImpl implements javax.servlet.Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // no-op
     }
 
     @Override
@@ -123,6 +124,7 @@ public class FormsPostFilterImpl implements javax.servlet.Filter {
 
     @Override
     public void destroy() {
+        // no-op
     }
 
     private String getParameter(SlingHttpServletRequest slingRequest, String param) {

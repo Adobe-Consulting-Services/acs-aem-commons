@@ -25,6 +25,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import aQute.bnd.annotation.ProviderType;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface ComponentErrorHandler {
     /**
      * When attribute is set on the Request causes Component Error Handler implementation to be skipped.

@@ -49,4 +49,10 @@ public interface ActionManagerFactory extends ActionManagerMBean {
      * @return true if an ActionManager is registered w the provided name, false otherwise.
      */
     public boolean hasActionManager(String name);
+
+    /**
+     * Remove a specific manager by its object reference
+     * @param manager 
+     */
+    public void purge(ActionManager manager);
 }

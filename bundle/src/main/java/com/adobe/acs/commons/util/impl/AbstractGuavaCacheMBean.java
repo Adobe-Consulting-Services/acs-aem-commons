@@ -63,6 +63,7 @@ public abstract class AbstractGuavaCacheMBean<K, V> extends AbstractCacheMBean<K
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public final TabularData getCacheStats() throws OpenDataException {
         // Exposing all google guava stats.
         final CompositeType cacheEntryType = new CompositeType("Cache Stats", "Cache Stats",

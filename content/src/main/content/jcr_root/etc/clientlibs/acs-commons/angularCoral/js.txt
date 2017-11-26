@@ -7,4 +7,3 @@ checkbox.js
 toolsHeader.js
 list.js
 table.js
-select.js

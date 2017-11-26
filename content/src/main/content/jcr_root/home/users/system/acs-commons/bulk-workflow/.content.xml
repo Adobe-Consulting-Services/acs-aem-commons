@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="b03204a7-0df9-30eb-85d9-513054ee5443"
+    rep:authorizableId="acs-commons-bulk-workflow-service"
+    rep:principalName="acs-commons-bulk-workflow-service"/>

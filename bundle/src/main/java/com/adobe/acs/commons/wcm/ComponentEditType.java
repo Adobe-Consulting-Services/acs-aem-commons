@@ -32,6 +32,7 @@ import aQute.bnd.annotation.ProviderType;
  * }
  */
 @ProviderType
+@SuppressWarnings("squid:S1118")
 public final class ComponentEditType {
     public static final Type CHART = new Type("CHART");
     public static final Type IMAGE = new Type("IMAGE");
@@ -52,8 +53,8 @@ public final class ComponentEditType {
      *
      */
     public static class Type {
-        private final static String CSS_PREFIX = "cq-";
-        private final static String CSS_POSTFIX = "-placeholder";
+        private static final String CSS_PREFIX = "cq-";
+        private static final String CSS_POSTFIX = "-placeholder";
         private final String name;
         private final String cssClass;
 

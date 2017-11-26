@@ -22,10 +22,10 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
 import com.adobe.acs.commons.workflow.bulk.execution.model.PayloadGroup;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
@@ -34,7 +34,6 @@ import org.apache.commons.collections.ListUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -118,16 +117,18 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
             this.scheduler = scheduler;
         }
 
+        @Override
+        @SuppressWarnings({"squid:S3776", "squid:S1141"})
         public void run() {
-            ResourceResolver resourceResolver = null;
+            ResourceResolver serviceResourceResolver = null;
             Resource configResource;
             long start = System.currentTimeMillis();
             int total = 0;
             boolean stopped = false;
 
             try {
-                resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                configResource = resourceResolver.getResource(configPath);
+                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+                configResource = serviceResourceResolver.getResource(configPath);
 
                 final Config config = configResource.adaptTo(Config.class);
                 final Workspace workspace = config.getWorkspace();
@@ -137,10 +138,10 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
                 }
 
                 try {
-                    SyntheticWorkflowModel model = syntheticWorkflowRunner.getSyntheticWorkflowModel(resourceResolver, config.getWorkflowModelId(), true);
+                    SyntheticWorkflowModel model = syntheticWorkflowRunner.getSyntheticWorkflowModel(serviceResourceResolver, config.getWorkflowModelId(), true);
 
                     if (config.isUserEventData()) {
-                        resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(config.getUserEventData());
+                        serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(config.getUserEventData());
                         log.debug("Set JCR Sessions user-event-data to [ {} ]", config.getUserEventData());
                     }
 
@@ -180,7 +181,7 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
                                 }
 
                                 long processStart = System.currentTimeMillis();
-                                swr.execute(resourceResolver, payload.getPayloadPath(), model, false, false);
+                                swr.execute(serviceResourceResolver, payload.getPayloadPath(), model, false, false);
                                 complete(workspace, payload);
                                 log.info("Processed [ {} ] in {} ms", payload.getPayloadPath(), System.currentTimeMillis() - processStart);
                             } catch (WorkflowException e) {
@@ -215,8 +216,8 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
             } catch (Exception e) {
                 log.error("Error processing Bulk Synthetic Workflow execution.", e);
             } finally {
-                if (resourceResolver != null) {
-                    resourceResolver.close();
+                if (serviceResourceResolver != null) {
+                    serviceResourceResolver.close();
                 }
             }
         }

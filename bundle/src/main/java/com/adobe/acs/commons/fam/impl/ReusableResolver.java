@@ -35,7 +35,7 @@ public class ReusableResolver {
         resolver = res;
         changeCount = 0;
         saveInterval = save;
-        pendingItems = new ArrayList<String>();
+        pendingItems = new ArrayList<>();
     }
 
     public void setCurrentItem(String current) {

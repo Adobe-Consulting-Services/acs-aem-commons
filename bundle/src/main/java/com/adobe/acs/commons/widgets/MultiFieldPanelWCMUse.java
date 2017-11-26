@@ -19,10 +19,10 @@
  */
 package com.adobe.acs.commons.widgets;
 
-import io.sightly.java.api.Use;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
+import org.apache.sling.scripting.sightly.pojo.Use;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

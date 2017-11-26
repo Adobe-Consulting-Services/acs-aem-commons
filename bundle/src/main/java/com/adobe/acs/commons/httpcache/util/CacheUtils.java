@@ -32,9 +32,7 @@ import java.io.IOException;
 public class CacheUtils {
     private static final Logger log = LoggerFactory.getLogger(CacheUtils.class);
 
-    private CacheUtils() {
-        throw new Error(CacheUtils.class.getName() + " is not meant to be instantiated.");
-    }
+    private CacheUtils() {}
 
     /**
      * Create a temporary file for taking copy of servlet response stream.

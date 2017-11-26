@@ -51,6 +51,8 @@ import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
 )
 public class UsersInitServlet extends SlingSafeMethodsServlet {
     private static final String QUERY = "SELECT * FROM [rep:Group] WHERE ISDESCENDANTNODE([/home/groups]) ORDER BY [rep:principalName]";
+    private static final String KEY_TEXT = "text";
+    private static final String KEY_VALUE = "value";
 
     /**
      * Returns a JSON containing the options available to the form, and any prior saved data that should pre-write the form.
@@ -115,21 +117,20 @@ public class UsersInitServlet extends SlingSafeMethodsServlet {
      * @throws JSONException
      */
     private JSONArray getGroupFilterOptions() throws JSONException {
-        JSONArray jsonArray = new JSONArray();
-
         JSONObject both = new JSONObject();
-        both.put("text", "Direct or Indirect Membership");
-        both.put("value", GROUP_FILTER_BOTH);
+        both.put(KEY_TEXT, "Direct or Indirect Membership");
+        both.put(KEY_VALUE, GROUP_FILTER_BOTH);
 
         JSONObject direct = new JSONObject();
-        direct.put("text", "Direct Membership");
-        direct.put("value", GROUP_FILTER_DIRECT);
+        direct.put(KEY_TEXT, "Direct Membership");
+        direct.put(KEY_VALUE, GROUP_FILTER_DIRECT);
 
 
         JSONObject indirect = new JSONObject();
-        indirect.put("text", "Indirect Membership");
-        indirect.put("value", GROUP_FILTER_INDIRECT);
+        indirect.put(KEY_TEXT, "Indirect Membership");
+        indirect.put(KEY_VALUE, GROUP_FILTER_INDIRECT);
 
+        JSONArray jsonArray = new JSONArray();
         jsonArray.put(direct);
         jsonArray.put(indirect);
         jsonArray.put(both);

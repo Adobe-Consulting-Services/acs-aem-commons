@@ -112,17 +112,16 @@ public final class JSONGenerator {
             String primaryNodeType;
             try {
                 primaryNodeType = node.getPrimaryNodeType().getName();
-                NodeIterator nIt;
                 if (nodeTypes.contains(primaryNodeType)
                         && !nodeTypeExcludes.contains(primaryNodeType)) {
-                    generateJSON(node, opts, out);
+                    generateNodeJSON(node, opts, out);
                 } else {
-                    nIt = node.getNodes();
-                    while (nIt.hasNext()) {
+                    NodeIterator nodeIterator = node.getNodes();
+                    while (nodeIterator.hasNext()) {
                         primaryNodeType = node.getPrimaryNodeType().getName();
-                        Node child = nIt.nextNode();
+                        Node child = nodeIterator.nextNode();
                         if (nodeTypes.contains(primaryNodeType)) {
-                            generateJSON(child, opts, out);
+                            generateNodeJSON(child, opts, out);
                         } else {
                             traverseTree(child, opts, out);
                         }
@@ -134,8 +133,8 @@ public final class JSONGenerator {
         }
     }
 
-    private static void generateJSON(Node node,
-                                     ChecksumGeneratorOptions opts, JSONWriter out)
+    private static void generateNodeJSON(Node node,
+                                         ChecksumGeneratorOptions opts, JSONWriter out)
             throws RepositoryException, JSONException {
         out.key(node.getPath());
         out.object();
@@ -174,77 +173,74 @@ public final class JSONGenerator {
                                          ChecksumGeneratorOptions opts, JSONWriter out)
             throws RepositoryException, JSONException, ValueFormatException {
         Set<String> excludes = opts.getExcludedProperties();
-        Set<String> sortValues = opts.getSortedProperties();
 
         SortedMap<String, Property> props = new TreeMap<String, Property>();
-        PropertyIterator pi = node.getProperties();
+        PropertyIterator propertyIterator = node.getProperties();
 
         // sort the properties by name as the JCR makes no guarantees on property order
-        while (pi.hasNext()) {
-            Property p = pi.nextProperty();
+        while (propertyIterator.hasNext()) {
+            Property property = propertyIterator.nextProperty();
             //skip the property if it is in the excludes list
-            if (excludes.contains(p.getName())) {
+            if (excludes.contains(property.getName())) {
                 continue;
             } else {
-                props.put(p.getName(), p);
+                props.put(property.getName(), property);
             }
         }
-        pi = null;
 
-        for (Property p : props.values()) {
-            int type = p.getType();
+        for (Property property : props.values()) {
+            outputProperty(property, opts, out);
+        }
+    }
 
-            if (p.isMultiple()) {
-                out.key(p.getName());
-                // create an array for multi value output
-                out.array();
-                boolean isSortedValues = sortValues.contains(p.getName());
-                Value[] values = p.getValues();
-                TreeMap<String, Value> sortedValueMap = new TreeMap<String, Value>();
-                for (Value v : values) {
-                    type = v.getType();
-                    if (type == PropertyType.BINARY) {
-                        if (isSortedValues) {
-                            try {
-                                java.io.InputStream stream =
-                                        v.getBinary().getStream();
-                                String ckSum = DigestUtils.shaHex(stream);
-                                stream.close();
-                                sortedValueMap.put(ckSum, v);
-                            } catch (IOException e) {
-                                sortedValueMap.put("ERROR: generating hash for binary of "
-                                        + p.getPath() + " : " + e.getMessage(), v);
-                            }
-                        } else {
-                            outputPropertyValue(p, v, out);
+    @SuppressWarnings("squid:S3776")
+    private static void outputProperty(Property property, ChecksumGeneratorOptions opts, JSONWriter out)
+            throws RepositoryException, JSONException {
+        Set<String> sortValues = opts.getSortedProperties();
+        if (property.isMultiple()) {
+            out.key(property.getName());
+            // create an array for multi value output
+            out.array();
+            boolean isSortedValues = sortValues.contains(property.getName());
+            Value[] values = property.getValues();
+            TreeMap<String, Value> sortedValueMap = new TreeMap<String, Value>();
+            for (Value v : values) {
+                int type = v.getType();
+                if (type == PropertyType.BINARY) {
+                    if (isSortedValues) {
+                        try {
+                            java.io.InputStream stream =
+                                    v.getBinary().getStream();
+                            String ckSum = DigestUtils.shaHex(stream);
+                            stream.close();
+                            sortedValueMap.put(ckSum, v);
+                        } catch (IOException e) {
+                            sortedValueMap.put("ERROR: generating hash for binary of "
+                                    + property.getPath() + " : " + e.getMessage(), v);
                         }
                     } else {
-                        String val = v.getString();
-                        if (isSortedValues) {
-                            sortedValueMap.put(val, v);
-                        } else {
-                            outputPropertyValue(p, v, out);
-                        }
+                        outputPropertyValue(property, v, out);
+                    }
+                } else {
+                    String val = v.getString();
+                    if (isSortedValues) {
+                        sortedValueMap.put(val, v);
+                    } else {
+                        outputPropertyValue(property, v, out);
                     }
                 }
-                if (isSortedValues) {
-                    for (Value v : sortedValueMap.values()) {
-                        outputPropertyValue(p, v, out);
-                    }
-                }
-                out.endArray();
-                // end multi value property output
-            } else {
-                out.key(p.getName());
-                outputPropertyValue(p, p.getValue(), out);
             }
+            if (isSortedValues) {
+                for (Value v : sortedValueMap.values()) {
+                    outputPropertyValue(property, v, out);
+                }
+            }
+            out.endArray();
+            // end multi value property output
+        } else {
+            out.key(property.getName());
+            outputPropertyValue(property, property.getValue(), out);
         }
-        //        if (nodeTypes.contains(primaryNodeType)) {
-        //            out.print(node.getPath());
-        //            out.print("\t");
-        //            out.println(DigestUtils.shaHex(checkSums.toString()));
-        //            out.flush();
-        //        }
     }
 
     /**
@@ -258,17 +254,17 @@ public final class JSONGenerator {
             throws RepositoryException, JSONException {
         Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
 
-        NodeIterator nIt;
-        nIt = node.getNodes();
+        NodeIterator nodeIterator = node.getNodes();
 
         TreeMap<String, Node> childSortMap = new TreeMap<String, Node>();
         boolean hasOrderedChildren = false;
         try {
             hasOrderedChildren = node.getPrimaryNodeType().hasOrderableChildNodes();
-        } catch (Exception e) {
+        } catch (Exception expected) {
+            // ignore
         }
-        while (nIt.hasNext()) {
-            Node child = nIt.nextNode();
+        while (nodeIterator.hasNext()) {
+            Node child = nodeIterator.nextNode();
             if (!nodeTypeExcludes
                     .contains(child.getPrimaryNodeType().getName())) {
                 if (hasOrderedChildren) {
@@ -293,44 +289,44 @@ public final class JSONGenerator {
         }
     }
 
-    private static void outputPropertyValue(Property p, Value v, JSONWriter out)
+    private static void outputPropertyValue(Property property, Value value, JSONWriter out)
             throws RepositoryException, JSONException {
 
-        if (v.getType() == PropertyType.STRING) {
-            out.value(v.getString());
-        } else if (v.getType() == PropertyType.BINARY) {
+        if (value.getType() == PropertyType.STRING) {
+            out.value(value.getString());
+        } else if (value.getType() == PropertyType.BINARY) {
             try {
-                java.io.InputStream stream = v.getBinary().getStream();
+                java.io.InputStream stream = value.getBinary().getStream();
                 String ckSum = DigestUtils.shaHex(stream);
                 stream.close();
                 out.value(ckSum);
             } catch (IOException e) {
-                out.value("ERROR: calculating hash for binary of " + p.getPath() + " : " + e.getMessage());
+                out.value("ERROR: calculating hash for binary of " + property.getPath() + " : " + e.getMessage());
             }
-        } else if (v.getType() == PropertyType.BOOLEAN) {
-            out.value(v.getBoolean());
-        } else if (v.getType() == PropertyType.DATE) {
-            Calendar cal = v.getDate();
+        } else if (value.getType() == PropertyType.BOOLEAN) {
+            out.value(value.getBoolean());
+        } else if (value.getType() == PropertyType.DATE) {
+            Calendar cal = value.getDate();
             if (cal != null) {
                 out.object();
                 out.key("type");
-                out.value(PropertyType.nameFromValue(v.getType()));
+                out.value(PropertyType.nameFromValue(value.getType()));
                 out.key("val");
                 out.value(cal.getTime().toString());
                 out.endObject();
             }
-        } else if (v.getType() == PropertyType.LONG) {
-            out.value(v.getLong());
-        } else if (v.getType() == PropertyType.DOUBLE) {
-            out.value(v.getDouble());
-        } else if (v.getType() == PropertyType.DECIMAL) {
-            out.value(v.getDecimal());
+        } else if (value.getType() == PropertyType.LONG) {
+            out.value(value.getLong());
+        } else if (value.getType() == PropertyType.DOUBLE) {
+            out.value(value.getDouble());
+        } else if (value.getType() == PropertyType.DECIMAL) {
+            out.value(value.getDecimal());
         } else {
             out.object();
             out.key("type");
-            out.value(PropertyType.nameFromValue(v.getType()));
+            out.value(PropertyType.nameFromValue(value.getType()));
             out.key("val");
-            out.value(v.getString());
+            out.value(value.getString());
             out.endObject();
         }
     }

@@ -27,55 +27,56 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
 @ProviderType
+@SuppressWarnings("squid:S00112")
 public interface MultiStepFormComponent {
 
-	/**
-	 * Get the data from the HTTP Request and move into the Map-based Form
-	 * abstraction
-	 * 
-	 * @param request
-	 * @return
-	 */
-	public Form getForm(SlingHttpServletRequest request, String step);
-	
-	/**
-	 * Validate the provided form data. Create any Error records on the form
-	 * itself.
-	 * 
-	 * @param form
-	 * @return
-	 */
-	public Form validate(Form form, String step);
+    /**
+     * Get the data from the HTTP Request and move into the Map-based Form
+     * abstraction
+     *
+     * @param request
+     * @return
+     */
+    Form getForm(SlingHttpServletRequest request, String step);
 
-	/**
-	 * Save the data to the underlying data store; implementation specific. This
-	 * could be CRX or external data store.
-	 * 
-	 * @param form
-	 * @return
-	 */
-	public boolean save(Form form, String step);
+    /**
+     * Validate the provided form data. Create any Error records on the form
+     * itself.
+     *
+     * @param form
+     * @return
+     */
+    Form validate(Form form, String step);
 
-	/**
-	 * Handle successful form submission. Typically includes a 302 redirect to a
-	 * Success page.
-	 * 
-	 * @param form
-	 * @param request
-	 * @param response
-	 */
-	public void onSuccess(Form form, String step,
+    /**
+     * Save the data to the underlying data store; implementation specific. This
+     * could be CRX or external data store.
+     *
+     * @param form
+     * @return
+     */
+    boolean save(Form form, String step);
+
+    /**
+     * Handle successful form submission. Typically includes a 302 redirect to a
+     * Success page.
+     *
+     * @param form
+     * @param request
+     * @param response
+     */
+    void onSuccess(Form form, String step,
                           SlingHttpServletRequest request, SlingHttpServletResponse response)
-			throws Exception;
+            throws Exception;
 
-	/**
-	 * Handle unsuccessful form submission. Typically includes a 302 redirect
-	 * back to self.
-	 * 
-	 * @param form
-	 * @param request
-	 * @param response
-	 */
-	public void onFailure(Form form, String step, SlingHttpServletRequest request,
+    /**
+     * Handle unsuccessful form submission. Typically includes a 302 redirect
+     * back to self.
+     *
+     * @param form
+     * @param request
+     * @param response
+     */
+    void onFailure(Form form, String step, SlingHttpServletRequest request,
                           SlingHttpServletResponse response) throws Exception;
 }

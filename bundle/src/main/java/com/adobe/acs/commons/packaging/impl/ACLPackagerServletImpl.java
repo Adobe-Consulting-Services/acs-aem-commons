@@ -22,12 +22,12 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.util.AemCapabilityHelper;
-import com.day.jcr.vault.fs.api.PathFilterSet;
-import com.day.jcr.vault.fs.filter.DefaultPathFilter;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
+import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
+import org.apache.jackrabbit.vault.fs.filter.DefaultPathFilter;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -72,8 +72,6 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
     private static final String DEFAULT_PACKAGE_NAME = "acls";
 
     private static final String DEFAULT_PACKAGE_GROUP_NAME = "ACLs";
-
-    private static final String DEFAULT_PACKAGE_VERSION = "1.0.0";
 
     private static final String DEFAULT_PACKAGE_DESCRIPTION = "ACL Package initially defined by a ACS AEM Commons - "
             + "ACL Packager configuration.";
@@ -155,6 +153,7 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
      * @return Set (ordered by path) of rep:ACE coverage who hold permissions for at least one Principal
      * enumerated in principleNames
      */
+    @SuppressWarnings("squid:S3776")
     private List<PathFilterSet> findResources(final ResourceResolver resourceResolver,
                                               final List<String> principalNames,
                                               final List<Pattern> includePatterns) {
@@ -289,12 +288,9 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
      * @return true if the resource's path matches any of the include patterns
      */
     private boolean isIncluded(final Resource resource, final List<Pattern> includePatterns) {
-        if (resource == null) {
-            // Resource is null; so dont accept this
+        if (resource == null // Resource is null; so dont accept this
+                || (!resource.isResourceType("rep:ACL"))) { // ONLY accept the resource is a rep:ACL node
             return false;
-        } else if (!resource.isResourceType("rep:ACL")) {
-            // ONLY accept the resource is a rep:ACL node
-           return false;
         }
 
         if (includePatterns == null || includePatterns.isEmpty()) {
@@ -339,9 +335,5 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
     /**
      * Compares and sorts resources alphabetically (descending) by path.
      */
-    private static Comparator<Resource> resourceComparator = new Comparator<Resource>() {
-        public int compare(final Resource r1, final Resource r2) {
-            return r1.getPath().compareTo(r2.getPath());
-        }
-    };
+    private static Comparator<Resource> resourceComparator = Comparator.comparing(Resource::getPath);
 }

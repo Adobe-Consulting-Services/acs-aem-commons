@@ -85,6 +85,7 @@ public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator imp
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public final boolean includes(final Predicate predicate, final Row row, final EvaluationContext context) {
         boolean or = predicate.getBool(OR);
 

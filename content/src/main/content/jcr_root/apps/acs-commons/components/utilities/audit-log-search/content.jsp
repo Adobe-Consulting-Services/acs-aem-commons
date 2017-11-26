@@ -37,7 +37,7 @@
 					No index found for the type <code>cq:AuditEvent</code>, this will result in very slow performance.
 					</p>
 					<p>
-					For more information on creating the necessary index, please see the <a target="_blank" href="https://adobe-consulting-services.github.io/acs-aem-commons/features/audit-log-search.html">ACS AEM Commons Audit Log Search feature doc page</a>.
+					For more information on creating the necessary index, please see the <a target="_blank" href="https://adobe-consulting-services.github.io/acs-aem-commons/features/audit-log-search/index.html">ACS AEM Commons Audit Log Search feature doc page</a>.
 					</p>
 				</div>
 			</div>

@@ -16,14 +16,18 @@
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/dam/video/mp3hq"/>
     <filter root="/etc/dam/video/ogghq"/>
+    <filter root="/etc/dam/video/flacmono"/>
     <filter root="/etc/cloudservices/typekit">
         <include pattern="/etc/cloudservices/typekit/jcr:content"/>
+        <include pattern="/etc/cloudservices/typekit/rep:policy"/>
     </filter>
     <filter root="/etc/cloudservices/dtm">
         <include pattern="/etc/cloudservices/dtm/jcr:content"/>
+        <include pattern="/etc/cloudservices/dtm/rep:policy"/>
     </filter>
     <filter root="/etc/cloudservices/sharethis">
         <include pattern="/etc/cloudservices/sharethis/jcr:content"/>
+        <include pattern="/etc/cloudservices/sharethis/rep:policy"/>
     </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/oak-index-manager(.*)?" />
@@ -48,14 +52,39 @@
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list/item_\d+"/>
+        <include pattern="/etc/acs-commons/manage-controlled-processes"/>
         <include pattern="/etc/acs-commons/notifications"/>
         <include pattern="/etc/acs-commons/notifications/jcr:content"/>
         <include pattern="/etc/acs-commons/packagers"/>
         <include pattern="/etc/acs-commons/packagers/jcr:content"/>
+        <include pattern="/etc/acs-commons/redirect-maps"/>
+        <include pattern="/etc/acs-commons/redirect-maps/jcr:content"/>
         <include pattern="/etc/acs-commons/workflow-remover(.*)"/>
         <include pattern="/etc/acs-commons/exporters" />
         <include pattern="/etc/acs-commons/exporters/jcr:content" />
         <include pattern="/etc/acs-commons/audit-log-search(.*)?" />
+        <include pattern="/etc/acs-commons/qr-code" />
+        <include pattern="/etc/acs-commons/qr-code/jcr:content" />
+        <include pattern="/etc/acs-commons/qr-code/jcr:content/clientlib-author" mode="merge"/>
+        <exclude pattern="/etc/acs-commons/qr-code/jcr:content/config" mode="merge"/>
     </filter>
+    <filter root="/var/acs-commons" mode="merge"/>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
+    <filter root="/etc/acs-commons/manage-controlled-processes/rep:policy"/>
+    <filter root="/home/users/system/acs-commons"/>
+    <filter root="/apps/rep:policy"/>
+    <filter root="/oak:index/rep:policy"/>
+    <filter root="/rep:policy"/>
+    <filter root="/etc/notification/email">
+        <include pattern="/etc/notification/email/rep:policy"/>
+        <include pattern="/etc/notification/email/acs-commons"/>
+        <include pattern="/etc/notification/email/acs-commons/(.*)?"/>
+    </filter>
+    <filter root="/content/dam/rep:policy"/>
+    <filter root="/content/rep:policy"/>
+    <filter root="/etc/workflow/instances/rep:policy"/>
+    <filter root="/home/users/rep:policy"/>
+    <filter root="/var/acs-commons/rep:policy"/>
+    <filter root="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl"/>
+    <filter root="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/dialogpublishurl"/>
 </workspaceFilter>

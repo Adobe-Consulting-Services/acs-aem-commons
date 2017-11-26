@@ -48,8 +48,11 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlushRulesImpl.AUTH_INFO;
 
 @SuppressWarnings("serial")
 @SlingServlet(resourceTypes = "acs-commons/components/utilities/dispatcher-flush/configuration",
@@ -75,6 +78,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     public static final String PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = "flush-with-admin-resource-resolver";
 
     @Override
+    @SuppressWarnings("squid:S3776")
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         final Resource resource = request.getResource();
@@ -101,7 +105,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
                     // Use the admin resource resolver for replication to ensure all
                     // replication permission checks are OK
                     // Make sure to close this resource resolver
-                    flushingResourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+                    flushingResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
                 } else {
                     // Use the HTTP Request's resource resolver; don't close this resource resolver
                     flushingResourceResolver = resourceResolver;
