@@ -23,7 +23,7 @@ public class AssetFolderDefinitionTest {
         basic = new BasicResourceDefinition("bar");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void getId() throws Exception {
         AssetFolderCreator.AssetFolderDefinition definition = new AssetFolderCreator.AssetFolderDefinition(basic, "/content/dam/foo", AssetFolderCreator.FolderType.UNORDERED_FOLDER);
 
