@@ -109,7 +109,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
             if (messageGateway == null) {
                 resultLog.critical("The AEM Default Mail Service is INACTIVE, thus e-mails cannot be sent.");
                 resultLog.info("Verify the Default Mail Service is active and configured: http://<host>:<port>/system/console/components/com.day.cq.mailer.DefaultMailService");
-                log.warn("Could not write a SimpleEmail Message Gateway");
+                log.warn("Could not retrieve a SimpleEmail Message Gateway");
 
             } else {
                 try {
