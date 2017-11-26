@@ -33,7 +33,11 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.sling.api.resource.*;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,7 +165,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
             try {
                 previousAssetFolderPath = parseAssetFolderCell(cells.next(), previousAssetFolderPath);
             } catch (IllegalArgumentException e) {
-                // Error logged in throwing method parseAssetFolderCell(..);
+                // Error logged in throwing method parseAssetFolderCell.
                 // Skip rest of row to avoid creating undesired structures with bad data.
                 break;
             }
@@ -212,12 +216,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
         assetFolderDefinitions.values().stream().forEach(assetFolderDefinition -> {
             try {
                 manager.withResolver(rr -> {
-                    try {
-                        createAssetFolder(assetFolderDefinition, rr);
-                    } catch (Exception e) {
-                        record(ReportRowStatus.FAILED_TO_CREATE, assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
-                        log.error("Unable to create Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
-                    }
+                    createAssetFolder(assetFolderDefinition, rr);
                 });
             } catch (Exception e) {
                 log.error("Unable to import asset folders via ACS Commons MCP - Asset Folder Creator", e);
@@ -233,39 +232,45 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
      * @throws PersistenceException
      * @throws RepositoryException
      */
-    protected void createAssetFolder(final AssetFolderDefinition assetFolderDefinition, final ResourceResolver resourceResolver) throws PersistenceException, RepositoryException {
-        ReportRowStatus status = ReportRowStatus.FAILED_TO_CREATE;
+    protected void createAssetFolder(final AssetFolderDefinition assetFolderDefinition, final ResourceResolver resourceResolver) {
+        ReportRowStatus status;
 
         Resource folder = resourceResolver.getResource(assetFolderDefinition.getPath());
 
-        if (folder == null) {
-            final Map<String, Object> folderProperties = new HashMap<>();
-            folderProperties.put(JcrConstants.JCR_PRIMARYTYPE, assetFolderDefinition.getNodeType());
-            folder = resourceResolver.create(resourceResolver.getResource(assetFolderDefinition.getParentPath()),
-                    assetFolderDefinition.getName(),
-                    folderProperties);
+        try {
+            if (folder == null) {
+                final Map<String, Object> folderProperties = new HashMap<>();
+                folderProperties.put(JcrConstants.JCR_PRIMARYTYPE, assetFolderDefinition.getNodeType());
+                folder = resourceResolver.create(resourceResolver.getResource(assetFolderDefinition.getParentPath()),
+                        assetFolderDefinition.getName(),
+                        folderProperties);
 
-            status = ReportRowStatus.CREATED;
-        } else {
-            status = ReportRowStatus.UPDATED_FOLDER_TITLES;
+                status = ReportRowStatus.CREATED;
+            } else {
+                status = ReportRowStatus.UPDATED_FOLDER_TITLES;
+            }
+
+            final Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
+
+            if (jcrContent == null) {
+                final Map<String, Object> jcrContentProperties = new HashMap<>();
+                jcrContentProperties.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
+                resourceResolver.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
+            }
+
+            setTitles(folder, assetFolderDefinition);
+            record(status, assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
+
+            log.debug("Created Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
+        } catch (Exception e) {
+            record(ReportRowStatus.FAILED_TO_CREATE, assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
+            log.error("Unable to create Asset Folder [ {} -> {} ]", new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
         }
-
-        final Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
-
-        if (jcrContent == null) {
-            final Map<String, Object> jcrContentProperties = new HashMap<>();
-            jcrContentProperties.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
-            resourceResolver.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
-        }
-
-        setTitles(folder, assetFolderDefinition);
-        record(status, assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
-
-        log.debug("Created Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
     }
 
     /**
      * Generates the Asset Folder Definition.
+     *
      * @param assetFolderBuilder The asset folder builder to use to construct the AssetFolderDefinition.
      * @param value The value to convert into a AssetFolderDefinition.
      * @param previousAssetFolderPath The previous Asset Folder processed
