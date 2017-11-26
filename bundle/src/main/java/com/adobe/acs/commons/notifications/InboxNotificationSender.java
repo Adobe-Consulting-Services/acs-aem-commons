@@ -54,7 +54,7 @@ public interface InboxNotificationSender {
             throws TaskManagerException;
 
     /**
-     * Builds an InboxNotifcation object that can be write prior to sending.
+     * Builds an InboxNotifcation object that can be populate prior to sending.
      * @return a blank InboxNotification object.
      */
     InboxNotification buildInboxNotification();

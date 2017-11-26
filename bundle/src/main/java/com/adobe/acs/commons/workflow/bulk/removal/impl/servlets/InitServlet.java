@@ -70,7 +70,7 @@ public class InitServlet extends SlingSafeMethodsServlet {
         final JSONObject json = new JSONObject();
 
         try {
-            // Only write the form if removal is not running.
+            // Only populate the form if removal is not running.
             json.put("form", this.getFormJSONObject(request.getResourceResolver()));
 
             response.getWriter().write(json.toString());
@@ -81,7 +81,7 @@ public class InitServlet extends SlingSafeMethodsServlet {
     }
 
     /**
-     * Get the JSON data to write the Workflow Removal form.
+     * Get the JSON data to populate the Workflow Removal form.
      *
      * @param resourceResolver
      * @return

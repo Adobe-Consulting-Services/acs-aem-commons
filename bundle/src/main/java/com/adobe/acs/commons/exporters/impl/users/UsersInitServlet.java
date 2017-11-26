@@ -55,7 +55,7 @@ public class UsersInitServlet extends SlingSafeMethodsServlet {
     private static final String KEY_VALUE = "value";
 
     /**
-     * Returns a JSON containing the options available to the form, and any prior saved data that should pre-write the form.
+     * Returns a JSON containing the options available to the form, and any prior saved data that should pre-populate the form.
      * @param request the Sling HTTP Request object
      * @param response the Sling HTTP Response object
      * @throws IOException

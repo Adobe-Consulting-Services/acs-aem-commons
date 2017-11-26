@@ -56,7 +56,7 @@ public final class EvolutionImpl implements Evolution {
         try {
             populate(versionResource, 0);
         } catch (Exception e) {
-            log.warn("Could not write Evolution", e);
+            log.warn("Could not populate Evolution", e);
         }
     }
 
