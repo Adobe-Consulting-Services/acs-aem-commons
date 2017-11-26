@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Dispatcher utilities.
+ * Replication utilities.
  */
-@aQute.bnd.annotation.Version("1.1.0")
+@aQute.bnd.annotation.Version("1.2.0")
 package com.adobe.acs.commons.replication;

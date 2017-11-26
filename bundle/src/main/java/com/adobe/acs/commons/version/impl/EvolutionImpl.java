@@ -93,6 +93,7 @@ public final class EvolutionImpl implements Evolution {
                 return true;
             }
         } catch (RepositoryException e) {
+            // no-op
         }
         return false;
     }

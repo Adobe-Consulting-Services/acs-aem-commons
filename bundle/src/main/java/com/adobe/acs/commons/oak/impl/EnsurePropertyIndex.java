@@ -40,6 +40,10 @@ import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import java.util.Map;
 
+
+/**
+ * @deprecated use EnsureOakIndex instead
+ */
 @Deprecated
 @Component(configurationFactory = true,
         metatype = true,
@@ -66,7 +70,7 @@ public class EnsurePropertyIndex {
 
     private static final Logger log = LoggerFactory.getLogger(EnsurePropertyIndex.class);
 
-    private static final String NN_OAK_INDEX = "oak:index";
+    private static final String PATH_OAK_INDEX = "/oak:index";
 
     private static final String NT_QID = "oak:QueryIndexDefinition";
 
@@ -143,11 +147,12 @@ public class EnsurePropertyIndex {
     }
 
     @Activate
+    @SuppressWarnings("squid:S3776")
     protected void activate(Map<String, Object> properties) throws RepositoryException {
         log.warn("EnsurePropertyIndex is deprecated. Please switch to EnsureOakIndex immediately.");
 
         if (capabilityHelper.isOak()) {
-            String name = PropertiesUtil.toString(properties.get(PROP_INDEX_NAME), null);
+            final String name = PropertiesUtil.toString(properties.get(PROP_INDEX_NAME), null);
 
             IndexDefinition def = new IndexDefinition();
             def.propertyName = PropertiesUtil.toString(properties.get(PROP_PROPERTY_NAME), null);
@@ -162,9 +167,9 @@ public class EnsurePropertyIndex {
 
             Session session = null;
             try {
-                session = repository.loginAdministrative(null);
+                session = repository.loginService(EnsureOakIndexJobHandler.SERVICE_NAME, null);
 
-                Node oakIndexContainer = session.getRootNode().getNode(NN_OAK_INDEX);
+                Node oakIndexContainer = session.getNode(PATH_OAK_INDEX);
                 if (oakIndexContainer.hasNode(name)) {
                     Node indexNode = oakIndexContainer.getNode(name);
                     if (needsUpdate(indexNode, def)) {

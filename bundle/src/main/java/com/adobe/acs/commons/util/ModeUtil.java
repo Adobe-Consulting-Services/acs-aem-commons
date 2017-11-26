@@ -36,6 +36,7 @@ import aQute.bnd.annotation.ProviderType;
 
 @ProviderType
 @Component(immediate = true)
+@SuppressWarnings("squid:S1118")
 public final class ModeUtil {
 
     private static boolean isAuthor = false;

@@ -22,19 +22,17 @@ package com.adobe.acs.commons.quickly.impl;
 
 import com.adobe.acs.commons.quickly.QuicklyEngine;
 import com.adobe.acs.commons.util.BufferingResponse;
-import com.adobe.acs.commons.util.ResourceDataUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-import javax.jcr.RepositoryException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -44,6 +42,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Map;
 
@@ -52,28 +51,28 @@ import java.util.Map;
  * Injects the necessary HTML into the Request page.
  */
 @Component(policy = ConfigurationPolicy.OPTIONAL)
-@Property(name = "pattern",
-          value = ".*")
+@Properties({
+                @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN,
+                          value = "/"),
+                @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+                          value = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)")
+            })
 @Service
-
 public class QuicklyFilter implements Filter {
     private static final String[] REJECT_PATH_PREFIXES = new String[]{
             "/libs/granite/core/content/login",
     };
 
-    private static final String HTML_FILE = "/apps/acs-commons/components/utilities/quickly/inject.html";
+    private static final String HTML_FILE = "/quickly/inject.html";
 
-    private static String appHTML = "";
+    private String appHTML = "";
 
     @Reference
     private QuicklyEngine quicklyEngine;
 
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
-
+        // no-op
     }
 
     @Override
@@ -118,9 +117,10 @@ public class QuicklyFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        // no-op
     }
 
+    @SuppressWarnings("squid:S3923")
     private boolean accepts(final HttpServletRequest request) {
         if (!StringUtils.equalsIgnoreCase("get", request.getMethod())) {
             // Only inject on GET requests
@@ -141,15 +141,13 @@ public class QuicklyFilter implements Filter {
     }
 
     @Activate
-    protected final void activate(final Map<String, String> config) throws IOException, RepositoryException, LoginException {
-        ResourceResolver resourceResolver = null;
+    protected final void activate(final Map<String, String> config) throws IOException {
+        InputStream inputStream = null;
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            appHTML = ResourceDataUtil.getNTFileAsString(HTML_FILE, resourceResolver);
+            inputStream = getClass().getResourceAsStream(HTML_FILE);
+            appHTML = IOUtils.toString(inputStream, "UTF-8");
         } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
+            IOUtils.closeQuietly(inputStream);
         }
     }
 }

@@ -22,24 +22,24 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
-import com.day.jcr.vault.fs.api.PathFilterSet;
-import com.day.jcr.vault.fs.api.WorkspaceFilter;
-import com.day.jcr.vault.fs.config.MetaInf;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import com.day.jcr.vault.packaging.JcrPackageManager;
-import com.day.jcr.vault.packaging.PackageId;
-import com.day.jcr.vault.packaging.Packaging;
-import com.day.jcr.vault.packaging.Version;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
+import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
+import org.apache.jackrabbit.vault.fs.config.MetaInf;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.commons.testing.sling.MockResource;
-import org.apache.sling.commons.testing.sling.MockResourceResolver;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -135,6 +135,9 @@ public class PackageHelperImplTest {
 
     @InjectMocks
     final PackageHelperImpl packageHelper = new PackageHelperImpl();
+
+    @Rule
+    private SlingContext slingContext = new SlingContext();
 
     List<PathFilterSet> packageOneFilterSets;
     List<PathFilterSet> packageTwoFilterSets;
@@ -236,7 +239,7 @@ public class PackageHelperImplTest {
         Node thumbnailNode = mock(Node.class);
 
         when(thumbnailResource.adaptTo(Node.class)).thenReturn(thumbnailNode);
-        when(thumbnailResource.isResourceType("nt:file")).thenReturn(true);
+        when(thumbnailNode.isNodeType("nt:file")).thenReturn(true);
 
         when(packageOneDefNode.getSession()).thenReturn(mock(Session.class));
 
@@ -340,12 +343,11 @@ public class PackageHelperImplTest {
 
     @Test
     public void testGetPreviewJSON() throws Exception {
-        final MockResourceResolver resourceResolver = new MockResourceResolver();
         final Set<Resource> resources = new HashSet<Resource>();
 
-        resources.add(new MockResource(resourceResolver, "/a/b/c", ""));
-        resources.add(new MockResource(resourceResolver, "/d/e/f", ""));
-        resources.add(new MockResource(resourceResolver, "/g/h/i", ""));
+        resources.add(slingContext.create().resource("/a/b/c"));
+        resources.add(slingContext.create().resource("/d/e/f"));
+        resources.add(slingContext.create().resource("/g/h/i"));
 
 
         final String actual = packageHelper.getPreviewJSON(resources);

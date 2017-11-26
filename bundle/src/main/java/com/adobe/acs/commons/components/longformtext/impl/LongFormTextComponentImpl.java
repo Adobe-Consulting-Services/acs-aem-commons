@@ -34,12 +34,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,11 +67,9 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
             final Document doc = htmlParser.parse(null, IOUtils.toInputStream(text), "UTF-8");
             doc.getDocumentElement().normalize();
 
-            final DOMImplementationLS domImplementation = (DOMImplementationLS) doc.getImplementation();
-            final LSSerializer lsSerializer = domImplementation.createLSSerializer();
-
-            lsSerializer.getDomConfig().setParameter("xml-declaration", false);
-            lsSerializer.getDomConfig().setParameter("namespaces", false);
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 
             final NodeList bodies = doc.getElementsByTagName("body");
 
@@ -76,6 +78,8 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
                 final NodeList children = body.getChildNodes();
 
                 for (int i = 0; i < children.getLength(); i++) {
+                    StringWriter writer = new StringWriter();
+                    StreamResult result = new StreamResult(writer);
 
                     final org.w3c.dom.Node child = children.item(i);
                     if (child == null) {
@@ -86,7 +90,11 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
                         continue;
                     }
 
-                    final String outerHTML = lsSerializer.writeToString(child);
+                    stripNamespaces(child);
+                    transformer.transform(new DOMSource(child), result);
+                    writer.flush();
+
+                    final String outerHTML = writer.toString();
 
                     if (StringUtils.isNotBlank(outerHTML)) {
                         paragraphs.add(outerHTML);
@@ -203,5 +211,23 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
             return false;
         }
         return true;
+    }
+
+
+    /**
+     * Method borrowed from: https://blog.avisi.nl/2013/07/24/java-stripping-namespaces-from-xml-using-dom/
+     *
+     * Recursively renames the namespace of a node.
+     * @param node the starting node.
+     */
+    private void stripNamespaces(org.w3c.dom.Node node) {
+        Document document = node.getOwnerDocument();
+        if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+            document.renameNode(node, null, node.getNodeName());
+        }
+        NodeList list = node.getChildNodes();
+        for (int i = 0; i < list.getLength(); ++i) {
+            stripNamespaces(list.item(i));
+        }
     }
 }

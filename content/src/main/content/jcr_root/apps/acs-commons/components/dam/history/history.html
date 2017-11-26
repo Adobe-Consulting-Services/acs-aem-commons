@@ -1,0 +1,55 @@
+<!--/*
+ #%L
+ ACS AEM Commons Content Package
+ %%
+ Copyright (C) 2014 Adobe
+ %%
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ #L%
+*/-->
+<div class="foundation-field-editable acs-dam-history" data-sly-use.history="history.js"
+     data-sly-use.clientLib="${'/libs/granite/sightly/templates/clientlib.html'}" data-sly-test="${history.hasContent}">
+    <sly data-sly-call="${clientLib.all @ categories='acs-commons.dam.history'}"></sly>
+    <span class="coral-Form-fieldwrapper">
+        <label class="coral-Form-fieldlabel acs-dam-label-replacement">${properties.fieldLabel || 'History'}</label>
+        <table>
+            <tbody>
+                <tr data-sly-repeat="${history.history}">
+                    <td class="acs-dam-history-column-when">${item['when']}</td>
+                    <td class="acs-dam-history-column-action">
+                        <coral-icon data-sly-test="${item['action'] == 'created'}" icon="addCircle" size="M" title="Created"></coral-icon>
+                        <coral-icon data-sly-test="${item['action'] == 'saved'}" icon="save" size="M" title="Saved"></coral-icon>
+                        <coral-icon data-sly-test="${item['action'] != 'saved' && item['action'] != 'created'}"
+                                    icon="edit" size="M" title="Other Edit"></coral-icon>
+                    </td>
+                    <td class="acs-dam-history-column-software">
+                        <div data-sly-test="${item['agent'].software == 'photoshop'}"
+                             class="acs-dam-history-software acs-dam-history-software--photoshop"></div>
+                        <div data-sly-test="${item['agent'].software == 'illustrator'}"
+                             class="acs-dam-history-software acs-dam-history-software--illustrator"></div>
+                        <div data-sly-test="${item['agent'].software == 'indesign'}"
+                             class="acs-dam-history-software acs-dam-history-software--indesign"></div>
+                        <div data-sly-test="${item['agent'].software == 'bridge'}"
+                             class="acs-dam-history-software acs-dam-history-software--bridge"></div>
+                        <coral-icon data-sly-test="${item['agent'].software == 'other'}"
+                              icon="question" size="M" title="Other"></coral-icon>
+                    </td>
+                    <td class="acs-dam-history-column-platform">
+                        <coral-icon data-sly-test="${item['agent'].platform == 'windows'}" icon="windows7" size="M" title="Windows"></coral-icon>
+                        <coral-icon data-sly-test="${item['agent'].platform == 'apple'}" icon="apple" size="M" title="Apple"></coral-icon>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </span>
+</div>

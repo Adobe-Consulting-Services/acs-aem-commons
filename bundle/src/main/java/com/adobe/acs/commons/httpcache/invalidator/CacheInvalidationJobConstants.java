@@ -35,6 +35,5 @@ public final class CacheInvalidationJobConstants {
     public static final String PAYLOAD_KEY_DATA_CHANGE_PATH = "path";
 
     private CacheInvalidationJobConstants() {
-        throw new Error(CacheInvalidationJobConstants.class.getName() + " is not meant to be instantiated.");
     }
 }

@@ -25,7 +25,6 @@ import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowRunnerImpl
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticCompleteWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticRestartWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticTerminateWorkflowException;
-import com.day.cq.security.Authorizable;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
@@ -38,11 +37,15 @@ import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.exec.filter.WorkItemFilter;
 import com.day.cq.workflow.model.WorkflowModel;
 import com.day.cq.workflow.model.WorkflowModelFilter;
+import org.apache.jackrabbit.api.JackrabbitSession;
+import org.apache.jackrabbit.api.security.user.UserManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.version.VersionException;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -82,6 +85,21 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     }
 
     @Override
+    public org.apache.jackrabbit.api.security.user.Authorizable getUser() {
+        if (this.session != null && this.session instanceof JackrabbitSession) {
+            try {
+                UserManager userManager = ((JackrabbitSession) this.session).getUserManager();
+                return userManager.getAuthorizable(this.session.getUserID());
+            } catch (RepositoryException e) {
+                log.error("Could not obtain a Jackrabbit UserManager", e);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    @SuppressWarnings("squid:S1192")
     public final void terminateWorkflow(final Workflow workflow) throws WorkflowException {
         if (workflow instanceof SyntheticWorkflow) {
             throw new SyntheticTerminateWorkflowException("Synthetic workflow [ " + workflow.getId() + " ] terminated");
@@ -91,6 +109,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public final void complete(final WorkItem workItem, final Route route) throws WorkflowException {
         if (workItem instanceof SyntheticWorkItem) {
             throw new SyntheticCompleteWorkflowException("Synthetic workflow [ "
@@ -101,6 +120,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public final void restartWorkflow(final Workflow workflow) throws WorkflowException {
         if (workflow instanceof SyntheticWorkflow) {
             throw new SyntheticRestartWorkflowException("Synthetic workflow [ " + workflow.getId() + " ] restarted");
@@ -112,12 +132,6 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     public final boolean isSuperuser() {
         return true;
-    }
-
-    @Deprecated
-    @Override
-    public final Authorizable getUser() {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
     @Override
@@ -185,6 +199,9 @@ public class SyntheticWorkflowSession implements WorkflowSession {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
+    /**
+     * @deprecated deprecated in interface
+     */
     @Deprecated
     @Override
     public final Workflow startWorkflow(final WorkflowModel workflowModel, final WorkflowData workflowData,
@@ -291,16 +308,13 @@ public class SyntheticWorkflowSession implements WorkflowSession {
         return new SyntheticWorkflowData(payloadType, payload);
     }
 
-    @Deprecated
     @Override
-    public final List<Authorizable> getDelegatees(final WorkItem workItem) throws WorkflowException {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+    public List<org.apache.jackrabbit.api.security.user.Authorizable> getDelegatees(WorkItem item) throws WorkflowException {
+        return new ArrayList<org.apache.jackrabbit.api.security.user.Authorizable>();
     }
 
-    @Deprecated
     @Override
-    public final void delegateWorkItem(final WorkItem workItem, final Authorizable authorizable)
-            throws WorkflowException {
+    public void delegateWorkItem(WorkItem item, org.apache.jackrabbit.api.security.user.Authorizable participant) throws WorkflowException, AccessControlException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
@@ -323,5 +337,4 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     public final void logout() {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
-
 }

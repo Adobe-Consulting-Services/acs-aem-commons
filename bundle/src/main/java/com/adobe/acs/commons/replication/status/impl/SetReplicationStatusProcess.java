@@ -20,14 +20,12 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.adobe.acs.commons.util.WorkflowHelper;
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowProcess;
-import com.day.cq.workflow.metadata.MetaDataMap;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -38,11 +36,14 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.Map;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.adobe.acs.commons.util.WorkflowHelper;
+import com.day.cq.workflow.WorkflowException;
+import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowProcess;
+import com.day.cq.workflow.metadata.MetaDataMap;
 
 @Component
 @Property(
@@ -54,77 +55,77 @@ import java.util.Map;
 @Service
 public class SetReplicationStatusProcess implements WorkflowProcess {
 
-	private static final Logger log = LoggerFactory.getLogger(SetReplicationStatusProcess.class);
-	
-	private final String ARG_REPL_DATE = "replicationDate";
-	private final String ARG_REPL_BY = "replicatedBy";
-	private final String ARG_REPL_ACTION = "replicationAction";
-	
-	@Reference
+    private static final Logger log = LoggerFactory.getLogger(SetReplicationStatusProcess.class);
+
+    private static final String ARG_REPL_DATE = "replicationDate";
+    private static final String ARG_REPL_BY = "replicatedBy";
+    private static final String ARG_REPL_ACTION = "replicationAction";
+
+    @Reference
     private WorkflowHelper workflowHelper;
-	
-	@Reference
-	private ReplicationStatusManager replStatusMgr;
 
-	
-	@Override
-	public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metadataMap) throws WorkflowException {
+    @Reference
+    private ReplicationStatusManager replStatusMgr;
 
-		ResourceResolver resourceResolver = null;
-		
-		try {
-			resourceResolver = workflowHelper.getResourceResolver(workflowSession);
-	        String replicatedResourcePath = getReplicatedResourcePath(workItem, resourceResolver);
-	        
-	        Map<String, String> params = extractWorkflowParams(metadataMap);
-	        
-	        String replAction;
-	        if (!params.containsKey(ARG_REPL_ACTION)) {
-	        	log.warn("Please add a replicationAction to your process arguments (ACTIVATED, DEACTIVATED or CLEAR).  Will now exit without processing.");
-	        	return;
-	        } else {
-	        	replAction = params.get(ARG_REPL_ACTION);
-	        }
-	        
-	        Calendar replicatedAt;
-	        if (!params.containsKey(ARG_REPL_DATE)) {
-	        	log.info("No replicationDate argument specified, will default to current time.");
-	        	replicatedAt = Calendar.getInstance();
-	        } else {
-	        	replicatedAt = getReplicationDate(params);
-	        }
-	        
-	        String replicatedBy;
-	        if (!params.containsKey(ARG_REPL_BY)) {
-	        	log.info("No replicatedBy argument specified, will default to 'migration'.");
-	        	replicatedBy = "migration";
-	        } else {
-	        	replicatedBy = params.get(ARG_REPL_BY);
-	        }
-	        
-	        replStatusMgr.setReplicationStatus(resourceResolver, replicatedBy, replicatedAt, ReplicationStatusManager.Status.valueOf(replAction), replicatedResourcePath);	        
-		} catch (Exception e) {
-			log.error("An exception occurred while setting replication status.", e);
-		}
-  	}
 
-	private String getReplicatedResourcePath(WorkItem workItem, ResourceResolver resourceResolver) {
-		String payloadPath = workItem.getWorkflowData().getPayload().toString();
-		Resource resource = replStatusMgr.getReplicationStatusResource(payloadPath, resourceResolver);
-		return resource.getPath();
-	}
+    @Override
+    public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metadataMap) throws WorkflowException {
 
-	private Map<String, String> extractWorkflowParams(MetaDataMap metadataMap) {
-		String[] lines = StringUtils.split(metadataMap.get(WorkflowHelper.PROCESS_ARGS, ""), System.getProperty("line.separator").toString());
-		Map<String, String> params = ParameterUtil.toMap(lines, "=");
-		return params;
-	}
+        ResourceResolver resourceResolver = null;
 
-	private Calendar getReplicationDate(Map<String, String> params) throws ParseException {
-		Calendar replicatedAt = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH);
-		replicatedAt.setTime(sdf.parse(params.get(ARG_REPL_DATE)));
-		return replicatedAt;
-	}
+        try {
+            resourceResolver = workflowHelper.getResourceResolver(workflowSession);
+            final String replicatedResourcePath = getReplicatedResourcePath(workItem, resourceResolver);
+
+            Map<String, String> params = extractWorkflowParams(metadataMap);
+
+            String replAction;
+            if (!params.containsKey(ARG_REPL_ACTION)) {
+                log.warn("Please add a replicationAction to your process arguments (ACTIVATED, DEACTIVATED or CLEAR).  Will now exit without processing.");
+                return;
+            } else {
+                replAction = params.get(ARG_REPL_ACTION);
+            }
+
+            Calendar replicatedAt;
+            if (!params.containsKey(ARG_REPL_DATE)) {
+                log.info("No replicationDate argument specified, will default to current time.");
+                replicatedAt = Calendar.getInstance();
+            } else {
+                replicatedAt = getReplicationDate(params);
+            }
+
+            String replicatedBy;
+            if (!params.containsKey(ARG_REPL_BY)) {
+                log.info("No replicatedBy argument specified, will default to 'migration'.");
+                replicatedBy = "migration";
+            } else {
+                replicatedBy = params.get(ARG_REPL_BY);
+            }
+
+            replStatusMgr.setReplicationStatus(resourceResolver, replicatedBy, replicatedAt, ReplicationStatusManager.Status.valueOf(replAction), replicatedResourcePath);
+        } catch (Exception e) {
+            log.error("An exception occurred while setting replication status.", e);
+        }
+    }
+
+    private String getReplicatedResourcePath(WorkItem workItem, ResourceResolver resourceResolver) {
+        String payloadPath = workItem.getWorkflowData().getPayload().toString();
+        Resource resource = replStatusMgr.getReplicationStatusResource(payloadPath, resourceResolver);
+        return resource.getPath();
+    }
+
+    private Map<String, String> extractWorkflowParams(MetaDataMap metadataMap) {
+        String[] lines = StringUtils.split(metadataMap.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+        Map<String, String> params = ParameterUtil.toMap(lines, "=");
+        return params;
+    }
+
+    private Calendar getReplicationDate(Map<String, String> params) throws ParseException {
+        Calendar replicatedAt = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH);
+        replicatedAt.setTime(sdf.parse(params.get(ARG_REPL_DATE)));
+        return replicatedAt;
+    }
 
 }

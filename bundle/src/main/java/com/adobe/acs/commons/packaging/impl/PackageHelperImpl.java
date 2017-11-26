@@ -22,25 +22,22 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
-import com.day.jcr.vault.fs.api.PathFilterSet;
-import com.day.jcr.vault.fs.config.DefaultWorkspaceFilter;
-import com.day.jcr.vault.fs.io.ImportOptions;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import com.day.jcr.vault.packaging.JcrPackageManager;
-import com.day.jcr.vault.packaging.PackageException;
-import com.day.jcr.vault.packaging.PackageId;
-import com.day.jcr.vault.packaging.Packaging;
-import com.day.jcr.vault.packaging.Version;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.LoginException;
+import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
+import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
+import org.apache.jackrabbit.vault.fs.io.ImportOptions;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -70,56 +67,52 @@ public final class PackageHelperImpl implements PackageHelper {
 
     private static final String JSON_EXCEPTION_MSG =
             "{\"status\": \"error\", \"msg\": \"Error creating JSON response.\"}";
+    private static final String KEY_STATUS = "status";
+    private static final String KEY_MSG = "msg";
+    private static final String KEY_PATH = "path";
+    private static final String KEY_FILTER_SETS = "filterSets";
+    private static final String KEY_IMPORT_MODE = "importMode";
+    private static final String KEY_ROOT_PATH = "rootPath";
 
     @Reference
     private Packaging packaging;
-
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
 
     /**
      * {@inheritDoc}
      */
     public void addThumbnail(final JcrPackage jcrPackage, Resource thumbnailResource) {
-        ResourceResolver resourceResolver = null;
-
         if (jcrPackage == null) {
             log.error("JCR Package is null; no package thumbnail needed for null packages!");
             return;
         }
-
-        boolean useDefault = thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE);
+        Node thumbnailNode = null;
+        if (thumbnailResource != null) {
+            thumbnailNode = thumbnailResource.adaptTo(Node.class);
+        }
 
         try {
+            boolean useDefault = thumbnailNode == null || !thumbnailNode.isNodeType(JcrConstants.NT_FILE);
+            final Node dstParentNode = jcrPackage.getDefinition().getNode();
+            final Session session = dstParentNode.getSession();
             if (useDefault) {
                 log.debug("Using default ACS AEM Commons packager package icon.");
-                resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-                thumbnailResource = resourceResolver.getResource(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH);
+                if (session.nodeExists(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH)) {
+                    thumbnailNode = session.getNode(DEFAULT_PACKAGE_THUMBNAIL_RESOURCE_PATH);
+                }
             }
 
-            if (thumbnailResource == null || !thumbnailResource.isResourceType(JcrConstants.NT_FILE)) {
+            if (thumbnailNode == null || !thumbnailNode.isNodeType(JcrConstants.NT_FILE)) {
                 log.warn("Cannot find a specific OR a default package icon; no package icon will be used.");
             } else {
-                final Node srcNode = thumbnailResource.adaptTo(Node.class);
-                final Node dstParentNode = jcrPackage.getDefinition().getNode();
-
-                JcrUtil.copy(srcNode, dstParentNode, NN_THUMBNAIL);
+                JcrUtil.copy(thumbnailNode, dstParentNode, NN_THUMBNAIL);
                 dstParentNode.getSession().save();
             }
         } catch (RepositoryException e) {
-            log.error("Could not add package thumbnail: {}", e.getMessage());
-        } catch (LoginException e) {
-            log.error("Could not add a default package thumbnail: {}", e.getMessage());
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
+            log.error("Could not add package thumbnail: {}", e);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @SuppressWarnings("squid:S3776")
     public Version getNextVersion(final JcrPackageManager jcrPackageManager,
                                   final String groupName, final String name,
                                   final String version) throws RepositoryException {
@@ -333,17 +326,17 @@ public final class PackageHelperImpl implements PackageHelper {
     public String getSuccessJSON(final JcrPackage jcrPackage) throws JSONException, RepositoryException {
         final JSONObject json = new JSONObject();
 
-        json.put("status", "success");
-        json.put("path", jcrPackage.getNode().getPath());
-        json.put("filterSets", new JSONArray());
+        json.put(KEY_STATUS, "success");
+        json.put(KEY_PATH, jcrPackage.getNode().getPath());
+        json.put(KEY_FILTER_SETS, new JSONArray());
 
         final List<PathFilterSet> filterSets = jcrPackage.getDefinition().getMetaInf().getFilter().getFilterSets();
         for (final PathFilterSet filterSet : filterSets) {
             final JSONObject jsonFilterSet = new JSONObject();
-            jsonFilterSet.put("importMode", filterSet.getImportMode().name());
-            jsonFilterSet.put("rootPath", filterSet.getRoot());
+            jsonFilterSet.put(KEY_IMPORT_MODE, filterSet.getImportMode().name());
+            jsonFilterSet.put(KEY_ROOT_PATH, filterSet.getRoot());
 
-            json.accumulate("filterSets", jsonFilterSet);
+            json.accumulate(KEY_FILTER_SETS, jsonFilterSet);
         }
 
         return json.toString();
@@ -381,14 +374,14 @@ public final class PackageHelperImpl implements PackageHelper {
     public String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets) throws JSONException {
         final JSONObject json = new JSONObject();
 
-        json.put("status", "preview");
-        json.put("path", "Not applicable (Preview)");
-        json.put("filterSets", new JSONArray());
+        json.put(KEY_STATUS, "preview");
+        json.put(KEY_PATH, "Not applicable (Preview)");
+        json.put(KEY_FILTER_SETS, new JSONArray());
 
         for (final PathFilterSet pathFilterSet : pathFilterSets) {
             final JSONObject tmp = new JSONObject();
-            tmp.put("importMode", "Not applicable (Preview)");
-            tmp.put("rootPath", pathFilterSet.getRoot());
+            tmp.put(KEY_IMPORT_MODE, "Not applicable (Preview)");
+            tmp.put(KEY_ROOT_PATH, pathFilterSet.getRoot());
 
             json.accumulate("filterSets", tmp);
         }
@@ -403,11 +396,11 @@ public final class PackageHelperImpl implements PackageHelper {
     public String getErrorJSON(final String msg) {
         final JSONObject json = new JSONObject();
         try {
-            json.put("status", "error");
-            json.put("msg", msg);
+            json.put(KEY_STATUS, "error");
+            json.put(KEY_MSG, msg);
             return json.toString();
         } catch (JSONException e) {
-            log.error("Error creating JSON Error response message: {}", e.getMessage());
+            log.error("Error creating JSON Error response message: {}", e);
             return JSON_EXCEPTION_MSG;
         }
     }

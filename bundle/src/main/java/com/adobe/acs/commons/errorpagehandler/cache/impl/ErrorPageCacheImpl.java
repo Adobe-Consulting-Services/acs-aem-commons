@@ -153,11 +153,7 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
 
     @Override
     public final int getCacheEntriesCount() {
-        if (this.cache == null) {
-            return 0;
-        } else {
-            return this.cache.size();
-        }
+        return this.cache.size();
     }
 
     @Override
@@ -188,6 +184,7 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
     }
 
 
+    @SuppressWarnings("squid:S1192")
     public final TabularData getCacheEntries() throws OpenDataException {
 
         final CompositeType cacheEntryType = new CompositeType(

@@ -60,7 +60,7 @@ public class TwitterFeedSchedulerTest {
 
         when(
                 resourceResolverFactory
-                        .getAdministrativeResourceResolver(anyMapOf(
+                        .getServiceResourceResolver(anyMapOf(
                                 String.class, Object.class))).thenReturn(
                 resourceResolver);
 

@@ -1,0 +1,59 @@
+<!--/*
+ #%L
+ ACS AEM Commons Content Package
+ %%
+ Copyright (C) 2014 Adobe
+ %%
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ #L%
+*/-->
+<template data-sly-template.colorantsTable="${ @ colorants}">
+    <table>
+        <tbody>
+        <tr data-sly-repeat="${colorants}">
+            <td class="acs-dam-color-swatches-column-name"><div class="acs-dam-color-swatches-column-color"
+                style="background-color: ${item.color @ context='styleString'}"></div> ${item.name}</td>
+            <td class="acs-dam-color-swatches-column-type"><div class="acs-dam-color-swatches-column-type--${item.type @ context='text'}"></div></td>
+            <td class="acs-dam-color-swatches-column-colorspace"><div class="acs-dam-color-swatches-column-colorspace--${item.colorSpace @ context='text'}"></div></td>
+        </tr>
+        </tbody>
+    </table>
+</template>
+
+<div class="foundation-field-editable acs-dam-color-swatches" data-sly-use.swatches="color-swatches.js"
+        data-sly-use.clientLib="${'/libs/granite/sightly/templates/clientlib.html'}" data-sly-test="${swatches.hasContent}">
+    <sly data-sly-call="${clientLib.all @ categories='acs-commons.dam.color-swatches'}"></sly>
+    <span class="coral-Form-fieldwrapper" data-sly-test="${swatches.plateNames}">
+        <label class="coral-Form-fieldlabel">Plate Names</label>
+        <table>
+            <tbody>
+                <tr data-sly-repeat="${swatches.plateNames}">
+                    <td class="acs-dam-color-swatches-plates-column-name">
+                        <div class="acs-dam-color-swatches-column-color"
+                             style="background-color: ${swatches.plateNames[item] @ context='styleString'}"></div> ${item}</td>
+                </tr>
+            </tbody>
+        </table>
+    </span>
+    <span class="coral-Form-fieldwrapper">
+        <label class="coral-Form-fieldlabel acs-dam-label-replacement">${properties.fieldLabel || 'Color Swatches'}</label>
+        <span class="coral-Form-field">
+            <sly data-sly-test="${swatches.colorants}" data-sly-call="${colorantsTable @ colorants=swatches.colorants}"></sly>
+            <div data-sly-repeat.swatchGroup="${swatches.swatchGroups}" class="acs-dam-color-swatches-swatch-group">
+                <coral-icon class="acs-dam-color-swatches-swatch-group-toggle" icon="chevronDown" size="XS"></coral-icon>
+                <span class="acs-dam-color-swatches-swatch-group-name">${swatchGroup.name} (${swatchGroup.type})</span>
+                <sly data-sly-test="${swatchGroup.colorants}" data-sly-call="${colorantsTable @ colorants=swatchGroup.colorants}"></sly>
+            </div>
+        </span>
+    </span>
+</div>

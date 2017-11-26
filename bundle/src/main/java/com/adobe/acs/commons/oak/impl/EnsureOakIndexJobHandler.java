@@ -32,6 +32,7 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +100,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
     };
     private static final String[] NAME_PROPERTIES = new String[] {"propertyNames", "declaringNodeTypes"} ;
 
+    static final String SERVICE_NAME = "ensure-oak-index";
+
     private final EnsureOakIndex ensureOakIndex;
 
     private final List<String> ignoreProperties = new ArrayList<String>();
@@ -120,11 +124,13 @@ public class EnsureOakIndexJobHandler implements Runnable {
     }
 
     @Override
+    @SuppressWarnings("squid:S1141")
     public void run() {
         ResourceResolver resourceResolver = null;
 
         try {
-            resourceResolver = this.ensureOakIndex.getResourceResolverFactory().getAdministrativeResourceResolver(null);
+            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+            resourceResolver = this.ensureOakIndex.getResourceResolverFactory().getServiceResourceResolver(authInfo);
 
             try {
                 this.ensure(resourceResolver, ensureDefinitionsPath, oakIndexesPath);
@@ -367,6 +373,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws IOException
      */
+    @SuppressWarnings("squid:S3776")
     public Resource update(final @Nonnull Resource ensureDefinition, final @Nonnull Resource oakIndexes, boolean forceReindex)
             throws RepositoryException, IOException {
 

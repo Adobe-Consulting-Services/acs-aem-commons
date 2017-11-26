@@ -69,6 +69,7 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
     private Map<String, String[]> attributes;
     @Property(label = "Rewrite Attributes",
             description = "List of element/attribute pairs to rewrite",
+            cardinality = Integer.MAX_VALUE,
             value = {"img:src"})
     private static final String PROP_ATTRIBUTES = "attributes";
 
@@ -103,8 +104,15 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
 
     @Activate
     protected void activate(final Map<String, Object> config) {
-        final String[] attrProp = PropertiesUtil.toStringArray(config.get(PROP_ATTRIBUTES), DEFAULT_ATTRIBUTES);
-        this.attributes = ParameterUtil.toMap(attrProp, ":", ",");
+        final String[] test = PropertiesUtil.toStringArray(config.get(PROP_ATTRIBUTES), new String[]{});
+
+        String[] normalizedValue = PropertiesUtil.toStringArray(config.get(PROP_ATTRIBUTES), DEFAULT_ATTRIBUTES);
+
+        if (test.length == 1 && StringUtils.contains(test[0], ",")) {
+            normalizedValue = StringUtils.split(test[0], ",");
+        }
+
+        this.attributes = ParameterUtil.toMap(normalizedValue, ":", ",");
     }
 
     public final class ResourceResolverMapTransformer extends AbstractTransformer {

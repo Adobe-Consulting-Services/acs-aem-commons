@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="e1d82695-b8e5-32b9-a0cd-841af885907b"
+    rep:authorizableId="acs-commons-manage-controlled-processes-service"
+    rep:principalName="acs-commons-manage-controlled-processes-service"/>

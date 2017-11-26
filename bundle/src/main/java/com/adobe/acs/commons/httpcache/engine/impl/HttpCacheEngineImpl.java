@@ -275,8 +275,8 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     protected void activate(Map<String, Object> configs) {
 
         // PIDs of global cache handling rules.
-        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get
-                (PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
+        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs
+                .get(PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();
@@ -362,6 +362,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public boolean deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                        HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException,
             HttpCacheDataStreamException, HttpCachePersistenceException {
@@ -486,6 +487,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public void invalidateCache(String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
 
         // Find out all the cache config which has this path applicable for invalidation.
@@ -533,6 +535,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredHttpCacheRules() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(
@@ -561,6 +564,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredHttpCacheConfigs() throws OpenDataException {
         // @formatter:off
         // Exposing all google guava stats.
@@ -595,6 +599,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredPersistenceStores() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(

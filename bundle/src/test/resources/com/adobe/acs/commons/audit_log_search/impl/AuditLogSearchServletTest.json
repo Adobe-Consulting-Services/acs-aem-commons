@@ -1,0 +1,21 @@
+{
+  "jcr:primaryType" : "sling:Folder",
+  "1" : {
+    "jcr:primaryType" : "cq:AuditEvent",
+    "cq:path" : "/content/geometrixx"
+  },
+  "2" : {
+    "jcr:primaryType" : "cq:AuditEvent",
+    "cq:path" : "/content/geometrixx/en"
+  },
+  "3" : {
+    "jcr:primaryType" : "cq:AuditEvent",
+    "cq:path" : "/content/we-media/en",
+    "cq:time" : "2017-11-01T15:01:43.751+00:00"
+  },
+  "4" : {
+    "jcr:primaryType" : "cq:AuditEvent",
+    "cq:path" : "/content/we-media/en",
+    "cq:time" : "2017-11-01T16:01:43.751+00:00"
+  }
+}

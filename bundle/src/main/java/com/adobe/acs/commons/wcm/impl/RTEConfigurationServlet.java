@@ -40,7 +40,7 @@ import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import com.adobe.acs.commons.util.PathInfoUtil;
-import com.adobe.granite.xss.XSSAPI;
+import org.apache.sling.xss.XSSAPI;
 
 /**
  * Servlets which allows for dynamic selection of RTE configuration. To use in a component, specify the xtype of
@@ -58,7 +58,7 @@ import com.adobe.granite.xss.XSSAPI;
  * . This will iterate through nodes under /etc/rteconfig to find a matching site (by regex). Then, look for a node
  * named CONFIGNAME and use that configuration.
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "checkstyle:abbreviationaswordinname"})
 @SlingServlet(extensions = "json", selectors = "rte", resourceTypes = "sling/servlet/default")
 public final class RTEConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
@@ -103,13 +103,13 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
                 return;
             }
 
-            writeConfigResource(root, rteName, true, request, response);
+            writeConfigResource(root, rteName, request, response);
         } catch (JSONException e) {
             throw new ServletException(e);
         }
     }
 
-    private void writeConfigResource(Resource resource, String rteName, boolean isDefault,
+    private void writeConfigResource(Resource resource, String rteName,
             SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException, JSONException, ServletException {
         JSONObject widget = createEmptyWidget(rteName);
@@ -166,6 +166,7 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         String componentPath = request.getResource().getPath();
@@ -181,15 +182,13 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
             while (children.hasNext()) {
                 Resource child = children.next();
                 if (matches(componentPath, child)) {
-                    boolean isDefault = false;
                     Resource config = child.getChild(configName);
                     if (config == null) {
                         config = child.getChild(DEFAULT_CONFIG_NAME);
-                        isDefault = true;
                     }
                     if (config != null) {
                         try {
-                            writeConfigResource(config, rteName, isDefault, request, response);
+                            writeConfigResource(config, rteName, request, response);
                         } catch (JSONException e) {
                             throw new ServletException(e);
                         }

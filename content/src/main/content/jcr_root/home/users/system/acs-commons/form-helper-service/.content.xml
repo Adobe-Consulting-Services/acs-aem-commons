@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="78dade7c-4e5d-3b4a-8e9a-e33dbd10d6ab"
+    rep:authorizableId="acs-commons-form-helper-service"
+    rep:principalName="acs-commons-form-helper-service"/>

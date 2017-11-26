@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    cq:dialogMode="floating"
+    cq:inherit="{Boolean}true"
+    jcr:primaryType="cq:EditConfig">
+    <cq:formParameters
+        jcr:description="Generate Audio Transcription with IBM Watson"
+        jcr:primaryType="nt:unstructured"
+        jcr:title="Generate Audio Transcription with IBM Watson"
+        advanceOnTimeout="true"
+        EXTERNAL_PROCESS="com.adobe.acs.commons.dam.audio.watson.impl.TranscriptionProcess"
+        period="10"
+        PROCESS_AUTO_ADVANCE="true"
+        timeout="3600"/>
+</jcr:root>

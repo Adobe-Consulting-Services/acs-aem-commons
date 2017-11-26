@@ -1,0 +1,114 @@
+
+/* Accordion Styles */
+.acs-commons-rte-accordion {
+    ul, ol {
+        margin-left: 0;
+        max-width: none;
+        padding-left: 0;
+    }
+
+    li.accordion-item {
+        border-top: 1px solid #333;
+        list-style: none;
+
+        &:before {
+            display: none;
+        }
+        &:last-child {
+            border-bottom: 1px solid #333;
+        }
+
+        .accordion-header {
+            cursor: pointer;
+            margin: 0;
+            padding: 40px 40px 40px 2em;
+            position: relative;
+            -webkit-transition: color 0.3s ease 0s;
+               -moz-transition: color 0.3s ease 0s;
+                 -o-transition: color 0.3s ease 0s;
+                -ms-transition: color 0.3s ease 0s;
+                    transition: color 0.3s ease 0s;
+
+            &:after {
+                content: "\25b6";
+                right: auto;
+                line-height: 1;
+                position: absolute;
+                left: 5px;
+                top: 50%;
+                -webkit-transform-origin: 60% 20% 0;
+                   -moz-transform-origin: 60% 20% 0;
+                    -ms-transform-origin: 60% 20% 0;
+                     -o-transform-origin: 60% 20% 0;
+                        transform-origin: 60% 20% 0;
+                -webkit-transition: all 0.3s ease 0s;
+                   -moz-transition: all 0.3s ease 0s;
+                    -ms-transition: all 0.3s ease 0s;
+                     -o-transition: all 0.3s ease 0s;
+                        transition: all 0.3s ease 0s;
+                -webkit-transform: translate(0,-50%);
+                   -moz-transform: translate(0,-50%);
+                    -ms-transform: translate(0,-50%);
+                     -o-transform: translate(0,-50%);
+                        transform: translate(0,-50%);
+            }
+        }
+        .accordion-content {
+            display: none;
+            padding-bottom: 40px;
+
+            & > *:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        // Active item modifications
+        &.active {
+            .accordion-header:after {
+                -webkit-transform: rotate(90deg);
+                   -moz-transform: rotate(90deg);
+                    -ms-transform: rotate(90deg);
+                     -o-transform: rotate(90deg);
+                        transform: rotate(90deg);
+            }
+        }
+    }
+
+    // Ordered List modifications
+    ol {
+        counter-reset: customlistcounter;
+        list-style-position: inside;
+        list-style-type: none;
+
+        & > li.accordion-item .accordion-header {
+            padding-left: 4em;
+
+            &:before {
+                content: counter(customlistcounter) " ";
+                counter-increment: customlistcounter;
+                font-weight: bold;
+                height: 1.7em;
+                left: 2em;
+                line-height: 1.6em;
+                position: absolute;
+                text-align: center;
+                top: 50%;
+                transform: translateY(-50%);
+                -webkit-transition: color 0.3s ease 0s;
+                   -moz-transition: color 0.3s ease 0s;
+                    -ms-transition: color 0.3s ease 0s;
+                     -o-transition: color 0.3s ease 0s;
+                        transition: color 0.3s ease 0s;
+                width: 1.7em;
+            }
+        }
+    }
+}
+
+
+// In the editor, always show the content area so it's editable
+.aem-AuthorLayer-Edit, .aem-AuthorLayer-Layouting {
+    .acs-commons-rte-accordion li.accordion-item .accordion-content {
+        display: block !important;
+    }
+}

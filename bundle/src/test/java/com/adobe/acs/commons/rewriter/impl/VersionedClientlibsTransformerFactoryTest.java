@@ -21,9 +21,9 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import ch.qos.logback.classic.turbo.TurboFilter;
-import com.day.cq.widget.HtmlLibrary;
-import com.day.cq.widget.HtmlLibraryManager;
-import com.day.cq.widget.LibraryType;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
 
 import junitx.util.PrivateAccessor;
 
@@ -120,7 +120,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Before
     public void setUp() throws Exception {
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
-        when(componentContext.getProperties()).thenReturn(new Hashtable<Object, Object>());
+        when(componentContext.getProperties()).thenReturn(new Hashtable<String, Object>());
         factory = new VersionedClientlibsTransformerFactory();
         filter = factory.new BadMd5VersionedClientLibsFilter();
         PrivateAccessor.setField(factory, "htmlLibraryManager", htmlLibraryManager);
@@ -152,7 +152,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void testRegisterFilter() throws Exception {
-        Hashtable<Object, Object> props = new Hashtable<Object, Object>();
+        Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put("enforce.md5", Boolean.TRUE);
         when(componentContext.getProperties()).thenReturn(props);
         factory.activate(componentContext);

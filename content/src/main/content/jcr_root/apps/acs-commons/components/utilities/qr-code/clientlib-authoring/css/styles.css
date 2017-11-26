@@ -1,0 +1,19 @@
+#acs-commons__qr-code {
+    background-color: white;
+    padding: 10px;
+    position: absolute;
+    top: 44px;
+    left: 100px;
+    border: 10px solid black;
+    display: none;
+    box-shadow: 0px 5px 20px black;
+}
+
+.acs-commons__qr-code--no-config {
+    color: black;
+    width: 500px;
+}
+
+#acs-commons__qr-code canvas {
+    display: block;
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!--
+Copyright 2017 Adobe.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<coral-wizardview class="coral-WizardView" id="startProcessWizard">
+    <coral-steplist coral-wizardview-steplist="" interaction="on" class="coral-StepList" __vent-id__="2" role="tablist" aria-multiselectable="false">
+        <coral-step selected class="coral-Step" role="tab" id="coral-id-1">
+            <coral-step-label class="coral-Step-label">Select Process</coral-step-label>
+        </coral-step>
+        <coral-step class="coral-Step" role="tab" id="coral-id-3">
+            <coral-step-label class="coral-Step-label">Provide Input</coral-step-label>
+        </coral-step>
+    </coral-steplist>
+    <coral-panelstack coral-wizardview-panelstack="" class="coral-PanelStack" role="presentation">
+        <coral-panel class="coral-Well coral-Panel" selected="" role="tabpanel">
+            <coral-panel-content data-sly-use.processes="${'com.adobe.acs.commons.mcp.model.AvailableProcessDefinitions'}">
+                <coral-selectlist id="processDefinitionSelector" data-sly-list.definitionName="${processes.definitions}">
+                    <coral-selectlist-item value="${definitionName}">${processes.definitions[definitionName].name}</coral-selectlist-item>
+                </coral-selectlist>
+            </coral-panel-content></coral-panel>
+        <coral-panel class="coral-Well coral-Panel" role="tabpanel"><coral-panel-content>
+                <coral-panel-content id="processDefinitionInput">
+                    <div id="processDefinitionInput"></div>
+                </coral-panel-content>
+                <button is="coral-button" variant="primary" coral-wizardview-previous="" size="M">
+                    <coral-button-label>Previous</coral-button-label>
+                </button>
+                <button id="startButton" is="coral-button" variant="primary" size="M">
+                    <coral-button-label>Start</coral-button-label>
+                </button>
+            </coral-panel-content></coral-panel>
+    </coral-panelstack>
+</coral-wizardview>

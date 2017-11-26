@@ -81,8 +81,12 @@ public class SyntheticWorkItem implements WorkItem {
         return CURRENT_ASSIGNEE;
     }
 
+    /**
+     * @deprecated deprecated in interface
+     */
     @Deprecated
     @Override
+    @SuppressWarnings("squid:S1149")
     public final Dictionary<String, String> getMetaData() {
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
 

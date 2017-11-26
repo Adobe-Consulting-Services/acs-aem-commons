@@ -23,13 +23,13 @@ package com.adobe.acs.commons.packaging.impl;
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.QueryBuilder;
-import com.day.jcr.vault.fs.io.AccessControlHandling;
-import com.day.jcr.vault.packaging.JcrPackage;
-import com.day.jcr.vault.packaging.JcrPackageDefinition;
-import com.day.jcr.vault.packaging.Packaging;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.jackrabbit.vault.fs.io.AccessControlHandling;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -86,10 +86,6 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
 
     private static final String QUERY_PACKAGE_THUMBNAIL_RESOURCE_PATH =
             "/apps/acs-commons/components/utilities/packager/query-packager/definition/package-thumbnail.png";
-
-    private static final String QUERY_BUILDER = "queryBuilder";
-
-    private static final String LIST = "list";
 
     @Reference
     private Packaging packaging;
@@ -183,26 +179,5 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
         } else {
             return request.getResource().getChild("configuration").adaptTo(ValueMap.class);
         }
-    }
-
-
-    /**
-     * Get the relative resource of the given resource if it resolves otherwise
-     * the provided resource.
-     *
-     * @param resource         the resource
-     * @param relPath          the relative path to resolve against the resource
-     * @return the relative resource if it resolves otherwise the resource
-     */
-    private Resource getRelativeAwareResource(final Resource resource, final String relPath) {
-        if (resource != null && StringUtils.isNotBlank(relPath)) {
-            final Resource relResource = resource.getChild(relPath);
-
-            if (relResource != null) {
-                return relResource;
-            }
-        }
-
-        return resource;
     }
 }

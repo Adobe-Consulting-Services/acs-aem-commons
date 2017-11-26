@@ -94,7 +94,6 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
 
     private boolean isValidType(WorkflowNode node) {
         return WorkflowNode.TYPE_START.equals(node.getType())
-                || WorkflowNode.TYPE_START.equals(node.getType())
                 || WorkflowNode.TYPE_PROCESS.equals(node.getType());
     }
 

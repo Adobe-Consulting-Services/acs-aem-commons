@@ -52,7 +52,7 @@ ACS.CQ.MultiFieldPanel = CQ.Ext.extend(CQ.Ext.Panel, {
         var multifield = this.findParentByType('multifield'),
             dialog = this.findParentByType('dialog');
 
-        if(ACS.CQ.MultiFieldPanel.xtype == this.xtype){
+        if(ACS.CQ.MultiFieldPanel.xtype === this.xtype){
             this.panelValue = new CQ.Ext.form.Hidden({
                 name: this.name
             });

@@ -25,20 +25,26 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class WFArgsWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(WFArgsWorkflowProcess.class);
 
-    public WFArgsWorkflowProcess() {
-
+    Map<String, Object> expected;
+    public WFArgsWorkflowProcess(Map<String, Object> expected) {
+        this.expected = expected;
     }
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
         // Workflow Data
-        Assert.assertEquals("world", metaDataMap.get("hello", String.class));
+        for (final Map.Entry<String, Object> entry : expected.entrySet()) {
+            Assert.assertEquals(entry.getValue(),
+                    metaDataMap.get(entry.getKey(), String.class));
+        }
     }
 }

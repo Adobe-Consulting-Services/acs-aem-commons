@@ -73,6 +73,7 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
         }
     }
 
+    @SuppressWarnings("squid:S3776")
     private void filter(JSONObject typeObject, String resourcePath, ResourceResolver resourceResolver) throws JSONException {
         final JSONArray models = typeObject.getJSONArray(KEY_MODELS);
         final JSONArray newModels = new JSONArray();

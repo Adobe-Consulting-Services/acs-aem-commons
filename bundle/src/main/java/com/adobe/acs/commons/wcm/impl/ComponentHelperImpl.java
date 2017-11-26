@@ -51,6 +51,7 @@ import javax.servlet.ServletRequest;
         description = "Component Helper is a service used in the context of CQ Components for "
                 + "encapsulating common tasks and performing common checks.")
 @Service
+@SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S1192"})
 public final class ComponentHelperImpl implements ComponentHelper {
     private static final String CSS_EDIT_MODE = "wcm-helper-edit-mode";
 
@@ -159,6 +160,8 @@ public final class ComponentHelperImpl implements ComponentHelper {
         return true;
     }
 
+
+    @SuppressWarnings("squid:S3776")
     public String getEditBlock(SlingHttpServletRequest request,
                                       ComponentEditType.Type editType,
                                       boolean... isConfigured) {
@@ -233,6 +236,7 @@ public final class ComponentHelperImpl implements ComponentHelper {
         return getDDEditBlock(request, name, null, isConfigured);
     }
 
+    @SuppressWarnings("squid:S3776")
     public String getDDEditBlock(SlingHttpServletRequest request, String name,
             ComponentEditType.Type editType, boolean... isConfigured) {
         if (!isAuthoringMode(request) || conditionAndCheck(isConfigured)) {

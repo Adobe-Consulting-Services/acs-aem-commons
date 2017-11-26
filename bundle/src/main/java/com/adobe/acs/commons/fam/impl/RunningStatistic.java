@@ -34,7 +34,7 @@ import javax.management.openmbean.TabularType;
  */
 public class RunningStatistic {
 
-    static private int rollingAverageWidth = 20;
+    private static int rollingAverageWidth = 20;
     private final String name;
     private final AtomicLong counter = new AtomicLong();
     private final AtomicLong min = new AtomicLong();
@@ -59,7 +59,7 @@ public class RunningStatistic {
     }
 
     public synchronized void reset() {
-        rollingSeries = Collections.synchronizedList(new LinkedList<Long>());
+        rollingSeries = Collections.synchronizedList(new LinkedList<>());
         for (int i = 0; i < rollingAverageWidth; i++) {
             rollingSeries.add(0L);
         }

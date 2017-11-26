@@ -26,8 +26,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,7 +41,6 @@ import java.util.Set;
 
 @ProviderType
 public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOptions {
-    private static final Logger log = LoggerFactory.getLogger(RequestChecksumGeneratorOptions.class);
 
     public RequestChecksumGeneratorOptions(SlingHttpServletRequest request) throws IOException {
         this.addIncludedNodeTypes(request.getParameterValues(NODES_TYPES));
@@ -101,27 +98,14 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
 
         Set<String> paths = new HashSet<String>();
         encoding = (encoding != null) ?  encoding : Charset.defaultCharset().name();
-        BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
 
-        try {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding))) {
             String path;
             while ((path = br.readLine()) != null) {
                 paths.add(path);
             }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
         }
 
         return paths;
-    }
-
-    private static List<String> asList(String[] arr) {
-        if (arr == null) {
-            return Collections.EMPTY_LIST;
-        } else {
-            return Arrays.asList(arr);
-        }
     }
 }

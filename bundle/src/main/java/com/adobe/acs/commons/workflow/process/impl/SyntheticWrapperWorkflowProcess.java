@@ -27,6 +27,7 @@ import com.adobe.acs.commons.util.visitors.ContentVisitor;
 import com.adobe.acs.commons.util.visitors.ResourceRunnable;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
+import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowRunnerAccessor;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
@@ -68,10 +69,9 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
     private static final String ARG_SAVE_INTERVAL = "saveInterval";
     private static final String ARG_WORKFLOW_MODEL_ID = "workflowModelId";
     private static final String ARG_THROTTLE = "throttle";
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Reference
-    private SyntheticWorkflowRunner syntheticWorkflowRunner;
+    private SyntheticWorkflowRunnerAccessor syntheticWorkflowRunnerAccessor;
 
     @Reference
     private ThrottledTaskRunner throttledTaskRunner;
@@ -82,6 +82,7 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
         ResourceResolver resourceResolver = null;
+        final SyntheticWorkflowRunner syntheticWorkflowRunner = syntheticWorkflowRunnerAccessor.getSyntheticWorkflowRunner();
 
         final String payload = (String) workItem.getWorkflowData().getPayload();
         final ProcessArgs processArgs = new ProcessArgs(metaDataMap);
@@ -141,7 +142,7 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
         int saveInterval;
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), LINE_SEPARATOR);
+            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));
@@ -171,6 +172,8 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
             return saveInterval;
         }
 
-        public boolean isThrottle() { return throttle; }
+        public boolean isThrottle() {
+            return throttle;
+        }
     }
 }

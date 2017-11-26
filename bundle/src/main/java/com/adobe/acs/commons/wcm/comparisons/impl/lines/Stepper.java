@@ -52,7 +52,9 @@ class Stepper<T> {
         if (t != null) {
             Serializable searchId = toId.apply(t);
             for (int i = step; i < ids.size(); i++) {
-                if (ids.get(i).equals(searchId)) return i + 1 - step;
+                if (ids.get(i).equals(searchId)) {
+                    return i + 1 - step;
+                }
             }
         }
         return -1;

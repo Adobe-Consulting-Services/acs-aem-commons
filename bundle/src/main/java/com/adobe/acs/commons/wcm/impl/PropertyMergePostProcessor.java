@@ -67,6 +67,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
      * @param requestParameterMap the Request Param Map
      * @return a list of the PropertyMerge directives by Destination
      */
+    @SuppressWarnings("squid:S3776")
     private List<PropertyMerge> getPropertyMerges(final RequestParameterMap requestParameterMap) {
         final HashMap<String, List<String>> mapping = new HashMap<String, List<String>>();
 
@@ -110,8 +111,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             RequestParameter allowDuplicatesParam = requestParameterMap.getValue(IGNORE_PREFIX + destination
                     + ALLOW_DUPLICATES_SUFFIX);
 
-            final boolean allowDuplicates =
-                    allowDuplicatesParam != null ? Boolean.valueOf(allowDuplicatesParam.getString()) : false;
+            final boolean allowDuplicates = allowDuplicatesParam != null && Boolean.valueOf(allowDuplicatesParam.getString());
 
             RequestParameter typeHintParam = requestParameterMap.getValue(IGNORE_PREFIX + destination
                     + TYPE_HINT_SUFFIX);

@@ -3,4 +3,4 @@
     jcr:primaryType="cq:ClientLibraryFolder"
     jsProcessor="[default:none,min:gcc]"
     categories="[acs-commons.error-page-handler]"
-    embed="[jquery,coralui]"/>
+    embed="[jquery,coralui2]"/>

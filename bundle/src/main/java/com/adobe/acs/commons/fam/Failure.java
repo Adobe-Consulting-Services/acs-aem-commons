@@ -16,21 +16,29 @@
 package com.adobe.acs.commons.fam;
 
 import aQute.bnd.annotation.ProviderType;
+import java.io.Serializable;
 
 import java.util.Calendar;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Represents a failure on a specific node
  */
 @ProviderType
-public final class Failure {
-    
+@SuppressWarnings("squid:S1068")
+public final class Failure implements Serializable {
+    private static final long serialVersionUID = 7526472295622776148L;
+
     private String nodePath;
-    private Exception exception;
-    private Calendar failedAt;
+    private String error;
+    private String stackTrace;
+    private Long time;
+    private transient Exception exception;
+    private final Calendar failedAt;
 
     public Failure() {
         this.failedAt = Calendar.getInstance();
+        time = System.currentTimeMillis();
     }
 
     /**
@@ -59,6 +67,10 @@ public final class Failure {
      */
     public void setException(Exception exception) {
         this.exception = exception;
+        if (exception != null) {
+            this.error = exception.getMessage();
+            this.stackTrace = ExceptionUtils.getStackTrace(exception);
+        }
     }
 
     /**

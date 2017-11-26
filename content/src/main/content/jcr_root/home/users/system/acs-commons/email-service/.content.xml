@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="42e38ac7-6920-3f53-beaf-53ebc4842d24"
+    rep:authorizableId="acs-commons-email-service"
+    rep:principalName="acs-commons-email-service"/>

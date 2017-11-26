@@ -20,6 +20,8 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
 
+import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
+import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowStep;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.ReadDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.SetDataWorkflowProcess;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -30,7 +32,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.Session;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.when;
@@ -46,8 +50,11 @@ public class SyntheticMixedWorkflowRunnerImplTest {
 
     SyntheticWorkflowRunnerImpl swr = new SyntheticWorkflowRunnerImpl();
 
+    List<SyntheticWorkflowStep> workflowSteps;
+
     @Before
     public void setUp() {
+        workflowSteps = new ArrayList<>();
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
     }
 
@@ -61,12 +68,14 @@ public class SyntheticMixedWorkflowRunnerImplTest {
         map.put("process.label", "read");
         swr.bindGraniteWorkflowProcesses(new com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.ReadDataWorkflowProcess(), map);
 
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+        workflowSteps.add(swr.getSyntheticWorkflowStep("set",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
+        workflowSteps.add(swr.getSyntheticWorkflowStep("read",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[] {"set", "read"},
-                metadata, false, false);
+               workflowSteps, false, false);
     }
 
     @Test
@@ -79,11 +88,13 @@ public class SyntheticMixedWorkflowRunnerImplTest {
         map.put("process.label", "read");
         swr.bindCqWorkflowProcesses(new ReadDataWorkflowProcess(), map);
 
-        Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+        workflowSteps.add(swr.getSyntheticWorkflowStep("update",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
+        workflowSteps.add(swr.getSyntheticWorkflowStep("read",
+                SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
 
         swr.execute(resourceResolver,
                 "/content/test",
-                new String[] {"update", "read"},
-                metadata, false, false);
+                workflowSteps, false, false);
     }
 }
