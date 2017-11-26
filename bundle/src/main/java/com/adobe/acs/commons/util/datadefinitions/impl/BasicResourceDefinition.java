@@ -63,7 +63,9 @@ public class BasicResourceDefinition implements ResourceDefinition {
         this.name = name;
     }
 
-    public void setPath(String path) { this.path = path; }
+    public void setPath(String path) {
+        this.path = path;
+    }
 
     public void setTitle(String title) {
         this.title = title;

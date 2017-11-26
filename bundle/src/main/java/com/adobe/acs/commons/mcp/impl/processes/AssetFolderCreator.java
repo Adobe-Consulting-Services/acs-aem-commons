@@ -42,7 +42,12 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Creates Asset Folder definitions (node and Title) based on a well defined Excel document.
@@ -53,14 +58,14 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     public static final String NAME = "Asset Folder Creator";
 
-    protected Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders;
+    protected transient Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders;
 
     public enum AssetFolderBuilder {
         TITLE_TO_NODE_NAME,
         TITLE_AND_NODE_NAME,
         LOWERCASE_WITH_DASHES,
         NONE
-    };
+    }
 
     enum FolderType {
         UNORDERED_FOLDER,
@@ -77,7 +82,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
             component = FileUploadComponent.class,
             options = {"mimeTypes=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "required"}
     )
-    public InputStream excelFile = null;
+    public transient InputStream excelFile = null;
 
     @FormField(
             name = "Folder Type",
@@ -105,7 +110,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     @Override
     public void init() throws RepositoryException {
-
+        // Initialization not required for this process
     }
 
     @Override
@@ -128,92 +133,89 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
     public void parseAssetFolderDefinitions(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
             final XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
-            // Close the inputstream to prevent resource leakage
+            // Close the InputStream to prevent resource leaks.
             excelFile.close();
 
             final XSSFSheet sheet = workbook.getSheetAt(0);
             final Iterator<Row> rows = sheet.rowIterator();
 
             while(rows.hasNext()) {
-                final Row row = rows.next();
-                final Iterator<Cell> cells = row.cellIterator();
-
-                // The previousAssetFolderPath is reset on each new row.
-                String previousAssetFolderPath = null;
-
-                while (cells.hasNext()) {
-                    final Cell cell = cells.next();
-
-                    final String cellValue = StringUtils.trimToNull(cell.getStringCellValue());
-                    if (StringUtils.isBlank(cellValue)) {
-                        // Hitting a blank cell means its the end of this row; don't process anything past this
-                        break;
-                    }
-
-                    // Generate a asset folder definition that will in turn be used to drive the asset folder definition creation
-                    AssetFolderDefinition assetFolderDefinition = getAssetFolderDefinition(primary, cellValue, previousAssetFolderPath);
-
-                    if (assetFolderDefinition == null) {
-                        assetFolderDefinition = getAssetFolderDefinition(fallback, cellValue, previousAssetFolderPath);
-                    }
-
-                    if (assetFolderDefinition == null) {
-                        log.warn("Could not find a Asset Folder Converter that accepts value [ {} ]; skipping...", cellValue);
-                        // Record parse failure
-                        record(ReportRowSatus.FAILED_TO_PARSE, "", cellValue);
-                        // Break to next Row
-                        break;
-                    } else {
-                        /* Prepare for next Cell */
-                        previousAssetFolderPath = assetFolderDefinition.getPath();
-
-                        if (assetFolderDefinitions.get(assetFolderDefinition.getId()) == null) {
-                            assetFolderDefinitions.put(assetFolderDefinition.getId(), assetFolderDefinition);
-                        }
-                    }
-                }
-            };
+                parseAssetFolderRow(rows.next());
+            }
             log.info("Finished Parsing and collected [ {} ] asset folders for creation.", assetFolderDefinitions.size());
         });
     }
 
     /**
-     * Perform the asset folder creation based on the successfully parsed values in parseAssetFolderDefinitions(..).
+     * Parse a row in the Excel that represents an asset folder and ancestors.
      *
-     * @param manager the action manager
+     * @param row the row to process from the Excel sheet.
      */
+    private void parseAssetFolderRow(final Row row) {
+        final Iterator<Cell> cells = row.cellIterator();
+
+        // The previousAssetFolderPath is reset on each new row.
+        String previousAssetFolderPath = null;
+
+        while (cells.hasNext()) {
+            try {
+                previousAssetFolderPath = parseAssetFolderCell(cells.next(), previousAssetFolderPath);
+            } catch (IllegalArgumentException e) {
+                // Error logged in throwing method parseAssetFolderCell(..);
+                // Skip rest of row to avoid creating undesired structures with bad data.
+                break;
+            }
+        }
+    }
+
+    /**
+     * Parse a single cell from an Excel row.
+     *
+     * @param cell the cell to process from the Excel row.
+     * @param previousAssetFolderPath the node path of the previous
+     * @return the asset folder path to the asset folder represented by {@param cell}
+     * @throws IllegalArgumentException
+     */
+    private String parseAssetFolderCell(final Cell cell, final String previousAssetFolderPath) throws IllegalArgumentException {
+        final String cellValue = StringUtils.trimToNull(cell.getStringCellValue());
+
+        if (StringUtils.isNotBlank(cellValue)) {
+
+            // Generate a asset folder definition that will in turn be used to drive the asset folder definition creation
+            AssetFolderDefinition assetFolderDefinition = getAssetFolderDefinition(primary, cellValue, previousAssetFolderPath);
+
+            // Try using the fallback converter if the primary convert could not resolve to a valid definition.
+            if (assetFolderDefinition == null) {
+                assetFolderDefinition = getAssetFolderDefinition(fallback, cellValue, previousAssetFolderPath);
+            }
+
+            if (assetFolderDefinition == null) {
+                log.warn("Could not find a Asset Folder Converter that accepts value [ {} ]; skipping...", cellValue);
+                // Record parse failure
+                record(ReportRowStatus.FAILED_TO_PARSE, "", cellValue);
+                throw new IllegalArgumentException(String.format("Unable to parse value [ %s ]. Skipping rest of row to prevent undesired structured from being created.", cellValue));
+            } else {
+                /* Prepare for next Cell */
+                if (assetFolderDefinitions.get(assetFolderDefinition.getId()) == null) {
+                    assetFolderDefinitions.put(assetFolderDefinition.getId(), assetFolderDefinition);
+                }
+
+                return assetFolderDefinition.getPath();
+            }
+        } else {
+            // If cell is blank then treat as it it is empty.
+            return previousAssetFolderPath;
+        }
+    }
+
     public void createAssetFolders(ActionManager manager) {
         assetFolderDefinitions.values().stream().forEach(assetFolderDefinition -> {
             try {
                 manager.withResolver(rr -> {
-                    ReportRowSatus status;
-
                     try {
-                        Resource folder = rr.getResource(assetFolderDefinition.getPath());
-                        if (folder == null) {
-                            final Map<String, Object> folderProperties = new HashMap<>();
-                            folderProperties.put(JcrConstants.JCR_PRIMARYTYPE, assetFolderDefinition.getNodeType());
-                            folder = rr.create(rr.getResource(assetFolderDefinition.getParentPath()),
-                                    assetFolderDefinition.getName(),
-                                    folderProperties);
-
-                            status = ReportRowSatus.CREATED;
-                        } else {
-                            status = ReportRowSatus.UPDATED_FOLDER_TITLES;
-                        }
-
-                        Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
-                        if (jcrContent == null) {
-                            final Map<String, Object> jcrContentProperties = new HashMap<>();
-                            jcrContentProperties.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
-                            rr.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
-                        }
-
-                        setTitles(folder, assetFolderDefinition);
-                        record(status, assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
-                        log.debug("Created Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
+                        createAssetFolder(assetFolderDefinition, rr);
                     } catch (Exception e) {
-                        record(ReportRowSatus.FAILED_TO_CREATE, assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
+                        record(ReportRowStatus.FAILED_TO_CREATE, assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
                         log.error("Unable to create Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
                     }
                 });
@@ -221,6 +223,45 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
                 log.error("Unable to import asset folders via ACS Commons MCP - Asset Folder Creator", e);
             }
         });
+    }
+
+    /**
+     * Creates an Asset Folder.
+     *
+     * @param assetFolderDefinition the asset folder definition to create.
+     * @param resourceResolver the resource resolver object used to create the asset folder.
+     * @throws PersistenceException
+     * @throws RepositoryException
+     */
+    protected void createAssetFolder(final AssetFolderDefinition assetFolderDefinition, final ResourceResolver resourceResolver) throws PersistenceException, RepositoryException {
+        ReportRowStatus status = ReportRowStatus.FAILED_TO_CREATE;
+
+        Resource folder = resourceResolver.getResource(assetFolderDefinition.getPath());
+
+        if (folder == null) {
+            final Map<String, Object> folderProperties = new HashMap<>();
+            folderProperties.put(JcrConstants.JCR_PRIMARYTYPE, assetFolderDefinition.getNodeType());
+            folder = resourceResolver.create(resourceResolver.getResource(assetFolderDefinition.getParentPath()),
+                    assetFolderDefinition.getName(),
+                    folderProperties);
+
+            status = ReportRowStatus.CREATED;
+        } else {
+            status = ReportRowStatus.UPDATED_FOLDER_TITLES;
+        }
+
+        final Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
+
+        if (jcrContent == null) {
+            final Map<String, Object> jcrContentProperties = new HashMap<>();
+            jcrContentProperties.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
+            resourceResolver.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
+        }
+
+        setTitles(folder, assetFolderDefinition);
+        record(status, assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
+
+        log.debug("Created Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
     }
 
     /**
@@ -262,7 +303,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     /** Reporting **/
 
-    transient private final GenericReport report = new GenericReport();
+    private final transient GenericReport report = new GenericReport();
 
     private final ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
@@ -272,14 +313,14 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
         ASSET_FOLDER_TITLE
     }
 
-    public enum ReportRowSatus {
+    public enum ReportRowStatus {
         CREATED,
         UPDATED_FOLDER_TITLES,
         FAILED_TO_PARSE,
         FAILED_TO_CREATE,
-    };
+    }
 
-    private void record(ReportRowSatus status, String path, String title) {
+    private void record(ReportRowStatus status, String path, String title) {
         final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
 
         row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(status.name()));
