@@ -53,7 +53,6 @@ public class DynamicClassicUiClientLibraryServletTest {
     private static final Category LIMIT = new Category("acs-commons.cq-widgets.add-ons.classicui-limit-parsys", "/etc/clientlibs/limit");
     private static final Category PLACEHOLDER = new Category("acs-commons.cq-widgets.add-ons.classicui-parsys-placeholder", "/etc/clientlibs/placeholder");
     private static final Category CUSTOM = new Category("custom", "/etc/clientlibs/custom");
-    private static final Category CUSTOM_CONTEXT = new Category("custom-context", "/etc/clientlibs/custom");
 
     @Mock
     private SlingHttpServletRequest request;
@@ -77,9 +76,7 @@ public class DynamicClassicUiClientLibraryServletTest {
         writer = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
         when(request.getResourceResolver()).thenReturn(resourceResolver);
-        when(resourceResolver.map(anyString())).then(i -> i.getArgumentAt(0, String.class));
-
-        when(externalizer.relativeLink(any(SlingHttpServletRequest.class), anyString())).thenAnswer(i -> i.getArgumentAt(1, String.class));
+        when(resourceResolver.map(any(SlingHttpServletRequest.class), anyString())).then(i -> i.getArgumentAt(1, String.class));
 
         when(htmlLibraryManager.getLibraries(any(String[].class), any(LibraryType.class), eq(true), eq(true))).thenAnswer(i -> {
             Set<ClientLibrary> result = new HashSet<>();

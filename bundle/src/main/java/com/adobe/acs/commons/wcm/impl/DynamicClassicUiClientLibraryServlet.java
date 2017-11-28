@@ -67,9 +67,6 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
     private static final String PROP_EXCLUDE_ALL = "exclude.all";
 
     @Reference
-    private Externalizer externalizer;
-
-    @Reference
     private HtmlLibraryManager htmlLibraryManager;
 
     private String[] categories;
@@ -87,7 +84,7 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
         if (!excludeAll) {
             Collection<ClientLibrary> libraries = htmlLibraryManager.getLibraries(categories, LibraryType.JS, true, true);
             for (ClientLibrary library : libraries) {
-                writer.value(externalizer.relativeLink(request, resourceResolver.map(library.getIncludePath(LibraryType.JS, htmlLibraryManager.isMinifyEnabled()))));
+                writer.value(resourceResolver.map(request, library.getIncludePath(LibraryType.JS, htmlLibraryManager.isMinifyEnabled())));
             }
         }
         writer.endArray();
@@ -97,7 +94,7 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
         if (!excludeAll) {
             Collection<ClientLibrary> libraries = htmlLibraryManager.getLibraries(categories, LibraryType.CSS, true, true);
             for (ClientLibrary library : libraries) {
-                writer.value(externalizer.relativeLink(request, resourceResolver.map(library.getIncludePath(LibraryType.CSS, htmlLibraryManager.isMinifyEnabled()))));
+                writer.value(resourceResolver.map(request, library.getIncludePath(LibraryType.CSS, htmlLibraryManager.isMinifyEnabled())));
             }
         }
         writer.endArray();
