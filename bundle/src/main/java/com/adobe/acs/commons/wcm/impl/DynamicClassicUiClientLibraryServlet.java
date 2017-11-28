@@ -22,7 +22,6 @@ package com.adobe.acs.commons.wcm.impl;
 import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
-import com.day.cq.commons.Externalizer;
 import com.google.gson.stream.JsonWriter;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Property;
@@ -37,7 +36,6 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 
