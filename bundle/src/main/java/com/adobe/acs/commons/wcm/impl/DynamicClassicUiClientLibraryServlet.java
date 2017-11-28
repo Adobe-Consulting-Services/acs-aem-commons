@@ -22,6 +22,7 @@ package com.adobe.acs.commons.wcm.impl;
 import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
+import com.day.cq.commons.Externalizer;
 import com.google.gson.stream.JsonWriter;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Property;
@@ -66,6 +67,9 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
     private static final String PROP_EXCLUDE_ALL = "exclude.all";
 
     @Reference
+    private Externalizer externalizer;
+
+    @Reference
     private HtmlLibraryManager htmlLibraryManager;
 
     private String[] categories;
@@ -83,7 +87,7 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
         if (!excludeAll) {
             Collection<ClientLibrary> libraries = htmlLibraryManager.getLibraries(categories, LibraryType.JS, true, true);
             for (ClientLibrary library : libraries) {
-                writer.value(resourceResolver.map(library.getIncludePath(LibraryType.JS, htmlLibraryManager.isMinifyEnabled())));
+                writer.value(externalizer.relativeLink(request, resourceResolver.map(library.getIncludePath(LibraryType.JS, htmlLibraryManager.isMinifyEnabled()))));
             }
         }
         writer.endArray();
@@ -93,7 +97,7 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
         if (!excludeAll) {
             Collection<ClientLibrary> libraries = htmlLibraryManager.getLibraries(categories, LibraryType.CSS, true, true);
             for (ClientLibrary library : libraries) {
-                writer.value(resourceResolver.map(library.getIncludePath(LibraryType.CSS, htmlLibraryManager.isMinifyEnabled())));
+                writer.value(externalizer.relativeLink(request, resourceResolver.map(library.getIncludePath(LibraryType.CSS, htmlLibraryManager.isMinifyEnabled()))));
             }
         }
         writer.endArray();
