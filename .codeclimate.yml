@@ -1,5 +1,27 @@
 ---
-engines:
+version: "2"
+checks:
+  argument-count:
+    enabled: false
+  complex-logic:
+    enabled: false
+  file-lines:
+    enabled: false
+  method-complexity:
+    enabled: false
+  method-count:
+    enabled: false
+  method-lines:
+    enabled: false
+  nested-control-flow:
+    enabled: false
+  return-statements:
+    enabled: false
+  similar-code:
+    enabled: false
+  identical-code:
+    enabled: false
+plugins:
   sonar-java:
     enabled: true
     channel: "beta"
@@ -22,12 +44,7 @@ engines:
 #    enabled: true
   pmd:
     enabled: true
-ratings:
-  paths:
-  - "**.java"
-  - "**.css"
-  - "**.js"
-exclude_paths:
+exclude_patterns:
 - ".idea/"
 - "**/vendor/"
 - "**/extensions/contentfinder/"

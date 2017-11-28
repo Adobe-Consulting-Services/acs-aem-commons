@@ -22,6 +22,8 @@ package com.adobe.acs.commons.wcm.impl;
 import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
+import com.day.cq.commons.Externalizer;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -72,7 +74,15 @@ public class DynamicClassicUiClientLibraryServletTest {
         writer = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
         when(request.getResourceResolver()).thenReturn(resourceResolver);
-        when(resourceResolver.map(anyString())).then(i -> i.getArgumentAt(0, String.class));
+        when(resourceResolver.map(any(SlingHttpServletRequest.class), anyString())).then(i -> {
+            SlingHttpServletRequest request = i.getArgumentAt(0, SlingHttpServletRequest.class);
+            String path = i.getArgumentAt(1, String.class);
+            if (request != null && StringUtils.isNotBlank(request.getContextPath())) {
+                return request.getContextPath().concat(path);
+            } else {
+                return path;
+            }
+        });
 
         when(htmlLibraryManager.getLibraries(any(String[].class), any(LibraryType.class), eq(true), eq(true))).thenAnswer(i -> {
             Set<ClientLibrary> result = new HashSet<>();
@@ -114,6 +124,24 @@ public class DynamicClassicUiClientLibraryServletTest {
 
         servlet.doGet(request, response);
         JSONAssert.assertEquals("{'js':['/etc/clientlibs/custom.js'], 'css':['/etc/clientlibs/custom.css']}", writer.toString(), false);
+    }
+
+    @Test
+    public void testDefaultWithContextPath() throws Exception {
+        when(request.getContextPath()).thenReturn("/test");
+        servlet.activate(Collections.emptyMap());
+
+        servlet.doGet(request, response);
+        JSONAssert.assertEquals("{'js':['/test/etc/clientlibs/limit.js','/test/etc/clientlibs/placeholder.js'], 'css':['/test/etc/clientlibs/limit.css','/test/etc/clientlibs/placeholder.css']}", writer.toString(), false);
+    }
+
+    @Test
+    public void testCustomWithContextPath() throws Exception {
+        when(request.getContextPath()).thenReturn("/test");
+        servlet.activate(Collections.singletonMap("categories", new String[] { CUSTOM.id }));
+
+        servlet.doGet(request, response);
+        JSONAssert.assertEquals("{'js':['/test/etc/clientlibs/custom.js'], 'css':['/test/etc/clientlibs/custom.css']}", writer.toString(), false);
     }
 
     private static class Category {

@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1171 - Reduce duplicate coverage comments in pull requests.
 - #1176 - Composite MultiField in case of NodeStore cannot restore value from deep property
 - #1154 - Select in Nested Multi-field is not stored correctly
+- #1187 - Externalize links from the DynamicClassicUiClientLibraryServlet to include context-path
 
 ## [3.12.0] - 2017-11-13
 

@@ -36,7 +36,6 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 
@@ -83,7 +82,7 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
         if (!excludeAll) {
             Collection<ClientLibrary> libraries = htmlLibraryManager.getLibraries(categories, LibraryType.JS, true, true);
             for (ClientLibrary library : libraries) {
-                writer.value(resourceResolver.map(library.getIncludePath(LibraryType.JS, htmlLibraryManager.isMinifyEnabled())));
+                writer.value(resourceResolver.map(request, library.getIncludePath(LibraryType.JS, htmlLibraryManager.isMinifyEnabled())));
             }
         }
         writer.endArray();
@@ -93,7 +92,7 @@ public class DynamicClassicUiClientLibraryServlet extends SlingSafeMethodsServle
         if (!excludeAll) {
             Collection<ClientLibrary> libraries = htmlLibraryManager.getLibraries(categories, LibraryType.CSS, true, true);
             for (ClientLibrary library : libraries) {
-                writer.value(resourceResolver.map(library.getIncludePath(LibraryType.CSS, htmlLibraryManager.isMinifyEnabled())));
+                writer.value(resourceResolver.map(request, library.getIncludePath(LibraryType.CSS, htmlLibraryManager.isMinifyEnabled())));
             }
         }
         writer.endArray();
