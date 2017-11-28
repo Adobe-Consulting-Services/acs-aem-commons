@@ -11,11 +11,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Added
 
-- #1175 - Permission Sensitive Cache Servlet
-
-### Added
-
 - #1145 - New Redirect Map Manager feature
+- #1175 - Permission Sensitive Cache Servlet
 
 ### Changed
 
