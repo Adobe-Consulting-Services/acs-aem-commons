@@ -399,9 +399,12 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Copy the cached data into the servlet output stream.
         try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
-            if (log.isDebugEnabled()) {
-                log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
+            try{
+                IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+            }catch(IllegalStateException ex) {
+                //for JspResponseServletWrapper and other response wrappers that do not support outputstream.
+                //this will only work for text/html responses.
+                IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
             }
 
             return true;
