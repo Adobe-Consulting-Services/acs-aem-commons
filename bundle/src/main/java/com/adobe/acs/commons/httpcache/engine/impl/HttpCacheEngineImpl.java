@@ -398,10 +398,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Copy the cached data into the servlet output stream.
         try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
-            if (log.isDebugEnabled()) {
-                log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
-            }
+            serveCacheContentIntoResponse(response, cacheContent);
 
             return true;
         } catch (IOException e) {
@@ -622,5 +619,24 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         }
 
         return tabularData;
+    }
+
+    /**
+     * Serves the cache content into the sling response.
+     * Has a fallback for wrappers that do not support the outputstream.
+     * @param response
+     * @param cacheContent
+     * @throws IOException
+     */
+    private void serveCacheContentIntoResponse(SlingHttpServletResponse response, CacheContent cacheContent)
+            throws IOException
+    {
+        try{
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+        }catch(IllegalStateException ex) {
+            //for JspResponseServletWrapper and other response wrappers that do not support outputstream.
+            //this will only work for text/html responses.
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
+        }
     }
 }
