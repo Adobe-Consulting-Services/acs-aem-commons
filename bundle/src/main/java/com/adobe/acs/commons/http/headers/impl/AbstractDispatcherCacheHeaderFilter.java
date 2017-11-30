@@ -22,7 +22,7 @@ package com.adobe.acs.commons.http.headers.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.jackrabbit.oak.commons.PropertiesUtil;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
