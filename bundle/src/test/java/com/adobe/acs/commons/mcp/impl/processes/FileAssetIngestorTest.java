@@ -21,7 +21,6 @@ package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.day.cq.dam.api.AssetManager;
 import com.google.common.base.Function;
 import com.google.common.io.Files;
@@ -112,7 +111,11 @@ public class FileAssetIngestorTest {
 
     @After
     public void teardown() throws Exception {
-        FileUtils.deleteDirectory(tempDirectory);
+        try {
+            FileUtils.deleteDirectory(tempDirectory);
+        } catch (IOException ex) {
+            // Ideally the files are cleaned up but some Redmond OS's don't readily release locks right away, causing errors we can ignore.
+        }
     }
 
     @Test
