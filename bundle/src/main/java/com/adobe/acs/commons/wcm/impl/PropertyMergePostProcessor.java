@@ -172,7 +172,11 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     }
 
     protected static String alignDestinationPath(String source, String destination) {
-        return source.substring(0, source.lastIndexOf(JcrConstants.JCR_CONTENT)) + destination;
+        if (source.contains(JcrConstants.JCR_CONTENT)) {
+            return source.substring(0, source.lastIndexOf(JcrConstants.JCR_CONTENT)) + destination;
+        } else {
+            return destination;
+        }
     }
     
     protected static String getParamValue(RequestParameterMap params, String paramName) {

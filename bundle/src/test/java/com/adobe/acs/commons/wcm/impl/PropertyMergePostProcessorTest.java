@@ -203,15 +203,23 @@ public class PropertyMergePostProcessorTest {
     
     @Test
     public void testPropertyPathAlignment() {
+        // Test based on what is actually posted when bulk editing assets
         Assert.assertEquals("./asset-share-commons/en/public/pictures/stacey-rozells-288200.jpg/jcr:content/metadata/dam:tags-merged", 
                 PropertyMergePostProcessor.alignDestinationPath(
                         "./asset-share-commons/en/public/pictures/stacey-rozells-288200.jpg/jcr:content/metadata/dam:tag1", 
                         "jcr:content/metadata/dam:tags-merged"));
         
+        // In the event someone were posting to the asset for updating its metadata, this should still work
         Assert.assertEquals("jcr:content/metadata/dam:tags-merged", 
                 PropertyMergePostProcessor.alignDestinationPath(
                         "jcr:content/metadata/dam:tag1", 
                         "jcr:content/metadata/dam:tags-merged"));        
+
+        // Should not break basic cases
+        Assert.assertEquals("PathB", 
+                PropertyMergePostProcessor.alignDestinationPath(
+                        "PathA", 
+                        "PathB"));
     }
 }
 
