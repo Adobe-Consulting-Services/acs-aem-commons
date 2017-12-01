@@ -106,7 +106,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
                             // if this is a DAM bulk update, search all request params ending with this value
                             trackAssetMergeParameters(requestParameters, source, destination, mapping);
                         } else {
-                            trackMergeParameters(mapping, destination, source);
+                            trackMergeParameters(mapping, source, destination);
                         }
                     });
         });
@@ -122,7 +122,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
                 .collect(Collectors.toList());
     }
 
-    private void trackMergeParameters(final HashMap<String, Set<String>> mapping, String destination, final String source) {
+    private void trackMergeParameters(final HashMap<String, Set<String>> mapping, final String source, String destination) {
         Set<String> sources = mapping.getOrDefault(destination, new HashSet<>());
         sources.add(source);
         mapping.put(destination, sources);
@@ -132,17 +132,17 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
         requestParameters.keySet().stream()
                 .map(String::valueOf)
                 .filter((paramName) -> (paramName.endsWith("/" + source)))
-                .forEach(param -> {
-                    String newDestination = param.substring(0, param.indexOf('/', 2)) + "/" + destination;
-                    trackMergeParameters(mapping, newDestination, param);
+                .forEach(adjustedSource -> {
+                    String adjustedDest = adjustedSource.substring(0, adjustedSource.indexOf('/', 2)) + "/" + destination;
+                    trackMergeParameters(mapping, adjustedSource, adjustedDest);
                 });
     }
 
     private void trackAllTagsMergeParameters(RequestParameterMap requestParameters, String destination, HashMap<String, Set<String>> mapping) {
-        requestParameters.forEach((param, value) -> {
+        requestParameters.forEach((source, value) -> {
             if (hasTags(value)) {
-                String newDestination = param.substring(0, param.indexOf('/', 2)) + "/" + destination;
-                trackMergeParameters(mapping, newDestination, param);
+                String newDestination = source.substring(0, source.indexOf('/', 2)) + "/" + destination;
+                trackMergeParameters(mapping, source, newDestination);
             }
         });
     }
