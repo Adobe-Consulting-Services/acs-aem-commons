@@ -31,7 +31,7 @@ public class PropertyMergePostProcessorTest {
     @Mock
     ResourceResolver resourceResolver;
 
-    ModifiableValueMap properties = new ModifiableValueMapDecorator(new HashMap<String, Object>());
+    ModifiableValueMap properties = new ModifiableValueMapDecorator(new HashMap<>());
 
     @Before
     public void setUp() throws Exception {
