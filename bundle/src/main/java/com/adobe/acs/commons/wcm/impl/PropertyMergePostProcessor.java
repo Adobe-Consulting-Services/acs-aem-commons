@@ -123,9 +123,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     }
 
     private void trackMergeParameters(final HashMap<String, Set<String>> mapping, final String source, String destination) {
-        Set<String> sources = mapping.getOrDefault(destination, new HashSet<>());
-        sources.add(source);
-        mapping.put(destination, sources);
+        mapping.merge(destination, new HashSet<String>(), (a, b) -> a).add(source);
     }
 
     private void trackAssetMergeParameters(final RequestParameterMap requestParameters, final String source, String destination, final HashMap<String, Set<String>> mapping) {
