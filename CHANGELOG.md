@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Changed
 
 - #1174 - Introduced CodeClimate quality checks. Resulted in lots of miscellaneous non-API changes.
+- #1193 - Improvements to Property Merge Post Processor, including asset metadata editing and merge-all-tags
 
 ### Fixed
 
