@@ -21,10 +21,15 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -40,6 +45,9 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     private static final String ALLOW_DUPLICATES_SUFFIX = AT_SUFFIX + ".AllowDuplicates";
     private static final String TYPE_HINT_SUFFIX = AT_SUFFIX + ".TypeHint";
     private static final String IGNORE_PREFIX = ":";
+    private static final String ALL_TAGS = "merge-all-tags";
+    private static final String VALID_JCR_NAME = "[^:/\\[\\]\\|\\s*]+";
+    private static final Pattern VALID_TAG = Pattern.compile("^" + VALID_JCR_NAME + ":" + VALID_JCR_NAME + "(/" + VALID_JCR_NAME + ")*$");
 
     @Override
     public final void process(final SlingHttpServletRequest request,
@@ -68,67 +76,106 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
      * Gets the corresponding list of PropertyMerge directives from the
      * RequestParams.
      *
-     * @param requestParameterMap the Request Param Map
+     * @param requestParameters the Request Param Map
      * @return a list of the PropertyMerge directives by Destination
      */
     @SuppressWarnings("squid:S3776")
-    private List<PropertyMerge> getPropertyMerges(final RequestParameterMap requestParameterMap) {
-        final HashMap<String, List<String>> mapping = new HashMap<>();
-        boolean isBulkUpdate = Boolean.valueOf(requestParameterMap.getValue("dam:bulkUpdate").getString());
+    private List<PropertyMerge> getPropertyMerges(final RequestParameterMap requestParameters) {
+        final HashMap<String, Set<String>> mapping = new HashMap<>();
+        boolean isBulkUpdate = Boolean.valueOf(getParamValue(requestParameters, "dam:bulkUpdate"));
 
         // Collect the Destination / Source mappings
-        requestParameterMap.forEach((key, values) -> {
+        requestParameters.forEach((key, values) -> {
             if (!StringUtils.endsWith(key, AT_SUFFIX)) {
                 // Not a @PropertyMerge request param
                 return;
             }
 
-            final String source = StringUtils.removeStart(StringUtils.substringBefore(key, AT_SUFFIX), IGNORE_PREFIX);
+            Function<String, String> stripPrefix = (s -> StringUtils.removeStart(StringUtils.stripToNull(s), IGNORE_PREFIX));
+            final String source = stripPrefix.apply(StringUtils.substringBefore(key, AT_SUFFIX));
 
             Stream.of(values)
-                    .filter(Objects::nonNull)
                     .map(RequestParameter::getString)
-                    .map(s -> StringUtils.removeStart(StringUtils.stripToNull(s), IGNORE_PREFIX))
+                    .map(stripPrefix)
                     .filter(Objects::nonNull)
                     .forEach(destination -> {
-                        // if this is a DAM bulk update, search all request params ending with this value
-                        if (isBulkUpdate) {
-                            requestParameterMap.keySet().stream()
-                                    .map(String::valueOf)
-                                    .filter((paramName) -> (paramName.endsWith("/" + source)))
-                                    .forEach(param -> {
-                                        String newDestination = param.substring(0, param.indexOf('/', 2)) + "/" + destination;
-                                        List<String> sources = mapping.getOrDefault(newDestination, new ArrayList<>());
-                                        sources.add(param);
-                                        mapping.put(newDestination, sources);
-                                    });
+                        if (source.equalsIgnoreCase(ALL_TAGS)) {
+                            // if this is a request for merging all tags, look at everyting that might be a tag
+                            trackAllTagsMergeParameters(requestParameters, destination, mapping);
+                        } else if (isBulkUpdate) {
+                            // if this is a DAM bulk update, search all request params ending with this value
+                            trackAssetMergeParameters(requestParameters, source, destination, mapping);
                         } else {
-                            List<String> sources = mapping.getOrDefault(destination, new ArrayList<>());
-                            sources.add(source);
-                            mapping.put(destination, sources);
+                            trackMergeParameters(mapping, destination, source);
                         }
                     });
         });
 
         // Convert the Mappings into PropertyMerge objects
-        final List<PropertyMerge> propertyMerges = new ArrayList<>();
+        return mapping.entrySet().stream()
+                .map(entry
+                        -> new PropertyMerge(entry.getKey(),
+                        entry.getValue(),
+                        areDuplicatesAllowed(requestParameters, entry.getKey()),
+                        getFieldTypeHint(requestParameters, entry.getKey())
+                ))
+                .collect(Collectors.toList());
+    }
 
-        mapping.forEach((destination, sources) -> {
-            RequestParameter allowDuplicatesParam = requestParameterMap.getValue(IGNORE_PREFIX + destination
-                    + ALLOW_DUPLICATES_SUFFIX);
+    private void trackMergeParameters(final HashMap<String, Set<String>> mapping, String destination, final String source) {
+        Set<String> sources = mapping.getOrDefault(destination, new HashSet<>());
+        sources.add(source);
+        mapping.put(destination, sources);
+    }
 
-            final boolean allowDuplicates = allowDuplicatesParam != null && Boolean.valueOf(allowDuplicatesParam.getString());
+    private void trackAssetMergeParameters(final RequestParameterMap requestParameters, final String source, String destination, final HashMap<String, Set<String>> mapping) {
+        requestParameters.keySet().stream()
+                .map(String::valueOf)
+                .filter((paramName) -> (paramName.endsWith("/" + source)))
+                .forEach(param -> {
+                    String newDestination = param.substring(0, param.indexOf('/', 2)) + "/" + destination;
+                    trackMergeParameters(mapping, newDestination, param);
+                });
+    }
 
-            RequestParameter typeHintParam = requestParameterMap.getValue(IGNORE_PREFIX + destination
-                    + TYPE_HINT_SUFFIX);
-
-            final String typeHint
-                    = typeHintParam != null ? typeHintParam.getString() : String.class.getSimpleName();
-
-            propertyMerges.add(new PropertyMerge(destination, sources, allowDuplicates, typeHint));
+    private void trackAllTagsMergeParameters(RequestParameterMap requestParameters, String destination, HashMap<String, Set<String>> mapping) {
+        requestParameters.forEach((param, value) -> {
+            if (hasTags(value)) {
+                String newDestination = param.substring(0, param.indexOf('/', 2)) + "/" + destination;
+                trackMergeParameters(mapping, newDestination, param);
+            }
         });
+    }
 
-        return propertyMerges;
+    protected static boolean hasTags(RequestParameter[] value) {
+        if (value == null) {
+            return false;
+        } else {
+            // True if there are no entries that do not look like tags
+            return !Stream.of(value).filter(p -> ! looksLikeTag(p.getString())).findFirst().isPresent();
+        }
+    }
+
+    protected static boolean looksLikeTag(String value) {
+        return VALID_TAG.asPredicate().test(value);
+    }
+
+    protected static boolean areDuplicatesAllowed(RequestParameterMap params, String field) {
+        return Boolean.valueOf(
+                getParamValue(params, IGNORE_PREFIX + field + ALLOW_DUPLICATES_SUFFIX)
+        );
+    }
+
+    protected static String getFieldTypeHint(RequestParameterMap params, String field) {
+        return StringUtils.defaultString(
+                getParamValue(params, IGNORE_PREFIX + field + TYPE_HINT_SUFFIX),
+                String.class.getSimpleName()
+        );
+    }
+
+    protected static String getParamValue(RequestParameterMap params, String paramName) {
+        RequestParameter param = params.getValue(paramName);
+        return param == null ? null : param.getString();
     }
 
     /**
@@ -149,7 +196,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
      * @return Optional resource updated, if any
      */
     protected final <T> Optional<Resource> merge(final Resource resource, final String destination,
-            final List<String> sources, final Class<T> typeHint,
+            final Collection<String> sources, final Class<T> typeHint,
             final boolean allowDuplicates) throws PersistenceException {
 
         // Create an empty array of type T
@@ -213,9 +260,9 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
         private boolean allowDuplicates;
         private Class<?> typeHint;
         private String destination;
-        private List<String> sources;
+        private Collection<String> sources;
 
-        public PropertyMerge(String destination, List<String> sources, boolean allowDuplicates, String typeHint) {
+        public PropertyMerge(String destination, Collection<String> sources, boolean allowDuplicates, String typeHint) {
             this.destination = destination;
             this.sources = sources;
             this.allowDuplicates = allowDuplicates;
@@ -256,7 +303,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             return destination;
         }
 
-        public List<String> getSources() {
+        public Collection<String> getSources() {
             return sources;
         }
     }

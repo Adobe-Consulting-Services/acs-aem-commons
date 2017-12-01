@@ -189,6 +189,17 @@ public class PropertyMergePostProcessorTest {
         Assert.assertArrayEquals(new Calendar[]{ january, september, july, september },
                 properties.get("dates", Calendar[].class));
     }
+    
+    @Test
+    public void testTagDetection() {
+        Assert.assertTrue("Valid root tag detection", PropertyMergePostProcessor.looksLikeTag("Some_Root:Tag"));
+        Assert.assertTrue("Valid sub tag detection", PropertyMergePostProcessor.looksLikeTag("Some_Root-123:Tag/Another_Tag456"));
+        Assert.assertFalse("Invalid tag pattern", PropertyMergePostProcessor.looksLikeTag("Some_Root123"));
+        Assert.assertFalse("Spaces check 1", PropertyMergePostProcessor.looksLikeTag("Some Root:Tag"));
+        Assert.assertFalse("Spaces check 2", PropertyMergePostProcessor.looksLikeTag("Some_Root : Tag"));
+        Assert.assertFalse("Spaces check 3", PropertyMergePostProcessor.looksLikeTag("Some_Root:Tag Name"));
+        Assert.assertFalse("Spaces check 4", PropertyMergePostProcessor.looksLikeTag("Some_Root:Tag/Other Tag Name"));
+    }
 }
 
 
