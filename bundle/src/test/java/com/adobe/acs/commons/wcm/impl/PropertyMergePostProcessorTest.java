@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.wcm.impl;
 
+import java.util.ArrayList;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -14,7 +15,17 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.servlets.post.Modification;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
+import org.apache.sling.testing.resourceresolver.MockResource;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -221,6 +232,43 @@ public class PropertyMergePostProcessorTest {
                         "PathA", 
                         "PathB"));
     }
+    
+    @Test
+    public void testMergeAllTags() throws Exception {
+          SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
+          MockSlingHttpServletRequest request = context.request();
+          ResourceResolver rr = context.resourceResolver();
+          request.setParameterMap(new HashMap<String, Object>(){{
+              put("./asset/jcr:content/metadata/dam:tag1", new String[] {
+                  "tag1:tag1a",
+                  "tag1:tag1b"
+              });
+              put("./asset/jcr:content/metadata/dam:tag2", new String[] {
+                  "tag1:tag2a",
+                  "tag1:tag2b"
+              });
+              put(":merge-all-tags@PropertyMerge", "jcr:content/metadata/dam:combined-tags");
+          }});
+          
+          Map<String, Object> emptyProperties = new HashMap<>();
+          Resource content = rr.create(rr.resolve("/"), "content", emptyProperties);
+          Resource dam = rr.create(content, "dam", emptyProperties);
+          request.setResource(dam);
+          Resource asset = rr.create(dam, "asset", emptyProperties);
+          Resource jcrContent = rr.create(asset, "jcr:content", emptyProperties);
+          Resource metadata = rr.create(jcrContent, "metadata", new HashMap<String, Object>(){{ 
+              put("dam:tag1", new String[]{"tag1:tag1a","tag1:tag1b"});
+              put("dam:tag2", new String[]{"tag2:tag2a","tag2:tag2b"});
+          }});
+          
+          PropertyMergePostProcessor processor = new PropertyMergePostProcessor();
+          List<Modification> changeLog = new ArrayList<>();
+          processor.process(request, changeLog);
+          Assert.assertFalse("Should have observed some changes", changeLog.isEmpty());
+          String[] tags = metadata.getValueMap().get("dam:combined-tags", String[].class);
+          Assert.assertArrayEquals(new String[]{"tag1:tag1a", "tag1:tag1b", "tag2:tag2a", "tag2:tag2b"}, tags);
+          
+    } 
 }
 
 
