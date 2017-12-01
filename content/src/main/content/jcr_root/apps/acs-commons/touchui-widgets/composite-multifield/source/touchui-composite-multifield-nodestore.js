@@ -207,18 +207,12 @@
                 $fields = $(multifield).children().children(cmf.CFFW);
 
                 $fields.each(function (j, field) {
-                    fillValue($form, $(multifield).data("name"), $(field).find("[name]"), (counter + 1));
+                    fillValue($form, $(multifield).data("name"), $(field).find("[name]").not("[name*='@']"), (counter + 1));
                 });
             });
 
             function fillValue($form, fieldSetName, $field, counter){
-                var name, value;
-                // for userpicker, richtext and datepicker, $field length is 2 but only userpicker use the second name value
-                if($field.length > 1 && !$field.parent().hasClass("richtext-container") && !$field.parent().hasClass("coral-DatePicker")) {
-                    name = $($field[1]).attr("name");
-                } else {
-                    name = $field.attr("name");
-                }
+                var name = $field.attr("name"), value;
 
                 if (!name) {
                     return;
