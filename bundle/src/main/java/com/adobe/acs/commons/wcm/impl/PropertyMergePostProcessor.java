@@ -31,6 +31,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.jackrabbit.JcrConstants;
 
 /**
  * ACS AEM Commons - Property Merge Sling POST Processor
@@ -112,9 +113,9 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
         });
 
         // Convert the Mappings into PropertyMerge objects
-        return mapping.entrySet().stream()
-                .map(entry
-                        -> new PropertyMerge(entry.getKey(),
+        return mapping.entrySet().stream().map(
+                entry -> new PropertyMerge(
+                        entry.getKey(),
                         entry.getValue(),
                         areDuplicatesAllowed(requestParameters, entry.getKey()),
                         getFieldTypeHint(requestParameters, entry.getKey())
@@ -131,7 +132,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
                 .map(String::valueOf)
                 .filter((paramName) -> (paramName.endsWith("/" + source)))
                 .forEach(adjustedSource -> {
-                    String adjustedDest = adjustedSource.substring(0, adjustedSource.indexOf('/', 2)) + "/" + destination;
+                    String adjustedDest = alignDestinationPath(adjustedSource, destination);
                     trackMergeParameters(mapping, adjustedSource, adjustedDest);
                 });
     }
@@ -139,18 +140,17 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     private void trackAllTagsMergeParameters(RequestParameterMap requestParameters, String destination, HashMap<String, Set<String>> mapping) {
         requestParameters.forEach((source, value) -> {
             if (hasTags(value)) {
-                String newDestination = source.substring(0, source.indexOf('/', 2)) + "/" + destination;
+                String newDestination = alignDestinationPath(source, destination);
                 trackMergeParameters(mapping, source, newDestination);
             }
         });
     }
 
-    protected static boolean hasTags(RequestParameter[] value) {
-        if (value == null) {
+    protected static boolean hasTags(RequestParameter[] params) {
+        if (params == null) {
             return false;
         } else {
-            // True if there are no entries that do not look like tags
-            return !Stream.of(value).filter(p -> ! looksLikeTag(p.getString())).findFirst().isPresent();
+            return Stream.of(params).allMatch(param -> looksLikeTag(param.getString()));
         }
     }
 
@@ -171,6 +171,10 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
         );
     }
 
+    protected static String alignDestinationPath(String source, String destination) {
+        return source.substring(0, source.lastIndexOf(JcrConstants.JCR_CONTENT)) + destination;
+    }
+    
     protected static String getParamValue(RequestParameterMap params, String paramName) {
         RequestParameter param = params.getValue(paramName);
         return param == null ? null : param.getString();
@@ -212,21 +216,15 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
         }
 
         for (final String source : sources) {
-            final T[] tmp;
             Resource sourceProperties = resource;
-            // Get the source value as type T
             String sourceParam = source;
             if (source.contains("/")) {
                 sourceProperties = resource.getResourceResolver().getResource(resource, source.substring(0, source.lastIndexOf('/')));
                 sourceParam = source.substring(source.lastIndexOf('/') + 1);
             }
 
-            tmp = sourceProperties.adaptTo(ModifiableValueMap.class).get(sourceParam, emptyArray);
-
-            // If the value is not null, add to collectedValues
-            if (tmp != null) {
-                collectedValues.addAll(Arrays.asList(tmp));
-            }
+            T[] tmp = sourceProperties.adaptTo(ModifiableValueMap.class).get(sourceParam, emptyArray);
+            collectedValues.addAll(Arrays.asList(tmp));
         }
 
         Resource targetResource;

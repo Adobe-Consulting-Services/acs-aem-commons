@@ -200,6 +200,19 @@ public class PropertyMergePostProcessorTest {
         Assert.assertFalse("Spaces check 3", PropertyMergePostProcessor.looksLikeTag("Some_Root:Tag Name"));
         Assert.assertFalse("Spaces check 4", PropertyMergePostProcessor.looksLikeTag("Some_Root:Tag/Other Tag Name"));
     }
+    
+    @Test
+    public void testPropertyPathAlignment() {
+        Assert.assertEquals("./asset-share-commons/en/public/pictures/stacey-rozells-288200.jpg/jcr:content/metadata/dam:tags-merged", 
+                PropertyMergePostProcessor.alignDestinationPath(
+                        "./asset-share-commons/en/public/pictures/stacey-rozells-288200.jpg/jcr:content/metadata/dam:tag1", 
+                        "jcr:content/metadata/dam:tags-merged"));
+        
+        Assert.assertEquals("jcr:content/metadata/dam:tags-merged", 
+                PropertyMergePostProcessor.alignDestinationPath(
+                        "jcr:content/metadata/dam:tag1", 
+                        "jcr:content/metadata/dam:tags-merged"));        
+    }
 }
 
 
