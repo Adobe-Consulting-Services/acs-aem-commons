@@ -24,6 +24,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import javax.servlet.WriteListener;
 
 /**
  * Writes to 2 outputstream. Required to take copy of the servlet response.
@@ -59,5 +60,15 @@ public class TeeServletOutputStream extends ServletOutputStream {
     @Override
     public void close() throws IOException {
         this.teeOutputStream.close();
+    }
+
+    @Override
+    public boolean isReady() {
+        return true;
+    }
+
+    @Override
+    public void setWriteListener(WriteListener wl) {
+        // Not supported
     }
 }

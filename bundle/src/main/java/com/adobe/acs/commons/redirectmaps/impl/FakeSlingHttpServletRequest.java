@@ -58,6 +58,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -526,5 +527,20 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
     @Override
     public List<RequestParameter> getRequestParameterList() {
         return null;
+    }
+
+    @Override
+    public String changeSessionId() {
+        return null;
+    }
+
+    @Override
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> type) throws IOException, ServletException {
+        return null;
+    }
+
+    @Override
+    public long getContentLengthLong() {
+        return 0;
     }
 }
