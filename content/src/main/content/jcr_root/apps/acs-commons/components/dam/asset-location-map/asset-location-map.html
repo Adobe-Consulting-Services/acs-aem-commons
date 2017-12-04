@@ -24,12 +24,19 @@
     <div id="${location.divId}"></div>
     <script>
         (function() {
-            var map = L.map('${location.divId @ context="scriptString"}').setView([${location.latitude @ context="text"}, ${location.longitude @ context="text"}], 13);
+            var map = L.map('${location.divId @ context="scriptString"}', {
+                  "center" : [${location.latitude @ context="text"}, ${location.longitude @ context="text"}],
+                  "zoom" : 13
+                });
             L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
             L.marker([${location.latitude @ context="text"}, ${location.longitude @ context="text"}]).addTo(map);
+
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 1500);
         }());
 
     </script>

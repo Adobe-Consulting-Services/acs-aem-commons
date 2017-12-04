@@ -35,6 +35,7 @@ import java.util.List;
 import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
 
+import junitx.util.PrivateAccessor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -65,7 +66,6 @@ public class RedirectMapModelTest {
 	@Mock
 	private Resource redirectMapResource;
 
-	@Spy
 	private List<RedirectConfigModel> redirectConfigs = new ArrayList<RedirectConfigModel>() {
 		private static final long serialVersionUID = 1L;
 
@@ -106,10 +106,10 @@ public class RedirectMapModelTest {
 	private static final Logger log = LoggerFactory.getLogger(RedirectMapModelTest.class);
 
 	@Before
-	public void init() throws RepositoryException, IOException {
+	public void init() throws Exception {
 		log.info("init");
 
-		MockitoAnnotations.initMocks(this);
+		PrivateAccessor.setField(model, "redirects", redirectConfigs);
 
 		searchResultsResource = mock(Resource.class);
 

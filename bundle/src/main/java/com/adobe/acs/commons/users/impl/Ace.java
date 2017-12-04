@@ -65,6 +65,9 @@ public final class Ace {
         for (String segment : segments) {
             AbstractMap.SimpleEntry<String, String> entry = ParameterUtil.toSimpleEntry(segment, KEY_VALUE_SEPARATOR);
 
+            if (entry == null) {
+                continue;
+            }
             if (StringUtils.equals(PROP_TYPE, entry.getKey())) {
                 this.type = StringUtils.stripToNull(entry.getValue());
             } else if (StringUtils.equals(PROP_PATH, entry.getKey())) {

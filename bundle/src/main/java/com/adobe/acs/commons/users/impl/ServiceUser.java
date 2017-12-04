@@ -1,9 +1,26 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.users.impl;
-
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;
-import org.apache.jackrabbit.oak.commons.PathUtils;
 import org.apache.jackrabbit.vault.util.PathUtil;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
@@ -20,7 +37,7 @@ public final class ServiceUser {
     private static final String PATH_SYSTEM_USERS = "/home/users/system";
     private final String principalName;
     private final String intermediatePath;
-    private final List<Ace> aces = new ArrayList<Ace>();
+    private final List<Ace> aces = new ArrayList<>();
 
     public ServiceUser(Map<String, Object> config) throws EnsureServiceUserException {
         String tmp = PropertiesUtil.toString(config.get(EnsureServiceUser.PROP_PRINCIPAL_NAME), null);
@@ -28,7 +45,7 @@ public final class ServiceUser {
         if (StringUtils.contains(tmp, "/")) {
             tmp = StringUtils.removeStart(tmp, PATH_SYSTEM_USERS);
             tmp = StringUtils.removeStart(tmp, "/");
-            this.principalName = PathUtils.getName(tmp);
+            this.principalName = StringUtils.substringAfterLast(tmp, "/");
             this.intermediatePath = PathUtil.makePath(PATH_SYSTEM_USERS, StringUtils.removeEnd(tmp, this.principalName));
         } else {
             this.principalName = tmp;
@@ -42,9 +59,10 @@ public final class ServiceUser {
             throw new EnsureServiceUserException(String.format("[ %s ] is an System User provided by AEM or ACS AEM Commons. You cannot ensure this user.", this.principalName));
         }
 
-        for (String entry : PropertiesUtil.toStringArray(config.get(EnsureServiceUser.PROP_ACES), new String[0])) {
+        final String[] acesProperty = PropertiesUtil.toStringArray(config.get(EnsureServiceUser.PROP_ACES), new String[0]);
+        for (String entry : acesProperty) {
             try {
-                getAces().add(new Ace(entry));
+                aces.add(new Ace(entry));
             } catch (EnsureServiceUserException e) {
                 log.warn("Malformed ACE config [ " + entry + " ] for Service User [ " + StringUtils.defaultIfEmpty(this.principalName, "NOT PROVIDED") + " ]", e);
             }
