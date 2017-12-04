@@ -154,13 +154,13 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             return false;
         } else {
             TagManager tagManager = rr.adaptTo(TagManager.class);
-            return Stream.of(params).allMatch(param -> 
-                    looksLikeTag(param.getString()) && 
-                    tagManager.resolve(param.getString()) != null
+            return Stream.of(params).allMatch(param
+                    -> looksLikeTag(param.getString())
+                    && tagManager.resolve(param.getString()) != null
             );
         }
     }
-    
+
     protected static boolean looksLikeTag(String value) {
         return VALID_TAG.asPredicate().test(value);
     }
@@ -185,7 +185,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             return destination;
         }
     }
-    
+
     protected static String getParamValue(RequestParameterMap params, String paramName) {
         RequestParameter param = params.getValue(paramName);
         return param == null ? null : param.getString();
@@ -213,7 +213,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             final boolean allowDuplicates) throws PersistenceException {
 
         ResourceResolver rr = resource.getResourceResolver();
-        
+
         // Create an empty array of type T
         @SuppressWarnings("unchecked")
         final T[] emptyArray = (T[]) Array.newInstance(typeHint, 0);
