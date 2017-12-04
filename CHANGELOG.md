@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-2.14.0...HEAD
 
+### Changed
+
+- #1192 - Ensure that HttpCache works with response objects when `getOutputStream()` throws `IllegalStateException`
+
 ## [2.14.0] - 2017-10-26
 
 ### Added

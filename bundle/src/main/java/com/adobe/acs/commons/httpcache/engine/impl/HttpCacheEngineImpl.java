@@ -398,11 +398,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Copy the cached data into the servlet output stream.
         try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+            serveCacheContentIntoResponse(response, cacheContent);
+
             if (log.isDebugEnabled()) {
                 log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
             }
-
             return true;
         } catch (IOException e) {
             throw new HttpCacheDataStreamException("Unable to copy from cached data to the servlet output stream.");
@@ -622,5 +622,15 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         }
 
         return tabularData;
+    }
+
+    private void serveCacheContentIntoResponse(SlingHttpServletResponse response, CacheContent cacheContent)
+            throws IOException {
+        try {
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+        } catch(IllegalStateException ex) {
+            // in this case, either the writer has already been obtained or the response doesn't support getOutputStream()
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter(), response.getCharacterEncoding());
+        }
     }
 }
