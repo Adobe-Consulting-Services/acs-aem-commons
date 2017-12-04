@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * ACS AEM Commons - Property Merge Sling POST Processor
@@ -48,7 +49,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     private static final String IGNORE_PREFIX = ":";
     private static final String ALL_TAGS = "merge-all-tags";
     private static final String VALID_JCR_NAME = "[^:/\\[\\]\\|\\s*]+";
-    private static final Pattern VALID_TAG = Pattern.compile("^" + VALID_JCR_NAME + ":" + VALID_JCR_NAME + "(/" + VALID_JCR_NAME + ")*$");
+    private static final Pattern VALID_TAG = Pattern.compile("^" + VALID_JCR_NAME + ":(" + VALID_JCR_NAME + "/)*(" + VALID_JCR_NAME + ")?$");
 
     @Override
     public final void process(final SlingHttpServletRequest request,
@@ -124,7 +125,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     }
 
     private void trackMergeParameters(final HashMap<String, Set<String>> mapping, final String source, String destination) {
-        mapping.merge(destination, new HashSet<String>(), (a, b) -> a).add(source);
+        mapping.merge(destination, new HashSet<>(), (a, b) -> a).add(source);
     }
 
     private void trackAssetMergeParameters(final RequestParameterMap requestParameters, final String source, String destination, final HashMap<String, Set<String>> mapping) {
@@ -173,7 +174,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
 
     protected static String alignDestinationPath(String source, String destination) {
         if (source.contains(JcrConstants.JCR_CONTENT)) {
-            return source.substring(0, source.lastIndexOf(JcrConstants.JCR_CONTENT)) + destination;
+            return StringUtils.substringBeforeLast(source, JcrConstants.JCR_CONTENT) + destination;
         } else {
             return destination;
         }
@@ -205,13 +206,13 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             final Collection<String> sources, final Class<T> typeHint,
             final boolean allowDuplicates) throws PersistenceException {
 
+        ResourceResolver rr = resource.getResourceResolver();
+        
         // Create an empty array of type T
         @SuppressWarnings("unchecked")
         final T[] emptyArray = (T[]) Array.newInstance(typeHint, 0);
 
-        final String targetProperty;
-
-        Collection<T> collectedValues = null;
+        Collection<T> collectedValues;
 
         if (allowDuplicates) {
             collectedValues = new ArrayList<>();
@@ -223,21 +224,19 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
             Resource sourceProperties = resource;
             String sourceParam = source;
             if (source.contains("/")) {
-                sourceProperties = resource.getResourceResolver().getResource(resource, source.substring(0, source.lastIndexOf('/')));
-                sourceParam = source.substring(source.lastIndexOf('/') + 1);
+                sourceParam = StringUtils.substringAfterLast(source, "/");
+                sourceProperties = rr.getResource(resource, StringUtils.substringBeforeLast(source, "/"));
             }
 
             T[] tmp = sourceProperties.adaptTo(ModifiableValueMap.class).get(sourceParam, emptyArray);
             collectedValues.addAll(Arrays.asList(tmp));
         }
 
-        Resource targetResource;
+        Resource targetResource = resource;
+        String targetProperty = destination;
         if (destination.contains("/")) {
-            targetProperty = destination.substring(destination.lastIndexOf('/') + 1);
-            targetResource = resource.getResourceResolver().getResource(resource, destination.substring(0, destination.lastIndexOf('/')));
-        } else {
-            targetProperty = destination;
-            targetResource = resource;
+            targetProperty = StringUtils.substringAfterLast(destination, "/");
+            targetResource = rr.getResource(resource, StringUtils.substringBeforeLast(destination, "/"));
         }
         ModifiableValueMap targetProperties = targetResource.adaptTo(ModifiableValueMap.class);
 

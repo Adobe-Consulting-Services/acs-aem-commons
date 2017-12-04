@@ -203,6 +203,7 @@ public class PropertyMergePostProcessorTest {
     
     @Test
     public void testTagDetection() {
+        Assert.assertTrue("Valid root tag detection", PropertyMergePostProcessor.looksLikeTag("Some_Root:"));
         Assert.assertTrue("Valid root tag detection", PropertyMergePostProcessor.looksLikeTag("Some_Root:Tag"));
         Assert.assertTrue("Valid sub tag detection", PropertyMergePostProcessor.looksLikeTag("Some_Root-123:Tag/Another_Tag456"));
         Assert.assertFalse("Invalid tag pattern", PropertyMergePostProcessor.looksLikeTag("Some_Root123"));
@@ -244,8 +245,8 @@ public class PropertyMergePostProcessorTest {
                   "tag1:tag1b"
               });
               put("./asset/jcr:content/metadata/dam:tag2", new String[] {
-                  "tag1:tag2a",
-                  "tag1:tag2b"
+                  "tag2:tag2a",
+                  "tag2:tag2b"
               });
               put(":merge-all-tags@PropertyMerge", "jcr:content/metadata/dam:combined-tags");
           }});
