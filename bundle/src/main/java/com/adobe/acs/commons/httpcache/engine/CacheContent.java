@@ -48,7 +48,7 @@ public class CacheContent {
     private TempSink tempSink;
 
     /**
-     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>get</code>
      * method.
      *
      * @param charEncoding
@@ -63,7 +63,7 @@ public class CacheContent {
     }
 
     /**
-     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>get</code>
      * method.
      *
      * @param status
@@ -83,7 +83,7 @@ public class CacheContent {
     }
 
     /**
-     * No argument constructor for the build method.
+     * No argument constructor for the get method.
      */
     public CacheContent() {
     }
@@ -97,7 +97,7 @@ public class CacheContent {
     public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
         this.status = responseWrapper.getStatus();
 
-        // Extract information from response and populate state of the instance.
+        // Extract information from response and write state of the instance.
         this.charEncoding = responseWrapper.getCharacterEncoding();
         this.contentType = responseWrapper.getContentType();
 

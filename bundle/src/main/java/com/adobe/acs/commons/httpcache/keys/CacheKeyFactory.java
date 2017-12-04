@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.httpcache.keys;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import org.apache.sling.api.SlingHttpServletRequest;

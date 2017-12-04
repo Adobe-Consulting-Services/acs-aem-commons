@@ -92,6 +92,17 @@ public class InitFormServlet extends SlingAllMethodsServlet {
         accumulate(json, KEY_USER_EVENT_DATA, withLabelValue("changedByWorkflowProcess", "changedByWorkflowProcess"));
         accumulate(json, KEY_USER_EVENT_DATA, withLabelValue("acs-aem-commons.bulk-workflow-manager", "acs-aem-commons.bulk-workflow-manager"));
 
+        // User Event Data
+        try {
+            json.accumulate("userEventData", new JSONObject().put("label", "Custom user-event-data").put("value", ""));
+            json.accumulate("userEventData", new JSONObject().put("label", "changedByWorkflowProcess").put("value", "changedByWorkflowProcess"));
+            json.accumulate("userEventData", new JSONObject().put("label", "acs-aem-commons.bulk-workflow-manager").put("value", "acs-aem-commons.bulk-workflow-manager"));
+
+        } catch (JSONException e) {
+            log.error("Could not create JSON for userEventData options", e);
+            throw new ServletException(e);
+        }
+
         // Workflow Models
         final WorkflowSession workflowSession = workflowService.getWorkflowSession(
                 request.getResourceResolver().adaptTo(Session.class));

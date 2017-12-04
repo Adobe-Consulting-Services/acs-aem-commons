@@ -43,6 +43,10 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -128,7 +132,6 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     }
 
     //-------------------------<CacheKeyFactory methods>
-
     @Override
     public CacheKey build(final SlingHttpServletRequest slingHttpServletRequest, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
@@ -156,6 +159,11 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
      * The ResourceTypeCacheKey is a custom CacheKey bound to this particular factory.
      */
     static class ResourceTypeCacheKey extends AbstractCacheKey implements CacheKey {
+
+        public ResourceTypeCacheKey(){
+            super();
+        }
+
         public ResourceTypeCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
                 HttpCacheKeyCreationException {
             super(request, cacheConfig);
@@ -198,6 +206,17 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         @Override
         public String getUri() {
             return this.resourcePath;
+        }
+
+        private void writeObject(ObjectOutputStream o) throws IOException
+        {
+            super.parentWriteObject(o);
+        }
+
+        private void readObject(ObjectInputStream o)
+                throws IOException, ClassNotFoundException {
+
+            super.parentReadObject(o);
         }
     }
 

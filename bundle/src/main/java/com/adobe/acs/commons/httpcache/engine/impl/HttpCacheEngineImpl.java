@@ -362,7 +362,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    @SuppressWarnings("squid:S3776")
     public boolean deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                        HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException,
             HttpCacheDataStreamException, HttpCachePersistenceException {
@@ -399,10 +398,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         // Copy the cached data into the servlet output stream.
         try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
-            if (log.isDebugEnabled()) {
-                log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
-            }
+            serveCacheContentIntoResponse(response, cacheContent);
 
             return true;
         } catch (IOException e) {
@@ -487,7 +483,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    @SuppressWarnings("squid:S3776")
     public void invalidateCache(String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
 
         // Find out all the cache config which has this path applicable for invalidation.
@@ -535,7 +530,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredHttpCacheRules() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(
@@ -564,7 +558,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredHttpCacheConfigs() throws OpenDataException {
         // @formatter:off
         // Exposing all google guava stats.
@@ -599,7 +592,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredPersistenceStores() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(
@@ -627,5 +619,24 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         }
 
         return tabularData;
+    }
+
+    /**
+     * Serves the cache content into the sling response.
+     * Has a fallback for wrappers that do not support the outputstream.
+     * @param response
+     * @param cacheContent
+     * @throws IOException
+     */
+    private void serveCacheContentIntoResponse(SlingHttpServletResponse response, CacheContent cacheContent)
+            throws IOException
+    {
+        try{
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+        }catch(IllegalStateException ex) {
+            //for JspResponseServletWrapper and other response wrappers that do not support outputstream.
+            //this will only work for text/html responses.
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
+        }
     }
 }

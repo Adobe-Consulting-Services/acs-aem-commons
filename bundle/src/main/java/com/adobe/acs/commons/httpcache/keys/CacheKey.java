@@ -19,12 +19,15 @@
  */
 package com.adobe.acs.commons.httpcache.keys;
 
+import java.io.Serializable;
+
 /**
  * Generic CacheKey interface that allows multiple implementations of CacheKey's via CacheKeyFactories. All CacheKeys
- * are scoped to being build off the Request object. Implementations are expected to override <code> hashCode(),
+ * are scoped to being get off the Request object. Implementations are expected to override <code> hashCode(),
  * equals(Object), toString()</code> methods.
  */
-public interface CacheKey {
+public interface CacheKey extends Serializable
+{
     /**
      * Get URI.
      * @return the universal resource id. This can be a RequestURI or a Resource path based on the context of the key.

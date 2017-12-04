@@ -1,3 +1,6 @@
 #base=js
 
 app.js
+vendor/diff.js
+details.js
+legend.js

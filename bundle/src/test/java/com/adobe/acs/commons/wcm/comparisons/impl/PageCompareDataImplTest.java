@@ -67,8 +67,10 @@ public class PageCompareDataImplTest {
 
         Resource resource = mockResource(path, versionName, new Date());
 
+        CompareFilter compareFilter = new CompareFilter(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName, compareFilter);
 
         // then
         assertThat(pageCompareData.getVersions(), not(Collections.<VersionSelection>emptyList()));
@@ -79,8 +81,10 @@ public class PageCompareDataImplTest {
         // given
         Resource resource = mockResource("/my/path", "latest", new Date());
 
+        CompareFilter compareFilter = new CompareFilter(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", compareFilter);
 
         // then
         assertThat(pageCompareData.getResource(), is(resource));
@@ -93,8 +97,10 @@ public class PageCompareDataImplTest {
 
         Resource resource = mockResource("/my/path", versionName, new Date());
 
+        CompareFilter compareFilter = new CompareFilter(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName, compareFilter);
 
         // then
         assertThat(pageCompareData.getVersion(), is(versionName));
@@ -104,10 +110,12 @@ public class PageCompareDataImplTest {
     public void getVersionDate() throws Exception {
         // given
         final Date date = new Date();
-        Resource resource = mockResource("/my/path", "latest", date);
+        Resource resource = mockResource("/my/path", "1.0", date);
+
+        CompareFilter compareFilter = new CompareFilter(new String[]{}, new String[]{});
 
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "1.0", compareFilter);
 
         // then
         assertThat(pageCompareData.getVersionDate(), is(date));
@@ -119,8 +127,10 @@ public class PageCompareDataImplTest {
         final String path = "/my/path";
         Resource resource = mockResource(path, "latest", new Date());
 
+        CompareFilter compareFilter = new CompareFilter(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", compareFilter);
 
         // then
         assertThat(pageCompareData.getPath(), is(path));
@@ -131,31 +141,38 @@ public class PageCompareDataImplTest {
         // given
         Resource resource = mockResource("/my/path", "latest", new Date());
 
+        CompareFilter compareFilter = new CompareFilter(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", compareFilter);
 
         // then
         assertThat(pageCompareData.getVersions(), not(Collections.<VersionSelection>emptyList()));
-        assertThat(pageCompareData.getVersions().get(1).getName(), is("latest"));
+        assertThat(pageCompareData.getVersions().get(0).getName(), is("latest"));
     }
 
     @Test
     public void getLines() throws Exception {
         // given
-        Resource resource = mockResource("/my/path", "latest", new Date());
+        Resource resource = mockResource("/my/path", "1.0", new Date());
 
         Set<String> valueMapKeys = Sets.newHashSet("a", "b");
-        Property a = mockProperty("a", "/my/path/a", "value a");
-        when(resource.adaptTo(Node.class).getProperty("a")).thenReturn(a);
-        Property b = mockProperty("b", "/my/path/b", "value b");
-        when(resource.adaptTo(Node.class).getProperty("b")).thenReturn(b);
         when(resource.getValueMap().keySet()).thenReturn(valueMapKeys);
 
+        Property a = mockProperty("a", "/my/path/a", "value a");
+        when(resource.adaptTo(Node.class).getProperty("a")).thenReturn(a);
+
+        Property b = mockProperty("b", "/my/path/b", "value b");
+        when(resource.adaptTo(Node.class).getProperty("b")).thenReturn(b);
+
+        CompareFilter compareFilter = new CompareFilter(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", compareFilter);
 
         // then
         assertThat(pageCompareData.getLines(), not(Collections.<PageCompareDataLine>emptyList()));
+        assertThat(pageCompareData.getLines().size(), is(2));
         assertThat(pageCompareData.getLines().get(0).getName(), is("a"));
         assertThat(pageCompareData.getLines().get(1).getName(), is("b"));
     }
@@ -185,8 +202,10 @@ public class PageCompareDataImplTest {
         List<Resource> children = Lists.newArrayList(childC, childD);
         when(resource.getChildren()).thenReturn(children);
 
+        CompareFilter compareFilter = new CompareFilter(new String[]{}, new String[]{});
+
         // when
-        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest", compareFilter);
 
         // then
         assertThat(pageCompareData.getLines(), not(Collections.<PageCompareDataLine>emptyList()));
@@ -195,6 +214,31 @@ public class PageCompareDataImplTest {
         assertThat(pageCompareData.getLines().get(2).getName(), is("c"));
         assertThat(pageCompareData.getLines().get(3).getName(), is("d"));
         assertThat(pageCompareData.getLines().get(4).getName(), is("e"));
+    }
+
+    @Test
+    public void getLines_filterProperty() throws Exception {
+        // given
+        Resource resource = mockResource("/my/path", "1.0", new Date());
+
+        Set<String> valueMapKeys = Sets.newHashSet("jcr:uuid", "b");
+        Property a = mockProperty("jcr:uuid", "/my/path/jcr:uuid", "value a");
+        when(resource.adaptTo(Node.class).getProperty("jcr:uuid")).thenReturn(a);
+
+        Property b = mockProperty("b", "/my/path/b", "value b");
+        when(resource.adaptTo(Node.class).getProperty("b")).thenReturn(b);
+
+        when(resource.getValueMap().keySet()).thenReturn(valueMapKeys);
+
+        CompareFilter compareFilter = new CompareFilter(new String[]{"(.*/)?jcr:uuid"}, new String[]{});
+
+        // when
+        PageCompareData pageCompareData = new PageCompareDataImpl(resource, "1.0", compareFilter);
+
+        // then
+        assertThat(pageCompareData.getLines(), not(Collections.<PageCompareDataLine>emptyList()));
+        assertThat(pageCompareData.getLines().size(), is(1));
+        assertThat(pageCompareData.getLines().get(0).getName(), is("b"));
     }
 
     private Property mockProperty(String name, String path, String value) throws RepositoryException {

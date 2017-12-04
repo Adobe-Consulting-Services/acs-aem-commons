@@ -19,8 +19,9 @@
  */
 /*global angular: false */
 
-angular.module('PageCompare', ['acsCoral'])
-.controller('MainCtrl', ['$scope', '$http', '$timeout', '$location',
+var pageCompareApp = angular.module('PageCompare', ['acsCoral']);
+
+pageCompareApp.controller('MainCtrl', ['$scope', '$http', '$timeout', '$location',
     function($scope, $http, $timeout, $location) {
 
         $scope.app = {

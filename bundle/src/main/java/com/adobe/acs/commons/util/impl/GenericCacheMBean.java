@@ -43,7 +43,7 @@ public interface GenericCacheMBean {
     @Description("Cache entry contents by key.")
     String getCacheEntry(@Name(value="Cache Key") String cacheKeyStr) throws Exception;
 
-    @Description("Conents of cache")
-    TabularData getCacheContents() throws OpenDataException;
+    @Description("Contents of cache")
+    TabularData getCacheContents() throws Exception;
 
 }

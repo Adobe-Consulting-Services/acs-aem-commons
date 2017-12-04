@@ -38,6 +38,28 @@
 
                         <h1 acs-coral-heading>Page Compare</h1>
 
+                        <div class="legende">
+                            <div class="definition" data-legend="EQUAL">
+                                <div class="color"></div>
+                                <div class="text">Equals</div>
+                            </div>
+                            <div class="definition" data-legend="NOT_EQUAL">
+                                <div class="color color-NOT_EQUAL"></div>
+                                <div class="text">Changed</div>
+                            </div>
+                            <div class="definition" data-legend="ONLY_LEFT">
+                                <div class="color color-ONLY_LEFT"></div>
+                                <div class="color empty second"></div>
+                                <div class="text">Only left</div>
+                            </div>
+                            <div class="definition" data-legend="ONLY_RIGHT">
+                                <div class="color empty"></div>
+                                <div class="color color-ONLY_RIGHT second"></div>
+                                <div class="text">Only right</div>
+                            </div>
+                            <div class="clearer"></div>
+                        </div>
+
                         <div class="search">
 
                             <div class="half">
@@ -58,8 +80,6 @@
                                             </c:forEach>
                                         </select>
                                     </c:if>
-
-
                                 </div>
                             </div>
                             <div class="half">
@@ -99,11 +119,16 @@
                                                     <table>
                                                         <c:forEach var="line" items="${model.data}" varStatus="forStatus">
                                                             <c:set var="versionEntry" value="${line.left}" />
+                                                            <c:set var="side" value="left" />
                                                             <c:if test="${!empty versionEntry}">
                                                                 <%@include file="one.jsp" %>
                                                             </c:if>
                                                             <c:if test="${empty versionEntry}">
-                                                                <div class="version-entry"><div class="inner-version-entry">&nbsp;</div></div>
+                                                                <div class="version-entry elem-${line.state}"><div class="inner-version-entry color-${line.state} empty">
+                                                                        &nbsp;
+                                                                        <div id="details-${side}-${forStatus.index}-detail" class="detail" data-details>
+                                                                        </div>
+                                                                </div></div>
                                                             </c:if>
                                                         </c:forEach>
                                                     </table>
@@ -134,11 +159,19 @@
                                                     <table>
                                                         <c:forEach var="line" items="${model.data}" varStatus="forStatus">
                                                             <c:set var="versionEntry" value="${line.right}" />
+                                                            <c:set var="side" value="right" />
                                                             <c:if test="${!empty versionEntry}">
                                                                 <%@include file="one.jsp" %>
                                                             </c:if>
                                                             <c:if test="${empty versionEntry}">
-                                                                <div class="version-entry"><div class="inner-version-entry">&nbsp;</div></div>
+                                                                <div class="version-entry elem-${line.state}">
+                                                                    <div class="inner-version-entry color-${line.state} empty">
+                                                                        &nbsp;
+                                                                        <div id="details-${side}-${forStatus.index}-detail" class="detail" data-details>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
                                                             </c:if>
                                                         </c:forEach>
                                                     </table>
