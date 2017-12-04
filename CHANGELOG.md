@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1174 - Introduced CodeClimate quality checks. Resulted in lots of miscellaneous non-API changes.
 - #1191 - Ensure that HttpCache works with response objects when `getOutputStream()` throws `IllegalStateException`
+- #1193 - Improvements to Property Merge Post Processor, including asset metadata editing and merge-all-tags
 
 ### Fixed
 
