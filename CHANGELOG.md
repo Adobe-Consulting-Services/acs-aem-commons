@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Changed
 
 - #1174 - Introduced CodeClimate quality checks. Resulted in lots of miscellaneous non-API changes.
+- #1191 - Ensure that HttpCache works with response objects when `getOutputStream()` throws `IllegalStateException`
 - #1193 - Improvements to Property Merge Post Processor, including asset metadata editing and merge-all-tags
 
 ### Fixed
@@ -25,7 +26,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1166 - Fixed issue with various ClientLib dependency errors, and fixed Quickly Filter registration.
 - #1171 - Reduce duplicate coverage comments in pull requests.
 - #1176 - Composite MultiField in case of NodeStore cannot restore value from deep property
+- #1154 - Select in Nested Multi-field is not stored correctly
 - #1187 - Externalize links from the DynamicClassicUiClientLibraryServlet to include context-path
+- #1197 - Redraw map after period in order to ensure it is properly centered
 
 ## [3.12.0] - 2017-11-13
 
