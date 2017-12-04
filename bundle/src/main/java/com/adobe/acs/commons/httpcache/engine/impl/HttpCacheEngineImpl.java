@@ -641,7 +641,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         }catch(IllegalStateException ex) {
             //for JspResponseServletWrapper and other response wrappers that do not support outputstream.
             //this will only work for text/html responses.
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter());
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter(), response.getCharacterEncoding());
         }
     }
 }
