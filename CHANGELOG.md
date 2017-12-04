@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Changed
 
 - #1174 - Introduced CodeClimate quality checks. Resulted in lots of miscellaneous non-API changes.
+- #1191 - Ensure that HttpCache works with response objects when `getOutputStream()` throws `IllegalStateException`
 
 ### Fixed
 
