@@ -9,6 +9,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -20,18 +21,21 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.servlets.post.Modification;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
-import org.mockito.Mockito;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PropertyMergePostProcessorTest {
+
+    @Rule
+    public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
 
     @InjectMocks
     PropertyMergePostProcessor propertyMerge = new PropertyMergePostProcessor();
@@ -233,18 +237,15 @@ public class PropertyMergePostProcessorTest {
 
     @Test
     public void testMergeAllTags() throws Exception {
-        SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
 
-        final TagManager mockTagManager = Mockito.mock(TagManager.class);
-        Tag fakeTag = Mockito.mock(Tag.class);
-        Mockito.when(mockTagManager.resolve(Mockito.any())).thenReturn(fakeTag);
+        final TagManager mockTagManager = mock(TagManager.class);
+        Tag fakeTag = mock(Tag.class);
+        when(mockTagManager.resolve(any())).thenReturn(fakeTag);
 
-        ResourceResolver rr = Mockito.spy(context.resourceResolver());
-        Mockito.when(rr.adaptTo(TagManager.class)).thenReturn(mockTagManager);
+        context.registerAdapter(ResourceResolver.class, TagManager.class, mockTagManager);
 
-        MockSlingHttpServletRequest request = Mockito.spy(context.request());
-        Mockito.when(request.getResourceResolver()).thenReturn(rr);
-
+        ResourceResolver rr = context.resourceResolver();
+        MockSlingHttpServletRequest request = context.request();
         request.setParameterMap(new HashMap<String, Object>() {
             {
                 put("./asset/jcr:content/metadata/dam:tag1", new String[]{
