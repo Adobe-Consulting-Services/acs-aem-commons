@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.wcm.impl;
 
+import com.day.cq.tagging.TagManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -47,7 +48,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     private static final String ALLOW_DUPLICATES_SUFFIX = AT_SUFFIX + ".AllowDuplicates";
     private static final String TYPE_HINT_SUFFIX = AT_SUFFIX + ".TypeHint";
     private static final String IGNORE_PREFIX = ":";
-    private static final String ALL_TAGS = "merge-all-tags";
+    protected static final String OPERATION_ALL_TAGS = "Operation.mergeAllTags";
     private static final String VALID_JCR_NAME = "[^:/\\[\\]\\|\\s*]+";
     private static final Pattern VALID_TAG = Pattern.compile("^" + VALID_JCR_NAME + ":(" + VALID_JCR_NAME + "/)*(" + VALID_JCR_NAME + ")?$");
 
@@ -55,7 +56,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
     public final void process(final SlingHttpServletRequest request,
             final List<Modification> modifications) throws Exception {
 
-        final List<PropertyMerge> propertyMerges = this.getPropertyMerges(request.getRequestParameterMap());
+        final List<PropertyMerge> propertyMerges = this.getPropertyMerges(request);
 
         final Resource resource = request.getResource();
 
@@ -82,7 +83,8 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
      * @return a list of the PropertyMerge directives by Destination
      */
     @SuppressWarnings("squid:S3776")
-    private List<PropertyMerge> getPropertyMerges(final RequestParameterMap requestParameters) {
+    private List<PropertyMerge> getPropertyMerges(final SlingHttpServletRequest request) {
+        final RequestParameterMap requestParameters = request.getRequestParameterMap();
         final HashMap<String, Set<String>> mapping = new HashMap<>();
         boolean isBulkUpdate = Boolean.valueOf(getParamValue(requestParameters, "dam:bulkUpdate"));
 
@@ -101,9 +103,9 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
                     .map(stripPrefix)
                     .filter(Objects::nonNull)
                     .forEach(destination -> {
-                        if (source.equalsIgnoreCase(ALL_TAGS)) {
+                        if (source.equalsIgnoreCase(OPERATION_ALL_TAGS)) {
                             // if this is a request for merging all tags, look at everyting that might be a tag
-                            trackAllTagsMergeParameters(requestParameters, destination, mapping);
+                            trackAllTagsMergeParameters(request, destination, mapping);
                         } else if (isBulkUpdate) {
                             // if this is a DAM bulk update, search all request params ending with this value
                             trackAssetMergeParameters(requestParameters, source, destination, mapping);
@@ -138,23 +140,27 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
                 });
     }
 
-    private void trackAllTagsMergeParameters(RequestParameterMap requestParameters, String destination, HashMap<String, Set<String>> mapping) {
-        requestParameters.forEach((source, value) -> {
-            if (hasTags(value)) {
+    private void trackAllTagsMergeParameters(SlingHttpServletRequest request, String destination, HashMap<String, Set<String>> mapping) {
+        request.getRequestParameterMap().forEach((source, value) -> {
+            if (hasTags(request.getResourceResolver(), value)) {
                 String newDestination = alignDestinationPath(source, destination);
                 trackMergeParameters(mapping, source, newDestination);
             }
         });
     }
 
-    protected static boolean hasTags(RequestParameter[] params) {
+    protected static boolean hasTags(ResourceResolver rr, RequestParameter[] params) {
         if (params == null) {
             return false;
         } else {
-            return Stream.of(params).allMatch(param -> looksLikeTag(param.getString()));
+            TagManager tagManager = rr.adaptTo(TagManager.class);
+            return Stream.of(params).allMatch(param -> 
+                    looksLikeTag(param.getString()) && 
+                    tagManager.resolve(param.getString()) != null
+            );
         }
     }
-
+    
     protected static boolean looksLikeTag(String value) {
         return VALID_TAG.asPredicate().test(value);
     }
@@ -227,7 +233,6 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
                 sourceParam = StringUtils.substringAfterLast(source, "/");
                 sourceProperties = rr.getResource(resource, StringUtils.substringBeforeLast(source, "/"));
             }
-
             T[] tmp = sourceProperties.adaptTo(ModifiableValueMap.class).get(sourceParam, emptyArray);
             collectedValues.addAll(Arrays.asList(tmp));
         }

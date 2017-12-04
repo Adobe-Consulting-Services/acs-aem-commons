@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.wcm.impl;
 
+import com.day.cq.tagging.Tag;
+import com.day.cq.tagging.TagManager;
 import java.util.ArrayList;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -15,17 +17,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.servlets.post.Modification;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
-import org.apache.sling.testing.resourceresolver.MockResource;
+import org.mockito.Mockito;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -53,8 +53,8 @@ public class PropertyMergePostProcessorTest {
     @Test
     public void testMerge_NoDuplicates_String() throws Exception {
 
-        properties.put("cats", new String[]{ "felix", "hobbes", "fluffy" });
-        properties.put("dogs", new String[]{ "snoopy", "ira", "fluffy" });
+        properties.put("cats", new String[]{"felix", "hobbes", "fluffy"});
+        properties.put("dogs", new String[]{"snoopy", "ira", "fluffy"});
         properties.put("fish", "nemo");
 
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(properties);
@@ -65,37 +65,35 @@ public class PropertyMergePostProcessorTest {
                 String.class,
                 false);
 
-        Assert.assertArrayEquals(new String[]{ "felix", "hobbes", "fluffy", "snoopy", "ira", "nemo" },
+        Assert.assertArrayEquals(new String[]{"felix", "hobbes", "fluffy", "snoopy", "ira", "nemo"},
                 properties.get("animals", String[].class));
     }
 
     @Test
     public void testMerge_NoDuplicates_Long() throws Exception {
 
-        properties.put("odd", new Long[]{ 1L, 3L });
-        properties.put("even", new Long[]{ 2L, 4L });
-        properties.put("duplicates", new Long[]{ 1L, 2L, 3L, 4L });
-
+        properties.put("odd", new Long[]{1L, 3L});
+        properties.put("even", new Long[]{2L, 4L});
+        properties.put("duplicates", new Long[]{1L, 2L, 3L, 4L});
 
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(properties);
 
         propertyMerge.merge(resource,
                 "longs",
                 Arrays.asList("even", "odd", "duplicates"),
-                Long.class, 
+                Long.class,
                 false);
 
-        Assert.assertArrayEquals(new Long[]{ 2L, 4L, 1L, 3L },
+        Assert.assertArrayEquals(new Long[]{2L, 4L, 1L, 3L},
                 properties.get("longs", Long[].class));
     }
 
     @Test
     public void testMerge_NoDuplicates_Double() throws Exception {
 
-        properties.put("tenths", new Double[]{ 1.1D, 1.2D });
+        properties.put("tenths", new Double[]{1.1D, 1.2D});
         properties.put("hundredths", 3.01D);
-        properties.put("duplicates", new Double[]{ 1.1D });
-
+        properties.put("duplicates", new Double[]{1.1D});
 
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(properties);
 
@@ -105,43 +103,42 @@ public class PropertyMergePostProcessorTest {
                 Double.class,
                 false);
 
-        Assert.assertArrayEquals(new Double[]{ 1.1D, 1.2D, 3.01D },
+        Assert.assertArrayEquals(new Double[]{1.1D, 1.2D, 3.01D},
                 properties.get("doubles", Double[].class));
     }
 
     @Test
     public void testMerge_NoDuplicates_Boolean() throws Exception {
 
-        properties.put("first", new Boolean[]{ true, false, true });
+        properties.put("first", new Boolean[]{true, false, true});
         properties.put("second", true);
-
 
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(properties);
 
         propertyMerge.merge(resource,
                 "booleans",
                 Arrays.asList("first", "second"),
-                Boolean.class, 
+                Boolean.class,
                 false);
 
-        Assert.assertArrayEquals(new Boolean[]{ true, false },
+        Assert.assertArrayEquals(new Boolean[]{true, false},
                 properties.get("booleans", Boolean[].class));
     }
 
     @Test
     public void testMerge_NoDuplicates_Calendar() throws Exception {
 
-        Calendar january =  Calendar.getInstance();
+        Calendar january = Calendar.getInstance();
         january.set(2015, Calendar.JANUARY, 1);
 
-        Calendar july =  Calendar.getInstance();
+        Calendar july = Calendar.getInstance();
         july.set(2015, Calendar.JULY, 4);
 
-        Calendar september =  Calendar.getInstance();
+        Calendar september = Calendar.getInstance();
         september.set(2015, Calendar.SEPTEMBER, 16);
 
-        properties.put("cold", new Calendar[] { january, september });
-        properties.put("hot", new Calendar[]{ july, september });
+        properties.put("cold", new Calendar[]{january, september});
+        properties.put("hot", new Calendar[]{july, september});
 
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(properties);
 
@@ -151,15 +148,15 @@ public class PropertyMergePostProcessorTest {
                 Calendar.class,
                 false);
 
-        Assert.assertArrayEquals(new Calendar[]{ january, september, july },
+        Assert.assertArrayEquals(new Calendar[]{january, september, july},
                 properties.get("dates", Calendar[].class));
     }
 
     @Test
     public void testMerge_Duplicates_String() throws Exception {
 
-        properties.put("cats", new String[]{ "felix", "hobbes", "fluffy" });
-        properties.put("dogs", new String[]{ "snoopy", "ira", "fluffy" });
+        properties.put("cats", new String[]{"felix", "hobbes", "fluffy"});
+        properties.put("dogs", new String[]{"snoopy", "ira", "fluffy"});
         properties.put("fish", "nemo");
 
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(properties);
@@ -170,24 +167,24 @@ public class PropertyMergePostProcessorTest {
                 String.class,
                 true);
 
-        Assert.assertArrayEquals(new String[]{ "felix", "hobbes", "fluffy", "snoopy", "ira", "fluffy", "nemo" },
+        Assert.assertArrayEquals(new String[]{"felix", "hobbes", "fluffy", "snoopy", "ira", "fluffy", "nemo"},
                 properties.get("animals", String[].class));
     }
 
     @Test
     public void testMerge_Duplicates_Calendar() throws Exception {
 
-        Calendar january =  Calendar.getInstance();
+        Calendar january = Calendar.getInstance();
         january.set(2015, Calendar.JANUARY, 1);
 
-        Calendar july =  Calendar.getInstance();
+        Calendar july = Calendar.getInstance();
         july.set(2015, Calendar.JULY, 4);
 
-        Calendar september =  Calendar.getInstance();
+        Calendar september = Calendar.getInstance();
         september.set(2015, Calendar.SEPTEMBER, 16);
 
-        properties.put("cold", new Calendar[] { january, september });
-        properties.put("hot", new Calendar[]{ july, september });
+        properties.put("cold", new Calendar[]{january, september});
+        properties.put("hot", new Calendar[]{july, september});
 
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(properties);
 
@@ -197,10 +194,10 @@ public class PropertyMergePostProcessorTest {
                 Calendar.class,
                 true);
 
-        Assert.assertArrayEquals(new Calendar[]{ january, september, july, september },
+        Assert.assertArrayEquals(new Calendar[]{january, september, july, september},
                 properties.get("dates", Calendar[].class));
     }
-    
+
     @Test
     public void testTagDetection() {
         Assert.assertTrue("Valid root tag detection", PropertyMergePostProcessor.looksLikeTag("Some_Root:"));
@@ -212,64 +209,75 @@ public class PropertyMergePostProcessorTest {
         Assert.assertFalse("Spaces check 3", PropertyMergePostProcessor.looksLikeTag("Some_Root:Tag Name"));
         Assert.assertFalse("Spaces check 4", PropertyMergePostProcessor.looksLikeTag("Some_Root:Tag/Other Tag Name"));
     }
-    
+
     @Test
     public void testPropertyPathAlignment() {
         // Test based on what is actually posted when bulk editing assets
-        Assert.assertEquals("./asset-share-commons/en/public/pictures/stacey-rozells-288200.jpg/jcr:content/metadata/dam:tags-merged", 
+        Assert.assertEquals("./asset-share-commons/en/public/pictures/stacey-rozells-288200.jpg/jcr:content/metadata/dam:tags-merged",
                 PropertyMergePostProcessor.alignDestinationPath(
-                        "./asset-share-commons/en/public/pictures/stacey-rozells-288200.jpg/jcr:content/metadata/dam:tag1", 
+                        "./asset-share-commons/en/public/pictures/stacey-rozells-288200.jpg/jcr:content/metadata/dam:tag1",
                         "jcr:content/metadata/dam:tags-merged"));
-        
+
         // In the event someone were posting to the asset for updating its metadata, this should still work
-        Assert.assertEquals("jcr:content/metadata/dam:tags-merged", 
+        Assert.assertEquals("jcr:content/metadata/dam:tags-merged",
                 PropertyMergePostProcessor.alignDestinationPath(
-                        "jcr:content/metadata/dam:tag1", 
-                        "jcr:content/metadata/dam:tags-merged"));        
+                        "jcr:content/metadata/dam:tag1",
+                        "jcr:content/metadata/dam:tags-merged"));
 
         // Should not break basic cases
-        Assert.assertEquals("PathB", 
+        Assert.assertEquals("PathB",
                 PropertyMergePostProcessor.alignDestinationPath(
-                        "PathA", 
+                        "PathA",
                         "PathB"));
     }
-    
+
     @Test
     public void testMergeAllTags() throws Exception {
-          SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
-          MockSlingHttpServletRequest request = context.request();
-          ResourceResolver rr = context.resourceResolver();
-          request.setParameterMap(new HashMap<String, Object>(){{
-              put("./asset/jcr:content/metadata/dam:tag1", new String[] {
-                  "tag1:tag1a",
-                  "tag1:tag1b"
-              });
-              put("./asset/jcr:content/metadata/dam:tag2", new String[] {
-                  "tag2:tag2a",
-                  "tag2:tag2b"
-              });
-              put(":merge-all-tags@PropertyMerge", "jcr:content/metadata/dam:combined-tags");
-          }});
-          
-          Map<String, Object> emptyProperties = new HashMap<>();
-          Resource content = rr.create(rr.resolve("/"), "content", emptyProperties);
-          Resource dam = rr.create(content, "dam", emptyProperties);
-          request.setResource(dam);
-          Resource asset = rr.create(dam, "asset", emptyProperties);
-          Resource jcrContent = rr.create(asset, "jcr:content", emptyProperties);
-          Resource metadata = rr.create(jcrContent, "metadata", new HashMap<String, Object>(){{ 
-              put("dam:tag1", new String[]{"tag1:tag1a","tag1:tag1b"});
-              put("dam:tag2", new String[]{"tag2:tag2a","tag2:tag2b"});
-          }});
-          
-          PropertyMergePostProcessor processor = new PropertyMergePostProcessor();
-          List<Modification> changeLog = new ArrayList<>();
-          processor.process(request, changeLog);
-          Assert.assertFalse("Should have observed some changes", changeLog.isEmpty());
-          String[] tags = metadata.getValueMap().get("dam:combined-tags", String[].class);
-          Assert.assertArrayEquals(new String[]{"tag1:tag1a", "tag1:tag1b", "tag2:tag2a", "tag2:tag2b"}, tags);
-          
-    } 
+        SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
+
+        final TagManager mockTagManager = Mockito.mock(TagManager.class);
+        Tag fakeTag = Mockito.mock(Tag.class);
+        Mockito.when(mockTagManager.resolve(Mockito.any())).thenReturn(fakeTag);
+
+        ResourceResolver rr = Mockito.spy(context.resourceResolver());
+        Mockito.when(rr.adaptTo(TagManager.class)).thenReturn(mockTagManager);
+
+        MockSlingHttpServletRequest request = Mockito.spy(context.request());
+        Mockito.when(request.getResourceResolver()).thenReturn(rr);
+
+        request.setParameterMap(new HashMap<String, Object>() {
+            {
+                put("./asset/jcr:content/metadata/dam:tag1", new String[]{
+                    "tag1:tag1a",
+                    "tag1:tag1b"
+                });
+                put("./asset/jcr:content/metadata/dam:tag2", new String[]{
+                    "tag2:tag2a",
+                    "tag2:tag2b"
+                });
+                put(":" + PropertyMergePostProcessor.OPERATION_ALL_TAGS + "@PropertyMerge", "jcr:content/metadata/dam:combined-tags");
+            }
+        });
+
+        Map<String, Object> emptyProperties = new HashMap<>();
+        Resource content = rr.create(rr.resolve("/"), "content", emptyProperties);
+        Resource dam = rr.create(content, "dam", emptyProperties);
+        request.setResource(dam);
+        Resource asset = rr.create(dam, "asset", emptyProperties);
+        Resource jcrContent = rr.create(asset, "jcr:content", emptyProperties);
+        Resource metadata = rr.create(jcrContent, "metadata", new HashMap<String, Object>() {
+            {
+                put("dam:tag1", new String[]{"tag1:tag1a", "tag1:tag1b"});
+                put("dam:tag2", new String[]{"tag2:tag2a", "tag2:tag2b"});
+            }
+        });
+
+        PropertyMergePostProcessor processor = new PropertyMergePostProcessor();
+        List<Modification> changeLog = new ArrayList<>();
+        processor.process(request, changeLog);
+        Assert.assertFalse("Should have observed some changes", changeLog.isEmpty());
+        String[] tags = metadata.getValueMap().get("dam:combined-tags", String[].class);
+        Assert.assertArrayEquals(new String[]{"tag1:tag1a", "tag1:tag1b", "tag2:tag2a", "tag2:tag2b"}, tags);
+
+    }
 }
-
-
