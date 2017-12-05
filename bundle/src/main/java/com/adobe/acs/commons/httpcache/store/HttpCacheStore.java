@@ -28,6 +28,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
  * Data store for persisting cache items. Data store implementation could be in-memory, disk or even JCR repository.
  * Multiple implementation of this cache store can be present at any time and they can work in conjunction.
  */
+@SuppressWarnings("squid:S1214")
 public interface HttpCacheStore {
     /** Represents the key to find out the type of cache data store. Type could be MEM, DISK, JCR, etc. */
     String KEY_CACHE_STORE_TYPE = "httpcache.cachestore.type";
@@ -79,16 +80,16 @@ public interface HttpCacheStore {
     void invalidate(CacheKey key);
 
     /**
-     * Invalidate all entries in the cache.
-     */
-    void invalidateAll();
-
-    /**
      * Invalidate all the cached items applicable for the given cache config.
      *
      * @param cacheConfig
      */
     void invalidate(HttpCacheConfig cacheConfig);
+
+    /**
+     * Invalidate all entries in the cache.
+     */
+    void invalidateAll();
 
     /**
      * Create a temp sink for stashing response stream.
