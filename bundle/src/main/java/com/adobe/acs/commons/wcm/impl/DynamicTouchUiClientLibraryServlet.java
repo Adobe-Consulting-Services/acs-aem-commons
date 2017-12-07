@@ -28,14 +28,14 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import java.util.Map;
 
-@SlingServlet(paths = "/bin/acs-commons/dynamic-classicui-clientlibs.json",
-    label = "ACS AEM Commons - Dynamic Classic UI Client Library Loader",
-    description = "Allows for dynamic loading of optional Classic UI Client Libraries",
+@SlingServlet(paths = "/bin/acs-commons/dynamic-touchui-clientlibs.json",
+    label = "ACS AEM Commons - Dynamic Touch UI Client Library Loader",
+    description = "Allows for dynamic loading of optional Touch UI Client Libraries",
     metatype = true)
-public class DynamicClassicUiClientLibraryServlet extends AbstractDynamicClientLibraryServlet {
+public class DynamicTouchUiClientLibraryServlet extends AbstractDynamicClientLibraryServlet {
 
-    private static final String CATEGORY_LIMIT = "acs-commons.cq-widgets.add-ons.classicui-limit-parsys";
-    private static final String CATEGORY_PLACEHOLDER = "acs-commons.cq-widgets.add-ons.classicui-parsys-placeholder";
+    private static final String CATEGORY_LIMIT = "acs-commons.cq-authoring.add-ons.touchui-limit-parsys";
+    private static final String CATEGORY_PLACEHOLDER = "acs-commons.cq-authoring.add-ons.touchui-parsys-placeholder";
 
     private static final String[] DEFAULT_CATEGORIES = new String[] {
             CATEGORY_LIMIT,
