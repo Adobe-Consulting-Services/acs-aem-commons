@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
+import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,10 +20,12 @@ import org.apache.jackrabbit.commons.JcrUtils;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 import com.day.cq.commons.jcr.JcrConstants;
 
 public class EntryNodeWriter
 {
+
 
     private final Session session;
     private final Node entryNode;
@@ -44,14 +48,14 @@ public class EntryNodeWriter
      */
     public void write() throws RepositoryException, IOException
     {
-        entryNode.setProperty("isCacheEntryNode", true);
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_ISCACHEENTRYNODE, true);
 
         populateMetaData();
         populateHeaders();
         populateBinaryContent();
         setExpireTime();
 
-        if(!entryNode.hasProperty("cacheKeySerialized"))
+        if(!entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY))
             populateCacheKey();
     }
 
@@ -59,14 +63,14 @@ public class EntryNodeWriter
     {
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, expireTimeInSeconds);
-        entryNode.setProperty("expiresOn",  calendar.getTimeInMillis() );
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  calendar.getTimeInMillis() );
     }
 
     private void populateMetaData() throws RepositoryException
     {
-        entryNode.setProperty("status", cacheContent.getStatus());
-        entryNode.setProperty("char-encoding", cacheContent.getCharEncoding());
-        entryNode.setProperty("content-type", cacheContent.getContentType());
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_STATUS, cacheContent.getStatus());
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_CHAR_ENCODING, cacheContent.getCharEncoding());
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_CONTENT_TYPE, cacheContent.getContentType());
     }
 
     /**
@@ -75,12 +79,14 @@ public class EntryNodeWriter
      */
     private void populateBinaryContent() throws RepositoryException
     {
-        final Node contents = JcrUtils.getOrCreateByPath(entryNode, "contents", false, JcrConstants.NT_FILE, JcrConstants.NT_FILE, false);
+        final Node contents = JcrUtils.getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, false, JcrConstants.NT_FILE, JcrConstants.NT_FILE, false);
+
+
         final Node jcrContent = JcrUtils.getOrCreateByPath(contents, JcrConstants.JCR_CONTENT, false, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE, false);
         //save input stream to node
         final Binary binary = session.getValueFactory().createBinary(cacheContent.getInputDataStream());
         jcrContent.setProperty(JcrConstants.JCR_DATA, binary);
-        jcrContent.setProperty(JcrConstants.JCR_MIMETYPE, "text/plain");
+        jcrContent.setProperty(JcrConstants.JCR_MIMETYPE, cacheContent.getContentType());
     }
 
     /**
@@ -89,7 +95,8 @@ public class EntryNodeWriter
      */
     private void populateHeaders() throws RepositoryException
     {
-        final Node headers = JcrUtils.getOrCreateByPath(entryNode, "headers", false, JcrConstants.NT_UNSTRUCTURED, JcrConstants.NT_UNSTRUCTURED, false);
+        final Node headers = JcrUtils.getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, false, OAK_UNSTRUCTURED
+                , OAK_UNSTRUCTURED, false);
 
         for(Iterator<Map.Entry<String, List<String>>> entryIterator = cacheContent.getHeaders().entrySet().iterator(); entryIterator.hasNext();){
             Map.Entry<String, List<String>> entry = entryIterator.next();
@@ -111,7 +118,7 @@ public class EntryNodeWriter
             inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             final Binary binary = session.getValueFactory().createBinary(inputStream);
 
-            entryNode.setProperty("cacheKeySerialized", binary);
+            entryNode.setProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY, binary);
         }finally {
             if(inputStream != null)
                 inputStream.close();

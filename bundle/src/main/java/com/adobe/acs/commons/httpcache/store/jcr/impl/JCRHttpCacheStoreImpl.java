@@ -21,12 +21,10 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
 import java.io.IOException;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeType;
@@ -62,11 +60,12 @@ import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.BucketNodeHandler;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.EntryNodeToCacheContentHandler;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.EntryNodeToCacheKeyHandler;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodes;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllEntryNodesCount;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.query.AllExpiredEntries;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.query.EntryNodeByStringKey;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.AllEntryNodesCountVisitor;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.EntryNodeByStringKeyVisitor;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.EntryNodeMapVisitor;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.ExpiredNodesVisitor;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.InvalidateAllNodesVisitor;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.InvalidateByCacheConfigVisitor;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
@@ -104,40 +103,40 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
         @Property(
             label = "Cache Root Path location",
             description = "Points to the location cache root node in the JCR repository",
-            name = JCRHttpCacheStoreImpl.PROP_ROOTPATH,
+            name = JCRHttpCacheStoreImpl.PN_ROOTPATH,
             value = JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH
         ),
         @Property(
             label = "Bucket Tree depth",
             description = "The depth the bucket tree goes. Minimum value is 1. This should be between 8 and 10.",
-            name = JCRHttpCacheStoreImpl.PROP_BUCKETDEPTH,
+            name = JCRHttpCacheStoreImpl.PN_BUCKETDEPTH,
             intValue = JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH,
             propertyPrivate = true
         ),
         @Property(
             label = "Delta save threshold",
             description = "The threshold to remove nodes when invalidating the cache",
-            name = JCRHttpCacheStoreImpl.PROP_SAVEDELTA,
+            name = JCRHttpCacheStoreImpl.PN_SAVEDELTA,
             intValue = JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA
         ),
         @Property(
             label = "Expiretime in ms",
             description = "The time seconds after which nodes will be removed by the scheduled cleanup service. ",
-            name = JCRHttpCacheStoreImpl.PROP_EXPIRETIMEINSECONDS,
+            name = JCRHttpCacheStoreImpl.PN_EXPIRETIMEINSECONDS,
             intValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS
         )
 })
 public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, CacheContent> implements HttpCacheStore, JcrCacheMBean, Runnable {
 
     //property keys
-    public static final String  PROP_ROOTPATH            = "httpcache.config.jcr.roothpath",
-                                PROP_BUCKETDEPTH         = "httpcache.config.jcr.bucketdepth",
-                                PROP_SAVEDELTA           = "httpcache.config.jcr.savedelta",
-                                PROP_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinms";
+    public static final String  PN_ROOTPATH            = "httpcache.config.jcr.roothpath",
+                                PN_BUCKETDEPTH         = "httpcache.config.jcr.bucketdepth",
+                                PN_SAVEDELTA           = "httpcache.config.jcr.savedelta",
+                                PN_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinms";
 
     //defaults
     public static final String  DEFAULT_ROOTPATH            = "/etc/acs-commons/httpcacheroot";
-    public static final int     DEFAULT_BUCKETDEPTH         = 3,
+    public static final int     DEFAULT_BUCKETDEPTH         = 10,
                                 DEFAULT_SAVEDELTA           = 500,
                                 DEFAULT_EXPIRETIMEINSECONDS = 6000;
 
@@ -162,10 +161,10 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Activate protected void activate(ComponentContext context)
     {
         Dictionary<?, ?> properties = context.getProperties();
-        cacheRootPath = PropertiesUtil.toString(properties.get(PROP_ROOTPATH), DEFAULT_ROOTPATH);
-        bucketTreeDepth = PropertiesUtil.toInteger(properties.get(PROP_BUCKETDEPTH), DEFAULT_BUCKETDEPTH);
-        deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(PROP_SAVEDELTA), DEFAULT_SAVEDELTA);
-        expireTimeInSeconds = PropertiesUtil.toInteger(properties.get(PROP_EXPIRETIMEINSECONDS), DEFAULT_EXPIRETIMEINSECONDS);
+        cacheRootPath = PropertiesUtil.toString(properties.get(PN_ROOTPATH), DEFAULT_ROOTPATH);
+        bucketTreeDepth = PropertiesUtil.toInteger(properties.get(PN_BUCKETDEPTH), DEFAULT_BUCKETDEPTH);
+        deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(PN_SAVEDELTA), DEFAULT_SAVEDELTA);
+        expireTimeInSeconds = PropertiesUtil.toInteger(properties.get(PN_EXPIRETIMEINSECONDS), DEFAULT_EXPIRETIMEINSECONDS);
     }
 
     @Deactivate protected void deactivate(){
@@ -267,7 +266,10 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         {
             @Override public Long apply(Session session) throws Exception
             {
-                return new AllEntryNodesCount(session,cacheRootPath).get();
+                final Node rootNode = session.getNode(cacheRootPath);
+                final AllEntryNodesCountVisitor visitor = new AllEntryNodesCountVisitor(11, deltaSaveThreshold);
+                visitor.visit(rootNode);
+                return visitor.getTotalEntryNodeCount();
             }
         });
     }
@@ -299,20 +301,10 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         {
             @Override public void accept(Session session) throws Exception
             {
-                final NodeIterator nodeIterator = new AllEntryNodes(session,cacheRootPath).get();
-                int delta = 0;
-                while (nodeIterator.hasNext()) {
-                    delta++;
-                    Node node = nodeIterator.nextNode();
-                    node.remove();
-                    if(delta > deltaSaveThreshold || !nodeIterator.hasNext()) {
-                        session.save();
-                        incrementEvictionCount(delta);
-                        delta = 0;
-                    }
-                }
-                incrementEvictionCount(delta);
-                session.save();
+            final Node rootNode = session.getNode(cacheRootPath);
+            final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, deltaSaveThreshold, cacheRootPath);
+            visitor.visit(rootNode);
+            incrementEvictionCount(visitor.getEvictionCount());
             }
         });
     }
@@ -323,25 +315,10 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         {
             @Override public void accept(Session session) throws Exception
             {
-                final NodeIterator nodeIterator = new AllEntryNodes(session, cacheRootPath).get();
-                int delta = 0;
-                while(nodeIterator.hasNext()){
-                    delta++;
-                    final Node entryNode = nodeIterator.nextNode();
-                    final CacheKey key = new EntryNodeToCacheKeyHandler(entryNode, dclm).get();
-                    if(cacheConfig.knows(key)) {
-                        entryNode.remove();
-
-                        if(delta > deltaSaveThreshold || !nodeIterator.hasNext()){
-                            session.save();
-                            incrementEvictionCount(delta);
-                            delta = 0;
-                        }
-                    }
-                }
-
-                session.save();
-                incrementEvictionCount(delta);
+                final InvalidateByCacheConfigVisitor visitor = new InvalidateByCacheConfigVisitor(11, deltaSaveThreshold, cacheConfig, dclm);
+                final Node rootNode = session.getNode(cacheRootPath);
+                visitor.visit(rootNode);
+                incrementEvictionCount(visitor.getEvictionCount());
             }
         });
     }
@@ -361,21 +338,10 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         {
             @Override public void accept(Session session) throws Exception
             {
-                final NodeIterator nodeIterator = new AllExpiredEntries(session, cacheRootPath).get();
-
-                int delta = 0;
-
-                while(nodeIterator.hasNext()){
-                    delta++;
-
-                    if(delta > deltaSaveThreshold || !nodeIterator.hasNext()){
-                        session.save();
-                        incrementEvictionCount(delta);
-                        delta = 0;
-                    }
-                }
-                session.save();
-                incrementEvictionCount(delta);
+                final Node rootNode = session.getNode(cacheRootPath);
+                final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, deltaSaveThreshold);
+                visitor.visit(rootNode);
+                incrementEvictionCount(visitor.getEvictionCount());
             }
         });
     }
@@ -390,15 +356,20 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         invalidateAll();
     }
 
-    @Override public String getCacheEntry(final String cacheKeyStr) throws Exception
-    {
+    @Override public String getCacheEntry(final String cacheKeyStr) throws Exception {
         return withSession(new Function<Session, String>()
         {
             @Override public String apply(Session session) throws Exception
             {
-                Node entryNode = new EntryNodeByStringKey(session,cacheRootPath, dclm, cacheKeyStr).get();
-                EntryNodeToCacheContentHandler builder = new EntryNodeToCacheContentHandler(entryNode);
-                return IOUtils.toString(builder.get().getInputDataStream());
+                EntryNodeByStringKeyVisitor visitor = new EntryNodeByStringKeyVisitor(11, dclm, cacheKeyStr);
+                final Node rootNode = session.getNode(cacheRootPath);
+                visitor.visit(rootNode);
+                CacheContent content = visitor.getCacheContentIfPresent();
+
+                if(content != null)
+                    return IOUtils.toString(content.getInputDataStream());
+                else
+                    return "not found";
             }
         });
     }
@@ -415,24 +386,16 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override protected Map<CacheKey, CacheContent> getCacheAsMap()
     {
-        final Map<CacheKey, CacheContent> cache = new HashMap<CacheKey, CacheContent>();
-
-        withSession(new Consumer<Session>()
+        return withSession(new Function<Session, Map<CacheKey,CacheContent>>()
         {
-            @Override public void accept(Session session) throws Exception
+            @Override public Map<CacheKey,CacheContent> apply(Session session) throws Exception
             {
-                NodeIterator nodeIterator = new AllEntryNodes(session, cacheRootPath).get();
-
-                while(nodeIterator.hasNext()){
-                    Node entryNode = nodeIterator.nextNode();
-                    CacheKey cacheKey = new EntryNodeToCacheKeyHandler(entryNode, dclm).get();
-                    CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
-                    cache.put(cacheKey, content);
-                }
+                final Node rootNode = session.getNode(cacheRootPath);
+                final EntryNodeMapVisitor visitor = new EntryNodeMapVisitor(11, deltaSaveThreshold, dclm);
+                visitor.visit(rootNode);
+                return visitor.getCache();
             }
         });
-
-        return cache;
     }
 
     @Override protected long getBytesLength(CacheContent cacheObj)

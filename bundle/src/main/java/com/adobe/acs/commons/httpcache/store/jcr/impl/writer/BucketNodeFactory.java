@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
+import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
+
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -39,7 +41,7 @@ public class BucketNodeFactory
         Node targetNode = cacheRoot;
 
         for(String path : pathArray){
-            Node childNode = JcrUtils.getOrCreateByPath(targetNode, path,false,"sling:Folder", "sling:Folder",false);
+            Node childNode = JcrUtils.getOrCreateByPath(targetNode, path,false,OAK_UNSTRUCTURED, OAK_UNSTRUCTURED,false);
             targetNode = childNode;
         }
 

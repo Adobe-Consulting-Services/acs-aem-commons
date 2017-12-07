@@ -9,6 +9,7 @@ import javax.jcr.RepositoryException;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 import com.adobe.acs.commons.util.DynamicObjectInputStream;
 
 public class EntryNodeToCacheKeyHandler
@@ -25,7 +26,7 @@ public class EntryNodeToCacheKeyHandler
     public CacheKey get()
             throws RepositoryException, IOException, ClassNotFoundException
     {
-        final javax.jcr.Property cacheKeyProperty = entryNode.getProperty("cacheKeySerialized");
+        final javax.jcr.Property cacheKeyProperty = entryNode.getProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY);
         final InputStream inputStream = cacheKeyProperty.getBinary().getStream();
 
         final ClassLoader dynamicClassLoader = dynamicClassLoaderManager.getDynamicClassLoader();

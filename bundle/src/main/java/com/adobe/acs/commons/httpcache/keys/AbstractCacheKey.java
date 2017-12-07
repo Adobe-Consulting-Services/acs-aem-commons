@@ -23,6 +23,7 @@ package com.adobe.acs.commons.httpcache.keys;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.day.cq.commons.PathInfo;
@@ -31,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 
-public abstract class AbstractCacheKey {
+public abstract class AbstractCacheKey implements Serializable{
 
     protected String authenticationRequirement;
     protected String uri;

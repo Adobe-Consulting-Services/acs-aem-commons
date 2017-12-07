@@ -25,6 +25,7 @@ import javax.management.openmbean.TabularData;
 import com.adobe.granite.jmx.annotation.Description;
 import com.adobe.granite.jmx.annotation.Name;
 
+@SuppressWarnings("squid:S00112")
 public interface GenericCacheMBean {
 
     @Description("Clear entire cache")
@@ -42,7 +43,7 @@ public interface GenericCacheMBean {
     @Description("Cache entry contents by key.")
     String getCacheEntry(@Name(value="Cache Key") String cacheKeyStr) throws Exception;
 
-    @Description("Conents of cache")
-    TabularData getCacheContents() throws OpenDataException;
+    @Description("Contents of cache")
+    TabularData getCacheContents() throws Exception;
 
 }

@@ -11,10 +11,11 @@ import javax.jcr.RepositoryException;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.day.cq.commons.jcr.JcrConstants;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 
 public class BucketNodeHandler
 {
+
     private final Node bucketNode;
     private final DynamicClassLoaderManager dynamicClassLoaderManager;
 
@@ -31,7 +32,7 @@ public class BucketNodeHandler
         if(null != existingEntryNode)
             return existingEntryNode;
         else
-            return getOrCreateUniqueByPath(bucketNode, "entry", JcrConstants.NT_UNSTRUCTURED);
+            return getOrCreateUniqueByPath(bucketNode, JCRHttpCacheStoreConstants.PATH_ENTRY, JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED);
     }
 
     public Node getEntryIfExists(CacheKey key)
