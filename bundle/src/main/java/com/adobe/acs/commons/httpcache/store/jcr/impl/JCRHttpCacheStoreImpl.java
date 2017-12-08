@@ -135,7 +135,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                                 PN_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinms";
 
     //defaults
-    public static final String  DEFAULT_ROOTPATH            = "/etc/acs-commons/httpcacheroot";
+    public static final String  DEFAULT_ROOTPATH            = "/etc/acs-commons/httpcache/root";
     public static final int     DEFAULT_BUCKETDEPTH         = 10,
                                 DEFAULT_SAVEDELTA           = 500,
                                 DEFAULT_EXPIRETIMEINSECONDS = 6000;
