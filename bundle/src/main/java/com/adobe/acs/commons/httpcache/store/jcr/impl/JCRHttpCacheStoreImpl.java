@@ -129,24 +129,24 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
 public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, CacheContent> implements HttpCacheStore, JcrCacheMBean, Runnable {
 
     //property keys
-    public static final String  PN_ROOTPATH            = "httpcache.config.jcr.roothpath",
-                                PN_BUCKETDEPTH         = "httpcache.config.jcr.bucketdepth",
-                                PN_SAVEDELTA           = "httpcache.config.jcr.savedelta",
-                                PN_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinms";
+    public static final String  PN_ROOTPATH            = "httpcache.config.jcr.roothpath";
+    public static final String  PN_BUCKETDEPTH         = "httpcache.config.jcr.bucketdepth";
+    public static final String  PN_SAVEDELTA           = "httpcache.config.jcr.savedelta";
+    public static final String  PN_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinms";
 
     //defaults
     public static final String  DEFAULT_ROOTPATH            = "/etc/acs-commons/httpcache/root";
-    public static final int     DEFAULT_BUCKETDEPTH         = 10,
-                                DEFAULT_SAVEDELTA           = 500,
-                                DEFAULT_EXPIRETIMEINSECONDS = 6000;
+    public static final int     DEFAULT_BUCKETDEPTH         = 10;
+    public static final int     DEFAULT_SAVEDELTA           = 500;
+    public static final int     DEFAULT_EXPIRETIMEINSECONDS = 6000;
 
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
 
     //fields
     private String              cacheRootPath;
-    private int                 bucketTreeDepth,
-                                deltaSaveThreshold,
-                                expireTimeInSeconds;
+    private int                 bucketTreeDepth;
+    private int                 deltaSaveThreshold;
+    private int                 expireTimeInSeconds;
 
     @Reference private ResourceResolverFactory   resourceResolverFactory;
     @Reference private DynamicClassLoaderManager dclm;
@@ -366,10 +366,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                 visitor.visit(rootNode);
                 CacheContent content = visitor.getCacheContentIfPresent();
 
-                if(content != null)
+                if(content != null) {
                     return IOUtils.toString(content.getInputDataStream());
-                else
+                }else {
                     return "not found";
+                }
             }
         });
     }
@@ -380,8 +381,9 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     protected void unbindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
-        if(cacheKeyFactories.contains(cacheKeyFactory))
+        if(cacheKeyFactories.contains(cacheKeyFactory)) {
             cacheKeyFactories.remove(cacheKeyFactory);
+        }
     }
 
     @Override protected Map<CacheKey, CacheContent> getCacheAsMap()
@@ -474,8 +476,9 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                 log.error("Error in handling the exception");
             }
         } finally {
-            if(resourceResolver != null && resourceResolver.isLive())
+            if(resourceResolver != null && resourceResolver.isLive()){
                 resourceResolver.close();
+            }
         }
         return null;
     }

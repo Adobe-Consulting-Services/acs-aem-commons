@@ -23,7 +23,8 @@ public class EntryNodeToCacheContentHandler
 {
     private final Node entryNode;
 
-    private String contentType, charEncoding;
+    private String contentType;
+    private String charEncoding;
     private int status;
     private final InputStream inputStream;
     private final Map<String, List<String>> headers = new HashMap<String, List<String>>();
@@ -50,12 +51,15 @@ public class EntryNodeToCacheContentHandler
             final String propName = property.getName();
             final Value value = property.getValue();
 
-            if(propName.equals(JCRHttpCacheStoreConstants.PN_CONTENT_TYPE))
+            if(propName.equals(JCRHttpCacheStoreConstants.PN_CONTENT_TYPE)) {
                 contentType = value.getString();
-            else if(propName.equals(JCRHttpCacheStoreConstants.PN_CHAR_ENCODING))
+            }
+            else if(propName.equals(JCRHttpCacheStoreConstants.PN_CHAR_ENCODING)) {
                 charEncoding = value.getString();
-            else if(propName.equals(JCRHttpCacheStoreConstants.PN_STATUS))
+            }
+            else if(propName.equals(JCRHttpCacheStoreConstants.PN_STATUS)) {
                 status = (int) value.getLong();
+            }
         }
     }
 
@@ -88,8 +92,9 @@ public class EntryNodeToCacheContentHandler
                     Value[] values = property.getValues();
                     List<String> stringValues = new ArrayList<String>(values.length);
 
-                    for(Value value : values)
+                    for(Value value : values) {
                         stringValues.add(value.getString());
+                    }
 
                     headers.put(name, stringValues);
                 }
@@ -100,7 +105,8 @@ public class EntryNodeToCacheContentHandler
     private boolean isNativeProperty(String propertyName)
     {
         return
-                 propertyName.startsWith(JCR_NAMESPACE) &&
+                 propertyName.startsWith(JCR_NAMESPACE)
+                         &&
                 !propertyName.startsWith(SLING_NAMESPACE);
     }
 

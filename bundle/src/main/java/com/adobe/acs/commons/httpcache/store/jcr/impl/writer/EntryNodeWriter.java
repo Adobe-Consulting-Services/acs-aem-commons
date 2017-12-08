@@ -55,8 +55,9 @@ public class EntryNodeWriter
         populateBinaryContent();
         setExpireTime();
 
-        if(!entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY))
+        if(!entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY)) {
             populateCacheKey();
+        }
     }
 
     private void setExpireTime() throws RepositoryException
@@ -95,8 +96,7 @@ public class EntryNodeWriter
      */
     private void populateHeaders() throws RepositoryException
     {
-        final Node headers = JcrUtils.getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, false, OAK_UNSTRUCTURED
-                , OAK_UNSTRUCTURED, false);
+        final Node headers = JcrUtils.getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, false, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED, false);
 
         for(Iterator<Map.Entry<String, List<String>>> entryIterator = cacheContent.getHeaders().entrySet().iterator(); entryIterator.hasNext();){
             Map.Entry<String, List<String>> entry = entryIterator.next();
@@ -120,8 +120,9 @@ public class EntryNodeWriter
 
             entryNode.setProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY, binary);
         }finally {
-            if(inputStream != null)
+            if(inputStream != null) {
                 inputStream.close();
+            }
         }
     }
 }

@@ -17,7 +17,8 @@ public interface CacheMBean
     @Description("Size of cache")
     String getCacheSize();
 
-    @Description("Available cache stats.") TabularData getCacheStats() throws OpenDataException;
+    @Description("Available cache stats.")
+    TabularData getCacheStats() throws OpenDataException;
 
     @Description("Cache entry contents by key.")
     String getCacheEntry(@Name(value="Cache Key") String cacheKeyStr) throws Exception;

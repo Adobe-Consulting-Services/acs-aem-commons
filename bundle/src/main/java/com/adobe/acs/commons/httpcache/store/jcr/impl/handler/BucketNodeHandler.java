@@ -29,10 +29,11 @@ public class BucketNodeHandler
     {
         final Node existingEntryNode = getEntryIfExists(key);
 
-        if(null != existingEntryNode)
+        if(null != existingEntryNode) {
             return existingEntryNode;
-        else
+        }else {
             return getOrCreateUniqueByPath(bucketNode, JCRHttpCacheStoreConstants.PATH_ENTRY, JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED);
+        }
     }
 
     public Node getEntryIfExists(CacheKey key)
@@ -43,8 +44,9 @@ public class BucketNodeHandler
         while(entryNodeIterator.hasNext()){
             Node entryNode = entryNodeIterator.nextNode();
             CacheKey entryKey = new EntryNodeToCacheKeyHandler(entryNode, dynamicClassLoaderManager).get();
-            if(key.equals(entryKey))
+            if(key.equals(entryKey)) {
                 return entryNode;
+            }
         }
 
         return null;

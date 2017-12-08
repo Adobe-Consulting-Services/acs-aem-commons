@@ -29,8 +29,9 @@ public class BucketNodeFactory
         this.key = key;
         this.cacheKeySplitDepth = cacheKeySplitDepth;
 
-        if(!session.nodeExists(cacheRootPath))
+        if(!session.nodeExists(cacheRootPath)) {
             throw new BucketNodeFactoryException("Cache root path " + cacheRootPath + " not found!");
+        }
         this.cacheRoot = session.getNode(cacheRootPath);
     }
 

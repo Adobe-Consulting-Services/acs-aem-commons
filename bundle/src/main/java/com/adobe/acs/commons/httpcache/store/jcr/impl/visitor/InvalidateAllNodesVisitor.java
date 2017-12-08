@@ -33,7 +33,8 @@ public class InvalidateAllNodesVisitor extends AbstractNodeVisitor
     private boolean nodeQualifiesForRemoval(Node node, String nodeName) throws RepositoryException
     {
         return
-                !StringUtils.equals(nodeName, JcrConstants.JCR_CONTENT) &&
+                !StringUtils.equals(nodeName, JcrConstants.JCR_CONTENT)
+                        &&
                 !StringUtils.equals(node.getPath(), rootNodePath);
     }
 }

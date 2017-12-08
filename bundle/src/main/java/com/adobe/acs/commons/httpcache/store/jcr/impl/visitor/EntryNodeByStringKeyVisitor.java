@@ -40,8 +40,9 @@ public class EntryNodeByStringKeyVisitor extends AbstractNodeVisitor
             CacheKey cacheKey;
             try {
                 cacheKey = entryNodeToCacheKeyHandler.get();
-                if(StringUtils.equals(cacheKey.toString(), cacheKeyStr))
+                if(StringUtils.equals(cacheKey.toString(), cacheKeyStr)) {
                     cacheContent = new EntryNodeToCacheContentHandler(node).get();
+                }
             } catch (Exception e) {
                 log.error("Exception occured in retrieving the cacheKey from the entryNode", e);
                 throw new RepositoryException(e);
