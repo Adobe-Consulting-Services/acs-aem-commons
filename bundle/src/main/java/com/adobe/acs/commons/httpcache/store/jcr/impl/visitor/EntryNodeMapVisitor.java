@@ -23,8 +23,8 @@ public class EntryNodeMapVisitor extends AbstractNodeVisitor
     private static final Logger log = LoggerFactory.getLogger(EntryNodeMapVisitor.class);
 
 
-    public EntryNodeMapVisitor( int maxLevel, long deltaSaveThreshold, DynamicClassLoaderManager dclm) {
-        super(maxLevel, deltaSaveThreshold);
+    public EntryNodeMapVisitor( int maxLevel, DynamicClassLoaderManager dclm) {
+        super(maxLevel, -1);
         this.dclm = dclm;
     }
 

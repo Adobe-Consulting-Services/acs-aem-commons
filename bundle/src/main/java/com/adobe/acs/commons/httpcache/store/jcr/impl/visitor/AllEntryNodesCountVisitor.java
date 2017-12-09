@@ -5,8 +5,8 @@ import javax.jcr.RepositoryException;
 
 public class AllEntryNodesCountVisitor extends AbstractNodeVisitor
 {
-    public AllEntryNodesCountVisitor( int maxLevel, long deltaSaveThreshold) {
-        super(maxLevel, deltaSaveThreshold);
+    public AllEntryNodesCountVisitor( int maxLevel) {
+        super(maxLevel, -1);
     }
 
     private long totalEntryNodeCount = 0;

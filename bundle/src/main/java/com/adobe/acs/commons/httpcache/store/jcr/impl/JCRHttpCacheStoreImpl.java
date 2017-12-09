@@ -267,7 +267,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             @Override public Long apply(Session session) throws Exception
             {
                 final Node rootNode = session.getNode(cacheRootPath);
-                final AllEntryNodesCountVisitor visitor = new AllEntryNodesCountVisitor(11, deltaSaveThreshold);
+                final AllEntryNodesCountVisitor visitor = new AllEntryNodesCountVisitor(11);
                 visitor.visit(rootNode);
                 return visitor.getTotalEntryNodeCount();
             }
@@ -393,7 +393,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             @Override public Map<CacheKey,CacheContent> apply(Session session) throws Exception
             {
                 final Node rootNode = session.getNode(cacheRootPath);
-                final EntryNodeMapVisitor visitor = new EntryNodeMapVisitor(11, deltaSaveThreshold, dclm);
+                final EntryNodeMapVisitor visitor = new EntryNodeMapVisitor(11, dclm);
                 visitor.visit(rootNode);
                 return visitor.getCache();
             }

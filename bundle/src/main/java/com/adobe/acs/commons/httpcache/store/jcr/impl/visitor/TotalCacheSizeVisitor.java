@@ -4,10 +4,12 @@ import static com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.AbstractNod
 
 import javax.jcr.Binary;
 import javax.jcr.Node;
+import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.util.TraversingItemVisitor;
 
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.jackrabbit.value.BinaryValue;
 
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 
@@ -15,13 +17,25 @@ public class TotalCacheSizeVisitor extends TraversingItemVisitor.Default
 {
     private long bytes = 0;
 
+    public TotalCacheSizeVisitor(){
+        super(false,-1);
+    }
+
     protected void entering(final Node node, int level) throws RepositoryException
     {
-        if(isCacheEntryNode(node)){
+        if(isCacheEntryNode(node) && node.hasNode(JCRHttpCacheStoreConstants.PATH_CONTENTS)){
             final Node contents = node.getNode(JCRHttpCacheStoreConstants.PATH_CONTENTS);
 
-            final Binary binary = contents.getNode(JcrConstants.JCR_CONTENT).getProperty(JcrConstants.JCR_DATA).getBinary();
-            bytes += binary.getSize();
+            if(contents.hasNode(JcrConstants.JCR_CONTENT)){
+                final Node jcrContent = contents.getNode(JcrConstants.JCR_CONTENT);
+
+                if(jcrContent.hasProperty(JcrConstants.JCR_DATA)){
+                    final Property property = jcrContent.getProperty(JcrConstants.JCR_DATA);
+                    final Binary binary = property.getBinary();
+                    bytes += binary.getSize();
+                }
+
+            }
         }
     }
 

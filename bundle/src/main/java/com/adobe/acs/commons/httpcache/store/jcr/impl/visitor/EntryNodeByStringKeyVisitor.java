@@ -22,7 +22,7 @@ public class EntryNodeByStringKeyVisitor extends AbstractNodeVisitor
     private CacheContent cacheContent;
 
     public EntryNodeByStringKeyVisitor(int maxLevel, DynamicClassLoaderManager dclm, String cacheKeyStr) {
-        super( maxLevel, 0);
+        super( maxLevel, -1);
         this.dclm = dclm;
         this.cacheKeyStr = cacheKeyStr;
     }

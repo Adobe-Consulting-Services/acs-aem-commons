@@ -41,14 +41,14 @@ public class InvalidateAllNodesVisitorTest
         settings.setExpiredEntryNodeCount(20);
         settings.setEmptyBucketNodeChainCount(2);
         final Node rootNode = new RootNodeMockFactory(settings).build();
-        final InvalidateAllNodesVisitor visitor = getMockedExpiredNodesVisitor(8);
+        final InvalidateAllNodesVisitor visitor = getMockedExpiredNodesVisitor(4);
         visitor.visit(rootNode);
         visitor.close();
 
         //validate 60 evictions. 10 entries, 20 expired entries, 30 bucket nodes should be removed.
         assertEquals(60, visitor.getEvictionCount());
 
-        Mockito.verify(rootNode.getSession(), Mockito.times(7)).save();
+        Mockito.verify(rootNode.getSession(), Mockito.times(12)).save();
     }
 
     public InvalidateAllNodesVisitor getMockedExpiredNodesVisitor(int deltaSaveThreshold)

@@ -6,16 +6,22 @@ import static org.powermock.api.mockito.PowerMockito.doCallRealMethod;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.jcr.Binary;
 import javax.jcr.ItemVisitor;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.AbstractNode;
+import org.apache.jackrabbit.value.BinaryImpl;
 import org.apache.sling.commons.testing.jcr.MockNodeIterator;
 import org.apache.sling.commons.testing.jcr.MockProperty;
 import org.apache.sling.commons.testing.jcr.MockPropertyIterator;
@@ -28,6 +34,9 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants
 public class RootNodeMockFactory
 {
     public static final String ROOT_PATH = "/etc/acs-commons/httpcache/root";
+
+    private static final String TEST_FILE_PATH = "com.adobe.acs.commons.httpcache.store.jcr.impl.visitor/cachecontent.html";
+
     private final Settings settings;
 
     private final Session session = mock(Session.class);
@@ -35,7 +44,7 @@ public class RootNodeMockFactory
     public RootNodeMockFactory(final Settings settings){
         this.settings = settings;
     }
-    public Node build() throws RepositoryException
+    public Node build() throws RepositoryException, IOException
     {
         final Node rootNode = mockStandardNode("rootnode");
 
@@ -110,7 +119,7 @@ public class RootNodeMockFactory
         return bucketNodeChain;
     }
 
-    private NodeIterator generateEntryNodes(final Node parentNode) throws RepositoryException
+    private NodeIterator generateEntryNodes(final Node parentNode) throws RepositoryException, IOException
     {
         int totalNodeCount = settings.entryNodeCount + settings.expiredEntryNodeCount;
         final Node[] nodes = new AbstractNode[totalNodeCount];
@@ -129,11 +138,15 @@ public class RootNodeMockFactory
         return new MockNodeIterator(nodes);
     }
 
-    private Node mockEntryNode(Node parentNode, int i, boolean isExpired) throws RepositoryException
+    private Node mockEntryNode(Node parentNode, int i, boolean isExpired) throws RepositoryException, IOException
     {
 
         final String nodeName = (isExpired) ? "expired-entrynode-" : "entrynode-";
         final Node entryNode = mockStandardNode(nodeName + (i + 1));
+
+        if(settings.enableCacheEntryBinaryContent){
+            mockEntryContentNode(entryNode);
+        }
 
         when(entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_ISCACHEENTRYNODE)).thenReturn(true);
         when(entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON)).thenReturn(true);
@@ -150,6 +163,26 @@ public class RootNodeMockFactory
 
         when(entryNode.getProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON)).thenReturn(expiresMockProperty);
         return entryNode;
+    }
+
+    private void mockEntryContentNode(Node entryNode) throws RepositoryException, IOException
+    {
+        final Node contentNode = mock(Node.class);
+        final Node jcrContentNode = mock(Node.class);
+        final Property dataProperty = mock(Property.class);
+
+        InputStream cacheTestStream = getClass().getClassLoader().getResourceAsStream(TEST_FILE_PATH);
+
+        final Binary binary = new BinaryImpl(cacheTestStream);
+
+        when(dataProperty.getBinary()).thenReturn(binary);
+
+        when(jcrContentNode.getProperty(JcrConstants.JCR_DATA)).thenReturn(dataProperty);
+        when(jcrContentNode.hasProperty(JcrConstants.JCR_DATA)).thenReturn(true);
+        when(contentNode.getNode(JcrConstants.JCR_CONTENT)).thenReturn(jcrContentNode);
+        when(contentNode.hasNode(JcrConstants.JCR_CONTENT)).thenReturn(true);
+        when(entryNode.getNode(JCRHttpCacheStoreConstants.PATH_CONTENTS)).thenReturn(contentNode);
+        when(entryNode.hasNode(JCRHttpCacheStoreConstants.PATH_CONTENTS)).thenReturn(true);
     }
 
     private Node mockStandardNode(String name) throws RepositoryException
@@ -175,6 +208,7 @@ public class RootNodeMockFactory
         private int bucketDepth               = 10;
         private int expiredEntryNodeCount     = 0;
         private int emptyBucketNodeChainCount = 0;
+        private boolean enableCacheEntryBinaryContent = false;
 
         public void setEntryNodeCount(int entryNodeCount)
         {
@@ -194,6 +228,11 @@ public class RootNodeMockFactory
         public void setEmptyBucketNodeChainCount(int emptyBucketNodeChainCount)
         {
             this.emptyBucketNodeChainCount = emptyBucketNodeChainCount;
+        }
+
+        public void setEnableCacheEntryBinaryContent(boolean enableCacheEntryBinaryContent)
+        {
+            this.enableCacheEntryBinaryContent = enableCacheEntryBinaryContent;
         }
     }
 }

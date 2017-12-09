@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Map;
@@ -97,8 +98,8 @@ public class EntryNodeMapVisitorTest
         final DynamicClassLoaderManager dclm = mock(DynamicClassLoaderManager.class);
 
 
-        final EntryNodeMapVisitor visitor = new EntryNodeMapVisitor(11, 500, dclm);
-        final EntryNodeMapVisitor spy = PowerMockito.spy(visitor);
+        final EntryNodeMapVisitor visitor = new EntryNodeMapVisitor(11, dclm);
+        final EntryNodeMapVisitor spy = spy(visitor);
 
         when(spy, "getCacheContent", any(Node.class)).thenAnswer(new Answer<Object>()
         {

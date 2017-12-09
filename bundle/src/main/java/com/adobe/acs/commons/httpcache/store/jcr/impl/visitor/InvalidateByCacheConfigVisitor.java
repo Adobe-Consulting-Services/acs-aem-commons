@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
+import java.io.IOException;
+
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
@@ -34,7 +36,7 @@ public class InvalidateByCacheConfigVisitor extends AbstractNodeVisitor
         if(isCacheEntryNode(node)) {
             //check and remove nodes that are expired.
             try {
-                final CacheKey key = new EntryNodeToCacheKeyHandler(node, dclm).get();
+                final CacheKey key = getCacheKey(node);
                 if(cacheConfig.knows(key)) {
                     node.remove();
                     persistSession();
@@ -48,5 +50,10 @@ public class InvalidateByCacheConfigVisitor extends AbstractNodeVisitor
             node.remove();
             persistSession();
         }
+    }
+
+    private CacheKey getCacheKey(final Node node) throws Exception
+    {
+        return new EntryNodeToCacheKeyHandler(node, dclm).get();
     }
 }
