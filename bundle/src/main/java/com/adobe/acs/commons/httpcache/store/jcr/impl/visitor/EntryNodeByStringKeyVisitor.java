@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
+import java.io.IOException;
+
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
@@ -35,11 +37,8 @@ public class EntryNodeByStringKeyVisitor extends AbstractNodeVisitor
     protected void entering(final Node node, int level) throws RepositoryException
     {
         if(isCacheEntryNode(node)){
-            final EntryNodeToCacheKeyHandler entryNodeToCacheKeyHandler = new EntryNodeToCacheKeyHandler(node, dclm);
-
-            CacheKey cacheKey;
             try {
-                cacheKey = entryNodeToCacheKeyHandler.get();
+                final CacheKey cacheKey = getCacheKey(node);
                 if(StringUtils.equals(cacheKey.toString(), cacheKeyStr)) {
                     cacheContent = new EntryNodeToCacheContentHandler(node).get();
                 }
@@ -48,6 +47,11 @@ public class EntryNodeByStringKeyVisitor extends AbstractNodeVisitor
                 throw new RepositoryException(e);
             }
         }
+    }
+
+    private CacheKey getCacheKey(final Node node) throws Exception
+    {
+        return new EntryNodeToCacheKeyHandler(node, dclm).get();
     }
 
     public void visit(Node node) throws RepositoryException {
