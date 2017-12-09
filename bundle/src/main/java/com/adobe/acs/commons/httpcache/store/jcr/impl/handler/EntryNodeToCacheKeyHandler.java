@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.jcr.Node;
+import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
@@ -26,13 +27,17 @@ public class EntryNodeToCacheKeyHandler
     public CacheKey get()
             throws RepositoryException, IOException, ClassNotFoundException
     {
-        final javax.jcr.Property cacheKeyProperty = entryNode.getProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY);
-        final InputStream inputStream = cacheKeyProperty.getBinary().getStream();
+        if(entryNode != null){
+            final Property cacheKeyProperty = entryNode.getProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY);
+            final InputStream inputStream = cacheKeyProperty.getBinary().getStream();
 
-        final ClassLoader dynamicClassLoader = dynamicClassLoaderManager.getDynamicClassLoader();
+            final ClassLoader dynamicClassLoader = dynamicClassLoaderManager.getDynamicClassLoader();
 
 
-        final DynamicObjectInputStream dynamicObjectInputStream = new DynamicObjectInputStream(inputStream, dynamicClassLoader);
-        return (CacheKey) dynamicObjectInputStream.readObject();
+            final DynamicObjectInputStream dynamicObjectInputStream = new DynamicObjectInputStream(inputStream, dynamicClassLoader);
+            return (CacheKey) dynamicObjectInputStream.readObject();
+        }
+
+        return null;
     }
 }

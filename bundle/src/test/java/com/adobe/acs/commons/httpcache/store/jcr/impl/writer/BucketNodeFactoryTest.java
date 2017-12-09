@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.httpcache.store.jcr.impl;
+package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory.HASHCODE_LENGTH;
 import static org.junit.Assert.assertEquals;
@@ -19,7 +19,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.exceptions.BucketNodeFactoryException;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BucketNodeFactoryTest
@@ -40,7 +39,7 @@ public class BucketNodeFactoryTest
         final MockSettings settings = new MockSettings();
         settings.cacheRootPath = "/some/non/existing/path";
         settings.cacheKeyHashCode = 1002021887;
-        settings.cacheSplitDepth = 3;
+        settings.bucketNodeDepth = 3;
         final BucketNodeFactory factory = buildNodeFactoryWithMocks(settings);
 
         factory.getBucketNode();
@@ -51,7 +50,7 @@ public class BucketNodeFactoryTest
     {
         final MockSettings settings = new MockSettings();
         settings.cacheKeyHashCode = 1002021887;
-        settings.cacheSplitDepth = 3;
+        settings.bucketNodeDepth = 3;
         settings.cacheRootPath = MockSettings.VALID_ROOT_PATH;
         final BucketNodeFactory factory = buildNodeFactoryWithMocks(settings);
 
@@ -66,7 +65,7 @@ public class BucketNodeFactoryTest
     {
         final MockSettings settings = new MockSettings();
         settings.cacheKeyHashCode = 1002021887;
-        settings.cacheSplitDepth = 4;
+        settings.bucketNodeDepth = 4;
         settings.cacheRootPath = MockSettings.VALID_ROOT_PATH;
         final BucketNodeFactory factory = buildNodeFactoryWithMocks(settings);
 
@@ -83,7 +82,7 @@ public class BucketNodeFactoryTest
     {
         final MockSettings settings = new MockSettings();
         settings.cacheKeyHashCode = 1002021887;
-        settings.cacheSplitDepth = 10;
+        settings.bucketNodeDepth = 10;
         settings.cacheRootPath = MockSettings.VALID_ROOT_PATH;
         final BucketNodeFactory factory = buildNodeFactoryWithMocks(settings);
 
@@ -107,16 +106,16 @@ public class BucketNodeFactoryTest
         when(session.nodeExists(MockSettings.VALID_ROOT_PATH)).thenReturn(true);
         when(session.getNode(MockSettings.VALID_ROOT_PATH)).thenReturn(cacheRootNode);
 
-        final BucketNodeFactory bucketNodeFactory = new BucketNodeFactory(session, settings.cacheRootPath, cacheKey, settings.cacheSplitDepth);
+        final BucketNodeFactory bucketNodeFactory = new BucketNodeFactory(session, settings.cacheRootPath, cacheKey, settings.bucketNodeDepth);
 
         final int hashCode = cacheKey.hashCode();
 
         if(hashCode > 0){
             final String hashString = StringUtils.leftPad(String.valueOf(hashCode), (int)HASHCODE_LENGTH, "0");
-            final int increment = (int) Math.ceil(HASHCODE_LENGTH / settings.cacheSplitDepth);
-            final String[] pathArray = new String[settings.cacheSplitDepth];
+            final int increment = (int) Math.ceil(HASHCODE_LENGTH / settings.bucketNodeDepth);
+            final String[] pathArray = new String[settings.bucketNodeDepth];
 
-            for(int position = 0, i = 0; i < settings.cacheSplitDepth; position += increment, i++){
+            for(int position = 0, i = 0; i < settings.bucketNodeDepth; position += increment, i++){
                 int endIndex = (position + increment > hashString.length()) ? hashString.length() : position + increment;
                 String nodeName =  StringUtils.leftPad(hashString.substring(position, endIndex), 5, "0");
                 pathArray[i] = nodeName;
@@ -166,7 +165,7 @@ public class BucketNodeFactoryTest
     private static class MockSettings{
 
         final static String VALID_ROOT_PATH = "/etc/acs-commons/jcr-cache";
-        int cacheSplitDepth,cacheKeyHashCode;
+        int bucketNodeDepth,cacheKeyHashCode;
         String cacheRootPath, cacheKeyURI, cacheKeyHierarchyResourcePath;
 
 

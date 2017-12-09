@@ -22,9 +22,14 @@ public abstract class AbstractNodeVisitor extends TraversingItemVisitor.Default
     public void visit(Node node) throws RepositoryException {
         session = node.getSession();
         super.visit(node);
-        //perform final save
-        session.save();
-        delta = 0;
+    }
+
+    public void close() throws RepositoryException
+    {
+        if(delta > 0){
+            session.save();
+            delta = 0;
+        }
     }
 
     public static boolean isCacheEntryNode(final Node node) throws RepositoryException

@@ -26,7 +26,7 @@ public class EntryNodeToCacheContentHandler
     private String contentType;
     private String charEncoding;
     private int status;
-    private final InputStream inputStream;
+    private InputStream inputStream;
     private final Map<String, List<String>> headers = new HashMap<String, List<String>>();
     private Binary binary;
 
@@ -37,9 +37,11 @@ public class EntryNodeToCacheContentHandler
     {
         this.entryNode = entryNode;
 
-        retrieveHeaders();
-        retrieveProperties();
-        inputStream = retrieveInputStream();
+        if(entryNode != null){
+            retrieveHeaders();
+            retrieveProperties();
+            inputStream = retrieveInputStream();
+        }
     }
 
     private void retrieveProperties() throws RepositoryException
