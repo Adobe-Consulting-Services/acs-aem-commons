@@ -12,6 +12,11 @@
         <include pattern="/apps/acs-commons/components/utilities/version-compare(.*)?" />
         <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
     </filter>
+    <filter root="/content/acs-commons">
+    	<include pattern="/content/acs-commons/jcr:content" />
+        <include pattern="/content/acs-commons/reports"/>
+        <include pattern="/content/acs-commons/reports/jcr:content"/>
+    </filter>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/dam/video/mp3hq"/>
@@ -30,6 +35,7 @@
         <include pattern="/etc/cloudservices/sharethis/rep:policy"/>
     </filter>
     <filter root="/etc/acs-commons">
+    	<include pattern="/etc/acs-commons/jcr:content" />
         <include pattern="/etc/acs-commons/oak-index-manager(.*)?" />
         <include pattern="/etc/acs-commons/automatic-package-replication"/>
         <include pattern="/etc/acs-commons/automatic-package-replication/jcr:content"/>
@@ -52,6 +58,10 @@
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list/item_\d+"/>
+        <include pattern="/etc/acs-commons/lists/report-parameter-components"/>
+        <include pattern="/etc/acs-commons/lists/report-parameter-components/jcr:content"/>
+        <include pattern="/etc/acs-commons/lists/report-parameter-components/jcr:content/list"/>
+        <include pattern="/etc/acs-commons/lists/report-parameter-components/jcr:content/list/default_\d+"/>
         <include pattern="/etc/acs-commons/manage-controlled-processes"/>
         <include pattern="/etc/acs-commons/notifications"/>
         <include pattern="/etc/acs-commons/notifications/jcr:content"/>
