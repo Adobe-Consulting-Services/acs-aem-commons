@@ -64,10 +64,20 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
         		if(window.location.hash !== '' && window.location.hash !== '#'){
             		var params = window.location.hash.substr(1);
             		loadResults(params).done(function(){
-            			var url = new URL(window.location.toString().replace('#','?'));
+            			var url = new URL("http://localhost:4502"+window.location.hash.replace('#','?'));
                 		url.searchParams.forEach(function(val,key){
-                			$('input[name="'+key+'"],coral-select[name="'+key+'"] select').val(val);
-                			$('textarea[name="'+key+'"], coral-select[name="'+key+'"] .coral3-Select-label').html(val);
+                			$('input[name="'+key+'"]').val(val);
+                			var $sel = $('coral-select[name="'+key+'"]')
+                			if($sel.length > 0){
+                				$sel.each(function(idx, select){
+                					select.items.getAll().forEach(function(item, idx){
+                						if(item.value === val){
+                							item.selected = true;
+                						}
+                					});
+                				});
+                			}
+                			$('textarea[name="'+key+'"] t').html(val);
                 		});
             		});
             	}
