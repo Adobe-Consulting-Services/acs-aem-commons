@@ -42,7 +42,7 @@ public class ExpiredNodesVisitorTest
         final ExpiredNodesVisitor visitor = getMockedExpiredNodesVisitor(8);
         visitor.visit(rootNode);
         visitor.close();
-        assertEquals(30, visitor.getEvictionCount());
+            assertEquals(30, visitor.getEvictionCount());
 
         Mockito.verify(rootNode.getSession(), Mockito.times(4)).save();
     }

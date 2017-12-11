@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
+import java.util.Calendar;
+
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
@@ -32,9 +34,10 @@ public class ExpiredNodesVisitor extends AbstractNodeVisitor {
         if(node.hasProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON)){
             final Property expiryProperty = node.getProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON);
 
-            long expiryTimeInMs = expiryProperty.getLong();
+            final Calendar expireDate = expiryProperty.getDate();
+            final Calendar now = Calendar.getInstance();
 
-            if(expiryTimeInMs < System.currentTimeMillis()) {
+            if(expireDate.before(now)) {
                 node.remove();
                 persistSession();
             }

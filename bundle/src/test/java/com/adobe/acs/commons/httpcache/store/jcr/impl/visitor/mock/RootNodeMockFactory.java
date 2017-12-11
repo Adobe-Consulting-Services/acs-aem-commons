@@ -8,6 +8,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.jcr.Binary;
@@ -155,11 +156,17 @@ public class RootNodeMockFactory
         when(entryNode.getParent()).thenReturn(parentNode);
 
         final MockProperty expiresMockProperty = new MockProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON);
+
+        int seconds;
         if(isExpired){
-            expiresMockProperty.setValue(System.currentTimeMillis() - 90000);
+            seconds = -9000;
         }else{
-            expiresMockProperty.setValue(System.currentTimeMillis() + 90000);
+            seconds = 9000;
         }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND,  seconds);
+        expiresMockProperty.setValue(calendar);
 
         when(entryNode.getProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON)).thenReturn(expiresMockProperty);
         return entryNode;
@@ -190,6 +197,7 @@ public class RootNodeMockFactory
         final Node node = mock(AbstractNode.class);
         when(node.getSession()).thenReturn(session);
         when(node.toString()).thenReturn(name);
+        when(node.getName()).thenReturn(name);
         doCallRealMethod().when(node).accept(any(ItemVisitor.class));
 
         when(node.hasNodes()).thenAnswer(new Answer<Boolean>()

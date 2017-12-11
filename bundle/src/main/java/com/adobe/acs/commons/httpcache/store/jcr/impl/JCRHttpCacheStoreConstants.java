@@ -2,6 +2,8 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
 public class JCRHttpCacheStoreConstants
 {
+    public static final String ROOT_NODE_NAME = "root";
+
     public static final String PATH_CONTENTS = "contents";
     public static final String PATH_HEADERS = "headers";
     public static final String PATH_ENTRY       = "entry";

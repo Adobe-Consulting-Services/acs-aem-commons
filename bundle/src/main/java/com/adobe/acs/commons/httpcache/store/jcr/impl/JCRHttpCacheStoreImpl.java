@@ -88,7 +88,7 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
             value = "com.adobe.acs.httpcache:type=JCR HTTP Cache Store",
             propertyPrivate = true),
         @Property(
-            label = "Cron expression defining when this Scheduled Service will run",
+            label = "Cron expression defining when the scheduled cache cleanup will run.",
             description = "[every minute = 0 * * * * ?] Visit www.cronmaker.com to generate cron expressions.",
             name = "scheduler.expression",
             value = "0 0 12 1/1 * ? *"
@@ -101,26 +101,29 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
             boolValue = false
         ),
         @Property(
-            label = "Cache Root Path location",
-            description = "Points to the location cache root node in the JCR repository",
+            label = "Cache Root Parent Path location",
+            description = "Points to the location of the cache root parent node in the JCR repository",
             name = JCRHttpCacheStoreImpl.PN_ROOTPATH,
             value = JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH
         ),
         @Property(
             label = "Bucket Tree depth",
-            description = "The depth the bucket tree goes. Minimum value is 1. This should be between 8 and 10.",
+            description = "The depth the bucket tree goes. Minimum value is 1. "
+                         + "This value can be used for tweaking performance. "
+                         + "The more data cached, the higher this value should be. "
+                         + "Downside is that the higher the value, the longer the retrieval of cache entries takes if the buckets are relatively low on entries.",
             name = JCRHttpCacheStoreImpl.PN_BUCKETDEPTH,
             intValue = JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH,
             propertyPrivate = true
         ),
         @Property(
             label = "Delta save threshold",
-            description = "The threshold to remove nodes when invalidating the cache",
+            description = "The threshold to add,remove and modify nodes when handling the cache",
             name = JCRHttpCacheStoreImpl.PN_SAVEDELTA,
             intValue = JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA
         ),
         @Property(
-            label = "Expiretime in ms",
+            label = "Expiretime in seconds",
             description = "The time seconds after which nodes will be removed by the scheduled cleanup service. ",
             name = JCRHttpCacheStoreImpl.PN_EXPIRETIMEINSECONDS,
             intValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS
@@ -132,13 +135,19 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     public static final String  PN_ROOTPATH            = "httpcache.config.jcr.roothpath";
     public static final String  PN_BUCKETDEPTH         = "httpcache.config.jcr.bucketdepth";
     public static final String  PN_SAVEDELTA           = "httpcache.config.jcr.savedelta";
-    public static final String  PN_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinms";
+    public static final String  PN_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinseconds";
 
     //defaults
-    public static final String  DEFAULT_ROOTPATH            = "/etc/acs-commons/httpcache/root";
+    public static final String  DEFAULT_ROOTPATH            = "/etc/acs-commons/httpcache";
+
+    //By default, we go for the maximum bucket depth. This uses the full hashcode of 10 digits.
     public static final int     DEFAULT_BUCKETDEPTH         = 10;
+
+    //Perform a save on a delta of 500 by default.
     public static final int     DEFAULT_SAVEDELTA           = 500;
-    public static final int     DEFAULT_EXPIRETIMEINSECONDS = 6000;
+
+    // 1 week.
+    public static final int     DEFAULT_EXPIRETIMEINSECONDS = 604800;
 
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
 
@@ -161,7 +170,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Activate protected void activate(ComponentContext context)
     {
         Dictionary<?, ?> properties = context.getProperties();
-        cacheRootPath = PropertiesUtil.toString(properties.get(PN_ROOTPATH), DEFAULT_ROOTPATH);
+        cacheRootPath = PropertiesUtil.toString(properties.get(PN_ROOTPATH), DEFAULT_ROOTPATH) + "/" + JCRHttpCacheStoreConstants.ROOT_NODE_NAME;
         bucketTreeDepth = PropertiesUtil.toInteger(properties.get(PN_BUCKETDEPTH), DEFAULT_BUCKETDEPTH);
         deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(PN_SAVEDELTA), DEFAULT_SAVEDELTA);
         expireTimeInSeconds = PropertiesUtil.toInteger(properties.get(PN_EXPIRETIMEINSECONDS), DEFAULT_EXPIRETIMEINSECONDS);
@@ -304,6 +313,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             final Node rootNode = session.getNode(cacheRootPath);
             final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, deltaSaveThreshold, cacheRootPath);
             visitor.visit(rootNode);
+            visitor.close();
             incrementEvictionCount(visitor.getEvictionCount());
             }
         });
@@ -318,6 +328,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                 final InvalidateByCacheConfigVisitor visitor = new InvalidateByCacheConfigVisitor(11, deltaSaveThreshold, cacheConfig, dclm);
                 final Node rootNode = session.getNode(cacheRootPath);
                 visitor.visit(rootNode);
+                visitor.close();
                 incrementEvictionCount(visitor.getEvictionCount());
             }
         });
@@ -341,6 +352,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                 final Node rootNode = session.getNode(cacheRootPath);
                 final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, deltaSaveThreshold);
                 visitor.visit(rootNode);
+                visitor.close();
                 incrementEvictionCount(visitor.getEvictionCount());
             }
         });
@@ -405,7 +417,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         try {
             return IOUtils.toByteArray(cacheObj.getInputDataStream()).length;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error reading the byte length on cachecontent {}", cacheObj);
         }
         return 0;
     }
@@ -419,6 +431,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         try {
             data.put("Size", FileUtils.byteCountToDisplaySize(IOUtils.toByteArray(cacheObj.getInputDataStream()).length));
         } catch (IOException e) {
+            log.error("Error adding cache data to JMX data map", e);
             data.put("Size", "0");
         }
     }
@@ -473,7 +486,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                     onError.accept(e);
                 }
             } catch (Exception subException) {
-                log.error("Error in handling the exception");
+                log.error("Error in handling the exception", subException);
             }
         } finally {
             if(resourceResolver != null && resourceResolver.isLive()){

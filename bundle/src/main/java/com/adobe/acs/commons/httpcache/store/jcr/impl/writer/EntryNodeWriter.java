@@ -53,7 +53,11 @@ public class EntryNodeWriter
         populateMetaData();
         populateHeaders();
         populateBinaryContent();
-        setExpireTime();
+
+        //if we the expire time is set, set it on the node
+        if(expireTimeInSeconds > 0){
+            setExpireTime();
+        }
 
         if(!entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY)) {
             populateCacheKey();
@@ -64,7 +68,7 @@ public class EntryNodeWriter
     {
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, expireTimeInSeconds);
-        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  calendar.getTimeInMillis() );
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  calendar );
     }
 
     private void populateMetaData() throws RepositoryException
