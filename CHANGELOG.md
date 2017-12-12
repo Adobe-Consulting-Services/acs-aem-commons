@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.13.0...HEAD
 
+### Fixed
+
+- #1204 - Unclosed stream in VersionedClientlibsTransformerFactory
+
 ## [3.13.0] - 2017-12-04
 
 ### Added

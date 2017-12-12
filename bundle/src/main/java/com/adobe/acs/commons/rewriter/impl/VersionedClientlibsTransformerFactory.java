@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -285,7 +286,12 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     @Nonnull private String calculateMd5(@Nonnull final HtmlLibrary htmlLibrary) throws IOException {
-        return DigestUtils.md5Hex(htmlLibrary.getInputStream());
+        InputStream stream = htmlLibrary.getInputStream();
+        try {
+            return DigestUtils.md5Hex(stream);
+        } finally {
+            stream.close();
+        }
     }
 
     private class VersionableClientlibsTransformer extends AbstractTransformer {
