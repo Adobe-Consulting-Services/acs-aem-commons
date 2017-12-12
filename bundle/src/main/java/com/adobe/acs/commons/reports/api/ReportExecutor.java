@@ -36,6 +36,14 @@ public interface ReportExecutor {
 	String getDetails();
 
 	/**
+	 * Return all of the results based on the request parameters and supplied
+	 * configuration settings in the configuration resource.
+	 * 
+	 * @return the results
+	 */
+	ResultsPage<?> getAllResults();
+
+	/**
 	 * Return the page of results based on the request parameters and supplied
 	 * configuration settings in the configuration resource.
 	 * 

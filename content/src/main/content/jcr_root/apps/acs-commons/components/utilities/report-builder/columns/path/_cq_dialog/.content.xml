@@ -28,6 +28,11 @@
 						name="./link"
 						text="Include Link?"
 						value="{Boolean}true" />
+					<exporter
+						jcr:primaryType="nt:unstructured"
+						sling:resourceType="granite/ui/components/foundation/form/hidden"
+						name="./exporter"
+						value="com.adobe.acs.commons.reports.models.PathReportCellCSVExporter" />
 				</items>
 			</column>
 		</items>

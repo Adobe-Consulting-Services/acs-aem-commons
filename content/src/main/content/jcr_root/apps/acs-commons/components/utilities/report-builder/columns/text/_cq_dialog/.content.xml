@@ -26,6 +26,11 @@
 						fieldLabel="Property"
 						name="./property"
 						required="{Boolean}true"/>
+					<exporter
+						jcr:primaryType="nt:unstructured"
+						sling:resourceType="granite/ui/components/foundation/form/hidden"
+						name="./exporter"
+						value="com.adobe.acs.commons.reports.models.StringReportCellCSVExporter" />
 				</items>
 			</column>
 		</items>

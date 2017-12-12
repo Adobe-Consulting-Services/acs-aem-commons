@@ -97,8 +97,7 @@ public class QueryReportExecutor implements ReportExecutor {
 		log.trace("Loaded statement: {}", statement);
 	}
 
-	@Override
-	public ResultsPage<Resource> getResults() {
+	private ResultsPage<Resource> fetchResults(int limit, int offset) {
 		prepareStatement();
 		ResourceResolver resolver = request.getResourceResolver();
 		Session session = resolver.adaptTo(Session.class);
@@ -108,10 +107,9 @@ public class QueryReportExecutor implements ReportExecutor {
 
 			Query query = queryMgr.createQuery(statement, config.getQueryLanguage());
 
-			log.debug("Fetching page {} with limit {} and offset {}",
-					new Object[] { page, config.getPageSize(), (config.getPageSize() * page) });
-			query.setLimit(config.getPageSize());
-			query.setOffset(config.getPageSize() * page);
+			log.debug("Fetching results with limit {} and offset {}", new Object[] { limit, offset });
+			query.setLimit(limit);
+			query.setOffset(offset);
 			QueryResult result = query.execute();
 			NodeIterator nodes = result.getNodes();
 
@@ -123,6 +121,11 @@ public class QueryReportExecutor implements ReportExecutor {
 			throw new RuntimeException("Exception executing search results", re);
 		}
 		return new ResultsPage<Resource>(results, config.getPageSize(), page);
+	}
+
+	@Override
+	public ResultsPage<Resource> getResults() {
+		return fetchResults(config.getPageSize(), config.getPageSize() * page);
 	}
 
 	@Override
@@ -150,7 +153,7 @@ public class QueryReportExecutor implements ReportExecutor {
 			final QueryResult queryResult = query.execute();
 
 			final RowIterator rows = queryResult.getRows();
-			while(rows.hasNext()){
+			while (rows.hasNext()) {
 				final Row row = rows.nextRow();
 
 				String[] cols = queryResult.getColumnNames();
@@ -160,7 +163,7 @@ public class QueryReportExecutor implements ReportExecutor {
 					details.put(cols[i], values[i].getString());
 				}
 			}
-			
+
 		} catch (RepositoryException re) {
 			log.error("Exception getting details", re);
 			throw new RuntimeException("Exception getting details", re);
@@ -172,6 +175,11 @@ public class QueryReportExecutor implements ReportExecutor {
 		}
 
 		return "<dl>" + sb.toString() + "</dl>";
+	}
+
+	@Override
+	public ResultsPage<?> getAllResults() {
+		return fetchResults(Integer.MAX_VALUE, 0);
 	}
 
 }

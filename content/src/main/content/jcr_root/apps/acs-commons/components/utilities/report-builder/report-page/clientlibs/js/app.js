@@ -53,10 +53,15 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
 				dfd.resolve();
 			});
 			return dfd.promise();
-    	}
+    	};
 
         $scope.app = {
 		};
+        
+        $scope.download = function(path){
+        	var url = path + '?' + $('#report--form').serialize();
+        	window.open(url,'_blank');
+        };
 
         $scope.init = function () {
         	$(document).ready(function(){
@@ -67,7 +72,7 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
             			var url = new URL("http://localhost:4502"+window.location.hash.replace('#','?'));
                 		url.searchParams.forEach(function(val,key){
                 			$('input[name="'+key+'"]').val(val);
-                			var $sel = $('coral-select[name="'+key+'"]')
+                			var $sel = $('coral-select[name="'+key+'"]');
                 			if($sel.length > 0){
                 				$sel.each(function(idx, select){
                 					select.items.getAll().forEach(function(item, idx){

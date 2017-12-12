@@ -43,10 +43,18 @@ public class ReportCellValue {
 
 	private Object value;
 
+	public ReportCellValue() {
+	}
+
+	public ReportCellValue(Resource result, String property) {
+		this.result = result;
+		this.property = property;
+		init();
+	}
+
 	@PostConstruct
 	private void init() {
-		value = result != null && result.getValueMap() != null
-				? result.getValueMap().get(property) : null;
+		value = result != null && result.getValueMap() != null ? result.getValueMap().get(property) : null;
 	}
 
 	public boolean isArray() {
@@ -55,5 +63,13 @@ public class ReportCellValue {
 
 	public Object getValue() {
 		return value;
+	}
+
+	public String getSingleValue() {
+		return result.getValueMap().get(property, String.class);
+	}
+
+	public String[] getMultipleValues() {
+		return result.getValueMap().get(property, String[].class);
 	}
 }

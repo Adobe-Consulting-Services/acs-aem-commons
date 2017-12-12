@@ -32,6 +32,7 @@
 			<div class="form-row">
 				<div class="form-left-cell">&nbsp;</div>
 				<button class="coral-Button coral-Button--primary">Execute Report</button>
+				<a class="coral-Button coral-Button--secondary" ng-click="download('${resource.path}.report.csv')">Download Report</a>
 			</div>
 		</form>
 	</div>
