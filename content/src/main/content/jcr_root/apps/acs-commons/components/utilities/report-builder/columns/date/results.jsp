@@ -22,7 +22,7 @@
 <sling2:getResource path="${result.path}" var="resultRsrc" />
 <td is="coral-table-cell" value="${result.valueMap[properties.property].time.time}">        
 	<c:choose>
-		<c:when test="${properties.format}">
+		<c:when test="${not empty properties.format}">
 			<fmt:formatDate value="${result.valueMap[properties.property].time}" pattern="${properties.format}" />
 		</c:when>
 		<c:otherwise>
