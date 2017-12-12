@@ -63,6 +63,9 @@ com.day.cq.rewriter.linkchecker.LinkCheckerSettings.fromRequest(slingRequest).se
 </div>
 <div class="pagination">
 	<c:if test="${results.previousPage != -1}">
+		<a href="${resource.path}.results.html?page=0&${report.parameters}" data-page="0" class="coral-Button coral-Button--square pagination__link pagination__prev">
+			First
+		</a>
 		<a href="${resource.path}.results.html?page=${results.previousPage}&${report.parameters}" data-page="${results.previousPage}" class="coral-Button coral-Button--square pagination__link pagination__prev">
 			Previous
 		</a>
