@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -279,13 +280,17 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
             @Override
             public String call() throws Exception {
-                return calculateMd5(htmlLibrary);
+                return calculateMd5(htmlLibrary, htmlLibraryManager.isMinifyEnabled());
             }
         });
     }
 
-    @Nonnull private String calculateMd5(@Nonnull final HtmlLibrary htmlLibrary) throws IOException {
-        return DigestUtils.md5Hex(htmlLibrary.getInputStream());
+    @Nonnull private String calculateMd5(@Nonnull final HtmlLibrary htmlLibrary, boolean isMinified) throws IOException {
+        // make sure that the minified version is being request in case minification is globally enabled
+        // as this will reset the dirty flag on the clientlib
+        try (InputStream input = htmlLibrary.getInputStream(isMinified)) {
+            return DigestUtils.md5Hex(input);
+        }
     }
 
     private class VersionableClientlibsTransformer extends AbstractTransformer {
@@ -400,7 +405,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                     // this static value "Invalid cache key parameter." happens when the cache key can't be
                     // found in the cache
                     if ("Invalid cache key parameter.".equals(md5FromCache)) {
-                        md5FromCache = calculateMd5(uriInfo.htmlLibrary);
+                        md5FromCache = calculateMd5(uriInfo.htmlLibrary, htmlLibraryManager.isMinifyEnabled());
                     }
 
                     if (md5FromCache == null) {

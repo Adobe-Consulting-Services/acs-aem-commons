@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.13.0...HEAD
 
+### Fixed
+- #1204 - Unclosed stream in VersionedClientlibsTransformerFactory
+- #1205 - Calculate MD5 based on minified clientlib (in case minification is enabled). This is a workaround around the AEM limitation to only correctly invalidate either the minified or unminified clientlib).
+
 ### Added
 
 - #989 - Dynamic Loading for optional Touch UI ClientLibraries.
