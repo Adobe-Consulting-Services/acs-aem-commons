@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #989 - Dynamic Loading for optional Touch UI ClientLibraries.
 
+### Fixed
+
+- #1204 - Unclosed stream in VersionedClientlibsTransformerFactory
+
 ## [3.13.0] - 2017-12-04
 
 ### Added
