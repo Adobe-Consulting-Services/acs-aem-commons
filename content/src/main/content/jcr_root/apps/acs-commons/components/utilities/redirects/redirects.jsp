@@ -3,7 +3,7 @@
 <%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
 <cq:setContentBundle />
 <div class="coral-Well">
-	<form action="${resource.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-save_redirects_${resource.name}" ng-submit="postValues('fn-acsCommons-save_redirects_${resource.name}')">
+	<form action="${resource.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-save_redirects_${resource.name}" ng-submit="postValues($event,'fn-acsCommons-save_redirects_${resource.name}')">
 		<input type="hidden" name="jcr:modified" />
 		<input type="hidden" name="jcr:modifiedBy" />
 		<div class="coral-Form-fieldwrapper">
@@ -70,7 +70,7 @@
 			<button class="coral-Button coral-Button--primary">Save</button>
 		</div>
 	</form>
-	<form action="${resource.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-remove_redirects_${resource.name}" ng-submit="postValues('fn-acsCommons-remove_redirects_${resource.name}')">
+	<form action="${resource.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-remove_redirects_${resource.name}" ng-submit="postValues($event,'fn-acsCommons-remove_redirects_${resource.name}')">
 		<input type="hidden"  name=":operation" value="delete" />
 		<div class="coral-Form-fieldwrapper" >
 			<button class="coral-Button coral-Button--warning">Remove</button>
