@@ -32,7 +32,7 @@
 				<input is="coral-textfield" class="coral-Form-field" placeholder="Enter your title" name="jcr:content/jcr:title" labelledby=title" required />
 			</div>
 			<div class="coral-Form-fieldwrapper" >
-				<button is="coral-button" icon="reportAdd" iconsize="S">
+				<button is="coral-button" icon="add" iconsize="S">
 					Add Report
 				</button>
 			</div>
@@ -43,8 +43,8 @@
 		<colgroup>
 			<col is="coral-table-column" sortable>
 			<col is="coral-table-column">
-			<col is="coral-table-column">
-			<col is="coral-table-column">
+			<col is="coral-table-column" fixedwidth>
+			<col is="coral-table-column" fixedwidth>
 		</colgroup>
 		<thead is="coral-table-head">
 			<tr is="coral-table-row">
