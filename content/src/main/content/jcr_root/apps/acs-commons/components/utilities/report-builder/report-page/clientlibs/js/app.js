@@ -32,7 +32,7 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
 			
 			$http({
 				method: 'GET',
-				url: $scope.app.uri+ '?'+ params
+				url: $scope.app.uri+ '?wcmmode=disabled&'+ params
 			}).success(function (data, status, headers, config) {
 				window.location.hash = '#' + params;
 				var time = new Date().getTime() - start;
