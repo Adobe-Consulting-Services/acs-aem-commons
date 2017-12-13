@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.reports.models;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ import javax.jcr.query.RowIterator;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -51,6 +51,8 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.reports.api.ReportExecutor;
 import com.adobe.acs.commons.reports.api.ResultsPage;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
 
 /**
  * Model for executing report requests.
@@ -85,16 +87,25 @@ public class QueryReportExecutor implements ReportExecutor {
 	}
 
 	private void prepareStatement() {
-		Map<String, String> parameters = new HashMap<String, String>();
-		Enumeration<String> paramNames = request.getParameterNames();
-		while (paramNames.hasMoreElements()) {
-			String key = paramNames.nextElement();
-			parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
+		try {
+			Map<String, String> parameters = new HashMap<String, String>();
+			Enumeration<String> paramNames = request.getParameterNames();
+			while (paramNames.hasMoreElements()) {
+				String key = paramNames.nextElement();
+				parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
+			}
+			log.trace("Loading parameters from request: {}", parameters);
+
+			Handlebars handlebars = new Handlebars();
+
+			Template template = handlebars.compileInline(config.getQuery());
+
+			statement = template.apply(parameters);
+
+			log.trace("Loaded statement: {}", statement);
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe);
 		}
-		log.trace("Loading parameters from request: {}", parameters);
-		StrSubstitutor sub = new StrSubstitutor(parameters);
-		statement = sub.replace(config.getQuery());
-		log.trace("Loaded statement: {}", statement);
 	}
 
 	private ResultsPage<Resource> fetchResults(int limit, int offset) {

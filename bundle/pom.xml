@@ -440,6 +440,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+		    <groupId>com.github.jknack</groupId>
+		    <artifactId>handlebars</artifactId>
+		    <version>4.0.6</version>
+		</dependency>
         <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
             <groupId>com.adobe.aem</groupId>
