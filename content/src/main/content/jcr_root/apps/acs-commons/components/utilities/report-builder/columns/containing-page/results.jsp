@@ -19,15 +19,17 @@
   --%>
 <%@include file="/libs/foundation/global.jsp" %>
 <%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
-<sling2:adaptTo var="tags" adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.reports.models.TagsCellValue" />
-<td is="coral-table-cell">
-	<ul>
-		<c:forEach var="tag" items="${tags.tags}">
-			<li>
-				<a href="#" data-href="/libs/cq/tagging/gui/content/tags.html${tag.path}" target="_blank">
-					${tag.title}
-				</a>
-			</li>
-		</c:forEach>
-	</ul>
+<%@ page import="com.day.cq.wcm.api.*" %>
+<%
+Resource result = (Resource) request.getAttribute("result");
+PageManager pageMgr = resourceResolver.adaptTo(PageManager.class);
+pageContext.setAttribute("page", pageManager.getContainingPage(result));
+%>
+<sling2:getResource path="${result.path}" var="resultRsrc" />
+<td is="coral-table-cell" value="${page.path}">        
+	<c:if test="${not empty page.path}">
+		<a target="_blank" href="#" data-href="/sites.html${page.path}" class="coral-Link">
+			<c:out value="${page.pageTitle}" default="${page.title}" />
+		</a>
+	</c:if>
 </td>

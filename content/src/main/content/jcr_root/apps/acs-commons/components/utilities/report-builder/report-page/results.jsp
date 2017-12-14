@@ -19,9 +19,6 @@
   --%>
 <%@include file="/libs/foundation/global.jsp" %>
 <%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
-<%
-com.day.cq.rewriter.linkchecker.LinkCheckerSettings.fromRequest(slingRequest).setIgnoreInternals(true);
-%>
 <sling2:adaptTo adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.reports.models.ReportRunner" var="runner" />
 <c:set var="reportExecutor" value="${runner.reportExecutor}" scope="request" />
 <c:set var="results" value="${reportExecutor.results}" scope="request" />
@@ -76,6 +73,3 @@ com.day.cq.rewriter.linkchecker.LinkCheckerSettings.fromRequest(slingRequest).se
 		</a>
 	</c:if>
 </div>
-<%
-com.day.cq.rewriter.linkchecker.LinkCheckerSettings.fromRequest(slingRequest).setIgnoreInternals(false);
-%>

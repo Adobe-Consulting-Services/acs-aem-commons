@@ -24,4 +24,6 @@
 	<dd>${properties.heading}</dd>
 	<dt>Editor</dt>
 	<dd>${properties.editor}</dd>
+	<dt>Custom Editor</dt>
+	<dd>${properties.customEditor}</dd>
 </dl>

@@ -17,17 +17,9 @@
   limitations under the License.
   #L%
   --%>
-<%@include file="/libs/foundation/global.jsp" %>
-<%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
-<sling2:adaptTo var="tags" adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.reports.models.TagsCellValue" />
-<td is="coral-table-cell">
-	<ul>
-		<c:forEach var="tag" items="${tags.tags}">
-			<li>
-				<a href="#" data-href="/libs/cq/tagging/gui/content/tags.html${tag.path}" target="_blank">
-					${tag.title}
-				</a>
-			</li>
-		</c:forEach>
-	</ul>
-</td>
+<%@include file="/libs/foundation/global.jsp" %><%
+%>
+<dl>
+	<dt>Heading</dt>
+	<dd>${properties.heading}</dd>
+</dl>

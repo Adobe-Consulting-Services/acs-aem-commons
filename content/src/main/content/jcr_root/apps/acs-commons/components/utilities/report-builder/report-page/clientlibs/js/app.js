@@ -42,6 +42,10 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
 					$scope.run($(this).data('page'));
 					return false;
 				});
+				$('.report__result a[data-href]').click(function(){
+					window.open($(this).data('href'),'_blank');
+					return false;
+				});
 				NotificationsService.running(false);
 				NotificationsService.add('success', 'SUCCESS', 'Ran report in '+time+'ms!');
 				$('input,select,coral-select').removeAttr('disabled');
@@ -96,9 +100,8 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
         };
         
         $scope.run = function(page) {
-        	var params = $('#report--form').serialize()+'&page='+page;
-        	loadResults(params);
-        };
-    }]);
-
-
+        	var params = $('#report--form').serialize()+'&page=' + page;
+			loadResults(params);
+		};
+	}
+]);

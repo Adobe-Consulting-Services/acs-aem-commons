@@ -21,7 +21,7 @@
 <td is="coral-table-cell" value="${result.path}">
 	<c:choose>
 		<c:when test="${properties.link}">
-			<a target="_blank" href="/crx/de/index.jsp#${result.path}" class="coral-Link">
+			<a target="_blank" href="#" data-href="/crx/de/index.jsp#${fn:replace(result.path,':','%3A')}" class="coral-Link">
 				${result.path}
 			</a>
 		</c:when>

@@ -18,8 +18,24 @@
   #L%
   --%>
 <%@include file="/libs/foundation/global.jsp" %>
-<td is="coral-table-cell">        
-	<a target="_blank" href="${properties.editor}${result.path}" class="coral-Button coral-Button--square">
+<td is="coral-table-cell">
+	<c:choose>
+		<c:when test="${properties.editor == 'custom'}">
+			<c:set var="editor" value="${properties.customEditor}" />
+		</c:when>
+		<c:otherwise>
+			<c:set var="editor" value="${properties.editor}" />
+		</c:otherwise>
+	</c:choose>
+	<c:choose>
+		<c:when test="${properties.useResourceType}">
+			<c:set var="path" value="${fn:replace(fn:substring(result.path, 6, fn:length(result.path)),':','%3A')}" />
+		</c:when>
+		<c:otherwise>
+			<c:set var="path" value="${fn:replace(result.path,':','%3A')}" />
+		</c:otherwise>
+	</c:choose>
+	<a target="_blank" data-href="${editor}${path}" class="coral-Button coral-Button--square">
 		<i class="coral-Icon coral-Icon--gear coral-Icon--sizeS"></i>
 	</a>
 </td>
