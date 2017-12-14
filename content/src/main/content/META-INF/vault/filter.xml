@@ -98,5 +98,6 @@
     	<include pattern="/var/acs-commons/jcr:content" />
         <include pattern="/var/acs-commons/reports"/>
         <include pattern="/var/acs-commons/reports/jcr:content"/>
+        <include pattern="/etc/acs-commons/reports(.*)?" mode="merge"/>
     </filter>
 </workspaceFilter>
