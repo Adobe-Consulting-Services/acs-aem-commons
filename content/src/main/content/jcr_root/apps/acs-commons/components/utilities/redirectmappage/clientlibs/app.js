@@ -22,7 +22,8 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
     .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
     function ($scope, $http, $timeout, NotificationsService) {
 
-        $scope.updateRedirectMap = function () {
+        $scope.updateRedirectMap = function (e) {
+        	e.preventDefault();
         	
 			NotificationsService.running(true);
 
@@ -42,7 +43,8 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
             return false;
         };
         
-        $scope.postValues = function (id) {
+        $scope.postValues = function (e, id) {
+        	e.preventDefault();
         	
 			NotificationsService.running(true);
 
