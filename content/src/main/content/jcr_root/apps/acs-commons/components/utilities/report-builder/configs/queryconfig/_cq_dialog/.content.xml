@@ -2,7 +2,8 @@
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
 	jcr:primaryType="nt:unstructured"
 	jcr:title="Report Builder Config"
-	sling:resourceType="cq/gui/components/authoring/dialog">
+	sling:resourceType="cq/gui/components/authoring/dialog"
+	helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/reports">
 	<content
 		jcr:primaryType="nt:unstructured"
 		sling:resourceType="granite/ui/components/foundation/container">
@@ -18,6 +19,7 @@
 						jcr:primaryType="nt:unstructured"
 						sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
 						fieldLabel="Query"
+						fieldDescription="This is templated with the URL parameters passed in the hash or the form values using Handlebars"
 						name="./query"
 						required="{Boolean}true"/>
 					<queryLanguage
@@ -28,14 +30,14 @@
 						required="{Boolean}true">
 						<items
 							jcr:primaryType="nt:unstructured">
-							<jcr-dqom
-								jcr:primaryType="nt:unstructured"
-								text="JCR-JQOM" 
-								value="JCR-JQOM"/>
 							<jcr-sql2
 								jcr:primaryType="nt:unstructured"
 								text="JCR SQL2" 
 								value="JCR-SQL2"/>
+							<jcr-dqom
+								jcr:primaryType="nt:unstructured"
+								text="JCR-JQOM" 
+								value="JCR-JQOM"/>
 							<sql
 								jcr:primaryType="nt:unstructured"
 								text="JCR SQL (Deprecated)" 
