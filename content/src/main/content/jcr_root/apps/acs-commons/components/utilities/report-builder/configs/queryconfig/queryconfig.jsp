@@ -21,7 +21,7 @@
 %>
 <dl>
 	<dt>Query</dt>
-	<dd>${properties.query}</dd>
+	<dd class="ng-non-bindable">${properties.query}</dd>
 	<dt>Query Language</dt>
 	<dd>${properties.queryLanguage}</dd>
 	<dt>Page Size</dt>
