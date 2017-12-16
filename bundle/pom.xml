@@ -66,7 +66,7 @@
                         </Import-Package>
                         <Embed-Dependency>guava</Embed-Dependency>
                         <Sling-Model-Packages>
-                        	com.adobe.acs.commons.redirectmaps.models,
+                            com.adobe.acs.commons.redirectmaps.models,
                             com.adobe.acs.commons.version.model,
                             com.adobe.acs.commons.wcm.comparisons.model,
                             com.adobe.acs.commons.workflow.bulk.execution.model,
@@ -165,6 +165,7 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.5</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -365,6 +366,7 @@
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.api</artifactId>
             <version>1.2.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.jackrabbit</groupId>
@@ -457,7 +459,7 @@
             <groupId>com.google.code.tld-generator</groupId>
             <artifactId>tld-generator</artifactId>
             <version>1.1</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
             <optional>true</optional>
             <exclusions>
                 <exclusion>

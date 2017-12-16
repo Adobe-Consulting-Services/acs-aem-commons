@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1213 - Fixing Redirect Manager Action Load Issues 
 - #1204 - Unclosed stream in VersionedClientlibsTransformerFactory
 - #1205 - Calculate MD5 based on minified clientlib (in case minification is enabled). This is a workaround around the AEM limitation to only correctly invalidate either the minified or unminified clientlib).
+- #1217 - Make compile-scope dependencies provided-scope and add enforcer rule to ensure no compile scope dependencies are added in the future.
 
 ### Added
 
