@@ -138,7 +138,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 log.error("Could not ensure management of Oak Index [ {} ]", oakIndexesPath, e);
             }
         } catch (IllegalArgumentException e) {
-            log.error("Caught IAE",e);
+            log.error("Could not ensure oak indexes due to illegal arguments.",e);
         } catch (LoginException e) {
             log.error("Could not get an admin resource resolver to ensure Oak Indexes", e);
         } catch (Exception e) {
