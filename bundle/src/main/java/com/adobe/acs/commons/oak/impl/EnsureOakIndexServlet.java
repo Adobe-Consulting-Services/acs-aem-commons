@@ -35,7 +35,7 @@ import java.io.IOException;
 public class EnsureOakIndexServlet extends HttpServlet {
     //@formatter:off
 	
-	private static final Logger LOG = LoggerFactory.getLogger(EnsureOakIndexServlet.class);
+	private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexServlet.class);
 	
     private static final String PARAM_FORCE = "force";
     private static final String PARAM_PATH = "path";
@@ -67,7 +67,7 @@ public class EnsureOakIndexServlet extends HttpServlet {
 	        response.getWriter().println("</pre>");
 	        
     	} catch (IOException e) {
-    		LOG.warn("Caught IOException while handling doGet()",e);
+    		log.warn("Caught IOException while handling doGet() in the Ensure Oak Index Servlet.", e);
     		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     	}
     }
@@ -92,7 +92,7 @@ public class EnsureOakIndexServlet extends HttpServlet {
 	        response.getWriter().println("Initiated the ensuring of " + count + " oak indexes");
 	        response.setStatus(HttpServletResponse.SC_OK);
         } catch (IOException e) {
-        	LOG.warn("Caught IOException while handling doPost()",e);
+        	log.warn("Caught IOException while handling doPost() in the Ensure Oak Index Servlet", e);
         	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
