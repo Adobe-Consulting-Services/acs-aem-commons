@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
@@ -37,7 +36,7 @@ import com.day.cq.tagging.TagManager;
 /**
  * Model for rendering the tags for a report item.
  */
-@Model(adaptables = SlingHttpServletRequest.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
+@Model(adaptables = SlingHttpServletRequest.class)
 public class TagsCellValue {
 
 	private static final Logger log = LoggerFactory.getLogger(TagsCellValue.class);

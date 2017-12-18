@@ -50,11 +50,15 @@ public class DateReportCellCSVExporter implements ReportCellCSVExporter {
 
 		Calendar cal = resource.getValueMap().get(property, Calendar.class);
 
-		if (StringUtils.isNotBlank(format)) {
-			SimpleDateFormat sdf = new SimpleDateFormat(format);
-			return sdf.format(cal.getTime());
+		if (cal != null && cal.getTime() != null) {
+			if (StringUtils.isNotBlank(format)) {
+				SimpleDateFormat sdf = new SimpleDateFormat(format);
+				return sdf.format(cal.getTime());
+			} else {
+				return cal.getTime().toString();
+			}
 		} else {
-			return cal.getTime().toString();
+			return null;
 		}
 	}
 }

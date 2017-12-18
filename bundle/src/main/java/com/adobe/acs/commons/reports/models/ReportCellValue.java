@@ -52,6 +52,18 @@ public class ReportCellValue {
 		init();
 	}
 
+	public String[] getMultipleValues() {
+		return result.getValueMap().get(property, String[].class);
+	}
+
+	public String getSingleValue() {
+		return result.getValueMap().get(property, String.class);
+	}
+
+	public Object getValue() {
+		return value;
+	}
+
 	@PostConstruct
 	private void init() {
 		value = result != null && result.getValueMap() != null ? result.getValueMap().get(property) : null;
@@ -59,17 +71,5 @@ public class ReportCellValue {
 
 	public boolean isArray() {
 		return value != null && value.getClass().isArray();
-	}
-
-	public Object getValue() {
-		return value;
-	}
-
-	public String getSingleValue() {
-		return result.getValueMap().get(property, String.class);
-	}
-
-	public String[] getMultipleValues() {
-		return result.getValueMap().get(property, String[].class);
 	}
 }
