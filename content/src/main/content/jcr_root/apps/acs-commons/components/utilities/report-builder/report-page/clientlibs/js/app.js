@@ -75,7 +75,7 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
             		loadResults(params).done(function(){
             			var url = new URL("http://localhost:4502"+window.location.hash.replace('#','?'));
                 		url.searchParams.forEach(function(val,key){
-                			$('input[name="'+key+'"]').val(val);
+                			$('input[name="'+key+'"]:not([type="checkbox"])').val(val);
                 			var $sel = $('coral-select[name="'+key+'"]');
                 			if($sel.length > 0){
                 				$sel.each(function(idx, select){
@@ -86,7 +86,10 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
                 					});
                 				});
                 			}
-                			$('textarea[name="'+key+'"] t').html(val);
+                			if($('input[name="'+key+'"][type="checkbox"]').val() == val){
+                				$('input[name="'+key+'"][type="checkbox"],coral-checkbox[name="'+key+'"]').attr('checked','checked');
+                			}
+                			$('textarea[name="'+key+'"]').html(val);
                 		});
             		});
             	}
@@ -100,7 +103,10 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
         };
         
         $scope.run = function(page) {
-        	var params = $('#report--form').serialize()+'&page=' + page;
+        	var params = $('#report--form').serialize();
+        	if(page){
+        		params += +'&page=' + page;
+        	}
 			loadResults(params);
 		};
 	}

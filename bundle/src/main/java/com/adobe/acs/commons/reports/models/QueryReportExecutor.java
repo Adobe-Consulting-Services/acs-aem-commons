@@ -118,9 +118,13 @@ public class QueryReportExecutor implements ReportExecutor {
 
 			Query query = queryMgr.createQuery(statement, config.getQueryLanguage());
 
-			log.debug("Fetching results with limit {} and offset {}", new Object[] { limit, offset });
-			query.setLimit(limit);
-			query.setOffset(offset);
+			if (page != -1) {
+				log.debug("Fetching results with limit {} and offset {}", new Object[] { limit, offset });
+				query.setLimit(limit);
+				query.setOffset(offset);
+			} else {
+				log.debug("Fetching all results");
+			}
 			QueryResult result = query.execute();
 			NodeIterator nodes = result.getNodes();
 

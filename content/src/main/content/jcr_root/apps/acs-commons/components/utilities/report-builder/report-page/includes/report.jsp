@@ -28,7 +28,11 @@
 					<cq:include path="parameters/${par.name}" resourceType="${par.valueMap.resourceType}" />
 				</div>
 			</c:forEach>
-			
+			<div class="form-row">
+				<coral-checkbox value="-1" name="page">
+					All Results
+				</coral-checkbox>
+			</div>
 			<div class="form-row">
 				<div class="form-left-cell">&nbsp;</div>
 				<button class="coral-Button coral-Button--primary">Execute Report</button>

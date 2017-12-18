@@ -44,18 +44,18 @@ public class ResultsPage<E extends Object> {
 	}
 
 	public int getResultsStart() {
-		return (pageSize * page) + 1;
+		return page != -1 ? (pageSize * page) + 1 : 1;
 	}
 
 	public int getResultsEnd() {
-		return (pageSize * page) + results.size();
+		return page != -1 ? (pageSize * page) + results.size() : results.size();
 	}
 
 	public int getNextPage() {
-		return results.size() == pageSize ? page + 1 : -1;
+		return (results.size() == pageSize && page != -1) ? page + 1 : -1;
 	}
 
 	public int getPreviousPage() {
-		return page != 0 ? page - 1 : -1;
+		return page > 0 ? page - 1 : -1;
 	}
 }

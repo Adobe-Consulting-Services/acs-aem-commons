@@ -104,7 +104,7 @@
             <editor_1384214937
                 jcr:primaryType="nt:unstructured"
                 sling:resourceType="acs-commons/components/utilities/report-builder/columns/editor"
-                customEditor="http://localhost:4502/var/acs-commons/reports/sample-references-report.html?wcmmode=disabled#type=nt%3Abase&#038;path="
+                customEditor="http://localhost:4502/var/acs-commons/reports/sample-references-report.html?wcmmode=disabled#type=nt%3Abase&#038;page=-1&#038;path="
                 editor="custom"
                 heading="References" />
             <editor

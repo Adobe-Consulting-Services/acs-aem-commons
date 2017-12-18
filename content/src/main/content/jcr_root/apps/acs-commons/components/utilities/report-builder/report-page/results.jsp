@@ -26,10 +26,11 @@
 <coral-drawer direction="up" class="report__details">
 	<pre>${reportExecutor.details}</pre>
 </coral-drawer>
-<div>Results ${results.resultsStart} - ${results.resultsEnd}</div>
+<div>Results <fmt:formatNumber value="${results.resultsStart}" /> - <fmt:formatNumber value="${results.resultsEnd}" /></div>
 <div class="report__result-container">
 	<table is="coral-table" selectable>
 		<colgroup>
+			<col is="coral-table-column" sortable="stortable" data-foundation-layout-table-column-name="Index" sortabletype="number">
 			<sling2:listChildren resource="${sling2:getRelativeResource(resource,'columns')}" var="columns" />
 			<c:forEach var="col" items="${columns}">
 				<col is="coral-table-column" sortable="stortable" data-foundation-layout-table-column-name="${sling2:encode(col.valueMap.heading,'HTML_ATTR')}">
@@ -37,6 +38,9 @@
 		</colgroup>
         <thead is="coral-table-head" sticky>
             <tr is="coral-table-row">
+            	<th is="coral-table-headercell">
+            		#
+            	</th>
             	<sling2:listChildren resource="${sling2:getRelativeResource(resource,'columns')}" var="columns" />
 				<c:forEach var="col" items="${columns}">
 					<th is="coral-table-headercell">
@@ -46,8 +50,11 @@
             </tr>
         </thead>
         <tbody is="coral-table-body">
-        	<c:forEach var="result" items="${results.results}">
+        	<c:forEach var="result" items="${results.results}" varStatus="status">
         		<tr is="coral-table-row">
+        			<td is="coral-table-cell" value="${status.index + 1}">
+        				<fmt:formatNumber value="${status.index + 1}" />
+        			</td>
         			<sling2:listChildren resource="${sling2:getRelativeResource(resource,'columns')}" var="columns" />
 		        	<c:forEach var="col" items="${columns}">
 						<c:set var="result" value="${result}" scope="request" />
