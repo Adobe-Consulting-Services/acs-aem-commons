@@ -54,8 +54,8 @@
 	        	<c:forEach var="result" items="${results.results}" varStatus="status">
 	        		
 	        		<tr is="coral-table-row">
-	        			<td is="coral-table-cell" value="${status.index + 1}">
-	        				<fmt:formatNumber value="${status.index + 1}" />
+	        			<td is="coral-table-cell" value="${status.index + results.resultsStart}">
+	        				<fmt:formatNumber value="${status.index + results.resultsStart}" />
 	        			</td>
 	        			<sling2:listChildren resource="${sling2:getRelativeResource(resource,'columns')}" var="columns" />
 			        	<c:forEach var="col" items="${columns}">
