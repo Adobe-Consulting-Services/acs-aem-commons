@@ -86,7 +86,12 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
                 		});
             		});
             	}
+
+            	var tools = $('.endor-Crumbs-item')[1];
+            	tools.innerText = 'Reports';
+            	tools.href='/etc/acs-commons/reports.html';
         	});
+
         	
         };
         

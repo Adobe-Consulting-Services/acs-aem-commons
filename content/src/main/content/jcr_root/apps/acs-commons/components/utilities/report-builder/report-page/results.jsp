@@ -31,7 +31,7 @@ com.day.cq.rewriter.linkchecker.LinkCheckerSettings.fromRequest(slingRequest).se
 </coral-drawer>
 <div>Results ${results.resultsStart} - ${results.resultsEnd}</div>
 <div class="report__result-container">
-	<table is="coral-table">
+	<table is="coral-table" selectable>
 		<colgroup>
 			<sling2:listChildren resource="${sling2:getRelativeResource(resource,'columns')}" var="columns" />
 			<c:forEach var="col" items="${columns}">

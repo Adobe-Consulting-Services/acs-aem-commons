@@ -3,7 +3,7 @@
     jcr:description="A tool for building automatic reports in AEM."
     jcr:primaryType="cq:Template"
     jcr:title="Report Builder"
-    allowedPaths="[/content/acs-commons/reports(/.*)?]"
+    allowedPaths="[/var/acs-commons/reports(/.*)?]"
     ranking="{Long}100">
     <jcr:content
         cq:designPath="/etc/designs/acs-commons"

@@ -12,11 +12,6 @@
         <include pattern="/apps/acs-commons/components/utilities/version-compare(.*)?" />
         <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
     </filter>
-    <filter root="/content/acs-commons">
-    	<include pattern="/content/acs-commons/jcr:content" />
-        <include pattern="/content/acs-commons/reports"/>
-        <include pattern="/content/acs-commons/reports/jcr:content"/>
-    </filter>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/dam/video/mp3hq"/>
@@ -69,6 +64,7 @@
         <include pattern="/etc/acs-commons/packagers/jcr:content"/>
         <include pattern="/etc/acs-commons/redirect-maps"/>
         <include pattern="/etc/acs-commons/redirect-maps/jcr:content"/>
+        <include pattern="/etc/acs-commons/reports(.*)"/>
         <include pattern="/etc/acs-commons/workflow-remover(.*)"/>
         <include pattern="/etc/acs-commons/exporters" />
         <include pattern="/etc/acs-commons/exporters/jcr:content" />
@@ -97,4 +93,10 @@
     <filter root="/var/acs-commons/rep:policy"/>
     <filter root="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl"/>
     <filter root="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/dialogpublishurl"/>
+    <filter root="/var/acs-commons">
+   		<include pattern="/var/acs-commons/rep:policy"/>
+    	<include pattern="/var/acs-commons/jcr:content" />
+        <include pattern="/var/acs-commons/reports"/>
+        <include pattern="/var/acs-commons/reports/jcr:content"/>
+    </filter>
 </workspaceFilter>

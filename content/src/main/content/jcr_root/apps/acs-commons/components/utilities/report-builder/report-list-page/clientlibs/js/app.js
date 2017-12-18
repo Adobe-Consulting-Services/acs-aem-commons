@@ -1,8 +1,8 @@
 /*
  * #%L
- * ACS AEM Commons Bundle
+ * ACS AEM Commons Package
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2013 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,44 +18,40 @@
  * #L%
  */
 /*global angular: false */
-angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.notifications'])
+angular.module('acs-commons-report-list-page-app', ['acsCoral', 'ACS.Commons.notifications'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
     function ($scope, $http, $timeout, NotificationsService) {
-
-        $scope.updateRedirectMap = function () {
-        	
+    	
+    	$scope.createReport = function (e,id) {
+    		e.preventDefault();
 			NotificationsService.running(true);
-
-            var $form = $('#fn-acsCommons-update-redirect');
-
-            $.ajax({
-                url: $form.attr('action'),
-                data: new FormData($form[0]),
-                cache: false,
-                contentType: 'multipart/form-data',
-                processData: false,
-                type: 'POST',
-                success: function(data){
-                	location.reload(true);
-                }
-            });
-            return false;
-        };
-        
-        $scope.postValues = function (id) {
-        	
-			NotificationsService.running(true);
-
             var $form = $('#'+id);
-
-            $.post($form.attr('action'), $form.serialize(), function() {
-            	location.reload(true);
+            var name = $form.find('input[name="jcr:content/jcr:title"]').val().toLowerCase().replace(/\W+/g, "-");
+            $.post($form.attr('action')+"/"+name, $form.serialize(), function() {
+            	setTimeout(function(){
+            		location.reload(true);
+            	}, 500);
             });
             return false;
         };
-
+    	
+    	$scope.postValues = function (e,id) {
+    		e.preventDefault();
+			NotificationsService.running(true);
+            var $form = $('#'+id);
+            $.post($form.attr('action'), $form.serialize(), function() {
+            	setTimeout(function(){
+            		location.reload(true);
+            	}, 500);
+            });
+            return false;
+        };
+    
         $scope.init = function () {
-        	$('.endor-Crumbs-item[href=/miscadmin]').html('Reports').attr('href','/etc/acs-commons/reports.html');
+        	$('button[data-href]').click(function(){
+        		window.location = $(this).data('href');
+        	});
         };
     }]);
+
 
