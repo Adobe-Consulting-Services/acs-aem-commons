@@ -3,6 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
+        jcr:description="A report allowing for displaying pages by template and path."
         jcr:title="Page Report"
         sling:resourceType="acs-commons/components/utilities/report-builder/report-page">
         <config

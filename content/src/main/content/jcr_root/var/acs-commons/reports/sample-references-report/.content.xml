@@ -3,6 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
+        jcr:description="A report for finding all of the references to the provided page and any subpages."
         jcr:title="References Report"
         sling:resourceType="acs-commons/components/utilities/report-builder/report-page">
         <config

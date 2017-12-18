@@ -3,6 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
+        jcr:description="A report for searching the available cq:Component nodes in the AEM installation instance."
         jcr:title="Components Report"
         sling:resourceType="acs-commons/components/utilities/report-builder/report-page">
         <config

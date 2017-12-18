@@ -3,6 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
+        jcr:description="A report showing all of the instances of a component by the component's sling:resourceType."
         jcr:title="Component Instances"
         sling:resourceType="acs-commons/components/utilities/report-builder/report-page">
         <config
