@@ -36,6 +36,13 @@ public interface ReportExecutor {
 	String getDetails();
 
 	/**
+	 * The parameters used to execute the report.
+	 * 
+	 * @return the report paramters as a string
+	 */
+	String getParameters();
+
+	/**
 	 * Return all of the results based on the request parameters and supplied
 	 * configuration settings in the configuration resource.
 	 * 

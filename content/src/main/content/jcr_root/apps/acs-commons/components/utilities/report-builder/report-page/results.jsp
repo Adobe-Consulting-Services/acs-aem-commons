@@ -50,32 +50,47 @@
             </tr>
         </thead>
         <tbody is="coral-table-body">
-        	<c:forEach var="result" items="${results.results}" varStatus="status">
-        		<tr is="coral-table-row">
-        			<td is="coral-table-cell" value="${status.index + 1}">
-        				<fmt:formatNumber value="${status.index + 1}" />
-        			</td>
-        			<sling2:listChildren resource="${sling2:getRelativeResource(resource,'columns')}" var="columns" />
-		        	<c:forEach var="col" items="${columns}">
-						<c:set var="result" value="${result}" scope="request" />
-						<sling:include path="columns/${col.name}" resourceType="${col.resourceType}" />
-					</c:forEach>
-				</tr>
-			</c:forEach>
+        	<c:catch var="ex">
+	        	<c:forEach var="result" items="${results.results}" varStatus="status">
+	        		
+	        		<tr is="coral-table-row">
+	        			<td is="coral-table-cell" value="${status.index + 1}">
+	        				<fmt:formatNumber value="${status.index + 1}" />
+	        			</td>
+	        			<sling2:listChildren resource="${sling2:getRelativeResource(resource,'columns')}" var="columns" />
+			        	<c:forEach var="col" items="${columns}">
+							<c:set var="result" value="${result}" scope="request" />
+							<sling:include path="columns/${col.name}" resourceType="${col.resourceType}" />
+						</c:forEach>
+					</tr>
+				</c:forEach>
+			</c:catch>
+			<c:if test = "${ex != null}">
+				<script>
+					var $not = $("<div/>");
+					$not.attr('class','coral-Alert coral-Alert--error coral-Alert--large');
+					$not.html('<i class="coral-Alert-typeIcon coral-Icon coral-Icon--sizeS coral-Icon--alert"></i><strong class="coral-Alert-title">Error</strong><div class="coral-Alert-message">Exception executing report: ${ex} ${ex.message}</div>');
+					$('.notifications').append($not);
+					setTimeout(function(){
+						$not.remove();
+					},
+					20000);
+				</script>
+			</c:if>
 		</tbody>
 	</table>
 </div>
 <div class="pagination">
 	<c:if test="${results.previousPage != -1}">
-		<a href="${resource.path}.results.html?page=0&${report.parameters}" data-page="0" class="coral-Button coral-Button--square pagination__link pagination__prev">
+		<a href="${resource.path}.results.html?page=0&${reportExecutor.parameters}" data-page="0" class="coral-Button coral-Button--square pagination__link pagination__prev">
 			First
 		</a>
-		<a href="${resource.path}.results.html?page=${results.previousPage}&${report.parameters}" data-page="${results.previousPage}" class="coral-Button coral-Button--square pagination__link pagination__prev">
+		<a href="${resource.path}.results.html?page=${results.previousPage}&${reportExecutor.parameters}" data-page="${results.previousPage}" class="coral-Button coral-Button--square pagination__link pagination__prev">
 			Previous
 		</a>
 	</c:if>
 	<c:if test="${results.nextPage != -1}">
-		<a href="${resource.path}.results.html?page=${results.nextPage}&${report.parameters}" data-page="${results.nextPage}" class="coral-Button coral-Button--square pagination__link pagination__next">
+		<a href="${resource.path}.results.html?page=${results.nextPage}&${reportExecutor.parameters}" data-page="${results.nextPage}" class="coral-Button coral-Button--square pagination__link pagination__next">
 			Next
 		</a>
 	</c:if>

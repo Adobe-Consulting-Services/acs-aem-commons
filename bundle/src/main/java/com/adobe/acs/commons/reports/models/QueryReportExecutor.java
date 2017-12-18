@@ -62,50 +62,16 @@ public class QueryReportExecutor implements ReportExecutor {
 
 	private static final Logger log = LoggerFactory.getLogger(QueryReportExecutor.class);
 
+	private QueryReportConfig config;
+
 	private int page;
 
 	private SlingHttpServletRequest request;
-
-	private QueryReportConfig config;
 
 	private String statement;
 
 	public QueryReportExecutor(SlingHttpServletRequest request) {
 		this.request = request;
-	}
-
-	public String getParameters() throws UnsupportedEncodingException {
-		List<String> params = new ArrayList<String>();
-		Enumeration<String> keys = request.getParameterNames();
-		while (keys.hasMoreElements()) {
-			String key = keys.nextElement();
-			for (String value : request.getParameterValues(key)) {
-				params.add(URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8"));
-			}
-		}
-		return StringUtils.join(params, "&");
-	}
-
-	private void prepareStatement() {
-		try {
-			Map<String, String> parameters = new HashMap<String, String>();
-			Enumeration<String> paramNames = request.getParameterNames();
-			while (paramNames.hasMoreElements()) {
-				String key = paramNames.nextElement();
-				parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
-			}
-			log.trace("Loading parameters from request: {}", parameters);
-
-			Handlebars handlebars = new Handlebars();
-
-			Template template = handlebars.compileInline(config.getQuery());
-
-			statement = template.apply(parameters);
-
-			log.trace("Loaded statement: {}", statement);
-		} catch (IOException ioe) {
-			throw new RuntimeException(ioe);
-		}
 	}
 
 	private ResultsPage<Resource> fetchResults(int limit, int offset) {
@@ -139,18 +105,8 @@ public class QueryReportExecutor implements ReportExecutor {
 	}
 
 	@Override
-	public ResultsPage<Resource> getResults() {
-		return fetchResults(config.getPageSize(), config.getPageSize() * page);
-	}
-
-	@Override
-	public void setConfiguration(Resource config) {
-		this.config = config.adaptTo(QueryReportConfig.class);
-	}
-
-	@Override
-	public void setPage(int page) {
-		this.page = page;
+	public ResultsPage<?> getAllResults() {
+		return fetchResults(Integer.MAX_VALUE, 0);
 	}
 
 	@Override
@@ -193,8 +149,57 @@ public class QueryReportExecutor implements ReportExecutor {
 	}
 
 	@Override
-	public ResultsPage<?> getAllResults() {
-		return fetchResults(Integer.MAX_VALUE, 0);
+	public String getParameters() {
+		List<String> params = new ArrayList<String>();
+		Enumeration<String> keys = request.getParameterNames();
+		while (keys.hasMoreElements()) {
+			String key = keys.nextElement();
+			for (String value : request.getParameterValues(key)) {
+				try {
+					params.add(URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8"));
+				} catch (UnsupportedEncodingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return StringUtils.join(params, "&");
+	}
+
+	@Override
+	public ResultsPage<Resource> getResults() {
+		return fetchResults(config.getPageSize(), config.getPageSize() * page);
+	}
+
+	private void prepareStatement() {
+		try {
+			Map<String, String> parameters = new HashMap<String, String>();
+			Enumeration<String> paramNames = request.getParameterNames();
+			while (paramNames.hasMoreElements()) {
+				String key = paramNames.nextElement();
+				parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
+			}
+			log.trace("Loading parameters from request: {}", parameters);
+
+			Handlebars handlebars = new Handlebars();
+
+			Template template = handlebars.compileInline(config.getQuery());
+
+			statement = template.apply(parameters);
+
+			log.trace("Loaded statement: {}", statement);
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
+	}
+
+	@Override
+	public void setConfiguration(Resource config) {
+		this.config = config.adaptTo(QueryReportConfig.class);
+	}
+
+	@Override
+	public void setPage(int page) {
+		this.page = page;
 	}
 
 }
