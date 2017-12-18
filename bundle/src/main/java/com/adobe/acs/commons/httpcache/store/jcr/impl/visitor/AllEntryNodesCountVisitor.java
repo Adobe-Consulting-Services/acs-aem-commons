@@ -13,6 +13,8 @@ public class AllEntryNodesCountVisitor extends AbstractNodeVisitor
 
     protected void entering(final Node node, int level) throws RepositoryException
     {
+        super.entering(node, level);
+
         if(isCacheEntryNode(node)) {
             totalEntryNodeCount++;
         }

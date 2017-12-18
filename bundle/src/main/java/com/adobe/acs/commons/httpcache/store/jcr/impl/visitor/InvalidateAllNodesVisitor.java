@@ -28,6 +28,7 @@ public class InvalidateAllNodesVisitor extends AbstractNodeVisitor
             node.remove();
             persistSession();
         }
+        super.leaving(node, level);
     }
 
     private boolean nodeQualifiesForRemoval(Node node, String nodeName) throws RepositoryException

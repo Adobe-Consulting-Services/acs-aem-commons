@@ -1,7 +1,5 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
-import java.io.IOException;
-
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
@@ -19,6 +17,8 @@ public class InvalidateByCacheConfigVisitor extends AbstractNodeVisitor
 
     private final HttpCacheConfig cacheConfig;
     private final DynamicClassLoaderManager dclm;
+
+
 
     public InvalidateByCacheConfigVisitor(
             int maxLevel,
@@ -50,6 +50,7 @@ public class InvalidateByCacheConfigVisitor extends AbstractNodeVisitor
             node.remove();
             persistSession();
         }
+        super.leaving(node, level);
     }
 
     private CacheKey getCacheKey(final Node node) throws Exception

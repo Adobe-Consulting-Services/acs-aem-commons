@@ -27,6 +27,7 @@ public class ExpiredNodesVisitor extends AbstractNodeVisitor {
             node.remove();
             persistSession();
         }
+        super.leaving(node, level);
     }
 
     private void checkNodeForExpiry(final Node node) throws RepositoryException

@@ -9,7 +9,6 @@ import javax.jcr.RepositoryException;
 import javax.jcr.util.TraversingItemVisitor;
 
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.jackrabbit.value.BinaryValue;
 
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 
@@ -23,6 +22,8 @@ public class TotalCacheSizeVisitor extends TraversingItemVisitor.Default
 
     protected void entering(final Node node, int level) throws RepositoryException
     {
+        super.entering(node, level);
+
         if(isCacheEntryNode(node) && node.hasNode(JCRHttpCacheStoreConstants.PATH_CONTENTS)){
             final Node contents = node.getNode(JCRHttpCacheStoreConstants.PATH_CONTENTS);
 

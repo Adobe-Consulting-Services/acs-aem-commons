@@ -5,14 +5,23 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.util.TraversingItemVisitor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 
 public abstract class AbstractNodeVisitor extends TraversingItemVisitor.Default
 {
+    private static final Logger log = LoggerFactory.getLogger(AbstractNodeVisitor.class);
+    private static final long WARN_THRESHOLD = 5000;
+
     private final long deltaSaveThreshold;
+    private final long startTimeInMs = System.currentTimeMillis();
     private long delta = 0;
     private long evictionCount = 0;
     private Session session;
+
+    private long loopCounter = 0;
 
     public AbstractNodeVisitor( int maxLevel, long deltaSaveThreshold) {
         super(false, maxLevel);
@@ -31,6 +40,20 @@ public abstract class AbstractNodeVisitor extends TraversingItemVisitor.Default
             delta = 0;
         }
     }
+
+    protected void entering(Node node, int level)
+            throws RepositoryException {
+        loopCounter++;
+    }
+
+    protected void leaving(Node node, int level)
+            throws RepositoryException{
+        long current = System.currentTimeMillis();
+        if((loopCounter % 20 == 0) && startTimeInMs + WARN_THRESHOLD < current){
+            log.warn("Visiting the JCR cache with the {} is taking to long! taking {}, ms", getClass().getSimpleName(), current - startTimeInMs);
+        }
+    }
+
 
     public static boolean isCacheEntryNode(final Node node) throws RepositoryException
     {

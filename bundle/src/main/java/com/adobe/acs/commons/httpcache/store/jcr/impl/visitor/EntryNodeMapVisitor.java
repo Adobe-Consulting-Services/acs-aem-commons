@@ -1,6 +1,5 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +34,8 @@ public class EntryNodeMapVisitor extends AbstractNodeVisitor
 
     protected void entering(final Node node, int level) throws RepositoryException
     {
+        super.entering(node, level);
+
         if(isCacheEntryNode(node))
         {
             CacheKey cacheKey;
