@@ -132,13 +132,13 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
 public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, CacheContent> implements HttpCacheStore, JcrCacheMBean, Runnable {
 
     //property keys
-    public static final String  PN_ROOTPATH            = "httpcache.config.jcr.roothpath";
+    public static final String  PN_ROOTPATH            = "httpcache.config.jcr.rootpath";
     public static final String  PN_BUCKETDEPTH         = "httpcache.config.jcr.bucketdepth";
     public static final String  PN_SAVEDELTA           = "httpcache.config.jcr.savedelta";
     public static final String  PN_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinseconds";
 
     //defaults
-    public static final String  DEFAULT_ROOTPATH            = "/etc/acs-commons/httpcache";
+    public static final String  DEFAULT_ROOTPATH            = "/var/acs-commons/httpcache";
 
     //By default, we go for the maximum bucket depth. This uses the full hashcode of 10 digits.
     public static final int     DEFAULT_BUCKETDEPTH         = 10;

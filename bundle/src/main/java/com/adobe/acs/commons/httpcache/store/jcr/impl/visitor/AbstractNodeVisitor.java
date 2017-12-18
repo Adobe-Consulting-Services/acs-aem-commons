@@ -13,15 +13,15 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants
 public abstract class AbstractNodeVisitor extends TraversingItemVisitor.Default
 {
     private static final Logger log = LoggerFactory.getLogger(AbstractNodeVisitor.class);
-    private static final long WARN_THRESHOLD = 5000;
+    private static final long WARN_THRESHOLD = 2000;
 
     private final long deltaSaveThreshold;
     private final long startTimeInMs = System.currentTimeMillis();
     private long delta = 0;
     private long evictionCount = 0;
+    private long loopCounter = 0;
     private Session session;
 
-    private long loopCounter = 0;
 
     public AbstractNodeVisitor( int maxLevel, long deltaSaveThreshold) {
         super(false, maxLevel);
@@ -41,16 +41,20 @@ public abstract class AbstractNodeVisitor extends TraversingItemVisitor.Default
         }
     }
 
-    protected void entering(Node node, int level)
-            throws RepositoryException {
+    protected void entering(Node node, int level) throws RepositoryException {
         loopCounter++;
+        logPossibleOverload();
     }
 
     protected void leaving(Node node, int level)
             throws RepositoryException{
+        logPossibleOverload();
+    }
+
+    private void logPossibleOverload(){
         long current = System.currentTimeMillis();
-        if((loopCounter % 20 == 0) && startTimeInMs + WARN_THRESHOLD < current){
-            log.warn("Visiting the JCR cache with the {} is taking to long! taking {}, ms", getClass().getSimpleName(), current - startTimeInMs);
+        if((loopCounter % 10 == 0) && startTimeInMs + WARN_THRESHOLD < current){
+            log.warn("Visiting the JCR cache with the {} is taking too long! taking {} seconds", getClass().getSimpleName(), (current - startTimeInMs / 1000));
         }
     }
 
