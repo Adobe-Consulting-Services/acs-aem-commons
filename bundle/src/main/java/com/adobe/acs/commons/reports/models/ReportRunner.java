@@ -46,7 +46,7 @@ public class ReportRunner {
 	private String failureMessage;
 
 	private int page;
-	
+
 	private ReportExecutor reportExecutor;
 
 	private SlingHttpServletRequest request;
@@ -70,12 +70,13 @@ public class ReportRunner {
 					ex.setConfiguration(config);
 					ex.setPage(this.page);
 					this.reportExecutor = ex;
+					return true;
 				} else {
 					log.warn("Class {} is not an instance of ReportExecutor", reportExecutor);
 				}
 			} catch (ClassNotFoundException e) {
 				log.warn("Unable to find class for " + reportExecutor, e);
-			} catch(Exception e){
+			} catch (Exception e) {
 				log.warn("Unexpected exception executing report executor " + reportExecutor, e);
 			}
 		} else {
@@ -133,6 +134,5 @@ public class ReportRunner {
 	public boolean isSuccessful() {
 		return succeeded;
 	}
-
 
 }
