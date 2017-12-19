@@ -118,7 +118,7 @@ public class ContentVisitorTest {
         verify(runnable, times(0)).run(resource);
     }
 
-    private class TestRunnable implements ResourceRunnable {
+    public static class TestRunnable implements ResourceRunnable {
         @Override
         public void run(Resource resource) throws Exception {
         }
