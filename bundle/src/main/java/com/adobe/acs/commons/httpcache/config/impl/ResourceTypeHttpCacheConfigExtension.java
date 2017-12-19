@@ -28,8 +28,6 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.commons.jcr.JcrConstants;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.felix.scr.annotations.Activate;
@@ -45,11 +43,6 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -162,8 +155,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     /**
      * The ResourceTypeCacheKey is a custom CacheKey bound to this particular factory.
      */
-    static class ResourceTypeCacheKey extends AbstractCacheKey implements CacheKey, Serializable
-    {
+    static class ResourceTypeCacheKey extends AbstractCacheKey implements CacheKey {
         public ResourceTypeCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
                 HttpCacheKeyCreationException {
             super(request, cacheConfig);
@@ -202,20 +194,6 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         @Override
         public String getUri() {
             return this.resourcePath;
-        }
-
-        /** For Serialization **/
-        private void writeObject(ObjectOutputStream o) throws IOException
-        {
-            parentWriteObject(o);
-        }
-
-
-        /** For De serialization **/
-        private void readObject(ObjectInputStream o)
-                throws IOException, ClassNotFoundException {
-
-            parentReadObject(o);
         }
     }
 
