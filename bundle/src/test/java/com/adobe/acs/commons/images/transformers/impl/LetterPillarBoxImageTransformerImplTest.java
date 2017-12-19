@@ -27,19 +27,14 @@ import static org.mockito.Mockito.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
 
 import com.day.image.Layer;
 
@@ -360,19 +355,6 @@ public class LetterPillarBoxImageTransformerImplTest {
         new LetterPillarBoxImageTransformerImpl().transform(layer, null);
 
         verifyZeroInteractions(layer);
-    }
-
-    private AtomicReference<Layer> setupMockLayer(final Layer mockLayer) throws Exception {
-        final AtomicReference<Layer> resultLayer = new AtomicReference<Layer>();
-        PowerMockito.whenNew(Layer.class).withParameterTypes(int.class, int.class, Paint.class)
-                .withArguments(anyInt(), anyInt(), Matchers.isA(Paint.class)).thenAnswer(new Answer<Layer>() {
-                    @Override
-                    public Layer answer(InvocationOnMock invocation) throws Throwable {
-                        resultLayer.set(mockLayer);
-                        return mockLayer;
-                    }
-                });
-        return resultLayer;
     }
 
     private class Transformer extends LetterPillarBoxImageTransformerImpl {
