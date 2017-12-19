@@ -33,13 +33,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ ColorModel.class, DirectColorModel.class })
+@RunWith(MockitoJUnitRunner.class)
 public class MultiplyBlendCompositeTest {
 
     private static final float ALPHA = 0.75f;
@@ -95,7 +93,7 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(),
                 srcColorModel.getBlueMask(), 0);
         composite.createContext(srcColorModel, destColorModel, hints);
-        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
         verifyZeroInteractions(hints);
     }
 
@@ -105,7 +103,7 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, 0, srcColorModel.getGreenMask(),
                 srcColorModel.getBlueMask(), srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
         verifyZeroInteractions(hints);
     }
 
@@ -115,7 +113,7 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), 0, srcColorModel.getBlueMask(),
                 srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
         verifyZeroInteractions(hints);
     }
 
@@ -125,7 +123,7 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(), 0,
                 srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
         verifyZeroInteractions(hints);
     }
 
@@ -135,7 +133,7 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(),
                 destColorModel.getBlueMask(), 0);
         composite.createContext(srcColorModel, destColorModel, hints);
-        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
         verifyZeroInteractions(hints);
     }
 
@@ -145,7 +143,7 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, 0, destColorModel.getGreenMask(),
                 destColorModel.getBlueMask(), destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
         verifyZeroInteractions(hints);
     }
 
@@ -155,7 +153,7 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), 0,
                 destColorModel.getBlueMask(), destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
         verifyZeroInteractions(hints);
     }
 
@@ -165,7 +163,7 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(),
                 0, destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        PowerMockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
+        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
         verifyZeroInteractions(hints);
     }
 }
