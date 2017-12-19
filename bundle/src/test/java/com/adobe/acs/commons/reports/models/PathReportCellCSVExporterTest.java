@@ -25,13 +25,11 @@ import static org.mockito.Mockito.when;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(PowerMockRunner.class)
 public class PathReportCellCSVExporterTest {
 
 	private static final Logger log = LoggerFactory.getLogger(PathReportCellCSVExporterTest.class);
@@ -44,6 +42,8 @@ public class PathReportCellCSVExporterTest {
 	@Before
 	public void init() {
 		log.info("init");
+		
+		MockitoAnnotations.initMocks(this);
 
 		when(mockResource.getPath()).thenReturn(PATH);
 	}

@@ -26,55 +26,54 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
-@RunWith(PowerMockRunner.class)
 public class ContainingPageReportCellCSVExporterTest {
 
 	private static final Logger log = LoggerFactory.getLogger(ContainingPageReportCellCSVExporterTest.class);
-	
+
 	@Mock
 	private Resource mockResource;
-	
+
 	@Mock
 	private PageManager pageManager;
-	
+
 	@Mock
 	private ResourceResolver resolver;
-	
+
 	@Mock
 	private Page page;
-	
-	private final String VALID_PATH="/content/test";
-	
+
+	private final String VALID_PATH = "/content/test";
+
 	@Before
 	public void init() {
 		log.info("init");
-		
+
+		MockitoAnnotations.initMocks(this);
+
 		when(mockResource.getResourceResolver()).thenReturn(resolver);
 		when(resolver.adaptTo(PageManager.class)).thenReturn(pageManager);
 		when(pageManager.getContainingPage(mockResource)).thenReturn(page);
 		when(page.getPath()).thenReturn(VALID_PATH);
 
 	}
-	
+
 	@Test
-	public void testExporter(){
+	public void testExporter() {
 		log.info("testExporter");
-		
+
 		ContainingPageReportCellCSVExporter valid = new ContainingPageReportCellCSVExporter();
 		String value = valid.getValue(mockResource);
 		assertEquals(VALID_PATH, value);
-		
+
 		log.info("Test successful!");
 	}
-	
-	
+
 }

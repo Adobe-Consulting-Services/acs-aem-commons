@@ -33,15 +33,13 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.redirectmaps.models.MapEntryTest;
 
-@RunWith(PowerMockRunner.class)
 public class ReportCellValueTest {
 
 	private static final String[] ARRAY_VALUE = new String[] { "val1", "val2" };
@@ -54,6 +52,8 @@ public class ReportCellValueTest {
 	@Before
 	public void init() {
 		log.info("init");
+		
+		MockitoAnnotations.initMocks(this);
 
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("multiple", ARRAY_VALUE);

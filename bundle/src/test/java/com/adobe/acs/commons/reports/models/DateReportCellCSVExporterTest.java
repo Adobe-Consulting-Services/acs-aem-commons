@@ -33,13 +33,11 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(PowerMockRunner.class)
 public class DateReportCellCSVExporterTest {
 
 	private static final Logger log = LoggerFactory.getLogger(DateReportCellCSVExporterTest.class);
@@ -54,6 +52,8 @@ public class DateReportCellCSVExporterTest {
 	@Before
 	public void init() {
 		log.info("init");
+		
+		MockitoAnnotations.initMocks(this);
 
 		if (start == null) {
 			start = Calendar.getInstance();

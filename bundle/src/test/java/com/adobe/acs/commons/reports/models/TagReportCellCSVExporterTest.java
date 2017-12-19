@@ -32,9 +32,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,6 @@ import com.adobe.acs.commons.redirectmaps.models.MapEntryTest;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
 
-@RunWith(PowerMockRunner.class)
 public class TagReportCellCSVExporterTest {
 
 	private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
@@ -67,6 +65,8 @@ public class TagReportCellCSVExporterTest {
 	@Before
 	public void init() {
 		log.info("init");
+		
+		MockitoAnnotations.initMocks(this);
 
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("tags", TAGS_VALUE);
