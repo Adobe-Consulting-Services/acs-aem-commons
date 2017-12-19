@@ -19,10 +19,12 @@
  */
 package com.adobe.acs.commons.components.longformtext.impl;
 
+import junitx.util.PrivateAccessor;
 import org.apache.sling.commons.html.HtmlParser;
 import org.apache.sling.commons.html.impl.DOMBuilder;
 import org.ccil.cowan.tagsoup.Parser;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -40,11 +42,14 @@ import java.io.InputStream;
 @RunWith(MockitoJUnitRunner.class)
 public class LongFormTextComponentImplTest {
 
-    @Spy
-    HtmlParser htmlParser = new SlingHtmlParser();
+    SlingHtmlParser htmlParser = new SlingHtmlParser();
 
-    @InjectMocks
     final LongFormTextComponentImpl longFormTextComponent = new LongFormTextComponentImpl();
+
+    @Before
+    public void setup() throws Exception {
+        PrivateAccessor.setField(longFormTextComponent, "htmlParser", htmlParser);
+    }
 
     @Test
     public void testGetTextParagraphs_1() throws Exception {
@@ -96,41 +101,5 @@ public class LongFormTextComponentImplTest {
         final String[] result = longFormTextComponent.getTextParagraphs(input);
 
         Assert.assertArrayEquals(expected, result);
-    }
-    
-    /**
-     * This is the private Impl of the Sling HtmlParser which is the OSGi Service used to part
-     * the HTML and created the Document in this Component.
-     *
-     * https://github.com/apache/sling/blob/43528d39840cdf011dea5b2768686cc96ee3326e/contrib/commons/html/src/main/java/org/apache/sling/commons/html/impl/HtmlParserImpl.java
-     */
-    private class SlingHtmlParser implements HtmlParser {
-
-        public void parse(InputStream stream, String encoding, ContentHandler ch)
-                throws SAXException {
-            throw new UnsupportedOperationException("This method is not supported for this Test");
-        }
-
-        /**
-         * @see org.apache.sling.commons.html.HtmlParser#parse(java.lang.String, java.io.InputStream, java.lang.String)
-         */
-        public Document parse(String systemId, InputStream stream, String encoding) throws IOException {
-            final Parser parser = new Parser();
-            final DOMBuilder builder = new DOMBuilder();
-            final InputSource source = new InputSource(stream);
-            source.setEncoding(encoding);
-            source.setSystemId(systemId);
-            try {
-                parser.setProperty("http://xml.org/sax/properties/lexical-handler", builder);
-                parser.setContentHandler(builder);
-                parser.parse(source);
-            } catch (SAXException se) {
-                if ( se.getCause() instanceof IOException ) {
-                    throw (IOException) se.getCause();
-                }
-                throw (IOException) new IOException("Unable to parse xml.").initCause(se);
-            }
-            return builder.getDocument();
-        }
     }
 }
