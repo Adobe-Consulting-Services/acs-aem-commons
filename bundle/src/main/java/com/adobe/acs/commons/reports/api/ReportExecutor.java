@@ -48,7 +48,7 @@ public interface ReportExecutor {
 	 * 
 	 * @return the results
 	 */
-	ResultsPage<?> getAllResults();
+	ResultsPage<? extends Object> getAllResults();
 
 	/**
 	 * Return the page of results based on the request parameters and supplied
@@ -56,7 +56,7 @@ public interface ReportExecutor {
 	 * 
 	 * @return the current page of results
 	 */
-	ResultsPage<?> getResults();
+	ResultsPage<? extends Object> getResults();
 
 	/**
 	 * Set the resource used to configure this report executor.

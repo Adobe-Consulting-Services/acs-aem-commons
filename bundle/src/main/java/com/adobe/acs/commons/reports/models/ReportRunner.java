@@ -46,6 +46,7 @@ public class ReportRunner {
 	private String failureMessage;
 
 	private int page;
+	
 	private ReportExecutor reportExecutor;
 
 	private SlingHttpServletRequest request;
@@ -58,11 +59,11 @@ public class ReportRunner {
 
 	private boolean executeConfig(Resource config, SlingHttpServletRequest request) {
 		log.trace("executeConfig");
-		String reportExecutor = config.getValueMap().get(PN_EXECUTOR, String.class);
-		if (StringUtils.isNotBlank(reportExecutor)) {
-			log.debug("Loading class for: {}", reportExecutor);
+		String reportExecutorClass = config.getValueMap().get(PN_EXECUTOR, String.class);
+		if (StringUtils.isNotBlank(reportExecutorClass)) {
+			log.debug("Loading class for: {}", reportExecutorClass);
 			try {
-				Class<?> exClass = getClass().getClassLoader().loadClass(reportExecutor);
+				Class<?> exClass = getClass().getClassLoader().loadClass(reportExecutorClass);
 				Object model = request.adaptTo(exClass);
 				if (model instanceof ReportExecutor) {
 					ReportExecutor ex = (ReportExecutor) model;
@@ -108,8 +109,9 @@ public class ReportRunner {
 			Iterator<Resource> children = configCtr.listChildren();
 			while (children.hasNext()) {
 				Resource config = children.next();
-				if (config != null && executeConfig(config, request)) {
+				if (executeConfig(config, request)) {
 					log.debug("Successfully executed report with configuration: {}", config);
+					resultsRetrieved = true;
 					break;
 				} else {
 					log.warn("Unable to execute report for configuration: {}", config);

@@ -56,11 +56,11 @@ public class PageReplicationStatusModel implements ReportCellCSVExporter {
 	@Self
 	private Resource resource;
 
-	private Calendar getLastModified(ResourceResolver resourceResolver, String path) {
-		Resource resource = resourceResolver.getResource(path);
+	private Calendar getLastModified(ResourceResolver resourceResolver, String pageContentPath) {
+		Resource pageContent = resourceResolver.getResource(pageContentPath);
 		Calendar lastModified = null;
 		if (resource != null) {
-			lastModified = resource.getValueMap().get(NameConstants.PN_PAGE_LAST_MOD, Calendar.class);
+			lastModified = pageContent.getValueMap().get(NameConstants.PN_PAGE_LAST_MOD, Calendar.class);
 		}
 		return lastModified;
 	}

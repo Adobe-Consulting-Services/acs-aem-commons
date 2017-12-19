@@ -1,4 +1,3 @@
-
 /*
  * #%L
  * ACS AEM Commons Bundle
@@ -75,30 +74,7 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 			csv.writeInit(writer);
 
 			// write the headers
-			List<String> row = new ArrayList<String>();
-			List<ReportCellCSVExporter> exporters = new ArrayList<ReportCellCSVExporter>();
-			for (Resource column : request.getResource().getChild("columns").getChildren()) {
-				String className = column.getValueMap().get("exporter", String.class);
-				if (!StringUtils.isEmpty(className)) {
-					try {
-						log.debug("Finding ReportCellCSVExporter for {}", className);
-						@SuppressWarnings("unchecked")
-						Class<ReportCellCSVExporter> clazz = (Class<ReportCellCSVExporter>) getClass().getClassLoader()
-								.loadClass(className);
-						ReportCellCSVExporter exporter = column.adaptTo(clazz);
-						log.debug("Loaded ReportCellCSVExporter {}", exporter);
-						if (exporter != null) {
-							exporters.add(exporter);
-							row.add(column.getValueMap().get("heading", String.class));
-						} else {
-							log.warn("Retrieved null ReportCellCSVExporter for {}", className);
-						}
-					} catch (Exception e) {
-						log.warn("Unable to render column due to issue fetching ReportCellCSVExporter " + className, e);
-					}
-				}
-			}
-			csv.writeRow(row.toArray(new String[row.size()]));
+			List<ReportCellCSVExporter> exporters = writeHeaders(request, csv);
 
 			Resource configCtr = request.getResource().getChild("config");
 
@@ -123,6 +99,35 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 			IOUtils.closeQuietly(writer);
 		}
 
+	}
+
+	private List<ReportCellCSVExporter> writeHeaders(SlingHttpServletRequest request, final Csv csv)
+			throws IOException {
+		List<String> row = new ArrayList<String>();
+		List<ReportCellCSVExporter> exporters = new ArrayList<ReportCellCSVExporter>();
+		for (Resource column : request.getResource().getChild("columns").getChildren()) {
+			String className = column.getValueMap().get("exporter", String.class);
+			if (!StringUtils.isEmpty(className)) {
+				try {
+					log.debug("Finding ReportCellCSVExporter for {}", className);
+					@SuppressWarnings("unchecked")
+					Class<ReportCellCSVExporter> clazz = (Class<ReportCellCSVExporter>) getClass().getClassLoader()
+							.loadClass(className);
+					ReportCellCSVExporter exporter = column.adaptTo(clazz);
+					log.debug("Loaded ReportCellCSVExporter {}", exporter);
+					if (exporter != null) {
+						exporters.add(exporter);
+						row.add(column.getValueMap().get("heading", String.class));
+					} else {
+						log.warn("Retrieved null ReportCellCSVExporter for {}", className);
+					}
+				} catch (Exception e) {
+					log.warn("Unable to render column due to issue fetching ReportCellCSVExporter " + className, e);
+				}
+			}
+		}
+		csv.writeRow(row.toArray(new String[row.size()]));
+		return exporters;
 	}
 
 	private void updateCSV(Resource config, SlingHttpServletRequest request, List<ReportCellCSVExporter> exporters,
