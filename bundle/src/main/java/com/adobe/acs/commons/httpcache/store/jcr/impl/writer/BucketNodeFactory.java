@@ -23,7 +23,7 @@ public class BucketNodeFactory
     private final int cacheKeySplitDepth;
     private final Node cacheRoot;
 
-    public BucketNodeFactory(Session session, String cacheRootPath, CacheKey key, int cacheKeySplitDepth)
+    public BucketNodeFactory(Session session, String cacheRootPath, CacheKey key, Integer cacheKeySplitDepth)
             throws RepositoryException, BucketNodeFactoryException
     {
         this.key = key;

@@ -120,7 +120,7 @@ public class EntryNodeMapVisitorTest
         return spy;
     }
 
-    private CacheKey generateRandomCacheKey()
+    public static CacheKey generateRandomCacheKey()
     {
         final String randomString = RandomStringUtils.random(10);
         return new CacheKey()

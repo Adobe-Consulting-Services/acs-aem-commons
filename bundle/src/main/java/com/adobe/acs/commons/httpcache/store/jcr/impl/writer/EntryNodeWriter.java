@@ -34,7 +34,7 @@ public class EntryNodeWriter
     private final int expireTimeInSeconds;
 
     public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent,
-            int expireTimeInSeconds){
+            Integer expireTimeInSeconds){
         this.session = session;
         this.entryNode = entryNode;
         this.cacheKey = cacheKey;

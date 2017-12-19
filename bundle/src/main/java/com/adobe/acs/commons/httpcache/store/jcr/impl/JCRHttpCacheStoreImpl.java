@@ -451,11 +451,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     }
 
-    private void withSession(final Consumer<Session> onSuccess){
+    public void withSession(final Consumer<Session> onSuccess){
         withSession(onSuccess, null);
     }
 
-    private void withSession(final Consumer<Session> onSuccess, final Consumer<Exception> onError)
+    public void withSession(final Consumer<Session> onSuccess, final Consumer<Exception> onError)
     {
         withSession(new Function<Session, Object>()
         {
@@ -468,11 +468,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         onError);
     }
 
-    private <T> T withSession(final Function<Session, T> onSuccess){
+    public <T> T withSession(final Function<Session, T> onSuccess){
         return withSession(onSuccess, null);
     }
 
-    private <T> T withSession(final Function<Session, T> onSuccess, final Consumer<Exception> onError){
+    public <T> T withSession(final Function<Session, T> onSuccess, final Consumer<Exception> onError){
         ResourceResolver resourceResolver = null;
         try {
             resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
