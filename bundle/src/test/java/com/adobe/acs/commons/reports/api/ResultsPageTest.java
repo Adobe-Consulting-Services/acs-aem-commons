@@ -30,7 +30,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(PowerMockRunner.class)
 public class ResultsPageTest {
 
 	private static final Logger log = LoggerFactory.getLogger(ResultsPageTest.class);
