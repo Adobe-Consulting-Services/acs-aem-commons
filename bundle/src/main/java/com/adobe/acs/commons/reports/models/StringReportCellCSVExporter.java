@@ -37,32 +37,32 @@ import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
 @Model(adaptables = Resource.class)
 public class StringReportCellCSVExporter implements ReportCellCSVExporter {
 
-	@Inject
-	private String property;
+  @Inject
+  private String property;
 
-	@Inject
-	@Optional
-	private String format;
+  @Inject
+  @Optional
+  private String format;
 
-	@Override
-	public String getValue(Object result) {
-		Resource resource = (Resource) result;
-		ReportCellValue val = new ReportCellValue(resource, property);
-		List<String> values = new ArrayList<String>();
-		if (val.getValue() != null) {
-			if (val.isArray()) {
-				for (String value : val.getMultipleValues()) {
-					values.add(value);
-				}
-			} else {
-				values.add(val.getSingleValue());
-			}
-		}
-		if (StringUtils.isNotBlank(format)) {
-			for (int i = 0; i < values.size(); i++) {
-				values.set(i, String.format(format, values.get(i)));
-			}
-		}
-		return StringUtils.join(values, ";");
-	}
+  @Override
+  public String getValue(Object result) {
+    Resource resource = (Resource) result;
+    ReportCellValue val = new ReportCellValue(resource, property);
+    List<String> values = new ArrayList<String>();
+    if (val.getValue() != null) {
+      if (val.isArray()) {
+        for (String value : val.getMultipleValues()) {
+          values.add(value);
+        }
+      } else {
+        values.add(val.getSingleValue());
+      }
+    }
+    if (StringUtils.isNotBlank(format)) {
+      for (int i = 0; i < values.size(); i++) {
+        values.set(i, String.format(format, values.get(i)));
+      }
+    }
+    return StringUtils.join(values, ";");
+  }
 }

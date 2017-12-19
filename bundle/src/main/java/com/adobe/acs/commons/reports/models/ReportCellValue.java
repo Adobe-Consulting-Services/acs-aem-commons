@@ -35,41 +35,41 @@ import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 @Model(adaptables = SlingHttpServletRequest.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class ReportCellValue {
 
-	@ValueMapValue
-	private String property;
+  @ValueMapValue
+  private String property;
 
-	@RequestAttribute
-	private Resource result;
+  @RequestAttribute
+  private Resource result;
 
-	private Object value;
+  private Object value;
 
-	public ReportCellValue() {
-	}
+  public ReportCellValue() {
+  }
 
-	public ReportCellValue(Resource result, String property) {
-		this.result = result;
-		this.property = property;
-		init();
-	}
+  public ReportCellValue(Resource result, String property) {
+    this.result = result;
+    this.property = property;
+    init();
+  }
 
-	public String[] getMultipleValues() {
-		return result.getValueMap().get(property, String[].class);
-	}
+  public String[] getMultipleValues() {
+    return result.getValueMap().get(property, String[].class);
+  }
 
-	public String getSingleValue() {
-		return result.getValueMap().get(property, String.class);
-	}
+  public String getSingleValue() {
+    return result.getValueMap().get(property, String.class);
+  }
 
-	public Object getValue() {
-		return value;
-	}
+  public Object getValue() {
+    return value;
+  }
 
-	@PostConstruct
-	private void init() {
-		value = result != null && result.getValueMap() != null ? result.getValueMap().get(property) : null;
-	}
+  @PostConstruct
+  private void init() {
+    value = result != null && result.getValueMap() != null ? result.getValueMap().get(property) : null;
+  }
 
-	public boolean isArray() {
-		return value != null && value.getClass().isArray();
-	}
+  public boolean isArray() {
+    return value != null && value.getClass().isArray();
+  }
 }

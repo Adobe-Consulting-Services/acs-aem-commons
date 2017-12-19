@@ -29,33 +29,33 @@ import java.util.List;
  */
 public class ResultsPage<E extends Object> {
 
-	private final List<E> results;
-	private final int pageSize;
-	private final int page;
+  private final List<E> results;
+  private final int pageSize;
+  private final int page;
 
-	public ResultsPage(List<E> results, int pageSize, int page) {
-		this.results = results;
-		this.pageSize = pageSize;
-		this.page = page;
-	}
+  public ResultsPage(List<E> results, int pageSize, int page) {
+    this.results = results;
+    this.pageSize = pageSize;
+    this.page = page;
+  }
 
-	public List<E> getResults() {
-		return results;
-	}
+  public List<E> getResults() {
+    return results;
+  }
 
-	public int getResultsStart() {
-		return page != -1 ? (pageSize * page) + 1 : 1;
-	}
+  public int getResultsStart() {
+    return page != -1 ? (pageSize * page) + 1 : 1;
+  }
 
-	public int getResultsEnd() {
-		return page != -1 ? (pageSize * page) + results.size() : results.size();
-	}
+  public int getResultsEnd() {
+    return page != -1 ? (pageSize * page) + results.size() : results.size();
+  }
 
-	public int getNextPage() {
-		return (results.size() == pageSize && page != -1) ? page + 1 : -1;
-	}
+  public int getNextPage() {
+    return (results.size() == pageSize && page != -1) ? page + 1 : -1;
+  }
 
-	public int getPreviousPage() {
-		return page > 0 ? page - 1 : -1;
-	}
+  public int getPreviousPage() {
+    return page > 0 ? page - 1 : -1;
+  }
 }

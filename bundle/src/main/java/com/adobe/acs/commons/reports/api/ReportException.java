@@ -20,18 +20,24 @@
 package com.adobe.acs.commons.reports.api;
 
 /**
- * Interface for Sling Models to implement to support exporting data for a
- * report column to a CSV
+ * An exception which occurs during the process of executing a report
  */
-public interface ReportCellCSVExporter {
+public class ReportException extends Exception {
+
+  private static final long serialVersionUID = -5659447277850005523L;
 
   /**
-   * Gets the CSV value from the specified result based on the column
-   * configuration of the current cell.
-   * 
-   * @param result
-   *            the report result
-   * @return the CSV rendered result
+   * Constructs a new exception with the specified detail message.
    */
-  public String getValue(Object result);
+  public ReportException(String message) {
+    super(message);
+  }
+
+  /**
+     * Constructs a new exception with the specified detail message and
+     * cause.  
+     */
+    public ReportException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

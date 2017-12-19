@@ -46,69 +46,69 @@ import com.day.cq.tagging.TagManager;
 
 public class TagsCellValueTest {
 
-	private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
+  private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
 
-	private static final String[] TAGS_VALUE = new String[] { "val1", "val2" };
+  private static final String[] TAGS_VALUE = new String[] { "val1", "val2" };
 
-	@Mock
-	private SlingHttpServletRequest request;
+  @Mock
+  private SlingHttpServletRequest request;
 
-	@Mock
-	private Resource mockResource;
+  @Mock
+  private Resource mockResource;
 
-	@Mock
-	private ResourceResolver resolver;
+  @Mock
+  private ResourceResolver resolver;
 
-	@Mock
-	private Tag tag1;
+  @Mock
+  private Tag tag1;
 
-	@Mock
-	private Tag tag2;
+  @Mock
+  private Tag tag2;
 
-	@Mock
-	private TagManager tagMgr;
+  @Mock
+  private TagManager tagMgr;
 
-	@Before
-	public void init() {
-		log.info("init");
-		
-		MockitoAnnotations.initMocks(this);
+  @Before
+  public void init() {
+    log.info("init");
+    
+    MockitoAnnotations.initMocks(this);
 
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("tags", TAGS_VALUE);
+    Map<String, Object> properties = new HashMap<String, Object>();
+    properties.put("tags", TAGS_VALUE);
 
-		when(request.getAttribute("result")).thenReturn(mockResource);
-		when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
+    when(request.getAttribute("result")).thenReturn(mockResource);
+    when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
 
-		when(request.getResourceResolver()).thenReturn(resolver);
-		when(resolver.adaptTo(TagManager.class)).thenReturn(tagMgr);
+    when(request.getResourceResolver()).thenReturn(resolver);
+    when(resolver.adaptTo(TagManager.class)).thenReturn(tagMgr);
 
-		when(tagMgr.resolve(TAGS_VALUE[0])).thenReturn(tag1);
-		when(tagMgr.resolve(TAGS_VALUE[1])).thenReturn(tag2);
+    when(tagMgr.resolve(TAGS_VALUE[0])).thenReturn(tag1);
+    when(tagMgr.resolve(TAGS_VALUE[1])).thenReturn(tag2);
 
-		when(tag1.getTitle()).thenReturn(TAGS_VALUE[0]);
-		when(tag2.getTitle()).thenReturn(TAGS_VALUE[1]);
-	}
+    when(tag1.getTitle()).thenReturn(TAGS_VALUE[0]);
+    when(tag2.getTitle()).thenReturn(TAGS_VALUE[1]);
+  }
 
-	@Test
-	public void testEmpty() throws IllegalAccessException {
-		log.info("testEmpty");
-		TagsCellValue val = new TagsCellValue();
-		FieldUtils.writeField(val, "property", "tags2", true);
-		FieldUtils.writeField(val, "request", request, true);
-		List<Tag> tags = val.getTags();
-		assertEquals(0, tags.size());
-		log.info("Test successful!");
-	}
+  @Test
+  public void testEmpty() throws IllegalAccessException {
+    log.info("testEmpty");
+    TagsCellValue val = new TagsCellValue();
+    FieldUtils.writeField(val, "property", "tags2", true);
+    FieldUtils.writeField(val, "request", request, true);
+    List<Tag> tags = val.getTags();
+    assertEquals(0, tags.size());
+    log.info("Test successful!");
+  }
 
-	@Test
-	public void testExporter() throws IllegalAccessException {
-		log.info("testExporter");
-		TagsCellValue val = new TagsCellValue();
-		FieldUtils.writeField(val, "property", "tags", true);
-		FieldUtils.writeField(val, "request", request, true);
-		assertTrue(ArrayUtils.isEquals(new Tag[] { tag1, tag2 }, val.getTags().toArray(new Tag[val.getTags().size()])));
-		log.info("Test successful!");
-	}
+  @Test
+  public void testExporter() throws IllegalAccessException {
+    log.info("testExporter");
+    TagsCellValue val = new TagsCellValue();
+    FieldUtils.writeField(val, "property", "tags", true);
+    FieldUtils.writeField(val, "request", request, true);
+    assertTrue(ArrayUtils.isEquals(new Tag[] { tag1, tag2 }, val.getTags().toArray(new Tag[val.getTags().size()])));
+    log.info("Test successful!");
+  }
 
 }

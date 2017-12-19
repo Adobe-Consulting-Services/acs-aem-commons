@@ -49,6 +49,7 @@ import org.apache.sling.models.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.reports.api.ReportException;
 import com.adobe.acs.commons.reports.api.ReportExecutor;
 import com.adobe.acs.commons.reports.api.ResultsPage;
 import com.github.jknack.handlebars.Handlebars;
@@ -60,146 +61,146 @@ import com.github.jknack.handlebars.Template;
 @Model(adaptables = SlingHttpServletRequest.class)
 public class QueryReportExecutor implements ReportExecutor {
 
-	private static final Logger log = LoggerFactory.getLogger(QueryReportExecutor.class);
+  private static final Logger log = LoggerFactory.getLogger(QueryReportExecutor.class);
 
-	private QueryReportConfig config;
+  private QueryReportConfig config;
 
-	private int page;
+  private int page;
 
-	private SlingHttpServletRequest request;
+  private SlingHttpServletRequest request;
 
-	private String statement;
+  private String statement;
 
-	public QueryReportExecutor(SlingHttpServletRequest request) {
-		this.request = request;
-	}
+  public QueryReportExecutor(SlingHttpServletRequest request) {
+    this.request = request;
+  }
 
-	private ResultsPage<Resource> fetchResults(int limit, int offset) {
-		prepareStatement();
-		ResourceResolver resolver = request.getResourceResolver();
-		Session session = resolver.adaptTo(Session.class);
-		List<Resource> results = new ArrayList<Resource>();
-		try {
-			QueryManager queryMgr = session.getWorkspace().getQueryManager();
+  private ResultsPage<Resource> fetchResults(int limit, int offset) throws ReportException {
+    prepareStatement();
+    ResourceResolver resolver = request.getResourceResolver();
+    Session session = resolver.adaptTo(Session.class);
+    List<Resource> results = new ArrayList<Resource>();
+    try {
+      QueryManager queryMgr = session.getWorkspace().getQueryManager();
 
-			Query query = queryMgr.createQuery(statement, config.getQueryLanguage());
+      Query query = queryMgr.createQuery(statement, config.getQueryLanguage());
 
-			if (page != -1) {
-				log.debug("Fetching results with limit {} and offset {}", new Object[] { limit, offset });
-				query.setLimit(limit);
-				query.setOffset(offset);
-			} else {
-				log.debug("Fetching all results");
-			}
-			QueryResult result = query.execute();
-			NodeIterator nodes = result.getNodes();
+      if (page != -1) {
+        log.debug("Fetching results with limit {} and offset {}", new Object[] { limit, offset });
+        query.setLimit(limit);
+        query.setOffset(offset);
+      } else {
+        log.debug("Fetching all results");
+      }
+      QueryResult result = query.execute();
+      NodeIterator nodes = result.getNodes();
 
-			while (nodes.hasNext()) {
-				results.add(resolver.getResource(nodes.nextNode().getPath()));
-			}
-		} catch (RepositoryException re) {
-			log.error("Exception executing search results", re);
-			throw new RuntimeException("Exception executing search results", re);
-		}
-		return new ResultsPage<Resource>(results, config.getPageSize(), page);
-	}
+      while (nodes.hasNext()) {
+        results.add(resolver.getResource(nodes.nextNode().getPath()));
+      }
+    } catch (RepositoryException re) {
+      log.error("Exception executing search results", re);
+      throw new ReportException("Exception executing search results", re);
+    }
+    return new ResultsPage<Resource>(results, config.getPageSize(), page);
+  }
 
-	@Override
-	public ResultsPage<?> getAllResults() {
-		return fetchResults(Integer.MAX_VALUE, 0);
-	}
+  @Override
+  public ResultsPage<?> getAllResults() throws ReportException {
+    return fetchResults(Integer.MAX_VALUE, 0);
+  }
 
-	@Override
-	public String getDetails() {
-		Map<String, String> details = new LinkedHashMap<String, String>();
-		details.put("Language", config.getQueryLanguage());
-		details.put("Page", Integer.toString(page));
-		details.put("Page Size", Integer.toString(config.getPageSize()));
-		details.put("Query", statement);
+  @Override
+  public String getDetails() throws ReportException {
+    Map<String, String> details = new LinkedHashMap<String, String>();
+    details.put("Language", config.getQueryLanguage());
+    details.put("Page", Integer.toString(page));
+    details.put("Page Size", Integer.toString(config.getPageSize()));
+    details.put("Query", statement);
 
-		try {
-			final QueryManager queryManager = request.getResourceResolver().adaptTo(Session.class).getWorkspace()
-					.getQueryManager();
-			final Query query = queryManager.createQuery("explain " + statement, config.getQueryLanguage());
-			final QueryResult queryResult = query.execute();
+    try {
+      final QueryManager queryManager = request.getResourceResolver().adaptTo(Session.class).getWorkspace()
+          .getQueryManager();
+      final Query query = queryManager.createQuery("explain " + statement, config.getQueryLanguage());
+      final QueryResult queryResult = query.execute();
 
-			final RowIterator rows = queryResult.getRows();
-			while (rows.hasNext()) {
-				final Row row = rows.nextRow();
+      final RowIterator rows = queryResult.getRows();
+      while (rows.hasNext()) {
+        final Row row = rows.nextRow();
 
-				String[] cols = queryResult.getColumnNames();
-				Value[] values = row.getValues();
+        String[] cols = queryResult.getColumnNames();
+        Value[] values = row.getValues();
 
-				for (int i = 0; i < cols.length; i++) {
-					details.put(cols[i], values[i].getString());
-				}
-			}
+        for (int i = 0; i < cols.length; i++) {
+          details.put(cols[i], values[i].getString());
+        }
+      }
 
-		} catch (RepositoryException re) {
-			log.error("Exception getting details", re);
-			throw new RuntimeException("Exception getting details", re);
-		}
-		StringBuilder sb = new StringBuilder();
-		for (Entry<String, String> entry : details.entrySet()) {
-			sb.append("<dt>" + StringEscapeUtils.escapeHtml(entry.getKey()) + "</dt>");
-			sb.append("<dd>" + StringEscapeUtils.escapeHtml(entry.getValue()) + "</dd>");
-		}
+    } catch (RepositoryException re) {
+      log.error("Exception getting details", re);
+      throw new ReportException("Exception getting details", re);
+    }
+    StringBuilder sb = new StringBuilder();
+    for (Entry<String, String> entry : details.entrySet()) {
+      sb.append("<dt>" + StringEscapeUtils.escapeHtml(entry.getKey()) + "</dt>");
+      sb.append("<dd>" + StringEscapeUtils.escapeHtml(entry.getValue()) + "</dd>");
+    }
 
-		return "<dl>" + sb.toString() + "</dl>";
-	}
+    return "<dl>" + sb.toString() + "</dl>";
+  }
 
-	@Override
-	public String getParameters() {
-		List<String> params = new ArrayList<String>();
-		Enumeration<String> keys = request.getParameterNames();
-		while (keys.hasMoreElements()) {
-			String key = keys.nextElement();
-			for (String value : request.getParameterValues(key)) {
-				try {
-					params.add(URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-		return StringUtils.join(params, "&");
-	}
+  @Override
+  public String getParameters() throws ReportException {
+    List<String> params = new ArrayList<String>();
+    Enumeration<String> keys = request.getParameterNames();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement();
+      for (String value : request.getParameterValues(key)) {
+        try {
+          params.add(URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+          throw new ReportException("UTF-8 encoding available", e);
+        }
+      }
+    }
+    return StringUtils.join(params, "&");
+  }
 
-	@Override
-	public ResultsPage<Resource> getResults() {
-		return fetchResults(config.getPageSize(), config.getPageSize() * page);
-	}
+  @Override
+  public ResultsPage<Resource> getResults() throws ReportException {
+    return fetchResults(config.getPageSize(), config.getPageSize() * page);
+  }
 
-	private void prepareStatement() {
-		try {
-			Map<String, String> parameters = new HashMap<String, String>();
-			Enumeration<String> paramNames = request.getParameterNames();
-			while (paramNames.hasMoreElements()) {
-				String key = paramNames.nextElement();
-				parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
-			}
-			log.trace("Loading parameters from request: {}", parameters);
+  private void prepareStatement() throws ReportException {
+    try {
+      Map<String, String> parameters = new HashMap<String, String>();
+      Enumeration<String> paramNames = request.getParameterNames();
+      while (paramNames.hasMoreElements()) {
+        String key = paramNames.nextElement();
+        parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
+      }
+      log.trace("Loading parameters from request: {}", parameters);
 
-			Handlebars handlebars = new Handlebars();
+      Handlebars handlebars = new Handlebars();
 
-			Template template = handlebars.compileInline(config.getQuery());
+      Template template = handlebars.compileInline(config.getQuery());
 
-			statement = template.apply(parameters);
+      statement = template.apply(parameters);
 
-			log.trace("Loaded statement: {}", statement);
-		} catch (IOException ioe) {
-			throw new RuntimeException(ioe);
-		}
-	}
+      log.trace("Loaded statement: {}", statement);
+    } catch (IOException ioe) {
+      throw new ReportException("Exception templating query", ioe);
+    }
+  }
 
-	@Override
-	public void setConfiguration(Resource config) {
-		this.config = config.adaptTo(QueryReportConfig.class);
-	}
+  @Override
+  public void setConfiguration(Resource config) {
+    this.config = config.adaptTo(QueryReportConfig.class);
+  }
 
-	@Override
-	public void setPage(int page) {
-		this.page = page;
-	}
+  @Override
+  public void setPage(int page) {
+    this.page = page;
+  }
 
 }

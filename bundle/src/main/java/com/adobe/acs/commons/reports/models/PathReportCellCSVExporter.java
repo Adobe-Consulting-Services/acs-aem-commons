@@ -30,9 +30,9 @@ import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
 @Model(adaptables = Resource.class)
 public class PathReportCellCSVExporter implements ReportCellCSVExporter {
 
-	@Override
-	public String getValue(Object result) {
-		Resource resource = (Resource) result;
-		return resource.getPath();
-	}
+  @Override
+  public String getValue(Object result) {
+    Resource resource = (Resource) result;
+    return resource.getPath();
+  }
 }

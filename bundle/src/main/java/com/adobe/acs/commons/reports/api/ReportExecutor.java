@@ -28,50 +28,52 @@ import org.apache.sling.api.resource.Resource;
  */
 public interface ReportExecutor {
 
-	/**
-	 * Gets the details for this report executor
-	 * 
-	 * @return the details
-	 */
-	String getDetails();
+  /**
+   * Gets the details for this report executor
+   * 
+   * @return the details
+   * @throws ReportException
+   */
+  String getDetails() throws ReportException;
 
-	/**
-	 * The parameters used to execute the report.
-	 * 
-	 * @return the report paramters as a string
-	 */
-	String getParameters();
+  /**
+   * The parameters used to execute the report.
+   * 
+   * @return the report parameters as a string
+   * @throws ReportException
+   */
+  String getParameters() throws ReportException;
 
-	/**
-	 * Return all of the results based on the request parameters and supplied
-	 * configuration settings in the configuration resource.
-	 * 
-	 * @return the results
-	 */
-	ResultsPage<? extends Object> getAllResults();
+  /**
+   * Return all of the results based on the request parameters and supplied
+   * configuration settings in the configuration resource.
+   * 
+   * @return the results
+   */
+  ResultsPage<? extends Object> getAllResults() throws ReportException;
 
-	/**
-	 * Return the page of results based on the request parameters and supplied
-	 * configuration settings in the configuration resource.
-	 * 
-	 * @return the current page of results
-	 */
-	ResultsPage<? extends Object> getResults();
+  /**
+   * Return the page of results based on the request parameters and supplied
+   * configuration settings in the configuration resource.
+   * 
+   * @return the current page of results
+   */
+  ResultsPage<? extends Object> getResults() throws ReportException;
 
-	/**
-	 * Set the resource used to configure this report executor.
-	 * 
-	 * @param config
-	 *            the resource to configure this report executor
-	 */
-	void setConfiguration(Resource config);
+  /**
+   * Set the resource used to configure this report executor.
+   * 
+   * @param config
+   *            the resource to configure this report executor
+   */
+  void setConfiguration(Resource config);
 
-	/**
-	 * This method will be called by the ReportRunner to set the current results
-	 * page.
-	 * 
-	 * @param page
-	 *            the result page
-	 */
-	void setPage(int page);
+  /**
+   * This method will be called by the ReportRunner to set the current results
+   * page.
+   * 
+   * @param page
+   *            the result page
+   */
+  void setPage(int page);
 }

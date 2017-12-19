@@ -44,63 +44,63 @@ import com.day.cq.wcm.api.NameConstants;
 @Model(adaptables = Resource.class)
 public class PageReplicationStatusModel implements ReportCellCSVExporter {
 
-	private static final Logger log = LoggerFactory.getLogger(PageReplicationStatusModel.class);
+  private static final Logger log = LoggerFactory.getLogger(PageReplicationStatusModel.class);
 
-	public enum STATUS {
-		ACTIVATED, DEACTIVATED, IN_PROGRESS, MODIFIED, NOT_ACTIVATED
-	}
+  public enum STATUS {
+    ACTIVATED, DEACTIVATED, IN_PROGRESS, MODIFIED, NOT_ACTIVATED
+  }
 
-	@OSGiService
-	private Replicator replicator;
+  @OSGiService
+  private Replicator replicator;
 
-	@Self
-	private Resource resource;
+  @Self
+  private Resource resource;
 
-	private Calendar getLastModified(ResourceResolver resourceResolver, String pageContentPath) {
-		Resource pageContent = resourceResolver.getResource(pageContentPath);
-		Calendar lastModified = null;
-		if (resource != null) {
-			lastModified = pageContent.getValueMap().get(NameConstants.PN_PAGE_LAST_MOD, Calendar.class);
-		}
-		return lastModified;
-	}
+  private Calendar getLastModified(ResourceResolver resourceResolver, String pageContentPath) {
+    Resource pageContent = resourceResolver.getResource(pageContentPath);
+    Calendar lastModified = null;
+    if (resource != null) {
+      lastModified = pageContent.getValueMap().get(NameConstants.PN_PAGE_LAST_MOD, Calendar.class);
+    }
+    return lastModified;
+  }
 
-	public String getReplicationStatus() {
+  public String getReplicationStatus() {
 
-		Session session = resource.getResourceResolver().adaptTo(Session.class);
-		String path = resource.getPath();
-		if (path.contains(JcrConstants.JCR_CONTENT)) {
-			path = StringUtils.substringAfter(path, JcrConstants.JCR_CONTENT) + JcrConstants.JCR_CONTENT;
-		} else {
-			path += "/" + JcrConstants.JCR_CONTENT;
-		}
+    Session session = resource.getResourceResolver().adaptTo(Session.class);
+    String path = resource.getPath();
+    if (path.contains(JcrConstants.JCR_CONTENT)) {
+      path = StringUtils.substringAfter(path, JcrConstants.JCR_CONTENT) + JcrConstants.JCR_CONTENT;
+    } else {
+      path += "/" + JcrConstants.JCR_CONTENT;
+    }
 
-		log.debug("Getting replication status for {}", path);
-		ReplicationStatus status = replicator.getReplicationStatus(session, path);
+    log.debug("Getting replication status for {}", path);
+    ReplicationStatus status = replicator.getReplicationStatus(session, path);
 
-		STATUS rStatus = STATUS.NOT_ACTIVATED;
-		if (status != null) {
-			if (status.isDeactivated()) {
-				rStatus = STATUS.DEACTIVATED;
-			} else if (status.isPending()) {
-				rStatus = STATUS.IN_PROGRESS;
-			} else if (status.isActivated()) {
-				Calendar lastModified = getLastModified(resource.getResourceResolver(), path);
-				if (lastModified != null && status.getLastPublished() != null
-						&& lastModified.after(status.getLastPublished())) {
-					rStatus = STATUS.MODIFIED;
-				} else {
-					rStatus = STATUS.ACTIVATED;
-				}
-			}
-		}
-		
-		log.debug("Retrieved replication status {}", rStatus);
-		return rStatus.toString();
-	}
+    STATUS rStatus = STATUS.NOT_ACTIVATED;
+    if (status != null) {
+      if (status.isDeactivated()) {
+        rStatus = STATUS.DEACTIVATED;
+      } else if (status.isPending()) {
+        rStatus = STATUS.IN_PROGRESS;
+      } else if (status.isActivated()) {
+        Calendar lastModified = getLastModified(resource.getResourceResolver(), path);
+        if (lastModified != null && status.getLastPublished() != null
+            && lastModified.after(status.getLastPublished())) {
+          rStatus = STATUS.MODIFIED;
+        } else {
+          rStatus = STATUS.ACTIVATED;
+        }
+      }
+    }
+    
+    log.debug("Retrieved replication status {}", rStatus);
+    return rStatus.toString();
+  }
 
-	@Override
-	public String getValue(Object result) {
-		return getReplicationStatus();
-	}
+  @Override
+  public String getValue(Object result) {
+    return getReplicationStatus();
+  }
 }

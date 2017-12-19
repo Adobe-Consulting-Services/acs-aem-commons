@@ -42,55 +42,55 @@ import com.adobe.acs.commons.redirectmaps.models.MapEntryTest;
 
 public class ReportCellValueTest {
 
-	private static final String[] ARRAY_VALUE = new String[] { "val1", "val2" };
+  private static final String[] ARRAY_VALUE = new String[] { "val1", "val2" };
 
-	private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
+  private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
 
-	@Mock
-	private Resource mockResource;
+  @Mock
+  private Resource mockResource;
 
-	@Before
-	public void init() {
-		log.info("init");
-		
-		MockitoAnnotations.initMocks(this);
+  @Before
+  public void init() {
+    log.info("init");
+    
+    MockitoAnnotations.initMocks(this);
 
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("multiple", ARRAY_VALUE);
-		properties.put("single", ARRAY_VALUE[0]);
-		when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
-	}
+    Map<String, Object> properties = new HashMap<String, Object>();
+    properties.put("multiple", ARRAY_VALUE);
+    properties.put("single", ARRAY_VALUE[0]);
+    when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
+  }
 
-	@Test
-	public void testMultiple() {
-		log.info("testMultiple");
-		ReportCellValue rcv = new ReportCellValue(mockResource, "multiple");
-		assertTrue(rcv.isArray());
-		assertEquals(ARRAY_VALUE, rcv.getValue());
-		assertArrayEquals(ARRAY_VALUE, rcv.getMultipleValues());
-		assertEquals(ARRAY_VALUE[0], rcv.getSingleValue());
-		log.info("Test successful!");
-	}
+  @Test
+  public void testMultiple() {
+    log.info("testMultiple");
+    ReportCellValue rcv = new ReportCellValue(mockResource, "multiple");
+    assertTrue(rcv.isArray());
+    assertEquals(ARRAY_VALUE, rcv.getValue());
+    assertArrayEquals(ARRAY_VALUE, rcv.getMultipleValues());
+    assertEquals(ARRAY_VALUE[0], rcv.getSingleValue());
+    log.info("Test successful!");
+  }
 
-	@Test
-	public void testNotFound() {
-		log.info("testNotFound");
-		ReportCellValue rcv = new ReportCellValue(mockResource, "somethingelse");
-		assertFalse(rcv.isArray());
-		assertNull(rcv.getValue());
-		assertNull(rcv.getMultipleValues());
-		assertNull(rcv.getSingleValue());
-		log.info("Test successful!");
-	}
+  @Test
+  public void testNotFound() {
+    log.info("testNotFound");
+    ReportCellValue rcv = new ReportCellValue(mockResource, "somethingelse");
+    assertFalse(rcv.isArray());
+    assertNull(rcv.getValue());
+    assertNull(rcv.getMultipleValues());
+    assertNull(rcv.getSingleValue());
+    log.info("Test successful!");
+  }
 
-	@Test
-	public void testSingle() {
-		log.info("testSingle");
-		ReportCellValue rcv = new ReportCellValue(mockResource, "single");
-		assertFalse(rcv.isArray());
-		assertEquals(ARRAY_VALUE[0], rcv.getValue());
-		assertEquals(ARRAY_VALUE[0], rcv.getSingleValue());
-		assertArrayEquals(new String[]{ARRAY_VALUE[0]}, rcv.getMultipleValues());
-		log.info("Test successful!");
-	}
+  @Test
+  public void testSingle() {
+    log.info("testSingle");
+    ReportCellValue rcv = new ReportCellValue(mockResource, "single");
+    assertFalse(rcv.isArray());
+    assertEquals(ARRAY_VALUE[0], rcv.getValue());
+    assertEquals(ARRAY_VALUE[0], rcv.getSingleValue());
+    assertArrayEquals(new String[]{ARRAY_VALUE[0]}, rcv.getMultipleValues());
+    log.info("Test successful!");
+  }
 }

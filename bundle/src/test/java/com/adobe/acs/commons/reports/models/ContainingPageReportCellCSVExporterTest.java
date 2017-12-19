@@ -36,44 +36,44 @@ import com.day.cq.wcm.api.PageManager;
 
 public class ContainingPageReportCellCSVExporterTest {
 
-	private static final Logger log = LoggerFactory.getLogger(ContainingPageReportCellCSVExporterTest.class);
+  private static final Logger log = LoggerFactory.getLogger(ContainingPageReportCellCSVExporterTest.class);
 
-	@Mock
-	private Resource mockResource;
+  @Mock
+  private Resource mockResource;
 
-	@Mock
-	private PageManager pageManager;
+  @Mock
+  private PageManager pageManager;
 
-	@Mock
-	private ResourceResolver resolver;
+  @Mock
+  private ResourceResolver resolver;
 
-	@Mock
-	private Page page;
+  @Mock
+  private Page page;
 
-	private final String VALID_PATH = "/content/test";
+  private final String VALID_PATH = "/content/test";
 
-	@Before
-	public void init() {
-		log.info("init");
+  @Before
+  public void init() {
+    log.info("init");
 
-		MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.initMocks(this);
 
-		when(mockResource.getResourceResolver()).thenReturn(resolver);
-		when(resolver.adaptTo(PageManager.class)).thenReturn(pageManager);
-		when(pageManager.getContainingPage(mockResource)).thenReturn(page);
-		when(page.getPath()).thenReturn(VALID_PATH);
+    when(mockResource.getResourceResolver()).thenReturn(resolver);
+    when(resolver.adaptTo(PageManager.class)).thenReturn(pageManager);
+    when(pageManager.getContainingPage(mockResource)).thenReturn(page);
+    when(page.getPath()).thenReturn(VALID_PATH);
 
-	}
+  }
 
-	@Test
-	public void testExporter() {
-		log.info("testExporter");
+  @Test
+  public void testExporter() {
+    log.info("testExporter");
 
-		ContainingPageReportCellCSVExporter valid = new ContainingPageReportCellCSVExporter();
-		String value = valid.getValue(mockResource);
-		assertEquals(VALID_PATH, value);
+    ContainingPageReportCellCSVExporter valid = new ContainingPageReportCellCSVExporter();
+    String value = valid.getValue(mockResource);
+    assertEquals(VALID_PATH, value);
 
-		log.info("Test successful!");
-	}
+    log.info("Test successful!");
+  }
 
 }

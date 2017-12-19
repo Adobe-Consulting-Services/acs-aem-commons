@@ -37,28 +37,28 @@ import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
 @Model(adaptables = Resource.class)
 public class DateReportCellCSVExporter implements ReportCellCSVExporter {
 
-	@Inject
-	private String property;
+  @Inject
+  private String property;
 
-	@Inject
-	@Optional
-	private String format;
+  @Inject
+  @Optional
+  private String format;
 
-	@Override
-	public String getValue(Object result) {
-		Resource resource = (Resource) result;
+  @Override
+  public String getValue(Object result) {
+    Resource resource = (Resource) result;
 
-		Calendar cal = resource.getValueMap().get(property, Calendar.class);
+    Calendar cal = resource.getValueMap().get(property, Calendar.class);
 
-		if (cal != null && cal.getTime() != null) {
-			if (StringUtils.isNotBlank(format)) {
-				SimpleDateFormat sdf = new SimpleDateFormat(format);
-				return sdf.format(cal.getTime());
-			} else {
-				return cal.getTime().toString();
-			}
-		} else {
-			return null;
-		}
-	}
+    if (cal != null && cal.getTime() != null) {
+      if (StringUtils.isNotBlank(format)) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.format(cal.getTime());
+      } else {
+        return cal.getTime().toString();
+      }
+    } else {
+      return null;
+    }
+  }
 }

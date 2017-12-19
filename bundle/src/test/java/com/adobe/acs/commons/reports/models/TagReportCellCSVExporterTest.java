@@ -43,61 +43,61 @@ import com.day.cq.tagging.TagManager;
 
 public class TagReportCellCSVExporterTest {
 
-	private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
+  private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
 
-	private static final String[] TAGS_VALUE = new String[] { "val1", "val2" };
+  private static final String[] TAGS_VALUE = new String[] { "val1", "val2" };
 
-	@Mock
-	private Resource mockResource;
+  @Mock
+  private Resource mockResource;
 
-	@Mock
-	private ResourceResolver resolver;
+  @Mock
+  private ResourceResolver resolver;
 
-	@Mock
-	private Tag tag1;
+  @Mock
+  private Tag tag1;
 
-	@Mock
-	private Tag tag2;
+  @Mock
+  private Tag tag2;
 
-	@Mock
-	private TagManager tagMgr;
+  @Mock
+  private TagManager tagMgr;
 
-	@Before
-	public void init() {
-		log.info("init");
-		
-		MockitoAnnotations.initMocks(this);
+  @Before
+  public void init() {
+    log.info("init");
+    
+    MockitoAnnotations.initMocks(this);
 
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("tags", TAGS_VALUE);
-		when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
+    Map<String, Object> properties = new HashMap<String, Object>();
+    properties.put("tags", TAGS_VALUE);
+    when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
 
-		when(mockResource.getResourceResolver()).thenReturn(resolver);
-		when(resolver.adaptTo(TagManager.class)).thenReturn(tagMgr);
+    when(mockResource.getResourceResolver()).thenReturn(resolver);
+    when(resolver.adaptTo(TagManager.class)).thenReturn(tagMgr);
 
-		when(tagMgr.resolve(TAGS_VALUE[0])).thenReturn(tag1);
-		when(tagMgr.resolve(TAGS_VALUE[1])).thenReturn(tag2);
+    when(tagMgr.resolve(TAGS_VALUE[0])).thenReturn(tag1);
+    when(tagMgr.resolve(TAGS_VALUE[1])).thenReturn(tag2);
 
-		when(tag1.getTitle()).thenReturn(TAGS_VALUE[0]);
-		when(tag2.getTitle()).thenReturn(TAGS_VALUE[1]);
-	}
+    when(tag1.getTitle()).thenReturn(TAGS_VALUE[0]);
+    when(tag2.getTitle()).thenReturn(TAGS_VALUE[1]);
+  }
 
-	@Test
-	public void testEmpty() throws IllegalAccessException {
-		log.info("testEmpty");
-		TagReportCellCSVExporter exporter = new TagReportCellCSVExporter();
-		FieldUtils.writeField(exporter, "property", "tags2", true);
-		assertEquals("", exporter.getValue(mockResource));
-		log.info("Test successful!");
-	}
+  @Test
+  public void testEmpty() throws IllegalAccessException {
+    log.info("testEmpty");
+    TagReportCellCSVExporter exporter = new TagReportCellCSVExporter();
+    FieldUtils.writeField(exporter, "property", "tags2", true);
+    assertEquals("", exporter.getValue(mockResource));
+    log.info("Test successful!");
+  }
 
-	@Test
-	public void testExporter() throws IllegalAccessException {
-		log.info("testExporter");
-		TagReportCellCSVExporter exporter = new TagReportCellCSVExporter();
-		FieldUtils.writeField(exporter, "property", "tags", true);
-		assertEquals(StringUtils.join(TAGS_VALUE, ";"), exporter.getValue(mockResource));
-		log.info("Test successful!");
-	}
+  @Test
+  public void testExporter() throws IllegalAccessException {
+    log.info("testExporter");
+    TagReportCellCSVExporter exporter = new TagReportCellCSVExporter();
+    FieldUtils.writeField(exporter, "property", "tags", true);
+    assertEquals(StringUtils.join(TAGS_VALUE, ";"), exporter.getValue(mockResource));
+    log.info("Test successful!");
+  }
 
 }

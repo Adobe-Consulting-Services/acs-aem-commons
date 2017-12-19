@@ -33,12 +33,12 @@ import com.day.cq.wcm.api.PageManager;
 @Model(adaptables = Resource.class)
 public class ContainingPageReportCellCSVExporter implements ReportCellCSVExporter {
 
-	@Override
-	public String getValue(Object obj) {
-		Resource result = (Resource) obj;
-		PageManager pageMgr = result.getResourceResolver().adaptTo(PageManager.class);
-		Page page = pageMgr.getContainingPage(result);
-		return page != null ? page.getPath() : "";
-	}
+  @Override
+  public String getValue(Object obj) {
+    Resource result = (Resource) obj;
+    PageManager pageMgr = result.getResourceResolver().adaptTo(PageManager.class);
+    Page page = pageMgr.getContainingPage(result);
+    return page != null ? page.getPath() : "";
+  }
 
 }

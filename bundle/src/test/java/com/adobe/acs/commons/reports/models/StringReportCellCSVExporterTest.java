@@ -40,49 +40,49 @@ import com.adobe.acs.commons.redirectmaps.models.MapEntryTest;
 
 public class StringReportCellCSVExporterTest {
 
-	private static final String[] ARRAY_VALUE = new String[] { "val1", "val2" };
+  private static final String[] ARRAY_VALUE = new String[] { "val1", "val2" };
 
-	private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
+  private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
 
-	@Mock
-	private Resource mockResource;
+  @Mock
+  private Resource mockResource;
 
-	@Before
-	public void init() {
-		log.info("init");
-		
-		MockitoAnnotations.initMocks(this);
+  @Before
+  public void init() {
+    log.info("init");
+    
+    MockitoAnnotations.initMocks(this);
 
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("multiple", ARRAY_VALUE);
-		properties.put("single", ARRAY_VALUE[0]);
-		when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
-	}
+    Map<String, Object> properties = new HashMap<String, Object>();
+    properties.put("multiple", ARRAY_VALUE);
+    properties.put("single", ARRAY_VALUE[0]);
+    when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
+  }
 
-	@Test
-	public void testMultiple() throws IllegalAccessException {
-		log.info("testMultiple");
-		StringReportCellCSVExporter exporter = new StringReportCellCSVExporter();
-		FieldUtils.writeField(exporter, "property", "multiple", true);
-		assertEquals(StringUtils.join(ARRAY_VALUE, ";"), exporter.getValue(mockResource));
-		log.info("Test successful!");
-	}
+  @Test
+  public void testMultiple() throws IllegalAccessException {
+    log.info("testMultiple");
+    StringReportCellCSVExporter exporter = new StringReportCellCSVExporter();
+    FieldUtils.writeField(exporter, "property", "multiple", true);
+    assertEquals(StringUtils.join(ARRAY_VALUE, ";"), exporter.getValue(mockResource));
+    log.info("Test successful!");
+  }
 
-	@Test
-	public void testNotFound() throws IllegalAccessException {
-		log.info("testNotFound");
-		StringReportCellCSVExporter exporter = new StringReportCellCSVExporter();
-		FieldUtils.writeField(exporter, "property", "somethingelse", true);
-		assertEquals("", exporter.getValue(mockResource));
-		log.info("Test successful!");
-	}
+  @Test
+  public void testNotFound() throws IllegalAccessException {
+    log.info("testNotFound");
+    StringReportCellCSVExporter exporter = new StringReportCellCSVExporter();
+    FieldUtils.writeField(exporter, "property", "somethingelse", true);
+    assertEquals("", exporter.getValue(mockResource));
+    log.info("Test successful!");
+  }
 
-	@Test
-	public void testSingle() throws IllegalAccessException {
-		log.info("testSingle");
-		StringReportCellCSVExporter exporter = new StringReportCellCSVExporter();
-		FieldUtils.writeField(exporter, "property", "single", true);
-		assertEquals(ARRAY_VALUE[0], exporter.getValue(mockResource));
-		log.info("Test successful!");
-	}
+  @Test
+  public void testSingle() throws IllegalAccessException {
+    log.info("testSingle");
+    StringReportCellCSVExporter exporter = new StringReportCellCSVExporter();
+    FieldUtils.writeField(exporter, "property", "single", true);
+    assertEquals(ARRAY_VALUE[0], exporter.getValue(mockResource));
+    log.info("Test successful!");
+  }
 }

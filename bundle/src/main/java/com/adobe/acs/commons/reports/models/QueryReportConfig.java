@@ -30,12 +30,12 @@ import org.apache.sling.models.annotations.Model;
 @Model(adaptables = Resource.class)
 public interface QueryReportConfig {
 
-	@Inject
-	int getPageSize();
+  @Inject
+  int getPageSize();
 
-	@Inject
-	String getQuery();
+  @Inject
+  String getQuery();
 
-	@Inject
-	String getQueryLanguage();
+  @Inject
+  String getQueryLanguage();
 }

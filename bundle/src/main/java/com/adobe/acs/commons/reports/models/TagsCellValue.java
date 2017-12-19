@@ -39,31 +39,31 @@ import com.day.cq.tagging.TagManager;
 @Model(adaptables = SlingHttpServletRequest.class)
 public class TagsCellValue {
 
-	private static final Logger log = LoggerFactory.getLogger(TagsCellValue.class);
+  private static final Logger log = LoggerFactory.getLogger(TagsCellValue.class);
 
-	@Self
-	private SlingHttpServletRequest request;
+  @Self
+  private SlingHttpServletRequest request;
 
-	@ValueMapValue
-	private String property;
+  @ValueMapValue
+  private String property;
 
-	public List<Tag> getTags() {
+  public List<Tag> getTags() {
 
-		TagManager tagMgr = request.getResourceResolver().adaptTo(TagManager.class);
+    TagManager tagMgr = request.getResourceResolver().adaptTo(TagManager.class);
 
-		Resource resource = (Resource) request.getAttribute("result");
+    Resource resource = (Resource) request.getAttribute("result");
 
-		log.debug("Loading tags from {}@{}", new String[] { resource.getPath(), property });
-		List<Tag> tags = new ArrayList<Tag>();
-		String[] values = resource.getValueMap().get(property, String[].class);
-		if (values != null) {
-			for (String value : values) {
-				tags.add(tagMgr.resolve(value));
-			}
-		}
-		log.debug("Loaded {} tags", tags.size());
+    log.debug("Loading tags from {}@{}", new String[] { resource.getPath(), property });
+    List<Tag> tags = new ArrayList<Tag>();
+    String[] values = resource.getValueMap().get(property, String[].class);
+    if (values != null) {
+      for (String value : values) {
+        tags.add(tagMgr.resolve(value));
+      }
+    }
+    log.debug("Loaded {} tags", tags.size());
 
-		return tags;
+    return tags;
 
-	}
+  }
 }

@@ -32,31 +32,31 @@ import org.slf4j.LoggerFactory;
 
 public class PathReportCellCSVExporterTest {
 
-	private static final Logger log = LoggerFactory.getLogger(PathReportCellCSVExporterTest.class);
+  private static final Logger log = LoggerFactory.getLogger(PathReportCellCSVExporterTest.class);
 
-	@Mock
-	private Resource mockResource;
+  @Mock
+  private Resource mockResource;
 
-	private static final String PATH = "/content/acs-aem-commons";
+  private static final String PATH = "/content/acs-aem-commons";
 
-	@Before
-	public void init() {
-		log.info("init");
-		
-		MockitoAnnotations.initMocks(this);
+  @Before
+  public void init() {
+    log.info("init");
+    
+    MockitoAnnotations.initMocks(this);
 
-		when(mockResource.getPath()).thenReturn(PATH);
-	}
+    when(mockResource.getPath()).thenReturn(PATH);
+  }
 
-	@Test
-	public void testExporter() throws IllegalAccessException {
-		log.info("testExporter");
+  @Test
+  public void testExporter() throws IllegalAccessException {
+    log.info("testExporter");
 
-		PathReportCellCSVExporter exporter = new PathReportCellCSVExporter();
+    PathReportCellCSVExporter exporter = new PathReportCellCSVExporter();
 
-		String value = exporter.getValue(mockResource);
-		assertEquals(PATH, value);
+    String value = exporter.getValue(mockResource);
+    assertEquals(PATH, value);
 
-		log.info("Test successful!");
-	}
+    log.info("Test successful!");
+  }
 }

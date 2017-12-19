@@ -40,68 +40,68 @@ import org.slf4j.LoggerFactory;
 
 public class DateReportCellCSVExporterTest {
 
-	private static final Logger log = LoggerFactory.getLogger(DateReportCellCSVExporterTest.class);
+  private static final Logger log = LoggerFactory.getLogger(DateReportCellCSVExporterTest.class);
 
-	@Mock
-	private Resource mockResource;
+  @Mock
+  private Resource mockResource;
 
-	private Calendar start;
+  private Calendar start;
 
-	private static final String FORMAT = "yyMMddHHmmssZ";
+  private static final String FORMAT = "yyMMddHHmmssZ";
 
-	@Before
-	public void init() {
-		log.info("init");
-		
-		MockitoAnnotations.initMocks(this);
+  @Before
+  public void init() {
+    log.info("init");
+    
+    MockitoAnnotations.initMocks(this);
 
-		if (start == null) {
-			start = Calendar.getInstance();
-		}
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("now", start);
-		when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
-	}
-	
-	@Test
-	public void testExporter() throws IllegalAccessException{
-		log.info("testExporter");
-		
-		DateReportCellCSVExporter exporter = new DateReportCellCSVExporter();
-		FieldUtils.writeField(exporter, "property", "now", true);
-		FieldUtils.writeField(exporter, "format", FORMAT, true);
-	
-		
-		String formattedDate = new SimpleDateFormat(FORMAT).format(start.getTime());
-		assertEquals(formattedDate, exporter.getValue(mockResource));
-		
-		log.info("Test successful!");
-	}
-	
+    if (start == null) {
+      start = Calendar.getInstance();
+    }
+    Map<String, Object> properties = new HashMap<String, Object>();
+    properties.put("now", start);
+    when(mockResource.getValueMap()).thenReturn(new ValueMapDecorator(properties));
+  }
+  
+  @Test
+  public void testExporter() throws IllegalAccessException{
+    log.info("testExporter");
+    
+    DateReportCellCSVExporter exporter = new DateReportCellCSVExporter();
+    FieldUtils.writeField(exporter, "property", "now", true);
+    FieldUtils.writeField(exporter, "format", FORMAT, true);
+  
+    
+    String formattedDate = new SimpleDateFormat(FORMAT).format(start.getTime());
+    assertEquals(formattedDate, exporter.getValue(mockResource));
+    
+    log.info("Test successful!");
+  }
+  
 
-	@Test
-	public void testNullProperty() throws IllegalAccessException{
-		log.info("testNullProperty");
-		
-		DateReportCellCSVExporter exporter = new DateReportCellCSVExporter();
-		FieldUtils.writeField(exporter, "property", "someothertime", true);
-		FieldUtils.writeField(exporter, "format", FORMAT, true);
-	
-		assertNull(exporter.getValue(mockResource));
-		
-		log.info("Test successful!");
-	}
+  @Test
+  public void testNullProperty() throws IllegalAccessException{
+    log.info("testNullProperty");
+    
+    DateReportCellCSVExporter exporter = new DateReportCellCSVExporter();
+    FieldUtils.writeField(exporter, "property", "someothertime", true);
+    FieldUtils.writeField(exporter, "format", FORMAT, true);
+  
+    assertNull(exporter.getValue(mockResource));
+    
+    log.info("Test successful!");
+  }
 
-	@Test
-	public void testDefaultFormatting() throws IllegalAccessException{
-		log.info("testDefaultFormatting");
-		
-		DateReportCellCSVExporter exporter = new DateReportCellCSVExporter();
-		FieldUtils.writeField(exporter, "property", "now", true);
-		
-		String formattedDate = start.getTime().toString();
-		assertEquals(formattedDate, exporter.getValue(mockResource));
-		
-		log.info("Test successful!");
-	}
+  @Test
+  public void testDefaultFormatting() throws IllegalAccessException{
+    log.info("testDefaultFormatting");
+    
+    DateReportCellCSVExporter exporter = new DateReportCellCSVExporter();
+    FieldUtils.writeField(exporter, "property", "now", true);
+    
+    String formattedDate = start.getTime().toString();
+    assertEquals(formattedDate, exporter.getValue(mockResource));
+    
+    log.info("Test successful!");
+  }
 }
