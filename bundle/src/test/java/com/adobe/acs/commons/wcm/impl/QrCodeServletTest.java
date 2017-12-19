@@ -1,7 +1,10 @@
 package com.adobe.acs.commons.wcm.impl;
 
-import com.day.cq.commons.Externalizer;
-import com.google.common.collect.ImmutableMap;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -12,17 +15,13 @@ import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
-import javax.servlet.http.HttpServletResponse;
+import com.day.cq.commons.Externalizer;
+import com.google.common.collect.ImmutableMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-
-@RunWith(MockitoJUnitRunner.class)
 public class QrCodeServletTest {
 
     @Rule
@@ -42,6 +41,7 @@ public class QrCodeServletTest {
 
     @Before
     public void setUp() throws Exception {
+    	MockitoAnnotations.initMocks(this);
         request = new MockSlingHttpServletRequest(context.resourceResolver(), context.bundleContext());
         response = new MockSlingHttpServletResponse();
 

@@ -22,28 +22,33 @@
 
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
-import com.adobe.acs.commons.wcm.comparisons.lines.Line;
-import com.adobe.acs.commons.wcm.comparisons.lines.Lines;
-import com.google.common.collect.Lists;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.Collections;
-import java.util.List;
-
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockitoAnnotations;
+
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
+import com.adobe.acs.commons.wcm.comparisons.lines.Line;
+import com.adobe.acs.commons.wcm.comparisons.lines.Lines;
+import com.google.common.collect.Lists;
+
 public class PageCompareDataLinesTest {
 
     Lines<PageCompareDataLine> underTest = new PageCompareDataLinesImpl();
+    
+    @Before
+    public void init(){
+    	MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void generate_emptyCollections_shouldGenerateList() throws Exception {
@@ -61,6 +66,7 @@ public class PageCompareDataLinesTest {
     @Test
     public void generate_oneLine_shouldGenerateList() throws Exception {
         // given
+    	
 
         PageCompareDataLine leftLine = mock(PageCompareDataLine.class);
         when(leftLine.getUniqueName()).thenReturn("left");

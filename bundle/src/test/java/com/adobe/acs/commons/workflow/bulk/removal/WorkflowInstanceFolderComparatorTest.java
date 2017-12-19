@@ -20,22 +20,27 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal;
 
-import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowInstanceFolderComparator;
-import org.apache.sling.api.resource.Resource;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.modules.junit4.PowerMockRunner;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import org.apache.sling.api.resource.Resource;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockitoAnnotations;
 
-@RunWith(PowerMockRunner.class)
+import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowInstanceFolderComparator;
+
 public class WorkflowInstanceFolderComparatorTest {
+	
+	@Before
+	public void init(){
+		MockitoAnnotations.initMocks(this);
+	}
 
     @Test
     public void testCompare_Simple() throws Exception {
