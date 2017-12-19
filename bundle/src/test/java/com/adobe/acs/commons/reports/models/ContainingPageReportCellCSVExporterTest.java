@@ -38,8 +38,11 @@ public class ContainingPageReportCellCSVExporterTest {
 
   private static final Logger log = LoggerFactory.getLogger(ContainingPageReportCellCSVExporterTest.class);
 
+
   @Mock
-  private Resource mockResource;
+  private Resource validResource;
+  @Mock
+  private Resource invalidResource;
 
   @Mock
   private PageManager pageManager;
@@ -58,9 +61,10 @@ public class ContainingPageReportCellCSVExporterTest {
 
     MockitoAnnotations.initMocks(this);
 
-    when(mockResource.getResourceResolver()).thenReturn(resolver);
+    when(validResource.getResourceResolver()).thenReturn(resolver);
+    when(invalidResource.getResourceResolver()).thenReturn(resolver);
     when(resolver.adaptTo(PageManager.class)).thenReturn(pageManager);
-    when(pageManager.getContainingPage(mockResource)).thenReturn(page);
+    when(pageManager.getContainingPage(validResource)).thenReturn(page);
     when(page.getPath()).thenReturn(VALID_PATH);
 
   }
@@ -70,10 +74,23 @@ public class ContainingPageReportCellCSVExporterTest {
     log.info("testExporter");
 
     ContainingPageReportCellCSVExporter valid = new ContainingPageReportCellCSVExporter();
-    String value = valid.getValue(mockResource);
+    String value = valid.getValue(validResource);
     assertEquals(VALID_PATH, value);
 
     log.info("Test successful!");
   }
+  
+
+  @Test
+  public void testInvalidPage() {
+    log.info("testInvalidPage");
+
+    ContainingPageReportCellCSVExporter invalid = new ContainingPageReportCellCSVExporter();
+    String value = invalid.getValue(invalidResource);
+    assertNull(value);
+
+    log.info("Test successful!");
+  }
+
 
 }

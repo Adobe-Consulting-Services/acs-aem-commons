@@ -122,6 +122,7 @@ public class ReportRunner {
       log.warn("No configurations found for {}", request.getResource());
       succeeded = false;
       failureMessage = "No configurations found!";
+      return;
     }
 
     if (!resultsRetrieved) {
