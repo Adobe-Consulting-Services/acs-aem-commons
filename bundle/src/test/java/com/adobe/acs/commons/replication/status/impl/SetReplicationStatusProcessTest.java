@@ -37,11 +37,10 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.adobe.acs.commons.util.WorkflowHelper;
@@ -52,7 +51,6 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 
 import junitx.util.PrivateAccessor;
 
-@RunWith(PowerMockRunner.class)
 public class SetReplicationStatusProcessTest {
 
 	@Mock
@@ -86,6 +84,9 @@ public class SetReplicationStatusProcessTest {
 	
 	@Before
     public void setUp() throws Exception {		
+
+		MockitoAnnotations.initMocks(this);
+		
 		when(workflowHelper.getResourceResolver(workflowSession)).thenReturn(resourceResolver);
 		
 		when(workItem.getWorkflowData()).thenReturn(workflowData);

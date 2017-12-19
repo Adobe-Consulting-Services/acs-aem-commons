@@ -20,19 +20,18 @@
 
 package com.adobe.acs.commons.replication;
 
-import com.day.cq.replication.Agent;
-import com.google.common.collect.ImmutableList;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.day.cq.replication.Agent;
+import com.google.common.collect.ImmutableList;
+
 public class AgentIdsAgentFilterTest {
 
     AgentIdsAgentFilter filter;
@@ -48,6 +47,8 @@ public class AgentIdsAgentFilterTest {
 
     @Before
     public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
+		
         when(agentAcceptOne.getId()).thenReturn("one");
         when(agentAcceptTwo.getId()).thenReturn("two");
         when(agentAcceptThree.getId()).thenReturn("three");

@@ -20,9 +20,14 @@
 
 package com.adobe.acs.commons.replication;
 
-import com.day.cq.replication.Agent;
-import com.day.cq.replication.AgentConfig;
-import com.google.common.collect.ImmutableMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -30,17 +35,13 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.day.cq.replication.Agent;
+import com.day.cq.replication.AgentConfig;
+import com.google.common.collect.ImmutableMap;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
-
-@RunWith(PowerMockRunner.class)
 public class BrandPortalAgentFilterTest {
 
     BrandPortalAgentFilter filter;
@@ -69,6 +70,9 @@ public class BrandPortalAgentFilterTest {
 
     @Before
     public void setUp() throws Exception {
+    	
+    	MockitoAnnotations.initMocks(this);
+    	
         slingContext.create().resource(assetsFolderPath,
                 ImmutableMap.<String, Object>builder()
                         .put("mpConfig", cloudServiceConfigPath)

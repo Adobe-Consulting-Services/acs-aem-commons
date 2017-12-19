@@ -1,24 +1,23 @@
 package com.adobe.acs.commons.components.longformtext.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.sling.commons.html.HtmlParser;
 import org.apache.sling.commons.html.impl.DOMBuilder;
 import org.ccil.cowan.tagsoup.Parser;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.w3c.dom.Document;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.InputStream;
 
-
-@RunWith(PowerMockRunner.class)
 public class LongFormTextComponentImplTest {
 
     @Spy
@@ -27,6 +26,11 @@ public class LongFormTextComponentImplTest {
     @InjectMocks
     final LongFormTextComponentImpl longFormTextComponent = new LongFormTextComponentImpl();
 
+    @Before
+    public void init(){
+		MockitoAnnotations.initMocks(this);
+    }
+    
     @Test
     public void testGetTextParagraphs_1() throws Exception {
         final String input = "<p>ira is a dog</p>\n<p> she barks a lot</p>";
