@@ -47,7 +47,7 @@ public class ReportRunner {
 
   private int page;
 
-  private ReportExecutor reportExecutor;
+  private ReportExecutor<?> reportExecutor;
 
   private SlingHttpServletRequest request;
 
@@ -66,7 +66,7 @@ public class ReportRunner {
         Class<?> exClass = getClass().getClassLoader().loadClass(reportExecutorClass);
         Object model = request.adaptTo(exClass);
         if (model instanceof ReportExecutor) {
-          ReportExecutor ex = (ReportExecutor) model;
+          ReportExecutor<?> ex = (ReportExecutor<?>) model;
           ex.setConfiguration(config);
           ex.setPage(this.page);
           this.reportExecutor = ex;
@@ -89,7 +89,7 @@ public class ReportRunner {
     return failureMessage;
   }
 
-  public ReportExecutor getReportExecutor() {
+  public ReportExecutor<?> getReportExecutor() {
     return reportExecutor;
   }
 

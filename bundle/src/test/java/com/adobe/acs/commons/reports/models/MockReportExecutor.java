@@ -25,7 +25,7 @@ import com.adobe.acs.commons.reports.api.ReportException;
 import com.adobe.acs.commons.reports.api.ReportExecutor;
 import com.adobe.acs.commons.reports.api.ResultsPage;
 
-public class MockReportExecutor implements ReportExecutor {
+public class MockReportExecutor implements ReportExecutor<Object> {
 
 	@Override
 	public String getDetails() throws ReportException {
@@ -40,13 +40,13 @@ public class MockReportExecutor implements ReportExecutor {
 	}
 
 	@Override
-	public ResultsPage<? extends Object> getAllResults() throws ReportException {
+	public ResultsPage<Object> getAllResults() throws ReportException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ResultsPage<? extends Object> getResults() throws ReportException {
+	public ResultsPage<Object> getResults() throws ReportException {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -59,7 +59,7 @@ import com.github.jknack.handlebars.Template;
  * Model for executing report requests.
  */
 @Model(adaptables = SlingHttpServletRequest.class)
-public class QueryReportExecutor implements ReportExecutor {
+public class QueryReportExecutor implements ReportExecutor<Resource> {
 
   private static final Logger log = LoggerFactory.getLogger(QueryReportExecutor.class);
 
@@ -106,7 +106,7 @@ public class QueryReportExecutor implements ReportExecutor {
   }
 
   @Override
-  public ResultsPage<?> getAllResults() throws ReportException {
+  public ResultsPage<Resource> getAllResults() throws ReportException {
     return fetchResults(Integer.MAX_VALUE, 0);
   }
 
