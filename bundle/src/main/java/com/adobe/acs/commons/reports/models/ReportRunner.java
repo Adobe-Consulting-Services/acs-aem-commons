@@ -89,8 +89,28 @@ public class ReportRunner {
     return failureMessage;
   }
 
-  public ReportExecutor<?> getReportExecutor() {
-    return reportExecutor;
+  /**
+   * Gets the ReportExecutor, returning the results as generic objects which
+   * must be cast.
+   * 
+   * @return the report executor
+   */
+  @SuppressWarnings("unchecked")
+  public ReportExecutor<Object> getReportExecutor() {
+    return (ReportExecutor<Object>) reportExecutor;
+  }
+
+  /**
+   * Gets the ReportExecutor, casting the data type with the specified class.
+   * This assumes that the caller knows the type of data object.
+   * 
+   * @param clazz
+   *            the class to cast the report data type
+   * @return the report executor
+   */
+  @SuppressWarnings("unchecked")
+  public <T> ReportExecutor<T> getReportExecutor(Class<T> clazz) {
+    return (ReportExecutor<T>) reportExecutor;
   }
 
   @PostConstruct
