@@ -23,6 +23,8 @@ package com.adobe.acs.commons.packaging.impl;
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.jackrabbit.commons.iterator.NodeIteratorAdapter;
+import org.apache.jackrabbit.commons.iterator.PropertyIteratorAdapter;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.config.MetaInf;
@@ -44,14 +46,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
+import javax.jcr.nodetype.NodeType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -66,9 +68,9 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.eq;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(JcrUtil.class)
+@RunWith(MockitoJUnitRunner.class)
 public class PackageHelperImplTest {
     @Mock
     Packaging packaging;
@@ -137,7 +139,7 @@ public class PackageHelperImplTest {
     final PackageHelperImpl packageHelper = new PackageHelperImpl();
 
     @Rule
-    private SlingContext slingContext = new SlingContext();
+    public SlingContext slingContext = new SlingContext();
 
     List<PathFilterSet> packageOneFilterSets;
     List<PathFilterSet> packageTwoFilterSets;
@@ -233,21 +235,24 @@ public class PackageHelperImplTest {
 
     @Test
     public void testAddThumbnail() throws Exception {
-        PowerMockito.mockStatic(JcrUtil.class);
-
         Resource thumbnailResource = mock(Resource.class);
         Node thumbnailNode = mock(Node.class);
+        NodeType ntFile = mock(NodeType.class);
 
         when(thumbnailResource.adaptTo(Node.class)).thenReturn(thumbnailNode);
         when(thumbnailNode.isNodeType("nt:file")).thenReturn(true);
+        when(thumbnailNode.getPrimaryNodeType()).thenReturn(ntFile);
+        when(ntFile.getName()).thenReturn("nt:file");
+        when(thumbnailNode.getMixinNodeTypes()).thenReturn(new NodeType[0]);
+        when(thumbnailNode.getProperties()).thenReturn(new PropertyIteratorAdapter(Collections.emptyIterator()));
+        when(thumbnailNode.getNodes()).thenReturn(new NodeIteratorAdapter(Collections.emptyIterator()));
 
         when(packageOneDefNode.getSession()).thenReturn(mock(Session.class));
 
         packageHelper.addThumbnail(packageOne, thumbnailResource);
 
         // Verification
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.copy(thumbnailNode, packageOneDefNode, "thumbnail.png");
+        verify(packageOneDefNode, times(1)).addNode(eq("thumbnail.png"), eq("nt:file"));
     }
 
     @Test
