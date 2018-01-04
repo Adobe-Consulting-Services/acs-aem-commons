@@ -69,6 +69,7 @@ public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWra
     }
 
     @Override
+    @SuppressWarnings("squid:S2095")
     public PrintWriter getWriter() throws IOException {
         if (this.servletOutputStream != null) {
             throw new IllegalStateException("Cannot invoke getWriter() once getOutputStream() has been called.");

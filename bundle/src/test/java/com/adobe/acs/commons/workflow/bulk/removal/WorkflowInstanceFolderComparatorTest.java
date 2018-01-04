@@ -24,7 +24,7 @@ import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowInstanceFolderCo
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,9 +32,9 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class WorkflowInstanceFolderComparatorTest {
 
     @Test

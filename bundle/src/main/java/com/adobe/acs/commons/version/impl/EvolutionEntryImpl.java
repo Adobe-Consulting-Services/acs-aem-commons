@@ -105,11 +105,11 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public String getValueStringShort() {
-        String value = getValueString();
-        if (value.length() > MAX_CHARS) {
-            return value.substring(0, MAX_CHARS) + "...";
+        String tempValue = getValueString();
+        if (tempValue.length() > MAX_CHARS) {
+            return tempValue.substring(0, MAX_CHARS) + "...";
         }
-        return value;
+        return tempValue;
     }
 
     @Override
@@ -125,6 +125,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
                 return true;
             }
         } catch (RepositoryException e) {
+            // no-op
         }
         return false;
     }
@@ -157,6 +158,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
                 return prop == null;
             }
         } catch (Exception e) {
+            // no-op
         }
         return true;
     }
@@ -175,6 +177,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
                 return prop == null;
             }
         } catch (Exception e) {
+            // no-op
         }
         return true;
     }

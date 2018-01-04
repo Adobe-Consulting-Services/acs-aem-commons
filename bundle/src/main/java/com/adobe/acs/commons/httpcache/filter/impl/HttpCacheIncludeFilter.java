@@ -70,9 +70,11 @@ public class HttpCacheIncludeFilter extends AbstractHttpCacheFilter implements F
     //---------------<Do nothing methods. Just to satisfy interface contract>
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // no-op
     }
 
     @Override
     public void destroy() {
+        // no-op
     }
 }

@@ -75,6 +75,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public final void terminateWorkflow(final Workflow workflow) throws WorkflowException {
         if (workflow instanceof  SyntheticWorkflow) {
             throw new SyntheticTerminateWorkflowException("Synthetic workflow [ " + workflow.getId() + " ] terminated");
@@ -84,6 +85,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public final void complete(final WorkItem workItem, final Route route) throws WorkflowException {
         if (workItem instanceof SyntheticWorkItem) {
             throw new SyntheticCompleteWorkflowException("Synthetic workflow [ "
@@ -94,6 +96,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     public final void restartWorkflow(final Workflow workflow) throws WorkflowException {
         if (workflow instanceof SyntheticWorkflow) {
             throw new SyntheticRestartWorkflowException("Synthetic workflow [ " + workflow.getId() + " ] restarted");

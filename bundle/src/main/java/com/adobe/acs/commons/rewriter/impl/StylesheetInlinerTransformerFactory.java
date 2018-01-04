@@ -72,10 +72,10 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
 
 
     public Transformer createTransformer() {
-        return new CSSInlinerTransformer();
+        return new CssInlinerTransformer();
     }
 
-    private class CSSInlinerTransformer extends AbstractTransformer {
+    private class CssInlinerTransformer extends AbstractTransformer {
 
         protected boolean afterHeadElement = false;
         protected List<String> stylesheetsInHead = new ArrayList<String>();
@@ -91,7 +91,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
         public void startElement(final String namespaceURI, final String localName, final String qName,
                 final Attributes attrs) throws SAXException {
             try {
-                if (SAXElementUtils.isCSS(localName, attrs)) {
+                if (SaxElementUtils.isCss(localName, attrs)) {
                     String sheet = attrs.getValue("", "href");
                     if (!afterHeadElement) {
                         stylesheetsInHead.add(sheet);
@@ -126,7 +126,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
             getContentHandler().endElement(uri, localName, qName);
         }
 
-        private void inlineSheet(final String namespaceURI, String s) throws Exception {
+        private void inlineSheet(final String namespaceURI, String s) throws IOException, SAXException {
             InputStream inputStream = null;
             
             String withoutExtension = s.substring(0, s.indexOf(LibraryType.CSS.extension));

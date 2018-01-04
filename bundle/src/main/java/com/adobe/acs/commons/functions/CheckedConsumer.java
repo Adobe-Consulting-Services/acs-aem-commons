@@ -27,6 +27,7 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @FunctionalInterface
+@SuppressWarnings("squid:S00112")
 public interface CheckedConsumer<T> {
 
     void accept(T t) throws Exception;

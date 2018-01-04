@@ -27,6 +27,7 @@ import com.day.image.Layer;
 import org.apache.sling.api.resource.ValueMap;
 
 @ConsumerType
+@SuppressWarnings("squid:S1214")
 public interface ImageTransformer {
     /**
      * OSGi Property used to identify the ImageTransformer.

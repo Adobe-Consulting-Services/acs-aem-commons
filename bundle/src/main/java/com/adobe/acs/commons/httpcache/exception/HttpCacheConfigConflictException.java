@@ -22,6 +22,7 @@ package com.adobe.acs.commons.httpcache.exception;
 /**
  * Custom exception representing a conflict in resolving cache config.
  */
+@SuppressWarnings({"serial", "squid:S2166"})
 public class HttpCacheConfigConflictException extends HttpCacheException {
     public HttpCacheConfigConflictException() {
     }

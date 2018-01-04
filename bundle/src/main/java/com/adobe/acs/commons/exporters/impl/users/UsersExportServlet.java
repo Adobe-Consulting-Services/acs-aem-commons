@@ -30,7 +30,8 @@ import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.*;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.slf4j.Logger;
@@ -247,6 +248,7 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
             return authorizable.getPath();
         }
 
+        @SuppressWarnings("checkstyle:abbreviationaswordinname")
         public String getID() throws RepositoryException {
             return authorizable.getID();
         }

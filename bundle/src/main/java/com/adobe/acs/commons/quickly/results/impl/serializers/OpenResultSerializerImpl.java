@@ -53,6 +53,6 @@ public class OpenResultSerializerImpl extends AbstractResultSerializer implement
             result.getAction().setUri("/editor.html" + result.getPath() + ".html");
         }
 
-        return super.toJSON(result, config);
+        return super.toJSON(result);
     }
 }

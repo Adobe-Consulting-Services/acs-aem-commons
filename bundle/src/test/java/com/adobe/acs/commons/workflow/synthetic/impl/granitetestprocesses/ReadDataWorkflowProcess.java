@@ -49,7 +49,6 @@ public class ReadDataWorkflowProcess implements WorkflowProcess {
         actual = workItem.getWorkflowData().getMetaDataMap().get("workitem", String.class);
         Assert.assertNull(actual);
 
-
         // Test Workflow Map
         actual = workItem.getWorkflow().getMetaDataMap().get("workflowdata", String.class);
         Assert.assertEquals("set on workflowdata", actual);

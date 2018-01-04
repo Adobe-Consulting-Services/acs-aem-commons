@@ -30,6 +30,7 @@ import org.apache.sling.commons.json.JSONException;
 import java.util.Collection;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface Operation {
 
     final String PROP_CMD = "cmd";

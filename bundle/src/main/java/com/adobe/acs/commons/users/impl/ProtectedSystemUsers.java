@@ -3,6 +3,8 @@ package com.adobe.acs.commons.users.impl;
 import org.apache.commons.lang.ArrayUtils;
 
 public final class ProtectedSystemUsers {
+    private ProtectedSystemUsers() {}
+
     private static final String[] PRINCIPAL_NAMES = new String[] {
 
                 /** AEM SYSTEM USERS **/
@@ -135,6 +137,8 @@ public final class ProtectedSystemUsers {
                 "acs-commons-dispatcher-flush-service",
                 "acs-commons-twitter-updater-service",
                 "acs-commons-review-task-asset-mover-service",
+                "acs-commons-automatic-package-replicator-service",
+                "acs-commons-manage-controlled-processes-service"
     };
 
     public static final boolean isProtected(String principalName) {

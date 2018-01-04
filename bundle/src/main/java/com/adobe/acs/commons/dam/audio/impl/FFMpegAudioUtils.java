@@ -19,13 +19,14 @@
  */
 package com.adobe.acs.commons.dam.audio.impl;
 
-import org.apache.felix.scr.annotations.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public class FFMpegAudioUtils {
 
     private static final Logger log = LoggerFactory.getLogger(FFMpegAudioUtils.class);
@@ -65,18 +66,6 @@ public class FFMpegAudioUtils {
     }
 
     public static final File createTempDir(File parentDir) throws IOException {
-        File tempDir = null;
-        try {
-            tempDir = File.createTempFile("cqdam", null, parentDir);
-            if (!tempDir.delete()) {
-                throw new IOException("Unable to delete temp directory.");
-            }
-            if (!tempDir.mkdir()) {
-                throw new IOException("Unable to create temp directory.");
-            }
-        } catch (IOException e) {
-            log.warn("could not create temp directory in the [{}] with the exception", parentDir, e);
-        }
-        return tempDir;
+        return Files.createTempDirectory(parentDir.toPath(), "cqdam").toFile();
     }
 }

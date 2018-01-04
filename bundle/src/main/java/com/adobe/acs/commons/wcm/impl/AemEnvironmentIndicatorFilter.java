@@ -56,6 +56,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             + "height: 5px;"
             + "z-index: 100000000000000;";
 
+    private static final String TITLE_UPDATE_SCRIPT = "<script>(function() { var c = 0; t = '%s' + ' | ' + document.title, "
+            + "i = setInterval(function() { if (document.title === t && c++ > 10) { clearInterval(i); } else { document.title = t; } }, 1500); "
+            + "document.title = t; })();</script>\n";
 
     @Reference
     private XSSAPI xss;
@@ -106,8 +109,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     private static final String[] DEFAULT_EXCLUDED_WCMMODES = {"DISABLED"};
     @Property (label = "Excluded WCM modes",
-    		description = "Do not display the indicator when these WCM modes",
-    		cardinality = Integer.MAX_VALUE)
+            description = "Do not display the indicator when these WCM modes",
+            cardinality = Integer.MAX_VALUE)
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
 
@@ -119,10 +122,11 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
-
+        // no-op
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public final void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
                                final FilterChain filterChain) throws IOException, ServletException {
 
@@ -146,10 +150,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
         boolean doInclude = true;
         if (ArrayUtils.isNotEmpty(excludedWCMModes)) {
-        	// Test for configured WCM modes, where the indicators are not displayed
-        	WCMMode wcmmode = extractFromRequest(request);
+            // Test for configured WCM modes, where the indicators are not displayed
+            WCMMode wcmmode = extractFromRequest(request);
 
-        	if (wcmmode != null) {
+            if (wcmmode != null) {
                 for (String m : excludedWCMModes) {
                     if (StringUtils.equalsIgnoreCase(wcmmode.name(), m)) {
                         doInclude = false;
@@ -179,9 +183,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                 }
 
                 if (StringUtils.isNotBlank(titlePrefix)) {
-                    printWriter.write("<script>document.title = '"
-                            + titlePrefix
-                            + " | ' + document.title;</script>");
+                    printWriter.printf(TITLE_UPDATE_SCRIPT, titlePrefix);
                 }
 
                 printWriter.write(contents.substring(bodyIndex));
@@ -196,9 +198,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        // no-op
     }
 
+    @SuppressWarnings("squid:S3923")
     private boolean accepts(final HttpServletRequest request) {
         if (StringUtils.isBlank(css) && StringUtils.isBlank(titlePrefix)) {
             // Only accept is properly configured
@@ -224,13 +227,14 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         return true;
     }
 
-    private String createCSS(final String providedColor) {
+    private String createCss(final String providedColor) {
         return "#" + DIV_ID + " { "
                 + "background-color:" + providedColor + BASE_DEFAULT_STYLE
                 + " }";
     }
 
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected final void activate(ComponentContext ctx) {
         Dictionary<?, ?> config = ctx.getProperties();
 
@@ -243,7 +247,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         if (StringUtils.isNotBlank(cssOverride)) {
             css = cssOverride;
         } else if (StringUtils.isNotBlank(color)) {
-            css = createCSS(color);
+            css = createCss(color);
         }
 
         titlePrefix = xss.encodeForJSString(
@@ -273,7 +277,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     // extract the WCMMode from the request; we cannot use
     // WCMMode.fromRequest(), because this is not a SlingHttpServletRequest
-    private WCMMode extractFromRequest (HttpServletRequest request) {
+    private WCMMode extractFromRequest(HttpServletRequest request) {
 
         return (WCMMode) request.getAttribute(
                 WCMMode.REQUEST_ATTRIBUTE_NAME);

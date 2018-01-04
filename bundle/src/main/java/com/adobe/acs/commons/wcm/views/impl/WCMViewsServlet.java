@@ -26,7 +26,6 @@ import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.commons.WCMUtils;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -46,9 +45,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 @SuppressWarnings("serial")
 @SlingServlet(
@@ -64,6 +70,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
 
     private static final String[] DEFAULT_VIEWS = new String[]{};
     private Map<String, String[]> defaultViews = new HashMap<String, String[]>();
+
     @Property(label = "WCM Views by Path",
             description = "Views to add to the Sidekick by default. Takes format [/path=view-1;view-2]",
             cardinality = Integer.MAX_VALUE,

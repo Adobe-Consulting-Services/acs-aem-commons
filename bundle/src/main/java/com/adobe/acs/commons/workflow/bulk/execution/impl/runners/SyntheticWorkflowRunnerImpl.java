@@ -22,7 +22,11 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
-import com.adobe.acs.commons.workflow.bulk.execution.model.*;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
+import com.adobe.acs.commons.workflow.bulk.execution.model.PayloadGroup;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.day.cq.workflow.WorkflowException;
@@ -113,6 +117,8 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
             this.scheduler = scheduler;
         }
 
+        @Override
+        @SuppressWarnings({"squid:S3776", "squid:S1141"})
         public void run() {
             ResourceResolver serviceResourceResolver = null;
             Resource configResource;
@@ -122,7 +128,6 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
 
             try {
                 serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
-                serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.bulk-workflow-manager");
                 configResource = serviceResourceResolver.getResource(configPath);
 
                 final Config config = configResource.adaptTo(Config.class);
@@ -134,7 +139,11 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
 
                 try {
                     SyntheticWorkflowModel model = syntheticWorkflowRunner.getSyntheticWorkflowModel(serviceResourceResolver, config.getWorkflowModelId(), true);
-                    serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
+
+                    if (config.isUserEventData()) {
+                        serviceResourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(config.getUserEventData());
+                        log.debug("Set JCR Sessions user-event-data to [ {} ]", config.getUserEventData());
+                    }
 
                     PayloadGroup payloadGroup = null;
                     if (workspace.getActivePayloadGroups().size() > 0) {

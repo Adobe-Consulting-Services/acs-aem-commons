@@ -1,0 +1,12 @@
+<'cq'='http://www.day.com/jcr/cq/1.0'>
+
+[cq:AuditEvent]
+  - cq:userid (string)
+  - cq:category (string)
+  - cq:properties (binary)
+  - * (undefined) multiple
+  - * (undefined)
+  - cq:time (date)
+  - cq:type (string)
+  - cq:path (string)
+  + * (nt:base) = nt:base multiple version

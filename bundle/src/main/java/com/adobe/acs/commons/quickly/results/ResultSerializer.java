@@ -26,8 +26,9 @@ import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface ResultSerializer {
-    public static final String PROP_TYPE = "type";
+    String PROP_TYPE = "type";
 
     /**
      * Turns a Result object into a JSON object

@@ -32,6 +32,13 @@ import org.scribe.utils.OAuthEncoder;
 public class LinkedInApi20Test {
 
     @Test
+    public void testNoStateDefined() {
+        LinkedInApi20 api = new LinkedInApi20();
+        String state = api.getState();
+        assertEquals(10, state.length());
+    }
+
+    @Test
     public void testAuthorizationWithNoScopes() {
         String state = RandomStringUtils.randomAlphabetic(10);
         String key = RandomStringUtils.randomAlphabetic(10);

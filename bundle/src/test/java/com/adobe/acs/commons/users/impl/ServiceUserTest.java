@@ -8,8 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceUserTest {
@@ -54,6 +53,7 @@ public class ServiceUserTest {
     }
 
 
+    @Test
     public void testServiceUser_blankGlob() throws EnsureServiceUserException {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read;path=/content/dam;rep:glob=;";
@@ -68,11 +68,12 @@ public class ServiceUserTest {
         Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
 
         for (Ace ace : serviceUser.getAces()) {
-            assertTrue(ace.hasRepGlob());
-            assertEquals("", ace.getRepGlob());
+            assertFalse(ace.hasRepGlob());
+            assertEquals(null, ace.getRepGlob());
         }
     }
 
+    @Test
     public void testServiceUser_NoGlob() throws EnsureServiceUserException {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read;path=/content/dam;";
@@ -87,7 +88,7 @@ public class ServiceUserTest {
         Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
 
         for (Ace ace : serviceUser.getAces()) {
-            assertTrue(!ace.hasRepGlob());
+            assertFalse(ace.hasRepGlob());
             assertEquals(null, ace.getRepGlob());
         }
     }

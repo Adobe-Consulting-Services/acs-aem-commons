@@ -40,43 +40,47 @@ public final class Ace {
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String LIST_SEPARATOR = ",";
 
-    public static final String TYPE = "type";
-    public static final String PATH = "path";
-    public static final String PRIVILEGES = "privileges";
-    public static final String REP_GLOB = AccessControlConstants.REP_GLOB;
-    public static final String REP_NT_NAMES = AccessControlConstants.REP_NT_NAMES;
-    public static final String REP_ITEM_NAMES = AccessControlConstants.REP_ITEM_NAMES;
-    public static final String REP_PREFIXES = AccessControlConstants.REP_PREFIXES;
+    private static final String PROP_TYPE = "type";
+    private static final String PROP_PATH = "path";
+    private static final String PROP_PRIVILEGES = "privileges";
+    private static final String PROP_REP_GLOB = AccessControlConstants.REP_GLOB;
+    private static final String PROP_REP_NT_NAMES = AccessControlConstants.REP_NT_NAMES;
+    private static final String PROP_REP_ITEM_NAMES = AccessControlConstants.REP_ITEM_NAMES;
+    private static final String PROP_REP_PREFIXES = AccessControlConstants.REP_PREFIXES;
 
 
     private String type;
     private String path;
     private String repGlob = null;
     private List<String> repNtNames = new ArrayList<String>();
-    private List<String> repItemNames = new ArrayList<String>();;
-    private List<String> repPrefixes = new ArrayList<String>();;
+    private List<String> repItemNames = new ArrayList<String>();
+    private List<String> repPrefixes = new ArrayList<String>();
     private final List<String> privilegeNames = new ArrayList<String>();
     private boolean exists = false;
 
+    @SuppressWarnings("squid:S3776")
     public Ace(String raw) throws EnsureServiceUserException {
         String[] segments = StringUtils.split(raw, PARAM_DELIMITER);
 
         for (String segment : segments) {
             AbstractMap.SimpleEntry<String, String> entry = ParameterUtil.toSimpleEntry(segment, KEY_VALUE_SEPARATOR);
 
-            if (StringUtils.equals(TYPE, entry.getKey())) {
+            if (entry == null) {
+                continue;
+            }
+            if (StringUtils.equals(PROP_TYPE, entry.getKey())) {
                 this.type = StringUtils.stripToNull(entry.getValue());
-            } else if (StringUtils.equals(PATH, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_PATH, entry.getKey())) {
                 this.path = StringUtils.stripToNull(entry.getValue());
-            } else if (StringUtils.equals(REP_GLOB, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_REP_GLOB, entry.getKey())) {
                 this.repGlob = StringUtils.stripToEmpty(entry.getValue());
-            } else if (StringUtils.equals(REP_NT_NAMES, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_REP_NT_NAMES, entry.getKey())) {
                 this.repNtNames.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
-            } else if (StringUtils.equals(REP_ITEM_NAMES, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_REP_ITEM_NAMES, entry.getKey())) {
                 this.repItemNames.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
-            } else if (StringUtils.equals(REP_PREFIXES, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_REP_PREFIXES, entry.getKey())) {
                 this.repPrefixes.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
-            } else if (StringUtils.equals(PRIVILEGES, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_PRIVILEGES, entry.getKey())) {
                 for (String privilege : StringUtils.split(entry.getValue(), LIST_SEPARATOR)) {
                     privilege = StringUtils.stripToNull(privilege);
                     if (privilege != null) {
@@ -218,7 +222,7 @@ public final class Ace {
         return true;
     }
 
-
+    @SuppressWarnings("squid:S2589")
     private boolean isRestrictionValid(boolean configExists, Value[] actualValues, List<String> configValues) {
         final ArrayList<String> actualRestrictions = new ArrayList<String>();
 

@@ -25,6 +25,7 @@ import javax.management.openmbean.TabularData;
 import com.adobe.granite.jmx.annotation.Description;
 import com.adobe.granite.jmx.annotation.Name;
 
+@SuppressWarnings("squid:S00112")
 public interface GenericCacheMBean {
 
     @Description("Clear entire cache")

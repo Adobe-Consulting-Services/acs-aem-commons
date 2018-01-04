@@ -25,6 +25,7 @@ import aQute.bnd.annotation.ProviderType;
  * Service interface for performing color space conversion operations.
  */
 @ProviderType
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public interface ColorConversion {
 
     /**
@@ -57,15 +58,16 @@ public interface ColorConversion {
 
         @Override
         public String toString() {
-            return "RGB{" +
-                    "red=" + red +
-                    ", green=" + green +
-                    ", blue=" + blue +
-                    '}';
+            return "RGB{"
+                    + "red=" + red
+                    + ", green=" + green
+                    + ", blue=" + blue
+                    + '}';
         }
     }
 
     @ProviderType
+    @SuppressWarnings({"checkstyle:membername", "checkstyle:parametername"})
     final class LAB {
         public final float lightness;
         public final int a;
@@ -79,11 +81,11 @@ public interface ColorConversion {
 
         @Override
         public String toString() {
-            return "LAB{" +
-                    "lightness=" + lightness +
-                    ", a=" + a +
-                    ", b=" + b +
-                    '}';
+            return "LAB{"
+                    + "lightness=" + lightness
+                    + ", a=" + a
+                    + ", b=" + b
+                    + '}';
         }
     }
 
@@ -103,12 +105,12 @@ public interface ColorConversion {
 
         @Override
         public String toString() {
-            return "CYMK{" +
-                    "cyan=" + cyan +
-                    ", magenta=" + magenta +
-                    ", yellow=" + yellow +
-                    ", black=" + black +
-                    '}';
+            return "CYMK{"
+                    + "cyan=" + cyan
+                    + ", magenta=" + magenta
+                    + ", yellow=" + yellow
+                    + ", black=" + black
+                    + '}';
         }
     }
 }

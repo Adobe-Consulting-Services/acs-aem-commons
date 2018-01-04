@@ -22,6 +22,7 @@ package com.adobe.acs.commons.httpcache.exception;
 /**
  * Custom exception representing failure condition in accessing JCR repository.
  */
+@SuppressWarnings({"serial", "squid:S2166"})
 public class HttpCacheRepositoryAccessException extends HttpCacheException {
     public HttpCacheRepositoryAccessException() {
     }

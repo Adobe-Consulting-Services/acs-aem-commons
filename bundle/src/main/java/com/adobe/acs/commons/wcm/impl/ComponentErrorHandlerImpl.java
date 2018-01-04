@@ -90,6 +90,9 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private static final String SERVICE_NAME = "component-error-handler";
     private static final Map<String, Object> AUTH_INFO;
+    private static final String DISABLED = "Disabled";
+    private static final String ENABLED = "Enabled";
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -178,6 +181,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // no-op
     }
 
     @Override
@@ -302,21 +306,16 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     protected final boolean accepts(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
 
-        if (!StringUtils.endsWith(request.getRequestURI(), ".html") ||
-                !StringUtils.contains(response.getContentType(), "html")) {
+        if (!StringUtils.endsWith(request.getRequestURI(), ".html")
+                || !StringUtils.contains(response.getContentType(), "html")) {
             // Do not inject around non-HTML requests
             return false;
         }
 
         final ComponentContext componentContext = WCMUtils.getComponentContext(request);
-        if (componentContext == null) {
-            // ComponentContext is null
-            return false;
-        } else if (componentContext.getComponent() == null) {
-            // Component is null
-            return false;
-        } else if (componentContext.isRoot()) {
-            // Suppress on root context
+        if (componentContext == null // ComponentContext is null
+                || componentContext.getComponent() == null // Component is null
+                || componentContext.isRoot()) { // Suppress on root context
             return false;
         }
 
@@ -385,15 +384,15 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
 
         log.info("Component Error Handling for Edit Modes: {} ~> {}",
-                editModeEnabled ? "Enabled" : "Disabled",
+                editModeEnabled ? ENABLED : DISABLED,
                 editErrorHTMLPath);
 
         log.info("Component Error Handling for Preview Modes: {} ~> {}",
-                previewModeEnabled ? "Enabled" : "Disabled",
+                previewModeEnabled ? ENABLED : DISABLED,
                 previewErrorHTMLPath);
 
         log.info("Component Error Handling for Publish Modes: {} ~> {}",
-                publishModeEnabled ? "Enabled" : "Disabled",
+                publishModeEnabled ? ENABLED : DISABLED,
                 publishErrorHTMLPath);
 
         suppressedResourceTypes = PropertiesUtil.toStringArray(config.get(PROP_SUPPRESSED_RESOURCE_TYPES),

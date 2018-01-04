@@ -15,13 +15,19 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import java.lang.management.ManagementFactory;
-import java.util.Dictionary;
-import java.util.List;
-import java.util.concurrent.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -35,14 +41,14 @@ import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.lang.management.ManagementFactory;
+import java.util.Dictionary;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Component(metatype = true, immediate = true, label = "ACS AEM Commons - Throttled Task Runner Service")
 @Service({ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class})
@@ -77,6 +83,11 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS);
         workerPool.submit(r);
     }
+    
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler);
+        workerPool.submit(r);
+    }    
 
     RunningStatistic waitTime = new RunningStatistic("Queue wait time");
     RunningStatistic throttleTime = new RunningStatistic("Throttle time");
@@ -170,6 +181,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     private long lastCheck = -1;
     private boolean wasRecentlyBusy = false;
 
+    @SuppressWarnings("squid:S3776")
     private boolean isTooBusy() throws InterruptedException {
         if (maxCpu <= 0 && maxHeap <= 0) {
             return false;
@@ -251,6 +263,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         initThreadPool();
     }
 
+    @SuppressWarnings("squid:S2142")
     private void initThreadPool() {
         if (workQueue == null) {
             workQueue = new LinkedBlockingDeque<>();
@@ -272,10 +285,11 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
     protected void activate(ComponentContext componentContext) {
         Dictionary<?, ?> properties = componentContext.getProperties();
+        int defaultThreadCount = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
 
         maxCpu = PropertiesUtil.toDouble(properties.get("max.cpu"), 0.85);
         maxHeap = PropertiesUtil.toDouble(properties.get("max.heap"), 0.85);
-        maxThreads = PropertiesUtil.toInteger(properties.get("max.threads"), 4);
+        maxThreads = PropertiesUtil.toInteger(properties.get("max.threads"), defaultThreadCount);
         cooldownWaitTime = PropertiesUtil.toInteger(properties.get("cooldown.wait.time"), 100);
         taskTimeout = PropertiesUtil.toInteger(properties.get("task.timeout"), 60000);
 

@@ -29,14 +29,11 @@ import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ConfigResourceVisitor extends AbstractResourceVisitor {
-    private static final Logger log = LoggerFactory.getLogger(ConfigResourceVisitor.class);
 
     private static final String BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH = "/etc/acs-commons/bulk-workflow-manager";
     private static final String NT_PAGE_CONTENT = "cq:PageContent";
@@ -55,9 +52,8 @@ public class ConfigResourceVisitor extends AbstractResourceVisitor {
             final ValueMap properties = resource.adaptTo(ValueMap.class);
             final String primaryType = properties.get(JcrConstants.JCR_PRIMARYTYPE, String.class);
 
-            if (BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH.equals(resource.getPath())) {
-                super.accept(resource);
-            } else if (ArrayUtils.contains(ACCEPTED_PRIMARY_TYPES, primaryType)) {
+            if (BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH.equals(resource.getPath())
+                    || ArrayUtils.contains(ACCEPTED_PRIMARY_TYPES, primaryType)) {
                 super.accept(resource);
             }
         }

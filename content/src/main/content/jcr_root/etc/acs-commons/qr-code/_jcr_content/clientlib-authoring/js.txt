@@ -1,0 +1,1 @@
+/apps/acs-commons/components/utilities/qr-code/clientlib-authoring/js/authoring.js

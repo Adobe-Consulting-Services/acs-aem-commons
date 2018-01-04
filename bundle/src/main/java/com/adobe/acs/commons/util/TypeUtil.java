@@ -70,8 +70,8 @@ public final class TypeUtil {
                     "Array must be even in length, representing a series of Key, Value pairs.");
         }
 
-        for (int i = 0; i < list.length; i++) {
-            map.put(list[i], list[++i]);
+        for (int i = 0; i < list.length; i = i + 2) {
+            map.put(list[i], list[i + 1]);
         }
 
         return map;

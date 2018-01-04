@@ -105,9 +105,9 @@
         //reads multifield data from server, creates the nested composite multifields and fills them
         addDataInFields: function () {
             var cmf = this, mNames = [],
-                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class='coral-Form-fieldset']"),
+                $fieldSets = $("[" + cmf.DATA_ACS_COMMONS_NESTED + "][class~='coral-Form-fieldset']"),
                 $form = $fieldSets.closest("form.foundation-form"),
-                actionUrl = $form.attr("action") + ".json",
+                actionUrl = $form.attr("action") + ".infinity.json",
                 mValues, $field, name, $multifield;
 
             $(".js-coral-Multifield-add").click(function(){
@@ -172,7 +172,7 @@
                     //strip ./
                     mName = mName.substring(2);
 
-                    mValues = data[mName];
+                    mValues = cmf.nestedPluck(data, mName);
 
                     if (_.isString(mValues)) {
                         mValues = [JSON.parse(mValues)];
@@ -194,7 +194,11 @@
                                 $field = $($fieldSets[i]).find("ul[data-fieldname='./" + rKey + "']").last();
                             }
 
-                            if (_.isArray(rValue) && !_.isEmpty(rValue)) {
+                            if(!_.isEmpty($field) && $field.siblings( "input.autocomplete-has-suggestion-btn")) {
+                                cmf.setWidgetValue($field.siblings( "input.autocomplete-has-suggestion-btn"), rValue);
+                            }
+
+                            if (_.isArray(rValue) && !_.isEmpty(rValue) && !cmf.isSelectMultiple($field)) {
                                 fillNestedFields($($fieldSets[i]).find("[data-init='multifield']"), rValue);
                             } else {
                                 cmf.setWidgetValue($field, rValue);
@@ -298,7 +302,7 @@
                     $nestedMultiField = $field.find("[data-init='multifield']");
 
                     if ($nestedMultiField.length === 0) {
-                        cmf.fillValue($field.find("[name]"), record);
+                        cmf.fillValue($field.find("[name]").not("[name*='@']"), record);
                     } else {
                         name = $nestedMultiField.find("[class='coral-Form-fieldset']").data("name");
 

@@ -25,6 +25,7 @@ import org.apache.sling.api.resource.Resource;
 import javax.jcr.RepositoryException;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface LongFormTextComponent {
     String LONG_FORM_TEXT_PAR = "long-form-text-par-";
 

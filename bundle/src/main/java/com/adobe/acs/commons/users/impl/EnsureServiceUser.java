@@ -4,9 +4,14 @@ import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlList;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlManager;
@@ -15,15 +20,29 @@ import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.commons.jackrabbit.authorization.AccessControlUtils;
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
-import org.apache.sling.api.resource.*;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.*;
+import javax.jcr.PropertyType;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Value;
+import javax.jcr.ValueFactory;
+import javax.jcr.ValueFormatException;
 import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.Privilege;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component(
         label = "ACS AEM Commons - Ensure Service User",
@@ -45,6 +64,7 @@ public final class EnsureServiceUser {
 
     private static final String SERVICE_NAME = "ensure-service-user";
     private static final Map<String, Object> AUTH_INFO;
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -154,11 +174,12 @@ public final class EnsureServiceUser {
      * @throws RepositoryException
      * @throws EnsureServiceUserException
      */
+    @SuppressWarnings("squid:S2583")
     protected void ensureExistance(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
         final User systemUser = ensureSystemUser(resourceResolver, serviceUser);
 
         if (systemUser != null) {
-            ensureACEs(resourceResolver, systemUser, serviceUser);
+            ensureAces(resourceResolver, systemUser, serviceUser);
         } else {
             log.error("Could not create or locate System User with principal name [ {} ]", serviceUser.getPrincipalName());
         }
@@ -175,7 +196,7 @@ public final class EnsureServiceUser {
     private void ensureRemoval(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
         final User systemUser = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
 
-        removeACEs(resourceResolver, systemUser, serviceUser);
+        removeAces(resourceResolver, systemUser, serviceUser);
 
         if (systemUser != null) {
             systemUser.remove();
@@ -215,12 +236,13 @@ public final class EnsureServiceUser {
      * return                  # of ace entries that could not be processed
      * @throws RepositoryException
      */
-    private int ensureACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
+    @SuppressWarnings("squid:S3776")
+    private int ensureAces(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
         int failures = 0;
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager = (JackrabbitAccessControlManager) session.getAccessControlManager();
-        final List<JackrabbitAccessControlList> acls = findACLs(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
+        final List<JackrabbitAccessControlList> acls = findAcls(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
 
         // For each rep:policy (ACL) this service user participates in ...
         for (final JackrabbitAccessControlList acl : acls) {
@@ -319,11 +341,11 @@ public final class EnsureServiceUser {
      * @param serviceUser      the Service User
      * @throws RepositoryException
      */
-    private void removeACEs(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
+    private void removeAces(ResourceResolver resourceResolver, User systemUser, ServiceUser serviceUser) throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager = (JackrabbitAccessControlManager) session.getAccessControlManager();
-        final List<JackrabbitAccessControlList> acls = findACLs(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
+        final List<JackrabbitAccessControlList> acls = findAcls(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
 
         for (final JackrabbitAccessControlList acl : acls) {
             final JackrabbitAccessControlEntry[] aces = (JackrabbitAccessControlEntry[]) acl.getAccessControlEntries();
@@ -369,7 +391,7 @@ public final class EnsureServiceUser {
                     throw new EnsureServiceUserException(String.format("User [ %s ] ensureExistance at [ %s ] but is NOT a system user", principalName, user.getPath()));
                 }
             } else {
-                throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a user", principalName, user.getPath()));
+                throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a user", principalName, authorizable.getPath()));
             }
         }
 
@@ -385,7 +407,7 @@ public final class EnsureServiceUser {
      * @return a list of ACLs that principal participates in.
      * @throws RepositoryException
      */
-    private List<JackrabbitAccessControlList> findACLs(ResourceResolver resourceResolver, String principalName, JackrabbitAccessControlManager accessControlManager) throws RepositoryException {
+    private List<JackrabbitAccessControlList> findAcls(ResourceResolver resourceResolver, String principalName, JackrabbitAccessControlManager accessControlManager) throws RepositoryException {
         final Set<String> paths = new HashSet<String>();
         final List<JackrabbitAccessControlList> acls = new ArrayList<JackrabbitAccessControlList>();
 

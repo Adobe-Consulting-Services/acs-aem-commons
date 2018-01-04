@@ -26,8 +26,6 @@ import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
@@ -35,7 +33,6 @@ import java.util.Calendar;
 
 @Model(adaptables = Resource.class)
 public class Failure {
-    private static final Logger log = LoggerFactory.getLogger(Failure.class);
 
     public static final String PN_PATH = "path";
     public static final String PN_PAYLOAD_PATH = "payloadPath";

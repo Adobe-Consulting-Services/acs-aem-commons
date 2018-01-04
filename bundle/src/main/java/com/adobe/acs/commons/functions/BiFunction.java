@@ -27,6 +27,7 @@ import aQute.bnd.annotation.ConsumerType;
  * @param <R> the type of the result of the function
  *
  * @see Function
+ * @deprecated Use CheckedBiFunction instead
  */
 @ConsumerType
 @Deprecated
@@ -54,7 +55,7 @@ public abstract class BiFunction<T, U, R> implements CheckedBiFunction<T, U, R> 
 
     private static class Adapter<T, U, R> extends BiFunction<T, U, R> {
 
-        final private CheckedBiFunction<T, U, R> delegate;
+        private final CheckedBiFunction<T, U, R> delegate;
 
         public Adapter(CheckedBiFunction<T, U, R> delegate) {
             this.delegate = delegate;

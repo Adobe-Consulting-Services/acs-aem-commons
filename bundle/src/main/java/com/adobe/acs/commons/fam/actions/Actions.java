@@ -16,6 +16,7 @@
 package com.adobe.acs.commons.fam.actions;
 
 import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -30,11 +31,39 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
  * Various deferred actions to be used with the ActionManager
  */
 @ProviderType
+@SuppressWarnings({"squid:S1181", "squid:S1193"})
 public final class Actions {
     private Actions() {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(Actions.class);
+
+    private static ThreadLocal<ActionManager> currentActionManager = new ThreadLocal<>();
+
+    /**
+     * Obtain the current action manager -- this is necessary for additional tracking such as current item
+     * @return current action manager
+     */
+    public static ActionManager getCurrentActionManager() {
+        return currentActionManager.get();
+    }
+
+    public static void setCurrentActionManager(ActionManager a) {
+        if (a == null) {
+            currentActionManager.remove();
+        } else {
+            currentActionManager.set(a);
+        }
+    }
+    
+    public static void setCurrentItem(String item) {
+        ActionManager manager = getCurrentActionManager();
+        if (manager != null) {
+            manager.setCurrentItem(item);
+        } else {
+            LOG.error("Could not identify current action manager.", new IllegalStateException());
+        }
+    }
 
     //-- Query Result consumers (for using withQueryResults)
     /**
@@ -55,7 +84,12 @@ public final class Actions {
                 try {
                     action.accept(r, s);
                     return;
-                } catch (Exception e) {
+                } catch (InterruptedException e) {
+                    r.revert();
+                    r.refresh();
+                    LOG.info("Timeout reached, aborting work", e);
+                    throw e;
+                } catch (Throwable e) {
                     r.revert();
                     r.refresh();
                     if (remaining-- <= 0) {
@@ -94,6 +128,7 @@ public final class Actions {
      * @param action Action to attempt
      * @return New retry wrapper around provided action
      */
+    @SuppressWarnings("squid:S3776")
     public static final CheckedConsumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final CheckedConsumer<ResourceResolver> action) {
         return (ResourceResolver r) -> {
             int remaining = retries;
@@ -101,14 +136,23 @@ public final class Actions {
                 try {
                     action.accept(r);
                     return;
-                } catch (Exception e) {
+                } catch (InterruptedException e) {
+                    r.revert();
+                    r.refresh();
+                    LOG.info("Timeout reached, aborting work", e);
+                    throw e;
+                } catch (Throwable e) {
                     r.revert();
                     r.refresh();
                     LOG.info("Error commit, retry count is " + remaining, e);
-                    if (remaining-- <= 0) {
-                        throw e;
+                    if (e instanceof Exception) {
+                        if (remaining-- <= 0) {
+                            throw e;
+                        } else {
+                            Thread.sleep(pausePerRetry);
+                        }
                     } else {
-                        Thread.sleep(pausePerRetry);
+                        throw e;
                     }
                 }
             }

@@ -51,6 +51,7 @@ public class OptionsServlet extends SlingSafeMethodsServlet {
     private HtmlLibraryManager libraryManager;
 
     @Override
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("application/json");

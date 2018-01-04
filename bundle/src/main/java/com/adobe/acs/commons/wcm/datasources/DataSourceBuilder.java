@@ -26,6 +26,7 @@ import org.apache.sling.commons.json.JSONException;
 import java.io.IOException;
 import java.util.List;
 
+@SuppressWarnings("squid:S1214")
 public interface DataSourceBuilder {
 
     String TEXT = "text";

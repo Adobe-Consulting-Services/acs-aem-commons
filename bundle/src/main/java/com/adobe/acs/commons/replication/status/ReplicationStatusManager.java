@@ -52,7 +52,7 @@ public interface ReplicationStatusManager {
      * <p>
      * Pages and Assets return their respective content resource while any other path returns itself
      *
-     * @param path 			   The path to retrieve the resource for.
+     * @param path             The path to retrieve the resource for.
      * @param resourceResolver The resource resolver must have access to read the specified path.
      */
     Resource getReplicationStatusResource(String path, ResourceResolver resourceResolver);

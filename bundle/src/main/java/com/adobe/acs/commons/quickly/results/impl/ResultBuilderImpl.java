@@ -96,7 +96,7 @@ public class ResultBuilderImpl implements ResultBuilder {
         }
 
         if (serializer != null) {
-            //log.trace("Serializing results using Result Serializer [ {} ] w/ [ {} ]", result.getResultType(), serializer.getClass().getSimpleName());
+            log.trace("Serializing results using Result Serializer [ {} ] w/ [ {} ]", result.getResultType(), serializer.getClass().getSimpleName());
             return serializer.toJSON(result, config);
         } else {
             log.trace("Could not find Quickly Result Serializer for type [ {} ]", result.getResultType());
@@ -113,6 +113,7 @@ public class ResultBuilderImpl implements ResultBuilder {
         return null;
     }
 
+    @SuppressWarnings("checkstyle:abbreviationaswordinname")
     protected final boolean acceptsAuthoringUIMode(Result result, AuthoringUIMode authoringUIMode) {
         if (result.getAuthoringMode() == null) {
             // All Authoring Modes

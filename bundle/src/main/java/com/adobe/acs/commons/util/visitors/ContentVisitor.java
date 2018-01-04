@@ -35,8 +35,8 @@ import java.util.Arrays;
 public class ContentVisitor<T extends ResourceRunnable> extends AbstractResourceVisitor {
     private static final Logger log = LoggerFactory.getLogger(ContentVisitor.class);
 
-    private final String[] DEFAULT_CONTAINER_TYPES = {JcrResourceConstants.NT_SLING_FOLDER, JcrResourceConstants.NT_SLING_ORDERED_FOLDER, JcrConstants.NT_FOLDER};
-    private final String[] DEFAULT_CONTENT_TYPES = {NameConstants.NT_PAGE, DamConstants.NT_DAM_ASSET};
+    private static final String[] DEFAULT_CONTAINER_TYPES = {JcrResourceConstants.NT_SLING_FOLDER, JcrResourceConstants.NT_SLING_ORDERED_FOLDER, JcrConstants.NT_FOLDER};
+    private static final String[] DEFAULT_CONTENT_TYPES = {NameConstants.NT_PAGE, DamConstants.NT_DAM_ASSET};
 
     private final T runnable;
     private final String[] contentTypes;
@@ -47,6 +47,7 @@ public class ContentVisitor<T extends ResourceRunnable> extends AbstractResource
         this.containerTypes = DEFAULT_CONTAINER_TYPES;
         this.contentTypes = DEFAULT_CONTENT_TYPES;
     }
+
     public ContentVisitor(T runnable, String[] containerTypes, String[] contentTypes) {
         this.runnable = runnable;
         this.containerTypes = Arrays.copyOf(containerTypes, containerTypes.length);

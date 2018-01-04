@@ -44,6 +44,7 @@ import com.day.image.Layer;
 @Component(metatype = false)
 @Service
 @Property(name = "process.label", value = "Matte Rendition")
+@SuppressWarnings({"squid:S00115", "checkstyle:localvariablename"})
 public final class MatteRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 
     private static final int RADIX_HEX = 16;

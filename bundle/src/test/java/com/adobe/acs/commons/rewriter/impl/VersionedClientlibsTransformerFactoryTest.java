@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.rewriter.impl;
 
-import ch.qos.logback.classic.turbo.TurboFilter;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
@@ -127,10 +126,10 @@ public class VersionedClientlibsTransformerFactoryTest {
         factory.activate(componentContext);
 
         when(htmlLibrary.getLibraryPath()).thenReturn(PATH);
-        when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings".getBytes()));
+        when(htmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings".getBytes()));
 
         when(proxiedHtmlLibrary.getLibraryPath()).thenReturn(PROXIED_PATH);
-        when(proxiedHtmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are proxied".getBytes()));
+        when(proxiedHtmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are proxied".getBytes()));
 
         when(processingContext.getRequest()).thenReturn(slingRequest);
         when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
@@ -530,7 +529,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
-        when(library.getInputStream()).thenReturn(INPUTSTREAM);
+        when(library.getInputStream(false)).thenReturn(INPUTSTREAM);
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.js");
         when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(library);
 
@@ -544,7 +543,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
-        when(library.getInputStream()).thenReturn(INPUTSTREAM );
+        when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.js");
         when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(library);
 
@@ -558,7 +557,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
-        when(library.getInputStream()).thenReturn(INPUTSTREAM );
+        when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.path.js");
         when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some.path")).thenReturn(library);
 

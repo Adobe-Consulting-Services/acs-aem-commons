@@ -31,18 +31,29 @@
                     var canModify = pageInfo.permissions && pageInfo.permissions.modify;
 
                     if (!!enabled && !!canModify) {
-                        if (config.actions.indexOf(CQ.wcm.EditBase.EDITSHARED) < 0) {
-                            var actionsCount = config.actions.length;
-                            var editActionIdx = null;
-                            for (var i = 0; i < actionsCount; i++) {
-                                if (config.actions[i] == CQ.wcm.EditBase.EDIT) {
-                                    editActionIdx = i;
-                                    break;
+                        var resourceType = config.params["./sling:resourceType"];
+                        var componentSharedDialogs = pageInfo.sharedComponentProperties.components[resourceType] || {};
+                        if (componentSharedDialogs[2] || componentSharedDialogs[3]) {
+                            if (config.actions.indexOf(CQ.wcm.EditBase.EDITSHARED) < 0) {
+                                var actionsCount = config.actions.length;
+                                var editActionIdx = null;
+                                for (var i = 0; i < actionsCount; i++) {
+                                    if (config.actions[i] == CQ.wcm.EditBase.EDIT) {
+                                        editActionIdx = i;
+                                        break;
+                                    }
                                 }
-                            }
-                            if (editActionIdx !== null) {
-                                config.actions.splice(editActionIdx + 1, 0, CQ.wcm.EditBase.EDITGLOBAL);
-                                config.actions.splice(editActionIdx + 1, 0, CQ.wcm.EditBase.EDITSHARED);
+                                if (editActionIdx !== null) {
+                                    // If global properties are enabled for this component...
+                                    if (componentSharedDialogs[3]) {
+                                        config.actions.splice(editActionIdx + 1, 0, CQ.wcm.EditBase.EDITGLOBAL);
+                                    }
+
+                                    // If shared properties are enabled for this component...
+                                    if (componentSharedDialogs[2]) {
+                                        config.actions.splice(editActionIdx + 1, 0, CQ.wcm.EditBase.EDITSHARED);
+                                    }
+                                }
                             }
                         }
                     }
