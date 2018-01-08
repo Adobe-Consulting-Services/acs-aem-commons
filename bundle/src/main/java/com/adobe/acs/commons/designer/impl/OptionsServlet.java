@@ -46,49 +46,49 @@ import com.google.gson.stream.JsonWriter;
 extensions = "json")
 public class OptionsServlet extends SlingSafeMethodsServlet {
 
-	@Reference
-	private HtmlLibraryManager libraryManager;
+    @Reference
+    private HtmlLibraryManager libraryManager;
 
-	@Override
-	@SuppressWarnings({"squid:S3776", "squid:S1141"})
-	protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
-			throws ServletException, IOException {
-		response.setContentType("application/json");
-		final JsonWriter writer = new JsonWriter(response.getWriter());
+    @Override
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json");
+        final JsonWriter writer = new JsonWriter(response.getWriter());
 
-		writer.beginArray();
-		String type = request.getRequestPathInfo().getSelectorString();
-		if (type != null) {
-			try {
-				Set<String> categories = new TreeSet<String>();
-				LibraryType libraryType = LibraryType.valueOf(type.toUpperCase());
-				Map<String, ClientLibrary> libraries = libraryManager.getLibraries();
-				for (ClientLibrary library : libraries.values()) {
-					if (library.getTypes() != null && library.getTypes().contains(libraryType)) {
-						String[] libraryCats = library.getCategories();
-						if (libraryCats != null) {
-							for (String cat : libraryCats) {
-								categories.add(cat);
-							}
-						}
-					}
-				}
+        writer.beginArray();
+        String type = request.getRequestPathInfo().getSelectorString();
+        if (type != null) {
+            try {
+                Set<String> categories = new TreeSet<String>();
+                LibraryType libraryType = LibraryType.valueOf(type.toUpperCase());
+                Map<String, ClientLibrary> libraries = libraryManager.getLibraries();
+                for (ClientLibrary library : libraries.values()) {
+                    if (library.getTypes() != null && library.getTypes().contains(libraryType)) {
+                        String[] libraryCats = library.getCategories();
+                        if (libraryCats != null) {
+                            for (String cat : libraryCats) {
+                                categories.add(cat);
+                            }
+                        }
+                    }
+                }
 
-				for (String cat : categories) {
-					writer.beginObject();
-					writer.name("value");
-					writer.value(cat);
-					writer.name("text");
-					writer.value(cat);
-					writer.endObject();
-				}
+                for (String cat : categories) {
+                    writer.beginObject();
+                    writer.name("value");
+                    writer.value(cat);
+                    writer.name("text");
+                    writer.value(cat);
+                    writer.endObject();
+                }
 
-			} catch (IllegalArgumentException e) {
-				// no matching type. no need to log, just return empty array.
-			}
-		}
-		writer.endArray();
-		
-		writer.close();
-	}
+            } catch (IllegalArgumentException e) {
+                // no matching type. no need to log, just return empty array.
+            }
+        }
+        writer.endArray();
+
+        writer.close();
+    }
 }

@@ -68,10 +68,10 @@ public class Parameters {
         JsonArray customPropertiesJSON = json.getAsJsonArray(CUSTOM_PROPERTIES);
         for (int i = 0; i < customPropertiesJSON.size(); i++) {
             JsonObject tmp = customPropertiesJSON.get(i).getAsJsonObject();
-            
+
             if (tmp.has(RELATIVE_PROPERTY_PATH)) {
-            		String relativePropertyPath = tmp.get(RELATIVE_PROPERTY_PATH).getAsString();
-            		tmpCustomProperties.add(relativePropertyPath);
+                String relativePropertyPath = tmp.get(RELATIVE_PROPERTY_PATH).getAsString();
+                tmpCustomProperties.add(relativePropertyPath);
             }
         }
 

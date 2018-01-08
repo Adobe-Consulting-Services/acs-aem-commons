@@ -37,33 +37,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SlingServlet(
-		label = "ACS AEM Commons - Users to CSV - Save Servlet",
-		methods = {"POST"},
-		resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
-		selectors = {"save"},
-		extensions = {"json"}
-		)
+        label = "ACS AEM Commons - Users to CSV - Save Servlet",
+        methods = {"POST"},
+        resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
+        selectors = {"save"},
+        extensions = {"json"}
+        )
 public class UsersSaveServlet extends SlingAllMethodsServlet {
-	private static final Logger log = LoggerFactory.getLogger(UsersSaveServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(UsersSaveServlet.class);
 
-	/**
-	 * Persists the Users to CSV form data to the underlying jcr:content node.
-	 * @param request the Sling HTTP Request object
-	 * @param response the Sling HTTP Response object
-	 * @throws IOException
-	 * @throws ServletException
-	 */
-	public void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException {
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
+    /**
+     * Persists the Users to CSV form data to the underlying jcr:content node.
+     * @param request the Sling HTTP Request object
+     * @param response the Sling HTTP Response object
+     * @throws IOException
+     * @throws ServletException
+     */
+    public void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException, ServletException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
-		final ValueMap properties = request.getResource().adaptTo(ModifiableValueMap.class);
+        final ValueMap properties = request.getResource().adaptTo(ModifiableValueMap.class);
 
-		final Parameters parameters = new Parameters(request);
-		properties.put(GROUP_FILTER, parameters.getGroupFilter());
-		properties.put(GROUPS, parameters.getGroups());
-		properties.put(CUSTOM_PROPERTIES, parameters.getCustomProperties());
-		request.getResourceResolver().commit();
+        final Parameters parameters = new Parameters(request);
+        properties.put(GROUP_FILTER, parameters.getGroupFilter());
+        properties.put(GROUPS, parameters.getGroups());
+        properties.put(CUSTOM_PROPERTIES, parameters.getCustomProperties());
+        request.getResourceResolver().commit();
 
-	}
+    }
 }

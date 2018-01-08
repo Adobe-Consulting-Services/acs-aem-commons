@@ -50,90 +50,90 @@ import java.util.Set;
 @SuppressWarnings("serial")
 @Component
 @Properties({
-	@Property(
-			name="sling.servlet.paths",
-			value= JSONDumpServlet.SERVLET_PATH
-			),
-	@Property(
-			name="sling.auth.requirements",
-			value= "-" + JSONDumpServlet.SERVLET_PATH
-			)
+    @Property(
+            name="sling.servlet.paths",
+            value= JSONDumpServlet.SERVLET_PATH
+            ),
+    @Property(
+            name="sling.auth.requirements",
+            value= "-" + JSONDumpServlet.SERVLET_PATH
+            )
 })
 @Service
 public class JSONDumpServlet extends BaseChecksumServlet {
-	private static final Logger log = LoggerFactory.getLogger(JSONDumpServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(JSONDumpServlet.class);
 
-	public static final String SERVLET_PATH =  ServletConstants.SERVLET_PATH  + "."
-			+ ServletConstants.JSON_SERVLET_SELECTOR + "."
-			+ ServletConstants.JSON_SERVLET_EXTENSION;
+    public static final String SERVLET_PATH =  ServletConstants.SERVLET_PATH  + "."
+            + ServletConstants.JSON_SERVLET_SELECTOR + "."
+            + ServletConstants.JSON_SERVLET_EXTENSION;
 
-	@Override
-	public final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
-	ServletException, IOException {
-		try {
-			this.handleCORS(request, response);
-			this.handleRequest(request, response);
-		} catch (RepositoryException e) {
-			throw new ServletException(e);
-		}
-	}
+    @Override
+    public final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
+    ServletException, IOException {
+        try {
+            this.handleCORS(request, response);
+            this.handleRequest(request, response);
+        } catch (RepositoryException e) {
+            throw new ServletException(e);
+        }
+    }
 
-	public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
-	ServletException, IOException {
-		try {
-			this.handleCORS(request, response);
-			this.handleRequest(request, response);
-		} catch (RepositoryException e) {
-			throw new ServletException(e);
-		}
-	}
+    public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
+    ServletException, IOException {
+        try {
+            this.handleCORS(request, response);
+            this.handleRequest(request, response);
+        } catch (RepositoryException e) {
+            throw new ServletException(e);
+        }
+    }
 
-	private void handleRequest(SlingHttpServletRequest request, SlingHttpServletResponse response)
-			throws IOException,
-			RepositoryException, ServletException {
+    private void handleRequest(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws IOException,
+            RepositoryException, ServletException {
 
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
-		// Generate current date and time for filename
-		DateFormat df = new SimpleDateFormat("yyyyddMM_HHmmss");
-		Date today = Calendar.getInstance().getTime();
-		String filename = df.format(today);
+        // Generate current date and time for filename
+        DateFormat df = new SimpleDateFormat("yyyyddMM_HHmmss");
+        Date today = Calendar.getInstance().getTime();
+        String filename = df.format(today);
 
-		response.setHeader("Content-Disposition", "filename=jcr-checksum-"
-				+ filename + ".json");
+        response.setHeader("Content-Disposition", "filename=jcr-checksum-"
+                + filename + ".json");
 
-		String optionsName = request.getParameter(ServletConstants.OPTIONS_NAME);
-		ChecksumGeneratorOptions options =
-				ChecksumGeneratorOptionsFactory.getOptions(request, optionsName);
+        String optionsName = request.getParameter(ServletConstants.OPTIONS_NAME);
+        ChecksumGeneratorOptions options =
+                ChecksumGeneratorOptionsFactory.getOptions(request, optionsName);
 
-		if (log.isDebugEnabled()) {
-			log.debug(options.toString());
-		}
+        if (log.isDebugEnabled()) {
+            log.debug(options.toString());
+        }
 
-		Set<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
+        Set<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
 
-		if (CollectionUtils.isEmpty(paths)) {
-			try {
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().print(
-						"ERROR: At least one path must be specified");
-			} catch (IOException ioe) {
-				throw ioe;
-			}
-		} else {
-			Session session = request.getResourceResolver().adaptTo(Session.class);
+        if (CollectionUtils.isEmpty(paths)) {
+            try {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().print(
+                        "ERROR: At least one path must be specified");
+            } catch (IOException ioe) {
+                throw ioe;
+            }
+        } else {
+            Session session = request.getResourceResolver().adaptTo(Session.class);
 
-			JsonWriter jsonWriter = new JsonWriter(response.getWriter());
+            JsonWriter jsonWriter = new JsonWriter(response.getWriter());
 
-			try {
-				JSONGenerator.generateJSON(session, paths, options, jsonWriter);
-				jsonWriter.close();
-			} catch (RepositoryException e) {
-				throw new ServletException("Error accessing repository", e);
-			} catch (IOException e) {
-				throw new ServletException("Unable to generate json", e);
-			}
-		}
-	}
+            try {
+                JSONGenerator.generateJSON(session, paths, options, jsonWriter);
+                jsonWriter.close();
+            } catch (RepositoryException e) {
+                throw new ServletException("Error accessing repository", e);
+            } catch (IOException e) {
+                throw new ServletException("Unable to generate json", e);
+            }
+        }
+    }
 }
