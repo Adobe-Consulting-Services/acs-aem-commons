@@ -24,6 +24,8 @@ import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.JSONGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
+import com.google.gson.stream.JsonWriter;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -31,8 +33,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,13 +125,13 @@ public class JSONDumpServlet extends BaseChecksumServlet {
 
         Session session = request.getResourceResolver().adaptTo(Session.class);
 
-        JSONWriter jsonWriter = new JSONWriter(response.getWriter());
+        JsonWriter jsonWriter = new JsonWriter(response.getWriter());
 
         try {
             JSONGenerator.generateJSON(session, paths, options, jsonWriter);
         } catch (RepositoryException e) {
             throw new ServletException("Error accessing repository", e);
-        } catch (JSONException e) {
+        } catch (IOException e) {
             throw new ServletException("Unable to generate json", e);
         }
     }

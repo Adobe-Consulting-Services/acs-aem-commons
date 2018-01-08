@@ -24,9 +24,9 @@ import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+import com.google.gson.stream.JsonWriter;
+
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,23 +63,23 @@ public final class JSONGenerator {
     }
 
     public static void generateJSON(Session session, String path,
-                                    JSONWriter out) throws RepositoryException, JSONException {
+                                    JsonWriter out) throws RepositoryException, IOException {
         Set<String> paths = new HashSet<String>();
         paths.add(path);
         generateJSON(session, paths, new DefaultChecksumGeneratorOptions(), out);
     }
 
     public static void generateJSON(Session session, Set<String> paths,
-                                    ChecksumGeneratorOptions opts, JSONWriter out)
-            throws RepositoryException, JSONException {
+                                    ChecksumGeneratorOptions opts, JsonWriter out)
+            throws RepositoryException, IOException {
         Node node = null;
 
         if (paths.size() > 1) {
-            out.array();
+            out.beginArray();
         }
 
         for (String path : paths) {
-            out.object();
+            out.beginObject();
             try {
                 if (session.itemExists(path)) {
                     Item item = session.getItem(path);
@@ -89,10 +89,10 @@ public final class JSONGenerator {
                 }
                 traverseTree(node, opts, out);
             } catch (PathNotFoundException e) {
-                out.key("ERROR");
+                out.name("ERROR");
                 out.value("WARN: Path doesn't exist: " + path);
             } catch (RepositoryException e) {
-                out.key("ERROR");
+                out.name("ERROR");
                 out.value("Unable to read path: " + e.getMessage());
             } finally {
                 out.endObject();
@@ -105,7 +105,7 @@ public final class JSONGenerator {
     }
 
     private static void traverseTree(Node node, ChecksumGeneratorOptions opts,
-                                     JSONWriter out) throws JSONException {
+                                     JsonWriter out) throws IOException {
         Set<String> nodeTypes = opts.getIncludedNodeTypes();
         Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
         if (node != null) {
@@ -134,10 +134,10 @@ public final class JSONGenerator {
     }
 
     private static void generateNodeJSON(Node node,
-                                         ChecksumGeneratorOptions opts, JSONWriter out)
-            throws RepositoryException, JSONException {
-        out.key(node.getPath());
-        out.object();
+                                         ChecksumGeneratorOptions opts, JsonWriter out)
+            throws RepositoryException, IOException {
+        out.name(node.getPath());
+        out.beginObject();
 
         outputProperties(node, opts, out);
 
@@ -147,11 +147,11 @@ public final class JSONGenerator {
     }
 
     private static void generateSubnodeJSON(Node node,
-                                            ChecksumGeneratorOptions opts, JSONWriter out)
-            throws RepositoryException, JSONException {
+                                            ChecksumGeneratorOptions opts, JsonWriter out)
+            throws RepositoryException, IOException {
 
-        out.key(node.getName());
-        out.object();
+        out.name(node.getName());
+        out.beginObject();
 
         outputProperties(node, opts, out);
 
@@ -168,10 +168,11 @@ public final class JSONGenerator {
      * @throws RepositoryException
      * @throws JSONException
      * @throws ValueFormatException
+     * @throws IOException 
      */
     private static void outputProperties(Node node,
-                                         ChecksumGeneratorOptions opts, JSONWriter out)
-            throws RepositoryException, JSONException, ValueFormatException {
+                                         ChecksumGeneratorOptions opts, JsonWriter out)
+            throws RepositoryException, ValueFormatException, IOException {
         Set<String> excludes = opts.getExcludedProperties();
 
         SortedMap<String, Property> props = new TreeMap<String, Property>();
@@ -194,13 +195,13 @@ public final class JSONGenerator {
     }
 
     @SuppressWarnings("squid:S3776")
-    private static void outputProperty(Property property, ChecksumGeneratorOptions opts, JSONWriter out)
-            throws RepositoryException, JSONException {
+    private static void outputProperty(Property property, ChecksumGeneratorOptions opts, JsonWriter out)
+            throws RepositoryException, IOException {
         Set<String> sortValues = opts.getSortedProperties();
         if (property.isMultiple()) {
-            out.key(property.getName());
+            out.name(property.getName());
             // create an array for multi value output
-            out.array();
+            out.beginArray();
             boolean isSortedValues = sortValues.contains(property.getName());
             Value[] values = property.getValues();
             TreeMap<String, Value> sortedValueMap = new TreeMap<String, Value>();
@@ -238,7 +239,7 @@ public final class JSONGenerator {
             out.endArray();
             // end multi value property output
         } else {
-            out.key(property.getName());
+            out.name(property.getName());
             outputPropertyValue(property, property.getValue(), out);
         }
     }
@@ -248,10 +249,11 @@ public final class JSONGenerator {
      * @param opts
      * @param out
      * @throws RepositoryException
+     * @throws IOException 
      * @throws JSONException
      */
-    private static void outputChildNodes(Node node, ChecksumGeneratorOptions opts, JSONWriter out)
-            throws RepositoryException, JSONException {
+    private static void outputChildNodes(Node node, ChecksumGeneratorOptions opts, JsonWriter out)
+            throws RepositoryException, IOException {
         Set<String> nodeTypeExcludes = opts.getExcludedNodeTypes();
 
         NodeIterator nodeIterator = node.getNodes();
@@ -269,8 +271,8 @@ public final class JSONGenerator {
                     .contains(child.getPrimaryNodeType().getName())) {
                 if (hasOrderedChildren) {
                     //output child node if parent is has orderable children
-                    out.key(child.getName());
-                    out.object();
+                    out.name(child.getName());
+                    out.beginObject();
                     generateSubnodeJSON(child, opts, out);
                     out.endObject();
                 } else {
@@ -282,15 +284,15 @@ public final class JSONGenerator {
         }
         // output the non-ordered child nodes in sorted order (lexicographically)
         for (Node child : childSortMap.values()) {
-            out.key(child.getName());
-            out.object();
+            out.name(child.getName());
+            out.beginObject();
             generateSubnodeJSON(child, opts, out);
             out.endObject();
         }
     }
 
-    private static void outputPropertyValue(Property property, Value value, JSONWriter out)
-            throws RepositoryException, JSONException {
+    private static void outputPropertyValue(Property property, Value value, JsonWriter out)
+            throws RepositoryException, IllegalStateException, IOException {
 
         if (value.getType() == PropertyType.STRING) {
             out.value(value.getString());
@@ -308,10 +310,10 @@ public final class JSONGenerator {
         } else if (value.getType() == PropertyType.DATE) {
             Calendar cal = value.getDate();
             if (cal != null) {
-                out.object();
-                out.key("type");
+                out.beginObject();
+                out.name("type");
                 out.value(PropertyType.nameFromValue(value.getType()));
-                out.key("val");
+                out.name("val");
                 out.value(cal.getTime().toString());
                 out.endObject();
             }
@@ -322,10 +324,10 @@ public final class JSONGenerator {
         } else if (value.getType() == PropertyType.DECIMAL) {
             out.value(value.getDecimal());
         } else {
-            out.object();
-            out.key("type");
+            out.beginObject();
+            out.name("type");
             out.value(PropertyType.nameFromValue(value.getType()));
-            out.key("val");
+            out.name("val");
             out.value(value.getString());
             out.endObject();
         }
