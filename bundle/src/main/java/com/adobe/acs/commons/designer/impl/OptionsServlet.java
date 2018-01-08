@@ -31,12 +31,11 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
 
 import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
+import com.google.gson.stream.JsonWriter;
 
 /**
  * Servlet which produces Options JSON for ClientLibsManager dialog
@@ -44,54 +43,52 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
  */
 @SuppressWarnings("serial")
 @SlingServlet(paths = "/apps/acs-commons/components/utilities/designer/clientlibsmanager/options",
-        extensions = "json")
+extensions = "json")
 public class OptionsServlet extends SlingSafeMethodsServlet {
 
-    @Reference
-    private HtmlLibraryManager libraryManager;
+	@Reference
+	private HtmlLibraryManager libraryManager;
 
-    @Override
-    @SuppressWarnings({"squid:S3776", "squid:S1141"})
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("application/json");
-        final JSONWriter writer = new JSONWriter(response.getWriter());
-        try {
-            writer.array();
-            String type = request.getRequestPathInfo().getSelectorString();
-            if (type != null) {
-                try {
-                    Set<String> categories = new TreeSet<String>();
-                    LibraryType libraryType = LibraryType.valueOf(type.toUpperCase());
-                    Map<String, ClientLibrary> libraries = libraryManager.getLibraries();
-                    for (ClientLibrary library : libraries.values()) {
-                        if (library.getTypes() != null && library.getTypes().contains(libraryType)) {
-                            String[] libraryCats = library.getCategories();
-                            if (libraryCats != null) {
-                                for (String cat : libraryCats) {
-                                    categories.add(cat);
-                                }
-                            }
-                        }
-                    }
+	@Override
+	@SuppressWarnings({"squid:S3776", "squid:S1141"})
+	protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("application/json");
+		final JsonWriter writer = new JsonWriter(response.getWriter());
 
-                    for (String cat : categories) {
-                        writer.object();
-                        writer.key("value");
-                        writer.value(cat);
-                        writer.key("text");
-                        writer.value(cat);
-                        writer.endObject();
-                    }
+		writer.beginArray();
+		String type = request.getRequestPathInfo().getSelectorString();
+		if (type != null) {
+			try {
+				Set<String> categories = new TreeSet<String>();
+				LibraryType libraryType = LibraryType.valueOf(type.toUpperCase());
+				Map<String, ClientLibrary> libraries = libraryManager.getLibraries();
+				for (ClientLibrary library : libraries.values()) {
+					if (library.getTypes() != null && library.getTypes().contains(libraryType)) {
+						String[] libraryCats = library.getCategories();
+						if (libraryCats != null) {
+							for (String cat : libraryCats) {
+								categories.add(cat);
+							}
+						}
+					}
+				}
 
-                } catch (IllegalArgumentException e) {
-                    // no matching type. no need to log, just return empty array.
-                }
-            }
-            writer.endArray();
-        } catch (JSONException e) {
-            response.reset();
-            throw new ServletException("Unable to produce JSON", e);
-        }
-    }
+				for (String cat : categories) {
+					writer.beginObject();
+					writer.name("value");
+					writer.value(cat);
+					writer.name("text");
+					writer.value(cat);
+					writer.endObject();
+				}
+
+			} catch (IllegalArgumentException e) {
+				// no matching type. no need to log, just return empty array.
+			}
+		}
+		writer.endArray();
+		
+		writer.close();
+	}
 }
