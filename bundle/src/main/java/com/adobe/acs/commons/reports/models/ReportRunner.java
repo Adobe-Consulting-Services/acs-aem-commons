@@ -47,7 +47,7 @@ public class ReportRunner {
 
   private int page;
 
-  private ReportExecutor<?> reportExecutor;
+  private ReportExecutor reportExecutor;
 
   private SlingHttpServletRequest request;
 
@@ -66,7 +66,7 @@ public class ReportRunner {
         Class<?> exClass = getClass().getClassLoader().loadClass(reportExecutorClass);
         Object model = request.adaptTo(exClass);
         if (model instanceof ReportExecutor) {
-          ReportExecutor<?> ex = (ReportExecutor<?>) model;
+          ReportExecutor ex = (ReportExecutor) model;
           ex.setConfiguration(config);
           ex.setPage(this.page);
           this.reportExecutor = ex;
@@ -90,27 +90,12 @@ public class ReportRunner {
   }
 
   /**
-   * Gets the ReportExecutor, returning the results as generic objects which
-   * must be cast.
+   * Gets the ReportExecutor.
    * 
    * @return the report executor
    */
-  @SuppressWarnings("unchecked")
-  public ReportExecutor<Object> getReportExecutor() {
-    return (ReportExecutor<Object>) reportExecutor;
-  }
-
-  /**
-   * Gets the ReportExecutor, casting the data type with the specified class.
-   * This assumes that the caller knows the type of data object.
-   * 
-   * @param clazz
-   *            the class to cast the report data type
-   * @return the report executor
-   */
-  @SuppressWarnings("unchecked")
-  public <T> ReportExecutor<T> getReportExecutor(Class<T> clazz) {
-    return (ReportExecutor<T>) reportExecutor;
+  public ReportExecutor getReportExecutor() {
+    return reportExecutor;
   }
 
   @PostConstruct

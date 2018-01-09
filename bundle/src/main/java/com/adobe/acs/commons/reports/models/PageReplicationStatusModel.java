@@ -46,7 +46,7 @@ public class PageReplicationStatusModel implements ReportCellCSVExporter {
 
   private static final Logger log = LoggerFactory.getLogger(PageReplicationStatusModel.class);
 
-  public enum STATUS {
+  public enum Status {
     ACTIVATED, DEACTIVATED, IN_PROGRESS, MODIFIED, NOT_ACTIVATED
   }
 
@@ -78,19 +78,19 @@ public class PageReplicationStatusModel implements ReportCellCSVExporter {
     log.debug("Getting replication status for {}", path);
     ReplicationStatus status = replicator.getReplicationStatus(session, path);
 
-    STATUS rStatus = STATUS.NOT_ACTIVATED;
+    Status rStatus = Status.NOT_ACTIVATED;
     if (status != null) {
       if (status.isDeactivated()) {
-        rStatus = STATUS.DEACTIVATED;
+        rStatus = Status.DEACTIVATED;
       } else if (status.isPending()) {
-        rStatus = STATUS.IN_PROGRESS;
+        rStatus = Status.IN_PROGRESS;
       } else if (status.isActivated()) {
         Calendar lastModified = getLastModified(resource.getResourceResolver(), path);
         if (lastModified != null && status.getLastPublished() != null
             && lastModified.after(status.getLastPublished())) {
-          rStatus = STATUS.MODIFIED;
+          rStatus = Status.MODIFIED;
         } else {
-          rStatus = STATUS.ACTIVATED;
+          rStatus = Status.ACTIVATED;
         }
       }
     }

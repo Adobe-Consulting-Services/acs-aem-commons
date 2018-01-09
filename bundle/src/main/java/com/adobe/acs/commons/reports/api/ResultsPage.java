@@ -23,23 +23,20 @@ import java.util.List;
 
 /**
  * Simple POJO for representing a page of results.
- * 
- * @param <E>
- *            the type of the result objects
  */
-public class ResultsPage<E extends Object> {
+public final class ResultsPage {
 
-  private final List<E> results;
+  private final List<Object> results;
   private final int pageSize;
   private final int page;
 
-  public ResultsPage(List<E> results, int pageSize, int page) {
+  public ResultsPage(List<Object> results, int pageSize, int page) {
     this.results = results;
     this.pageSize = pageSize;
     this.page = page;
   }
 
-  public List<E> getResults() {
+  public List<Object> getResults() {
     return results;
   }
 

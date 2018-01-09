@@ -25,42 +25,42 @@ import com.adobe.acs.commons.reports.api.ReportException;
 import com.adobe.acs.commons.reports.api.ReportExecutor;
 import com.adobe.acs.commons.reports.api.ResultsPage;
 
-public class MockReportExecutor implements ReportExecutor<Object> {
+public class MockReportExecutor implements ReportExecutor {
 
-	@Override
-	public String getDetails() throws ReportException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getDetails() throws ReportException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public String getParameters() throws ReportException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getParameters() throws ReportException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public ResultsPage<Object> getAllResults() throws ReportException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public ResultsPage getAllResults() throws ReportException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public ResultsPage<Object> getResults() throws ReportException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public ResultsPage getResults() throws ReportException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public void setConfiguration(Resource config) {
-		// TODO Auto-generated method stub
+    @Override
+    public void setConfiguration(Resource config) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public void setPage(int page) {
-		// TODO Auto-generated method stub
+    @Override
+    public void setPage(int page) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
 }

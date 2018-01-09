@@ -59,7 +59,7 @@ import com.github.jknack.handlebars.Template;
  * Model for executing report requests.
  */
 @Model(adaptables = SlingHttpServletRequest.class)
-public class QueryReportExecutor implements ReportExecutor<Resource> {
+public class QueryReportExecutor implements ReportExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(QueryReportExecutor.class);
 
@@ -75,11 +75,11 @@ public class QueryReportExecutor implements ReportExecutor<Resource> {
     this.request = request;
   }
 
-  private ResultsPage<Resource> fetchResults(int limit, int offset) throws ReportException {
+  private ResultsPage fetchResults(int limit, int offset) throws ReportException {
     prepareStatement();
     ResourceResolver resolver = request.getResourceResolver();
     Session session = resolver.adaptTo(Session.class);
-    List<Resource> results = new ArrayList<Resource>();
+    List<Object> results = new ArrayList<>();
     try {
       QueryManager queryMgr = session.getWorkspace().getQueryManager();
 
@@ -102,11 +102,11 @@ public class QueryReportExecutor implements ReportExecutor<Resource> {
       log.error("Exception executing search results", re);
       throw new ReportException("Exception executing search results", re);
     }
-    return new ResultsPage<Resource>(results, config.getPageSize(), page);
+    return new ResultsPage(results, config.getPageSize(), page);
   }
 
   @Override
-  public ResultsPage<Resource> getAllResults() throws ReportException {
+  public ResultsPage getAllResults() throws ReportException {
     return fetchResults(Integer.MAX_VALUE, 0);
   }
 
@@ -167,7 +167,7 @@ public class QueryReportExecutor implements ReportExecutor<Resource> {
   }
 
   @Override
-  public ResultsPage<Resource> getResults() throws ReportException {
+  public ResultsPage getResults() throws ReportException {
     return fetchResults(config.getPageSize(), config.getPageSize() * page);
   }
 
