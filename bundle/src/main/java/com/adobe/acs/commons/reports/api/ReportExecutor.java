@@ -26,7 +26,7 @@ import org.apache.sling.api.resource.Resource;
  * Models which are adaptable from a SlingHttpServletRequest and return a page
  * of results based on the supplied configuration.
  */
-public interface ReportExecutor<T> {
+public interface ReportExecutor {
 
   /**
    * Gets the details for this report executor
@@ -50,7 +50,7 @@ public interface ReportExecutor<T> {
    * 
    * @return the results
    */
-  ResultsPage<T> getAllResults() throws ReportException;
+  ResultsPage getAllResults() throws ReportException;
 
   /**
    * Return the page of results based on the request parameters and supplied
@@ -58,7 +58,7 @@ public interface ReportExecutor<T> {
    * 
    * @return the current page of results
    */
-  ResultsPage<T> getResults() throws ReportException;
+  ResultsPage getResults() throws ReportException;
 
   /**
    * Set the resource used to configure this report executor.

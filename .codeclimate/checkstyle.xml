@@ -100,7 +100,7 @@
         <module name="AbbreviationAsWordInName">
             <property name="ignoreFinal" value="false"/>
             <property name="allowedAbbreviationLength" value="1"/>
-            <property name="allowedAbbreviations" value="JSON,HTML,JCR,SQL,DAM,AEM,WCM,URI,SSL,ACL,UI,XML,RGB"/>
+            <property name="allowedAbbreviations" value="JSON,HTML,JCR,SQL,DAM,AEM,WCM,URI,SSL,ACL,UI,XML,RGB,CSV"/>
         </module>
         <module name="OverloadMethodsDeclarationOrder"/>
         <module name="VariableDeclarationUsageDistance"/>
