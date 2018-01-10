@@ -27,6 +27,7 @@
 			<input type="hidden" name="jcr:content/sling:resourceType" value="acs-commons/components/utilities/report-builder/report-page" />
 			<input type="hidden" name="jcr:content/jcr:created" />
 			<input type="hidden" name="jcr:content/jcr:createdBy" />
+			<input type="hidden" name="jcr:content/cq:designPath" value="/etc/designs/acs-commons" />
 			<div class="coral-Form-fieldwrapper">
 				<label class="coral-Form-fieldlabel" id="title">Title</label>
 				<input is="coral-textfield" class="coral-Form-field" placeholder="Enter your title" name="jcr:content/jcr:title" labelledby=title" required />
