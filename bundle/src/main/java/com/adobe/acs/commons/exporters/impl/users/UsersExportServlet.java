@@ -33,7 +33,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,12 +80,7 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
         response.setContentType("text/csv");
         response.setCharacterEncoding("UTF-8");
 
-        final Parameters parameters;
-        try {
-            parameters = new Parameters(request);
-        } catch (JSONException e) {
-            throw new ServletException(e);
-        }
+        final Parameters parameters = new Parameters(request);
 
         log.debug("Users to CSV Export Parameters: {}", parameters.toString());
 

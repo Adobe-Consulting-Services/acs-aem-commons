@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #989 - Dynamic Loading for optional Touch UI ClientLibraries.
 - #1218 - New Report Builder Feature.
 
+### Changed
+
+- #1224 - Refactored several components to use GSON rather than Sling Commons JSON.
+
 ## [3.13.0] - 2017-12-04
 
 ### Added
