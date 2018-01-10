@@ -144,17 +144,17 @@ public class WorkflowDelegationStep implements WorkflowProcess {
     private WorkflowModel getDelegateWorkflowModel(WorkflowSession workflowSession, String confWorkflowModelId,
         String contentWorkflowModelId, String defaultWorkflowModelId) throws WorkflowException {
       WorkflowModel workflowModel = null;
-      final String DEBUGTEXT = "Using configured delegate Workflow Model [ {} ] found in {}";
-      final String EXCEPTIONTEXT = "Could not find configured Workflow Model [ %s ] in %s";
+      final String debugText = "Using configured delegate Workflow Model [ {} ] found in {}";
+      final String exceptionText = "Could not find configured Workflow Model [ %s ] in %s";
 
       // Check /conf
       if (StringUtils.isNotBlank(confWorkflowModelId)) {
         workflowModel = getWorkflowModel(workflowSession, confWorkflowModelId);
 
         if (workflowModel != null) {
-          log.debug(DEBUGTEXT, workflowModel.getId(), "/conf");
+          log.debug(debugText, workflowModel.getId(), "/conf");
         } else {
-          throw new WorkflowException(String.format(EXCEPTIONTEXT, confWorkflowModelId, "/conf"));
+          throw new WorkflowException(String.format(exceptionText, confWorkflowModelId, "/conf"));
         }
         // Check Content
       } else if (StringUtils.isNotBlank(contentWorkflowModelId)) {
@@ -162,9 +162,9 @@ public class WorkflowDelegationStep implements WorkflowProcess {
         workflowModel = getWorkflowModel(workflowSession, contentWorkflowModelId);
 
         if (workflowModel != null) {
-          log.debug(DEBUGTEXT, workflowModel.getId(), "/content");
+          log.debug(debugText, workflowModel.getId(), "/content");
         } else {
-          throw new WorkflowException(String.format(EXCEPTIONTEXT, confWorkflowModelId, "/content"));
+          throw new WorkflowException(String.format(exceptionText, confWorkflowModelId, "/content"));
         }
 
         // Check default
@@ -172,10 +172,10 @@ public class WorkflowDelegationStep implements WorkflowProcess {
         workflowModel = getWorkflowModel(workflowSession, defaultWorkflowModelId);
 
         if (workflowModel != null) {
-          log.debug(DEBUGTEXT, workflowModel.getId(), "parameter defaultworkflowmodelid");
+          log.debug(debugText, workflowModel.getId(), "parameter defaultworkflowmodelid");
         } else {
           throw new WorkflowException(
-              String.format(EXCEPTIONTEXT, confWorkflowModelId, "parameter defaultworkflowmodelid"));
+              String.format(exceptionText, confWorkflowModelId, "parameter defaultworkflowmodelid"));
         }
       }
 
@@ -186,7 +186,7 @@ public class WorkflowDelegationStep implements WorkflowProcess {
      * Ensures that workflow model id points to $model$/jcr:content/model
      */
     private WorkflowModel getWorkflowModel(WorkflowSession workflowSession, String workflowModelId) {
-  	String id = StringUtils.stripToEmpty(workflowModelId);
+      String id = StringUtils.stripToEmpty(workflowModelId);
       WorkflowModel workflowModel = null;
 
       if (StringUtils.isNotBlank(id)) {
