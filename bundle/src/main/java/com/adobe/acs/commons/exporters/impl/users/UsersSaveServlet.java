@@ -33,8 +33,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SlingServlet(
         label = "ACS AEM Commons - Users to CSV - Save Servlet",
@@ -44,7 +42,6 @@ import org.slf4j.LoggerFactory;
         extensions = {"json"}
         )
 public class UsersSaveServlet extends SlingAllMethodsServlet {
-    private static final Logger log = LoggerFactory.getLogger(UsersSaveServlet.class);
 
     /**
      * Persists the Users to CSV form data to the underlying jcr:content node.
