@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - #989 - Dynamic Loading for optional Touch UI ClientLibraries.
+- #1218 - New Report Builder Feature.
 
 ## [3.13.0] - 2017-12-04
 
