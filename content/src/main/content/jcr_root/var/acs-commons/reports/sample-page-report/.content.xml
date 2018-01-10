@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:description="A report allowing for displaying pages by template and path."
+        jcr:title="Page Report"
+        sling:resourceType="acs-commons/components/utilities/report-builder/report-page">
+        <config
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/foundation/components/parsys">
+            <queryconfig
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/configs/queryconfig"
+                pageSize="50"
+                query="SELECT * FROM [cq:Page] AS s WHERE ISDESCENDANTNODE([{{path}}]) {{#if template }} AND [jcr:content/cq:template] LIKE '{{template}}' {{/if}} ORDER BY {{order}}"
+                queryLanguage="JCR-SQL2"
+                reportExecutor="com.adobe.acs.commons.reports.models.QueryReportExecutor"/>
+        </config>
+        <parameters
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/foundation/components/parsys">
+            <basic
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/parameters/basic"
+                fieldLabel="Path"
+                name="path"
+                required="true"
+                resourceType="granite/ui/components/coral/foundation/form/textfield"/>
+            <basic_382822302
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/parameters/basic"
+                fieldLabel="Temple"
+                name="template"
+                resourceType="granite/ui/components/coral/foundation/form/textfield"/>
+            <select
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/parameters/select"
+                fieldLabel="Order"
+                name="order"
+                resourceType="granite/ui/components/coral/foundation/form/select">
+                <items jcr:primaryType="nt:unstructured">
+                    <item0
+                        jcr:primaryType="nt:unstructured"
+                        text="Default"
+                        value="SCORE()"/>
+                    <item1
+                        jcr:primaryType="nt:unstructured"
+                        text="Title (A-Z)"
+                        value="\[jcr:content/jcr:title] ASC"/>
+                    <item2
+                        jcr:primaryType="nt:unstructured"
+                        text="Title (Z-A)"
+                        value="\[jcr:content/jcr:title] DESC"/>
+                    <item3
+                        jcr:primaryType="nt:unstructured"
+                        text="Last Modified"
+                        value="\[jcr:content/cq:lastModified] DESC"/>
+                    <item4
+                        jcr:primaryType="nt:unstructured"
+                        text="Oldest"
+                        value="\[jcr:content/cq:lastModified] ASC"/>
+                </items>
+            </select>
+        </parameters>
+        <columns
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/foundation/components/parsys">
+            <path
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/path"
+                exporter="com.adobe.acs.commons.reports.models.PathReportCellCSVExporter"
+                heading="Path"
+                link="true"/>
+            <text
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/text"
+                exporter="com.adobe.acs.commons.reports.models.StringReportCellCSVExporter"
+                heading="Title"
+                property="jcr:content/jcr:title"/>
+            <text_774696801
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/text"
+                exporter="com.adobe.acs.commons.reports.models.StringReportCellCSVExporter"
+                heading="Template"
+                property="jcr:content/cq:template"/>
+            <date
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/date"
+                exporter="com.adobe.acs.commons.reports.models.DateReportCellCSVExporter"
+                format="EEE, d MMM yyyy HH:mm:ss Z"
+                heading="Last Modified"
+                property="jcr:content/cq:lastModified"/>
+            <tags
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/tags"
+                exporter="com.adobe.acs.commons.reports.models.TagReportCellCSVExporter"
+                heading="Tags"
+                property="jcr:content/cq:tags"/>
+            <replicationstatus
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/replicationstatus"
+                exporter="com.adobe.acs.commons.reports.models.PageReplicationStatusModel"
+                heading="Replication Status"/>
+            <editor_1384214937
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/editor"
+                customEditor="http://localhost:4502/var/acs-commons/reports/sample-references-report.html?wcmmode=disabled#type=nt%3Abase&#038;page=-1&#038;path="
+                editor="custom"
+                heading="References" />
+            <editor
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/editor"
+                editor="/sites.html"
+                heading="Edit"/>
+        </columns>
+    </jcr:content>
+</jcr:root>

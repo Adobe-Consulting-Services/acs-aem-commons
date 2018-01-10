@@ -70,7 +70,8 @@
                             com.adobe.acs.commons.version.model,
                             com.adobe.acs.commons.wcm.comparisons.model,
                             com.adobe.acs.commons.workflow.bulk.execution.model,
-                            com.adobe.acs.commons.mcp.model
+                            com.adobe.acs.commons.mcp.model,
+                            com.adobe.acs.commons.reports.models
                         </Sling-Model-Packages>
                     </instructions>
                 </configuration>
@@ -441,6 +442,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+		    <groupId>com.github.jknack</groupId>
+		    <artifactId>handlebars</artifactId>
+		    <version>4.0.6</version>
+		    <scope>provided</scope>
+		</dependency>
         <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
             <groupId>com.adobe.aem</groupId>
