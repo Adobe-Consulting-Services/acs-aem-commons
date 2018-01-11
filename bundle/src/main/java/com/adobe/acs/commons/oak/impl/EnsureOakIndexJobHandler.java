@@ -104,7 +104,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
     private final EnsureOakIndex ensureOakIndex;
 
-    private final List<String> ignoreProperties = new ArrayList<String>();
+    private final List<String> ignoreProperties = new ArrayList<>();
 
     private String oakIndexesPath;
 
@@ -134,13 +134,11 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
             try {
                 this.ensure(resourceResolver, ensureDefinitionsPath, oakIndexesPath);
-            } catch (PersistenceException e) {
-                log.error("Could not ensure management of Oak Index [ {} ]", oakIndexesPath, e);
             } catch (IOException e) {
                 log.error("Could not ensure management of Oak Index [ {} ]", oakIndexesPath, e);
             }
         } catch (IllegalArgumentException e) {
-            log.error(e.getMessage());
+            log.error("Could not ensure oak indexes due to illegal arguments.",e);
         } catch (LoginException e) {
             log.error("Could not get an admin resource resolver to ensure Oak Indexes", e);
         } catch (Exception e) {
@@ -185,7 +183,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
             log.info("Ensure Definitions path [ {} ] does NOT have children to process", ensureDefinitions.getPath());
         }
 
-        final List<Resource> delayedProcessing = new ArrayList<Resource>();
+        final List<Resource> delayedProcessing = new ArrayList<>();
 
         // First, handle all things that may not result in a a collective re-indexing
         // Includes: IGNORES, DELETES, DISABLED ensure definitions
@@ -194,8 +192,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
             final Resource ensureDefinition = ensureDefinitionsIterator.next();
             final Resource oakIndex = oakIndexes.getChild(ensureDefinition.getName());
 
-            log.debug("Ensuring Oak Index [ {} ] ~> [ {} ]", ensureDefinition.getPath(),
-                    oakIndexesPath + "/" + ensureDefinition.getName());
+            log.debug("Ensuring Oak Index [ {} ] ~> [ {}/{} ]", new Object[]{
+                    ensureDefinition.getPath(), oakIndexesPath, ensureDefinition.getName()});
 
             if (!handleLightWeightIndexOperations(
                     ensureDefinition, oakIndex)) {
@@ -245,9 +243,9 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
         try {
             Resource ensuredOakIndex = null;
+            validateEnsureDefinition(ensureDefinition);
             if (oakIndex == null) {
                 // CREATE
-                validateEnsureDefinition(ensureDefinition);
                 ensuredOakIndex = this.create(ensureDefinition, oakIndexes);
 
                 // Force re-index
@@ -256,7 +254,6 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 }
             } else {
                 // UPDATE
-                validateEnsureDefinition(ensureDefinition);
                 boolean forceReindex = ensureDefinitionProperties.get(PN_FORCE_REINDEX, false);
 
                 if (ensureDefinitionProperties.get(PN_RECREATE_ON_UPDATE, false)) {
@@ -269,7 +266,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 }
             }
         } catch (OakIndexDefinitionException e) {
-            log.error("Skipping {} : {}", ensureDefinition.getPath(), e.getMessage());
+            log.error("Skipping processing of {}", ensureDefinition.getPath(), e);
         }
     }
 
@@ -297,7 +294,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
             // DELETE
             if (oakIndex != null) {
                 this.delete(oakIndex);
-            } else if (log.isInfoEnabled()) {
+            } else {
                 // Oak index does not exist
                 log.info("Requesting deletion of a non-existent Oak Index at [ {} ].\n"
                                 + "Consider removing the Ensure Definition at [ {} ] if it is no longer needed.",
@@ -310,10 +307,9 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 this.disableIndex(oakIndex);
             } else {
                 // Oak index does not exist
-                log.info("Requesting disable of a non-existent Oak Index at [ {} ].\n"
+                log.info("Requesting disable of a non-existent Oak Index at [ {}/{} ].\n"
                                 + "Consider removing the Ensure Definition at [ {} ] if it is no longer needed.",
-                        oakIndexesPath + "/" + ensureDefinition.getName(),
-                        ensureDefinition.getPath());
+                        new Object[]{oakIndexesPath, ensureDefinition.getName(), ensureDefinition.getPath()});
             }
         } else {
             // handle updates, creates and all reindexing stuff in the second round
@@ -331,6 +327,10 @@ public class EnsureOakIndexJobHandler implements Runnable {
     public void forceRefresh(final @Nonnull Resource oakIndex) throws PersistenceException {
 
         final ModifiableValueMap mvm = oakIndex.adaptTo(ModifiableValueMap.class);
+        if (mvm == null ) {
+            String msg = String.format("Cannot adapt {} to a ModifiableValueMap (permissions?)", oakIndex.getPath());
+            throw new PersistenceException(msg);
+        }
         mvm.put(PN_REINDEX, true);
 
         log.info("Forcing re-index of [ {} ]", oakIndex.getPath());
@@ -524,7 +524,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
     }
 
     /**
-     * Validate is the ensure definition is in a valid format; uses for create and updates.
+     * Validate that the ensure definition is in a valid format; uses for create and updates.
      *
      * @param ensureDefinition the ensure definition ensureDefinition
      * @throws RepositoryException
