@@ -193,7 +193,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
             final Resource oakIndex = oakIndexes.getChild(ensureDefinition.getName());
 
             log.debug("Ensuring Oak Index [ {} ] ~> [ {}/{} ]", new Object[]{
-            		ensureDefinition.getPath(), oakIndexesPath, ensureDefinition.getName()});
+                    ensureDefinition.getPath(), oakIndexesPath, ensureDefinition.getName()});
 
             if (!handleLightWeightIndexOperations(
                     ensureDefinition, oakIndex)) {
@@ -328,8 +328,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
         final ModifiableValueMap mvm = oakIndex.adaptTo(ModifiableValueMap.class);
         if (mvm == null ) {
-        	String msg = String.format("Cannot adapt {} to a ModifiableValueMap (permissions?)", oakIndex.getPath());
-        	throw new PersistenceException(msg);
+            String msg = String.format("Cannot adapt {} to a ModifiableValueMap (permissions?)", oakIndex.getPath());
+            throw new PersistenceException(msg);
         }
         mvm.put(PN_REINDEX, true);
 
