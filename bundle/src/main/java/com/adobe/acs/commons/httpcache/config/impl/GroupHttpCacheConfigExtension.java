@@ -46,6 +46,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -148,7 +153,7 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     /**
      * The GroupCacheKey is a custom CacheKey bound to this particular factory.
      */
-    class GroupCacheKey extends AbstractCacheKey implements CacheKey {
+    class GroupCacheKey extends AbstractCacheKey implements CacheKey, Serializable {
 
         /* This key is composed of uri, list of user groups and authentication requirement details */
         private List<String> cacheKeyUserGroups;
@@ -194,6 +199,24 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
             formattedString.append(StringUtils.join(cacheKeyUserGroups, "|"));
             formattedString.append("] [AUTH_REQ:" + getAuthenticationRequirement() + "]");
             return formattedString.toString();
+        }
+
+        /** For Serialization **/
+        private void writeObject(ObjectOutputStream o) throws IOException
+        {
+            parentWriteObject(o);
+            final Object[] userGroupArray = cacheKeyUserGroups.toArray();
+            o.writeObject(StringUtils.join(userGroupArray, ","));
+        }
+
+        /** For De serialization **/
+        private void readObject(ObjectInputStream o)
+                throws IOException, ClassNotFoundException {
+
+            parentReadObject(o);
+            final String userGroupsStr = (String) o.readObject();
+            final String[] userGroupStrArray = userGroupsStr.split(",");
+            cacheKeyUserGroups = Arrays.asList(userGroupStrArray);
         }
     }
 
