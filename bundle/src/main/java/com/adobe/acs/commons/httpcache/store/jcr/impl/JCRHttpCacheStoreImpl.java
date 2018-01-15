@@ -75,7 +75,7 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
  */
-@Component( label = "ACS AEM Commons - JCR Cache - Java Content Repository cache store.",
+@Component( label = "ACS AEM Commons - Http Cache - JCR Cache Store.",
             description = "Cache data store implementation for JCR storage.",
             metatype = true)
 @Service( value = {HttpCacheStore.class, JcrCacheMBean.class, Runnable.class} )
@@ -88,7 +88,7 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
             value = "com.adobe.acs.httpcache:type=JCR HTTP Cache Store",
             propertyPrivate = true),
         @Property(
-            label = "Cron expression defining when the scheduled cache cleanup will run.",
+            label = "Cache clean-up schedule",
             description = "[every minute = 0 * * * * ?] Visit www.cronmaker.com to generate cron expressions.",
             name = "scheduler.expression",
             value = "0 0 12 1/1 * ? *"
@@ -101,13 +101,13 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
             boolValue = false
         ),
         @Property(
-            label = "Cache Root Parent Path location",
+            label = "Cache-root Parent Path location",
             description = "Points to the location of the cache root parent node in the JCR repository",
             name = JCRHttpCacheStoreImpl.PN_ROOTPATH,
             value = JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH
         ),
         @Property(
-            label = "Bucket Tree depth",
+            label = "Cache bucketing tree depth",
             description = "The depth the bucket tree goes. Minimum value is 1. "
                          + "This value can be used for tweaking performance. "
                          + "The more data cached, the higher this value should be. "
@@ -117,13 +117,13 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
             propertyPrivate = true
         ),
         @Property(
-            label = "Delta save threshold",
+            label = "Save threshold",
             description = "The threshold to add,remove and modify nodes when handling the cache",
             name = JCRHttpCacheStoreImpl.PN_SAVEDELTA,
             intValue = JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA
         ),
         @Property(
-            label = "Expiretime in seconds",
+            label = "Expire time in seconds",
             description = "The time seconds after which nodes will be removed by the scheduled cleanup service. ",
             name = JCRHttpCacheStoreImpl.PN_EXPIRETIMEINSECONDS,
             intValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS
