@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #989 - Dynamic Loading for optional Touch UI ClientLibraries.
 - #1218 - New Report Builder Feature.
+- #1228 - Added config option to have extensionless URLs in sitemap
 
 ### Changed
 
