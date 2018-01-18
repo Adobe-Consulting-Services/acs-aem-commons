@@ -81,6 +81,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final String DEFAULT_EXTERNALIZER_DOMAIN = "publish";
 
+    private static final boolean DEFAULT_EXTENSIONLESS_URLS = false;
+
     @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
     private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
 
@@ -104,7 +106,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     @Property(boolValue = DEFAULT_INCLUDE_INHERITANCE_VALUE, label = "Include Inherit Value", description = "If true searches for the frequency and priority attribute in the current page if null looks in the parent.")
     private static final String PROP_INCLUDE_INHERITANCE_VALUE = "include.inherit";
-    
+
+    @Property(boolValue = DEFAULT_EXTENSIONLESS_URLS, label = "Extensionless URLs", description = "If true, external links included in sitemap are generated without .html extension")
+    private static final String PROP_EXTENSIONLESS_URLS = "extensionless.urls";
+
     @Property(label = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
     private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
 
@@ -128,8 +133,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private List<String> damAssetTypes;
 
     private String excludeFromSiteMapProperty;
-    
+
     private String characterEncoding;
+
+    private boolean extensionlessUrls;
 
     @Activate
     protected void activate(Map<String, Object> properties) {
@@ -147,8 +154,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
                 .asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
         this.excludeFromSiteMapProperty = PropertiesUtil.toString(properties.get(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY),
                 NameConstants.PN_HIDE_IN_NAV);
-        this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY),
-                null);
+        this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY), null);
+        this.extensionlessUrls = PropertiesUtil.toBoolean(properties.get(PROP_EXTENSIONLESS_URLS),
+                DEFAULT_EXTENSIONLESS_URLS);
     }
 
     @Override
@@ -222,8 +230,14 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             return;
         }
         stream.writeStartElement(NS, "url");
+        String loc = "";
 
-        String loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s.html", page.getPath()));
+        if (!extensionlessUrls) {
+            loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s.html", page.getPath()));
+        } else {
+            loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s/", page.getPath()));
+        }
+
         writeElement(stream, "loc", loc);
 
         if (includeLastModified) {
@@ -234,7 +248,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         }
 
         if (includeInheritValue) {
-            HierarchyNodeInheritanceValueMap hierarchyNodeInheritanceValueMap = new HierarchyNodeInheritanceValueMap(page.getContentResource());
+            HierarchyNodeInheritanceValueMap hierarchyNodeInheritanceValueMap = new HierarchyNodeInheritanceValueMap(
+                    page.getContentResource());
             writeFirstPropertyValue(stream, "changefreq", changefreqProperties, hierarchyNodeInheritanceValueMap);
             writeFirstPropertyValue(stream, "priority", priorityProperties, hierarchyNodeInheritanceValueMap);
         } else {
@@ -242,7 +257,6 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             writeFirstPropertyValue(stream, "changefreq", changefreqProperties, properties);
             writeFirstPropertyValue(stream, "priority", priorityProperties, properties);
         }
-        
 
         stream.writeEndElement();
     }
@@ -267,7 +281,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         Resource contentResource = asset.adaptTo(Resource.class).getChild(JcrConstants.JCR_CONTENT);
         if (contentResource != null) {
             if (includeInheritValue) {
-                HierarchyNodeInheritanceValueMap hierarchyNodeInheritanceValueMap = new HierarchyNodeInheritanceValueMap(contentResource);
+                HierarchyNodeInheritanceValueMap hierarchyNodeInheritanceValueMap = new HierarchyNodeInheritanceValueMap(
+                        contentResource);
                 writeFirstPropertyValue(stream, "changefreq", changefreqProperties, hierarchyNodeInheritanceValueMap);
                 writeFirstPropertyValue(stream, "priority", priorityProperties, hierarchyNodeInheritanceValueMap);
             } else {
