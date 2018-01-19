@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -139,6 +140,13 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     //defaults
     public static final String  DEFAULT_ROOTPATH            = "/var/acs-commons/httpcache";
+    private static final String SERVICE_NAME = "httpcache-jcr-storage-service";
+
+    private static final Map<String, Object> AUTH_INFO;
+
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     //By default, we go for the maximum bucket depth. This uses the full hashcode of 10 digits.
     public static final int     DEFAULT_BUCKETDEPTH         = 10;
@@ -475,7 +483,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     public <T> T withSession(final Function<Session, T> onSuccess, final Consumer<Exception> onError){
         ResourceResolver resourceResolver = null;
         try {
-            resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
             final Session session = resourceResolver.adaptTo(Session.class);
             return onSuccess.apply(session);
 
