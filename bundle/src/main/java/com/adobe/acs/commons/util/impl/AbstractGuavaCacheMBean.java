@@ -40,7 +40,7 @@ import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;
 
-public abstract class AbstractGuavaCacheMBean<K, V> extends AnnotatedStandardMBean implements GenericCacheMBean {
+public abstract class AbstractGuavaCacheMBean<K, V> extends AbstractCacheMBean<K,V> implements GenericCacheMBean {
 
     public <T> AbstractGuavaCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException {
         super(implementation, mbeanInterface);
@@ -52,35 +52,14 @@ public abstract class AbstractGuavaCacheMBean<K, V> extends AnnotatedStandardMBe
 
     protected abstract Cache<K, V> getCache();
 
-    protected abstract long getBytesLength(V cacheObj);
-
-    protected abstract void addCacheData(Map<String, Object> data, V cacheObj);
-
-    protected abstract String toString(V cacheObj) throws Exception;
-
-    protected abstract CompositeType getCacheEntryType() throws OpenDataException;
-
     @Override
     public final void clearCache() {
         getCache().invalidateAll();
     }
 
-    @Override
-    public final long getCacheEntriesCount() {
-        return getCache().size();
-    }
-
-    @Override
-    public final String getCacheSize() {
-        // Iterate through the cache entries and compute the total size of byte array.
-        long size = 0L;
-        ConcurrentMap<K, V> cacheAsMap = getCache().asMap();
-        for (final Map.Entry<K, V> entry : cacheAsMap.entrySet()) {
-            size += getBytesLength(entry.getValue());
-        }
-
-        // Convert bytes to human-friendly format
-        return FileUtils.byteCountToDisplaySize(size);
+    @Override protected final Map<K, V> getCacheAsMap()
+    {
+        return getCache().asMap();
     }
 
     @Override
@@ -147,49 +126,5 @@ public abstract class AbstractGuavaCacheMBean<K, V> extends AnnotatedStandardMBe
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         return tabularData;
-    }
-
-    @Override
-    public final TabularData getCacheContents() throws OpenDataException {
-        final CompositeType cacheEntryType = getCacheEntryType();
-
-        final TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType("Cache Entries", "Cache Entries", cacheEntryType, new String[] { "Cache Key" }));
-
-        ConcurrentMap<K, V> cacheAsMap = getCache().asMap();
-        for (final Map.Entry<K, V> entry : cacheAsMap.entrySet()) {
-            final Map<String, Object> data = new HashMap<String, Object>();
-            data.put("Cache Key", entry.getKey().toString());
-
-            V cacheObj = entry.getValue();
-            if (cacheObj != null) {
-                addCacheData(data, cacheObj);
-            }
-
-            tabularData.put(new CompositeDataSupport(cacheEntryType, data));
-        }
-
-        return tabularData;
-    }
-
-    @Override
-    public String getCacheEntry(String cacheKeyStr) throws Exception {
-        K cacheKey = null;
-
-        for (K cacheKeyTmp : getCache().asMap().keySet()) {
-            if (StringUtils.equals(cacheKeyStr, cacheKeyTmp.toString())) {
-                cacheKey = cacheKeyTmp;
-                break;
-            }
-        }
-
-        if (cacheKey != null) {
-            V persistenceObject = getCache().getIfPresent(cacheKey);
-            if (persistenceObject != null) {
-                return toString(persistenceObject);
-            }
-        }
-
-        return "Invalid cache key parameter.";
     }
 }

@@ -275,8 +275,8 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     protected void activate(Map<String, Object> configs) {
 
         // PIDs of global cache handling rules.
-        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs
-                .get(PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
+        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get
+                (PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();
@@ -362,7 +362,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    @SuppressWarnings("squid:S3776")
     public boolean deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                        HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException,
             HttpCacheDataStreamException, HttpCachePersistenceException {
@@ -400,6 +399,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         // Copy the cached data into the servlet output stream.
         try {
             serveCacheContentIntoResponse(response, cacheContent);
+
             if (log.isDebugEnabled()) {
                 log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
             }
@@ -486,7 +486,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    @SuppressWarnings("squid:S3776")
     public void invalidateCache(String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
 
         // Find out all the cache config which has this path applicable for invalidation.
@@ -527,14 +526,13 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     }
 
-
     //-------------------------<Mbean specific implementation>
+
     public HttpCacheEngineImpl() throws NotCompliantMBeanException {
         super(HttpCacheEngineMBean.class);
     }
 
     @Override
-    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredHttpCacheRules() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(
@@ -563,7 +561,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredHttpCacheConfigs() throws OpenDataException {
         // @formatter:off
         // Exposing all google guava stats.
@@ -598,7 +595,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Override
-    @SuppressWarnings("squid:S1192")
     public TabularData getRegisteredPersistenceStores() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(
@@ -632,7 +628,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             throws IOException {
         try {
             IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
-        } catch (IllegalStateException ex) {
+        } catch(IllegalStateException ex) {
             // in this case, either the writer has already been obtained or the response doesn't support getOutputStream()
             IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter(), response.getCharacterEncoding());
         }
