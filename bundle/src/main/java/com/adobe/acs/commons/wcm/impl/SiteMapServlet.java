@@ -109,7 +109,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(boolValue = DEFAULT_INCLUDE_INHERITANCE_VALUE, label = "Include Inherit Value", description = "If true searches for the frequency and priority attribute in the current page if null looks in the parent.")
     private static final String PROP_INCLUDE_INHERITANCE_VALUE = "include.inherit";
 
-    @Property(boolValue = DEFAULT_EXTENSIONLESS_URLS, label = "Extensionless URLs", description = "If true, page links included in sitemap are generated without .html extensionh, e.g. /content/geometrixx/en.")
+    @Property(boolValue = DEFAULT_EXTENSIONLESS_URLS, label = "Extensionless URLs", description = "If true, page links included in sitemap are generated without .html extension, e.g. /content/geometrixx/en.")
     private static final String PROP_EXTENSIONLESS_URLS = "extensionless.urls";
     
     @Property(boolValue = DEFAULT_TRAILING_SLASH, label = "Trailing Slash for Extensionless URLs", description = "Only relevant if Extensionless URLs is selected.  If true, extensionless page links include a trailing slash, e.g. /content/geometrixx/en/.")
