@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+### Added
+
+- #1225 - Extension to the workflow delegation process step. It allows to configure the delegation workflows in /conf
+
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.13.0...HEAD
 
 ## [3.14.0] - 2018-01-18
