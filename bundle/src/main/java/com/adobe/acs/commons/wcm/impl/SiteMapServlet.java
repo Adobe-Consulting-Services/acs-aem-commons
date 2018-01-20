@@ -82,7 +82,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private static final String DEFAULT_EXTERNALIZER_DOMAIN = "publish";
 
     private static final boolean DEFAULT_EXTENSIONLESS_URLS = false;
-    
+
     private static final boolean DEFAULT_TRAILING_SLASH = false;
 
     @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
@@ -111,9 +111,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     @Property(boolValue = DEFAULT_EXTENSIONLESS_URLS, label = "Extensionless URLs", description = "If true, page links included in sitemap are generated without .html extension, e.g. /content/geometrixx/en.")
     private static final String PROP_EXTENSIONLESS_URLS = "extensionless.urls";
-    
+
     @Property(boolValue = DEFAULT_TRAILING_SLASH, label = "Trailing Slash for Extensionless URLs", description = "Only relevant if Extensionless URLs is selected.  If true, extensionless page links include a trailing slash, e.g. /content/geometrixx/en/.")
-    private static final String PROP_TRAILING_SLASH = "trailing.slash";    
+    private static final String PROP_TRAILING_SLASH = "trailing.slash";
 
     @Property(label = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
     private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
@@ -142,7 +142,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private String characterEncoding;
 
     private boolean extensionlessUrls;
-    
+
     private boolean trailingSlash;
 
     @Activate
@@ -243,7 +243,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         if (!extensionlessUrls) {
             loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s.html", page.getPath()));
         } else {
-        		String urlFormat = trailingSlash ? "%s/" : "%s";
+            String urlFormat = trailingSlash ? "%s/" : "%s";
             loc = externalizer.externalLink(resolver, externalizerDomain, String.format(urlFormat, page.getPath()));
         }
 
