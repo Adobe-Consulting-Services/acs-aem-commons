@@ -7,7 +7,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.13.0...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.1...HEAD
+
+## [3.14.1] - 2018-01-21
+
+### Added
+
+- #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
 
 ## [3.14.0] - 2018-01-18
 
@@ -16,7 +22,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #989 - Dynamic Loading for optional Touch UI ClientLibraries.
 - #1218 - New Report Builder Feature.
 - #1228 - Added config option to have extensionless URLs in sitemap.
-- #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
 
 ### Changed
 
