@@ -164,7 +164,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY), null);
         this.extensionlessUrls = PropertiesUtil.toBoolean(properties.get(PROP_EXTENSIONLESS_URLS),
                 DEFAULT_EXTENSIONLESS_URLS);
-        this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH), DEFAULT_REMOVE_TRAILING_SLASH);
+        this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH), 
+                DEFAULT_REMOVE_TRAILING_SLASH);
     }
 
     @Override
