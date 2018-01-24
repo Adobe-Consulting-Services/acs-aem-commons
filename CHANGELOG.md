@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.0...HEAD
 
+### Fixed
+
+- #1231 - Do not set fieldLabel or fieldDescription on radiogroup components.
+
 ## [3.14.0] - 2018-01-18
 
 ### Added

@@ -44,6 +44,8 @@ public abstract class RadioComponent extends FieldComponent {
         setResourceType("granite/ui/components/foundation/form/radiogroup");
         getComponentMetadata().put("vertical", hasOption("vertical"));
         getComponentMetadata().put("text", getFieldDefinition().name());
+        getComponentMetadata().remove("fieldLabel");
+        getComponentMetadata().remove("fieldDescription");
     }
 
     @Override
