@@ -47,6 +47,10 @@
             result[param[0]] = param[1];
         });
 
+        if (result.content === undefined) {
+            return undefined;
+        }
+
         return decodeURIComponent(result.content);
     }
 
@@ -83,17 +87,19 @@
             children = getChildEditables(editable.getParent()),
             isWithin = true, currentLimit = "";
 
-        $.ajax( { url: path + ".2.json", async: false } ).done(function(data){
-            if(_.isEmpty(data) || !data[ACS_COMPONENTS_LIMIT]){
+        if (path !== undefined) {
+            $.ajax({url: path + ".2.json", async: false}).done(function (data) {
+              if (_.isEmpty(data) || !data[ACS_COMPONENTS_LIMIT]) {
                 return;
-            }
+              }
 
-            currentLimit = data[ACS_COMPONENTS_LIMIT];
+              currentLimit = data[ACS_COMPONENTS_LIMIT];
 
-            var limit = parseInt(data[ACS_COMPONENTS_LIMIT]);
+              var limit = parseInt(data[ACS_COMPONENTS_LIMIT]);
 
-            isWithin = children.length <= limit;
-        });
+              isWithin = children.length <= limit;
+            });
+        }
 
         if(!isWithin){
             showErrorAlert("Limit exceeded, allowed - " + currentLimit);

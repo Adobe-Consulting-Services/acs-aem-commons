@@ -54,6 +54,10 @@
             result[param[0]] = param[1];
         });
 
+        if (result.content === undefined) {
+            return undefined;
+        }
+
         return decodeURIComponent(result.content);
     }
 
