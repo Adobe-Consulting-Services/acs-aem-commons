@@ -1,3 +1,13 @@
+/*
+ * #%L ACS AEM Commons Bundle %% Copyright (C) 2017 Adobe %% Licensed under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License. #L%
+ */
 
 package com.adobe.acs.commons.users.impl;
 
@@ -58,8 +68,8 @@ public class EnsureAce {
      * @throws RepositoryException
      */
     @SuppressWarnings("squid:S3776")
-    public int ensureAces(ResourceResolver resourceResolver, Authorizable authorizable, AbstractAuthorizable serviceUser)
-            throws RepositoryException {
+    public int ensureAces(ResourceResolver resourceResolver, Authorizable authorizable,
+            AbstractAuthorizable serviceUser) throws RepositoryException {
         int failures = 0;
         final Session session = resourceResolver.adaptTo(Session.class);
 
@@ -151,8 +161,9 @@ public class EnsureAce {
             }
 
             // Add ACE to the ACL
-            acl.addEntry(authorizable.getPrincipal(), ace.getPrivileges(accessControlManager)
-                    .toArray(new Privilege[] {}), ace.isAllow(), restrictions, multiRestrictions);
+            acl.addEntry(authorizable.getPrincipal(),
+                    ace.getPrivileges(accessControlManager).toArray(new Privilege[] {}), ace.isAllow(), restrictions,
+                    multiRestrictions);
 
             // Update the ACL on the content
             accessControlManager.setPolicy(ace.getContentPath(), acl);
@@ -175,8 +186,8 @@ public class EnsureAce {
      *            the Service User
      * @throws RepositoryException
      */
-    public void removeAces(ResourceResolver resourceResolver, Authorizable authorizable, AbstractAuthorizable serviceUser)
-            throws RepositoryException {
+    public void removeAces(ResourceResolver resourceResolver, Authorizable authorizable,
+            AbstractAuthorizable serviceUser) throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager =
