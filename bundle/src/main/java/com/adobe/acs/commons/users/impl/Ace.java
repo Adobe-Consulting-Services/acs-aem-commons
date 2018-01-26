@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.principals.impl;
+package com.adobe.acs.commons.users.impl;
 
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.collections.CollectionUtils;

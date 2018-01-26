@@ -9,7 +9,7 @@
  * specific language governing permissions and limitations under the License. #L%
  */
 
-package com.adobe.acs.commons.principals.impl;
+package com.adobe.acs.commons.users.impl;
 
 import java.util.ArrayList;
 import java.util.List;

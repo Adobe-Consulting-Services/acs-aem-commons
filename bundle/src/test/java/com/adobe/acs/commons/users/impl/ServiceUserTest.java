@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.principals.impl;
+package com.adobe.acs.commons.users.impl;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

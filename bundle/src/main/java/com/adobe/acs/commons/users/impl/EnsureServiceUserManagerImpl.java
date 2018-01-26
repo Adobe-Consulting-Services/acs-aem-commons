@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.principals.impl;
+package com.adobe.acs.commons.users.impl;
 
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.lang.StringUtils;

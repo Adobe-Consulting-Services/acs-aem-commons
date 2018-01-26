@@ -1,0 +1,268 @@
+package com.adobe.acs.commons.users.impl;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.api.security.user.Authorizable;
+import org.apache.jackrabbit.api.security.user.User;
+import org.apache.jackrabbit.api.security.user.UserManager;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.jcr.RepositoryException;
+import java.util.Collections;
+import java.util.Map;
+
+@Component(
+        label = "ACS AEM Commons - Ensure Service User",
+        configurationFactory = true,
+        metatype = true,
+        immediate = true,
+        policy = ConfigurationPolicy.REQUIRE
+)
+@Properties({
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Ensure Service User: {operation} {principalName}"
+        )
+})
+@Service(value = EnsureServiceUser.class)
+public final class EnsureServiceUser {
+    private static final Logger log = LoggerFactory.getLogger(EnsureServiceUser.class);
+
+
+    private static final String SERVICE_NAME = "ensure-service-user";
+    private static final Map<String, Object> AUTH_INFO;
+
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
+
+    private ServiceUser serviceUser = null;
+    private Operation operation = null;
+
+    public enum Operation {
+        ADD,
+        REMOVE
+    }
+
+    public static boolean DEFAULT_ENSURE_IMMEDIATELY = true;
+    @Property(label = "Ensure immediately",
+            boolValue = true,
+            description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean."
+    )
+    public static final String PROP_ENSURE_IMMEDIATELY = "ensure-immediately";
+
+
+    public static final String DEFAULT_OPERATION = "add";
+    @Property(label = "Operation",
+            description = "Defines if the service user (principal name) should be adjusted to align with this config or removed completely",
+            options = {
+                    @PropertyOption(name = "add", value = "Ensure existence (add)"),
+                    @PropertyOption(name = "remove", value = "Ensure extinction (remove)")
+            }
+    )
+    public static final String PROP_OPERATION = "operation";
+
+    @Property(label = "Principal Name",
+            description = "The service user's principal name"
+    )
+    public static final String PROP_PRINCIPAL_NAME = "principalName";
+
+    @Property(label = "ACEs",
+            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
+            cardinality = Integer.MAX_VALUE
+    )
+    public static final String PROP_ACES = "aces";
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
+    @Reference
+    private EnsureAce ensureAce;
+
+    /**
+     * @return the Service User this OSGi Config represents
+     */
+    public ServiceUser getServiceUser() {
+        return serviceUser;
+    }
+
+    /**
+     * @return the Operation this OSGi Config represents
+     */
+    public Operation getOperation() {
+        return operation;
+    }
+
+    /**
+     * Entry point for Ensuring a System User.
+     *
+     * @param operation   the ensure operation to execute (ADD or REMOVE)
+     * @param serviceUser the service user configuration to ensure
+     * @throws EnsureServiceUserException
+     */
+    public void ensure(Operation operation, ServiceUser serviceUser) throws EnsureServiceUserException {
+        final long start = System.currentTimeMillis();
+
+        ResourceResolver resourceResolver = null;
+
+        try {
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+
+            if (Operation.ADD.equals(operation)) {
+                ensureExistance(resourceResolver, serviceUser);
+            } else if (Operation.REMOVE.equals(operation)) {
+                ensureRemoval(resourceResolver, serviceUser);
+            } else {
+                throw new EnsureServiceUserException("Unable to determine Ensure Service User operation Could not create or locate value system user (it is null).");
+            }
+
+            if (resourceResolver.hasChanges()) {
+                resourceResolver.commit();
+                log.debug("Persisted change to Service User [ {} ]", serviceUser.getPrincipalName());
+            } else {
+                log.debug("No changes required for Service User [ {} ]. Skipping...", serviceUser.getPrincipalName());
+            }
+
+            log.info("Successfully ensured [ {} ] of Service User [ {} ] in [ {} ms ]", new String[] { operation.toString(), getServiceUser().getPrincipalName(), String.valueOf(System.currentTimeMillis() - start) });
+        } catch (Exception e) {
+            throw new EnsureServiceUserException(String.format("Failed to ensure [ %s ] of Service User [ %s ]", operation.toString(), serviceUser.getPrincipalName()), e);
+        } finally {
+            if (resourceResolver != null) {
+                resourceResolver.close();
+            }
+        }
+    }
+
+    /**
+     * Ensures that the provided ServiceUser and configured ACEs exist. Any extra ACEs will be removed, and any missing ACEs added.
+     *
+     * @param resourceResolver the resource resolver to perform the user and ACE management
+     * @param serviceUser      the service user to ensure
+     * @throws RepositoryException
+     * @throws EnsureServiceUserException
+     */
+    @SuppressWarnings("squid:S2583")
+    protected void ensureExistance(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
+        final User systemUser = ensureSystemUser(resourceResolver, serviceUser);
+
+        if (systemUser != null) {
+            ensureAce.ensureAces(resourceResolver, systemUser, serviceUser);
+        } else {
+            log.error("Could not create or locate System User with principal name [ {} ]", serviceUser.getPrincipalName());
+        }
+    }
+
+    /**
+     * Ensures that the provided ServiceUser and any of its ACEs are removed.
+     *
+     * @param resourceResolver the resource resolver to perform the user and ACE management
+     * @param serviceUser      the service user to ensure
+     * @throws RepositoryException
+     * @throws EnsureServiceUserException
+     */
+    private void ensureRemoval(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
+        final User systemUser = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
+
+        ensureAce.removeAces(resourceResolver, systemUser, serviceUser);
+
+        if (systemUser != null) {
+            systemUser.remove();
+        }
+    }
+
+    /**
+     * Ensures a System User exists with the principal name provided by the Service User configuration.
+     *
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param serviceUser      the service user to ensure
+     * @return the System User; this should never return null
+     * @throws RepositoryException
+     * @throws EnsureServiceUserException
+     */
+    private User ensureSystemUser(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException, EnsureServiceUserException {
+        User user = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
+
+        if (user == null) {
+            final UserManager userManager = resourceResolver.adaptTo(UserManager.class);
+
+            // No principal found with this name; create the system user
+            log.debug("Requesting creation of system user [ {} ] at [ {} ]", serviceUser.getPrincipalName(), serviceUser.getIntermediatePath());
+            user = userManager.createSystemUser(serviceUser.getPrincipalName(), serviceUser.getIntermediatePath());
+            log.debug("Created system user at [ {} ]", user.getPath());
+        }
+
+        return user;
+    }
+
+    /**
+     * Locates a System User by principal name, or null. Note, if a rep:User can be found but it is NOT a system user, this method will throw an exception.
+     *
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param principalName    the principal name
+     * @return the System User or null
+     * @throws RepositoryException
+     * @throws EnsureServiceUserException
+     */
+    private User findSystemUser(ResourceResolver resourceResolver, String principalName) throws RepositoryException, EnsureServiceUserException {
+        UserManager userManager = resourceResolver.adaptTo(UserManager.class);
+        User user = null;
+
+        // Handle the actual user creation
+
+        Authorizable authorizable = userManager.getAuthorizable(principalName);
+
+        if (authorizable != null) {
+            // Am authorizable was found with this name; check if this is a system user
+            if (authorizable instanceof User) {
+                user = (User) authorizable;
+                if (!user.isSystemUser()) {
+                    throw new EnsureServiceUserException(String.format("User [ %s ] ensureExistance at [ %s ] but is NOT a system user", principalName, user.getPath()));
+                }
+            } else {
+                throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a user", principalName, authorizable.getPath()));
+            }
+        }
+
+        return user;
+    }
+
+    @Activate
+    protected void activate(final Map<String, Object> config) {
+        boolean ensureImmediately = PropertiesUtil.toBoolean(config.get(PROP_ENSURE_IMMEDIATELY), DEFAULT_ENSURE_IMMEDIATELY);
+
+        String operationStr = StringUtils.upperCase(PropertiesUtil.toString(config.get(PROP_OPERATION), DEFAULT_OPERATION));
+        try {
+            this.operation = Operation.valueOf(operationStr);
+            // Parse OSGi Configuration into Service User object
+            this.serviceUser = new ServiceUser(config);
+
+            if (ensureImmediately) {
+                // Ensure
+                ensure(operation, getServiceUser());
+            } else {
+                log.info("This Service User is configured to NOT ensure immediately. Please ensure this Service User via the JMX MBean.");
+            }
+
+
+        } catch (EnsureServiceUserException e) {
+            log.error("Unable to ensure Service User [ {} ]", PropertiesUtil.toString(config.get(PROP_PRINCIPAL_NAME), "Undefined Service User Principal Name"), e);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown Ensure Service User operation [ " +  operationStr + " ]", e);
+        }
+    }
+
+
+
+
+}
