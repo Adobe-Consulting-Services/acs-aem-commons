@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.4...HEAD
 
+### Fixed
+
+- #1230 - Fixed issue causing XHR requests to undefined.2.json from TouchUI Parsys-related ClientLibs
+
 ## [3.14.4] - 2018-01-24
 
 ### Fixed
