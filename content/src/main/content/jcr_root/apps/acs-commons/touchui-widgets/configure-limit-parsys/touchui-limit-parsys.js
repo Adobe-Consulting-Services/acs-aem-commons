@@ -89,15 +89,15 @@
 
         if (path !== undefined) {
             $.ajax({url: path + ".2.json", async: false}).done(function (data) {
-              if (_.isEmpty(data) || !data[ACS_COMPONENTS_LIMIT]) {
-                return;
-              }
+                if (_.isEmpty(data) || !data[ACS_COMPONENTS_LIMIT]) {
+                    return;
+                }
 
-              currentLimit = data[ACS_COMPONENTS_LIMIT];
+                currentLimit = data[ACS_COMPONENTS_LIMIT];
 
-              var limit = parseInt(data[ACS_COMPONENTS_LIMIT]);
+                var limit = parseInt(currentLimit);
 
-              isWithin = children.length <= limit;
+                isWithin = children.length <= limit;
             });
         }
 
