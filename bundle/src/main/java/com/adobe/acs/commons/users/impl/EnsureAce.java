@@ -58,7 +58,7 @@ public class EnsureAce {
      * @throws RepositoryException
      */
     @SuppressWarnings("squid:S3776")
-    public int ensureAces(ResourceResolver resourceResolver, Authorizable authorizable, ServiceUser serviceUser)
+    public int ensureAces(ResourceResolver resourceResolver, Authorizable authorizable, AbstractAuthorizable serviceUser)
             throws RepositoryException {
         int failures = 0;
         final Session session = resourceResolver.adaptTo(Session.class);
@@ -175,7 +175,7 @@ public class EnsureAce {
      *            the Service User
      * @throws RepositoryException
      */
-    public void removeAces(ResourceResolver resourceResolver, Authorizable authorizable, ServiceUser serviceUser)
+    public void removeAces(ResourceResolver resourceResolver, Authorizable authorizable, AbstractAuthorizable serviceUser)
             throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
