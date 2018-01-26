@@ -59,12 +59,14 @@ public abstract class AbstractAuthorizable {
         final String[] acesProperty =
                 PropertiesUtil.toStringArray(config.get(EnsureServiceUser.PROP_ACES), new String[0]);
         for (String entry : acesProperty) {
-            try {
-                aces.add(new Ace(entry));
-            } catch (EnsureAuthorizableException e) {
-                log.warn(
-                        "Malformed ACE config [ " + entry + " ] for Service User [ "
-                                + StringUtils.defaultIfEmpty(this.principalName, "NOT PROVIDED") + " ]", e);
+            if(StringUtils.isNotBlank(entry)) {
+                try {
+                    aces.add(new Ace(entry));
+                } catch (EnsureAuthorizableException e) {
+                    log.warn(
+                            "Malformed ACE config [ " + entry + " ] for Service User [ "
+                                    + StringUtils.defaultIfEmpty(this.principalName, "NOT PROVIDED") + " ]", e);
+                }
             }
         }
     }
