@@ -25,18 +25,14 @@ import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 @Component
 @Properties({ @Property(label = "MBean Name", name = "jmx.objectname",
         value = "com.adobe.acs.commons:type=Ensure Service User", propertyPrivate = true) })
-@References({
-        @Reference(referenceInterface = EnsureServiceUser.class, policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
-        @Reference(referenceInterface = EnsureGroup.class, policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) })
+@References({ @Reference(referenceInterface = EnsureAuthorizable.class, policy = ReferencePolicy.DYNAMIC,
+        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) })
 @Service(value = DynamicMBean.class)
 public class EnsureAuthorizableManagerImpl extends AnnotatedStandardMBean implements EnsureAuthorizableManager {
 
     private final Logger log = LoggerFactory.getLogger(EnsureAuthorizableManagerImpl.class);
 
-    private Map<String, EnsureServiceUser> ensureServiceUsers = new ConcurrentHashMap<String, EnsureServiceUser>();
-    private Map<String, EnsureGroup> ensureGroups = new ConcurrentHashMap<>();
+    private Map<String, EnsureAuthorizable> ensureAuthorizables = new ConcurrentHashMap<>();
 
     public EnsureAuthorizableManagerImpl() throws NotCompliantMBeanException {
         super(EnsureAuthorizableManager.class);
@@ -44,73 +40,41 @@ public class EnsureAuthorizableManagerImpl extends AnnotatedStandardMBean implem
 
     @Override
     public final void ensureAll() {
-        for (final EnsureServiceUser ensureServiceUser : ensureServiceUsers.values()) {
+        for (final EnsureAuthorizable ensureAuthorizable : ensureAuthorizables.values()) {
             try {
-                ensureServiceUser.ensure(ensureServiceUser.getOperation(), ensureServiceUser.getServiceUser());
+                ensureAuthorizable.ensure(ensureAuthorizable.getOperation(), ensureAuthorizable.getAuthorizable());
             } catch (EnsureAuthorizableException e) {
-                log.error("Error Ensuring Service User [ {} ]", ensureServiceUser.getServiceUser().getPrincipalName(),
-                        e);
-            }
-        }
-
-        for (final EnsureGroup ensureGroup : ensureGroups.values()) {
-            try {
-                ensureGroup.ensure(ensureGroup.getOperation(), ensureGroup.getGroup());
-            } catch (EnsureAuthorizableException e) {
-                log.error("Error Ensuring Group [ {} ]", ensureGroup.getGroup().getPrincipalName(), e);
+                log.error("Error Ensuring Authorizable [ {} ]", ensureAuthorizable.getAuthorizable()
+                        .getPrincipalName(), e);
             }
         }
     }
 
     @Override
     public final void ensurePrincipalName(String principalName) {
-        for (final EnsureServiceUser ensureServiceUser : ensureServiceUsers.values()) {
-            if (StringUtils.equals(principalName, ensureServiceUser.getServiceUser().getPrincipalName())) {
+        for (final EnsureAuthorizable ensureAuthorizable : ensureAuthorizables.values()) {
+            if (StringUtils.equals(principalName, ensureAuthorizable.getAuthorizable().getPrincipalName())) {
                 try {
-                    ensureServiceUser.ensure(ensureServiceUser.getOperation(), ensureServiceUser.getServiceUser());
+                    ensureAuthorizable.ensure(ensureAuthorizable.getOperation(), ensureAuthorizable.getAuthorizable());
                 } catch (EnsureAuthorizableException e) {
-                    log.error("Error Ensuring Service User [ {} ]", ensureServiceUser.getServiceUser()
+                    log.error("Error Ensuring Authorizable [ {} ]", ensureAuthorizable.getAuthorizable()
                             .getPrincipalName(), e);
                 }
             }
         }
+    }
 
-        for (final EnsureGroup ensureGroup : ensureGroups.values()) {
-            if (StringUtils.equals(principalName, ensureGroup.getGroup().getPrincipalName())) {
-                try {
-                    ensureGroup.ensure(ensureGroup.getOperation(), ensureGroup.getGroup());
-                } catch (EnsureAuthorizableException e) {
-                    log.error("Error Ensuring Group [ {} ]", ensureGroup.getGroup().getPrincipalName(), e);
-                }
-            }
+    protected final void bindEnsureAuthorizable(final EnsureAuthorizable service, final Map<Object, Object> props) {
+        final String type = PropertiesUtil.toString(props.get("service.pid"), null);
+        if (type != null) {
+            this.ensureAuthorizables.put(type, service);
         }
     }
 
-    protected final void bindEnsureServiceUser(final EnsureServiceUser service, final Map<Object, Object> props) {
+    protected final void unbindEnsureAuthorizable(final EnsureAuthorizable service, final Map<Object, Object> props) {
         final String type = PropertiesUtil.toString(props.get("service.pid"), null);
         if (type != null) {
-            this.ensureServiceUsers.put(type, service);
-        }
-    }
-
-    protected final void unbindEnsureServiceUser(final EnsureServiceUser service, final Map<Object, Object> props) {
-        final String type = PropertiesUtil.toString(props.get("service.pid"), null);
-        if (type != null) {
-            this.ensureServiceUsers.remove(type);
-        }
-    }
-
-    protected final void bindEnsureGroup(final EnsureGroup service, final Map<Object, Object> props) {
-        final String type = PropertiesUtil.toString(props.get("service.pid"), null);
-        if (type != null) {
-            this.ensureGroups.put(type, service);
-        }
-    }
-
-    protected final void unbindEnsureGroup(final EnsureGroup service, final Map<Object, Object> props) {
-        final String type = PropertiesUtil.toString(props.get("service.pid"), null);
-        if (type != null) {
-            this.ensureGroups.remove(type);
+            this.ensureAuthorizables.remove(type);
         }
     }
 }

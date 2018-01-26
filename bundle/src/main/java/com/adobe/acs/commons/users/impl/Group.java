@@ -43,9 +43,4 @@ public class Group extends AbstractAuthorizable {
     public List<String> getMissingMemberOf() {
         return memberOf.stream().filter(group -> !membership.contains(group)).collect(Collectors.toList());
     }
-
-    public static enum Operation {
-
-        ADD, REMOVE
-    }
 }

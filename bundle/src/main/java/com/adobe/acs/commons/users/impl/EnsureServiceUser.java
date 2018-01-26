@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
         immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Properties({ @Property(name = "webconsole.configurationFactory.nameHint",
         value = "Ensure Service User: {operation} {principalName}") })
-@Service(value = EnsureServiceUser.class)
-public final class EnsureServiceUser {
+@Service(value = { EnsureServiceUser.class, EnsureAuthorizable.class })
+public final class EnsureServiceUser implements EnsureAuthorizable {
 
     @Property(label = "Ensure immediately", boolValue = true,
             description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean.")
@@ -57,7 +57,7 @@ public final class EnsureServiceUser {
     }
 
     private ServiceUser serviceUser = null;
-    private Group.Operation operation = null;
+    private Operation operation = null;
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
@@ -65,17 +65,19 @@ public final class EnsureServiceUser {
     private EnsureAce ensureAce;
 
     /**
-     * @return the Service User this OSGi Config represents
+     * @return the Operation this OSGi Config represents
      */
-    public ServiceUser getServiceUser() {
-        return serviceUser;
+    @Override
+    public Operation getOperation() {
+        return operation;
     }
 
     /**
-     * @return the Operation this OSGi Config represents
+     * @return the Service User this OSGi Config represents
      */
-    public Group.Operation getOperation() {
-        return operation;
+    @Override
+    public ServiceUser getAuthorizable() {
+        return serviceUser;
     }
 
     /**
@@ -87,7 +89,8 @@ public final class EnsureServiceUser {
      *            the service user configuration to ensure
      * @throws EnsureAuthorizableException
      */
-    public void ensure(Group.Operation operation, ServiceUser serviceUser) throws EnsureAuthorizableException {
+    @Override
+    public void ensure(Operation operation, AbstractAuthorizable serviceUser) throws EnsureAuthorizableException {
         final long start = System.currentTimeMillis();
 
         ResourceResolver resourceResolver = null;
@@ -95,10 +98,10 @@ public final class EnsureServiceUser {
         try {
             resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
-            if (Group.Operation.ADD.equals(operation)) {
-                ensureExistance(resourceResolver, serviceUser);
-            } else if (Group.Operation.REMOVE.equals(operation)) {
-                ensureRemoval(resourceResolver, serviceUser);
+            if (Operation.ADD.equals(operation)) {
+                ensureExistance(resourceResolver, (ServiceUser) serviceUser);
+            } else if (Operation.REMOVE.equals(operation)) {
+                ensureRemoval(resourceResolver, (ServiceUser) serviceUser);
             } else {
                 throw new EnsureAuthorizableException(
                         "Unable to determine Ensure Service User operation Could not create or locate value system user (it is null).");
@@ -113,7 +116,7 @@ public final class EnsureServiceUser {
 
             log.info(
                     "Successfully ensured [ {} ] of Service User [ {} ] in [ {} ms ]",
-                    new String[] { operation.toString(), getServiceUser().getPrincipalName(),
+                    new String[] { operation.toString(), getAuthorizable().getPrincipalName(),
                             String.valueOf(System.currentTimeMillis() - start) });
         } catch (Exception e) {
             throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Service User [ %s ]",
@@ -160,7 +163,7 @@ public final class EnsureServiceUser {
      * @throws EnsureAuthorizableException
      */
     private void ensureRemoval(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException,
-                                                                                                  EnsureAuthorizableException {
+            EnsureAuthorizableException {
         final User systemUser = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
 
         ensureAce.removeAces(resourceResolver, systemUser, serviceUser);
@@ -211,7 +214,7 @@ public final class EnsureServiceUser {
      * @throws EnsureAuthorizableException
      */
     private User findSystemUser(ResourceResolver resourceResolver, String principalName) throws RepositoryException,
-                                                                                                EnsureAuthorizableException {
+            EnsureAuthorizableException {
         UserManager userManager = resourceResolver.adaptTo(UserManager.class);
         User user = null;
 
@@ -245,13 +248,13 @@ public final class EnsureServiceUser {
         String operationStr =
                 StringUtils.upperCase(PropertiesUtil.toString(config.get(PROP_OPERATION), DEFAULT_OPERATION));
         try {
-            this.operation = Group.Operation.valueOf(operationStr);
+            this.operation = Operation.valueOf(operationStr);
             // Parse OSGi Configuration into Service User object
             this.serviceUser = new ServiceUser(config);
 
             if (ensureImmediately) {
                 // Ensure
-                ensure(operation, getServiceUser());
+                ensure(operation, getAuthorizable());
             } else {
                 log.info("This Service User is configured to NOT ensure immediately. Please ensure this Service User via the JMX MBean.");
             }
