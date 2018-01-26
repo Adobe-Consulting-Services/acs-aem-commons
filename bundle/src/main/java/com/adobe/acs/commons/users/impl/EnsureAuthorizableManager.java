@@ -5,7 +5,7 @@ import com.adobe.granite.jmx.annotation.Description;
 import com.adobe.granite.jmx.annotation.Name;
 
 @ProviderType
-@Description("ACS AEM Commons - Ensure Service User MBean")
+@Description("ACS AEM Commons - Ensure Authorizable MBean")
 public interface EnsureAuthorizableManager {
 
     @Description("Execute all Ensure Service User & Ensure Group configurations")
