@@ -2,8 +2,8 @@ package com.adobe.acs.commons.users.impl;
 
 import org.apache.commons.lang.ArrayUtils;
 
-public final class ProtectedSystemUsers {
-    private ProtectedSystemUsers() {}
+public final class ProtectedAuthorizables {
+    private ProtectedAuthorizables() {}
 
     private static final String[] PRINCIPAL_NAMES = new String[] {
 

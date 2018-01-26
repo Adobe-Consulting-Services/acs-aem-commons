@@ -50,7 +50,7 @@ public abstract class AbstractAuthorizable {
         // Check the principal name for validity
         if (StringUtils.isBlank(this.principalName)) {
             throw new EnsureAuthorizableException("No Principal Name provided to Ensure Service User");
-        } else if (ProtectedSystemUsers.isProtected(this.principalName)) {
+        } else if (ProtectedAuthorizables.isProtected(this.principalName)) {
             throw new EnsureAuthorizableException(String.format(
                     "[ %s ] is an System User provided by AEM or ACS AEM Commons. You cannot ensure this user.",
                     this.principalName));
