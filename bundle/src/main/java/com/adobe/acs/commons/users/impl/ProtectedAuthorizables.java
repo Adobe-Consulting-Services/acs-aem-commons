@@ -138,7 +138,21 @@ public final class ProtectedAuthorizables {
                 "acs-commons-twitter-updater-service",
                 "acs-commons-review-task-asset-mover-service",
                 "acs-commons-automatic-package-replicator-service",
-                "acs-commons-manage-controlled-processes-service"
+                "acs-commons-manage-controlled-processes-service",
+
+                /** AEM Groups **/
+
+                "administrators",
+                "content-authors",
+                "contributor",
+                "dam-users",
+                "everyone",
+                "tag-administrators",
+                "template-authors",
+                "user-administrators",
+                "workflow-administrators",
+                "workflow-users",
+                "workflow-editors"
     };
 
     public static final boolean isProtected(String principalName) {
