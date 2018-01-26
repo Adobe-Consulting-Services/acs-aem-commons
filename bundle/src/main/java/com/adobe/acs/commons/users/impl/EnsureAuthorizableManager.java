@@ -6,11 +6,11 @@ import com.adobe.granite.jmx.annotation.Name;
 
 @ProviderType
 @Description("ACS AEM Commons - Ensure Service User MBean")
-public interface EnsureServiceUserManager {
+public interface EnsureAuthorizableManager {
 
-    @Description("Execute all Ensure Service User configurations")
+    @Description("Execute all Ensure Service User & Ensure Group configurations")
     void ensureAll();
 
-    @Description("Execute all Ensure Service User configurations for the provided principal name")
+    @Description("Execute all Ensure Service User and Ensure Group configurations for the provided principal name")
     void ensurePrincipalName(@Name(value="Principal Name")String principalName);
 }

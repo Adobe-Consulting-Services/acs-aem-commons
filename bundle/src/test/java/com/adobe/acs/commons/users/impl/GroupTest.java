@@ -16,7 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class GroupTest {
 
     @Test
-    public void testGroupMemberOf() throws EnsureServiceUserException {
+    public void testGroupMemberOf() throws EnsureAuthorizableException {
 
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureGroup.PROP_MEMBER_OF, new String[] { "contributors", "user-administrators" });
@@ -31,7 +31,7 @@ public class GroupTest {
     }
 
     @Test
-    public void testGroupMemberOf_missing() throws EnsureServiceUserException {
+    public void testGroupMemberOf_missing() throws EnsureAuthorizableException {
 
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureGroup.PROP_MEMBER_OF, new String[] { "contributors", "user-administrators" });

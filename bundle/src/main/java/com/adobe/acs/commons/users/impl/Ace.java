@@ -59,7 +59,7 @@ public final class Ace {
     private boolean exists = false;
 
     @SuppressWarnings("squid:S3776")
-    public Ace(String raw) throws EnsureServiceUserException {
+    public Ace(String raw) throws EnsureAuthorizableException {
         String[] segments = StringUtils.split(raw, PARAM_DELIMITER);
 
         for (String segment : segments) {
@@ -93,13 +93,13 @@ public final class Ace {
         validate(this.type, this.path, this.privilegeNames);
     }
 
-    protected void validate(String type, String path, List<String> privilegeNames) throws EnsureServiceUserException {
+    protected void validate(String type, String path, List<String> privilegeNames) throws EnsureAuthorizableException {
         if (!ArrayUtils.contains(new String[] { "allow", "deny"}, type)) {
-            throw new EnsureServiceUserException("Ensure Service User requires valid type. [ " + type + " ] type is invalid");
+            throw new EnsureAuthorizableException("Ensure Service User requires valid type. [ " + type + " ] type is invalid");
         } else if (!StringUtils.startsWith(path , "/")) {
-            throw new EnsureServiceUserException("Ensure Service User requires an absolute path. [ " + path + " ] path is invalid");
+            throw new EnsureAuthorizableException("Ensure Service User requires an absolute path. [ " + path + " ] path is invalid");
         } else if (privilegeNames.size() < 1) {
-            throw new EnsureServiceUserException("Ensure Service User requires at least 1 privilege to apply.");
+            throw new EnsureAuthorizableException("Ensure Service User requires at least 1 privilege to apply.");
         }
     }
 

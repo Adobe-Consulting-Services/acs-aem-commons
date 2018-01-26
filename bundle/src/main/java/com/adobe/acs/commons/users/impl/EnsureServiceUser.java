@@ -57,7 +57,7 @@ public final class EnsureServiceUser {
     }
 
     private ServiceUser serviceUser = null;
-    private Operation operation = null;
+    private Group.Operation operation = null;
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
@@ -74,7 +74,7 @@ public final class EnsureServiceUser {
     /**
      * @return the Operation this OSGi Config represents
      */
-    public Operation getOperation() {
+    public Group.Operation getOperation() {
         return operation;
     }
 
@@ -85,9 +85,9 @@ public final class EnsureServiceUser {
      *            the ensure operation to execute (ADD or REMOVE)
      * @param serviceUser
      *            the service user configuration to ensure
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
-    public void ensure(Operation operation, ServiceUser serviceUser) throws EnsureServiceUserException {
+    public void ensure(Group.Operation operation, ServiceUser serviceUser) throws EnsureAuthorizableException {
         final long start = System.currentTimeMillis();
 
         ResourceResolver resourceResolver = null;
@@ -95,12 +95,12 @@ public final class EnsureServiceUser {
         try {
             resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
-            if (Operation.ADD.equals(operation)) {
+            if (Group.Operation.ADD.equals(operation)) {
                 ensureExistance(resourceResolver, serviceUser);
-            } else if (Operation.REMOVE.equals(operation)) {
+            } else if (Group.Operation.REMOVE.equals(operation)) {
                 ensureRemoval(resourceResolver, serviceUser);
             } else {
-                throw new EnsureServiceUserException(
+                throw new EnsureAuthorizableException(
                         "Unable to determine Ensure Service User operation Could not create or locate value system user (it is null).");
             }
 
@@ -116,7 +116,7 @@ public final class EnsureServiceUser {
                     new String[] { operation.toString(), getServiceUser().getPrincipalName(),
                             String.valueOf(System.currentTimeMillis() - start) });
         } catch (Exception e) {
-            throw new EnsureServiceUserException(String.format("Failed to ensure [ %s ] of Service User [ %s ]",
+            throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Service User [ %s ]",
                     operation.toString(), serviceUser.getPrincipalName()), e);
         } finally {
             if (resourceResolver != null) {
@@ -134,11 +134,11 @@ public final class EnsureServiceUser {
      * @param serviceUser
      *            the service user to ensure
      * @throws RepositoryException
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
     @SuppressWarnings("squid:S2583")
     protected void ensureExistance(ResourceResolver resourceResolver, ServiceUser serviceUser)
-            throws RepositoryException, EnsureServiceUserException {
+            throws RepositoryException, EnsureAuthorizableException {
         final User systemUser = ensureSystemUser(resourceResolver, serviceUser);
 
         if (systemUser != null) {
@@ -157,10 +157,10 @@ public final class EnsureServiceUser {
      * @param serviceUser
      *            the service user to ensure
      * @throws RepositoryException
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
     private void ensureRemoval(ResourceResolver resourceResolver, ServiceUser serviceUser) throws RepositoryException,
-            EnsureServiceUserException {
+                                                                                                  EnsureAuthorizableException {
         final User systemUser = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
 
         ensureAce.removeAces(resourceResolver, systemUser, serviceUser);
@@ -179,10 +179,10 @@ public final class EnsureServiceUser {
      *            the service user to ensure
      * @return the System User; this should never return null
      * @throws RepositoryException
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
     private User ensureSystemUser(ResourceResolver resourceResolver, ServiceUser serviceUser)
-            throws RepositoryException, EnsureServiceUserException {
+            throws RepositoryException, EnsureAuthorizableException {
         User user = findSystemUser(resourceResolver, serviceUser.getPrincipalName());
 
         if (user == null) {
@@ -208,10 +208,10 @@ public final class EnsureServiceUser {
      *            the principal name
      * @return the System User or null
      * @throws RepositoryException
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
     private User findSystemUser(ResourceResolver resourceResolver, String principalName) throws RepositoryException,
-            EnsureServiceUserException {
+                                                                                                EnsureAuthorizableException {
         UserManager userManager = resourceResolver.adaptTo(UserManager.class);
         User user = null;
 
@@ -224,12 +224,12 @@ public final class EnsureServiceUser {
             if (authorizable instanceof User) {
                 user = (User) authorizable;
                 if (!user.isSystemUser()) {
-                    throw new EnsureServiceUserException(String.format(
+                    throw new EnsureAuthorizableException(String.format(
                             "User [ %s ] ensureExistance at [ %s ] but is NOT a system user", principalName,
                             user.getPath()));
                 }
             } else {
-                throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a user",
+                throw new EnsureAuthorizableException(String.format("Authorizable [ %s ] at [ %s ] is not a user",
                         principalName, authorizable.getPath()));
             }
         }
@@ -245,7 +245,7 @@ public final class EnsureServiceUser {
         String operationStr =
                 StringUtils.upperCase(PropertiesUtil.toString(config.get(PROP_OPERATION), DEFAULT_OPERATION));
         try {
-            this.operation = Operation.valueOf(operationStr);
+            this.operation = Group.Operation.valueOf(operationStr);
             // Parse OSGi Configuration into Service User object
             this.serviceUser = new ServiceUser(config);
 
@@ -256,7 +256,7 @@ public final class EnsureServiceUser {
                 log.info("This Service User is configured to NOT ensure immediately. Please ensure this Service User via the JMX MBean.");
             }
 
-        } catch (EnsureServiceUserException e) {
+        } catch (EnsureAuthorizableException e) {
             log.error("Unable to ensure Service User [ {} ]",
                     PropertiesUtil.toString(config.get(PROP_PRINCIPAL_NAME), "Undefined Service User Principal Name"),
                     e);

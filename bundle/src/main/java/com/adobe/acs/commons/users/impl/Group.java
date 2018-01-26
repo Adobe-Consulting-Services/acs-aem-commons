@@ -20,7 +20,7 @@ public class Group extends AbstractAuthorizable {
     private final List<String> memberOf;
     private final List<String> membership = new ArrayList<>();
 
-    public Group(Map<String, Object> config) throws EnsureServiceUserException {
+    public Group(Map<String, Object> config) throws EnsureAuthorizableException {
         super(config);
 
         String[] memberOfArr = PropertiesUtil.toStringArray(config.get(EnsureGroup.PROP_MEMBER_OF), new String[0]);
@@ -42,5 +42,10 @@ public class Group extends AbstractAuthorizable {
 
     public List<String> getMissingMemberOf() {
         return memberOf.stream().filter(group -> !membership.contains(group)).collect(Collectors.toList());
+    }
+
+    public static enum Operation {
+
+        ADD, REMOVE
     }
 }

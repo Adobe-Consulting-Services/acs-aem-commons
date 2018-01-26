@@ -22,7 +22,7 @@ public final class ServiceUser extends AbstractAuthorizable {
 
     private static final String PATH_SYSTEM_USERS = "/home/users/system";
 
-    public ServiceUser(Map<String, Object> config) throws EnsureServiceUserException {
+    public ServiceUser(Map<String, Object> config) throws EnsureAuthorizableException {
         super(config);
     }
 

@@ -79,7 +79,7 @@ public final class EnsureGroup {
     }
 
     private Group group = null;
-    private Operation operation = null;
+    private Group.Operation operation = null;
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
     @Reference
@@ -95,7 +95,7 @@ public final class EnsureGroup {
     /**
      * @return the Operation this OSGi Config represents
      */
-    public Operation getOperation() {
+    public Group.Operation getOperation() {
         return operation;
     }
 
@@ -106,9 +106,9 @@ public final class EnsureGroup {
      *            the ensure operation to execute (ADD or REMOVE)
      * @param group
      *            the group configuration to ensure
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
-    public void ensure(Operation operation, Group group) throws EnsureServiceUserException {
+    public void ensure(Group.Operation operation, Group group) throws EnsureAuthorizableException {
         final long start = System.currentTimeMillis();
 
         ResourceResolver resourceResolver = null;
@@ -116,12 +116,12 @@ public final class EnsureGroup {
         try {
             resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
-            if (Operation.ADD.equals(operation)) {
+            if (Group.Operation.ADD.equals(operation)) {
                 ensureExistance(resourceResolver, group);
-            } else if (Operation.REMOVE.equals(operation)) {
+            } else if (Group.Operation.REMOVE.equals(operation)) {
                 ensureRemoval(resourceResolver, group);
             } else {
-                throw new EnsureServiceUserException(
+                throw new EnsureAuthorizableException(
                         "Unable to determine Ensure Group operation Could not create or locate value group (it is null).");
             }
 
@@ -135,7 +135,7 @@ public final class EnsureGroup {
             log.info("Successfully ensured [ {} ] of Group [ {} ] in [ {} ms ]", new String[] { operation.toString(),
                     getGroup().getPrincipalName(), String.valueOf(System.currentTimeMillis() - start) });
         } catch (Exception e) {
-            throw new EnsureServiceUserException(String.format("Failed to ensure [ %s ] of Group [ %s ]",
+            throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Group [ %s ]",
                     operation.toString(), group.getPrincipalName()), e);
         } finally {
             if (resourceResolver != null) {
@@ -153,11 +153,11 @@ public final class EnsureGroup {
      * @param group
      *            the group to ensure
      * @throws RepositoryException
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
     @SuppressWarnings("squid:S2583")
     protected void ensureExistance(ResourceResolver resourceResolver, Group group) throws RepositoryException,
-            EnsureServiceUserException {
+                                                                                          EnsureAuthorizableException {
         final org.apache.jackrabbit.api.security.user.Group jcrGroup = ensureGroup(resourceResolver, group);
 
         if (jcrGroup != null) {
@@ -176,10 +176,10 @@ public final class EnsureGroup {
      * @param group
      *            the group to ensure
      * @throws RepositoryException
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
     private void ensureRemoval(ResourceResolver resourceResolver, Group group) throws RepositoryException,
-            EnsureServiceUserException {
+                                                                                      EnsureAuthorizableException {
         org.apache.jackrabbit.api.security.user.Group jcrGroup = findGroup(resourceResolver, group.getPrincipalName());
 
         ensureAce.removeAces(resourceResolver, jcrGroup, group);
@@ -199,10 +199,10 @@ public final class EnsureGroup {
      *            the group to ensure
      * @return the Group; this should never return null
      * @throws RepositoryException
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
     private org.apache.jackrabbit.api.security.user.Group ensureGroup(ResourceResolver resourceResolver, Group group)
-            throws RepositoryException, EnsureServiceUserException {
+            throws RepositoryException, EnsureAuthorizableException {
         org.apache.jackrabbit.api.security.user.Group jcrGroup = findGroup(resourceResolver, group.getPrincipalName());
 
         if (jcrGroup == null) {
@@ -228,10 +228,10 @@ public final class EnsureGroup {
      *            the principal name
      * @return the Group or null
      * @throws RepositoryException
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      */
     private org.apache.jackrabbit.api.security.user.Group findGroup(ResourceResolver resourceResolver,
-            String principalName) throws RepositoryException, EnsureServiceUserException {
+            String principalName) throws RepositoryException, EnsureAuthorizableException {
         UserManager userManager = resourceResolver.adaptTo(UserManager.class);
         org.apache.jackrabbit.api.security.user.Group group = null;
 
@@ -242,7 +242,7 @@ public final class EnsureGroup {
             if (authorizable instanceof org.apache.jackrabbit.api.security.user.Group) {
                 group = (org.apache.jackrabbit.api.security.user.Group) authorizable;
             } else {
-                throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a group",
+                throw new EnsureAuthorizableException(String.format("Authorizable [ %s ] at [ %s ] is not a group",
                         principalName, authorizable.getPath()));
             }
         }
@@ -260,14 +260,14 @@ public final class EnsureGroup {
      *            the Jackrabbit security group object
      * @param group
      *            the Group configuration object
-     * @throws EnsureServiceUserException
+     * @throws EnsureAuthorizableException
      *             if any of the groups in the config don't exist, or exist but are not groups
      * @throws RepositoryException
      *             if an error occurs while performing repository operations
      */
     private void ensureMembership(ResourceResolver resourceResolver,
-            org.apache.jackrabbit.api.security.user.Group jcrGroup, Group group) throws EnsureServiceUserException,
-            RepositoryException {
+            org.apache.jackrabbit.api.security.user.Group jcrGroup, Group group) throws EnsureAuthorizableException,
+                                                                                        RepositoryException {
         UserManager userManager = resourceResolver.adaptTo(UserManager.class);
 
         List<String> memberOf = group.getMemberOf();
@@ -294,7 +294,7 @@ public final class EnsureGroup {
                             (org.apache.jackrabbit.api.security.user.Group) authorizable;
                     groupToAdd.addMember(jcrGroup);
                 } else {
-                    throw new EnsureServiceUserException(String.format("Authorizable [ %s ] at [ %s ] is not a group",
+                    throw new EnsureAuthorizableException(String.format("Authorizable [ %s ] at [ %s ] is not a group",
                             groupName, authorizable.getPath()));
                 }
             }
@@ -328,7 +328,7 @@ public final class EnsureGroup {
         String operationStr =
                 StringUtils.upperCase(PropertiesUtil.toString(config.get(PROP_OPERATION), DEFAULT_OPERATION));
         try {
-            this.operation = Operation.valueOf(operationStr);
+            this.operation = Group.Operation.valueOf(operationStr);
             // Parse OSGi Configuration into Group object
             this.group = new Group(config);
 
@@ -339,7 +339,7 @@ public final class EnsureGroup {
                 log.info("This Group is configured to NOT ensure immediately. Please ensure this Group via the JMX MBean.");
             }
 
-        } catch (EnsureServiceUserException e) {
+        } catch (EnsureAuthorizableException e) {
             log.error("Unable to ensure Group [ {} ]",
                     PropertiesUtil.toString(config.get(PROP_PRINCIPAL_NAME), "Undefined Group Principal Name"), e);
         } catch (IllegalArgumentException e) {

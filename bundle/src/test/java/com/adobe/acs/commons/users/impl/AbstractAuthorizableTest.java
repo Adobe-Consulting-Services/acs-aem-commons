@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 public class AbstractAuthorizableTest {
 
     @Test
-    public void testServiceUser() throws EnsureServiceUserException {
+    public void testServiceUser() throws EnsureAuthorizableException {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read,rep:write;path=/content/dam;rep:glob=/jcr:content/*;rep:ntNames=cq:Page,dam:Asset;rep:itemNames=jcr:title,jcr:description;rep:prefixes=cq,dam";
 
@@ -53,7 +53,7 @@ public class AbstractAuthorizableTest {
 
 
     @Test
-    public void testServiceUser_blankGlob() throws EnsureServiceUserException {
+    public void testServiceUser_blankGlob() throws EnsureAuthorizableException {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read;path=/content/dam;rep:glob=;";
 
@@ -73,7 +73,7 @@ public class AbstractAuthorizableTest {
     }
 
     @Test
-    public void testServiceUser_NoGlob() throws EnsureServiceUserException {
+    public void testServiceUser_NoGlob() throws EnsureAuthorizableException {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read;path=/content/dam;";
 
@@ -92,8 +92,8 @@ public class AbstractAuthorizableTest {
         }
     }
 
-    @Test(expected=EnsureServiceUserException.class)
-    public void testServiceUser_ProtectedSystemUser() throws EnsureServiceUserException {
+    @Test(expected=EnsureAuthorizableException.class)
+    public void testServiceUser_ProtectedSystemUser() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "cryptoservice");
 
@@ -102,7 +102,7 @@ public class AbstractAuthorizableTest {
 
 
     @Test
-    public void testServiceUser_principalName() throws EnsureServiceUserException {
+    public void testServiceUser_principalName() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
 
@@ -113,7 +113,7 @@ public class AbstractAuthorizableTest {
     }
 
     @Test
-    public void testServiceUser_relativePrincipalName1() throws EnsureServiceUserException {
+    public void testServiceUser_relativePrincipalName1() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "folder/test-service-user");
 
@@ -124,7 +124,7 @@ public class AbstractAuthorizableTest {
     }
 
     @Test
-    public void testServiceUser_relativePrincipalName2() throws EnsureServiceUserException {
+    public void testServiceUser_relativePrincipalName2() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "./folder/test-service-user");
 
@@ -135,7 +135,7 @@ public class AbstractAuthorizableTest {
     }
 
     @Test
-    public void testServiceUser_relativePrincipalName3() throws EnsureServiceUserException {
+    public void testServiceUser_relativePrincipalName3() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "/folder/test-service-user");
 
@@ -146,7 +146,7 @@ public class AbstractAuthorizableTest {
     }
 
     @Test
-    public void testServiceUser_absoluteRealtivePrincipalName2() throws EnsureServiceUserException {
+    public void testServiceUser_absoluteRealtivePrincipalName2() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "/home/fake/folder/test-service-user");
 
@@ -158,7 +158,7 @@ public class AbstractAuthorizableTest {
 
     private class FakeAuthorizable extends AbstractAuthorizable {
 
-        public FakeAuthorizable(Map<String, Object> config) throws EnsureServiceUserException {
+        public FakeAuthorizable(Map<String, Object> config) throws EnsureAuthorizableException {
             super(config);
         }
 

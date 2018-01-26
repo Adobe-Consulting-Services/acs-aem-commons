@@ -33,7 +33,7 @@ public abstract class AbstractAuthorizable {
     protected String intermediatePath;
     protected List<Ace> aces = new ArrayList<>();
 
-    public AbstractAuthorizable(Map<String, Object> config) throws EnsureServiceUserException {
+    public AbstractAuthorizable(Map<String, Object> config) throws EnsureAuthorizableException {
         String tmp = PropertiesUtil.toString(config.get(EnsureServiceUser.PROP_PRINCIPAL_NAME), null);
 
         if (StringUtils.contains(tmp, "/")) {
@@ -49,9 +49,9 @@ public abstract class AbstractAuthorizable {
 
         // Check the principal name for validity
         if (StringUtils.isBlank(this.principalName)) {
-            throw new EnsureServiceUserException("No Principal Name provided to Ensure Service User");
+            throw new EnsureAuthorizableException("No Principal Name provided to Ensure Service User");
         } else if (ProtectedSystemUsers.isProtected(this.principalName)) {
-            throw new EnsureServiceUserException(String.format(
+            throw new EnsureAuthorizableException(String.format(
                     "[ %s ] is an System User provided by AEM or ACS AEM Commons. You cannot ensure this user.",
                     this.principalName));
         }
@@ -61,7 +61,7 @@ public abstract class AbstractAuthorizable {
         for (String entry : acesProperty) {
             try {
                 aces.add(new Ace(entry));
-            } catch (EnsureServiceUserException e) {
+            } catch (EnsureAuthorizableException e) {
                 log.warn(
                         "Malformed ACE config [ " + entry + " ] for Service User [ "
                                 + StringUtils.defaultIfEmpty(this.principalName, "NOT PROVIDED") + " ]", e);
