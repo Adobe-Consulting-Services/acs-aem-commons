@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.users.impl;
+package com.adobe.acs.commons.principals.impl;
 
 /**
  * Exception used when Ensure Service User activities fail.

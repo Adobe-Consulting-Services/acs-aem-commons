@@ -1,6 +1,5 @@
-package com.adobe.acs.commons.users.impl;
+package com.adobe.acs.commons.principals.impl;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -24,8 +23,8 @@ public class ServiceUserTest {
 
         ServiceUser serviceUser = new ServiceUser(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/users/system", serviceUser.getIntermediatePath());
 
         for (Ace ace : serviceUser.getAces()) {
             assertEquals(true, ace.isAllow());
@@ -64,8 +63,8 @@ public class ServiceUserTest {
 
         ServiceUser serviceUser = new ServiceUser(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/users/system", serviceUser.getIntermediatePath());
 
         for (Ace ace : serviceUser.getAces()) {
             assertFalse(ace.hasRepGlob());
@@ -84,8 +83,8 @@ public class ServiceUserTest {
 
         ServiceUser serviceUser = new ServiceUser(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/users/system", serviceUser.getIntermediatePath());
 
         for (Ace ace : serviceUser.getAces()) {
             assertFalse(ace.hasRepGlob());
@@ -109,8 +108,8 @@ public class ServiceUserTest {
 
         ServiceUser serviceUser = new ServiceUser(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/users/system", serviceUser.getIntermediatePath());
     }
 
     @Test
@@ -120,8 +119,8 @@ public class ServiceUserTest {
 
         ServiceUser serviceUser = new ServiceUser(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
     }
 
     @Test
@@ -131,8 +130,8 @@ public class ServiceUserTest {
 
         ServiceUser serviceUser = new ServiceUser(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
     }
 
     @Test
@@ -142,8 +141,8 @@ public class ServiceUserTest {
 
         ServiceUser serviceUser = new ServiceUser(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
     }
 
     @Test
@@ -153,8 +152,8 @@ public class ServiceUserTest {
 
         ServiceUser serviceUser = new ServiceUser(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
     }
 
 }

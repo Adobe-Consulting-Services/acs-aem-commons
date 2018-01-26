@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.users.impl;
+package com.adobe.acs.commons.principals.impl;
 
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
