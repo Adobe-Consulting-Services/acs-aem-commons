@@ -39,42 +39,41 @@ import com.adobe.granite.references.ReferenceList;
 @Model(adaptables = Resource.class)
 public class ReferencesModel implements ReportCellCSVExporter {
 
-	@Inject
-	@OSGiService
-	private ReferenceAggregator aggregator;
-	
-	private ReferenceList referenceList;
+  @Inject
+  @OSGiService
+  private ReferenceAggregator aggregator;
+  
+  private ReferenceList referenceList;
 
-	private Resource resource;
+  private Resource resource;
 
-	public ReferencesModel(Resource resource) {
-		this.resource = resource;
-	}
-	
-	public List<Reference> getReferences() {
-		return referenceList;
-	}
+  public ReferencesModel(Resource resource) {
+    this.resource = resource;
+  }
+  
+  public List<Reference> getReferences() {
+    return referenceList;
+  }
 
-	@Override
-	public String getValue(Object result) {
-		resource = (Resource) result;
-		init();
-		List<String> refStrings = new ArrayList<String>();
-		for (Reference reference : referenceList) {
-			refStrings.add(reference.getType() + " - " + reference.getTarget().getPath());
-		}
-		return StringUtils.join(refStrings, ";");
-	}
+  @Override
+  public String getValue(Object result) {
+    resource = (Resource) result;
+    init();
+    List<String> refStrings = new ArrayList<String>();
+    for (Reference reference : referenceList) {
+      refStrings.add(reference.getType() + " - " + reference.getTarget().getPath());
+    }
+    return StringUtils.join(refStrings, ";");
+  }
 
-	@PostConstruct
-	public void init(){
-		referenceList = aggregator.createReferenceList(resource);
-		Iterator<Reference> references = referenceList.iterator();
-		while(references.hasNext()){
-			if(references.next().getTarget().getPath().equals(resource.getPath())){
-				references.remove();
-			}
-		}
-	}
-
+  @PostConstruct
+  public void init(){
+    referenceList = aggregator.createReferenceList(resource);
+    Iterator<Reference> references = referenceList.iterator();
+    while(references.hasNext()){
+      if(references.next().getTarget().getPath().equals(resource.getPath())){
+        references.remove();
+      }
+    }
+  }
 }
