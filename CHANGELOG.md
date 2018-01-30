@@ -7,7 +7,23 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.13.0...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.4...HEAD
+
+### Fixed
+
+- #1230 - Fixed issue causing XHR requests to undefined.2.json from TouchUI Parsys-related ClientLibs
+
+## [3.14.4] - 2018-01-24
+
+### Fixed
+
+- #1233 - Restore missing ACLs accidentally removed by a prior commit.
+
+## [3.14.2] - 2018-01-24
+
+### Fixed
+
+- #1231 - Do not set fieldLabel or fieldDescription on radiogroup components.
 
 ## [3.14.0] - 2018-01-18
 
