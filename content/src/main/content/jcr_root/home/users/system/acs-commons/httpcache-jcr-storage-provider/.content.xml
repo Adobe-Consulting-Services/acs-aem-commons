@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
-          jcr:primaryType="rep:SystemUser"
-          jcr:uuid="fe2f3e40-e46f-3af2-9668-62072d41dff5"
-          rep:authorizableId="acs-commons-httpcache-jcr-storage-service"
-          rep:principalName="acs-commons-httpcache-jcr-storage-service"/>
+      jcr:primaryType="rep:SystemUser"
+      rep:authorizableId="acs-commons-httpcache-jcr-storage-service"
+      rep:principalName="acs-commons-httpcache-jcr-storage-service"/>
