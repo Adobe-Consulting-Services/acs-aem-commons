@@ -40,58 +40,58 @@ import com.adobe.granite.references.ReferenceList;
 
 public class ReferencesModelTest {
 
-	private static final Logger log = LoggerFactory.getLogger(ReferencesModelTest.class);
+  private static final Logger log = LoggerFactory.getLogger(ReferencesModelTest.class);
 
-	@Mock
-	private Resource mockResourceSource;
+  @Mock
+  private Resource mockResourceSource;
 
-	@Mock
-	private Resource mockResourceTarget;
+  @Mock
+  private Resource mockResourceTarget;
 
-	private ReferencesModel referencesModel;
+  private ReferencesModel referencesModel;
 
-	@Before
-	public void init()
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		log.info("init");
+  @Before
+  public void init()
+      throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    log.info("init");
 
-		MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.initMocks(this);
 
-		when(mockResourceSource.getPath()).thenReturn("/source");
-		when(mockResourceTarget.getPath()).thenReturn("/target");
+    when(mockResourceSource.getPath()).thenReturn("/source");
+    when(mockResourceTarget.getPath()).thenReturn("/target");
 
-		ReferenceList references = new MockReferenceList(mockResourceSource);
-		references.add(new Reference(mockResourceSource, mockResourceTarget, "VALID"));
-		references.add(new Reference(mockResourceSource, mockResourceSource, "INVALID"));
+    ReferenceList references = new MockReferenceList(mockResourceSource);
+    references.add(new Reference(mockResourceSource, mockResourceTarget, "VALID"));
+    references.add(new Reference(mockResourceSource, mockResourceSource, "INVALID"));
 
-		ReferenceAggregator aggregator = new MockReferencesAggregator(references);
+    ReferenceAggregator aggregator = new MockReferencesAggregator(references);
 
-		referencesModel = new ReferencesModel(mockResourceSource);
-		Field af = ReferencesModel.class.getDeclaredField("aggregator");
-		af.setAccessible(true);
-		af.set(referencesModel, aggregator);
-		referencesModel.init();
-	}
+    referencesModel = new ReferencesModel(mockResourceSource);
+    Field af = ReferencesModel.class.getDeclaredField("aggregator");
+    af.setAccessible(true);
+    af.set(referencesModel, aggregator);
+    referencesModel.init();
+  }
 
-	@Test
-	public void testGetReferences() throws IllegalAccessException {
-		log.info("testGetReferences");
+  @Test
+  public void testGetReferences() throws IllegalAccessException {
+    log.info("testGetReferences");
 
-		assertNotNull(referencesModel.getReferences());
-		assertTrue(1 == referencesModel.getReferences().size());
-		assertEquals("/target", referencesModel.getReferences().get(0).getTarget().getPath());
-		assertEquals("VALID", referencesModel.getReferences().get(0).getType());
+    assertNotNull(referencesModel.getReferences());
+    assertTrue(1 == referencesModel.getReferences().size());
+    assertEquals("/target", referencesModel.getReferences().get(0).getTarget().getPath());
+    assertEquals("VALID", referencesModel.getReferences().get(0).getType());
 
-		log.info("Test Successful!");
-	}
+    log.info("Test Successful!");
+  }
 
-	@Test
-	public void testGetValue() throws IllegalAccessException {
-		log.info("testGetValue");
+  @Test
+  public void testGetValue() throws IllegalAccessException {
+    log.info("testGetValue");
 
-		assertNotNull(referencesModel.getValue(mockResourceSource));
-		assertEquals("VALID - /target", referencesModel.getValue(mockResourceSource));
+    assertNotNull(referencesModel.getValue(mockResourceSource));
+    assertEquals("VALID - /target", referencesModel.getValue(mockResourceSource));
 
-		log.info("Test Successful!");
-	}
+    log.info("Test Successful!");
+  }
 }
