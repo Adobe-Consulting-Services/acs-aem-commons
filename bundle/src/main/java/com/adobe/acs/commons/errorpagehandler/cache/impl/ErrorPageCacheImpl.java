@@ -189,7 +189,7 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
 
         final CompositeType cacheEntryType = new CompositeType(
                 "cacheEntry",
-                JMX_PN_CACHEENTRY,
+                "Cache Entry",
                 new String[]{"errorPage", "hit", "miss", "hitRate", "missRate", "sizeInKB" },
                 new String[]{"Error Page", "Hit", "Miss", "Hit Rate", "Miss Rate", "Size in KB" },
                 new OpenType[]{SimpleType.STRING, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.FLOAT,
