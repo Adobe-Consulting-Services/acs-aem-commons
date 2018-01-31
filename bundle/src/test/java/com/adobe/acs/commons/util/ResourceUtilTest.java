@@ -28,9 +28,9 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import javax.jcr.Node;
-import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,9 +55,14 @@ public class ResourceUtilTest {
         Session session = resourceResolver.adaptTo(Session.class);
         Node mynode = session.getRootNode().addNode("mynode");
         mynode.setProperty("bool_prop_true", true);
+        mynode.setProperty("bool_prop_true_str", "true");
         mynode.setProperty("bool_prop_false", false);
+        mynode.setProperty("bool_prop_false_str", "false");
         mynode.setProperty("date_prop", new GregorianCalendar(2016, 10, 15, 12, 34, 56));
+        mynode.setProperty("dbl_prop", 1234.567d);
+        mynode.setProperty("dbl_prop_str", "1234.567");
         mynode.setProperty("long_prop", 1234L);
+        mynode.setProperty("long_prop_str", "1234");
         mynode.setProperty("ref_prop", "/mynode/myothernode");
         mynode.setProperty("ref_prop_bad_path", "/mynode/boguspath");
         mynode.setProperty("string_prop", "prop val");
@@ -69,88 +74,104 @@ public class ResourceUtilTest {
     }
 
     @Test
-    public void testGetProperty() throws RepositoryException {
-        Property prop = ResourceUtil.getProperty(resource, "string_prop");
-
-        assertNotNull(prop);
-        assertEquals("prop val", prop.getString());
-    }
-
-    @Test
-    public void testGetPropertyReturnsNullIfPropertyNotFound() throws RepositoryException {
-        assertNull(ResourceUtil.getProperty(resource, "bogus_prop_name"));
-    }
-
-    @Test
-    public void testGetPropertyBoolean() throws RepositoryException {
+    public void testGetPropertyBoolean() {
         assertTrue(ResourceUtil.getPropertyBoolean(resource, "bool_prop_true"));
+        assertTrue(ResourceUtil.getPropertyBoolean(resource, "bool_prop_true_str"));
         assertFalse(ResourceUtil.getPropertyBoolean(resource, "bool_prop_false"));
+        assertFalse(ResourceUtil.getPropertyBoolean(resource, "bool_prop_false_str"));
     }
 
     @Test
-    public void testGetPropertyBooleanReturnsFalseWhenPropertyNotFound() throws RepositoryException {
+    public void testGetPropertyBooleanReturnsFalseWhenPropertyNotFound() {
         assertFalse(ResourceUtil.getPropertyBoolean(resource, "bogus_prop_name"));
     }
 
     @Test
-    public void testGetPropertyDate() throws RepositoryException {
+    public void testGetPropertyDate() {
         assertEquals(new GregorianCalendar(2016, 10, 15, 12, 34, 56), ResourceUtil.getPropertyDate(resource, "date_prop"));
     }
 
     @Test
-    public void testGetPropertyDateReturnsNullIfPropertyNotFound() throws RepositoryException {
+    public void testGetPropertyDateReturnsNullIfPropertyNotFound() {
         assertNull(ResourceUtil.getPropertyDate(resource, "bogus_prop_name"));
     }
 
     @Test
-    public void testGetPropertyLong() throws RepositoryException {
-        assertEquals(new Long(1234L), ResourceUtil.getPropertyLong(resource, "long_prop"));
+    public void testGetPropertyDecimal() {
+        assertEquals(new BigDecimal("1234.567"), ResourceUtil.getPropertyDecimal(resource, "dbl_prop"));
+        assertEquals(new BigDecimal("1234.567"), ResourceUtil.getPropertyDecimal(resource, "dbl_prop_str"));
+        assertEquals(new BigDecimal("1234"), ResourceUtil.getPropertyDecimal(resource, "long_prop"));
+        assertEquals(new BigDecimal("1234"), ResourceUtil.getPropertyDecimal(resource, "long_prop_str"));
     }
 
     @Test
-    public void testGetPropertyLongReturnsNullIfPropertyNotFound() throws RepositoryException {
+    public void testGetPropertyDecimalReturnsNullIfPropertyNotFound() {
+        assertNull(ResourceUtil.getPropertyDecimal(resource, "bogus_prop_name"));
+    }
+
+    @Test
+    public void testGetPropertyDouble() {
+        assertEquals(new Double(1234.567d), ResourceUtil.getPropertyDouble(resource, "dbl_prop"));
+        assertEquals(new Double(1234.567d), ResourceUtil.getPropertyDouble(resource, "dbl_prop_str"));
+        assertEquals(new Double(1234L), ResourceUtil.getPropertyDouble(resource, "long_prop"));
+        assertEquals(new Double(1234L), ResourceUtil.getPropertyDouble(resource, "long_prop_str"));
+    }
+
+    @Test
+    public void testGetPropertyDoubleReturnsNullIfPropertyNotFound() {
+        assertNull(ResourceUtil.getPropertyDouble(resource, "bogus_prop_name"));
+    }
+
+    @Test
+    public void testGetPropertyLong() {
+        assertEquals(new Long(1234L), ResourceUtil.getPropertyLong(resource, "long_prop"));
+        assertEquals(new Long(1234L), ResourceUtil.getPropertyLong(resource, "long_prop_str"));
+    }
+
+    @Test
+    public void testGetPropertyLongReturnsNullIfPropertyNotFound() {
         assertNull(ResourceUtil.getPropertyLong(resource, "bogus_prop_name"));
     }
 
     @Test
-    public void testGetPropertyReference() throws RepositoryException {
+    public void testGetPropertyReference() {
         Resource reference = ResourceUtil.getPropertyReference(resource, "ref_prop");
         assertNotNull(reference);
         assertEquals("/mynode/myothernode", reference.getPath());
     }
 
     @Test
-    public void testGetPropertyReferenceReturnsNullIfPathNotFound() throws RepositoryException {
+    public void testGetPropertyReferenceReturnsNullIfPathNotFound() {
         assertNull(ResourceUtil.getPropertyReference(resource, "ref_prop_bad_path"));
     }
 
     @Test
-    public void testGetPropertyReferenceReturnsNullIfPropertyNotFound() throws RepositoryException {
+    public void testGetPropertyReferenceReturnsNullIfPropertyNotFound() {
         assertNull(ResourceUtil.getPropertyReference(resource, "bogus_prop_name"));
     }
 
     @Test
-    public void testGetPropertyString() throws RepositoryException {
+    public void testGetPropertyString() {
         assertEquals("prop val", ResourceUtil.getPropertyString(resource, "string_prop"));
     }
 
     @Test
-    public void testGetPropertyStringReturnsNullIfPropertyNotFound() throws RepositoryException {
+    public void testGetPropertyStringReturnsNullIfPropertyNotFound() {
         assertNull(ResourceUtil.getPropertyString(resource, "bogus_prop_name"));
     }
 
     @Test
-    public void testGetPropertyStrings() throws RepositoryException {
+    public void testGetPropertyStrings() {
         assertEquals(Arrays.asList("a", "bcd", "e"), ResourceUtil.getPropertyStrings(resource, "strings_prop"));
     }
 
     @Test
-    public void testGetPropertyStringsReturnsListForSingleValue() throws RepositoryException {
+    public void testGetPropertyStringsReturnsListForSingleValue() {
         assertEquals(Collections.singletonList("prop val"), ResourceUtil.getPropertyStrings(resource, "string_prop"));
     }
 
     @Test
-    public void testGetPropertyStringsReturnsEmptyListIfPropertyNotFound() throws RepositoryException {
+    public void testGetPropertyStringsReturnsEmptyListIfPropertyNotFound() {
         assertEquals(new ArrayList<>(), ResourceUtil.getPropertyStrings(resource, "bogus_prop_name"));
     }
 

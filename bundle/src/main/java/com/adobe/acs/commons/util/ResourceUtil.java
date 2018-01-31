@@ -22,11 +22,7 @@ package com.adobe.acs.commons.util;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 
-import javax.jcr.Node;
-import javax.jcr.PathNotFoundException;
-import javax.jcr.Property;
-import javax.jcr.RepositoryException;
-import javax.jcr.Value;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -36,30 +32,6 @@ import java.util.List;
  */
 public abstract class ResourceUtil {
     /**
-     * Private ctor to hide the defualt public ctor.
-     */
-    private ResourceUtil() {
-    }
-
-    /**
-     * Get a single-value property from a resource.
-     *
-     * If the property does not exist, this function will return null instead
-     * of throwing a RepositoryException.
-     *
-     * @param resource The resource from which to get the property.
-     * @param namePattern Property name.
-     * @return Property value.
-     */
-    public static Property getProperty(Resource resource, String namePattern) throws RepositoryException {
-        try {
-            return resource.adaptTo(Node.class).getProperty(namePattern);
-        } catch (PathNotFoundException p) {
-            return null;
-        }
-    }
-
-    /**
      * Convenience method for getting a single-value boolean property from
      * a resource.
      *
@@ -67,9 +39,8 @@ public abstract class ResourceUtil {
      * @param namePattern Property name.
      * @return Property value if present, else false.
      */
-    public static boolean getPropertyBoolean(Resource resource, String namePattern) throws RepositoryException {
-        Property prop = getProperty(resource, namePattern);
-        return prop != null && prop.getBoolean();
+    public static boolean getPropertyBoolean(Resource resource, String namePattern) {
+        return resource.getValueMap().get(namePattern, false);
     }
 
     /**
@@ -80,9 +51,28 @@ public abstract class ResourceUtil {
      * @param namePattern Property name.
      * @return Property value.
      */
-    public static Calendar getPropertyDate(Resource resource, String namePattern) throws RepositoryException {
-        Property prop = getProperty(resource, namePattern);
-        return prop != null ? prop.getDate() : null;
+    public static Calendar getPropertyDate(Resource resource, String namePattern) {
+        return resource.getValueMap().get(namePattern, Calendar.class);
+    }
+
+    /**
+     * Conventience method for getting a single-value BigDecimal property from a resource.
+     * @param resource The resource from which to get the property.
+     * @param namePattern Property name.
+     * @return Property value.
+     */
+    public static BigDecimal getPropertyDecimal(Resource resource, String namePattern) {
+        return resource.getValueMap().get(namePattern, BigDecimal.class);
+    }
+
+    /**
+     * Conventience method for getting a single-value Double property from a resource.
+     * @param resource The resource from which to get the property.
+     * @param namePattern Property name.
+     * @return Property value.
+     */
+    public static Double getPropertyDouble(Resource resource, String namePattern) {
+        return resource.getValueMap().get(namePattern, Double.class);
     }
 
     /**
@@ -91,9 +81,8 @@ public abstract class ResourceUtil {
      * @param namePattern Property name.
      * @return Property value.
      */
-    public static Long getPropertyLong(Resource resource, String namePattern) throws RepositoryException {
-        Property prop = getProperty(resource, namePattern);
-        return prop != null ? prop.getLong() : null;
+    public static Long getPropertyLong(Resource resource, String namePattern) {
+        return resource.getValueMap().get(namePattern, Long.class);
     }
 
     /**
@@ -105,7 +94,7 @@ public abstract class ResourceUtil {
      * @param namePattern Name of the property storing the resource path.
      * @return The referenced resource.
      */
-    public static Resource getPropertyReference(Resource resource, String namePattern) throws RepositoryException {
+    public static Resource getPropertyReference(Resource resource, String namePattern) {
         String referencePath = getPropertyString(resource, namePattern);
         if (StringUtils.isNotBlank(referencePath)) {
             return resource.getResourceResolver().getResource(referencePath);
@@ -120,9 +109,8 @@ public abstract class ResourceUtil {
      * @param namePattern Property name.
      * @return Property value.
      */
-    public static String getPropertyString(Resource resource, String namePattern) throws RepositoryException {
-        Property prop = getProperty(resource, namePattern);
-        return prop != null ? prop.getString() : null;
+    public static String getPropertyString(Resource resource, String namePattern) {
+        return resource.getValueMap().get(namePattern, String.class);
     }
 
     /**
@@ -132,30 +120,14 @@ public abstract class ResourceUtil {
      * @param namePattern Property name.
      * @return Property values.
      */
-    public static List<String> getPropertyStrings(Resource resource, String namePattern) throws RepositoryException {
-        List<String> props = new ArrayList<>();
-        for (Value val : getPropertyValues(resource, namePattern)) {
-            props.add(val.getString());
-        }
-        return props;
-    }
-
-    /**
-     * Internal method to get all values for a multi-value property.
-     *
-     * @param resource The resource from which to get the property.
-     * @param namePattern Property name.
-     * @return Property values.
-     */
-    private static Value[] getPropertyValues(Resource resource, String namePattern) throws RepositoryException {
-        Property prop = getProperty(resource, namePattern);
-        if (prop != null) {
-            if (prop.isMultiple()) {
-                return prop.getValues();
-            } else {
-                return (new Value[]{prop.getValue()});
+    public static List<String> getPropertyStrings(Resource resource, String namePattern) {
+        String[] vals = resource.getValueMap().get(namePattern, String[].class);
+        List<String> valsList = new ArrayList<>();
+        if (vals != null) {
+            for (String val : vals) {
+                valsList.add(val);
             }
         }
-        return new Value[0];
+        return valsList;
     }
 }
