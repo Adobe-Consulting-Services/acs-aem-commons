@@ -1,5 +1,6 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,8 +56,7 @@ public class EntryNodeMapVisitor extends AbstractNodeVisitor
         return new EntryNodeToCacheContentHandler(node).get();
     }
 
-    private CacheKey getCacheKey(final Node node) throws Exception
-    {
+    private CacheKey getCacheKey(final Node node) throws RepositoryException, IOException, ClassNotFoundException {
         return new EntryNodeToCacheKeyHandler(node, dclm).get();
     }
 }
