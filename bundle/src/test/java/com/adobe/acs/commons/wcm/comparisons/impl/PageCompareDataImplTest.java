@@ -59,6 +59,9 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class PageCompareDataImplTest {
 
+
+
+
     @Test
     public void shouldInitialize() throws Exception {
         // given

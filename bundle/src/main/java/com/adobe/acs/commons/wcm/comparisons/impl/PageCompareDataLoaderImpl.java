@@ -23,48 +23,18 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-import java.util.Map;
 
-@Component(label = "ACS AEM Commons - Page Compare Tool",
-        description = "Have a look at the evolution of a resource on a property/resource level.", metatype = true)
+@Component
 @Service
-@org.apache.felix.scr.annotations.Properties({
-        @Property(label = "Ignored property names",
-                description = "Property names (regex possible) listed here will be excluded from the page compare feature.",
-                name = PageCompareDataLoaderImpl.PROPERTY_IGNORES, value = { "(.*/)?jcr:uuid", "(.*/)?(cq|jcr):lastModified", "(.*/)?(cq|jcr):lastModifiedBy", "(.*/)?jcr:frozenUuid", "(.*/)?jcr:primaryType", "(.*/)?jcr:frozenPrimaryType" }, cardinality = Integer.MAX_VALUE),
-        @Property(label = "Ignored resource names",
-                description = "Resource names (regex possible) listed here will be excluded from the page compare feature.",
-                name = PageCompareDataLoaderImpl.RESOURCE_IGNORES, value = { "" }, cardinality = Integer.MAX_VALUE) })
 public class PageCompareDataLoaderImpl implements PageCompareDataLoader {
-
-    private static final Logger log = LoggerFactory.getLogger(PageCompareDataLoaderImpl.class);
-
-    static final String PROPERTY_IGNORES = "properties.ignore";
-    static final String RESOURCE_IGNORES = "resources.ignore";
-
-    private CompareFilter compareFilter;
 
     @Override
     public PageCompareData load(Resource resource, String versionName) throws RepositoryException {
-        return new PageCompareDataImpl(resource, versionName, compareFilter);
-    }
-
-    @Activate
-    protected void activate(final Map<String, String> config) {
-        String[] propertyIgnores = PropertiesUtil.toStringArray(config.get(PROPERTY_IGNORES), new String[] { "" });
-        String[] resourceIgnores = PropertiesUtil.toStringArray(config.get(RESOURCE_IGNORES), new String[] { "" });
-        this.compareFilter = new CompareFilter(propertyIgnores, resourceIgnores);
-        log.debug("Ignored properties: {}", propertyIgnores);
-        log.debug("Ignored resources: {}", resourceIgnores);
+        return new PageCompareDataImpl(resource, versionName);
     }
 }
