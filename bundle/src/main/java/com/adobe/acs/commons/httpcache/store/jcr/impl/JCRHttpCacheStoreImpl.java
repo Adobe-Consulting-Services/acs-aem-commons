@@ -311,21 +311,6 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     @Override
-    public void invalidateAll(){
-        withSession(new Consumer<Session>()
-        {
-            @Override public void accept(Session session) throws Exception
-            {
-            final Node rootNode = session.getNode(cacheRootPath);
-            final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, deltaSaveThreshold, cacheRootPath);
-            visitor.visit(rootNode);
-            visitor.close();
-            incrementEvictionCount(visitor.getEvictionCount());
-            }
-        });
-    }
-
-    @Override
     public void invalidate(final HttpCacheConfig cacheConfig) {
         withSession(new Consumer<Session>()
         {
@@ -336,6 +321,21 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                 visitor.visit(rootNode);
                 visitor.close();
                 incrementEvictionCount(visitor.getEvictionCount());
+            }
+        });
+    }
+
+    @Override
+    public void invalidateAll(){
+        withSession(new Consumer<Session>()
+        {
+            @Override public void accept(Session session) throws Exception
+            {
+            final Node rootNode = session.getNode(cacheRootPath);
+            final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, deltaSaveThreshold, cacheRootPath);
+            visitor.visit(rootNode);
+            visitor.close();
+            incrementEvictionCount(visitor.getEvictionCount());
             }
         });
     }
@@ -430,15 +430,15 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override protected void addCacheData(Map<String, Object> data, CacheContent cacheObj)
     {
-        data.put("Status", cacheObj.getStatus());
-        data.put("Content Type", cacheObj.getContentType());
-        data.put("Character Encoding", cacheObj.getCharEncoding());
+        data.put(JMX_PN_STATUS, cacheObj.getStatus());
+        data.put(JMX_PN_CONTENTTYPE, cacheObj.getContentType());
+        data.put(JMX_PN_CHARENCODING, cacheObj.getCharEncoding());
 
         try {
-            data.put("Size", FileUtils.byteCountToDisplaySize(IOUtils.toByteArray(cacheObj.getInputDataStream()).length));
+            data.put(JMX_PN_SIZE, FileUtils.byteCountToDisplaySize(IOUtils.toByteArray(cacheObj.getInputDataStream()).length));
         } catch (IOException e) {
             log.error("Error adding cache data to JMX data map", e);
-            data.put("Size", "0");
+            data.put(JMX_PN_SIZE, "0");
         }
     }
 
@@ -454,9 +454,9 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     protected CompositeType getCacheEntryType() throws OpenDataException {
-        return new CompositeType("Cache Entry", "Cache Entry",
-                new String[] { "Cache Key", "Status", "Size", "Content Type", "Character Encoding" },
-                new String[] { "Cache Key", "Status", "Size", "Content Type", "Character Encoding" },
+        return new CompositeType(JMX_PN_CACHEENTRY, JMX_PN_CACHEENTRY,
+                new String[] { JMX_PN_CACHEKEY, JMX_PN_STATUS, JMX_PN_SIZE, JMX_PN_CONTENTTYPE, JMX_PN_CHARENCODING },
+                new String[] { JMX_PN_CACHEKEY, JMX_PN_STATUS, JMX_PN_SIZE, JMX_PN_CONTENTTYPE, JMX_PN_CHARENCODING },
                 new OpenType[] { SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
 
     }

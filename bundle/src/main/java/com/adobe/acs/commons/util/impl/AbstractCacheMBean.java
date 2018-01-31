@@ -19,6 +19,22 @@ import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
 public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean implements  CacheMBean
 {
+    /** jmx labels **/
+    protected static final String JMX_PN_CACHESTATS = "Cache Stats";
+    protected static final String JMX_PN_STAT = "Stat";
+    protected static final String JMX_PN_VALUE = "Value";
+    protected static final String JMX_PN_CACHEKEY = "Cache Key";
+    protected static final String JMX_PN_CACHEENTRY = "Cache Entry";
+    protected static final String JMX_PN_CONTENTTYPE = "Content Type";
+    protected static final String JMX_PN_STATUS = "Status";
+    protected static final String JMX_PN_CHARENCODING = "Character Encoding";
+    protected static final String JMX_PN_SIZE = "Size";
+    protected static final String JMX_PN_HITS = "Hits";
+    protected static final String JMX_PN_TOTALSIZESERVED = "Total Size Served from Cache";
+
+
+
+
     public <T> AbstractCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException
     {
         super(implementation, mbeanInterface);
@@ -50,12 +66,12 @@ public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean imp
             final CompositeType cacheEntryType = getCacheEntryType();
 
             final TabularDataSupport tabularData = new TabularDataSupport(
-                    new TabularType("Cache Entries", "Cache Entries", cacheEntryType, new String[] { "Cache Key" }));
+                    new TabularType("Cache Entries", "Cache Entries", cacheEntryType, new String[] { JMX_PN_CACHEKEY }));
 
             Map<K, V> cacheAsMap = getCacheAsMap();
             for (final Map.Entry<K, V> entry : cacheAsMap.entrySet()) {
                 final Map<String, Object> data = new HashMap<String, Object>();
-                data.put("Cache Key", entry.getKey().toString());
+                data.put(JMX_PN_CACHEKEY, entry.getKey().toString());
 
                 V cacheObj = entry.getValue();
                 if (cacheObj != null) {

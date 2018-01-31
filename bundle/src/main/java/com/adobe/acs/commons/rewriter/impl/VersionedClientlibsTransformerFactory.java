@@ -335,9 +335,9 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     @Override
     @SuppressWarnings("squid:S1192")
     protected CompositeType getCacheEntryType() throws OpenDataException {
-        return new CompositeType("Cache Entry", "Cache Entry",
-                new String[] { "Cache Key", "Value" },
-                new String[] { "Cache Key", "Value" },
+        return new CompositeType(JMX_PN_CACHEENTRY, JMX_PN_CACHEENTRY,
+                new String[] { JMX_PN_CACHEKEY, "Value" },
+                new String[] { JMX_PN_CACHEKEY, "Value" },
                 new OpenType[] { SimpleType.STRING, SimpleType.STRING });
     }
 
