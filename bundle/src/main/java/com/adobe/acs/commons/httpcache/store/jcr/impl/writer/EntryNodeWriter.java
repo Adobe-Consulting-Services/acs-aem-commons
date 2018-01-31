@@ -112,21 +112,14 @@ public class EntryNodeWriter
 
     private void populateCacheKey() throws RepositoryException, IOException
     {
-        ByteArrayInputStream inputStream = null;
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        objectOutputStream.writeObject(cacheKey);
+        objectOutputStream.close();
 
-        try{
-            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            objectOutputStream.writeObject(cacheKey);
-            objectOutputStream.close();
-            inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+        try(ByteArrayInputStream inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray())){
             final Binary binary = session.getValueFactory().createBinary(inputStream);
-
             entryNode.setProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY, binary);
-        }finally {
-            if(inputStream != null) {
-                inputStream.close();
-            }
         }
     }
 }

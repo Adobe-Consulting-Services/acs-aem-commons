@@ -45,26 +45,30 @@ public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean imp
     }
 
     @Override
-    public final TabularData getCacheContents() throws OpenDataException {
-        final CompositeType cacheEntryType = getCacheEntryType();
+    public final TabularData getCacheContents() throws CacheMBeanException {
+        try{
+            final CompositeType cacheEntryType = getCacheEntryType();
 
-        final TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType("Cache Entries", "Cache Entries", cacheEntryType, new String[] { "Cache Key" }));
+            final TabularDataSupport tabularData = new TabularDataSupport(
+                    new TabularType("Cache Entries", "Cache Entries", cacheEntryType, new String[] { "Cache Key" }));
 
-        Map<K, V> cacheAsMap = getCacheAsMap();
-        for (final Map.Entry<K, V> entry : cacheAsMap.entrySet()) {
-            final Map<String, Object> data = new HashMap<String, Object>();
-            data.put("Cache Key", entry.getKey().toString());
+            Map<K, V> cacheAsMap = getCacheAsMap();
+            for (final Map.Entry<K, V> entry : cacheAsMap.entrySet()) {
+                final Map<String, Object> data = new HashMap<String, Object>();
+                data.put("Cache Key", entry.getKey().toString());
 
-            V cacheObj = entry.getValue();
-            if (cacheObj != null) {
-                addCacheData(data, cacheObj);
+                V cacheObj = entry.getValue();
+                if (cacheObj != null) {
+                    addCacheData(data, cacheObj);
+                }
+
+                tabularData.put(new CompositeDataSupport(cacheEntryType, data));
             }
 
-            tabularData.put(new CompositeDataSupport(cacheEntryType, data));
+            return tabularData;
+        }catch(OpenDataException ex){
+            throw new CacheMBeanException("Error getting the cache contents", ex);
         }
-
-        return tabularData;
     }
 
     @Override

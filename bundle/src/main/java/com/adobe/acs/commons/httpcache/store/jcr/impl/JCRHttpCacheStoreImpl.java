@@ -185,9 +185,6 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         expireTimeInSeconds = PropertiesUtil.toInteger(properties.get(PN_EXPIRETIMEINSECONDS), DEFAULT_EXPIRETIMEINSECONDS);
     }
 
-    @Deactivate protected void deactivate(){
-    }
-
     @Override
     public void put(final CacheKey key, final CacheContent content) throws HttpCacheDataStreamException {
         final long currentTime = System.currentTimeMillis();

@@ -13,6 +13,8 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.EntryNodeToCacheContentHandler;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.EntryNodeToCacheKeyHandler;
 
+import java.io.IOException;
+
 public class EntryNodeByStringKeyVisitor extends AbstractNodeVisitor
 {
     private static final Logger log = LoggerFactory.getLogger(EntryNodeByStringKeyVisitor.class);
@@ -49,8 +51,7 @@ public class EntryNodeByStringKeyVisitor extends AbstractNodeVisitor
         }
     }
 
-    private CacheKey getCacheKey(final Node node) throws Exception
-    {
+    private CacheKey getCacheKey(final Node node) throws RepositoryException, IOException, ClassNotFoundException {
         return new EntryNodeToCacheKeyHandler(node, dclm).get();
     }
 

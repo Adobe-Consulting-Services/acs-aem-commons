@@ -32,74 +32,74 @@ public abstract class AbstractJCRCacheMBean<K,V> extends AbstractCacheMBean<K,V>
     @Override public TabularData getCacheStats() throws OpenDataException
     {
         // Exposing all google guava stats.
-        final CompositeType cacheEntryType = new CompositeType("Cache Stats", "Cache Stats",
-                new String[] { "Stat", "Value" }, new String[] { "Stat", "Value" },
+        final CompositeType cacheEntryType = new CompositeType(JMX_PN_CACHESTATS, JMX_PN_CACHESTATS,
+                new String[] {JMX_PN_STAT, JMX_PN_VALUE }, new String[] {JMX_PN_STAT, JMX_PN_VALUE },
                 new OpenType[] { SimpleType.STRING, SimpleType.STRING });
 
         final TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType("Cache Stats", "Cache Stats", cacheEntryType, new String[] { "Stat" }));
+                new TabularType(JMX_PN_CACHESTATS, JMX_PN_CACHESTATS, cacheEntryType, new String[] {JMX_PN_STAT}));
 
 
         final Map<String, Object> row = new HashMap<String, Object>();
 
-        row.put("Stat", "Request Count");
-        row.put("Value", String.valueOf(requestCount.get()));
+        row.put(JMX_PN_STAT, "Request Count");
+        row.put(JMX_PN_VALUE, String.valueOf(requestCount.get()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Average Lookup Time");
-        row.put("Value", String.valueOf(getAvgLookupTime()));
+        row.put(JMX_PN_STAT, "Average Lookup Time");
+        row.put(JMX_PN_VALUE, String.valueOf(getAvgLookupTime()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Total Lookup Time");
-        row.put("Value", String.valueOf(totalLookupTime.get()));
+        row.put(JMX_PN_STAT, "Total Lookup Time");
+        row.put(JMX_PN_VALUE, String.valueOf(totalLookupTime.get()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Hit Count");
-        row.put("Value", String.valueOf(hitCount.get()));
+        row.put(JMX_PN_STAT, "Hit Count");
+        row.put(JMX_PN_VALUE, String.valueOf(hitCount.get()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Hit Rate");
-        row.put("Value", String.valueOf(getHitRate()));
+        row.put(JMX_PN_STAT, "Hit Rate");
+        row.put(JMX_PN_VALUE, String.valueOf(getHitRate()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Miss Count");
-        row.put("Value", String.valueOf(missCount.get()));
+        row.put(JMX_PN_STAT, "Miss Count");
+        row.put(JMX_PN_VALUE, String.valueOf(missCount.get()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Miss Rate");
-        row.put("Value", String.valueOf(getMissRate()));
+        row.put(JMX_PN_STAT, "Miss Rate");
+        row.put(JMX_PN_VALUE, String.valueOf(getMissRate()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Eviction Count");
-        row.put("Value", String.valueOf(evictionCount.get()));
+        row.put(JMX_PN_STAT, "Eviction Count");
+        row.put(JMX_PN_VALUE, String.valueOf(evictionCount.get()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Load Count");
-        row.put("Value", String.valueOf(loadCount.get()));
+        row.put(JMX_PN_STAT, "Load Count");
+        row.put(JMX_PN_VALUE, String.valueOf(loadCount.get()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Load Exception Count");
-        row.put("Value", String.valueOf(loadExceptionCount.get()));
+        row.put(JMX_PN_STAT, "Load Exception Count");
+        row.put(JMX_PN_VALUE, String.valueOf(loadExceptionCount.get()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Load Exception Rate");
-        row.put("Value", String.valueOf(getLoadExceptionRate()));
+        row.put(JMX_PN_STAT, "Load Exception Rate");
+        row.put(JMX_PN_VALUE, String.valueOf(getLoadExceptionRate()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Load Success Count");
-        row.put("Value", String.valueOf(loadSuccessCount.get()));
+        row.put(JMX_PN_STAT, "Load Success Count");
+        row.put(JMX_PN_VALUE, String.valueOf(loadSuccessCount.get()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Load Success Rate");
-        row.put("Value", String.valueOf(getLoadSuccessRate()));
+        row.put(JMX_PN_STAT, "Load Success Rate");
+        row.put(JMX_PN_VALUE, String.valueOf(getLoadSuccessRate()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Average Load Penalty");
-        row.put("Value", String.valueOf(getAvgLoadPenalty()));
+        row.put(JMX_PN_STAT, "Average Load Penalty");
+        row.put(JMX_PN_VALUE, String.valueOf(getAvgLoadPenalty()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put("Stat", "Total Load Time");
-        row.put("Value", String.valueOf(totalLoadTime.get()));
+        row.put(JMX_PN_STAT, "Total Load Time");
+        row.put(JMX_PN_VALUE, String.valueOf(totalLoadTime.get()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         return tabularData;

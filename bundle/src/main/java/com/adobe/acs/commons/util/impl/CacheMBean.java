@@ -9,6 +9,11 @@ import com.adobe.granite.jmx.annotation.Name;
 
 public interface CacheMBean
 {
+    /** jmx labels **/
+    String JMX_PN_CACHESTATS = "Cache Stats";
+    String JMX_PN_STAT = "Stat";
+    String JMX_PN_VALUE = "Value";
+
     @Description("Clear entire cache")
     void clearCache();
 
@@ -25,5 +30,5 @@ public interface CacheMBean
     String getCacheEntry(@Name(value="Cache Key") String cacheKeyStr) throws CacheMBeanException;
 
     @Description("Contents of cache")
-    TabularData getCacheContents() throws Exception;
+    TabularData getCacheContents() throws CacheMBeanException;
 }

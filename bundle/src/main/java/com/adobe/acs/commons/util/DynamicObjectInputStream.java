@@ -16,6 +16,7 @@ public class DynamicObjectInputStream extends ObjectInputStream
         this.dynamicClassLoader = dynamicClassLoader;
     }
 
+    @Override
     protected Class<?> resolveClass(ObjectStreamClass desc)
             throws IOException, ClassNotFoundException
     {
