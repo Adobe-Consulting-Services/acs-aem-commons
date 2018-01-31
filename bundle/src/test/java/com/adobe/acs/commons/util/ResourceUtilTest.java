@@ -87,8 +87,18 @@ public class ResourceUtilTest {
     }
 
     @Test
+    public void testGetPropertyCalendar() {
+        assertEquals(new GregorianCalendar(2016, 10, 15, 12, 34, 56), ResourceUtil.getPropertyCalendar(resource, "date_prop"));
+    }
+
+    @Test
+    public void testGetPropertyCalendarReturnsNullIfPropertyNotFound() {
+        assertNull(ResourceUtil.getPropertyCalendar(resource, "bogus_prop_name"));
+    }
+
+    @Test
     public void testGetPropertyDate() {
-        assertEquals(new GregorianCalendar(2016, 10, 15, 12, 34, 56), ResourceUtil.getPropertyDate(resource, "date_prop"));
+        assertEquals(new GregorianCalendar(2016, 10, 15, 12, 34, 56).getTime(), ResourceUtil.getPropertyDate(resource, "date_prop"));
     }
 
     @Test

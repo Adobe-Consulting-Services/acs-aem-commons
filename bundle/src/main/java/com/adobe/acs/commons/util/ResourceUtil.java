@@ -23,10 +23,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,6 +52,18 @@ public abstract class ResourceUtil {
     }
 
     /**
+     * Convenience method for getting a single-value Calendar property from
+     * a resource.
+     *
+     * @param resource The resource from which to get the property.
+     * @param namePattern Property name.
+     * @return Property value.
+     */
+    public static Calendar getPropertyCalendar(Resource resource, String namePattern) {
+        return resource.getValueMap().get(namePattern, Calendar.class);
+    }
+
+    /**
      * Convenience method for getting a single-value Date property from
      * a resource.
      *
@@ -59,8 +71,8 @@ public abstract class ResourceUtil {
      * @param namePattern Property name.
      * @return Property value.
      */
-    public static Calendar getPropertyDate(Resource resource, String namePattern) {
-        return resource.getValueMap().get(namePattern, Calendar.class);
+    public static Date getPropertyDate(Resource resource, String namePattern) {
+        return resource.getValueMap().get(namePattern, Date.class);
     }
 
     /**
