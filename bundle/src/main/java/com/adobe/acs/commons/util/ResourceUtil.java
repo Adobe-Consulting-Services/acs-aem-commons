@@ -36,6 +36,12 @@ import java.util.List;
  */
 public abstract class ResourceUtil {
     /**
+     * Private ctor to hide the defualt public ctor.
+     */
+    private ResourceUtil() {
+    }
+
+    /**
      * Get a single-value property from a resource.
      *
      * If the property does not exist, this function will return null instead
