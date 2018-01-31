@@ -32,6 +32,12 @@ import java.util.List;
  */
 public abstract class ResourceUtil {
     /**
+     * Private ctor to hide the defualt public ctor.
+     */
+    private ResourceUtil() {
+    }
+
+    /**
      * Convenience method for getting a single-value boolean property from
      * a resource.
      *
