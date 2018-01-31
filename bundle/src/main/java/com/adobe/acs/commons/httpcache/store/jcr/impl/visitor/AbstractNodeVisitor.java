@@ -5,6 +5,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.util.TraversingItemVisitor;
 
+import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +69,7 @@ public abstract class AbstractNodeVisitor extends TraversingItemVisitor.Default
     {
         return  !node.hasProperty(JCRHttpCacheStoreConstants.PN_ISCACHEENTRYNODE)
                 && !node.hasNodes()
+                && !node.getName().equals(AccessControlConstants.NT_REP_POLICY)
                 && !node.getName().equals(JCRHttpCacheStoreConstants.ROOT_NODE_NAME);
     }
 
