@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>3.14.5-SNAPSHOT</version>
+        <version>3.14.7-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -55,7 +55,8 @@
                             sun.misc.*;resolution:=optional,
                             org.apache.sling.models.annotations.*;resolution:=optional, <!-- the used class InjectionStrategy is only since Sling Models API 1.2 -->
                             org.apache.sling.models.spi.injectorspecific.*;resolution:=optional, <!-- that package was added with Sling Models API 1.1 -->
-                            com.amazonaws.*;resolution:=optional,
+                            com.amazonaws.*;resolution:=optional, <!-- only required for MCP S3 Ingestor -->
+                            com.github.jknack.handlebars;resolution:=optional, <!-- only required for Report Builder -->
                             com.day.cq.wcm.workflow.process;version="[6.0,8)", <!-- using a wider version range for forward compatibility -->
                             com.day.cq.mailer;version="[5.9,7)", <!-- using a wider version range for forward compatibility -->
                             com.adobe.cq.sightly;version="[2.5,4)",
