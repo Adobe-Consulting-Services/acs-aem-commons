@@ -24,7 +24,9 @@ import org.apache.sling.api.resource.Resource;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -128,12 +130,6 @@ public abstract class ResourceUtil {
      */
     public static List<String> getPropertyStrings(Resource resource, String namePattern) {
         String[] vals = resource.getValueMap().get(namePattern, String[].class);
-        List<String> valsList = new ArrayList<>();
-        if (vals != null) {
-            for (String val : vals) {
-                valsList.add(val);
-            }
-        }
-        return valsList;
+        return vals != null ? Arrays.asList(vals) : Collections.EMPTY_LIST;
     }
 }
