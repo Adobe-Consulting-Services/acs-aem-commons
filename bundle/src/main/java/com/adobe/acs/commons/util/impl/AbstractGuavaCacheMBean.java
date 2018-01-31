@@ -19,28 +19,15 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-
-import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;
 
-public abstract class AbstractGuavaCacheMBean<K, V> extends AbstractCacheMBean<K,V> implements GenericCacheMBean {
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.*;
+import java.util.HashMap;
+import java.util.Map;
+
+public abstract class AbstractGuavaCacheMBean<K, V> extends AbstractCacheMBean<K,V> implements CacheMBean {
 
     public <T> AbstractGuavaCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException {
         super(implementation, mbeanInterface);

@@ -3,6 +3,7 @@ package com.adobe.acs.commons.util.impl;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import com.adobe.granite.jmx.annotation.Description;
 import com.adobe.granite.jmx.annotation.Name;
 
@@ -21,7 +22,7 @@ public interface CacheMBean
     TabularData getCacheStats() throws OpenDataException;
 
     @Description("Cache entry contents by key.")
-    String getCacheEntry(@Name(value="Cache Key") String cacheKeyStr) throws Exception;
+    String getCacheEntry(@Name(value="Cache Key") String cacheKeyStr) throws CacheMBeanException;
 
     @Description("Contents of cache")
     TabularData getCacheContents() throws Exception;

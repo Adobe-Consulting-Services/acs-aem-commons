@@ -11,6 +11,7 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -34,7 +35,7 @@ public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean imp
 
     protected abstract void addCacheData(Map<String, Object> data, V cacheObj);
 
-    protected abstract String toString(V cacheObj) throws Exception;
+    protected abstract String toString(V cacheObj) throws CacheMBeanException;
 
     protected abstract CompositeType getCacheEntryType() throws OpenDataException;
 
@@ -80,7 +81,7 @@ public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean imp
         return FileUtils.byteCountToDisplaySize(size);
     }
 
-    public String getCacheEntry(String cacheKeyStr) throws Exception {
+    public String getCacheEntry(String cacheKeyStr) throws CacheMBeanException {
         K cacheKey = null;
 
         final Map<K,V> map = getCacheAsMap();

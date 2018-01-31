@@ -33,6 +33,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -376,7 +377,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         invalidateAll();
     }
 
-    @Override public String getCacheEntry(final String cacheKeyStr) throws Exception {
+    @Override public String getCacheEntry(final String cacheKeyStr) throws CacheMBeanException {
         return withSession(new Function<Session, String>()
         {
             @Override public String apply(Session session) throws Exception
@@ -444,11 +445,15 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         }
     }
 
-    @Override protected String toString(CacheContent cacheObj) throws Exception
+    @Override protected String toString(CacheContent cacheObj) throws CacheMBeanException
     {
-        return IOUtils.toString(
-                cacheObj.getInputDataStream(),
-                cacheObj.getCharEncoding());
+        try {
+            return IOUtils.toString(
+                    cacheObj.getInputDataStream(),
+                    cacheObj.getCharEncoding());
+        } catch (IOException e) {
+            throw new CacheMBeanException("Failed to get the cache contents", e);
+        }
     }
 
     protected CompositeType getCacheEntryType() throws OpenDataException {

@@ -117,6 +117,17 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
+
+    /** jmx property labels */
+    static final String JMX_PN_ORDER = "Order";
+    static final String JMX_PN_OSGICOMPONENT = "OSGi Component";
+    static final String JMX_PN_HTTPCACHE_CONFIGS = "HTTP Cache Configs";
+    static final String JMX_PN_HTTPCACHE_CONFIG = "HTTP Cache Config";
+    static final String JMX_PN_HTTPCACHE_STORE = "HTTP Cache Store";
+    static final String JMX_PN_HTTPCACHE_STORES = "HTTP Cache Stores";
+    static final String JMX_HTTPCACHE_HANDLING_RULE = "HTTP Cache Handling Rule";
+    static final String JMX_PN_HTTPCACHE_HANDLING_RULES = "HTTP Cache Handling Rules";
+
     /** Thread safe list to contain the registered HttpCacheConfig references. */
     private CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<HttpCacheConfig>();
 
@@ -536,24 +547,24 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public TabularData getRegisteredHttpCacheRules() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(
-                "HTTP Cache Handling Rule",
-                "HTTP Cache Handling Rule",
-                new String[]{"HTTP Cache Handling Rule"},
-                new String[]{"HTTP Cache Handling Rule"},
+                JMX_HTTPCACHE_HANDLING_RULE,
+                JMX_HTTPCACHE_HANDLING_RULE,
+                new String[]{JMX_HTTPCACHE_HANDLING_RULE},
+                new String[]{JMX_HTTPCACHE_HANDLING_RULE},
                 new OpenType[]{SimpleType.STRING});
 
         final TabularDataSupport tabularData = new TabularDataSupport(
                 new TabularType(
-                        "HTTP Cache Handling Rules",
-                        "HTTP Cache Handling Rules",
+                        JMX_PN_HTTPCACHE_HANDLING_RULES,
+                        JMX_PN_HTTPCACHE_HANDLING_RULES,
                         cacheEntryType,
-                        new String[]{"HTTP Cache Handling Rule"}));
+                        new String[]{JMX_HTTPCACHE_HANDLING_RULE}));
         // @formatter:on
 
         for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
             final Map<String, Object> row = new HashMap<String, Object>();
 
-            row.put("HTTP Cache Handling Rule", entry.getValue().getClass().getName());
+            row.put(JMX_HTTPCACHE_HANDLING_RULE, entry.getValue().getClass().getName());
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
         }
 
@@ -565,18 +576,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         // @formatter:off
         // Exposing all google guava stats.
         final CompositeType cacheEntryType = new CompositeType(
-                "HTTP Cache Config",
-                "HTTP Cache Config",
-                new String[]{ "Order", "OSGi Component" },
-                new String[]{ "Order", "OSGi Component" },
+                JMX_PN_HTTPCACHE_CONFIG,
+                JMX_PN_HTTPCACHE_CONFIG,
+                new String[]{JMX_PN_ORDER, JMX_PN_OSGICOMPONENT },
+                new String[]{ JMX_PN_ORDER, JMX_PN_OSGICOMPONENT },
                 new OpenType[]{ SimpleType.INTEGER, SimpleType.STRING });
 
         final TabularDataSupport tabularData = new TabularDataSupport(
                 new TabularType(
-                        "HTTP Cache Configs",
-                        "HTTP Cache Configs",
+                        JMX_PN_HTTPCACHE_CONFIGS,
+                        JMX_PN_HTTPCACHE_CONFIGS,
                         cacheEntryType,
-                        new String[]{ "OSGi Component" }));
+                        new String[]{ JMX_PN_OSGICOMPONENT }));
 
         // @formatter:on
 
@@ -585,8 +596,8 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
             Map<String, Object> osgiConfig = cacheConfigConfigs.get(cacheConfig);
 
-            row.put("Order", cacheConfig.getOrder());
-            row.put("OSGi Component", (String) osgiConfig.get(Constants.SERVICE_PID));
+            row.put(JMX_PN_ORDER, cacheConfig.getOrder());
+            row.put(JMX_PN_OSGICOMPONENT, (String) osgiConfig.get(Constants.SERVICE_PID));
 
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
         }
@@ -598,18 +609,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public TabularData getRegisteredPersistenceStores() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(
-                "HTTP Cache Store",
-                "HTTP Cache Store",
-                new String[]{ "HTTP Cache Store" },
-                new String[]{ "HTTP Cache Store" },
+                JMX_PN_HTTPCACHE_STORE,
+                JMX_PN_HTTPCACHE_STORE,
+                new String[]{JMX_PN_HTTPCACHE_STORE},
+                new String[]{JMX_PN_HTTPCACHE_STORE},
                 new OpenType[]{ SimpleType.STRING});
 
         final TabularDataSupport tabularData = new TabularDataSupport(
                 new TabularType(
-                        "HTTP Cache Stores",
-                        "HTTP Cache Stores",
+                        JMX_PN_HTTPCACHE_STORES,
+                        JMX_PN_HTTPCACHE_STORES,
                         cacheEntryType,
-                        new String[]{ "HTTP Cache Store" }));
+                        new String[]{JMX_PN_HTTPCACHE_STORE}));
         // @formatter:on
 
         Enumeration<String> storeNames = cacheStoresMap.keys();
@@ -617,7 +628,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             final String storeName = storeNames.nextElement();
             final Map<String, Object> row = new HashMap<String, Object>();
 
-            row.put("HTTP Cache Store", storeName);
+            row.put(JMX_PN_HTTPCACHE_STORE, storeName);
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
         }
 

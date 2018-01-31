@@ -19,42 +19,18 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-
+import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
+import com.adobe.acs.commons.util.impl.CacheMBean;
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -76,14 +52,26 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
-import com.adobe.acs.commons.util.impl.GenericCacheMBean;
-import com.adobe.granite.ui.clientlibs.HtmlLibrary;
-import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
-import com.adobe.granite.ui.clientlibs.LibraryType;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter
@@ -102,7 +90,7 @@ import com.google.common.cache.CacheBuilder;
         value = "com.adobe.acs.commons.rewriter:type=VersionedClientlibsTransformerMd5Cache", propertyPrivate = true)
 })
 @Service(value = {DynamicMBean.class, TransformerFactory.class, EventHandler.class})
-public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, GenericCacheMBean {
+public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, CacheMBean {
 
     private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);
 
@@ -146,7 +134,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     private ServiceRegistration filterReg;
 
     public VersionedClientlibsTransformerFactory() throws NotCompliantMBeanException {
-        super(GenericCacheMBean.class);
+        super(CacheMBean.class);
     }
 
     @Activate
@@ -340,7 +328,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     @Override
-    protected String toString(String cacheObj) throws Exception {
+    protected String toString(String cacheObj) throws CacheMBeanException {
         return cacheObj;
     }
 
