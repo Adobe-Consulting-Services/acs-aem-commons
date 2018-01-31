@@ -24,21 +24,17 @@ public class InvalidateAllNodesVisitor extends AbstractNodeVisitor
 
     protected void leaving(final Node node, int level) throws RepositoryException
     {
-        final String nodeName = node.getName();
-        if(nodeQualifiesForRemoval(node, nodeName)){
+        if(nodeQualifiesForRemoval(node)){
             node.remove();
             persistSession();
         }
         super.leaving(node, level);
     }
 
-    private boolean nodeQualifiesForRemoval(Node node, String nodeName) throws RepositoryException
+    private boolean nodeQualifiesForRemoval(Node node) throws RepositoryException
     {
         return
-                !StringUtils.equals(nodeName, AccessControlConstants.NT_REP_POLICY)
-                        &&
-                !StringUtils.equals(nodeName, JcrConstants.JCR_CONTENT)
-                        &&
-                !StringUtils.equals(node.getPath(), rootNodePath);
+                isCacheEntryNode(node) ||
+                isBucketNode(node);
     }
 }

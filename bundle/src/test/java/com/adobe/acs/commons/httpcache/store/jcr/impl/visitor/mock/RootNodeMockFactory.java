@@ -83,6 +83,7 @@ public class RootNodeMockFactory
             when(node.getParent()).thenReturn(currentParentNode);
             when(node.getProperties()).thenReturn(new MockPropertyIterator(IteratorUtils.EMPTY_ITERATOR));
             when(node.hasProperty(JCRHttpCacheStoreConstants.PN_ISCACHEENTRYNODE)).thenReturn(false);
+            when(node.hasProperty(JCRHttpCacheStoreConstants.PN_ISBUCKETNODE)).thenReturn(true);
 
             currentParentNode = node;
         }
@@ -150,6 +151,7 @@ public class RootNodeMockFactory
         }
 
         when(entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_ISCACHEENTRYNODE)).thenReturn(true);
+        when(entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_ISBUCKETNODE)).thenReturn(false);
         when(entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON)).thenReturn(true);
         when(entryNode.getNodes()).thenReturn(new MockNodeIterator());
         when(entryNode.getProperties()).thenReturn(new MockPropertyIterator(IteratorUtils.EMPTY_ITERATOR));

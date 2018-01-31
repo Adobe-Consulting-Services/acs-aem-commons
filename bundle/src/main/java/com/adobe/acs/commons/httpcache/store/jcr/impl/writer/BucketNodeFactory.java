@@ -1,6 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
+import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.PN_ISBUCKETNODE;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -43,6 +44,10 @@ public class BucketNodeFactory
 
         for(String path : pathArray){
             Node childNode = JcrUtils.getOrCreateByPath(targetNode, path,false,OAK_UNSTRUCTURED, OAK_UNSTRUCTURED,false);
+            if(!childNode.hasProperty(PN_ISBUCKETNODE)){
+                childNode.setProperty(PN_ISBUCKETNODE, true);
+            }
+
             targetNode = childNode;
         }
 

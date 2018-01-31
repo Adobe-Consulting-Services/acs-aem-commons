@@ -10,6 +10,8 @@ public class JCRHttpCacheStoreConstants
 
     public static final String PN_CACHEKEY = "cacheKeySerialized";
     public static final String PN_ISCACHEENTRYNODE = "isCacheEntryNode";
+    public static final String PN_ISBUCKETNODE = "isBucketNode";
+
     public static final String PN_EXPIRES_ON = "expiresOn";
     public static final String PN_STATUS = "status";
     public static final String PN_CHAR_ENCODING = "char-encoding";
