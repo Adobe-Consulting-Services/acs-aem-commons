@@ -182,7 +182,8 @@ public class JCRHttpCacheStoreMocks
         Whitebox.setInternalState(store, "resourceResolverFactory", resourceResolverFactory);
         Whitebox.setInternalState(store, "dclm", dclm);
         Whitebox.setInternalState(store, "cacheRootPath", JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH);
-        when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(resourceResolver);
+
+        when(resourceResolverFactory.getServiceResourceResolver(any(Map.class))).thenReturn(resourceResolver);
         when(session.getNode(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(rootNode);
         when(session.nodeExists(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(true);
 
