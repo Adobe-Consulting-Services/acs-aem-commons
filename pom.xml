@@ -25,6 +25,12 @@
         <name>Adobe</name>
         <url>http://www.adobe.com/</url>
     </organization>
+    <scm>
+        <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
+        <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
+        <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/master</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <!-- ====================================================================== -->
     <!-- P R O P E R T I E S -->
@@ -255,11 +261,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <scm>
-        <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
 
     <dependencyManagement>
         <dependencies>
