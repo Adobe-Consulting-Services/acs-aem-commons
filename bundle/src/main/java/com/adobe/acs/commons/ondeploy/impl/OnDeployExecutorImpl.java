@@ -19,26 +19,30 @@
  */
 package com.adobe.acs.commons.ondeploy.impl;
 
-import com.adobe.acs.commons.ondeploy.OnDeployScript;
 import com.adobe.acs.commons.ondeploy.OnDeployExecutor;
-import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
+import com.adobe.acs.commons.ondeploy.OnDeployScript;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.QueryBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -64,10 +68,19 @@ import java.util.Map;
         label = "ACS AEM Commons - On-Deploy Scripts Executor",
         description = "Developer tool that triggers scripts (specified via an implementation of OnDeployScriptProvider) to execute on deployment.",
         immediate = true,
+        metatype = true,
         policy = ConfigurationPolicy.REQUIRE
 )
 @Service
 public class OnDeployExecutorImpl implements OnDeployExecutor {
+    @Property(
+            name = "scripts",
+            cardinality = Integer.MAX_VALUE,
+            label = "Scripts",
+            description = "Classes that repersent on-deploy scripts (implement OnDeployScript), in the order to run them."
+    )
+    private static final String PROP_SCRIPTS = "scripts";
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Reference
@@ -75,7 +88,9 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
     @Reference
-    private OnDeployScriptProvider scriptProvider;
+    private DynamicClassLoaderManager dynamicClassLoaderManager;
+
+    private List<OnDeployScript> scripts = null;
 
     /**
      * Executes all on-deploy scripts on activation of this service.
@@ -85,7 +100,7 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
     @Activate
     protected final void activate(final Map<String, String> properties) {
         logger.info("Checking for on-deploy scripts");
-        List<OnDeployScript> scripts = scriptProvider.getScripts();
+        configure(properties);
         if (scripts.size() == 0) {
             logger.trace("No on-deploy scripts found.");
             return;
@@ -121,6 +136,35 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         }
     }
 
+    private void configure(final Map<String, String> properties) {
+        scripts = new ArrayList<>();
+
+        ClassLoader cl = dynamicClassLoaderManager.getDynamicClassLoader();
+        String[] scriptClasses = PropertiesUtil.toStringArray(properties.get(PROP_SCRIPTS), new String[0]);
+        for (String scriptClassName : scriptClasses) {
+            if (StringUtils.isNotBlank(scriptClassName)) {
+                try {
+                    Class scriptClass = cl.loadClass(scriptClassName);
+                    if (OnDeployScript.class.isAssignableFrom(scriptClass)) {
+                        try {
+                            scripts.add((OnDeployScript) scriptClass.newInstance());
+                        } catch (Exception e) {
+                            logger.error("Could not instatiate on-deploy script class: {}", scriptClassName);
+                            throw new OnDeployEarlyTerminationException(e);
+                        }
+                    } else {
+                        String errMsg = "On-deploy script class does not implement the OnDeployScript interface: " + scriptClassName;
+                        logger.error(errMsg);
+                        throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
+                    }
+                } catch (ClassNotFoundException cnfe) {
+                    logger.error("Could not find on-deploy script class: {}", scriptClassName);
+                    throw new OnDeployEarlyTerminationException(cnfe);
+                }
+            }
+        }
+    }
+
     protected Node getOrCreateStatusTrackingNode(Session session, String statusNodePath) {
         try {
             return JcrUtil.createPath(statusNodePath, "nt:unstructured", "nt:unstructured", session, false);
@@ -151,11 +195,15 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
                 logger.info("On-deploy script completed successfully: {}", statusNodePath);
                 trackScriptEnd(session, statusNode, statusNodePath, "success");
             } catch (Exception e) {
-                logger.error("On-deploy script failed: {}", statusNodePath, e);
+                String errMsg = "On-deploy script failed: " + script.getClass().getName();
+                logger.error(errMsg, e);
                 trackScriptEnd(session, statusNode, statusNodePath, "fail");
+                throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
             }
         } else if (!status.equals("success")) {
-            logger.warn("Skipping on-deploy script as it may already be in progress: {} - status: {}", statusNodePath, status);
+            String errMsg = "On-deploy script is already running or in an otherwise unknown state: " + script.getClass().getName() + " - status: " + status;
+            logger.error(errMsg);
+            throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
         } else {
             logger.debug("Skipping on-deploy script, as it is already complete: {}", statusNodePath);
         }
@@ -173,7 +221,8 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
             statusNode.setProperty("endDate", Calendar.getInstance());
             session.save();
         } catch (RepositoryException e) {
-            logger.warn("On-deploy script status node could not be updated: {} - status: {}", statusNodePath, status);
+            logger.error("On-deploy script status node could not be updated: {} - status: {}", statusNodePath, status);
+            throw new OnDeployEarlyTerminationException(e);
         }
     }
 
