@@ -222,7 +222,7 @@ public class OnDeployScriptBaseTest {
 
         onDeployScript.updateResourceType(resourceToUpdate.adaptTo(Node.class), "test/component/comp2");
 
-        assertLogText("Node at /content/resource-type-update2 is already resource type 'test/component/comp2'");
+        assertLogText("Node at /content/resource-type-update2 is already resource type: test/component/comp2");
     }
 
     private class OnDeployScriptBaseExt extends OnDeployScriptBase {
