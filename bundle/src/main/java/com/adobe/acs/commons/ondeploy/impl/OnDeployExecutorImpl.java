@@ -69,7 +69,8 @@ import java.util.Map;
         description = "Developer tool that triggers scripts (specified via an implementation of OnDeployScriptProvider) to execute on deployment.",
         immediate = true,
         metatype = true,
-        policy = ConfigurationPolicy.REQUIRE
+        policy = ConfigurationPolicy.REQUIRE,
+        configurationFactory = true
 )
 @Service
 public class OnDeployExecutorImpl implements OnDeployExecutor {
