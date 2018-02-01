@@ -26,6 +26,7 @@ import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.PageManager;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
+import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Workspace;
@@ -122,6 +124,36 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
         } catch (PathNotFoundException e) {
             logger.info("Creating node (and missing parents): {}", absolutePath);
             return JcrUtil.createPath(absolutePath, intermediateNodeType, nodeType, session, false);
+        }
+    }
+
+    /**
+     * Rename a property on a node.
+     *
+     * @param node Node to update the property name on.
+     * @param oldPropertyName Old property name.
+     * @param newPropertyName New property name.
+     */
+    protected void renameProperty(Node node, String oldPropertyName, String newPropertyName) throws RepositoryException {
+        Resource resource = resourceResolver.getResource(node.getPath());
+        renameProperty(resource, oldPropertyName, newPropertyName);
+    }
+
+    /**
+     * Rename a property on a resource.
+     *
+     * @param node Resource to update the property name on.
+     * @param oldPropertyName Old property name.
+     * @param newPropertyName New property name.
+     */
+    protected void renameProperty(Resource resource, String oldPropertyName, String newPropertyName) {
+        ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
+        if (properties.containsKey(oldPropertyName)) {
+            logger.info("Renaming property '{}' to '{}' on resource: {}", new Object[] { oldPropertyName, newPropertyName, resource.getPath() });
+            properties.put(newPropertyName, properties.get(oldPropertyName));
+            properties.remove(oldPropertyName);
+        } else {
+            logger.debug("Property '{}' does not exist on resource: {}", oldPropertyName, resource.getPath());
         }
     }
 
