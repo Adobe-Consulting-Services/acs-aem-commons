@@ -41,8 +41,10 @@ import java.util.Arrays;
 
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -64,6 +66,7 @@ public class OnDeployScriptBaseTest {
         nodeContent.addNode("to-delete");
         Node nodeContentResType1 = nodeContent.addNode("resource-type-update1");
         nodeContentResType1.setProperty("sling:resourceType", "test/component/comp1");
+        nodeContentResType1.setProperty("text", "hello world");
         Node nodeContentResType2 = nodeContent.addNode("resource-type-update2");
         nodeContentResType2.setProperty("sling:resourceType", "test/component/comp2");
 
@@ -149,6 +152,32 @@ public class OnDeployScriptBaseTest {
         Node base = grandParent.getParent();
         assertEquals("/content", base.getPath());
         assertEquals("nt:resource", base.getPrimaryNodeType().getName());
+    }
+
+    @Test
+    public void testRenameProperty() throws RepositoryException {
+        Resource resource = resourceResolver.getResource("/content/resource-type-update1");
+        Node node = resource.adaptTo(Node.class);
+
+        assertTrue(resource.getValueMap().containsKey("text"));
+        assertFalse(resource.getValueMap().containsKey("label"));
+        assertEquals("hello world", resource.getValueMap().get("text", String.class));
+
+        onDeployScript.renameProperty(node, "text", "label");
+
+        assertFalse(resource.getValueMap().containsKey("text"));
+        assertTrue(resource.getValueMap().containsKey("label"));
+        assertEquals("hello world", resource.getValueMap().get("label", String.class));
+    }
+
+    @Test
+    public void testRenamePropertyWhenPropertyDoesNotExist() throws RepositoryException {
+        Resource resource = resourceResolver.getResource("/content/resource-type-update1");
+        Node node = resource.adaptTo(Node.class);
+
+        onDeployScript.renameProperty(node, "bogus", "label");
+
+        assertLogText("Property 'bogus' does not exist on resource: /content/resource-type-update1");
     }
 
     @Test
