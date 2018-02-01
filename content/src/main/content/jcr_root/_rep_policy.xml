@@ -33,6 +33,10 @@
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-automatic-package-replicator-service"
             rep:privileges="{Name}[jcr:read]"/>
+    <allow5
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-on-deploy-scripts-service"
+            rep:privileges="{Name}[jcr:read]"/>
     <!--
     <allow4
             jcr:primaryType="rep:GrantACE"

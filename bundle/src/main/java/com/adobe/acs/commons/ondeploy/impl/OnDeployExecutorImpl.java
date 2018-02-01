@@ -1,0 +1,192 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package com.adobe.acs.commons.ondeploy.impl;
+
+import com.adobe.acs.commons.ondeploy.OnDeployScript;
+import com.adobe.acs.commons.ondeploy.OnDeployExecutor;
+import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
+import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.search.QueryBuilder;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * A service that triggers scripts on deployment to an AEM server.
+ * <p>
+ * This class manages scripts so that they only run once (unless the script
+ * fails).  Script execution statuses are stored in the JCR @
+ * /var/acs-commons/on-deploy-scripts-status.
+ * <p>
+ * Scripts are specified by implementing a OnDeployScriptProvider service that
+ * returns a list of OnDeployScript instances.
+ * <p>
+ * NOTE: Since it's always a possibility that
+ * /var/acs-commons/on-deploy-scripts-status will be deleted in the JCR,
+ * scripts should be written defensively in case they are actually run more
+ * than once.  This also covers the scenario where a script is run a second
+ * time after failing the first time.
+ */
+@Component(
+        label = "ACS AEM Commons - On-Deploy Scripts Executor",
+        description = "Developer tool that triggers scripts (specified via an implementation of OnDeployScriptProvider) to execute on deployment.",
+        immediate = true,
+        policy = ConfigurationPolicy.REQUIRE
+)
+@Service
+public class OnDeployExecutorImpl implements OnDeployExecutor {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Reference
+    private QueryBuilder queryBuilder;
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+    @Reference
+    private OnDeployScriptProvider scriptProvider;
+
+    /**
+     * Executes all on-deploy scripts on activation of this service.
+     *
+     * @param properties OSGi properties for this service (unused).
+     */
+    @Activate
+    protected final void activate(final Map<String, String> properties) {
+        logger.info("Checking for on-deploy scripts");
+        List<OnDeployScript> scripts = scriptProvider.getScripts();
+        if (scripts.size() == 0) {
+            logger.trace("No on-deploy scripts found.");
+            return;
+        }
+        ResourceResolver resourceResolver = null;
+        Session session = null;
+        try {
+            try {
+                Map<String, Object> userParams = new HashMap<>();
+                userParams.put(ResourceResolverFactory.SUBSERVICE, "onDeployScripts");
+                resourceResolver = resourceResolverFactory.getServiceResourceResolver(userParams);
+            } catch (LoginException le2) {
+                logger.error("On-deploy scripts cannot be run because the system cannot log in with the appropriate service user");
+                throw new OnDeployEarlyTerminationException(le2);
+            }
+            session = resourceResolver.adaptTo(Session.class);
+            runScripts(resourceResolver, session, scripts);
+        } finally {
+            if (session != null) {
+                try {
+                    session.logout();
+                } catch (Exception e) {
+                    logger.warn("Failed session.logout()", e);
+                }
+            }
+            if (resourceResolver != null) {
+                try {
+                    resourceResolver.close();
+                } catch (Exception e) {
+                    logger.warn("Failed resourceResolver.close()", e);
+                }
+            }
+        }
+    }
+
+    protected Node getOrCreateStatusTrackingNode(Session session, String statusNodePath) {
+        try {
+            return JcrUtil.createPath(statusNodePath, "nt:unstructured", "nt:unstructured", session, false);
+        } catch (RepositoryException re) {
+            logger.error("On-deploy script cannot be run because the system could not find or create the script status node: {}", statusNodePath);
+            throw new OnDeployEarlyTerminationException(re);
+        }
+    }
+
+    protected String getScriptStatus(ResourceResolver resourceResolver, Node statusNode, String statusNodePath) {
+        try {
+            Resource resource = resourceResolver.getResource(statusNode.getPath());
+            return resource.getValueMap().get("status", (String) null);
+        } catch (RepositoryException re) {
+            logger.error("On-deploy script cannot be run because the system read the script status node: {}", statusNodePath);
+            throw new OnDeployEarlyTerminationException(re);
+        }
+    }
+
+    protected void runScript(ResourceResolver resourceResolver, Session session, OnDeployScript script) {
+        String statusNodePath = "/var/acs-commons/on-deploy-scripts-status/" + script.getClass().getName();
+        Node statusNode = getOrCreateStatusTrackingNode(session, statusNodePath);
+        String status = getScriptStatus(resourceResolver, statusNode, statusNodePath);
+        if (status == null || status.equals("fail")) {
+            trackScriptStart(session, statusNode, statusNodePath);
+            try {
+                script.execute(resourceResolver, queryBuilder);
+                logger.info("On-deploy script completed successfully: {}", statusNodePath);
+                trackScriptEnd(session, statusNode, statusNodePath, "success");
+            } catch (Exception e) {
+                logger.error("On-deploy script failed: {}", statusNodePath, e);
+                trackScriptEnd(session, statusNode, statusNodePath, "fail");
+            }
+        } else if (!status.equals("success")) {
+            logger.warn("Skipping on-deploy script as it may already be in progress: {} - status: {}", statusNodePath, status);
+        } else {
+            logger.debug("Skipping on-deploy script, as it is already complete: {}", statusNodePath);
+        }
+    }
+
+    protected void runScripts(ResourceResolver resourceResolver, Session session, List<OnDeployScript> scripts) {
+        for (OnDeployScript script : scripts) {
+            runScript(resourceResolver, session, script);
+        }
+    }
+
+    protected void trackScriptEnd(Session session, Node statusNode, String statusNodePath, String status) {
+        try {
+            statusNode.setProperty("status", status);
+            statusNode.setProperty("endDate", Calendar.getInstance());
+            session.save();
+        } catch (RepositoryException e) {
+            logger.warn("On-deploy script status node could not be updated: {} - status: {}", statusNodePath, status);
+        }
+    }
+
+    protected void trackScriptStart(Session session, Node statusNode, String statusNodePath) {
+        logger.info("Starting on-deploy script: {}", statusNodePath);
+        try {
+            statusNode.setProperty("status", "running");
+            statusNode.setProperty("startDate", Calendar.getInstance());
+            statusNode.setProperty("endDate", (Calendar) null);
+            session.save();
+        } catch (RepositoryException e) {
+            logger.error("On-deploy script cannot be run because the system could not write to the script status node: {}", statusNodePath);
+            throw new OnDeployEarlyTerminationException(e);
+        }
+    }
+}
