@@ -103,7 +103,7 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         logger.info("Checking for on-deploy scripts");
         configure(properties);
         if (scripts.size() == 0) {
-            logger.trace("No on-deploy scripts found.");
+            logger.debug("No on-deploy scripts found.");
             return;
         }
         ResourceResolver resourceResolver = null;

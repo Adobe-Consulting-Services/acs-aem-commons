@@ -120,7 +120,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
         try {
             return session.getNode(absolutePath);
         } catch (PathNotFoundException e) {
-            logger.info("Creating node (and missing parents) at {}", absolutePath);
+            logger.info("Creating node (and missing parents): {}", absolutePath);
             return JcrUtil.createPath(absolutePath, intermediateNodeType, nodeType, session, false);
         }
     }
@@ -154,12 +154,18 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
         map.put("1_property", "sling:resourceType");
         map.put("1_property.value", oldResourceType);
 
+        logger.info("Finding all nodes under /content with resource type: {}", oldResourceType);
+
         Query query = queryBuilder.createQuery(PredicateGroup.create(map), session);
         SearchResult result = query.getResult();
         Iterator<Node> nodeItr = result.getNodes();
-        while (nodeItr.hasNext()) {
-            Node node = nodeItr.next();
-            updateResourceType(node, newResourceType);
+        if (nodeItr.hasNext()) {
+            while (nodeItr.hasNext()) {
+                Node node = nodeItr.next();
+                updateResourceType(node, newResourceType);
+            }
+        } else {
+            logger.info("No nodes found");
         }
     }
 
@@ -172,10 +178,10 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
     protected void updateResourceType(Node node, String resourceType) throws RepositoryException {
         String currentResourceType = node.getProperty("sling:resourceType").getString();
         if (!resourceType.equals(currentResourceType)) {
-            logger.info("Updating node at {} to resource type '{}'", node.getPath(), resourceType);
+            logger.info("Updating node at {} to resource type: {}", node.getPath(), resourceType);
             node.setProperty("sling:resourceType", resourceType);
         } else {
-            logger.info("Node at {} is already resource type '{}'", node.getPath(), resourceType);
+            logger.info("Node at {} is already resource type: {}", node.getPath(), resourceType);
         }
     }
 }
