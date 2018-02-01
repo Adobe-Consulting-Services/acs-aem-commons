@@ -19,6 +19,10 @@
  */
 package com.adobe.acs.commons.ondeploy.impl;
 
+/**
+ * An exception representing a failed (and thus incomplete) execution of
+ * on-deploy scripts.
+ */
 public class OnDeployEarlyTerminationException extends RuntimeException {
     public OnDeployEarlyTerminationException(Throwable cause) {
         super("On-deploy scripts terminated due to a fatal error. Scripts stopped running at the first failing " +

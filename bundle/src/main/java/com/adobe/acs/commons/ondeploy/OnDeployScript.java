@@ -23,7 +23,7 @@ import com.day.cq.search.QueryBuilder;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
- * A script that runs the first time it is deployed to an AEM server.
+ * An on-deploy script that can be run via the OnDeployExecutor.
  */
 public interface OnDeployScript {
     /**

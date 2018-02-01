@@ -55,8 +55,7 @@ import java.util.Map;
  * fails).  Script execution statuses are stored in the JCR @
  * /var/acs-commons/on-deploy-scripts-status.
  * <p>
- * Scripts are specified by implementing a OnDeployScriptProvider service that
- * returns a list of OnDeployScript instances.
+ * Scripts are specified via OSGi config, are are run in the order specified.
  * <p>
  * NOTE: Since it's always a possibility that
  * /var/acs-commons/on-deploy-scripts-status will be deleted in the JCR,
@@ -137,6 +136,11 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         }
     }
 
+    /**
+     * Convert the conifgured list of on-deploy script classes to object instances.
+     *
+     * @param properties OSGi configs.
+     */
     private void configure(final Map<String, String> properties) {
         scripts = new ArrayList<>();
 
