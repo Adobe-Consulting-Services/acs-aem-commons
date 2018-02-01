@@ -21,6 +21,7 @@ package com.adobe.acs.commons.ondeploy.impl;
 
 import com.adobe.acs.commons.ondeploy.OnDeployExecutor;
 import com.adobe.acs.commons.ondeploy.OnDeployScript;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -81,6 +82,16 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
     )
     private static final String PROP_SCRIPTS = "scripts";
 
+    private static final String SCRIPT_DATE_END = "endDate";
+    private static final String SCRIPT_DATE_START = "startDate";
+    private static final String SCRIPT_STATUS = "status";
+    private static final String SCRIPT_STATUS_JCR_FOLDER = "/var/acs-commons/on-deploy-scripts-status";
+    private static final String SCRIPT_STATUS_FAIL = "fail";
+    private static final String SCRIPT_STATUS_RUNNING = "running";
+    private static final String SCRIPT_STATUS_SUCCESS = "success";
+
+    private static final String SERVICE_NAME = "on-deploy-scripts";
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Reference
@@ -108,14 +119,7 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         ResourceResolver resourceResolver = null;
         Session session = null;
         try {
-            try {
-                Map<String, Object> userParams = new HashMap<>();
-                userParams.put(ResourceResolverFactory.SUBSERVICE, "onDeployScripts");
-                resourceResolver = resourceResolverFactory.getServiceResourceResolver(userParams);
-            } catch (LoginException le2) {
-                logger.error("On-deploy scripts cannot be run because the system cannot log in with the appropriate service user");
-                throw new OnDeployEarlyTerminationException(le2);
-            }
+            resourceResolver = logIn();
             session = resourceResolver.adaptTo(Session.class);
             runScripts(resourceResolver, session, scripts);
         } finally {
@@ -172,7 +176,7 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
 
     protected Node getOrCreateStatusTrackingNode(Session session, String statusNodePath) {
         try {
-            return JcrUtil.createPath(statusNodePath, "nt:unstructured", "nt:unstructured", session, false);
+            return JcrUtil.createPath(statusNodePath, JcrConstants.NT_UNSTRUCTURED, JcrConstants.NT_UNSTRUCTURED, session, false);
         } catch (RepositoryException re) {
             logger.error("On-deploy script cannot be run because the system could not find or create the script status node: {}", statusNodePath);
             throw new OnDeployEarlyTerminationException(re);
@@ -182,30 +186,41 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
     protected String getScriptStatus(ResourceResolver resourceResolver, Node statusNode, String statusNodePath) {
         try {
             Resource resource = resourceResolver.getResource(statusNode.getPath());
-            return resource.getValueMap().get("status", (String) null);
+            return resource.getValueMap().get(SCRIPT_STATUS, (String) null);
         } catch (RepositoryException re) {
             logger.error("On-deploy script cannot be run because the system read the script status node: {}", statusNodePath);
             throw new OnDeployEarlyTerminationException(re);
         }
     }
 
+    protected ResourceResolver logIn() {
+        try {
+            Map<String, Object> userParams = new HashMap<>();
+            userParams.put(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
+            return resourceResolverFactory.getServiceResourceResolver(userParams);
+        } catch (LoginException le2) {
+            logger.error("On-deploy scripts cannot be run because the system cannot log in with the appropriate service user");
+            throw new OnDeployEarlyTerminationException(le2);
+        }
+    }
+
     protected void runScript(ResourceResolver resourceResolver, Session session, OnDeployScript script) {
-        String statusNodePath = "/var/acs-commons/on-deploy-scripts-status/" + script.getClass().getName();
+        String statusNodePath = SCRIPT_STATUS_JCR_FOLDER + "/" + script.getClass().getName();
         Node statusNode = getOrCreateStatusTrackingNode(session, statusNodePath);
         String status = getScriptStatus(resourceResolver, statusNode, statusNodePath);
-        if (status == null || status.equals("fail")) {
+        if (status == null || status.equals(SCRIPT_STATUS_FAIL)) {
             trackScriptStart(session, statusNode, statusNodePath);
             try {
                 script.execute(resourceResolver, queryBuilder);
                 logger.info("On-deploy script completed successfully: {}", statusNodePath);
-                trackScriptEnd(session, statusNode, statusNodePath, "success");
+                trackScriptEnd(session, statusNode, statusNodePath, SCRIPT_STATUS_SUCCESS);
             } catch (Exception e) {
                 String errMsg = "On-deploy script failed: " + script.getClass().getName();
                 logger.error(errMsg, e);
-                trackScriptEnd(session, statusNode, statusNodePath, "fail");
+                trackScriptEnd(session, statusNode, statusNodePath, SCRIPT_STATUS_FAIL);
                 throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
             }
-        } else if (!status.equals("success")) {
+        } else if (!status.equals(SCRIPT_STATUS_SUCCESS)) {
             String errMsg = "On-deploy script is already running or in an otherwise unknown state: " + script.getClass().getName() + " - status: " + status;
             logger.error(errMsg);
             throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
@@ -222,8 +237,8 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
 
     protected void trackScriptEnd(Session session, Node statusNode, String statusNodePath, String status) {
         try {
-            statusNode.setProperty("status", status);
-            statusNode.setProperty("endDate", Calendar.getInstance());
+            statusNode.setProperty(SCRIPT_STATUS, status);
+            statusNode.setProperty(SCRIPT_DATE_END, Calendar.getInstance());
             session.save();
         } catch (RepositoryException e) {
             logger.error("On-deploy script status node could not be updated: {} - status: {}", statusNodePath, status);
@@ -234,9 +249,9 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
     protected void trackScriptStart(Session session, Node statusNode, String statusNodePath) {
         logger.info("Starting on-deploy script: {}", statusNodePath);
         try {
-            statusNode.setProperty("status", "running");
-            statusNode.setProperty("startDate", Calendar.getInstance());
-            statusNode.setProperty("endDate", (Calendar) null);
+            statusNode.setProperty(SCRIPT_STATUS, SCRIPT_STATUS_RUNNING);
+            statusNode.setProperty(SCRIPT_DATE_START, Calendar.getInstance());
+            statusNode.setProperty(SCRIPT_DATE_END, (Calendar) null);
             session.save();
         } catch (RepositoryException e) {
             logger.error("On-deploy script cannot be run because the system could not write to the script status node: {}", statusNodePath);

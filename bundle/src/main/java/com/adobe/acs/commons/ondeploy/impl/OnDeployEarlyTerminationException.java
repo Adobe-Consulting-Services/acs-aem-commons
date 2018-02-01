@@ -25,8 +25,8 @@ package com.adobe.acs.commons.ondeploy.impl;
  */
 public class OnDeployEarlyTerminationException extends RuntimeException {
     public OnDeployEarlyTerminationException(Throwable cause) {
-        super("On-deploy scripts terminated due to a fatal error. Scripts stopped running at the first failing " +
-                "script to ensure proper script order. One or more on-deploy scripts have not been run, " +
-                "and will not be run again until next deployment or service activation.", cause);
+        super("On-deploy scripts terminated due to a fatal error. Scripts stopped running at the first failing "
+                + "script to ensure proper script order. One or more on-deploy scripts have not been run, "
+                + "and will not be run again until next deployment or service activation.", cause);
     }
 }

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.ondeploy.impl;
 
 import com.adobe.acs.commons.ondeploy.OnDeployScript;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
@@ -46,6 +47,8 @@ import java.util.Map;
  * Base on-deploy script implementation.
  */
 public abstract class OnDeployScriptBase implements OnDeployScript {
+    private static final String SLING_RESOURCE_TYPE = "sling:resourceType";
+
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected PageManager pageManager;
@@ -87,7 +90,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @return The fetched or created node.
      */
     protected Node getOrCreateNode(String absolutePath) throws RepositoryException {
-        return getOrCreateNode(absolutePath, "nt:unstructured", "nt:unstructured");
+        return getOrCreateNode(absolutePath, JcrConstants.NT_UNSTRUCTURED, JcrConstants.NT_UNSTRUCTURED);
     }
 
     /**
@@ -102,7 +105,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @return The fetched or created node.
      */
     protected Node getOrCreateNode(String absolutePath, String nodeType) throws RepositoryException {
-        return getOrCreateNode(absolutePath, "nt:unstructured", nodeType);
+        return getOrCreateNode(absolutePath, JcrConstants.NT_UNSTRUCTURED, nodeType);
     }
 
     /**
@@ -183,7 +186,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
         Map<String, String> map = new HashMap<>();
         map.put("p.limit", "-1");
         map.put("path", "/content");
-        map.put("1_property", "sling:resourceType");
+        map.put("1_property", SLING_RESOURCE_TYPE);
         map.put("1_property.value", oldResourceType);
 
         logger.info("Finding all nodes under /content with resource type: {}", oldResourceType);
@@ -208,10 +211,10 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @param resourceType The new sling:resourceType to be used.
      */
     protected void updateResourceType(Node node, String resourceType) throws RepositoryException {
-        String currentResourceType = node.getProperty("sling:resourceType").getString();
+        String currentResourceType = node.getProperty(SLING_RESOURCE_TYPE).getString();
         if (!resourceType.equals(currentResourceType)) {
             logger.info("Updating node at {} to resource type: {}", node.getPath(), resourceType);
-            node.setProperty("sling:resourceType", resourceType);
+            node.setProperty(SLING_RESOURCE_TYPE, resourceType);
         } else {
             logger.info("Node at {} is already resource type: {}", node.getPath(), resourceType);
         }
