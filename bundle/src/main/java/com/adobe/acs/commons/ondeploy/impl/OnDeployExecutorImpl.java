@@ -152,23 +152,23 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         String[] scriptClasses = PropertiesUtil.toStringArray(properties.get(PROP_SCRIPTS), new String[0]);
         for (String scriptClassName : scriptClasses) {
             if (StringUtils.isNotBlank(scriptClassName)) {
+                Class scriptClass;
                 try {
-                    Class scriptClass = cl.loadClass(scriptClassName);
-                    if (OnDeployScript.class.isAssignableFrom(scriptClass)) {
-                        try {
-                            scripts.add((OnDeployScript) scriptClass.newInstance());
-                        } catch (Exception e) {
-                            logger.error("Could not instatiate on-deploy script class: {}", scriptClassName);
-                            throw new OnDeployEarlyTerminationException(e);
-                        }
-                    } else {
-                        String errMsg = "On-deploy script class does not implement the OnDeployScript interface: " + scriptClassName;
-                        logger.error(errMsg);
-                        throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
-                    }
+                    scriptClass = cl.loadClass(scriptClassName);
                 } catch (ClassNotFoundException cnfe) {
                     logger.error("Could not find on-deploy script class: {}", scriptClassName);
                     throw new OnDeployEarlyTerminationException(cnfe);
+                }
+                if (!OnDeployScript.class.isAssignableFrom(scriptClass)) {
+                    String errMsg = "On-deploy script class does not implement the OnDeployScript interface: " + scriptClassName;
+                    logger.error(errMsg);
+                    throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
+                }
+                try {
+                    scripts.add((OnDeployScript) scriptClass.newInstance());
+                } catch (Exception e) {
+                    logger.error("Could not instatiate on-deploy script class: {}", scriptClassName);
+                    throw new OnDeployEarlyTerminationException(e);
                 }
             }
         }
