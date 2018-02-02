@@ -60,7 +60,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
     /**
      * @see OnDeployScript#execute(ResourceResolver, QueryBuilder)
      */
-    public final void execute(ResourceResolver resourceResolver, QueryBuilder queryBuilder) throws Exception {
+    public final void execute(ResourceResolver resourceResolver, QueryBuilder queryBuilder) {
         this.resourceResolver = resourceResolver;
         this.queryBuilder = queryBuilder;
 
@@ -68,9 +68,12 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
         this.session = resourceResolver.adaptTo(Session.class);
         this.workspace = session.getWorkspace();
 
-        execute();
-
-        session.save();
+        try {
+            execute();
+            session.save();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

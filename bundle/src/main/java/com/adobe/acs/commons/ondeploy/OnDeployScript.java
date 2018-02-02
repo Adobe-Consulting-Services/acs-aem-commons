@@ -32,5 +32,5 @@ public interface OnDeployScript {
      * @param resourceResolver Resource resolver.
      * @param queryBuilder Query builder.
      */
-    void execute(ResourceResolver resourceResolver, QueryBuilder queryBuilder) throws Exception;
+    void execute(ResourceResolver resourceResolver, QueryBuilder queryBuilder);
 }
