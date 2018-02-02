@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.Value;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -102,6 +103,17 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
     private DynamicClassLoaderManager dynamicClassLoaderManager;
 
     private List<OnDeployScript> scripts = null;
+
+    // TODO: These were needed for injection to work in tests
+    protected void bindQueryBuilder(QueryBuilder queryBuilder) {
+        this.queryBuilder = queryBuilder;
+    }
+    protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
+        this.resourceResolverFactory = resourceResolverFactory;
+    }
+    protected void bindDynamicClassLoaderManager(DynamicClassLoaderManager dynamicClassLoaderManager) {
+        this.dynamicClassLoaderManager = dynamicClassLoaderManager;
+    }
 
     /**
      * Executes all on-deploy scripts on activation of this service.
@@ -251,7 +263,7 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         try {
             statusNode.setProperty(SCRIPT_STATUS, SCRIPT_STATUS_RUNNING);
             statusNode.setProperty(SCRIPT_DATE_START, Calendar.getInstance());
-            statusNode.setProperty(SCRIPT_DATE_END, (Calendar) null);
+            statusNode.setProperty(SCRIPT_DATE_END, (Value) null);
             session.save();
         } catch (RepositoryException e) {
             logger.error("On-deploy script cannot be run because the system could not write to the script status node: {}", statusNodePath);
