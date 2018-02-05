@@ -288,7 +288,7 @@ public class OnDeployScriptBaseTest {
         assertLogText("Node at /content/resource-type-update2 is already resource type: test/component/comp2");
     }
 
-    private class OnDeployScriptBaseExt extends OnDeployScriptBase {
+    protected class OnDeployScriptBaseExt extends OnDeployScriptBase {
         @Override
         protected void execute() throws Exception {
             // no op
