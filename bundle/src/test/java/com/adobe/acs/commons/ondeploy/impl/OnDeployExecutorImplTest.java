@@ -27,9 +27,11 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
+import static org.powermock.api.mockito.PowerMockito.verifyNoMoreInteractions;
 
 /**
  * Created by brett on 2/2/18.
@@ -116,6 +118,18 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
+    public void testExecuteNoScripts() {
+        OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
+
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[0]);
+        context.registerInjectActivateService(impl, onDeployExecutorProps);
+
+        assertLogText("No on-deploy scripts found.");
+        verify(impl, never()).logIn();
+    }
+
+    @Test
     public void testExecuteSuccessfulScripts() {
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
         onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), OnDeployScriptTestExampleSuccessWithPause.class.getName() });
@@ -146,5 +160,47 @@ public class OnDeployExecutorImplTest {
         assertTrue(System.currentTimeMillis() - start.getTimeInMillis() < 10000);
         assertTrue(start.getTimeInMillis() + 1000 <= end.getTimeInMillis());
         assertTrue(end.getTimeInMillis() - start.getTimeInMillis() < 10000);
+    }
+
+    @Test
+    public void testScriptClassErrorClassNotFound() {
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), "com.adobe.acs.BogusClassThatDoesntExist" });
+
+        try {
+            context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
+            fail("Expected exception");
+        } catch (Exception e) {
+            assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
+            assertLogText("Could not find on-deploy script class: com.adobe.acs.BogusClassThatDoesntExist");
+        }
+    }
+
+    @Test
+    public void testScriptClassErrorClassNotScript() {
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), OnDeployExecutorImpl.class.getName() });
+
+        try {
+            context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
+            fail("Expected exception");
+        } catch (Exception e) {
+            assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
+            assertLogText("On-deploy script class does not implement the OnDeployScript interface: " + OnDeployExecutorImpl.class.getName());
+        }
+    }
+
+    @Test
+    public void testScriptClassErrorCtorFailure() {
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), OnDeployScriptTestExampleFailCtor.class.getName() });
+
+        try {
+            context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
+            fail("Expected exception");
+        } catch (Exception e) {
+            assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
+            assertLogText("Could not instatiate on-deploy script class: " + OnDeployScriptTestExampleFailCtor.class.getName());
+        }
     }
 }
