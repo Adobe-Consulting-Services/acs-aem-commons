@@ -16,6 +16,7 @@ import org.apache.sling.testing.mock.sling.services.MockSlingSettingService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Matchers;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -24,7 +25,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.doThrow;
 
 /**
  * Created by brett on 2/2/18.
@@ -44,6 +53,70 @@ public class OnDeployExecutorImplTest {
                 .addNode("on-deploy-scripts-status", JcrConstants.NT_UNSTRUCTURED);
 
         LogTester.reset();
+    }
+
+    @Test
+    public void testCloseResources() {
+        ResourceResolver resourceResolver = mock(ResourceResolver.class);
+        Session session = mock(Session.class);
+
+        doReturn(session).when(resourceResolver).adaptTo(Session.class);
+
+        OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
+        doReturn(resourceResolver).when(impl).logIn();
+        doNothing().when(impl).runScripts(same(resourceResolver), same(session), anyList());
+
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExample1.class.getName() });
+        context.registerInjectActivateService(impl, onDeployExecutorProps);
+
+        verify(session).logout();
+        verify(resourceResolver).close();
+    }
+
+    @Test
+    public void testCloseResourcesIsFailSafe() {
+        ResourceResolver resourceResolver = mock(ResourceResolver.class);
+        Session session = mock(Session.class);
+
+        doReturn(session).when(resourceResolver).adaptTo(Session.class);
+
+        OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
+        doReturn(resourceResolver).when(impl).logIn();
+        doNothing().when(impl).runScripts(same(resourceResolver), same(session), anyList());
+
+        doThrow(new RuntimeException("resolver close failed")).when(resourceResolver).close();
+        doThrow(new RuntimeException("session logout failed")).when(session).logout();
+
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExample1.class.getName() });
+        context.registerInjectActivateService(impl, onDeployExecutorProps);
+
+        assertLogText("Failed session.logout()");
+        assertLogText("Failed resourceResolver.close()");
+    }
+
+    @Test
+    public void testCloseResourcesOnException() {
+        ResourceResolver resourceResolver = mock(ResourceResolver.class);
+        Session session = mock(Session.class);
+
+        doReturn(session).when(resourceResolver).adaptTo(Session.class);
+
+        OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
+        doReturn(resourceResolver).when(impl).logIn();
+        doThrow(new RuntimeException("Scripts broke!")).when(impl).runScripts(same(resourceResolver), same(session), anyList());
+
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExample1.class.getName() });
+
+        try {
+            context.registerInjectActivateService(impl, onDeployExecutorProps);
+            fail("Expected exception");
+        } catch (Exception e) {
+            verify(session).logout();
+            verify(resourceResolver).close();
+        }
     }
 
     @Test
