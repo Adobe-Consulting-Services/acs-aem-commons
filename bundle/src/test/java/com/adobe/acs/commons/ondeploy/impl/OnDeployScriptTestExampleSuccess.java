@@ -6,6 +6,6 @@ package com.adobe.acs.commons.ondeploy.impl;
 public class OnDeployScriptTestExampleSuccess extends OnDeployScriptBase {
     @Override
     protected void execute() throws Exception {
-        logger.info("Executing test script: OnDeployScriptTestExample1");
+        logger.info("Executing test script: OnDeployScriptTestExampleSuccess");
     }
 }

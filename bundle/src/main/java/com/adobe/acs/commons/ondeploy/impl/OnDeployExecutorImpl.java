@@ -227,13 +227,13 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
                 logger.info("On-deploy script completed successfully: {}", statusNodePath);
                 trackScriptEnd(session, statusNode, statusNodePath, SCRIPT_STATUS_SUCCESS);
             } catch (Exception e) {
-                String errMsg = "On-deploy script failed: " + script.getClass().getName();
+                String errMsg = "On-deploy script failed: " + statusNodePath;
                 logger.error(errMsg, e);
                 trackScriptEnd(session, statusNode, statusNodePath, SCRIPT_STATUS_FAIL);
                 throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
             }
         } else if (!status.equals(SCRIPT_STATUS_SUCCESS)) {
-            String errMsg = "On-deploy script is already running or in an otherwise unknown state: " + script.getClass().getName() + " - status: " + status;
+            String errMsg = "On-deploy script is already running or in an otherwise unknown state: " + statusNodePath + " - status: " + status;
             logger.error(errMsg);
             throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
         } else {

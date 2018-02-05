@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -43,47 +44,34 @@ public class LogTester extends AppenderBase<LoggingEvent> {
         reset();
     }
 
-    public static void assertLogEvents(int expected) {
-        assertLogEvents(expected, ALL);
-    }
-
-    public static void assertLogEvents(int expected, String loggerName) {
-        int count = 0;
-        if (loggingEvents.containsKey(loggerName)) {
-            count = loggingEvents.get(loggerName).size();
-        }
-        String msg = "Expected " + loggerName + " log size to be " + expected + " event";
-        msg += (expected > 1 ? "s" : "");
-        msg += " but found " + count;
-        assertEquals(msg, expected, count);
-    }
-
+    /**
+     * Assert that (any) logger contains the expected string.
+     *
+     * @param expected Expected string.
+     */
     public static void assertLogText(String expected) {
         assertLogText(expected, ALL, null);
     }
 
+    /**
+     * Assert that a specified logger contains the expected string.
+     *
+     * @param expected   Expected string.
+     * @param loggerName Logger to check.
+     */
     public static void assertLogText(String expected, String loggerName) {
         assertLogText(expected, loggerName, null);
     }
 
+    /**
+     * Assert that a specified logger contains the exepcted string at a given line in the log.
+     *
+     * @param expected   Expected string.
+     * @param loggerName Logger to check.
+     * @param line       Line to check (any line if null).
+     */
     public static void assertLogText(String expected, String loggerName, Integer line) {
-        boolean found = false;
-        if (loggingEvents.containsKey(loggerName)) {
-            List<LoggingEvent> events = loggingEvents.get(loggerName);
-            if (line != null) {
-                if (events.size() >= line) {
-                    found = events.get(line - 1).getFormattedMessage().equals(expected);
-                }
-            } else {
-                for (LoggingEvent event : loggingEvents.get(loggerName)) {
-                    if (event.getFormattedMessage().equals(expected)) {
-                        found = true;
-                        break;
-                    }
-                }
-            }
-        }
-
+        boolean found = foundInLogs(expected, loggerName, line);
         String msg = "Expected " + loggerName + " log to contain '" + expected + "'";
         if (line != null) {
             msg += " at line: " + line;
@@ -102,11 +90,69 @@ public class LogTester extends AppenderBase<LoggingEvent> {
         assertTrue(msg, found);
     }
 
+    /**
+     * Assert that (any) logger does not contains the unexpected string.
+     *
+     * @param unexpected Unexpected string.
+     */
+    public static void assertNotLogText(String unexpected) {
+        assertNotLogText(unexpected, ALL);
+    }
+
+    /**
+     * Assert that a specified logger does not contain the unexpected string.
+     *
+     * @param unexpected Unexpected string.
+     * @param loggerName Logger to check.
+     */
+    public static void assertNotLogText(String unexpected, String loggerName) {
+        boolean found = foundInLogs(unexpected, loggerName, null);
+        String msg = "Expected " + loggerName + " log to not contain '" + unexpected + "'";
+        if (found) {
+            msg += " - Log Contents:";
+            List<LoggingEvent> events = loggingEvents.get(loggerName);
+            for (LoggingEvent event : events) {
+                msg += "\n" + event.getFormattedMessage();
+            }
+        }
+        assertFalse(msg, found);
+    }
+
+    private static boolean foundInLogs(String expected, String loggerName, Integer line) {
+        boolean found = false;
+        if (loggingEvents.containsKey(loggerName)) {
+            List<LoggingEvent> events = loggingEvents.get(loggerName);
+            if (line != null) {
+                if (events.size() >= line) {
+                    found = events.get(line - 1).getFormattedMessage().equals(expected);
+                }
+            } else {
+                for (LoggingEvent event : loggingEvents.get(loggerName)) {
+                    if (event.getFormattedMessage().equals(expected)) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Clear the contents of the log.
+     * <p>
+     * This should generally be called at the end of any @Before test functions
+     * so that the log contents are limited to only those created within the
+     * body of the test.
+     */
     public static void reset() {
         loggingEvents = new HashMap<String, List<LoggingEvent>>();
         loggingEvents.put(ALL, new ArrayList<LoggingEvent>());
     }
 
+    /**
+     * Save the logging event to memory so that assertions can be run on log contents.
+     */
     @Override
     protected void append(LoggingEvent loggingEvent) {
         loggingEvents.get(ALL).add(loggingEvent);
