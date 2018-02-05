@@ -91,7 +91,7 @@ public class LogTester extends AppenderBase<LoggingEvent> {
     }
 
     /**
-     * Assert that (any) logger does not contains the unexpected string.
+     * Assert that no logger contains the unexpected string.
      *
      * @param unexpected Unexpected string.
      */
