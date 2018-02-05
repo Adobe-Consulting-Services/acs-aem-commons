@@ -216,20 +216,20 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         }
     }
 
-    protected void runScript(ResourceResolver resourceResolver, Session session, OnDeployScript script) {
+    protected void runScript(ResourceResolver resourceResolver, Session session, OnDeployScript script) throws RepositoryException {
         String statusNodePath = SCRIPT_STATUS_JCR_FOLDER + "/" + script.getClass().getName();
         Node statusNode = getOrCreateStatusTrackingNode(session, statusNodePath);
         String status = getScriptStatus(resourceResolver, statusNode, statusNodePath);
         if (status == null || status.equals(SCRIPT_STATUS_FAIL)) {
-            trackScriptStart(session, statusNode, statusNodePath);
+            trackScriptStart(session, statusNode);
             try {
                 script.execute(resourceResolver, queryBuilder);
                 logger.info("On-deploy script completed successfully: {}", statusNodePath);
-                trackScriptEnd(session, statusNode, statusNodePath, SCRIPT_STATUS_SUCCESS);
+                trackScriptEnd(session, statusNode, SCRIPT_STATUS_SUCCESS);
             } catch (Exception e) {
                 String errMsg = "On-deploy script failed: " + statusNodePath;
                 logger.error(errMsg, e);
-                trackScriptEnd(session, statusNode, statusNodePath, SCRIPT_STATUS_FAIL);
+                trackScriptEnd(session, statusNode, SCRIPT_STATUS_FAIL);
                 throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
             }
         } else if (!status.equals(SCRIPT_STATUS_SUCCESS)) {
@@ -243,30 +243,34 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
 
     protected void runScripts(ResourceResolver resourceResolver, Session session, List<OnDeployScript> scripts) {
         for (OnDeployScript script : scripts) {
-            runScript(resourceResolver, session, script);
+            try {
+                runScript(resourceResolver, session, script);
+            } catch (Exception e) {
+                throw new OnDeployEarlyTerminationException(e);
+            }
         }
     }
 
-    protected void trackScriptEnd(Session session, Node statusNode, String statusNodePath, String status) {
+    protected void trackScriptEnd(Session session, Node statusNode, String status) throws RepositoryException {
         try {
             statusNode.setProperty(SCRIPT_STATUS, status);
             statusNode.setProperty(SCRIPT_DATE_END, Calendar.getInstance());
             session.save();
         } catch (RepositoryException e) {
-            logger.error("On-deploy script status node could not be updated: {} - status: {}", statusNodePath, status);
+            logger.error("On-deploy script status node could not be updated: {} - status: {}", statusNode.getPath(), status);
             throw new OnDeployEarlyTerminationException(e);
         }
     }
 
-    protected void trackScriptStart(Session session, Node statusNode, String statusNodePath) {
-        logger.info("Starting on-deploy script: {}", statusNodePath);
+    protected void trackScriptStart(Session session, Node statusNode) throws RepositoryException {
+        logger.info("Starting on-deploy script: {}", statusNode.getPath());
         try {
             statusNode.setProperty(SCRIPT_STATUS, SCRIPT_STATUS_RUNNING);
             statusNode.setProperty(SCRIPT_DATE_START, Calendar.getInstance());
             statusNode.setProperty(SCRIPT_DATE_END, (Value) null);
             session.save();
         } catch (RepositoryException e) {
-            logger.error("On-deploy script cannot be run because the system could not write to the script status node: {}", statusNodePath);
+            logger.error("On-deploy script cannot be run because the system could not write to the script status node: {}", statusNode.getPath());
             throw new OnDeployEarlyTerminationException(e);
         }
     }

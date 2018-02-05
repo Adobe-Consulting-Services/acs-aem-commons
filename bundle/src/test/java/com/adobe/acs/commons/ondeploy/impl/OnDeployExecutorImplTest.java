@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.Calendar;
@@ -20,6 +21,7 @@ import java.util.Map;
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static com.adobe.acs.commons.testutil.LogTester.assertNotLogText;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -33,7 +35,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
-import static org.powermock.api.mockito.PowerMockito.verifyNoMoreInteractions;
 
 /**
  * Created by brett on 2/2/18.
@@ -67,7 +68,7 @@ public class OnDeployExecutorImplTest {
         doNothing().when(impl).runScripts(same(resourceResolver), same(session), anyList());
 
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName() });
         context.registerInjectActivateService(impl, onDeployExecutorProps);
 
         verify(session).logout();
@@ -89,7 +90,7 @@ public class OnDeployExecutorImplTest {
         doThrow(new RuntimeException("session logout failed")).when(session).logout();
 
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName() });
         context.registerInjectActivateService(impl, onDeployExecutorProps);
 
         assertLogText("Failed session.logout()");
@@ -108,7 +109,7 @@ public class OnDeployExecutorImplTest {
         doThrow(new RuntimeException("Scripts broke!")).when(impl).runScripts(same(resourceResolver), same(session), anyList());
 
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName() });
 
         try {
             context.registerInjectActivateService(impl, onDeployExecutorProps);
@@ -132,21 +133,50 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteSuccessfulScripts() {
+    public void testExecuteRerunsFailedScripts() throws RepositoryException {
+        OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
+        ResourceResolver resourceResolver = context.resourceResolver();
+
+        // Mimic the situation where a script initiated in the past failed
+        Session session = context.resourceResolver().adaptTo(Session.class);
+        String status1NodePath = "/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName();
+        Node statusNode = impl.getOrCreateStatusTrackingNode(session, status1NodePath);
+        impl.trackScriptStart(session, statusNode);
+        impl.trackScriptEnd(session, statusNode, "fail");
+        Resource originalStatus1 = resourceResolver.getResource(status1NodePath);
+        assertEquals("fail", originalStatus1.getValueMap().get("status", ""));
+        LogTester.reset();
+
+        // Here's where the real test begins
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), OnDeployScriptTestExampleSuccessWithPause.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName(), OnDeployScriptTestExampleSuccess2.class.getName() });
         context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
 
-        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess.class.getName());
-        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess.class.getName());
+        Resource status1 = resourceResolver.getResource(status1NodePath);
+        assertNotNull(status1);
+        assertEquals("success", status1.getValueMap().get("status", ""));
+
+        Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        assertNotNull(status2);
+        assertEquals("success", status2.getValueMap().get("status", ""));
+    }
+
+    @Test
+    public void testExecuteSuccessfulScripts() {
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName(), OnDeployScriptTestExampleSuccessWithPause.class.getName() });
+        context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
+
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
         assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
 
-        assertLogText("Executing test script: OnDeployScriptTestExampleSuccess", OnDeployScriptTestExampleSuccess.class.getName());
+        assertLogText("Executing test script: OnDeployScriptTestExampleSuccess1", OnDeployScriptTestExampleSuccess1.class.getName());
         assertLogText("Executing test script: OnDeployScriptTestExampleSuccessWithPause", OnDeployScriptTestExampleSuccessWithPause.class.getName());
 
         ResourceResolver resourceResolver = context.resourceResolver();
-        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess.class.getName());
+        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
 
@@ -162,9 +192,70 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteWhenScriptFails() {
+    public void testExecuteSkipsAlreadySucccessfulScripts() throws RepositoryException {
+        // Run the script successfully the first time
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), OnDeployScriptTestExampleFailExecute.class.getName(), OnDeployScriptTestExampleSuccessWithPause.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName() });
+        context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
+        LogTester.reset();
+
+        // Here's where the real test begins
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName(), OnDeployScriptTestExampleSuccess2.class.getName() });
+        context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
+
+        assertLogText("Skipping on-deploy script, as it is already complete: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+
+        ResourceResolver resourceResolver = context.resourceResolver();
+        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertNotNull(status1);
+        assertEquals("success", status1.getValueMap().get("status", ""));
+
+        Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        assertNotNull(status2);
+        assertEquals("success", status2.getValueMap().get("status", ""));
+    }
+
+    @Test
+    public void testExecuteTerminatesWhenScriptAlreadyRunning() throws RepositoryException {
+        OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
+
+        // Mimic the situation where a script initiated in the past is still running
+        Session session = context.resourceResolver().adaptTo(Session.class);
+        String status1NodePath = "/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName();
+        Node statusNode = impl.getOrCreateStatusTrackingNode(session, status1NodePath);
+        impl.trackScriptStart(session, statusNode);
+        LogTester.reset();
+
+        // Here's where the real test begins
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName(), OnDeployScriptTestExampleSuccess2.class.getName() });
+
+        try {
+            context.registerInjectActivateService(impl, onDeployExecutorProps);
+            fail("Expected exception from failed script");
+        } catch (Exception e) {
+            assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
+        }
+
+        assertLogText("On-deploy script is already running or in an otherwise unknown state: " + status1NodePath + " - status: running");
+        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+
+        ResourceResolver resourceResolver = context.resourceResolver();
+        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertNotNull(status1);
+        assertEquals("running", status1.getValueMap().get("status", ""));
+
+        Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        assertNull(status2);
+    }
+
+    @Test
+    public void testExecuteTerminatesWhenScriptFails() {
+        Map<String, Object> onDeployExecutorProps = new HashMap<>();
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName(), OnDeployScriptTestExampleFailExecute.class.getName(), OnDeployScriptTestExampleSuccess2.class.getName() });
 
         try {
             context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
@@ -173,19 +264,19 @@ public class OnDeployExecutorImplTest {
             assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
         }
 
-        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess.class.getName());
-        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess.class.getName());
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
         assertNotLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
         assertLogText("On-deploy script failed: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
-        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
+        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
 
-        assertLogText("Executing test script: OnDeployScriptTestExampleSuccess", OnDeployScriptTestExampleSuccess.class.getName());
+        assertLogText("Executing test script: OnDeployScriptTestExampleSuccess1", OnDeployScriptTestExampleSuccess1.class.getName());
         assertLogText("Executing test script: OnDeployScriptTestExampleFailExecute", OnDeployScriptTestExampleFailExecute.class.getName());
-        assertNotLogText("Executing test script: OnDeployScriptTestExampleSuccessWithPause");
+        assertNotLogText("Executing test script: OnDeployScriptTestExampleSuccess2");
 
         ResourceResolver resourceResolver = context.resourceResolver();
-        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess.class.getName());
+        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
 
@@ -193,14 +284,14 @@ public class OnDeployExecutorImplTest {
         assertNotNull(status2);
         assertEquals("fail", status2.getValueMap().get("status", ""));
 
-        Resource status3 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
+        Resource status3 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status3);
     }
 
     @Test
     public void testScriptClassErrorClassNotFound() {
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), "com.adobe.acs.BogusClassThatDoesntExist" });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName(), "com.adobe.acs.BogusClassThatDoesntExist" });
 
         try {
             context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
@@ -214,7 +305,7 @@ public class OnDeployExecutorImplTest {
     @Test
     public void testScriptClassErrorClassNotScript() {
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), OnDeployExecutorImpl.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName(), OnDeployExecutorImpl.class.getName() });
 
         try {
             context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
@@ -228,7 +319,7 @@ public class OnDeployExecutorImplTest {
     @Test
     public void testScriptClassErrorCtorFailure() {
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), OnDeployScriptTestExampleFailCtor.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess1.class.getName(), OnDeployScriptTestExampleFailCtor.class.getName() });
 
         try {
             context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
