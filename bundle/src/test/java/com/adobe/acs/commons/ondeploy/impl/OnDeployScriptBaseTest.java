@@ -74,18 +74,6 @@ public class OnDeployScriptBaseTest {
         Node nodeContentResType2 = nodeContent.addNode("resource-type-update2");
         nodeContentResType2.setProperty("sling:resourceType", "test/component/comp2");
 
-        Node nodeEtc = session.getRootNode().addNode("etc", "sling:Folder");
-        nodeEtc.addNode("blueprints", "sling:Folder");
-        Node nodeEtcRepl = nodeEtc.addNode("replication");
-        Node nodeEtcReplAgentsAuthor = nodeEtcRepl.addNode("agents.author");
-        Node nodeEtcReplAgentsAuthorPublish = nodeEtcReplAgentsAuthor.addNode("publish").addNode("jcr:content");
-        nodeEtcReplAgentsAuthorPublish.setProperty("transportUri", "http://localhost:4503/bin/receive?sling:authRequestLogin=1");
-        Node nodeEtcReplAgentsAuthorFlush = nodeEtcReplAgentsAuthor.addNode("flush").addNode("jcr:content");
-        nodeEtcReplAgentsAuthorFlush.setProperty("transportUri", "http://localhost:8000/dispatcher/invalidate.cache");
-        Node nodeEtcReplAgentsPublish = nodeEtcRepl.addNode("agents.publish");
-        Node nodeEtcReplAgentsPublishFlush = nodeEtcReplAgentsPublish.addNode("flush").addNode("jcr:content");
-        nodeEtcReplAgentsPublishFlush.setProperty("transportUri", "http://localhost:8000/dispatcher/invalidate.cache");
-
         // Create the test class instance
         onDeployScript = new OnDeployScriptBaseExt();
         queryBuilder = mock(QueryBuilder.class);
