@@ -1,30 +1,26 @@
 package com.adobe.acs.commons.ondeploy.impl;
 
-import com.adobe.acs.commons.ondeploy.OnDeployExecutor;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.settings.SlingSettingsService;
-import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.apache.sling.testing.mock.sling.services.MockSlingSettingService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Matchers;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.io.IOException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.same;
@@ -67,7 +63,7 @@ public class OnDeployExecutorImplTest {
         doNothing().when(impl).runScripts(same(resourceResolver), same(session), anyList());
 
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExample1.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName() });
         context.registerInjectActivateService(impl, onDeployExecutorProps);
 
         verify(session).logout();
@@ -89,7 +85,7 @@ public class OnDeployExecutorImplTest {
         doThrow(new RuntimeException("session logout failed")).when(session).logout();
 
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExample1.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName() });
         context.registerInjectActivateService(impl, onDeployExecutorProps);
 
         assertLogText("Failed session.logout()");
@@ -108,7 +104,7 @@ public class OnDeployExecutorImplTest {
         doThrow(new RuntimeException("Scripts broke!")).when(impl).runScripts(same(resourceResolver), same(session), anyList());
 
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExample1.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName() });
 
         try {
             context.registerInjectActivateService(impl, onDeployExecutorProps);
@@ -122,16 +118,33 @@ public class OnDeployExecutorImplTest {
     @Test
     public void testExecuteSuccessfulScripts() {
         Map<String, Object> onDeployExecutorProps = new HashMap<>();
-        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExample1.class.getName(), OnDeployScriptTestExample2.class.getName() });
+        onDeployExecutorProps.put("scripts", new String[] { OnDeployScriptTestExampleSuccess.class.getName(), OnDeployScriptTestExampleSuccessWithPause.class.getName() });
         context.registerInjectActivateService(new OnDeployExecutorImpl(), onDeployExecutorProps);
 
-        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExample1.class.getName());
-        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExample1.class.getName());
-        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExample2.class.getName());
-        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExample2.class.getName());
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess.class.getName());
+        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess.class.getName());
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
+        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
 
-        assertLogText("Executing test script: OnDeployScriptTestExample1", OnDeployScriptTestExample1.class.getName());
+        assertLogText("Executing test script: OnDeployScriptTestExample1", OnDeployScriptTestExampleSuccess.class.getName());
 
-        assertLogText("Executing test script: OnDeployScriptTestExample2", OnDeployScriptTestExample2.class.getName());
+        assertLogText("Executing test script: OnDeployScriptTestExample2", OnDeployScriptTestExampleSuccessWithPause.class.getName());
+
+        ResourceResolver resourceResolver = context.resourceResolver();
+        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess.class.getName());
+        assertNotNull(status1);
+        assertEquals("success", status1.getValueMap().get("status", ""));
+
+        Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
+        Calendar start = status2.getValueMap().get("startDate", Calendar.class);
+        Calendar end = status2.getValueMap().get("endDate", Calendar.class);
+
+        assertNotNull(status2);
+        assertEquals("success", status2.getValueMap().get("status", ""));
+
+        assertTrue(start.getTimeInMillis() <= System.currentTimeMillis());
+        assertTrue(System.currentTimeMillis() - start.getTimeInMillis() < 10000);
+        assertTrue(start.getTimeInMillis() + 1000 <= end.getTimeInMillis());
+        assertTrue(end.getTimeInMillis() - start.getTimeInMillis() < 10000);
     }
 }
