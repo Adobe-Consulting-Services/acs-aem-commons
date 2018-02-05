@@ -72,7 +72,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
             execute();
             session.save();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new OnDeployScriptException(e);
         }
     }
 
@@ -203,7 +203,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
                 updateResourceType(node, newResourceType);
             }
         } else {
-            logger.info("No nodes found");
+            logger.info("No nodes found with resource type: {}", oldResourceType);
         }
     }
 

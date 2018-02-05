@@ -38,6 +38,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static org.junit.Assert.assertEquals;
@@ -45,8 +46,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 public class OnDeployScriptBaseTest {
@@ -89,6 +93,23 @@ public class OnDeployScriptBaseTest {
 
         // Reset the LogTester
         LogTester.reset();
+    }
+
+    @Test
+    public void testExecuteException() throws Exception {
+        Exception originalException = new Exception("Oops it broke");
+
+        onDeployScript = spy(onDeployScript);
+        doThrow(originalException).when(onDeployScript).execute();
+
+        try {
+            onDeployScript.execute(resourceResolver, queryBuilder);
+            fail("Expected exception");
+        } catch (Exception e) {
+            assertTrue(OnDeployScriptException.class.isAssignableFrom(e.getClass()));
+            assertEquals("On-deploy script failure", e.getMessage());
+            assertEquals(originalException, e.getCause());
+        }
     }
 
     @Test
@@ -231,6 +252,19 @@ public class OnDeployScriptBaseTest {
 
         assertEquals("mysite/type/new", node1.getProperty("sling:resourceType").getString());
         assertEquals("mysite/type/new", node2.getProperty("sling:resourceType").getString());
+    }
+
+    @Test
+    public void testSearchAndUpdateResourceTypeWhenNoNodesFound() throws RepositoryException {
+        Query query = mock(Query.class);
+        SearchResult result = mock(SearchResult.class);
+        when(result.getNodes()).thenReturn(Collections.EMPTY_LIST.iterator());
+        when(query.getResult()).thenReturn(result);
+        when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).thenReturn(query);
+
+        onDeployScript.searchAndUpdateResourceType("mysite/type/old", "mysite/type/new");
+
+        assertLogText("No nodes found with resource type: mysite/type/old");
     }
 
     @Test
