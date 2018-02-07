@@ -1,0 +1,20 @@
+{
+  "en" : {
+    "jcr:primaryType" : "cq:Page",
+    "jcr:content" : {
+      "jcr:primaryType": "cq:PageContent"
+    },
+    "events" : {
+      "jcr:primaryType" : "cq:Page",
+      "jcr:content" : {
+        "jcr:primaryType": "cq:PageContent"
+      }
+    },
+    "about" : {
+      "jcr:primaryType" : "cq:Page",
+      "jcr:content" : {
+        "jcr:primaryType": "cq:PageContent"
+      }
+    }
+  }
+}
