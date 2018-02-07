@@ -83,6 +83,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final boolean DEFAULT_EXTENSIONLESS_URLS = false;
 
+    private static final boolean DEFAULT_REMOVE_TRAILING_SLASH = false;
+
     @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
     private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
 
@@ -109,6 +111,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     @Property(boolValue = DEFAULT_EXTENSIONLESS_URLS, label = "Extensionless URLs", description = "If true, page links included in sitemap are generated without .html extension and the path is included with a trailing slash, e.g. /content/geometrixx/en/.")
     private static final String PROP_EXTENSIONLESS_URLS = "extensionless.urls";
+
+    @Property(boolValue = DEFAULT_REMOVE_TRAILING_SLASH, label = "Remove Trailing Slash from Extensionless URLs", description = "Only relevant if Extensionless URLs is selected.  If true, the trailing slash is removed from extensionless page links, e.g. /content/geometrixx/en.")
+    private static final String PROP_REMOVE_TRAILING_SLASH = "remove.slash";
 
     @Property(label = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
     private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
@@ -138,6 +143,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private boolean extensionlessUrls;
 
+    private boolean removeTrailingSlash;
+
     @Activate
     protected void activate(Map<String, Object> properties) {
         this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
@@ -157,6 +164,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY), null);
         this.extensionlessUrls = PropertiesUtil.toBoolean(properties.get(PROP_EXTENSIONLESS_URLS),
                 DEFAULT_EXTENSIONLESS_URLS);
+        this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH), 
+                DEFAULT_REMOVE_TRAILING_SLASH);
     }
 
     @Override
@@ -235,7 +244,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         if (!extensionlessUrls) {
             loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s.html", page.getPath()));
         } else {
-            loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s/", page.getPath()));
+            String urlFormat = removeTrailingSlash ? "%s" : "%s/";
+            loc = externalizer.externalLink(resolver, externalizerDomain, String.format(urlFormat, page.getPath()));
         }
 
         writeElement(stream, "loc", loc);
