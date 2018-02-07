@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.util;
 
+import aQute.bnd.annotation.ProviderType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 
@@ -32,7 +33,8 @@ import java.util.List;
 /**
  * Utils for JCR resources.
  */
-public abstract class ResourceUtil {
+@ProviderType
+public final class ResourceUtil {
     /**
      * Private ctor to hide the defualt public ctor.
      */
