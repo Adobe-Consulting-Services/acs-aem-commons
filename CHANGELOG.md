@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
+- #1242 - New ResourceUtil utility class.
 
 ## [3.14.6] - 2018-01-31
 
