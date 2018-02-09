@@ -36,9 +36,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
 
-/**
- * Created by brett on 2/2/18.
- */
 public class OnDeployExecutorImplTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
