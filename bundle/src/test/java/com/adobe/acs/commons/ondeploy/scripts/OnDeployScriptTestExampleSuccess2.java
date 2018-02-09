@@ -1,4 +1,6 @@
-package com.adobe.acs.commons.ondeploy.impl;
+package com.adobe.acs.commons.ondeploy.scripts;
+
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptBase;
 
 public class OnDeployScriptTestExampleSuccess2 extends OnDeployScriptBase {
     @Override

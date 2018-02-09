@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.ondeploy.impl;
 
 import com.adobe.acs.commons.ondeploy.OnDeployExecutor;
-import com.adobe.acs.commons.ondeploy.OnDeployScript;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.QueryBuilder;

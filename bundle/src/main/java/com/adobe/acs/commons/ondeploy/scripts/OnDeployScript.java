@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.ondeploy;
+package com.adobe.acs.commons.ondeploy.scripts;
 
 import com.day.cq.search.QueryBuilder;
 import org.apache.sling.api.resource.ResourceResolver;

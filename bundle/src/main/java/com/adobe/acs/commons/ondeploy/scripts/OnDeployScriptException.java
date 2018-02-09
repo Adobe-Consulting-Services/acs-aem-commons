@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.ondeploy.impl;
+package com.adobe.acs.commons.ondeploy.scripts;
 
 /**
  * An exception representing a failed on-deploy script.

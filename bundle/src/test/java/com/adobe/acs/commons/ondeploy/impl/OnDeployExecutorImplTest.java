@@ -1,5 +1,10 @@
 package com.adobe.acs.commons.ondeploy.impl;
 
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailCtor;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.search.QueryBuilder;

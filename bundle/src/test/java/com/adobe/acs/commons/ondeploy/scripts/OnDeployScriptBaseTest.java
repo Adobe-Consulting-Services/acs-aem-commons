@@ -17,8 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.ondeploy.impl;
+package com.adobe.acs.commons.ondeploy.scripts;
 
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptBase;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptException;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;

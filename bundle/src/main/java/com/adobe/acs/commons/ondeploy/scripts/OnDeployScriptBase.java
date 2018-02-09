@@ -17,9 +17,8 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.ondeploy.impl;
+package com.adobe.acs.commons.ondeploy.scripts;
 
-import com.adobe.acs.commons.ondeploy.OnDeployScript;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.PredicateGroup;
@@ -35,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
-import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Workspace;
