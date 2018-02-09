@@ -20,23 +20,23 @@
 package com.adobe.acs.commons.ondeploy.impl;
 
 import com.adobe.acs.commons.ondeploy.OnDeployExecutor;
+import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.QueryBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,6 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -70,19 +69,10 @@ import java.util.Map;
         description = "Developer tool that triggers scripts (specified via an implementation of OnDeployScriptProvider) to execute on deployment.",
         immediate = true,
         metatype = true,
-        policy = ConfigurationPolicy.REQUIRE,
-        configurationFactory = true
+        policy = ConfigurationPolicy.REQUIRE
 )
 @Service
 public class OnDeployExecutorImpl implements OnDeployExecutor {
-    @Property(
-            name = "scripts",
-            cardinality = Integer.MAX_VALUE,
-            label = "Scripts",
-            description = "Classes that repersent on-deploy scripts (implement OnDeployScript), in the order to run them."
-    )
-    private static final String PROP_SCRIPTS = "scripts";
-
     private static final String SCRIPT_DATE_END = "endDate";
     private static final String SCRIPT_DATE_START = "startDate";
     private static final String SCRIPT_STATUS = "status";
@@ -101,8 +91,8 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
     private ResourceResolverFactory resourceResolverFactory;
     @Reference
     private DynamicClassLoaderManager dynamicClassLoaderManager;
-
-    private List<OnDeployScript> scripts = null;
+    @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    private List<OnDeployScriptProvider> scriptProviders;
 
     // TODO: These were needed for injection to work in tests
     protected void bindQueryBuilder(QueryBuilder queryBuilder) {
@@ -115,15 +105,17 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         this.dynamicClassLoaderManager = dynamicClassLoaderManager;
     }
 
-    /**
-     * Executes all on-deploy scripts on activation of this service.
-     *
-     * @param properties OSGi properties for this service (unused).
-     */
     @Activate
-    protected final void activate(final Map<String, String> properties) {
-        logger.info("Checking for on-deploy scripts");
-        configure(properties);
+    protected void activate() {
+        // noop
+    }
+
+    /**
+     * Executes all on-deploy scripts on bind of a script provider.
+     */
+    protected void bindScriptProvider(OnDeployScriptProvider scriptProvider) {
+        logger.info("Executing on-deploy scripts from scriptProvider: {}", scriptProvider.getClass().getName());
+        List<OnDeployScript> scripts = scriptProvider.getScripts();
         if (scripts.size() == 0) {
             logger.debug("No on-deploy scripts found.");
             return;
@@ -152,38 +144,8 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         }
     }
 
-    /**
-     * Convert the conifgured list of on-deploy script classes to object instances.
-     *
-     * @param properties OSGi configs.
-     */
-    private void configure(final Map<String, String> properties) {
-        scripts = new ArrayList<>();
-
-        ClassLoader cl = dynamicClassLoaderManager.getDynamicClassLoader();
-        String[] scriptClasses = PropertiesUtil.toStringArray(properties.get(PROP_SCRIPTS), new String[0]);
-        for (String scriptClassName : scriptClasses) {
-            if (StringUtils.isNotBlank(scriptClassName)) {
-                Class scriptClass;
-                try {
-                    scriptClass = cl.loadClass(scriptClassName);
-                } catch (ClassNotFoundException cnfe) {
-                    logger.error("Could not find on-deploy script class: {}", scriptClassName);
-                    throw new OnDeployEarlyTerminationException(cnfe);
-                }
-                if (!OnDeployScript.class.isAssignableFrom(scriptClass)) {
-                    String errMsg = "On-deploy script class does not implement the OnDeployScript interface: " + scriptClassName;
-                    logger.error(errMsg);
-                    throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
-                }
-                try {
-                    scripts.add((OnDeployScript) scriptClass.newInstance());
-                } catch (Exception e) {
-                    logger.error("Could not instatiate on-deploy script class: {}", scriptClassName);
-                    throw new OnDeployEarlyTerminationException(e);
-                }
-            }
-        }
+    protected void unbindScriptProvider(OnDeployScriptProvider scriptProvider) {
+        // noop
     }
 
     protected Node getOrCreateStatusTrackingNode(Session session, String statusNodePath) {
