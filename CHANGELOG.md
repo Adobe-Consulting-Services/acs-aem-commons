@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
 - #1242 - New ResourceUtil utility class.
 
+### Fixed
+
+- #1250 - Redirect Map upload fails with "multipart boundary" error
+
 ## [3.14.6] - 2018-01-31
 
 ### Fixed
