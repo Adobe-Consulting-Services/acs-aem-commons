@@ -9,16 +9,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.8...HEAD
 
-## [3.14.8] - 2018-02-13
-
-### Fixed
-
-- #1250 - Redirect Map upload fails with "multipart boundary" error
-
 ### Added
 
 - #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
 - #1242 - New ResourceUtil utility class.
+
+## [3.14.8] - 2018-02-13
 
 ### Fixed
 
