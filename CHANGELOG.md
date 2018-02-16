@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1192 - Ensure that HttpCache works with response objects when `getOutputStream()` throws `IllegalStateException`
 
+### Fixed
+
+- #939 - Fix Cycling dependency on activation.
+
 ## [2.14.0] - 2017-10-26
 
 ### Added
