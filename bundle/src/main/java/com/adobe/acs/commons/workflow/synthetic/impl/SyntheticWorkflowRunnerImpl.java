@@ -47,6 +47,7 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,6 +105,8 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+
+    private ServiceRegistration accessorReg;
 
     /**
      * {@inheritDoc}
@@ -494,6 +497,12 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     @Activate
     protected final void activate(BundleContext bundleContext) {
+       this.accessorReg = bundleContext.registerService(SyntheticWorkflowRunnerAccessor.class.getName(), new SyntheticWorkflowRunnerAccessor() {
+           @Override
+           public SyntheticWorkflowRunner getSyntheticWorkflowRunner() {
+                return SyntheticWorkflowRunnerImpl.this;
+           }
+        }, new Hashtable());
     }
 
     @Deactivate
@@ -501,6 +510,10 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         log.trace("Deactivating Synthetic Workflow Runner");
         this.workflowProcessesByLabel = new ConcurrentHashMap<String, SyntheticWorkflowProcess>();
         this.workflowProcessesByProcessName = new ConcurrentHashMap<String, SyntheticWorkflowProcess>();
+        if (accessorReg != null) {
+            accessorReg.unregister();
+            accessorReg = null;
+        }
     }
 
 
