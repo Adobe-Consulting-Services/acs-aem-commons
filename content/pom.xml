@@ -75,7 +75,7 @@
                             <version>[6.2.136,)</version>
                         </dependency>
                     </dependencies>
-                    <targetURL>http://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
+                    <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
             </plugin>
             
