@@ -1,12 +1,21 @@
 /*
- * #%L ACS AEM Commons Bundle %% Copyright (C) 2017 Adobe %% Licensed under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License. #L%
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
 
 package com.adobe.acs.commons.users.impl;
@@ -14,7 +23,6 @@ package com.adobe.acs.commons.users.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,37 +69,38 @@ public class EnsureAce {
      *
      * @param resourceResolver
      *            the resource resolver to perform the user management
+     * @param jcrAuthorizable
+     *            the Jackrabbit Authorizable Object (User or Group) the Authorizable represents
      * @param authorizable
-     *            the Authorizable (User or Group) the ServiceUser represents
-     * @param serviceUser
-     *            the Service User return # of ace entries that could not be processed
+     *            the Authorizable to ensure
+     * @return The number of ace entries that could not be processed
      * @throws RepositoryException
      */
     @SuppressWarnings("squid:S3776")
-    public int ensureAces(ResourceResolver resourceResolver, Authorizable authorizable,
-            AbstractAuthorizable serviceUser) throws RepositoryException {
+    public int ensureAces(ResourceResolver resourceResolver, Authorizable jcrAuthorizable,
+            AbstractAuthorizable authorizable) throws RepositoryException {
         int failures = 0;
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager =
                 (JackrabbitAccessControlManager) session.getAccessControlManager();
         final List<JackrabbitAccessControlList> acls =
-                findAcls(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
+                findAcls(resourceResolver, authorizable.getPrincipalName(), accessControlManager);
 
         // For each rep:policy (ACL) this service user participates in ...
         for (final JackrabbitAccessControlList acl : acls) {
             final JackrabbitAccessControlEntry[] aces = (JackrabbitAccessControlEntry[]) acl.getAccessControlEntries();
-            final boolean serviceUserCoversThisPath = serviceUser.hasAceAt(acl.getPath());
+            final boolean serviceUserCoversThisPath = authorizable.hasAceAt(acl.getPath());
 
             for (final JackrabbitAccessControlEntry ace : aces) {
 
-                if (!StringUtils.equals(serviceUser.getPrincipalName(), ace.getPrincipal().getName())) {
+                if (!StringUtils.equals(authorizable.getPrincipalName(), ace.getPrincipal().getName())) {
                     // Only care about ACEs that this service user participates in
                     continue;
                 }
 
                 // Pertains to this service user
-                if (StringUtils.startsWith(acl.getPath(), authorizable.getPath())) {
+                if (StringUtils.startsWith(acl.getPath(), jcrAuthorizable.getPath())) {
                     // Skip the corner case of ACL's under the system user itself; Do nothing to these.
 
                 } else if (!serviceUserCoversThisPath) {
@@ -102,15 +111,15 @@ public class EnsureAce {
                     acl.removeAccessControlEntry(ace);
 
                 } else {
-                    final Ace serviceUserAce = serviceUser.getAce(ace);
+                    final Ace serviceUserAce = authorizable.getAce(ace);
                     if (serviceUserAce == null) {
                         acl.removeAccessControlEntry(ace);
                         log.debug("Removed System ACE as it doesn't exist in Service User [ {} ] configuration",
-                                serviceUser.getPrincipalName());
+                                authorizable.getPrincipalName());
                     } else {
                         serviceUserAce.setExists(true);
                         log.debug("No-op on System ACE as it already matches Service User [ {} ] configuration",
-                                serviceUser.getPrincipalName());
+                                authorizable.getPrincipalName());
 
                     }
                 }
@@ -120,11 +129,11 @@ public class EnsureAce {
         }
 
         // Create an ACEs that do not yet exist
-        for (Ace ace : serviceUser.getMissingAces()) {
+        for (Ace ace : authorizable.getMissingAces()) {
             if (resourceResolver.getResource(ace.getContentPath()) == null) {
                 log.warn(
                         "Unable to apply Service User [ {} ] privileges due to missing path at [ {} ]. Please create the path and re-ensure this service user.",
-                        serviceUser.getPrincipalName(), ace.getContentPath());
+                        authorizable.getPrincipalName(), ace.getContentPath());
                 failures++;
                 continue;
             }
@@ -161,14 +170,14 @@ public class EnsureAce {
             }
 
             // Add ACE to the ACL
-            acl.addEntry(authorizable.getPrincipal(),
+            acl.addEntry(jcrAuthorizable.getPrincipal(),
                     ace.getPrivileges(accessControlManager).toArray(new Privilege[] {}), ace.isAllow(), restrictions,
                     multiRestrictions);
 
             // Update the ACL on the content
             accessControlManager.setPolicy(ace.getContentPath(), acl);
 
-            log.debug("Added Service User ACE for [ {} ] to [ {} ]", serviceUser.getPrincipalName(),
+            log.debug("Added Service User ACE for [ {} ] to [ {} ]", authorizable.getPrincipalName(),
                     ace.getContentPath());
         }
 
@@ -180,28 +189,28 @@ public class EnsureAce {
      *
      * @param resourceResolver
      *            the resource resolver to perform the user management
+     * @param jcrAuthorizable
+     *            the Jackrabbit Authorizable Object (User or Group) the Authorizable represents
      * @param authorizable
-     *            the Authorizable (User or Group) the Service User represents
-     * @param serviceUser
-     *            the Service User
+     *            the Authorizable to remove
      * @throws RepositoryException
      */
-    public void removeAces(ResourceResolver resourceResolver, Authorizable authorizable,
-            AbstractAuthorizable serviceUser) throws RepositoryException {
+    public void removeAces(ResourceResolver resourceResolver, Authorizable jcrAuthorizable,
+            AbstractAuthorizable authorizable) throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager =
                 (JackrabbitAccessControlManager) session.getAccessControlManager();
         final List<JackrabbitAccessControlList> acls =
-                findAcls(resourceResolver, serviceUser.getPrincipalName(), accessControlManager);
+                findAcls(resourceResolver, authorizable.getPrincipalName(), accessControlManager);
 
         for (final JackrabbitAccessControlList acl : acls) {
             final JackrabbitAccessControlEntry[] aces = (JackrabbitAccessControlEntry[]) acl.getAccessControlEntries();
 
             // Check all the existing ACEs in the ACL
             for (JackrabbitAccessControlEntry ace : aces) {
-                if (StringUtils.equals(serviceUser.getPrincipalName(), ace.getPrincipal().getName())) {
-                    if (authorizable != null && StringUtils.startsWith(acl.getPath(), authorizable.getPath())) {
+                if (StringUtils.equals(authorizable.getPrincipalName(), ace.getPrincipal().getName())) {
+                    if (jcrAuthorizable != null && StringUtils.startsWith(acl.getPath(), jcrAuthorizable.getPath())) {
                         // Skip! Don't ensureRemoval ACE's from the system user itself!
                     } else {
                         acl.removeAccessControlEntry(ace);
@@ -210,7 +219,7 @@ public class EnsureAce {
             }
 
             accessControlManager.setPolicy(acl.getPath(), acl);
-            log.debug("Removed ACE from ACL at [ {} ] for [ {} ]", acl.getPath(), serviceUser.getPrincipalName());
+            log.debug("Removed ACE from ACL at [ {} ] for [ {} ]", acl.getPath(), authorizable.getPrincipalName());
         }
     }
 
@@ -240,21 +249,23 @@ public class EnsureAce {
 
         final Query query =
                 queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
-        final Iterator<Resource> resources = query.getResult().getResources();
+        query.getResult().getHits().forEach(hit -> {
+            try {
+                Resource aceResource = hit.getResource();
+                Resource contentResource = aceResource.getParent().getParent();
 
-        while (resources.hasNext()) {
-            // Get the content resource as this is what the AccessControlManager API will use to find the ACLs under it
-            Resource contentResource = resources.next().getParent().getParent();
-
-            if (!paths.contains(contentResource.getPath())) {
-                for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
-                    if (policy instanceof JackrabbitAccessControlList) {
-                        acls.add((JackrabbitAccessControlList) policy);
-                        break;
+                if (!paths.contains(contentResource.getPath())) {
+                    for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
+                        if (policy instanceof JackrabbitAccessControlList) {
+                            acls.add((JackrabbitAccessControlList) policy);
+                            break;
+                        }
                     }
                 }
+            } catch (RepositoryException e) {
+                log.error("Failed to get resource for query result.", e);
             }
-        }
+        });
 
         return acls;
     }
