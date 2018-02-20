@@ -252,6 +252,10 @@ public class EnsureAce {
         query.getResult().getHits().forEach(hit -> {
             try {
                 Resource aceResource = hit.getResource();
+
+                //first parent is the rep:policy node
+                //second parent (grand-parent) is the content node this ACE controls
+                //that is the node we need to use the JackrabbitAccessControlManager api
                 Resource contentResource = aceResource.getParent().getParent();
 
                 if (!paths.contains(contentResource.getPath())) {
