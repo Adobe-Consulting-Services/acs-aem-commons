@@ -24,9 +24,7 @@
 	<dt>Label</dt>
 	<dd>${properties.fieldLabel}</dd>
 	<dt>Name</dt>
-	<dd>${properties.name}</dd> 
-    <dt>DataSource</dt>
-    <dd>${properties['datasource/sling:resourceType']}</dd>
+	<dd>${properties.name}</dd>
     <dt>Drop-down Query</dt>
     <dd>${properties.dropdownquery}</dd>
 </dl>
