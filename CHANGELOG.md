@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
 - #1242 - New ResourceUtil utility class.
+- #1255 - Add trimming to the dispatcher flush rules to allow multi line xml configs
+- #1256 - Allow adding of context root maven property for deploying acs-aem-commons locally
 
 ## [3.14.8] - 2018-02-13
 
