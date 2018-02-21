@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.8...HEAD
 
+## [3.14.7] - 2018-02-08
+
+### Added
+
+- Added the new component for dynamically population of dropdown in Report Builder Parameter
+
 ### Added
 
 - #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
