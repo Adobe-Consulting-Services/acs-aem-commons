@@ -251,7 +251,7 @@ public class EnsureAce {
                 queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
         query.getResult().getHits().forEach(hit -> {
             try {
-                Resource aceResource = hit.getResource();
+                Resource aceResource = resourceResolver.getResource(hit.getPath());
 
                 //first parent is the rep:policy node
                 //second parent (grand-parent) is the content node this ACE controls
