@@ -22,6 +22,7 @@ package com.adobe.acs.commons.ondeploy.scripts;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptBase;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptException;
 import com.adobe.acs.commons.testutil.LogTester;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
@@ -50,6 +51,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -65,7 +67,7 @@ public class OnDeployScriptBaseTest {
 
     @Before
     public void setup() throws Exception {
-        resourceResolver = context.resourceResolver();
+        resourceResolver = spy(context.resourceResolver());
 
         Session session = resourceResolver.adaptTo(Session.class);
         Node nodeContent = session.getRootNode().addNode("content", "nt:resource");
@@ -75,11 +77,13 @@ public class OnDeployScriptBaseTest {
         nodeContentResType1.setProperty("text", "hello world");
         Node nodeContentResType2 = nodeContent.addNode("resource-type-update2");
         nodeContentResType2.setProperty("sling:resourceType", "test/component/comp2");
+        nodeContent.addNode("resource-type-missing");
 
         // Create the test class instance
         onDeployScript = new OnDeployScriptBaseExt();
         queryBuilder = mock(QueryBuilder.class);
-        onDeployScript.execute(resourceResolver, queryBuilder);
+        doReturn(queryBuilder).when(resourceResolver).adaptTo(QueryBuilder.class);
+        onDeployScript.execute(resourceResolver);
 
         // Reset the LogTester
         LogTester.reset();
@@ -93,7 +97,7 @@ public class OnDeployScriptBaseTest {
         doThrow(originalException).when(onDeployScript).execute();
 
         try {
-            onDeployScript.execute(resourceResolver, queryBuilder);
+            onDeployScript.execute(resourceResolver);
             fail("Expected exception");
         } catch (Exception e) {
             assertTrue(OnDeployScriptException.class.isAssignableFrom(e.getClass()));
@@ -265,6 +269,17 @@ public class OnDeployScriptBaseTest {
         onDeployScript.updateResourceType(resourceToUpdate.adaptTo(Node.class), "test/component/comp2");
 
         resourceToUpdate = resourceResolver.getResource("/content/resource-type-update1");
+        assertEquals("test/component/comp2", resourceToUpdate.getResourceType());
+    }
+
+    @Test
+    public void testUpdateResourceTypeWhenTypeMissing() throws RepositoryException {
+        Resource resourceToUpdate = resourceResolver.getResource("/content/resource-type-missing");
+        assertEquals(JcrConstants.NT_UNSTRUCTURED, resourceToUpdate.getResourceType());
+
+        onDeployScript.updateResourceType(resourceToUpdate.adaptTo(Node.class), "test/component/comp2");
+
+        resourceToUpdate = resourceResolver.getResource("/content/resource-type-missing");
         assertEquals("test/component/comp2", resourceToUpdate.getResourceType());
     }
 

@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
-import com.day.cq.search.QueryBuilder;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
@@ -27,10 +26,9 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 public interface OnDeployScript {
     /**
-     * Execute the script, passing in a resourceResolver and queryBuilder instance.
+     * Execute the script, passing in a resourceResolver instance.
      *
      * @param resourceResolver Resource resolver.
-     * @param queryBuilder Query builder.
      */
-    void execute(ResourceResolver resourceResolver, QueryBuilder queryBuilder);
+    void execute(ResourceResolver resourceResolver);
 }

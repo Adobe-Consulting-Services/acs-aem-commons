@@ -50,17 +50,15 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected PageManager pageManager;
-    protected QueryBuilder queryBuilder;
     protected ResourceResolver resourceResolver;
     protected Session session;
     protected Workspace workspace;
 
     /**
-     * @see OnDeployScript#execute(ResourceResolver, QueryBuilder)
+     * @see OnDeployScript#execute(ResourceResolver)
      */
-    public final void execute(ResourceResolver resourceResolver, QueryBuilder queryBuilder) {
+    public final void execute(ResourceResolver resourceResolver) {
         this.resourceResolver = resourceResolver;
-        this.queryBuilder = queryBuilder;
 
         this.pageManager = resourceResolver.adaptTo(PageManager.class);
         this.session = resourceResolver.adaptTo(Session.class);
@@ -192,7 +190,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
 
         logger.info("Finding all nodes under /content with resource type: {}", oldResourceType);
 
-        Query query = queryBuilder.createQuery(PredicateGroup.create(map), session);
+        Query query = resourceResolver.adaptTo(QueryBuilder.class).createQuery(PredicateGroup.create(map), session);
         SearchResult result = query.getResult();
         Iterator<Node> nodeItr = result.getNodes();
         if (nodeItr.hasNext()) {
@@ -212,8 +210,8 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @param resourceType The new sling:resourceType to be used.
      */
     protected void updateResourceType(Node node, String resourceType) throws RepositoryException {
-        String currentResourceType = node.getProperty(SLING_RESOURCE_TYPE).getString();
-        if (!resourceType.equals(currentResourceType)) {
+        boolean hasResourceType = node.hasProperty(SLING_RESOURCE_TYPE);
+        if (!hasResourceType || !resourceType.equals(node.getProperty(SLING_RESOURCE_TYPE).getString())) {
             logger.info("Updating node at {} to resource type: {}", node.getPath(), resourceType);
             node.setProperty(SLING_RESOURCE_TYPE, resourceType);
         } else {

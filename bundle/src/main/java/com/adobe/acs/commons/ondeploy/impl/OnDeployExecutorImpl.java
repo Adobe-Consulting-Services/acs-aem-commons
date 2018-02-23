@@ -24,7 +24,6 @@ import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
-import com.day.cq.search.QueryBuilder;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -86,28 +85,23 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Reference
-    private QueryBuilder queryBuilder;
-    @Reference
     private ResourceResolverFactory resourceResolverFactory;
     @Reference
     private DynamicClassLoaderManager dynamicClassLoaderManager;
     @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     private List<OnDeployScriptProvider> scriptProviders;
 
-    // TODO: These were needed for injection to work in tests
-    protected void bindQueryBuilder(QueryBuilder queryBuilder) {
-        this.queryBuilder = queryBuilder;
+    @Activate
+    protected void activate() {
+        // noop
     }
-    protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
-        this.resourceResolverFactory = resourceResolverFactory;
-    }
+
     protected void bindDynamicClassLoaderManager(DynamicClassLoaderManager dynamicClassLoaderManager) {
         this.dynamicClassLoaderManager = dynamicClassLoaderManager;
     }
 
-    @Activate
-    protected void activate() {
-        // noop
+    protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
+        this.resourceResolverFactory = resourceResolverFactory;
     }
 
     /**
@@ -185,7 +179,7 @@ public class OnDeployExecutorImpl implements OnDeployExecutor {
         if (status == null || status.equals(SCRIPT_STATUS_FAIL)) {
             trackScriptStart(session, statusNode);
             try {
-                script.execute(resourceResolver, queryBuilder);
+                script.execute(resourceResolver);
                 logger.info("On-deploy script completed successfully: {}", statusNodePath);
                 trackScriptEnd(session, statusNode, SCRIPT_STATUS_SUCCESS);
             } catch (Exception e) {
