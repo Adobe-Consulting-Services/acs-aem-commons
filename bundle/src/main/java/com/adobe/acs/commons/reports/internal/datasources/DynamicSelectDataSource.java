@@ -54,7 +54,7 @@ import static javax.jcr.query.Query.JCR_SQL2;
 )
 public class DynamicSelectDataSource extends SlingSafeMethodsServlet {
 
-    private final static Logger log = LoggerFactory.getLogger(DynamicSelectDataSource.class);
+    private static final Logger log = LoggerFactory.getLogger(DynamicSelectDataSource.class);
 
     final String PN_DROP_DOWN_QUERY_LANGUAGE = "dropDownQueryLanguage";
     final String PN_DROP_DOWN_QUERY = "dropDownQuery";
