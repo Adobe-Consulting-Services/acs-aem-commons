@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Added
 
-- Added the new component for dynamically population of dropdown in Report Builder Parameter
+- #1247 - Added the new component for dynamically population of dropdown in Report Builder Parameter
 
 ### Added
 

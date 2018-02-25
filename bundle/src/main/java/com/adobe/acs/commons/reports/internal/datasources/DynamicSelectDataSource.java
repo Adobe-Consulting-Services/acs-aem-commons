@@ -29,6 +29,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -48,10 +49,11 @@ import static javax.jcr.query.Query.JCR_SQL2;
         service = Servlet.class,
         property = {
                 "sling.servlet.resourceTypes=acs-commons/components/utilities/report-builder/data-sources/dynamic-select",
-                "sling.servlet.methods=get"
+                "sling.servlet.methods=" + HttpConstants.METHOD_GET,
         }
 )
 public class DynamicSelectDataSource extends SlingSafeMethodsServlet {
+
     private final static Logger log = LoggerFactory.getLogger(DynamicSelectDataSource.class);
 
     final String PN_DROP_DOWN_QUERY_LANGUAGE = "dropDownQueryLanguage";
@@ -99,7 +101,7 @@ public class DynamicSelectDataSource extends SlingSafeMethodsServlet {
                                 String value = entry.getValue().toString();
                                 distinctOptionValues.add(value);
                                 options.add(new DataSourceOption(value, value));
-                    });
+                            });
                 }
             }
 
