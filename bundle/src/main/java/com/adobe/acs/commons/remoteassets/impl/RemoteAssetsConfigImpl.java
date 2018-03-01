@@ -64,6 +64,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private String username = "";
     private String password = "";
     private Integer retryDelay;
+    private String eventUserData = "";
 
     @Property(label = "Server")
     private static final String SERVER = "server";
@@ -88,6 +89,12 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
             intValue = 15
     )
     private static final String RETRY_DELAY = "retryDelay";
+
+    @Property(
+            label = "Event User Data",
+            description = "The event user data that will be set during all JCR manipulations performed by remote assets. This can be used in workflow launchers that listen to DAM paths (such as for DAM Update Assets) to exclude unnecessary processing such as rendition generation.",
+            value = "changedByWorkflowProcess")
+    private static final String EVENT_USER_DATA = "event-user-data";
 
     private List<String> syncPaths = new ArrayList<>();
 
@@ -114,6 +121,11 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     @Override
     public Integer getRetryDelay() {
         return retryDelay;
+    }
+
+    @Override
+    public String getEventUserData() {
+        return eventUserData;
     }
 
     @Activate
@@ -145,6 +157,8 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
         if (retryDelay < 1) {
             retryDelay = 1;
         }
+
+        eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), "");
     }
 
     @Deactivate

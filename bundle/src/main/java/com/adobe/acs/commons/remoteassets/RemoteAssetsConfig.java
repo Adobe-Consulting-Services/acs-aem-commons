@@ -67,4 +67,12 @@ public interface RemoteAssetsConfig {
      * Number of minutes the server will wait to attempt to sync a remote asset that failed a sync attempt.
      */
     Integer getRetryDelay();
+
+    /**
+     * The event user data that will be set during all JCR manipulations performed by remote assets.
+     *
+     * This can be used in workflow launchers that listen to DAM paths (such as for DAM Update Assets)
+     * to exclude unnecessary processing such as rendition generation.
+     */
+    String getEventUserData();
 }

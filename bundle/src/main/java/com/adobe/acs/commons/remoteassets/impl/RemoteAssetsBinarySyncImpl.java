@@ -92,6 +92,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
     protected void activate() throws RepositoryException, LoginException {
         resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
         session = resourceResolver.adaptTo(Session.class);
+        session.getWorkspace().getObservationManager().setUserData(remoteAssetsConfig.getEventUserData());
     }
 
     @Deactivate

@@ -3,6 +3,7 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
+import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.granite.asset.api.Asset;
 import com.adobe.granite.asset.api.AssetManager;
 import com.adobe.granite.asset.api.Rendition;
@@ -45,6 +46,9 @@ public class DEMOConvertGeometrixxAssetsToRemote extends SlingAllMethodsServlet 
     @Reference
     private DynamicClassLoaderManager dynamicClassLoaderManager;
 
+    @Reference
+    private RemoteAssetsConfig remoteAssetsConfig;
+
     /**
      * TODO THIS IS A TEMPORARY CLASS FOR DEMO PURPOSES, TO BE DELETED AT A LATER TIME
      */
@@ -55,6 +59,8 @@ public class DEMOConvertGeometrixxAssetsToRemote extends SlingAllMethodsServlet 
         try {
             ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
             Session session = resourceResolver.adaptTo(Session.class);
+
+            session.getWorkspace().getObservationManager().setUserData(remoteAssetsConfig.getEventUserData());
 
             AssetManager assetManager = resourceResolver.adaptTo(AssetManager.class);
 
@@ -96,11 +102,11 @@ public class DEMOConvertGeometrixxAssetsToRemote extends SlingAllMethodsServlet 
         log.info("Converting asset {} to remote", asset.getPath());
 
         Iterator<? extends Rendition> renditionIterator = asset.listRenditions();
+        String mimeType = asset.getRendition("original").getMimeType();
         while (renditionIterator.hasNext()) {
             Rendition assetRendition = renditionIterator.next();
 
             InputStream inputStream;
-            String mimeType = asset.getRendition("original").getMimeType();
             if ("image/png".equals(mimeType)) {
                 inputStream = dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/AEM_remote_asset.png");
             } else {
