@@ -35,44 +35,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.adobe.acs.commons.remoteassets;
+package com.adobe.acs.commons.remoteassets.impl;
 
-import java.util.List;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Configuration for Remote Assets.
+ * Common functionality for Remote Assets.
  */
-public interface RemoteAssetsConfig {
-    /**
-     * Server from which to pull the assets from.
-     */
-    String getServer();
+public class RemoteAssets {
+    private static final Logger log = LoggerFactory.getLogger(RemoteAssets.class);
 
-    /**
-     * Username to log into the remote assets server.
-     */
-    String getUsername();
+    public static final String SERVICE_NAME = "remote-assets";
 
-    /**
-     * Password to log into the remote assets server.
-     */
-    String getPassword();
-
-    /**
-     * Paths to sync from the remote assets server.
-     */
-    List<String> getSyncPaths();
-
-    /**
-     * Number of minutes the server will wait to attempt to sync a remote asset that failed a sync attempt.
-     */
-    Integer getRetryDelay();
-
-    /**
-     * The event user data that will be set during all JCR manipulations performed by remote assets.
-     *
-     * This can be used in workflow launchers that listen to DAM paths (such as for DAM Update Assets)
-     * to exclude unnecessary processing such as rendition generation.
-     */
-    String getEventUserData();
+    public static final ResourceResolver logIn(ResourceResolverFactory resourceResolverFactory) {
+        try {
+            Map<String, Object> userParams = new HashMap<>();
+            userParams.put(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
+            return resourceResolverFactory.getServiceResourceResolver(userParams);
+        } catch (LoginException le2) {
+            log.error("Remote assets functionality cannot be enabled - service user login failed");
+            throw new RemoteAssetsServiceException(le2);
+        }
+    }
 }

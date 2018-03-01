@@ -60,12 +60,6 @@ import java.util.List;
 
 @Service(RemoteAssetsConfig.class)
 public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
-    private String server = "";
-    private String username = "";
-    private String password = "";
-    private Integer retryDelay;
-    private String eventUserData = "";
-
     @Property(label = "Server")
     private static final String SERVER = "server";
 
@@ -96,7 +90,12 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
             value = "changedByWorkflowProcess")
     private static final String EVENT_USER_DATA = "event-user-data";
 
+    private String server = "";
+    private String username = "";
+    private String password = "";
     private List<String> syncPaths = new ArrayList<>();
+    private Integer retryDelay;
+    private String eventUserData = "";
 
     @Override
     public String getServer() {

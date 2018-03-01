@@ -53,12 +53,12 @@ public class DEMOConvertGeometrixxAssetsToRemote extends SlingAllMethodsServlet 
      * TODO THIS IS A TEMPORARY CLASS FOR DEMO PURPOSES, TO BE DELETED AT A LATER TIME
      */
     @Override
-    protected void doGet(final SlingHttpServletRequest request,
-                         final SlingHttpServletResponse response) throws ServletException, IOException {
-
+    protected void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws ServletException, IOException {
+        ResourceResolver resourceResolver = null;
+        Session session = null;
         try {
-            ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
-            Session session = resourceResolver.adaptTo(Session.class);
+            resourceResolver = RemoteAssets.logIn(resourceResolverFactory);
+            session = resourceResolver.adaptTo(Session.class);
 
             session.getWorkspace().getObservationManager().setUserData(remoteAssetsConfig.getEventUserData());
 
@@ -73,6 +73,21 @@ public class DEMOConvertGeometrixxAssetsToRemote extends SlingAllMethodsServlet 
             response.getWriter().println("All assets under /content/dam/geometrixx have been converted to remote assets");
         } catch (Exception e) {
             throw new ServletException(e);
+        } finally {
+            if (session != null) {
+                try {
+                    session.logout();
+                } catch (Exception e) {
+                    log.warn("Failed session.logout()", e);
+                }
+            }
+            if (resourceResolver != null) {
+                try {
+                    resourceResolver.close();
+                } catch (Exception e) {
+                    log.warn("Failed resourceResolver.close()", e);
+                }
+            }
         }
     }
 

@@ -35,44 +35,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.adobe.acs.commons.remoteassets;
+package com.adobe.acs.commons.remoteassets.impl;
 
-import java.util.List;
-
-/**
- * Configuration for Remote Assets.
- */
-public interface RemoteAssetsConfig {
-    /**
-     * Server from which to pull the assets from.
-     */
-    String getServer();
-
-    /**
-     * Username to log into the remote assets server.
-     */
-    String getUsername();
-
-    /**
-     * Password to log into the remote assets server.
-     */
-    String getPassword();
-
-    /**
-     * Paths to sync from the remote assets server.
-     */
-    List<String> getSyncPaths();
-
-    /**
-     * Number of minutes the server will wait to attempt to sync a remote asset that failed a sync attempt.
-     */
-    Integer getRetryDelay();
-
-    /**
-     * The event user data that will be set during all JCR manipulations performed by remote assets.
-     *
-     * This can be used in workflow launchers that listen to DAM paths (such as for DAM Update Assets)
-     * to exclude unnecessary processing such as rendition generation.
-     */
-    String getEventUserData();
+public class RemoteAssetsServiceException extends RuntimeException {
+    public RemoteAssetsServiceException(Throwable t) {
+        super("Remote assets service not configured correctly", t);
+    }
 }

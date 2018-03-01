@@ -88,7 +88,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     @Activate
     protected void activate() throws RepositoryException, org.apache.sling.api.resource.LoginException {
-        resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null);
+        resourceResolver = RemoteAssets.logIn(resourceResolverFactory);
         session = resourceResolver.adaptTo(Session.class);
         session.getWorkspace().getObservationManager().setUserData(remoteAssetsConfig.getEventUserData());
     }
@@ -96,11 +96,18 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     @Deactivate
     protected void deactivate() {
         if (session != null) {
-            session.logout();
+            try {
+                session.logout();
+            } catch (Exception e) {
+                log.warn("Failed session.logout()", e);
+            }
         }
-
         if (resourceResolver != null) {
-            resourceResolver.close();
+            try {
+                resourceResolver.close();
+            } catch (Exception e) {
+                log.warn("Failed resourceResolver.close()", e);
+            }
         }
     }
 
