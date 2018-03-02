@@ -160,14 +160,18 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             if (resource.getPath().startsWith(syncPath)) {
                 Session session = resource.getResourceResolver().adaptTo(Session.class);
                 String userId = session.getUserID();
-                if (config.getWhitelistedServiceUsers().contains(userId)) {
-                    return true;
-                }
-                User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
-                if (currentUser != null && !currentUser.isSystemUser()) {
-                    return true;
+                if (!userId.equals("admin")) {
+                    if (config.getWhitelistedServiceUsers().contains(userId)) {
+                        return true;
+                    }
+                    User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
+                    if (currentUser != null && !currentUser.isSystemUser()) {
+                        return true;
+                    } else {
+                        log.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
+                    }
                 } else {
-                    log.error("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
+                    log.debug("Avoiding binary sync for admin user");
                 }
             }
         }
