@@ -37,8 +37,8 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -87,7 +87,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     private Session session;
 
     @Activate
-    protected void activate() throws RepositoryException, org.apache.sling.api.resource.LoginException {
+    protected void activate() throws RepositoryException {
         resourceResolver = RemoteAssets.logIn(resourceResolverFactory);
         session = resourceResolver.adaptTo(Session.class);
         session.getWorkspace().getObservationManager().setUserData(remoteAssetsConfig.getEventUserData());
