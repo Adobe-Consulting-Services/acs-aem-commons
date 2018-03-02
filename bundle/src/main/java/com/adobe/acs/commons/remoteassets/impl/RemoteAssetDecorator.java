@@ -37,18 +37,22 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceDecorator;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.jcr.base.util.AccessControlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Calendar;
 import java.util.Set;
@@ -93,17 +97,25 @@ public class RemoteAssetDecorator implements ResourceDecorator {
      */
     @Override
     public Resource decorate(final Resource resource) {
-        if (!this.accepts(resource)) {
+        try {
+            if (!this.accepts(resource)) {
+                return resource;
+            }
+        } catch (Exception e) {
+            // Logging at debug level b/c if this happens it could represent a ton of logging
+            if (log.isDebugEnabled()) {
+                log.debug("Failed binary sync check for remote asset: {} - {}", resource.getPath(), e.getMessage());
+            }
             return resource;
         }
 
         Resource ret = resource;
         try {
             remoteResourcesSyncing.add(resource.getPath());
-            log.info("Sync'ing remote asset: {}", resource.getPath());
+            log.info("Sync'ing remote asset binaries: {}", resource.getPath());
             ret = assetSync.syncAsset(resource);
         } catch (Exception e) {
-            log.error("Failed to sync remote asset: {}", resource.getPath(), e);
+            log.error("Failed to sync binaries for remote asset: {} - {}", resource.getPath(), e.getMessage());
         } finally {
             remoteResourcesSyncing.remove(resource.getPath());
         }
@@ -122,7 +134,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
      * @param resource Resource to check
      * @return true if resource is remote, else false
      */
-    private boolean accepts(final Resource resource) {
+    private boolean accepts(final Resource resource) throws RepositoryException {
         if (resource == null) {
             return false;
         }
@@ -146,7 +158,17 @@ public class RemoteAssetDecorator implements ResourceDecorator {
 
         for (String syncPath : config.getSyncPaths()) {
             if (resource.getPath().startsWith(syncPath)) {
-                return true;
+                Session session = resource.getResourceResolver().adaptTo(Session.class);
+                String userId = session.getUserID();
+                if (config.getWhitelistedServiceUsers().contains(userId)) {
+                    return true;
+                }
+                User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
+                if (currentUser != null && !currentUser.isSystemUser()) {
+                    return true;
+                } else {
+                    log.error("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
+                }
             }
         }
 

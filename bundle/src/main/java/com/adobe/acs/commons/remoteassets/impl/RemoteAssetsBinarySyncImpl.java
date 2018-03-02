@@ -37,8 +37,8 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.granite.asset.api.Asset;
 import com.adobe.granite.asset.api.Rendition;
 import org.apache.felix.scr.annotations.Activate;
