@@ -8,4 +8,4 @@
     username="admin"
     password="admin"
     paths="[/content/dam/sync]"
-    retryDelay="{Long}1"/>
+    retry.delay="{Long}1"/>

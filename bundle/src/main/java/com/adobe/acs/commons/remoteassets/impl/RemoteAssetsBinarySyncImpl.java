@@ -37,8 +37,8 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.granite.asset.api.Asset;
 import com.adobe.granite.asset.api.Rendition;
 import org.apache.felix.scr.annotations.Activate;
@@ -47,7 +47,6 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.value.DateValue;
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -89,7 +88,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
     private Session session;
 
     @Activate
-    protected void activate() throws RepositoryException, LoginException {
+    protected void activate() throws RepositoryException {
         resourceResolver = RemoteAssets.logIn(resourceResolverFactory);
         session = resourceResolver.adaptTo(Session.class);
         session.getWorkspace().getObservationManager().setUserData(remoteAssetsConfig.getEventUserData());

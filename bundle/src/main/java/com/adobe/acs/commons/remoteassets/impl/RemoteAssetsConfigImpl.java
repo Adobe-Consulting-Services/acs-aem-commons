@@ -55,7 +55,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Configuration service for Remote Asset feature. Implements {@link RemoteAssetsConfig}.
@@ -81,7 +83,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private static final String PASSWORD = "password";
 
     @Property(
-            label = "Asset sync paths",
+            label = "Asset Sync Paths",
             description = "Paths to sync assets from the remote server (e.g. /content/dam)",
             cardinality = Integer.MAX_VALUE,
             value = {}
@@ -89,11 +91,11 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private static final String SYNC_PATHS = "paths";
 
     @Property(
-            label = "Failure retry delay (in minutes)",
+            label = "Failure Retry Delay (in minutes)",
             description = "Number of minutes the server will wait to attempt to sync a remote asset that failed a sync attempt (minimum 1)",
             intValue = 15
     )
-    private static final String RETRY_DELAY = "retryDelay";
+    private static final String RETRY_DELAY = "retry.delay";
 
     @Property(
             label = "Event User Data",
@@ -101,7 +103,15 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
                     "workflow launchers that listen to DAM paths (such as for DAM Update Assets) to exclude unnecessary processing such as " +
                     "rendition generation.",
             value = "changedByWorkflowProcess")
-    private static final String EVENT_USER_DATA = "event-user-data";
+    private static final String EVENT_USER_DATA = "event.user.data";
+
+    @Property(
+            label = "Whitelisted Service Users",
+            description = "Service users that are allowed to trigger remote asset binary syncs.  By defualt, service user activity never triggers an asset binary sync.",
+            cardinality = Integer.MAX_VALUE,
+            value = {}
+    )
+    private static final String WHITELISTED_SERVICE_USERS = "whitelisted.service.users";
 
     private String server = "";
     private String username = "";
@@ -109,6 +119,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private List<String> syncPaths = new ArrayList<>();
     private Integer retryDelay;
     private String eventUserData = "";
+    private Set<String> whitelistedServiceUsers = new HashSet<>();
 
     /**
      * Method to run on activation.
@@ -145,6 +156,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
         }
 
         this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), "");
+        this.whitelistedServiceUsers = new HashSet<String>(Arrays.asList(PropertiesUtil.toStringArray(properties.get(SYNC_PATHS), new String[0])));
     }
 
     /**
@@ -207,5 +219,14 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     @Override
     public String getEventUserData() {
         return this.eventUserData;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getWhitelistedServiceUsers()
+     * @return String
+     */
+    @Override
+    public Set<String> getWhitelistedServiceUsers() {
+        return this.whitelistedServiceUsers;
     }
 }

@@ -38,6 +38,7 @@
 package com.adobe.acs.commons.remoteassets;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Configuration for Remote Assets.
@@ -76,4 +77,11 @@ public interface RemoteAssetsConfig {
      * to exclude unnecessary processing such as rendition generation.
      */
     String getEventUserData();
+
+    /**
+     * Service users that are allowed to trigger remote asset binary syncs.
+     *
+     * By defualt, service user activity never triggers an asset binary sync.
+     */
+    Set<String> getWhitelistedServiceUsers();
 }

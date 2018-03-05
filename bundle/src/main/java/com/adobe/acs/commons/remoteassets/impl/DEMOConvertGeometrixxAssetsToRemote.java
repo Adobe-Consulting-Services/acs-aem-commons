@@ -123,9 +123,9 @@ public class DEMOConvertGeometrixxAssetsToRemote extends SlingAllMethodsServlet 
 
             InputStream inputStream;
             if ("image/png".equals(mimeType)) {
-                inputStream = dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/AEM_remote_asset.png");
+                inputStream = dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.png");
             } else {
-                inputStream = dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/AEM_remote_asset.jpg");
+                inputStream = dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpg");
             }
 
             Map<String, Object> props = new HashMap<>();
