@@ -35,6 +35,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
@@ -48,18 +49,28 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
 
-@Component(immediate = true, metatype = true,
+/**
+ * Configuration service for Remote Asset feature. Implements {@link RemoteAssetsConfig}.
+ */
+@Component(
+        immediate = true,
+        metatype = true,
         label = "ACS AEM Commons - Remote Assets - Config",
-        policy = ConfigurationPolicy.REQUIRE)
-
-@Service(RemoteAssetsConfig.class)
+        policy = ConfigurationPolicy.REQUIRE
+)
+@Service()
 public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);
+
     @Property(label = "Server")
     private static final String SERVER = "server";
 
@@ -86,7 +97,9 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(
             label = "Event User Data",
-            description = "The event user data that will be set during all JCR manipulations performed by remote assets. This can be used in workflow launchers that listen to DAM paths (such as for DAM Update Assets) to exclude unnecessary processing such as rendition generation.",
+            description = "The event user data that will be set during all JCR manipulations performed by remote assets. This can be used in " +
+                    "workflow launchers that listen to DAM paths (such as for DAM Update Assets) to exclude unnecessary processing such as " +
+                    "rendition generation.",
             value = "changedByWorkflowProcess")
     private static final String EVENT_USER_DATA = "event-user-data";
 
@@ -97,71 +110,102 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private Integer retryDelay;
     private String eventUserData = "";
 
-    @Override
-    public String getServer() {
-        return server;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public List<String> getSyncPaths() {
-        return syncPaths;
-    }
-
-    @Override
-    public Integer getRetryDelay() {
-        return retryDelay;
-    }
-
-    @Override
-    public String getEventUserData() {
-        return eventUserData;
-    }
-
+    /**
+     * Method to run on activation.
+     * @param componentContext ComponentContext
+     */
     @Activate
     @Modified
     private void activate(final ComponentContext componentContext) {
         final Dictionary<?, ?> properties = componentContext.getProperties();
 
-        server = PropertiesUtil.toString(properties.get(SERVER), "");
-        if (StringUtils.isBlank(server)) {
+        this.server = PropertiesUtil.toString(properties.get(SERVER), "");
+        if (StringUtils.isBlank(this.server)) {
             throw new IllegalArgumentException("Remote server must be specified");
         }
 
-        username = PropertiesUtil.toString(properties.get(USERNAME), "");
-        if (StringUtils.isBlank(username)) {
+        this.username = PropertiesUtil.toString(properties.get(USERNAME), "");
+        if (StringUtils.isBlank(this.username)) {
             throw new IllegalArgumentException("Remote server username must be specified");
         }
 
-        password = PropertiesUtil.toString(properties.get(PASSWORD), "");
-        if (StringUtils.isBlank(password)) {
+        this.password = PropertiesUtil.toString(properties.get(PASSWORD), "");
+        if (StringUtils.isBlank(this.password)) {
             throw new IllegalArgumentException("Remote server password must be specified");
         }
 
-        syncPaths = Arrays.asList(PropertiesUtil.toStringArray(properties.get(SYNC_PATHS), new String[0]));
-        if (syncPaths.size() == 0) {
+        this.syncPaths = Arrays.asList(PropertiesUtil.toStringArray(properties.get(SYNC_PATHS), new String[0]));
+        if (this.syncPaths.size() == 0) {
             throw new IllegalArgumentException("At least one sync path must be specified");
         }
 
-        retryDelay = PropertiesUtil.toInteger(properties.get(RETRY_DELAY), 1);
-        if (retryDelay < 1) {
-            retryDelay = 1;
+        this.retryDelay = PropertiesUtil.toInteger(properties.get(RETRY_DELAY), 1);
+        if (this.retryDelay < 1) {
+            this.retryDelay = 1;
         }
 
-        eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), "");
+        this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), "");
     }
 
+    /**
+     * Method to run on deactivation.
+     */
     @Deactivate
     private void deactivate() {
+        // Do nothing.
     }
 
+    /**
+     * @see RemoteAssetsConfig#getServer()
+     * @return String
+     */
+    @Override
+    public String getServer() {
+        return this.server;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getUsername()
+     * @return String
+     */
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getPassword()
+     * @return String
+     */
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getSyncPaths()
+     * @return List<String>
+     */
+    @Override
+    public List<String> getSyncPaths() {
+        return this.syncPaths;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getRetryDelay()
+     * @return Integer
+     */
+    @Override
+    public Integer getRetryDelay() {
+        return this.retryDelay;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getEventUserData()
+     * @return String
+     */
+    @Override
+    public String getEventUserData() {
+        return this.eventUserData;
+    }
 }

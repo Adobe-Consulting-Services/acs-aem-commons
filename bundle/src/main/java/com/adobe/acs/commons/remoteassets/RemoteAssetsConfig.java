@@ -43,6 +43,7 @@ import java.util.List;
  * Configuration for Remote Assets.
  */
 public interface RemoteAssetsConfig {
+
     /**
      * Server from which to pull the assets from.
      */

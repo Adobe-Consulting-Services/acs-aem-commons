@@ -37,13 +37,11 @@
  */
 package com.adobe.acs.commons.remoteassets;
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-
 /**
  * Service that syncs remote asset nodes w/o binaries from the remote server.
  */
 public interface RemoteAssetsNodeSync {
+
 	/**
 	 * Sync remote asset nodes from remote server, excluding binaries.
 	 */
