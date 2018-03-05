@@ -35,7 +35,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
@@ -156,7 +155,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
         }
 
         this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), "");
-        this.whitelistedServiceUsers = new HashSet<String>(Arrays.asList(PropertiesUtil.toStringArray(properties.get(SYNC_PATHS), new String[0])));
+        this.whitelistedServiceUsers = new HashSet<>(Arrays.asList(PropertiesUtil.toStringArray(properties.get(SYNC_PATHS), new String[0])));
     }
 
     /**

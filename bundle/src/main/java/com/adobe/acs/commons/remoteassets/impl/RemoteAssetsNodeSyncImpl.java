@@ -35,7 +35,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
