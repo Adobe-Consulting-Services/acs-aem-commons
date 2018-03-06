@@ -92,7 +92,7 @@ public class AnnotatedFieldDeserializer {
 
             if (val instanceof RequestParameter) {
                 /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
-                if (field.getDeclaringClass() == RequestParameter.class) {
+                if (field.getType() == RequestParameter.class) {
                     FieldUtils.writeField(field, target, val, true);
                 } else {
                     try {
