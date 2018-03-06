@@ -22,6 +22,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1255 - Add trimming to the dispatcher flush rules to allow multi line xml configs
 - #1256 - Allow adding of context root maven property for deploying acs-aem-commons locally
 
+### Fixed
+
+- #1260 - MCP serialization issue; using file upload would break the UI if large files were uploaded
+
 ## [3.14.8] - 2018-02-13
 
 ### Fixed
