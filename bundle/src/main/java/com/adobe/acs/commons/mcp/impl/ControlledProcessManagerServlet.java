@@ -190,19 +190,14 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
                         entry -> {
                             final RequestParameter[] values = entry.getValue();
 
-                            try {
-                                if (values.length == 1) {
-                                    if (values[0].getFileName() != null) {
-                                        return values[0].getInputStream();
-                                    } else {
-                                        return values[0].getString();
-                                    }
+                            if (values.length == 1) {
+                                if (values[0].getFileName() != null) {
+                                    return values[0];
                                 } else {
-                                    return Arrays.stream(values).collect(Collectors.toList());
+                                    return values[0].getString();
                                 }
-                            } catch (IOException e) {
-                                LOG.error("Unable to get InputStream for uploaded file [ {} ]", entry.getKey(), e);
-                                return null;
+                            } else {
+                                return Arrays.stream(values).collect(Collectors.toList());
                             }
                         }
                 ));

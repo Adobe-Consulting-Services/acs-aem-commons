@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1242 - New ResourceUtil utility class.
 - #1255 - Add trimming to the dispatcher flush rules to allow multi line xml configs
 - #1256 - Allow adding of context root maven property for deploying acs-aem-commons locally
+- #1274 - MCP now supports RequestParameter in process definitions.  This gives access to file binary and other metadata such as name and size.
 
 ### Fixed
 
