@@ -44,7 +44,7 @@ public class ManagedProcess implements Serializable {
     @Inject
     private String requester;
     @Inject
-    transient private ValueMap requestInputs;
+    private ValueMap requestInputs;
     @Inject
     private Long startTime;
     @Inject
