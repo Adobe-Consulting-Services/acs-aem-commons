@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.8...HEAD
 
+### Added
+
+- #1274 - MCP now supports RequestParameter in process definitions.  This gives access to file binary and other metadata such as name and size.
+
 ## [3.14.7] - 2018-02-08
 
 ### Added
