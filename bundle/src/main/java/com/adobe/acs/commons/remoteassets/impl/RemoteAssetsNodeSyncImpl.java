@@ -103,6 +103,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     private ResourceResolver resourceResolver;
     private Session session;
+    private String encodedAuth;
 
     /**
      * Method to run on activation.
@@ -110,6 +111,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      */
     @Activate
     protected void activate() throws RepositoryException {
+        String rawAuth = String.format("%s:%s", this.remoteAssetsConfig.getUsername(), this.remoteAssetsConfig.getPassword());
+        this.encodedAuth = Base64.getEncoder().encodeToString(rawAuth.getBytes(StandardCharsets.UTF_8));
         this.resourceResolver = RemoteAssets.logIn(this.resourceResolverFactory);
         this.session = this.resourceResolver.adaptTo(Session.class);
         this.session.getWorkspace().getObservationManager().setUserData(this.remoteAssetsConfig.getEventUserData());
@@ -189,9 +192,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         path = path.replace(" ", "%20");
         URL url = new URL(this.remoteAssetsConfig.getServer().concat(path).concat(".1.json"));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        String rawAuth = String.format("%s:%s", this.remoteAssetsConfig.getUsername(), this.remoteAssetsConfig.getPassword());
-        String encodedAuth = Base64.getEncoder().encodeToString(rawAuth.getBytes(StandardCharsets.UTF_8));
-        connection.setRequestProperty("Authorization", String.format("Basic %s", encodedAuth));
+        connection.setRequestProperty("Authorization", String.format("Basic %s", this.encodedAuth));
 
         InputStream is = connection.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
