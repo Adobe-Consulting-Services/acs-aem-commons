@@ -50,6 +50,7 @@ import org.apache.jackrabbit.value.DateValue;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.xss.XSSAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +84,9 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
 
     @Reference
     private RemoteAssetsConfig remoteAssetsConfig;
+
+    @Reference
+    private XSSAPI xssApi;
 
     private ResourceResolver resourceResolver;
     private Session session;
@@ -120,7 +124,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
             Node node = localRes.adaptTo(Node.class);
 
             Asset asset = localRes.getParent().adaptTo(Asset.class);
-            String baseUrl = remoteAssetsConfig.getServer() + asset.getPath().replace(" ", "%20") + "/_jcr_content/renditions/";
+            String baseUrl = remoteAssetsConfig.getServer().concat(this.xssApi.getValidHref(asset.getPath())).concat("/_jcr_content/renditions/");
 
             Iterator<? extends Rendition> renditions = asset.listRenditions();
             while (renditions.hasNext()) {
@@ -130,10 +134,9 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                 URL url = new URL(String.format("%s%s", baseUrl, renditionName));
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
-                String authName = remoteAssetsConfig.getUsername();
-                String authPassword = remoteAssetsConfig.getPassword();
-                String encoded = Base64.getEncoder().encodeToString((String.format("%s:%s", authName, authPassword).getBytes(StandardCharsets.UTF_8)));
-                connection.setRequestProperty("Authorization", "Basic "+encoded);
+                String rawAuth = String.format("%s:%s", this.remoteAssetsConfig.getUsername(), this.remoteAssetsConfig.getPassword());
+                String encodedAuth = Base64.getEncoder().encodeToString(rawAuth.getBytes(StandardCharsets.UTF_8));
+                connection.setRequestProperty("Authorization", String.format("Basic %s", encodedAuth));
 
                 log.info("syncing from remote asset url {}", url);
                 InputStream inputStream = connection.getInputStream();
