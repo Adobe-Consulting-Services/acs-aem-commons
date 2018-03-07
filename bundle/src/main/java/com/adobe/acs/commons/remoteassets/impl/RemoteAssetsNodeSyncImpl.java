@@ -41,6 +41,7 @@ import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
+import com.google.common.net.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -48,8 +49,10 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.commons.JcrUtils;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -59,6 +62,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.ValueFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,8 +71,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Service to sync node tree from supplied felix configuration. Implements {@link RemoteAssetsNodeSync}.
@@ -88,6 +97,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     @Reference
     private RemoteAssetsConfig remoteAssetsConfig;
+
+    @Reference
+    private DynamicClassLoaderManager dynamicClassLoaderManager;
 
     private ResourceResolver resourceResolver;
     private Session session;
@@ -132,16 +144,10 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     public void syncAssets() {
         try {
             for (String syncPath : this.remoteAssetsConfig.getSyncPaths()) {
-                URL url = new URL(this.remoteAssetsConfig.getServer().concat(syncPath).concat(".infinity.json"));
-                JSONObject json = getJsonObjectFromUri(url);
-                Iterator keys = json.keys();
-                Node contentNode = JcrUtils.getNodeIfExists(syncPath, this.session);
-                if (contentNode == null) {
-                    contentNode = JcrUtil.createPath(syncPath, JcrConstants.NT_UNSTRUCTURED, this.session);
-                    LOG.info("Node {} created!!", contentNode.getPath());
-                }
-
-                createOrUpdateNodesFromJson(json, keys, contentNode);
+                this.session.refresh(true);
+                JSONObject topLevelJson = getJsonFromUri(syncPath);
+                Node topLevelSyncNode = getOrCreateNode(syncPath, (String) topLevelJson.get(JcrConstants.JCR_PRIMARYTYPE));
+                createOrUpdateNodes(topLevelJson, topLevelSyncNode);
                 this.session.save();
             }
         } catch (MalformedURLException e) {
@@ -152,21 +158,40 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             LOG.error("Repository Exception {}", e);
         } catch (IOException e) {
             LOG.error("IO Exception {}", e);
+        } catch (ParseException e) {
+            LOG.error("Parse Exception {}", e);
         }
     }
 
     /**
+     * Grab JSON from the provided path and sync to the JCR.
+     * @param nextPath String
+     * @throws RepositoryException exception
+     */
+    private Node getOrCreateNode(final String nextPath, final String primaryType) throws RepositoryException {
+        Node node = JcrUtils.getNodeIfExists(nextPath, this.session);
+        if (node == null) {
+            node = JcrUtil.createPath(nextPath, primaryType, this.session);
+            LOG.info("Node {} created!!", node.getPath());
+        }
+
+        return node;
+    }
+
+    /**
      * Get {@link JSONObject} from URL response.
-     * @param url URL
+     * @param path String
      * @return JSONObject
      * @throws IOException exception
      * @throws JSONException exception
      */
-    private JSONObject getJsonObjectFromUri(final URL url) throws IOException, JSONException {
+    private JSONObject getJsonFromUri(String path) throws IOException, JSONException {
+        path = path.replace(" ", "%20");
+        URL url = new URL(this.remoteAssetsConfig.getServer().concat(path).concat(".1.json"));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        String rawAuth = this.remoteAssetsConfig.getUsername().concat(":").concat(this.remoteAssetsConfig.getPassword());
+        String rawAuth = String.format("%s:%s", this.remoteAssetsConfig.getUsername(), this.remoteAssetsConfig.getPassword());
         String encodedAuth = Base64.getEncoder().encodeToString(rawAuth.getBytes(StandardCharsets.UTF_8));
-        connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
+        connection.setRequestProperty("Authorization", String.format("Basic %s", encodedAuth));
 
         InputStream is = connection.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -180,13 +205,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         String sbString = sb.toString();
         if (StringUtils.startsWith(sbString, "{")) {
             return new JSONObject(sbString);
-        } else if (StringUtils.startsWith(sbString, "[")) {
-            JSONArray jsonArray = new JSONArray(sbString);
-            URL newUrl = new URL(this.remoteAssetsConfig.getServer().concat(jsonArray.get(0).toString()));
-            return getJsonObjectFromUri(newUrl);
         } else {
             if (LOG.isErrorEnabled()) {
-                LOG.error("Unable to grab JSON object. Please ensure URL {} is valid. \nRaw Response: {}", url.toString(), sbString);
+                LOG.error("Unable to grab JSON Object. Please ensure URL {} is valid. \nRaw Response: {}", url.toString(), sbString);
             }
             return new JSONObject();
         }
@@ -195,42 +216,55 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     /**
      * Create or update nodes from remote JSON.
      * @param json JSONObject
-     * @param keys Iterator
      * @param parentNode Node
      * @throws JSONException exception
+     * @throws ParseException exception
      * @throws RepositoryException exception
      */
-    private void createOrUpdateNodesFromJson(final JSONObject json, final Iterator keys, final Node parentNode)
-            throws JSONException, RepositoryException {
+    private void createOrUpdateNodes(final JSONObject json, final Node parentNode)
+            throws JSONException, ParseException, RepositoryException, IOException {
 
+        Iterator keys = json.keys();
         while (keys.hasNext()) {
             Object key = keys.next();
             if (json.get((String) key) instanceof JSONObject) {
-                Node childNode = JcrUtils.getNodeIfExists(parentNode.getPath().concat((String) key), this.session);
-                if (childNode == null) {
-                    childNode = JcrUtil.createPath(parentNode.getPath()
-                            .concat("/")
-                            .concat((String) key), JcrConstants.NT_UNSTRUCTURED, this.session);
-//                    LOG.info("Node {} created!!", childNode.getPath());
+                String objectPath = String.format("%s/%s", parentNode.getPath(), key);
+                JSONObject objectJson = getJsonFromUri(objectPath);
+                Node node = getOrCreateNode(objectPath, (String) objectJson.get(JcrConstants.JCR_PRIMARYTYPE));
+                createOrUpdateNodes(objectJson, node);
+            } else if (json.get((String) key) instanceof JSONArray) {
+                if (JcrConstants.JCR_PREDECESSORS.equals(key)) {
+                    continue;
                 }
 
-                JSONObject objectJson = json.getJSONObject((String) key);
-                Iterator objectKeys = objectJson.keys();
-                createOrUpdateNodesFromJson(objectJson, objectKeys, childNode);
-            } else if (json.get((String) key) instanceof JSONArray) {
-                continue;
+                if (JcrConstants.JCR_MIXINTYPES.equals(key)) {
+                    JSONArray mixins = (JSONArray) json.get((String) key);
+                    for (int i = 0; i < mixins.length(); i++) {
+                        parentNode.addMixin(mixins.getString(i));
+                    }
+                } else {
+                    JSONArray rawValues = (JSONArray) json.get((String) key);
+                    String[] values = new String[rawValues.length()];
+
+                    for (int i = 0; i < rawValues.length(); i++) {
+                        values[i] = rawValues.getString(i);
+                    }
+
+                    parentNode.setProperty((String) key, values);
+                }
             } else {
                 try {
-                    if (parentNode.hasProperty((String) key) && parentNode.getProperty((String) key).getString().equals(json.get((String) key))) {
+                    // When retrieving JSON from Sling, ':' before a property name denotes a property with a binary value.
+                    if (JcrConstants.JCR_DATA.equals(key) || ":".concat(JcrConstants.JCR_DATA).equals(key)) {
+                        setTemporaryBinary(parentNode);
+                    } else if (parentNode.hasProperty((String) key) && parentNode.getProperty((String) key).getString().equals(json.get((String) key))) {
                         continue;
-                    }
-
-                    if (isPropertyProtected((String) key)) {
+                    } else if (isPropertyProtected((String) key)) {
                         continue;
-                    }
-
-                    if (JcrConstants.JCR_PRIMARYTYPE.equals(key)) {
+                    } else if (JcrConstants.JCR_PRIMARYTYPE.equals(key)) {
                         parentNode.setPrimaryType((String) json.get((String) key));
+                    } else if (JcrConstants.JCR_LASTMODIFIED.equals(key)) {
+                        parentNode.setProperty((String) key, getFormattedDate((String) json.get((String) key)));
                     } else {
                         if (json.get((String) key) instanceof Boolean) {
                             parentNode.setProperty((String) key, (Boolean) json.get((String) key));
@@ -243,7 +277,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                         }
                     }
 
-//                    LOG.info("Property {} set on Node {}!!", key, parentNode.getPath());
+                    LOG.info("Property {} set on Node {}!!", key, parentNode.getPath());
                 } catch (RepositoryException re) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn("Repository exception thrown. Skipping {} property.", key, re);
@@ -254,21 +288,66 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
+     * Set a temporary binary. Also, property 'jcr:data' is a mandatory field.
+     * @param node Node
+     * @throws RepositoryException exception
+     */
+    private void setTemporaryBinary(final Node node) throws RepositoryException {
+//        try {
+            ValueFactory valueFactory = this.session.getValueFactory();
+            Resource resource = this.resourceResolver.getResource(node.getPath());
+            String mimeType = (String) resource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
+            InputStream inputStream;
+
+            if (MediaType.PNG.toString().equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.png");
+            } else if (MediaType.JPEG.toString().equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpg");
+            } else {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpg");
+            }
+
+            node.setProperty(JcrConstants.JCR_DATA, valueFactory.createBinary(inputStream));
+//        } catch (Exception e) {
+//            LOG.error("***********************", e);
+//        }
+    }
+
+    /**
      * Determine whether the provided property is a protected property.
      * @param key String
      */
     private boolean isPropertyProtected(final String key) {
-        String[] potectedProperties = new String[] {
+        String[] protectedProperties = new String[] {
                 JcrConstants.JCR_CREATED, JcrConstants.JCR_CREATED_BY, JcrConstants.JCR_VERSIONHISTORY, JcrConstants.JCR_BASEVERSION,
                 JcrConstants.JCR_ISCHECKEDOUT, JcrConstants.JCR_UUID
         };
 
-        for (String property: potectedProperties) {
+        for (String property: protectedProperties) {
             if (property.equals(key)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Get formatted {@link Calendar} object.
+     * @param date String
+     * @return Calendar
+     * @throws ParseException exception
+     */
+    private Calendar getFormattedDate(final String date) throws ParseException {
+//        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.getDefault());
+//        sdf.parse(date);
+//        return sdf.getCalendar();
+
+
+        Calendar cal = Calendar.getInstance();
+        // TODO make use of non-deprecated methods.
+        cal.setTime(new Date(date));
+        new Date();
+        return cal;
     }
 }
