@@ -24,8 +24,10 @@ The password is your API key (not your password), which you can find via https:/
 2. If this is a minor release, create two new Milestones in GitHub -- one for the next minor release and one for the first patch release. For example,
 if you are releasing 3.18.0, create 3.20.0 and 3.18.2.
 3. If this is a patch release, create a new Milestone in GitHub for the next patch release. For example, if you are releasing 3.18.2, create 3.18.4.
+4. Close the current milestone in GitHub issues.
 4. Make sure that the issues and pull requests are associated with the proper milestone -- anything open for the current release should be moved to the next release, either minor or patch depending on the nature of the issue.
 5. Run the release: `mvn release:prepare` followed by `mvn release:perform`.
+6. Go to https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases and edit the release tag, using the CHANGELOG data as the release text and attaching the content package zip files (both min and regular) to the release.
 6. Log into Bintray and go to https://bintray.com/acs/releases, publish all of the artifacts.
 7. Create a new internal Adobe JIRA issue requesting that the artifacts be promoted to repo.adobe.com.
 8. After the files are promoted, add a release announcement (and any other docs) to the documentation site.
