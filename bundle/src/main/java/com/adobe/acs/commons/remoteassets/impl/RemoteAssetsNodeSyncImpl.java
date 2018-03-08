@@ -258,6 +258,10 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                         for (int i = 0; i < rawValues.length(); i++) {
                             propertyValues[i] = this.valueFactory.createValue(rawValues.getInt(i));
                         }
+                    } else if (firstVal instanceof Long) {
+                        for (int i = 0; i < rawValues.length(); i++) {
+                            propertyValues[i] = this.valueFactory.createValue(rawValues.getLong(i));
+                        }
                     } else {
                         for (int i = 0; i < rawValues.length(); i++) {
                             propertyValues[i] = this.valueFactory.createValue(rawValues.getString(i));
@@ -290,6 +294,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                             parentNode.setProperty(key, (Boolean) json.get(key));
                         } else if (json.get(key) instanceof Double) {
                             parentNode.setProperty(key, (Double) json.get(key));
+                        } else if (json.get(key) instanceof Long) {
+                            parentNode.setProperty(key, (Long) json.get(key));
                         } else if (json.get(key) instanceof Integer) {
                             parentNode.setProperty(key, (Integer) json.get(key));
                         } else {
