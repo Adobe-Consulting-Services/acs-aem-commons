@@ -8,7 +8,7 @@
 ### Setup
 
 In your Maven settings.xml file (~/.m2/settings.xml), add a server entry with the id `bintray`. The username is your bintray username.
-The password is your API key (not your password):
+The password is your API key (not your password), which you can find via https://bintray.com/profile/edit :
 
     <servers>
         <server>
