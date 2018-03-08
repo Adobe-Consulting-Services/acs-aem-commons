@@ -36,7 +36,9 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -138,7 +140,11 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             return false;
         }
 
-        for (String syncPath : config.getSyncPaths()) {
+        List<String> syncPaths = new ArrayList<>();
+        syncPaths.addAll(this.config.getTagSyncPaths());
+        syncPaths.addAll(this.config.getDamSyncPaths());
+
+        for (String syncPath : syncPaths) {
             if (resource.getPath().startsWith(syncPath)) {
                 Session session = resource.getResourceResolver().adaptTo(Session.class);
                 String userId = session.getUserID();
