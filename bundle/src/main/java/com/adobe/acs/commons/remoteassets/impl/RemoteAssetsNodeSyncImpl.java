@@ -119,7 +119,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     /**
      * Method to run on activation.
-     * @throws RepositoryException Exception
+     * @throws RepositoryException exception
      */
     @Activate
     protected void activate() throws RepositoryException {
@@ -398,7 +398,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      */
     private Calendar getFormattedDate(final String date) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss Z");
-        sdf.parse(date.replace("GMT", ""));
+        sdf.parse(date.replace("GMT", StringUtils.EMPTY));
         return sdf.getCalendar();
     }
 }
