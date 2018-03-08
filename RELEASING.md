@@ -9,14 +9,24 @@
 
 In your Maven settings.xml file (~/.m2/settings.xml), add a server entry with the id `bintray`. The username is your bintray username.
 The password is your API key (not your password), which you can find via https://bintray.com/profile/edit :
+    <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                          https://maven.apache.org/xsd/settings-1.0.0.xsd">
+        ...
+        <servers>
+            <server>
+                <id>bintray</id>
+                <username>justinedelson</username>
+                <password>*****</password>
+            </server>
+        </servers>
+        ...
+    </settings>
 
-    <servers>
-        <server>
-            <id>bintray</id>
-            <username>justinedelson</username>
-            <password>*****</password>
-        </server>
-    </servers>
+### Prior to release
+
+Make sure that all issues assigned to the current milestone have been closed and all necessary pull requests have been merged and closed out.  Don't proceed with the release until you know what you're releasing. ;)
 
 ### Release Process
 
