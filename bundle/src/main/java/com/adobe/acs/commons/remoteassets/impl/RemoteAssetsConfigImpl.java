@@ -30,8 +30,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,8 +50,6 @@ import java.util.Set;
 @Service()
 public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);
-
     @Property(label = "Server")
     private static final String SERVER = "server";
 
@@ -64,12 +60,20 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private static final String PASSWORD = "password";
 
     @Property(
+            label = "Tag Sync Paths",
+            description = "Paths to sync tags from the remote server (e.g. /etc/tags",
+            cardinality = Integer.MAX_VALUE,
+            value = {}
+    )
+    private static final String TAG_SYNC_PATHS = "tag.paths";
+
+    @Property(
             label = "Asset Sync Paths",
             description = "Paths to sync assets from the remote server (e.g. /content/dam)",
             cardinality = Integer.MAX_VALUE,
             value = {}
     )
-    private static final String SYNC_PATHS = "paths";
+    private static final String DAM_SYNC_PATHS = "dam.paths";
 
     @Property(
             label = "Failure Retry Delay (in minutes)",
@@ -94,12 +98,13 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     )
     private static final String WHITELISTED_SERVICE_USERS = "whitelisted.service.users";
 
-    private String server = "";
-    private String username = "";
-    private String password = "";
-    private List<String> syncPaths = new ArrayList<>();
+    private String server = StringUtils.EMPTY;
+    private String username = StringUtils.EMPTY;
+    private String password = StringUtils.EMPTY;
+    private List<String> tagSyncPaths = new ArrayList<>();
+    private List<String> damSyncPaths = new ArrayList<>();
     private Integer retryDelay;
-    private String eventUserData = "";
+    private String eventUserData = StringUtils.EMPTY;
     private Set<String> whitelistedServiceUsers = new HashSet<>();
 
     /**
@@ -111,24 +116,29 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private void activate(final ComponentContext componentContext) {
         final Dictionary<?, ?> properties = componentContext.getProperties();
 
-        this.server = PropertiesUtil.toString(properties.get(SERVER), "");
+        this.server = PropertiesUtil.toString(properties.get(SERVER), StringUtils.EMPTY);
         if (StringUtils.isBlank(this.server)) {
             throw new IllegalArgumentException("Remote server must be specified");
         }
 
-        this.username = PropertiesUtil.toString(properties.get(USERNAME), "");
+        this.username = PropertiesUtil.toString(properties.get(USERNAME), StringUtils.EMPTY);
         if (StringUtils.isBlank(this.username)) {
             throw new IllegalArgumentException("Remote server username must be specified");
         }
 
-        this.password = PropertiesUtil.toString(properties.get(PASSWORD), "");
+        this.password = PropertiesUtil.toString(properties.get(PASSWORD), StringUtils.EMPTY);
         if (StringUtils.isBlank(this.password)) {
             throw new IllegalArgumentException("Remote server password must be specified");
         }
 
-        this.syncPaths = Arrays.asList(PropertiesUtil.toStringArray(properties.get(SYNC_PATHS), new String[0]));
-        if (this.syncPaths.size() == 0) {
-            throw new IllegalArgumentException("At least one sync path must be specified");
+        this.tagSyncPaths = Arrays.asList(PropertiesUtil.toStringArray(properties.get(TAG_SYNC_PATHS), new String[0]));
+        if (this.tagSyncPaths.size() == 0) {
+            throw new IllegalArgumentException("At least one tag sync path must be specified");
+        }
+
+        this.damSyncPaths = Arrays.asList(PropertiesUtil.toStringArray(properties.get(DAM_SYNC_PATHS), new String[0]));
+        if (this.damSyncPaths.size() == 0) {
+            throw new IllegalArgumentException("At least one asset sync path must be specified");
         }
 
         this.retryDelay = PropertiesUtil.toInteger(properties.get(RETRY_DELAY), 1);
@@ -136,8 +146,8 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
             this.retryDelay = 1;
         }
 
-        this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), "");
-        this.whitelistedServiceUsers = new HashSet<>(Arrays.asList(PropertiesUtil.toStringArray(properties.get(SYNC_PATHS), new String[0])));
+        this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), StringUtils.EMPTY);
+        this.whitelistedServiceUsers = new HashSet<>(Arrays.asList(PropertiesUtil.toStringArray(properties.get(DAM_SYNC_PATHS), new String[0])));
     }
 
     /**
@@ -176,12 +186,21 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     }
 
     /**
-     * @see RemoteAssetsConfig#getSyncPaths()
+     * @see RemoteAssetsConfig#getTagSyncPaths()
      * @return List<String>
      */
     @Override
-    public List<String> getSyncPaths() {
-        return this.syncPaths;
+    public List<String> getTagSyncPaths() {
+        return this.tagSyncPaths;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getDamSyncPaths()
+     * @return List<String>
+     */
+    @Override
+    public List<String> getDamSyncPaths() {
+        return this.damSyncPaths;
     }
 
     /**

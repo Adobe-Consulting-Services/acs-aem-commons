@@ -7,5 +7,6 @@
     server="http://localhost:4504"
     username="admin"
     password="admin"
-    paths="[/content/dam/sync]"
+    tag.paths="[]"
+    dam.paths="[]"
     retry.delay="{Long}1"/>

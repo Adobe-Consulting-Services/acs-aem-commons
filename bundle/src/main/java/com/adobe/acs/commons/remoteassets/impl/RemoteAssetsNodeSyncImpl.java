@@ -24,6 +24,9 @@ import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.DamConstants;
+import com.day.cq.tagging.Tag;
+import com.day.cq.tagging.TagManager;
+import com.day.cq.wcm.api.NameConstants;
 import com.google.common.net.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -32,6 +35,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.commons.JcrUtils;
+import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -49,7 +53,6 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -58,11 +61,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -80,7 +85,10 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     private static final String DATE_REGEX = "[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\s[A-Za-z]{3}[-+]\\d\\d\\d\\d";
     private static final Set<String> PROTECTED_PROPERTIES = new HashSet<>(Arrays.asList(
             JcrConstants.JCR_CREATED, JcrConstants.JCR_CREATED_BY, JcrConstants.JCR_VERSIONHISTORY, JcrConstants.JCR_BASEVERSION,
-            JcrConstants.JCR_ISCHECKEDOUT, JcrConstants.JCR_UUID
+            JcrConstants.JCR_ISCHECKEDOUT, JcrConstants.JCR_UUID, JcrConstants.JCR_PREDECESSORS
+    ));
+    private static final Set<String> PROTECTED_NODES = new HashSet<>(Arrays.asList(
+            DamConstants.THUMBNAIL_NODE, AccessControlConstants.REP_POLICY
     ));
 
     @Reference
@@ -138,8 +146,12 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      */
     @Override
     public void syncAssets() {
+        List<String> syncPaths = new ArrayList<>();
+        syncPaths.addAll(this.remoteAssetsConfig.getTagSyncPaths());
+        syncPaths.addAll(this.remoteAssetsConfig.getDamSyncPaths());
+
         try {
-            for (String syncPath : this.remoteAssetsConfig.getSyncPaths()) {
+            for (String syncPath : syncPaths) {
                 this.session.refresh(true);
                 JSONObject topLevelJson = getJsonFromUri(syncPath);
                 Node topLevelSyncNode = getOrCreateNode(syncPath, (String) topLevelJson.get(JcrConstants.JCR_PRIMARYTYPE));
@@ -161,12 +173,17 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * Grab JSON from the provided path and sync to the JCR.
      * @param nextPath String
      * @param primaryType String
-     * @throws RepositoryException exception
      */
-    private Node getOrCreateNode(final String nextPath, final String primaryType) throws RepositoryException {
-        Node node = JcrUtils.getNodeIfExists(nextPath, this.session);
-        if (node == null) {
-            node = JcrUtil.createPath(nextPath, primaryType, this.session);
+    private Node getOrCreateNode(final String nextPath, final String primaryType) {
+        Node node = null;
+
+        try {
+            node = JcrUtils.getNodeIfExists(nextPath, this.session);
+            if (node == null) {
+                node = JcrUtil.createPath(nextPath, primaryType, this.session);
+            }
+        } catch (RepositoryException e) {
+            LOG.error("Repository Exception. Unable to get or create node '{}'", nextPath, e);
         }
 
         return node;
@@ -223,16 +240,21 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         while (keys.hasNext()) {
             String key = keys.next();
             if (json.get(key) instanceof JSONObject) {
-                if (key.equals(DamConstants.THUMBNAIL_NODE)) {
+                if (PROTECTED_NODES.contains(key)) {
                     continue;
                 }
 
                 String objectPath = String.format("%s/%s", parentNode.getPath(), key);
                 JSONObject objectJson = getJsonFromUri(objectPath);
                 Node node = getOrCreateNode(objectPath, (String) objectJson.get(JcrConstants.JCR_PRIMARYTYPE));
+
+                if (DamConstants.NT_DAM_ASSET.equals(parentNode.getProperty(JcrConstants.JCR_PRIMARYTYPE).getValue().getString())) {
+                    node.setProperty("isRemoteAsset", true);
+                }
+
                 createOrUpdateNodes(objectJson, node);
             } else if (json.get(key) instanceof JSONArray) {
-                if (JcrConstants.JCR_PREDECESSORS.equals(key)) {
+                if (PROTECTED_PROPERTIES.contains(key)) {
                     continue;
                 }
 
@@ -241,6 +263,17 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                     for (int i = 0; i < mixins.length(); i++) {
                         parentNode.addMixin(mixins.getString(i));
                     }
+                } else if (NameConstants.PN_TAGS.equals(key)) {
+                    TagManager tagManager = this.resourceResolver.adaptTo(TagManager.class);
+                    JSONArray tags = (JSONArray) json.get(key);
+                    Tag[] tagArray = new Tag[tags.length()];
+
+                    for (int i = 0; i < tags.length(); i++) {
+                        tagArray[i] = tagManager.resolve(tags.getString(i));
+                    }
+
+                    Resource parentResource = this.resourceResolver.getResource(parentNode.getPath());
+                    tagManager.setTags(parentResource, tagArray);
                 } else {
                     JSONArray rawValues = (JSONArray) json.get(key);
                     Object firstVal = rawValues.get(0);
@@ -272,15 +305,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                 }
             } else {
                 try {
-                    Node grandparentNode = parentNode.getParent();
-                    if (DamConstants.NT_DAM_ASSET.equals(grandparentNode.getProperty(JcrConstants.JCR_PRIMARYTYPE).getValue().getString())
-                            && !grandparentNode.hasProperty("isRemoteAsset")) {
-                        parentNode.setProperty("isRemoteAsset", true);
-                    }
-
                     // When retrieving JSON from Sling, ':' before a property name denotes a property with a binary value.
-                    if (key.startsWith(":")) {
-                        setBinary(key, parentNode, json);
+                    if (":".concat(JcrConstants.JCR_DATA).equals(key)) {
+                        setBinary(parentNode);
                     } else if (parentNode.hasProperty(key) && parentNode.getProperty(key).getString().equals(json.get(key))) {
                         continue;
                     } else if (PROTECTED_PROPERTIES.contains(key)) {
@@ -313,69 +340,61 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     /**
      * Set a temporary binary. Also, property 'jcr:data' is a mandatory field.
-     * @param key String
      * @param node Node
-     * @param jsonObject JSONObject
-     * @throws JSONException exception
      * @throws RepositoryException exception
      */
-    private void setBinary(final String key, final Node node, final JSONObject jsonObject) throws JSONException, RepositoryException {
+    private void setBinary(final Node node) throws RepositoryException {
         InputStream inputStream;
-        if (":".concat(JcrConstants.JCR_DATA).equals(key)) {
-            Resource resource = this.resourceResolver.getResource(node.getPath());
-            String mimeType = (String) resource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
+        Resource resource = this.resourceResolver.getResource(node.getPath());
+        String mimeType = (String) resource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
 
-            if (MediaType.PNG.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.png");
-            } else if (MediaType.JPEG.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
-            } else if ("image/jpg".equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpg");
-            } else if (MediaType.BMP.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.bmp");
-            } else if (MediaType.CSS_UTF_8.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.css");
-            } else if (MediaType.OPENDOCUMENT_TEXT.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.doc");
-            } else if (MediaType.OOXML_DOCUMENT.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.docx");
-            } else if (MediaType.EPUB.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.epub");
-            } else if (MediaType.GIF.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.gif");
-            } else if (MediaType.HTML_UTF_8.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.html");
-            } else if (MediaType.PDF.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.pdf");
-            } else if (MediaType.OPENDOCUMENT_PRESENTATION.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.ppt");
-            } else if (MediaType.OOXML_PRESENTATION.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.pptx");
-            } else if (MediaType.PSD.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.psd");
-            } else if (MediaType.SVG_UTF_8.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.svg");
-            } else if (MediaType.TIFF.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.tiff");
-            } else if (MediaType.PLAIN_TEXT_UTF_8.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.txt");
-            } else if (MediaType.OPENDOCUMENT_SPREADSHEET.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xls");
-            } else if (MediaType.OOXML_SHEET.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xlsx");
-            } else if (MediaType.APPLICATION_XML_UTF_8.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xml");
-            } else if (MediaType.ZIP.toString().equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.zip");
-            } else {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
-            }
-
-            node.setProperty(JcrConstants.JCR_DATA, this.valueFactory.createBinary(inputStream));
+        if (MediaType.JPEG.toString().equals(mimeType) || "image/jpg".equals(mimeType)) {
+//            if (node.getParent().getParent().getParent().getParent().get)
+//            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpg");
+        } else if (MediaType.PNG.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.png");
+        } else if (MediaType.BMP.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.bmp");
+        } else if (MediaType.CSS_UTF_8.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.css");
+        } else if (MediaType.OPENDOCUMENT_TEXT.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.doc");
+        } else if (MediaType.OOXML_DOCUMENT.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.docx");
+        } else if (MediaType.EPUB.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.epub");
+        } else if (MediaType.GIF.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.gif");
+        } else if (MediaType.HTML_UTF_8.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.html");
+        } else if (MediaType.PDF.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.pdf");
+        } else if (MediaType.OPENDOCUMENT_PRESENTATION.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.ppt");
+        } else if (MediaType.OOXML_PRESENTATION.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.pptx");
+        } else if (MediaType.PSD.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.psd");
+        } else if (MediaType.SVG_UTF_8.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.svg");
+        } else if (MediaType.TIFF.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.tiff");
+        } else if (MediaType.PLAIN_TEXT_UTF_8.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.txt");
+        } else if (MediaType.OPENDOCUMENT_SPREADSHEET.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xls");
+        } else if (MediaType.OOXML_SHEET.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xlsx");
+        } else if (MediaType.APPLICATION_XML_UTF_8.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xml");
+        } else if (MediaType.ZIP.toString().equals(mimeType)) {
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.zip");
         } else {
-            inputStream = new ByteArrayInputStream(String.valueOf(jsonObject.get(key)).getBytes(StandardCharsets.UTF_8));
-            node.setProperty(key.replace(":", StringUtils.EMPTY), this.valueFactory.createBinary(inputStream));
+            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
         }
+
+        node.setProperty(JcrConstants.JCR_DATA, this.valueFactory.createBinary(inputStream));
     }
 
     /**

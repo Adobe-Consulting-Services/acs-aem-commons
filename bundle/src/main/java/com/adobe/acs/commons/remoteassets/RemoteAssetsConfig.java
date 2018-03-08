@@ -45,7 +45,12 @@ public interface RemoteAssetsConfig {
     /**
      * Paths to sync from the remote assets server.
      */
-    List<String> getSyncPaths();
+    List<String> getTagSyncPaths();
+
+    /**
+     * Paths to sync from the remote assets server.
+     */
+    List<String> getDamSyncPaths();
 
     /**
      * Number of minutes the server will wait to attempt to sync a remote asset that failed a sync attempt.
@@ -54,7 +59,6 @@ public interface RemoteAssetsConfig {
 
     /**
      * The event user data that will be set during all JCR manipulations performed by remote assets.
-     *
      * This can be used in workflow launchers that listen to DAM paths (such as for DAM Update Assets)
      * to exclude unnecessary processing such as rendition generation.
      */
@@ -62,8 +66,7 @@ public interface RemoteAssetsConfig {
 
     /**
      * Service users that are allowed to trigger remote asset binary syncs.
-     *
-     * By defualt, service user activity never triggers an asset binary sync.
+     * By default, service user activity never triggers an asset binary sync.
      */
     Set<String> getWhitelistedServiceUsers();
 }
