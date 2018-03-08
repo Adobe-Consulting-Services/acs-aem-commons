@@ -29,6 +29,7 @@ import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.api.NameConstants;
 import com.google.common.net.MediaType;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -56,6 +57,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -69,6 +71,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Service to sync node tree from supplied felix configuration. Implements {@link RemoteAssetsNodeSync}.
@@ -82,7 +85,8 @@ import java.util.Set;
 public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);
-    private static final String DATE_REGEX = "[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\s[A-Za-z]{3}[-+]\\d\\d\\d\\d";
+    private static final Pattern DATE_REGEX = Pattern.compile("[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\s[A-Za-z]{3}[-+]\\d\\d\\d\\d");
+    private static final Pattern DECIMAL_REGEX = Pattern.compile("-?\\d+\\.\\d+");
     private static final Set<String> PROTECTED_PROPERTIES = new HashSet<>(Arrays.asList(
             JcrConstants.JCR_CREATED, JcrConstants.JCR_CREATED_BY, JcrConstants.JCR_VERSIONHISTORY, JcrConstants.JCR_BASEVERSION,
             JcrConstants.JCR_ISCHECKEDOUT, JcrConstants.JCR_UUID, JcrConstants.JCR_PREDECESSORS
@@ -305,29 +309,33 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                 }
             } else {
                 try {
-                    // When retrieving JSON from Sling, ':' before a property name denotes a property with a binary value.
+                    Object value = json.get(key);
+
                     if (":".concat(JcrConstants.JCR_DATA).equals(key)) {
                         setBinary(parentNode);
-                    } else if (parentNode.hasProperty(key) && parentNode.getProperty(key).getString().equals(json.get(key))) {
+                    } else if (key.startsWith(":")) {
+                        // Skip binary properties, since they do not come across in JSON
+                        continue;
+                    } else if (parentNode.hasProperty(key) && parentNode.getProperty(key).getString().equals(value)) {
                         continue;
                     } else if (PROTECTED_PROPERTIES.contains(key)) {
                         continue;
                     } else if (JcrConstants.JCR_PRIMARYTYPE.equals(key)) {
-                        parentNode.setPrimaryType((String) json.get(key));
-                    } else if (json.get(key) instanceof String && ((String) json.get(key)).matches(DATE_REGEX)) {
-                        parentNode.setProperty(key, getFormattedDate((String) json.get(key)));
+                        parentNode.setPrimaryType((String) value);
+                    } else if (value instanceof String && DATE_REGEX.matcher((String) value).matches()) {
+                        parentNode.setProperty(key, getFormattedDate((String) value));
+                    } else if (value instanceof String && DECIMAL_REGEX.matcher((String) value).matches()) {
+                        parentNode.setProperty(key, new BigDecimal((String) value));
+                    } else if (value instanceof Boolean) {
+                        parentNode.setProperty(key, (Boolean) value);
+                    } else if (value instanceof Double) {
+                        parentNode.setProperty(key, (Double) value);
+                    } else if (value instanceof Long) {
+                        parentNode.setProperty(key, (Long) value);
+                    } else if (value instanceof Integer) {
+                        parentNode.setProperty(key, (Integer) value);
                     } else {
-                        if (json.get(key) instanceof Boolean) {
-                            parentNode.setProperty(key, (Boolean) json.get(key));
-                        } else if (json.get(key) instanceof Double) {
-                            parentNode.setProperty(key, (Double) json.get(key));
-                        } else if (json.get(key) instanceof Long) {
-                            parentNode.setProperty(key, (Long) json.get(key));
-                        } else if (json.get(key) instanceof Integer) {
-                            parentNode.setProperty(key, (Integer) json.get(key));
-                        } else {
-                            parentNode.setProperty(key, (String) json.get(key));
-                        }
+                        parentNode.setProperty(key, value != null ? value.toString() : null);
                     }
                 } catch (RepositoryException re) {
                     if (LOG.isWarnEnabled()) {
