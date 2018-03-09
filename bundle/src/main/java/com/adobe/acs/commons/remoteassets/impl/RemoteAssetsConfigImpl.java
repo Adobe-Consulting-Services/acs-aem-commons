@@ -117,13 +117,22 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
         final Dictionary<?, ?> properties = componentContext.getProperties();
 
         this.server = PropertiesUtil.toString(properties.get(SERVER), StringUtils.EMPTY);
+        if (StringUtils.isBlank(this.server)) {
+            throw new IllegalArgumentException("Remote server must be specified");
+        }
         this.username = PropertiesUtil.toString(properties.get(USERNAME), StringUtils.EMPTY);
+        if (StringUtils.isBlank(this.username)) {
+            throw new IllegalArgumentException("Remote server username must be specified");
+        }
         this.password = PropertiesUtil.toString(properties.get(PASSWORD), StringUtils.EMPTY);
+        if (StringUtils.isBlank(this.password)) {
+            throw new IllegalArgumentException("Remote server password must be specified");
+        }
         this.tagSyncPaths = Arrays.asList(PropertiesUtil.toStringArray(properties.get(TAG_SYNC_PATHS), new String[0]));
         this.damSyncPaths = Arrays.asList(PropertiesUtil.toStringArray(properties.get(DAM_SYNC_PATHS), new String[0]));
         this.retryDelay = PropertiesUtil.toInteger(properties.get(RETRY_DELAY), 1);
         this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), StringUtils.EMPTY);
-        this.whitelistedServiceUsers = new HashSet<>(Arrays.asList(PropertiesUtil.toStringArray(properties.get(DAM_SYNC_PATHS), new String[0])));
+        this.whitelistedServiceUsers = new HashSet<>(Arrays.asList(PropertiesUtil.toStringArray(properties.get(WHITELISTED_SERVICE_USERS), new String[0])));
     }
 
     /**
