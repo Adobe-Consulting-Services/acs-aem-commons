@@ -52,7 +52,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * @see com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync
+ * Service to sync a remote asset's binaries a from remote server. Implements {@link RemoteAssetsBinarySync}.
  */
 @Component(
     label = "ACS AEM Commons - Remote Assets - Binary Sync Service",
@@ -60,7 +60,8 @@ import java.util.Map;
 )
 @Service
 public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
-    private final Logger log = LoggerFactory.getLogger(RemoteAssetsBinarySyncImpl.class);
+
+    private final Logger LOG = LoggerFactory.getLogger(RemoteAssetsBinarySyncImpl.class);
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -74,6 +75,10 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
     private ResourceResolver resourceResolver;
     private Session session;
 
+    /**
+     * Method to run on activation.
+     * @throws RepositoryException exception
+     */
     @Activate
     protected void activate() throws RepositoryException {
         resourceResolver = RemoteAssets.logIn(resourceResolverFactory);
@@ -83,24 +88,31 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
         }
     }
 
+    /**
+     * Method to run on deactivation.
+     */
     @Deactivate
     protected void deactivate() {
         if (session != null) {
             try {
                 session.logout();
             } catch (Exception e) {
-                log.warn("Failed session.logout()", e);
+                LOG.warn("Failed session.logout()", e);
             }
         }
         if (resourceResolver != null) {
             try {
                 resourceResolver.close();
             } catch (Exception e) {
-                log.warn("Failed resourceResolver.close()", e);
+                LOG.warn("Failed resourceResolver.close()", e);
             }
         }
     }
 
+    /**
+     * @see RemoteAssetsBinarySync#syncAsset(Resource)
+     * @return Resource
+     */
     @Override
     public Resource syncAsset(Resource resource) {
         try {
@@ -123,7 +135,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                 String encodedAuth = Base64.getEncoder().encodeToString(rawAuth.getBytes(StandardCharsets.UTF_8));
                 connection.setRequestProperty("Authorization", String.format("Basic %s", encodedAuth));
 
-                log.info("syncing from remote asset url {}", url);
+                LOG.info("syncing from remote asset url {}", url);
                 InputStream inputStream = connection.getInputStream();
 
                 Map<String, Object> props = new HashMap<>();
@@ -138,16 +150,21 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
             session.save();
             return localRes;
         } catch (Exception e) {
-            log.error("Error transfering remote asset '{}' to local server", resource.getPath(), e);
+            LOG.error("Error transfering remote asset '{}' to local server", resource.getPath(), e);
             try {
                 session.refresh(false);
             } catch (RepositoryException re) {
-                log.error("Failed to rollback asset changes", re);
+                LOG.error("Failed to rollback asset changes", re);
             }
             return flagAssetAsFailedSync(resource);
         }
     }
 
+    /**
+     * Sets a property on the resource if the asset sync failed.
+     * @param resource Resource
+     * @return Resource
+     */
     private Resource flagAssetAsFailedSync(Resource resource) {
         try {
             Resource localRes = resourceResolver.getResource(resource.getPath());
@@ -156,11 +173,11 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
             session.save();
             return localRes;
         } catch (Exception e) {
-            log.error("Error flagging remote asset '{}' as failed - asset may attempt to sync numerous times in succession", resource.getPath(), e);
+            LOG.error("Error flagging remote asset '{}' as failed - asset may attempt to sync numerous times in succession", resource.getPath(), e);
             try {
                 session.refresh(false);
             } catch (RepositoryException re) {
-                log.error("Failed to rollback asset changes", re);
+                LOG.error("Failed to rollback asset changes", re);
             }
         }
         return resource;

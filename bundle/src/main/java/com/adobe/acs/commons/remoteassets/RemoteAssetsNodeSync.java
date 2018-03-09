@@ -27,5 +27,5 @@ public interface RemoteAssetsNodeSync {
 	/**
 	 * Sync remote asset nodes from remote server, excluding binaries.
 	 */
-	public void syncAssets();
+    void syncAssets();
 }

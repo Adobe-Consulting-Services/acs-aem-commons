@@ -19,7 +19,15 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
+/**
+ * Remote Assets Service Exception.
+ */
 public class RemoteAssetsServiceException extends RuntimeException {
+
+    /**
+     * Constructor.
+     * @param t Throwable
+     */
     public RemoteAssetsServiceException(Throwable t) {
         super("Remote assets service not configured correctly", t);
     }

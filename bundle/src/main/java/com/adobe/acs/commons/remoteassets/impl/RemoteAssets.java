@@ -32,17 +32,22 @@ import java.util.Map;
  * Common functionality for Remote Assets.
  */
 public class RemoteAssets {
-    private static final Logger log = LoggerFactory.getLogger(RemoteAssets.class);
 
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteAssets.class);
     public static final String SERVICE_NAME = "remote-assets";
 
-    public static final ResourceResolver logIn(ResourceResolverFactory resourceResolverFactory) {
+    /**
+     * Retrieve a {@link ResourceResolver} after logging in.
+     * @param resourceResolverFactory ResourceResolverFactory
+     * @return ResourceResolver
+     */
+    public static ResourceResolver logIn(ResourceResolverFactory resourceResolverFactory) {
         try {
             Map<String, Object> userParams = new HashMap<>();
             userParams.put(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
             return resourceResolverFactory.getServiceResourceResolver(userParams);
         } catch (LoginException le2) {
-            log.error("Remote assets functionality cannot be enabled - service user login failed");
+            LOG.error("Remote assets functionality cannot be enabled - service user login failed");
             throw new RemoteAssetsServiceException(le2);
         }
     }

@@ -28,6 +28,7 @@ import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.api.NameConstants;
 import com.google.common.net.MediaType;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -86,7 +87,8 @@ import java.util.regex.Pattern;
 public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);
-    private static final Pattern DATE_REGEX = Pattern.compile("[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\sGMT[-+]\\d\\d\\d\\d");
+    private static final Pattern DATE_REGEX = Pattern
+            .compile("[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\sGMT[-+]\\d\\d\\d\\d");
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("EEE MMM dd yyyy HH:mm:ss 'GMT'Z");
     private static final Pattern DECIMAL_REGEX = Pattern.compile("-?\\d+\\.\\d+");
     private static final Set<String> PROTECTED_PROPERTIES = new HashSet<>(Arrays.asList(
@@ -202,7 +204,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @throws IOException exception
      * @throws JSONException exception
      */
-    private JSONObject getJsonFromUri(String path) throws IOException, JSONException {
+    private JSONObject getJsonFromUri(final String path) throws IOException, JSONException {
         // we want to traverse the JCR one level at a time, hence the '1' selector.
         URL url = new URL(this.remoteAssetsConfig.getServer().concat(this.xssApi.getValidHref(path)).concat(".1.json"));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -211,7 +213,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         connection.setRequestProperty("Authorization", String.format("Basic %s", encodedAuth));
 
         InputStream is = connection.getInputStream();
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        InputStreamReader isReader = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isReader);
         StringBuilder sb = new StringBuilder();
 
         String line;
@@ -219,7 +222,11 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             sb.append(line);
         }
 
+        is.close();
+        isReader.close();
+        br.close();
         String sbString = sb.toString();
+
         if (StringUtils.startsWith(sbString, "{")) {
             return new JSONObject(sbString);
         } else {
@@ -269,7 +276,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                     }
                 } catch (RepositoryException re) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn("Repository exception thrown. Skipping {} property.", key);
+                        LOG.warn("Repository exception thrown. Skipping {} array property for node '{}'.", key, parentNode.getPath());
                     }
                 }
             } else {
@@ -292,7 +299,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                     }
                 } catch (RepositoryException re) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn("Repository exception thrown. Skipping {} property.", key);
+                        LOG.warn("Repository exception thrown. Skipping '{}' single property for node '{}'.", key, parentNode.getPath());
                     }
                 }
             }
@@ -307,7 +314,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @throws JSONException exception
      * @throws RepositoryException exception
      */
-    private void setMixinsProperty(JSONObject json, String key, Node node) throws JSONException, RepositoryException {
+    private void setMixinsProperty(final JSONObject json, final String key, final Node node) throws JSONException, RepositoryException {
         JSONArray mixins = (JSONArray) json.get(key);
         for (int i = 0; i < mixins.length(); i++) {
             node.addMixin(mixins.getString(i));
@@ -322,7 +329,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @throws JSONException exception
      * @throws RepositoryException exception
      */
-    private void setTagsProperty(JSONObject json, String key, Node node) throws JSONException, RepositoryException {
+    private void setTagsProperty(final JSONObject json, final String key, final Node node) throws JSONException, RepositoryException {
         TagManager tagManager = this.resourceResolver.adaptTo(TagManager.class);
         JSONArray tags = (JSONArray) json.get(key);
         ArrayList<Tag> tagList = new ArrayList<>();
@@ -331,7 +338,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             Tag tag = tagManager.resolve(tags.getString(i));
             if (tag == null) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("Tag '{}' could not be found, skipping...", tags.getString(i));
+                    LOG.warn("Tag '{}' could not be found. Skipping tag for node '{}'.", tags.getString(i), node.getPath());
                 }
 
                 continue;
@@ -354,7 +361,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @throws JSONException exception
      * @throws RepositoryException exception
      */
-    private void setArrayProperty(JSONObject json, String key, Node node) throws JSONException, RepositoryException {
+    private void setArrayProperty(final JSONObject json, final String key, final Node node) throws JSONException, RepositoryException {
         JSONArray rawValues = (JSONArray) json.get(key);
         Object firstVal = rawValues.get(0);
         Value[] propertyValues = new Value[rawValues.length()];
@@ -388,17 +395,25 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * Set JCR Data property to a temporary binary for the property's node.
      * Also, property 'jcr:data' is a mandatory field.
      * @param node Node
+     * @throws IOException exception
      * @throws RepositoryException exception
      */
-    private void setJcrDataProperty(final Node node) throws RepositoryException {
+    private void setJcrDataProperty(final Node node) throws IOException, RepositoryException {
         InputStream inputStream;
         Resource resource = this.resourceResolver.getResource(node.getPath());
         String mimeType = (String) resource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
 
         if (MediaType.JPEG.toString().equals(mimeType) || "image/jpg".equals(mimeType)) {
-//            if (node.getParent().getParent().getParent().getParent().get)
-//            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
-            inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpg");
+            Node assetNode = node;
+            while (!DamConstants.NT_DAM_ASSET.equals(assetNode.getPrimaryNodeType().getName())) {
+                assetNode = assetNode.getParent();
+            }
+
+            if ("jpg".equalsIgnoreCase(FilenameUtils.getExtension(assetNode.getName()))) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpg");
+            } else {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
+            }
         } else if (MediaType.PNG.toString().equals(mimeType)) {
             inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.png");
         } else if (MediaType.BMP.toString().equals(mimeType)) {
@@ -442,6 +457,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         }
 
         node.setProperty(JcrConstants.JCR_DATA, this.valueFactory.createBinary(inputStream));
+        inputStream.close();
     }
 
     /**
@@ -451,9 +467,15 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @param node Node
      * @throws RepositoryException exception
      */
-    private void setProperty(Object value, String key, Node node) throws RepositoryException {
+    private void setProperty(final Object value, final String key, final Node node) throws RepositoryException {
         if (value instanceof String && DATE_REGEX.matcher((String) value).matches()) {
-            node.setProperty(key, getFormattedDate((String) value));
+            try {
+                node.setProperty(key, getFormattedDate((String) value));
+            } catch (DateTimeParseException e) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Unable to parse date '{}' for node '{}'.", value, node.getPath());
+                }
+            }
         } else if (value instanceof String && DECIMAL_REGEX.matcher((String) value).matches()) {
             node.setProperty(key, new BigDecimal((String) value));
         } else if (value instanceof Boolean) {
@@ -473,14 +495,12 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * Get formatted {@link Calendar} object.
      * @param dateStr String
      * @return Calendar if parsable, else null.
+     * @throws DateTimeParseException exception
      */
-    private Calendar getFormattedDate(final String dateStr) {
-        if (dateStr != null) {
-            try {
-                return GregorianCalendar.from(ZonedDateTime.parse(dateStr, DATE_TIME_FORMATTER));
-            } catch (DateTimeParseException e) {
-                LOG.warn("Unable to parse date {}", dateStr);
-            }
+    private Calendar getFormattedDate(final String dateStr) throws DateTimeParseException {
+        if (StringUtils.isNotEmpty(dateStr)) {
+            return GregorianCalendar.from(ZonedDateTime.parse(dateStr, DATE_TIME_FORMATTER));
+
         }
         return null;
     }

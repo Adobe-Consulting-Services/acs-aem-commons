@@ -25,11 +25,10 @@ import org.apache.sling.api.resource.Resource;
  * Service for synchronizing a remote asset's binaries a from remote server.
  */
 public interface RemoteAssetsBinarySync {
+
     /**
      * Sync an asset's binaries from a remote server.
-     *
      * All binaries (original + renditions) are sync'd.
-     *
      * @param resource Resource representing a dam:Asset
      * @return The updated resource
      */

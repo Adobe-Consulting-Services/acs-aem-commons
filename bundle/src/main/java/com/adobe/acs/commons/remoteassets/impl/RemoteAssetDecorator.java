@@ -42,15 +42,14 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * ResourceDecorator that instruments remote assets to sync binaries as needed.
- *
  * This "decorator" is used to detect the first time a "remote" asset is
  * referenced by the system and sync that asset from the remote server to
  * make it now a "true" asset.
  */
 @Component(
-    label = "ACS AEM Commons - Remote Assets - Asset Resource Decorator",
-    description = "Captures a request for a remote asset so that the binary can be sync'd to the current server making it a true local asset",
-    policy = ConfigurationPolicy.REQUIRE
+        label = "ACS AEM Commons - Remote Assets - Asset Resource Decorator",
+        description = "Captures a request for a remote asset so that the binary can be sync'd to the current server making it a true local asset",
+        policy = ConfigurationPolicy.REQUIRE
 )
 @Service
 public class RemoteAssetDecorator implements ResourceDecorator {
@@ -71,7 +70,6 @@ public class RemoteAssetDecorator implements ResourceDecorator {
 
     /**
      * When resolving a remote asset, first sync the asset from the remote server.
-     *
      * @param resource The resource being resolved.
      * @return The current resource.  If the resource is a "remote" asset, it will
      * first be converted to a true local AEM asset by sync'ing in the rendition
@@ -104,6 +102,14 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         return ret;
     }
 
+    /**
+     * When resolving a remote asset, first sync the asset from the remote server.
+     * @param resource The resource being resolved.
+     * @param request HttpServletRequest
+     * @return The current resource.  If the resource is a "remote" asset, it will
+     * first be converted to a true local AEM asset by sync'ing in the rendition
+     * binaries from the remote server.
+     */
     @Deprecated
     @Override
     public Resource decorate(final Resource resource, final HttpServletRequest request) {
@@ -112,7 +118,6 @@ public class RemoteAssetDecorator implements ResourceDecorator {
 
     /**
      * Check if this resource is a remote resource.
-     *
      * @param resource Resource to check
      * @return true if resource is remote, else false
      */
@@ -120,6 +125,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         if (resource == null) {
             return false;
         }
+
         ValueMap props = resource.getValueMap();
         if (!props.get("jcr:primaryType", "").equals("dam:AssetContent")) {
             return false;
