@@ -60,8 +60,6 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -172,8 +170,6 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             LOG.error("IO Exception {}", e);
         } catch (JSONException e) {
             LOG.error("Json Exception {}", e);
-        } catch (ParseException e) {
-            LOG.error("Parse Exception {}", e);
         } catch (RepositoryException e) {
             LOG.error("Repository Exception {}", e);
         }
@@ -240,12 +236,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @param parentNode Node
      * @throws IOException exception
      * @throws JSONException exception
-     * @throws ParseException exception
      * @throws RepositoryException exception
      */
-    private void createOrUpdateNodes(final JSONObject json, final Node parentNode)
-            throws IOException, JSONException, ParseException, RepositoryException {
-
+    private void createOrUpdateNodes(final JSONObject json, final Node parentNode) throws IOException, JSONException, RepositoryException {
         Iterator<String> keys = json.keys();
         while (keys.hasNext()) {
             String key = keys.next();
@@ -456,10 +449,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @param value Object
      * @param key String
      * @param node Node
-     * @throws ParseException exception
      * @throws RepositoryException exception
      */
-    private void setProperty(Object value, String key, Node node) throws ParseException, RepositoryException {
+    private void setProperty(Object value, String key, Node node) throws RepositoryException {
         if (value instanceof String && DATE_REGEX.matcher((String) value).matches()) {
             node.setProperty(key, getFormattedDate((String) value));
         } else if (value instanceof String && DECIMAL_REGEX.matcher((String) value).matches()) {
@@ -482,7 +474,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @param dateStr String
      * @return Calendar if parsable, else null.
      */
-    private Calendar getFormattedDate(final String dateStr) throws ParseException {
+    private Calendar getFormattedDate(final String dateStr) {
         if (dateStr != null) {
             try {
                 return GregorianCalendar.from(ZonedDateTime.parse(dateStr, DATE_TIME_FORMATTER));
