@@ -86,9 +86,9 @@
         <include pattern="/etc/notification/email/acs-commons"/>
         <include pattern="/etc/notification/email/acs-commons/(.*)?"/>
     </filter>
-    <filter root="/etc/tags/rep:policy"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
+    <filter root="/etc/tags/rep:policy"/>
     <filter root="/etc/workflow/instances/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
     <filter root="/var/acs-commons/rep:policy"/>

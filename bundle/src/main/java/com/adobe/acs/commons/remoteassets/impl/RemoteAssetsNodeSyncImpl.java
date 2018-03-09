@@ -29,7 +29,6 @@ import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.api.NameConstants;
 import com.google.common.net.MediaType;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -258,61 +257,27 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
                 createOrUpdateNodes(objectJson, node);
             } else if (json.get(key) instanceof JSONArray) {
-                if (PROTECTED_PROPERTIES.contains(key)) {
-                    continue;
-                }
-
-                if (JcrConstants.JCR_MIXINTYPES.equals(key)) {
-                    JSONArray mixins = (JSONArray) json.get(key);
-                    for (int i = 0; i < mixins.length(); i++) {
-                        parentNode.addMixin(mixins.getString(i));
-                    }
-                } else if (NameConstants.PN_TAGS.equals(key)) {
-                    TagManager tagManager = this.resourceResolver.adaptTo(TagManager.class);
-                    JSONArray tags = (JSONArray) json.get(key);
-                    Tag[] tagArray = new Tag[tags.length()];
-
-                    for (int i = 0; i < tags.length(); i++) {
-                        tagArray[i] = tagManager.resolve(tags.getString(i));
-                    }
-
-                    Resource parentResource = this.resourceResolver.getResource(parentNode.getPath());
-                    tagManager.setTags(parentResource, tagArray);
-                } else {
-                    JSONArray rawValues = (JSONArray) json.get(key);
-                    Object firstVal = rawValues.get(0);
-                    Value[] propertyValues = new Value[rawValues.length()];
-
-                    if (firstVal instanceof Boolean) {
-                        for (int i = 0; i < rawValues.length(); i++) {
-                            propertyValues[i] = this.valueFactory.createValue(rawValues.getBoolean(i));
-                        }
-                    } else if (firstVal instanceof Double) {
-                        for (int i = 0; i < rawValues.length(); i++) {
-                            propertyValues[i] = this.valueFactory.createValue(rawValues.getDouble(i));
-                        }
-                    } else if (firstVal instanceof Integer) {
-                        for (int i = 0; i < rawValues.length(); i++) {
-                            propertyValues[i] = this.valueFactory.createValue(rawValues.getInt(i));
-                        }
-                    } else if (firstVal instanceof Long) {
-                        for (int i = 0; i < rawValues.length(); i++) {
-                            propertyValues[i] = this.valueFactory.createValue(rawValues.getLong(i));
-                        }
+                try {
+                    if (PROTECTED_PROPERTIES.contains(key)) {
+                        continue;
+                    } else if (JcrConstants.JCR_MIXINTYPES.equals(key)) {
+                        setMixinsProperty(json, key, parentNode);
+                    } else if (NameConstants.PN_TAGS.equals(key)) {
+                        setTagsProperty(json, key, parentNode);
                     } else {
-                        for (int i = 0; i < rawValues.length(); i++) {
-                            propertyValues[i] = this.valueFactory.createValue(rawValues.getString(i));
-                        }
+                        setArrayProperty(json, key, parentNode);
                     }
-
-                    parentNode.setProperty(key, propertyValues);
+                } catch (RepositoryException re) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Repository exception thrown. Skipping {} property.", key);
+                    }
                 }
             } else {
                 try {
                     Object value = json.get(key);
 
                     if (":".concat(JcrConstants.JCR_DATA).equals(key)) {
-                        setBinary(parentNode);
+                        setJcrDataProperty(parentNode);
                     } else if (key.startsWith(":")) {
                         // Skip binary properties, since they do not come across in JSON
                         continue;
@@ -322,20 +287,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                         continue;
                     } else if (JcrConstants.JCR_PRIMARYTYPE.equals(key)) {
                         parentNode.setPrimaryType((String) value);
-                    } else if (value instanceof String && DATE_REGEX.matcher((String) value).matches()) {
-                        parentNode.setProperty(key, getFormattedDate((String) value));
-                    } else if (value instanceof String && DECIMAL_REGEX.matcher((String) value).matches()) {
-                        parentNode.setProperty(key, new BigDecimal((String) value));
-                    } else if (value instanceof Boolean) {
-                        parentNode.setProperty(key, (Boolean) value);
-                    } else if (value instanceof Double) {
-                        parentNode.setProperty(key, (Double) value);
-                    } else if (value instanceof Long) {
-                        parentNode.setProperty(key, (Long) value);
-                    } else if (value instanceof Integer) {
-                        parentNode.setProperty(key, (Integer) value);
                     } else {
-                        parentNode.setProperty(key, value != null ? value.toString() : null);
+                        setProperty(value, key, parentNode);
                     }
                 } catch (RepositoryException re) {
                     if (LOG.isWarnEnabled()) {
@@ -347,11 +300,97 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Set a temporary binary. Also, property 'jcr:data' is a mandatory field.
+     * Set mixins property for the property's node.
+     * @param json JSONObject
+     * @param key String
+     * @param node Node
+     * @throws JSONException exception
+     * @throws RepositoryException exception
+     */
+    private void setMixinsProperty(JSONObject json, String key, Node node) throws JSONException, RepositoryException {
+        JSONArray mixins = (JSONArray) json.get(key);
+        for (int i = 0; i < mixins.length(); i++) {
+            node.addMixin(mixins.getString(i));
+        }
+    }
+
+    /**
+     * Set tags property for the property's node.
+     * @param json JSONObject
+     * @param key String
+     * @param node Node
+     * @throws JSONException exception
+     * @throws RepositoryException exception
+     */
+    private void setTagsProperty(JSONObject json, String key, Node node) throws JSONException, RepositoryException {
+        TagManager tagManager = this.resourceResolver.adaptTo(TagManager.class);
+        JSONArray tags = (JSONArray) json.get(key);
+        ArrayList<Tag> tagList = new ArrayList<>();
+
+        for (int i = 0; i < tags.length(); i++) {
+            Tag tag = tagManager.resolve(tags.getString(i));
+            if (tag == null) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Tag '{}' could not be found, skipping...", tags.getString(i));
+                }
+
+                continue;
+            }
+
+            tagList.add(tag);
+        }
+
+        if (tagList.size() > 0) {
+            Resource parentResource = this.resourceResolver.getResource(node.getPath());
+            tagManager.setTags(parentResource, tagList.toArray(new Tag[0]));
+        }
+    }
+
+    /**
+     * Set generic array property for the property's node.
+     * @param json JSONObject
+     * @param key String
+     * @param node Node
+     * @throws JSONException exception
+     * @throws RepositoryException exception
+     */
+    private void setArrayProperty(JSONObject json, String key, Node node) throws JSONException, RepositoryException {
+        JSONArray rawValues = (JSONArray) json.get(key);
+        Object firstVal = rawValues.get(0);
+        Value[] propertyValues = new Value[rawValues.length()];
+
+        if (firstVal instanceof Boolean) {
+            for (int i = 0; i < rawValues.length(); i++) {
+                propertyValues[i] = this.valueFactory.createValue(rawValues.getBoolean(i));
+            }
+        } else if (firstVal instanceof Double) {
+            for (int i = 0; i < rawValues.length(); i++) {
+                propertyValues[i] = this.valueFactory.createValue(rawValues.getDouble(i));
+            }
+        } else if (firstVal instanceof Integer) {
+            for (int i = 0; i < rawValues.length(); i++) {
+                propertyValues[i] = this.valueFactory.createValue(rawValues.getInt(i));
+            }
+        } else if (firstVal instanceof Long) {
+            for (int i = 0; i < rawValues.length(); i++) {
+                propertyValues[i] = this.valueFactory.createValue(rawValues.getLong(i));
+            }
+        } else {
+            for (int i = 0; i < rawValues.length(); i++) {
+                propertyValues[i] = this.valueFactory.createValue(rawValues.getString(i));
+            }
+        }
+
+        node.setProperty(key, propertyValues);
+    }
+
+    /**
+     * Set JCR Data property to a temporary binary for the property's node.
+     * Also, property 'jcr:data' is a mandatory field.
      * @param node Node
      * @throws RepositoryException exception
      */
-    private void setBinary(final Node node) throws RepositoryException {
+    private void setJcrDataProperty(final Node node) throws RepositoryException {
         InputStream inputStream;
         Resource resource = this.resourceResolver.getResource(node.getPath());
         String mimeType = (String) resource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
@@ -403,6 +442,32 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         }
 
         node.setProperty(JcrConstants.JCR_DATA, this.valueFactory.createBinary(inputStream));
+    }
+
+    /**
+     * Set generic property for the property's node.
+     * @param value Object
+     * @param key String
+     * @param node Node
+     * @throws ParseException exception
+     * @throws RepositoryException exception
+     */
+    private void setProperty(Object value, String key, Node node) throws ParseException, RepositoryException {
+        if (value instanceof String && DATE_REGEX.matcher((String) value).matches()) {
+            node.setProperty(key, getFormattedDate((String) value));
+        } else if (value instanceof String && DECIMAL_REGEX.matcher((String) value).matches()) {
+            node.setProperty(key, new BigDecimal((String) value));
+        } else if (value instanceof Boolean) {
+            node.setProperty(key, (Boolean) value);
+        } else if (value instanceof Double) {
+            node.setProperty(key, (Double) value);
+        } else if (value instanceof Long) {
+            node.setProperty(key, (Long) value);
+        } else if (value instanceof Integer) {
+            node.setProperty(key, (Integer) value);
+        } else {
+            node.setProperty(key, value == null ? null : value.toString());
+        }
     }
 
     /**
