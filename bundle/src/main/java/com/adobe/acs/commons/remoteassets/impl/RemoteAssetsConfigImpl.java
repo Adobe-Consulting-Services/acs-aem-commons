@@ -85,6 +85,14 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private static final String RETRY_DELAY = "retry.delay";
 
     @Property(
+            label = "Number of Assets to Sync Before Saving",
+            description = "Number of assets to sync before saving and refreshing the session. The lower the number, the slower the sync will " +
+                    "take (default 100)",
+            intValue = 100
+    )
+    private static final String SAVE_INTERVAL = "save.interval";
+
+    @Property(
             label = "Event User Data",
             description = "The event user data that will be set during all JCR manipulations performed by remote assets. This can be used in " +
                     "workflow launchers that listen to DAM paths (such as for DAM Update Assets) to exclude unnecessary processing such as " +
@@ -106,6 +114,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private List<String> tagSyncPaths = new ArrayList<>();
     private List<String> damSyncPaths = new ArrayList<>();
     private Integer retryDelay;
+    private Integer saveInterval;
     private String eventUserData = StringUtils.EMPTY;
     private Set<String> whitelistedServiceUsers = new HashSet<>();
 
@@ -137,6 +146,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toList());
         this.retryDelay = PropertiesUtil.toInteger(properties.get(RETRY_DELAY), 1);
+        this.saveInterval = PropertiesUtil.toInteger(properties.get(SAVE_INTERVAL), 100);
         this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), StringUtils.EMPTY);
         this.whitelistedServiceUsers = Stream.of(PropertiesUtil.toStringArray(properties.get(WHITELISTED_SERVICE_USERS), new String[0]))
                 .filter(item -> StringUtils.isNotBlank(item))
@@ -203,6 +213,15 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     @Override
     public Integer getRetryDelay() {
         return this.retryDelay;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getSaveInterval()
+     * @return Integer
+     */
+    @Override
+    public Integer getSaveInterval() {
+        return this.saveInterval;
     }
 
     /**

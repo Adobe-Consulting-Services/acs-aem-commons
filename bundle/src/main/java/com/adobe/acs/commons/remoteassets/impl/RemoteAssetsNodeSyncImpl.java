@@ -44,7 +44,6 @@ import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.xss.XSSAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +58,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
@@ -98,6 +99,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     private static final Set<String> PROTECTED_NODES = new HashSet<>(Arrays.asList(
             DamConstants.THUMBNAIL_NODE, AccessControlConstants.REP_POLICY
     ));
+    private static int saveRefreshCount = 0;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -107,9 +109,6 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     @Reference
     private DynamicClassLoaderManager dynamicClassLoaderManager;
-
-    @Reference
-    private XSSAPI xssApi;
 
     private ResourceResolver resourceResolver;
     private Session session;
@@ -206,36 +205,42 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @throws JSONException exception
      */
     private JSONObject getJsonFromUri(final String path) throws IOException, JSONException {
-        // we want to traverse the JCR one level at a time, hence the '1' selector.
-        URL url = new URL(this.remoteAssetsConfig.getServer().concat(this.xssApi.getValidHref(path)).concat(".1.json"));
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        String rawAuth = String.format("%s:%s", this.remoteAssetsConfig.getUsername(), this.remoteAssetsConfig.getPassword());
-        String encodedAuth = Base64.getEncoder().encodeToString(rawAuth.getBytes(StandardCharsets.UTF_8));
-        connection.setRequestProperty("Authorization", String.format("Basic %s", encodedAuth));
+        try {
+            URI pathUi = new URI(null, null, path, null);
+            // we want to traverse the JCR one level at a time, hence the '1' selector.
+            URL url = new URL(this.remoteAssetsConfig.getServer().concat(pathUi.toString()).concat(".1.json"));
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            String rawAuth = String.format("%s:%s", this.remoteAssetsConfig.getUsername(), this.remoteAssetsConfig.getPassword());
+            String encodedAuth = Base64.getEncoder().encodeToString(rawAuth.getBytes(StandardCharsets.UTF_8));
+            connection.setRequestProperty("Authorization", String.format("Basic %s", encodedAuth));
 
-        InputStream is = connection.getInputStream();
-        InputStreamReader isReader = new InputStreamReader(is);
-        BufferedReader br = new BufferedReader(isReader);
-        StringBuilder sb = new StringBuilder();
+            InputStream is = connection.getInputStream();
+            InputStreamReader isReader = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isReader);
+            StringBuilder sb = new StringBuilder();
 
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
-        }
-
-        is.close();
-        isReader.close();
-        br.close();
-        String sbString = sb.toString();
-
-        if (StringUtils.startsWith(sbString, "{")) {
-            return new JSONObject(sbString);
-        } else {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Unable to grab JSON Object. Please ensure URL {} is valid. \nRaw Response: {}", url.toString(), sbString);
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
             }
-            return new JSONObject();
+
+            is.close();
+            isReader.close();
+            br.close();
+            String sbString = sb.toString();
+
+            if (StringUtils.startsWith(sbString, "{")) {
+                return new JSONObject(sbString);
+            } else {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Unable to grab JSON Object. Please ensure URL {} is valid. \nRaw Response: {}", url.toString(), sbString);
+                }
+            }
+        } catch (URISyntaxException e) {
+            LOG.error("URI Syntax Exception {}", e);
         }
+
+        return new JSONObject();
     }
 
     /**
@@ -259,11 +264,19 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                 JSONObject objectJson = getJsonFromUri(objectPath);
                 Node node = getOrCreateNode(objectPath, (String) objectJson.get(JcrConstants.JCR_PRIMARYTYPE));
 
+                createOrUpdateNodes(objectJson, node);
+
                 if (DamConstants.NT_DAM_ASSET.equals(parentNode.getProperty(JcrConstants.JCR_PRIMARYTYPE).getValue().getString())) {
                     node.setProperty("isRemoteAsset", true);
-                }
 
-                createOrUpdateNodes(objectJson, node);
+                    // Save and refresh the session after the save refresh count has reached the configured amount.
+                    saveRefreshCount++;
+                    if (saveRefreshCount == this.remoteAssetsConfig.getSaveInterval()) {
+                        this.session.save();
+                        this.session.refresh(true);
+                        saveRefreshCount = 0;
+                    }
+                }
             } else if (json.get(key) instanceof JSONArray) {
                 try {
                     if (PROTECTED_PROPERTIES.contains(key)) {

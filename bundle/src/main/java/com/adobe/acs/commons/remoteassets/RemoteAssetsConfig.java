@@ -58,6 +58,11 @@ public interface RemoteAssetsConfig {
     Integer getRetryDelay();
 
     /**
+     * Number of assets to sync before saving and refreshing the session.
+     */
+    Integer getSaveInterval();
+
+    /**
      * The event user data that will be set during all JCR manipulations performed by remote assets.
      * This can be used in workflow launchers that listen to DAM paths (such as for DAM Update Assets)
      * to exclude unnecessary processing such as rendition generation.
