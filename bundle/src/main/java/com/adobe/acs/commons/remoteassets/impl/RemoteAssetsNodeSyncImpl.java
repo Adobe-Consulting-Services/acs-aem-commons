@@ -62,10 +62,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -84,7 +88,8 @@ import java.util.regex.Pattern;
 public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);
-    private static final Pattern DATE_REGEX = Pattern.compile("[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\s[A-Za-z]{3}[-+]\\d\\d\\d\\d");
+    private static final Pattern DATE_REGEX = Pattern.compile("[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\sGMT[-+]\\d\\d\\d\\d");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("EEE MMM dd yyyy HH:mm:ss 'GMT'Z");
     private static final Pattern DECIMAL_REGEX = Pattern.compile("-?\\d+\\.\\d+");
     private static final Set<String> PROTECTED_PROPERTIES = new HashSet<>(Arrays.asList(
             JcrConstants.JCR_CREATED, JcrConstants.JCR_CREATED_BY, JcrConstants.JCR_VERSIONHISTORY, JcrConstants.JCR_BASEVERSION,
@@ -118,7 +123,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     protected void activate() throws RepositoryException {
         this.resourceResolver = RemoteAssets.logIn(this.resourceResolverFactory);
         this.session = this.resourceResolver.adaptTo(Session.class);
-        this.session.getWorkspace().getObservationManager().setUserData(this.remoteAssetsConfig.getEventUserData());
+        if (StringUtils.isNotBlank(remoteAssetsConfig.getEventUserData())) {
+            this.session.getWorkspace().getObservationManager().setUserData(this.remoteAssetsConfig.getEventUserData());
+        }
         this.valueFactory = this.session.getValueFactory();
     }
 
@@ -472,13 +479,17 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     /**
      * Get formatted {@link Calendar} object.
-     * @param date String
-     * @return Calendar
-     * @throws ParseException exception
+     * @param dateStr String
+     * @return Calendar if parsable, else null.
      */
-    private Calendar getFormattedDate(final String date) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss Z");
-        sdf.parse(date.replace("GMT", StringUtils.EMPTY));
-        return sdf.getCalendar();
+    private Calendar getFormattedDate(final String dateStr) throws ParseException {
+        if (dateStr != null) {
+            try {
+                return GregorianCalendar.from(ZonedDateTime.parse(dateStr, DATE_TIME_FORMATTER));
+            } catch (DateTimeParseException e) {
+                LOG.warn("Unable to parse date {}", dateStr);
+            }
+        }
+        return null;
     }
 }

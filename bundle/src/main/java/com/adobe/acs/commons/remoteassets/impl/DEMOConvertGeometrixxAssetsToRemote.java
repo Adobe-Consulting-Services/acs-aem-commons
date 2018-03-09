@@ -7,6 +7,7 @@ import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.granite.asset.api.Asset;
 import com.adobe.granite.asset.api.AssetManager;
 import com.adobe.granite.asset.api.Rendition;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -60,7 +61,9 @@ public class DEMOConvertGeometrixxAssetsToRemote extends SlingAllMethodsServlet 
             resourceResolver = RemoteAssets.logIn(resourceResolverFactory);
             session = resourceResolver.adaptTo(Session.class);
 
-            session.getWorkspace().getObservationManager().setUserData(remoteAssetsConfig.getEventUserData());
+            if (StringUtils.isNotBlank(remoteAssetsConfig.getEventUserData())) {
+                session.getWorkspace().getObservationManager().setUserData(remoteAssetsConfig.getEventUserData());
+            }
 
             AssetManager assetManager = resourceResolver.adaptTo(AssetManager.class);
 
