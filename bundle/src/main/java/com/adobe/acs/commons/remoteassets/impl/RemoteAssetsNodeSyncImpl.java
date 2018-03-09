@@ -181,6 +181,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * Grab JSON from the provided path and sync to the JCR.
      * @param nextPath String
      * @param primaryType String
+     * @return Node
      */
     private Node getOrCreateNode(final String nextPath, final String primaryType) {
         Node node = null;
