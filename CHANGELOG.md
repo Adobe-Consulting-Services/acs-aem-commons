@@ -7,11 +7,35 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.4...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.10...HEAD
+
+## [3.14.10] - 2018-03-08
+
+### Added
+
+- #1247 - Added the new component for dynamically population of dropdown in Report Builder Parameter
+- #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
+- #1242 - New ResourceUtil utility class.
+- #1255 - Add trimming to the dispatcher flush rules to allow multi line xml configs
+- #1256 - Allow adding of context root maven property for deploying acs-aem-commons locally
+- #1274 - MCP now supports RequestParameter in process definitions.  This gives access to file binary and other metadata such as name and size.
+
+### Fixed
+
+- #1260 - MCP serialization issue; using file upload would break the UI if large files were uploaded
+
+## [3.14.8] - 2018-02-13
+
+### Fixed
+
+- #1250 - Redirect Map upload fails with "multipart boundary" error
+
+## [3.14.6] - 2018-01-31
 
 ### Fixed
 
 - #1230 - Fixed issue causing XHR requests to undefined.2.json from TouchUI Parsys-related ClientLibs
+- #1239 - Fixing issue which prevented ACS AEM Commons 3.14.0, 3.14.2 and 3.14.4 being installed on AEM 6.2.
 
 ## [3.14.4] - 2018-01-24
 
@@ -31,7 +55,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #989 - Dynamic Loading for optional Touch UI ClientLibraries.
 - #1218 - New Report Builder Feature.
-- #1228 - Added config option to have extensionless URLs in sitemap
+- #1228 - Added config option to have extensionless URLs in sitemap.
 
 ### Changed
 

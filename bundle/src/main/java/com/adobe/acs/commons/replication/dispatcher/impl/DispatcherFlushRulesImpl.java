@@ -63,15 +63,14 @@ import java.util.regex.Pattern;
                 + "'CQ-Action-Scope: ResourceOnly'."
                 + "Neither rule sets supports chaining; { /a/.*=/b/c -> /b/.*=/d/e }, "
                 + "due to dangerous cyclic conditions.",
-        immediate = false,
         metatype = true,
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Rule: {prop.replication-action-type}, for Hirearchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
 })
 public class DispatcherFlushRulesImpl implements Preprocessor {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
@@ -279,8 +278,8 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         final Map<Pattern, String[]> rules = new LinkedHashMap<Pattern, String[]>();
 
         for (final Map.Entry<String, String> entry : configuredRules.entrySet()) {
-            final Pattern pattern = Pattern.compile(entry.getKey());
-            rules.put(pattern, entry.getValue().split("&"));
+            final Pattern pattern = Pattern.compile(entry.getKey().trim());
+            rules.put(pattern, entry.getValue().trim().split("&"));
         }
 
         return rules;

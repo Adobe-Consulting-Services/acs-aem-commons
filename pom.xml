@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>3.14.5-SNAPSHOT</version>
+    <version>3.14.11-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -25,6 +25,12 @@
         <name>Adobe</name>
         <url>http://www.adobe.com/</url>
     </organization>
+    <scm>
+        <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
+        <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
+        <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/master</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <!-- ====================================================================== -->
     <!-- P R O P E R T I E S -->
@@ -32,6 +38,7 @@
     <properties>
         <crx.host>localhost</crx.host>
         <crx.port>4502</crx.port>
+        <crx.contextRoot />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <license.licenseName>apache_v2</license.licenseName>
@@ -255,11 +262,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <scm>
-        <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
 
     <dependencyManagement>
         <dependencies>
