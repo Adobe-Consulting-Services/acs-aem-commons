@@ -31,6 +31,9 @@ import org.apache.felix.scr.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Job that will sync nodes based on OSGi configuration. Implements {@link Runnable}.
+ */
 @Component(
         label = "ACS AEM Commons - Remote Assets Sync Job",
         description = "Scheduled Service that runs the Remote Assets node sync.",
