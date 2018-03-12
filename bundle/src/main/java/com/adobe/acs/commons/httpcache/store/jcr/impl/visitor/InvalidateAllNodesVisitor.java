@@ -13,11 +13,8 @@ import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.Access
 public class InvalidateAllNodesVisitor extends AbstractNodeVisitor
 {
 
-    private final String rootNodePath;
-
-    public InvalidateAllNodesVisitor( int maxLevel, long deltaSaveThreshold, String rootNodePath) {
+    public InvalidateAllNodesVisitor( int maxLevel, long deltaSaveThreshold) {
         super(maxLevel, deltaSaveThreshold);
-        this.rootNodePath = rootNodePath;
     }
 
 
@@ -34,7 +31,8 @@ public class InvalidateAllNodesVisitor extends AbstractNodeVisitor
     private boolean nodeQualifiesForRemoval(Node node) throws RepositoryException
     {
         return
-                isCacheEntryNode(node) ||
+                isCacheEntryNode(node)
+                        ||
                 isBucketNode(node);
     }
 }

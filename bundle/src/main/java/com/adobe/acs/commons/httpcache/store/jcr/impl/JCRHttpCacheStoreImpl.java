@@ -332,7 +332,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             @Override public void accept(Session session) throws Exception
             {
             final Node rootNode = session.getNode(cacheRootPath);
-            final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, deltaSaveThreshold, cacheRootPath);
+            final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, deltaSaveThreshold);
             visitor.visit(rootNode);
             visitor.close();
             incrementEvictionCount(visitor.getEvictionCount());

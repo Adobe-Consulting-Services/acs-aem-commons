@@ -53,7 +53,7 @@ public class InvalidateAllNodesVisitorTest
 
     public InvalidateAllNodesVisitor getMockedExpiredNodesVisitor(int deltaSaveThreshold)
     {
-        final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, deltaSaveThreshold, RootNodeMockFactory.ROOT_PATH);
+        final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, deltaSaveThreshold);
         return visitor;
     }
 }
