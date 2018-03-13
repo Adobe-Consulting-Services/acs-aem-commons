@@ -100,7 +100,6 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     private static final Set<String> PROTECTED_NODES = new HashSet<>(Arrays.asList(
             DamConstants.THUMBNAIL_NODE, AccessControlConstants.REP_POLICY
     ));
-    private static int saveRefreshCount = 0;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -114,6 +113,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     private ResourceResolver resourceResolver;
     private Session session;
     private ValueFactory valueFactory;
+    private int saveRefreshCount = 0;
 
     /**
      * Method to run on activation.
@@ -288,11 +288,11 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                     }
 
                     // Save and refresh the session after the save refresh count has reached the configured amount.
-                    saveRefreshCount++;
-                    if (saveRefreshCount == this.remoteAssetsConfig.getSaveInterval()) {
+                    this.saveRefreshCount++;
+                    if (this.saveRefreshCount == this.remoteAssetsConfig.getSaveInterval()) {
                         this.session.save();
                         this.session.refresh(true);
-                        saveRefreshCount = 0;
+                        this.saveRefreshCount = 0;
 
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Session has been saved and refreshed.");
