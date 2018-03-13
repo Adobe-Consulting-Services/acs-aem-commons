@@ -94,7 +94,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         try {
             remoteResourcesSyncing.add(resource.getPath());
             LOG.info("Sync'ing remote asset binaries: {}", resource.getPath());
-            ret = assetSync.syncAsset(resource);
+            ret = this.assetSync.syncAsset(resource);
         } catch (Exception e) {
             LOG.error("Failed to sync binaries for remote asset: {} - {}", resource.getPath(), e.getMessage());
         } finally {
@@ -141,7 +141,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         }
 
         Calendar lastFailure = props.get("remoteSyncFailed", (Calendar) null);
-        if (lastFailure != null && System.currentTimeMillis() < (lastFailure.getTimeInMillis() + (config.getRetryDelay() * 60000))) {
+        if (lastFailure != null && System.currentTimeMillis() < (lastFailure.getTimeInMillis() + (this.config.getRetryDelay() * 60000))) {
             return false;
         }
 
@@ -150,7 +150,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
                 Session session = resource.getResourceResolver().adaptTo(Session.class);
                 String userId = session.getUserID();
                 if (!userId.equals("admin")) {
-                    if (config.getWhitelistedServiceUsers().contains(userId)) {
+                    if (this.config.getWhitelistedServiceUsers().contains(userId)) {
                         return true;
                     }
                     User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);

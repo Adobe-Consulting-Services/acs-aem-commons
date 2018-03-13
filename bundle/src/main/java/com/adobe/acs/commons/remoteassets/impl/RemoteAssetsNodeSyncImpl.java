@@ -463,16 +463,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             String mimeType = (String) resource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
 
             if ("image/jpeg".equals(mimeType) || "image/jpg".equals(mimeType)) {
-                Node assetNode = node;
-                while (!DamConstants.NT_DAM_ASSET.equals(assetNode.getPrimaryNodeType().getName())) {
-                    assetNode = assetNode.getParent();
-                }
-
-                if ("jpg".equalsIgnoreCase(FilenameUtils.getExtension(assetNode.getName()))) {
-                    inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpg");
-                } else {
-                    inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
-                }
+                inputStream = getCorrectBinaryTypeStream(node, "jpg", "jpeg");
             } else if ("image/png".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.png");
             } else if ("image/bmp".equals(mimeType)) {
@@ -500,7 +491,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             } else if ("image/svg+xml".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.svg");
             } else if ("image/tiff".equals(mimeType)) {
-                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.tiff");
+                inputStream = getCorrectBinaryTypeStream(node, "tiff", "tif");
             } else if ("text/plain".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.txt");
             } else if ("application/excel".equals(mimeType)) {
@@ -511,6 +502,44 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xml");
             } else if ("application/zip".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.zip");
+            } else if ("video/3gpp2".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.3g2");
+            } else if ("video/3gpp".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.3gp");
+            } else if ("audio/aac".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.aac");
+            } else if ("audio/aiff".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.aiff");
+            } else if ("video/avi".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.avi");
+            } else if ("application/postscript".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.eps");
+            } else if ("video/x-flv".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.flv");
+            } else if ("application/x-indesign".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.indd");
+            } else if ("video/quicktime".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.mov");
+            } else if ("audio/mpeg3".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.mp3");
+            } else if ("video/mp4".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.mp4");
+            } else if ("audio/mpeg".equals(mimeType)) {
+                inputStream = getCorrectBinaryTypeStream(node, "mpep", "mpg");
+            } else if ("video/mpeg".equals(mimeType)) {
+                inputStream = getCorrectBinaryTypeStream(node, "mpep", "mpg");
+            } else if ("audio/ogg".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.ogg");
+            } else if ("video/ogg".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.ogv");
+            } else if ("audio/wav".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.wav");
+            } else if ("audio/webm".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.webm");
+            } else if ("audio/x-ms-wma".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.wma");
+            } else if ("video/x-ms-wmv".equals(mimeType)) {
+                inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.wmv");
             } else {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
             }
@@ -522,6 +551,24 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             }
             inputStream.close();
         }
+    }
+
+    /**
+     * Get the correct temporary binary (file type) based on file extension.
+     * @param parentNode Node
+     * @param file1 String
+     * @param file2 String
+     * @return InputStream
+     * @throws RepositoryException exception
+     */
+    private InputStream getCorrectBinaryTypeStream(final Node parentNode, final String file1, final String file2) throws RepositoryException {
+        Node assetNode = parentNode;
+        while (!DamConstants.NT_DAM_ASSET.equals(assetNode.getPrimaryNodeType().getName())) {
+            assetNode = assetNode.getParent();
+        }
+
+        String fileType = file1.equalsIgnoreCase(FilenameUtils.getExtension(assetNode.getName())) ? file1 : file2;
+        return this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.".concat(fileType));
     }
 
     /**
