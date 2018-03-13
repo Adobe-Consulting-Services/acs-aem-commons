@@ -47,7 +47,7 @@ public class CropImageTransformerImpl implements ImageTransformer {
 
     private static final String KEY_BOUNDS = "bounds";
 
-    protected static final String KEY_SMART_BOUNDING = "smart";
+    private static final String KEY_SMART_BOUNDING = "smart";
 
     private static final int NUM_BOUNDS_PARAMS = 4;
 
@@ -60,7 +60,7 @@ public class CropImageTransformerImpl implements ImageTransformer {
     private static final int PARAM_INDEX_HEIGHT = 3;
 
     @Override
-    public Layer transform(final Layer layer, final ValueMap properties) {
+    public final Layer transform(final Layer layer, final ValueMap properties) {
         if (properties == null || properties.isEmpty()) {
             log.warn("Transform [ {} ] requires parameters.", TYPE);
             return layer;
@@ -100,7 +100,7 @@ public class CropImageTransformerImpl implements ImageTransformer {
     }
 
     @SuppressWarnings("squid:S2589")
-    protected Rectangle getSmartBounds(int x, int y, int width, int height, int layerWidth, int layerHeight) {
+    private Rectangle getSmartBounds(int x, int y, int width, int height, int layerWidth, int layerHeight) {
         final Rectangle rectangle = new Rectangle();
 
         final int x2 = x + width;
