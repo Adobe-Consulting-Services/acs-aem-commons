@@ -23,6 +23,7 @@ package com.adobe.acs.commons.images.impl;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.day.image.Layer;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
@@ -30,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -44,6 +46,8 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NamedTransformImageServletTest {
+    static final String TIFF_ORIENTATION = "tiff:Orientation";
+    static final String JCR_CONTENT_METADATA = "jcr:content/metadata";
 
     final String NAMED_TRANSFORM_FEATURE = "feature";
     final String NAMED_TRANSFORM_SMALL = "small";
@@ -73,6 +77,14 @@ public class NamedTransformImageServletTest {
     private NamedTransformImageServlet servlet;
 
     private MockSlingHttpServletRequest mockRequest;
+
+    @Mock
+    private Resource mockImageResource;
+
+    @Mock
+    private Resource metadataResource;
+
+    private ValueMap metadataValueMap;
 
     @Before
     public void setUp() throws Exception {
@@ -217,6 +229,118 @@ public class NamedTransformImageServletTest {
     }
 
     @Test
+    public void test_prcoessImageOrientation_imageMetadataValueMapIsNull() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(null);
+
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verifyZeroInteractions(layer);
+    }
+
+    @Test
+    public void test_prcoessImageOrientation_noOrientationMetadata() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(metadataValueMap);
+
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verifyZeroInteractions(layer);
+    }
+
+    @Test
+    public void test_prcoessImageOrientation_normalOrientation() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        initValueMap("1");
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(metadataValueMap);
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verifyZeroInteractions(layer);
+    }
+
+    @Test
+    public void test_prcoessImageOrientation_mirrorHorizontalOrientation() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        initValueMap("2");
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(metadataValueMap);
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verify(layer, times(1)).flipHorizontally();
+    }
+
+    @Test
+    public void test_prcoessImageOrientation_rotate180Orientation() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        initValueMap("3");
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(metadataValueMap);
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verify(layer, times(1)).rotate(180);
+    }
+
+    @Test
+    public void test_prcoessImageOrientation_mirrorVerticalOrientation() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        initValueMap("4");
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(metadataValueMap);
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verify(layer, times(1)).flipVertically();
+    }
+
+    @Test
+    public void test_prcoessImageOrientation_mirrorHorizontalRotate279Orientation() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        initValueMap("5");
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(metadataValueMap);
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verify(layer, times(1)).flipHorizontally();
+        verify(layer, times(1)).rotate(270);
+    }
+
+    @Test
+    public void test_prcoessImageOrientation_rotate90Orientation() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        initValueMap("6");
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(metadataValueMap);
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verify(layer, times(1)).rotate(90);
+    }
+
+    @Test
+    public void test_prcoessImageOrientation_mirrorHorizontalRotate90Orientation() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        initValueMap("7");
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(metadataValueMap);
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verify(layer, times(1)).flipHorizontally();
+        verify(layer, times(1)).rotate(90);
+    }
+
+    @Test
+    public void test_prcoessImageOrientation_rotate270Orientation() throws Exception {
+        when(mockImageResource.getChild(JCR_CONTENT_METADATA)).thenReturn(metadataResource);
+        initValueMap("8");
+        when(metadataResource.adaptTo(ValueMap.class)).thenReturn(metadataValueMap);
+        Layer layer = mock(Layer.class);
+        servlet.processImageOrientation(mockImageResource, layer);
+
+        verify(layer, times(1)).rotate(270);
+    }
+
+    @Test
     public void test_isProgressiveJpeg() throws Exception {
         ValueMap progressiveTransforms = new ValueMapDecorator(new HashMap<String, Object>());
 
@@ -253,6 +377,12 @@ public class NamedTransformImageServletTest {
         progressiveTransforms.remove("enabled");
         assertFalse(servlet.isProgressiveJpeg("", progressiveTransforms));
 
+    }
+
+    private void initValueMap(String num) {
+        Map<String, Object> metadataMap = new HashMap<String, Object>();
+        metadataMap.put(TIFF_ORIENTATION, num);
+        metadataValueMap = new ValueMapDecorator(metadataMap);
     }
 
     /* Testing for resolveImage requires too much orchestration/mocking to be useful */

@@ -27,6 +27,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.dam.commons.util.OrientationUtil;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -157,6 +158,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
 
+    private static final String TIFF_ORIENTATION = "tiff:Orientation";
+
     @Property(label = "Asset Rendition Picker Regex",
             description = "Regex to select the Rendition to transform when directly transforming a DAM Asset."
                     + " [ Default: cq5dam.web.(.*) ]",
@@ -214,7 +217,10 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Image image = this.resolveImage(request);
         final String mimeType = this.getMimeType(request, image);
         Layer layer = this.getLayer(image);
-        
+
+        // Adjust layer to image orientation
+        processImageOrientation(image.getResource(), layer);
+
         if (layer == null) {
             response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
             return;
@@ -271,6 +277,59 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
 
         return layer;
+    }
+
+    /**
+     * Rotate and flip image based on it's tiff:Orientation metadata.
+     * @param imageResource image resource
+     * @param layer image Layer object
+     */
+    protected void processImageOrientation(Resource imageResource, Layer layer) {
+        ValueMap properties = getImageMetadataValueMap(imageResource);
+        if(properties != null) {
+            String orientation = properties.get(TIFF_ORIENTATION, String.class);
+            if(orientation != null &&  Short.parseShort(orientation) != OrientationUtil.ORIENTATION_NORMAL) {
+                switch(Short.parseShort(orientation)) {
+                    case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL:
+                        layer.flipHorizontally();
+                        break;
+                    case OrientationUtil.ORIENTATION_ROTATE_180:
+                        layer.rotate(180);
+                        break;
+                    case OrientationUtil.ORIENTATION_MIRROR_VERTICAL:
+                        layer.flipVertically();
+                        break;
+                    case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_270_CW:
+                        layer.flipHorizontally();
+                        layer.rotate(270);
+                        break;
+                    case OrientationUtil.ORIENTATION_ROTATE_90_CW:
+                        layer.rotate(90);
+                        break;
+                    case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_90_CW:
+                        layer.flipHorizontally();
+                        layer.rotate(90);
+                        break;
+                    case OrientationUtil.ORIENTATION_ROTATE_270_CW:
+                        layer.rotate(270);
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns ValueMap of the Image Metadata resource
+     * @param imageResource image resource
+     * @return metadata ValueMap, or null if given resource doesn't have jcr:content/metadata node.
+     */
+    protected ValueMap getImageMetadataValueMap(Resource imageResource) {
+        ValueMap result = null;
+        final Resource metadata = imageResource.getChild("jcr:content/metadata");
+        if (metadata != null) {
+            result = metadata.adaptTo(ValueMap.class);
+        }
+        return result;
     }
 
     /**
