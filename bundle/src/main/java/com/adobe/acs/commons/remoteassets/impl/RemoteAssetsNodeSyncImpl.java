@@ -27,7 +27,6 @@ import com.day.cq.dam.api.DamConstants;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.api.NameConstants;
-import com.google.common.net.MediaType;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -328,11 +327,6 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                         continue;
                     } else if (PROTECTED_PROPERTIES.contains(key)) {
                         continue;
-                    } else if (JcrConstants.JCR_PRIMARYTYPE.equals(key)) {
-                        parentNode.setPrimaryType((String) value);
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Property '{}' added for node '{}'.", JcrConstants.JCR_PRIMARYTYPE, parentNode.getPath());
-                        }
                     } else {
                         setProperty(value, key, parentNode);
                     }
@@ -468,7 +462,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             Resource resource = this.resourceResolver.getResource(node.getPath());
             String mimeType = (String) resource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
 
-            if (MediaType.JPEG.toString().equals(mimeType) || "image/jpg".equals(mimeType)) {
+            if ("image/jpeg".equals(mimeType) || "image/jpg".equals(mimeType)) {
                 Node assetNode = node;
                 while (!DamConstants.NT_DAM_ASSET.equals(assetNode.getPrimaryNodeType().getName())) {
                     assetNode = assetNode.getParent();
@@ -479,43 +473,43 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                 } else {
                     inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
                 }
-            } else if (MediaType.PNG.toString().equals(mimeType)) {
+            } else if ("image/png".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.png");
-            } else if (MediaType.BMP.toString().equals(mimeType)) {
+            } else if ("image/bmp".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.bmp");
             } else if ("text/css".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.css");
-            } else if (MediaType.OPENDOCUMENT_TEXT.toString().equals(mimeType)) {
+            } else if ("application/msword".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.doc");
-            } else if (MediaType.OOXML_DOCUMENT.toString().equals(mimeType)) {
+            } else if ("application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.docx");
-            } else if (MediaType.EPUB.toString().equals(mimeType)) {
+            } else if ("application/epub+zip".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.epub");
-            } else if (MediaType.GIF.toString().equals(mimeType)) {
+            } else if ("image/gif".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.gif");
             } else if ("text/html".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.html");
-            } else if (MediaType.PDF.toString().equals(mimeType)) {
+            } else if ("application/pdf".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.pdf");
-            } else if (MediaType.OPENDOCUMENT_PRESENTATION.toString().equals(mimeType)) {
+            } else if ("application/mspowerpoint".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.ppt");
-            } else if (MediaType.OOXML_PRESENTATION.toString().equals(mimeType)) {
+            } else if ("application/vnd.openxmlformats-officedocument.presentationml.presentation".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.pptx");
-            } else if (MediaType.PSD.toString().equals(mimeType)) {
+            } else if ("application/octet-stream".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.psd");
             } else if ("image/svg+xml".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.svg");
-            } else if (MediaType.TIFF.toString().equals(mimeType)) {
+            } else if ("image/tiff".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.tiff");
             } else if ("text/plain".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.txt");
-            } else if (MediaType.OPENDOCUMENT_SPREADSHEET.toString().equals(mimeType)) {
+            } else if ("application/excel".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xls");
-            } else if (MediaType.OOXML_SHEET.toString().equals(mimeType)) {
+            } else if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xlsx");
             } else if ("application/xml".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xml");
-            } else if (MediaType.ZIP.toString().equals(mimeType)) {
+            } else if ("application/zip".equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.zip");
             } else {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");
