@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
-import com.adobe.acs.commons.remoteassets.TriggerRemoteAssetSyncMBean;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSyncTriggerMBean;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -33,13 +33,13 @@ import org.apache.felix.scr.annotations.Service;
 @Component(immediate = true)
 @Service
 @Properties({ @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Remote Asset Sync") })
-public class TriggerRemoteAssetSyncImpl implements TriggerRemoteAssetSyncMBean {
+public class RemoteAssetsNodeSyncTrigger implements RemoteAssetsNodeSyncTriggerMBean {
 
     @Reference
     private transient RemoteAssetsNodeSync assetSyncService;
 
     /**
-     * @see TriggerRemoteAssetSyncMBean#syncAssets().
+     * @see RemoteAssetsNodeSyncTriggerMBean#syncAssets().
      */
     @Override
     public void syncAssets() {

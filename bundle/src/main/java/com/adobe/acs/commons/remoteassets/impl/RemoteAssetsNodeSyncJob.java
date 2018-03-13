@@ -55,9 +55,9 @@ import org.slf4j.LoggerFactory;
         )
 })
 @Service
-public class RemoteAssetsSyncJob implements Runnable {
+public class RemoteAssetsNodeSyncJob implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsSyncJob.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncJob.class);
 
     @Reference
     private RemoteAssetsNodeSync remoteAssetsNodeSync;

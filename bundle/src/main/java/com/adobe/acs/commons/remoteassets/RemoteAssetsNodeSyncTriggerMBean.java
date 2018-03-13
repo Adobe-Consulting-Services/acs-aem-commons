@@ -25,7 +25,7 @@ import com.adobe.granite.jmx.annotation.Description;
  * MBean interface for interacting with the Remote Asset Sync.
  */
 @Description("MBean for managing the Remote Asset Sync.")
-public interface TriggerRemoteAssetSyncMBean {
+public interface RemoteAssetsNodeSyncTriggerMBean {
 
     /**
      * Method to run when triggering the syncAssets() located in {@link RemoteAssetsNodeSync}.

@@ -53,14 +53,15 @@ import java.util.concurrent.ConcurrentSkipListSet;
 )
 @Service
 public class RemoteAssetDecorator implements ResourceDecorator {
-    private final Logger log = LoggerFactory.getLogger(RemoteAssetDecorator.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetDecorator.class);
 
     /**
      * This set stores resource paths for remote assets that are in the process
      * of being sync'd from the remote server.  This prevents an infinite loop
      * when the RemoteAssetSync service fetches the asset in order to update it.
      */
-    static Set<String> remoteResourcesSyncing = new ConcurrentSkipListSet<>();
+    private static Set<String> remoteResourcesSyncing = new ConcurrentSkipListSet<>();
 
     @Reference
     private RemoteAssetsBinarySync assetSync;
@@ -83,8 +84,8 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             }
         } catch (Exception e) {
             // Logging at debug level b/c if this happens it could represent a ton of logging
-            if (log.isDebugEnabled()) {
-                log.debug("Failed binary sync check for remote asset: {} - {}", resource.getPath(), e.getMessage());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Failed binary sync check for remote asset: {} - {}", resource.getPath(), e.getMessage());
             }
             return resource;
         }
@@ -92,10 +93,10 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         Resource ret = resource;
         try {
             remoteResourcesSyncing.add(resource.getPath());
-            log.info("Sync'ing remote asset binaries: {}", resource.getPath());
+            LOG.info("Sync'ing remote asset binaries: {}", resource.getPath());
             ret = assetSync.syncAsset(resource);
         } catch (Exception e) {
-            log.error("Failed to sync binaries for remote asset: {} - {}", resource.getPath(), e.getMessage());
+            LOG.error("Failed to sync binaries for remote asset: {} - {}", resource.getPath(), e.getMessage());
         } finally {
             remoteResourcesSyncing.remove(resource.getPath());
         }
@@ -156,10 +157,10 @@ public class RemoteAssetDecorator implements ResourceDecorator {
                     if (currentUser != null && !currentUser.isSystemUser()) {
                         return true;
                     } else {
-                        log.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
+                        LOG.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
                     }
                 } else {
-                    log.debug("Avoiding binary sync for admin user");
+                    LOG.debug("Avoiding binary sync for admin user");
                 }
             }
         }
