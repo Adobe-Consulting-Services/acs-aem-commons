@@ -40,6 +40,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -138,7 +139,19 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                 connection.setRequestProperty("Authorization", String.format("Basic %s", encodedAuth));
 
                 LOG.info("syncing from remote asset url {}", url);
-                InputStream inputStream = connection.getInputStream();
+
+                InputStream inputStream;
+                try {
+                    inputStream = connection.getInputStream();
+                } catch (FileNotFoundException fne) {
+                    if ("original".equals(renditionName)) {
+                        throw fne;
+                    }
+
+                    asset.removeRendition(renditionName);
+                    LOG.warn("Rendition '{}' not found on remote environment. Removing local rendition.", renditionName);
+                    continue;
+                }
 
                 Map<String, Object> props = new HashMap<>();
                 props.put("rendition.mime", assetRendition.getMimeType());
