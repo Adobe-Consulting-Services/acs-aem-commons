@@ -28,21 +28,21 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 
 /**
- * Manages the Remote Asset Sync's syncAsset job.
+ * Manages the Remote Asset Node Sync's syncAsset job.
  */
 @Component(immediate = true)
 @Service
-@Properties({ @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Remote Asset Sync") })
+@Properties({ @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Remote Asset Node Sync") })
 public class RemoteAssetsNodeSyncTrigger implements RemoteAssetsNodeSyncTriggerMBean {
 
     @Reference
-    private transient RemoteAssetsNodeSync assetSyncService;
+    private transient RemoteAssetsNodeSync assetNodeSyncService;
 
     /**
-     * @see RemoteAssetsNodeSyncTriggerMBean#syncAssets().
+     * @see RemoteAssetsNodeSyncTriggerMBean#syncAssetNodes().
      */
     @Override
-    public void syncAssets() {
-        this.assetSyncService.syncAssets();
+    public void syncAssetNodes() {
+        this.assetNodeSyncService.syncAssetNodes();
     }
 }

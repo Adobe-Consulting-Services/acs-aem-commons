@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
+import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.day.cq.commons.jcr.JcrConstants;
@@ -151,10 +152,10 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * @see RemoteAssetsNodeSync#syncAssets()
+     * @see RemoteAssetsNodeSync#syncAssetNodes()
      */
     @Override
-    public void syncAssets() {
+    public void syncAssetNodes() {
         List<String> syncPaths = new ArrayList<>();
         syncPaths.addAll(this.remoteAssetsConfig.getTagSyncPaths());
         syncPaths.addAll(this.remoteAssetsConfig.getDamSyncPaths());
@@ -453,81 +454,81 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             Resource resource = this.resourceResolver.getResource(node.getPath());
             String mimeType = (String) resource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
 
-            if ("video/3gpp2".equals(mimeType)) {
+            if (FileExtensionMimeTypeConstants._3G2.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.3g2");
-            } else if ("video/3gpp".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._3GP.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.3gp");
-            } else if ("audio/x-aac".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._AAC.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.aac");
-            } else if ("audio/x-aiff".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._AIFF.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.aiff");
-            } else if ("video/x-msvideo".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._AVI.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.avi");
-            } else if ("image/bmp".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._BMP.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.bmp");
-            } else if ("text/css".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._CSS.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.css");
-            } else if ("application/msword".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._DOC.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.doc");
-            } else if ("application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._DOCX.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.docx");
-            } else if ("application/postscript".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._EPS_PS.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.eps");
-            } else if ("application/epub+zip".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._EPUB.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.epub");
-            } else if ("video/x-flv".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._FLA_SWF.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.flv");
-            } else if ("image/gif".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._GIF.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.gif");
-            } else if ("text/html".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._HTML.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.html");
-            } else if ("image/jpeg".equals(mimeType) || "image/jpg".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._JPEG_JPG.equals(mimeType)) {
                 inputStream = getCorrectBinaryTypeStream(node, "jpeg", "jpg");
-            } else if ("application/x-indesign".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._INDD.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.indd");
-            } else if ("video/quicktime".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._MOV.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.mov");
-            } else if ("audio/mpeg".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._MP3.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.mp3");
-            } else if ("video/mp4".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._MP4.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.mp4");
-            } else if ("video/mpeg".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._M2V_MPEG_MPG.equals(mimeType)) {
                 inputStream = getCorrectBinaryTypeStream(node, "mpeg", "mpg");
-            } else if ("audio/ogg".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._OGG.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.ogg");
-            } else if ("video/ogg".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._OGV.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.ogv");
-            } else if ("application/pdf".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._PDF.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.pdf");
-            } else if ("image/png".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._PNG.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.png");
-            } else if ("application/vnd.ms-powerpoint".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._PPT.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.ppt");
-            } else if ("application/vnd.openxmlformats-officedocument.presentationml.presentation".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._PPTX.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.pptx");
-            } else if ("image/vnd.adobe.photoshop".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._PSD.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.psd");
-            } else if ("image/svg+xml".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._SVG.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.svg");
-            } else if ("image/tiff".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._TIFF_TIF.equals(mimeType)) {
                 inputStream = getCorrectBinaryTypeStream(node, "tiff", "tif");
-            } else if ("text/plain".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._TXT.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.txt");
-            } else if ("audio/x-wav".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._WAV.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.wav");
-            } else if ("video/webm".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._WEBM.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.webm");
-            } else if ("audio/x-ms-wma".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._WMA.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.wma");
-            } else if ("video/x-ms-wmv".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._WMV.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.wmv");
-            } else if ("application/vnd.ms-excel".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._XLS.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xls");
-            } else if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._XLSX.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xlsx");
-            } else if ("application/xml".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._XML.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.xml");
-            } else if ("application/zip".equals(mimeType)) {
+            } else if (FileExtensionMimeTypeConstants._ZIP.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.zip");
             } else {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream("/remoteassets/remote_asset.jpeg");

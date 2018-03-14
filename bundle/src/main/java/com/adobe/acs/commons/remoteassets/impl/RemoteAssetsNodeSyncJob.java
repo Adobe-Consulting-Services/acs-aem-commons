@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Job that will sync nodes based on OSGi configuration. Implements {@link Runnable}.
+ * Job that will sync asset nodes based on OSGi configuration. Implements {@link Runnable}.
  */
 @Component(
         label = "ACS AEM Commons - Remote Assets Sync Job",
@@ -87,7 +87,7 @@ public class RemoteAssetsNodeSyncJob implements Runnable {
             LOG.debug("Remote assets node sync job started.");
         }
 
-        this.remoteAssetsNodeSync.syncAssets();
+        this.remoteAssetsNodeSync.syncAssetNodes();
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Remote assets node sync job finished.");

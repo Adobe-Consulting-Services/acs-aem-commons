@@ -22,14 +22,14 @@ package com.adobe.acs.commons.remoteassets;
 import com.adobe.granite.jmx.annotation.Description;
 
 /**
- * MBean interface for interacting with the Remote Asset Sync.
+ * MBean interface for interacting with the Remote Asset Node Sync.
  */
 @Description("MBean for managing the Remote Asset Sync.")
 public interface RemoteAssetsNodeSyncTriggerMBean {
 
     /**
-     * Method to run when triggering the syncAssets() located in {@link RemoteAssetsNodeSync}.
+     * Method to run when triggering the syncAssetNodes() located in {@link RemoteAssetsNodeSync}.
      */
-    @Description("Executes remote asset sync based on configured paths.")
-    void syncAssets();
+    @Description("Executes remote asset node sync based on configured paths.")
+    void syncAssetNodes();
 }
