@@ -62,11 +62,11 @@ public class DataImporter extends ProcessDefinition {
     private static final String PATH = "path";
 
     public enum MergeMode {
-        create_and_overwrite_all(true, true, true),
-        merge_only(true, true, false),
-        create_missing_no_merge(true, false, false),
-        overwrite_existing(false, true, true),
-        update_existing(false, true, false),
+        create_and_overwrite_properties(true, true, true),
+        create_and_merge_properties(true, true, false),
+        create_only_skip_existing(true, false, false),
+        overwrite_existing_only(false, true, true),
+        merge_existing_only(false, true, false),
         do_nothing(false, false, false);
 
         boolean create = false;
@@ -92,9 +92,9 @@ public class DataImporter extends ProcessDefinition {
             name = "Existing action",
             description = "What to do if an asset exists",
             component = RadioComponent.EnumerationSelector.class,
-            options = {"default=create_and_overwrite_all", "vertical"}
+            options = {"default=create_and_overwrite_properties", "vertical"}
     )
-    private MergeMode mergeMode = MergeMode.create_and_overwrite_all;
+    private MergeMode mergeMode = MergeMode.create_and_overwrite_properties;
 
     @FormField(
             name = "Structure node type",
@@ -118,6 +118,15 @@ public class DataImporter extends ProcessDefinition {
     )
     private boolean detailedReport = true;
 
+    @FormField(
+            name = "Import in sorted order",
+            description = "If checked, nodes will be imported in the order determined by their paths",
+            component = CheckboxComponent.class,
+            options = "checked"
+    )
+    private boolean presortData = true;
+
+    
     private String fileName;
     private int rowCount;
     transient List<String> fileHeader;
@@ -249,7 +258,9 @@ public class DataImporter extends ProcessDefinition {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.toList());
-            Collections.sort(nodeData, (a, b) -> a.get(PATH).compareTo(b.get(PATH)));
+            if (presortData) {
+                Collections.sort(nodeData, (a, b) -> b.get(PATH).compareTo(a.get(PATH)));
+            }
         }
     }
 
