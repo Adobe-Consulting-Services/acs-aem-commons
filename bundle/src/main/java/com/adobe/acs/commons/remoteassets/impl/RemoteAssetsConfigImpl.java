@@ -32,7 +32,6 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +62,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(
             label = "Tag Sync Paths",
-            description = "Paths to sync tags from the remote server (e.g. /etc/tags",
+            description = "Paths to sync tags from the remote server (e.g. /etc/tags/{asset})",
             cardinality = Integer.MAX_VALUE,
             value = {}
     )
@@ -71,7 +70,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(
             label = "Asset Sync Paths",
-            description = "Paths to sync assets from the remote server (e.g. /content/dam)",
+            description = "Paths to sync assets from the remote server (e.g. /content/dam/{asset})",
             cardinality = Integer.MAX_VALUE,
             value = {}
     )
@@ -86,8 +85,8 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(
             label = "Number of Assets to Sync Before Saving",
-            description = "Number of assets to sync before saving and refreshing the session. The lower the number, the slower the sync will " +
-                    "take (default 100)",
+            description = "Number of asset nodes to sync before saving and refreshing the session during a node sync. The lower the number, " +
+                    "the longer the sync will take (default 100)",
             intValue = 100
     )
     private static final String SAVE_INTERVAL = "save.interval";
@@ -125,7 +124,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     @Activate
     @Modified
     private void activate(final ComponentContext componentContext) {
-        final Dictionary<?, ?> properties = componentContext.getProperties();
+        final Dictionary<String, Object> properties = componentContext.getProperties();
 
         this.server = PropertiesUtil.toString(properties.get(SERVER), StringUtils.EMPTY);
         if (StringUtils.isBlank(this.server)) {

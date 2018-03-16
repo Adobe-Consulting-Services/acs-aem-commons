@@ -45,8 +45,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -134,15 +132,16 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                 URL url = new URL(String.format("%s%s", baseUrl, renditionName));
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
-                String rawAuth = String.format("%s:%s", this.remoteAssetsConfig.getUsername(), this.remoteAssetsConfig.getPassword());
-                String encodedAuth = Base64.getEncoder().encodeToString(rawAuth.getBytes(StandardCharsets.UTF_8));
-                connection.setRequestProperty("Authorization", String.format("Basic %s", encodedAuth));
+                connection.setRequestProperty("Authorization", String.format("Basic %s", RemoteAssets.encodeForBasicAuth(this.remoteAssetsConfig)));
 
-                LOG.info("syncing from remote asset url {}", url);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("syncing from remote asset url {}", url);
+                }
 
-                InputStream inputStream;
-                try {
-                    inputStream = connection.getInputStream();
+                try (InputStream inputStream = connection.getInputStream()) {
+                    Map<String, Object> props = new HashMap<>();
+                    props.put("rendition.mime", assetRendition.getMimeType());
+                    asset.setRendition(renditionName, inputStream, props);
                 } catch (FileNotFoundException fne) {
                     if ("original".equals(renditionName)) {
                         throw fne;
@@ -150,14 +149,9 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
 
                     asset.removeRendition(renditionName);
                     LOG.warn("Rendition '{}' not found on remote environment. Removing local rendition.", renditionName);
-                    continue;
+                } finally {
+                    connection.disconnect();
                 }
-
-                Map<String, Object> props = new HashMap<>();
-                props.put("rendition.mime", assetRendition.getMimeType());
-                asset.setRendition(renditionName, inputStream, props);
-
-                inputStream.close();
             }
 
             node.setProperty("isRemoteAsset", (Value)null);

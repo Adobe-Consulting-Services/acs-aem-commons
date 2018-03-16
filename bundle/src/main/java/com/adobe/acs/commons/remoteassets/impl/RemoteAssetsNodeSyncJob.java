@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2017 Adobe
+ * Copyright (C) 2018 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,14 +83,14 @@ public class RemoteAssetsNodeSyncJob implements Runnable {
      */
     @Override
     public final void run() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Remote assets node sync job started.");
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Remote assets node sync job started.");
         }
 
         this.remoteAssetsNodeSync.syncAssetNodes();
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Remote assets node sync job finished.");
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Remote assets node sync job finished.");
         }
     }
 }

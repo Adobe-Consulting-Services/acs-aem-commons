@@ -43,12 +43,12 @@ public interface RemoteAssetsConfig {
     String getPassword();
 
     /**
-     * Paths to sync from the remote assets server.
+     * Tag paths to sync from the remote assets server.
      */
     List<String> getTagSyncPaths();
 
     /**
-     * Paths to sync from the remote assets server.
+     * Asset paths to sync from the remote assets server.
      */
     List<String> getDamSyncPaths();
 
@@ -58,7 +58,7 @@ public interface RemoteAssetsConfig {
     Integer getRetryDelay();
 
     /**
-     * Number of assets to sync before saving and refreshing the session.
+     * Number of asset nodes to sync before saving and refreshing the session during the remote asset node sync.
      */
     Integer getSaveInterval();
 

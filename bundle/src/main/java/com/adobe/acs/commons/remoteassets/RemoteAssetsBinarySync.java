@@ -29,7 +29,7 @@ public interface RemoteAssetsBinarySync {
     /**
      * Sync an asset's binaries from a remote server.
      * All binaries (original + renditions) are sync'd.
-     * @param resource Resource representing a dam:Asset
+     * @param resource Resource representing a dam:AssetContent
      * @return The updated resource
      */
     Resource syncAsset(Resource resource);

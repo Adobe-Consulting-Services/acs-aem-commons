@@ -19,12 +19,15 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
+import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,5 +53,15 @@ public class RemoteAssets {
             LOG.error("Remote assets functionality cannot be enabled - service user login failed");
             throw new RemoteAssetsServiceException(le2);
         }
+    }
+
+    /**
+     * Retrieve the Base64 encoded authentication string.
+     * @param config RemoteAssetsConfig
+     * @return String
+     */
+    public static String encodeForBasicAuth(final RemoteAssetsConfig config) {
+        String rawAuth = String.format("%s:%s", config.getUsername(), config.getPassword());
+        return Base64.getEncoder().encodeToString(rawAuth.getBytes(StandardCharsets.UTF_8));
     }
 }

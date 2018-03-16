@@ -24,8 +24,8 @@ package com.adobe.acs.commons.remoteassets;
  */
 public interface RemoteAssetsNodeSync {
 
-	/**
-	 * Sync remote asset nodes from remote server, excluding binaries.
-	 */
+    /**
+     * Sync remote asset nodes from remote server, excluding binaries.
+     */
     void syncAssetNodes();
 }
