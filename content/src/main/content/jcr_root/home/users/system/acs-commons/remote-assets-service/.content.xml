@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="a1544aa0-90e1-3719-9473-674376d67e91"
+    rep:authorizableId="acs-commons-remote-assets-service"
+    rep:principalName="acs-commons-remote-assets-service"/>
