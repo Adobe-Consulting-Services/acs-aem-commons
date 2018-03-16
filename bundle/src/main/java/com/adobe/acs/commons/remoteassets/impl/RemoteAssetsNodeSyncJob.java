@@ -83,14 +83,8 @@ public class RemoteAssetsNodeSyncJob implements Runnable {
      */
     @Override
     public final void run() {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Remote assets node sync job started.");
-        }
-
+        LOG.info("Remote assets node sync job started.");
         this.remoteAssetsNodeSync.syncAssetNodes();
-
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Remote assets node sync job finished.");
-        }
+        LOG.info("Remote assets node sync job finished.");
     }
 }

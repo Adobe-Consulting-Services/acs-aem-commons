@@ -62,7 +62,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(
             label = "Tag Sync Paths",
-            description = "Paths to sync tags from the remote server (e.g. /etc/tags/{asset})",
+            description = "Paths to sync tags from the remote server (e.g. /etc/tags/asset)",
             cardinality = Integer.MAX_VALUE,
             value = {}
     )
@@ -70,7 +70,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(
             label = "Asset Sync Paths",
-            description = "Paths to sync assets from the remote server (e.g. /content/dam/{asset})",
+            description = "Paths to sync assets from the remote server (e.g. /content/dam)",
             cardinality = Integer.MAX_VALUE,
             value = {}
     )

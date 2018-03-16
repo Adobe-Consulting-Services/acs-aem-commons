@@ -162,10 +162,6 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             for (String syncPath : syncPaths) {
                 this.session.refresh(true);
                 JSONObject topLevelJson = getJsonFromUri(syncPath);
-                if (topLevelJson == null) {
-                    throw new JSONException("Response JSON came back null.");
-                }
-
                 Node topLevelSyncNode = getOrCreateNode(syncPath, (String) topLevelJson.get(JcrConstants.JCR_PRIMARYTYPE));
                 createOrUpdateNodes(topLevelJson, topLevelSyncNode);
                 this.session.save();
@@ -249,7 +245,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             LOG.error("URI Syntax Exception {}", e);
         }
 
-        return null;
+        throw new JSONException("Response JSON came back null.");
     }
 
     /**
@@ -271,10 +267,6 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
                 String objectPath = String.format("%s/%s", parentNode.getPath(), key);
                 JSONObject objectJson = getJsonFromUri(objectPath);
-                if (objectJson == null) {
-                    throw new JSONException("Response JSON came back null.");
-                }
-
                 Node node = getOrCreateNode(objectPath, (String) objectJson.get(JcrConstants.JCR_PRIMARYTYPE));
                 createOrUpdateNodes(objectJson, node);
 
@@ -347,10 +339,10 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     private void setMixinsProperty(final JSONObject json, final String key, final Node node) throws JSONException, RepositoryException {
         JSONArray mixins = (JSONArray) json.get(key);
         for (int i = 0; i < mixins.length(); i++) {
-            node.addMixin(mixins.getString(i));
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Mixin '{}' added for node '{}'.", mixins.getString(i), node.getPath());
+                LOG.debug("Adding mixin '{}' for node '{}'.", mixins.getString(i), node.getPath());
             }
+            node.addMixin(mixins.getString(i));
         }
     }
 
@@ -379,7 +371,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
         if (tagList.size() > 0) {
             Resource parentResource = this.resourceResolver.getResource(node.getPath());
-            tagManager.setTags(parentResource, tagList.toArray(new Tag[0]));
+            tagManager.setTags(parentResource, tagList.toArray(new Tag[tagList.size()]));
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Tags added for node '{}'.", node.getPath());
@@ -426,7 +418,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                 LOG.debug("Array property '{}' added for node '{}'.", key, node.getPath());
             }
         } catch (Exception e) {
-            LOG.error("Unable to assign property:node to '{}'.", key + node.getPath(), e);
+            LOG.error("Unable to assign property:node to '{}' {}", key + node.getPath(), e);
         }
     }
 
@@ -560,7 +552,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             }
         } finally {
             try {
-                inputStream.close();
+                if (inputStream != null) {
+                    inputStream.close();
+                }
             } catch (IOException ie) {
                 LOG.error("IOException thrown {}", ie);
             }
@@ -582,7 +576,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             assetNode = assetNode.getParent();
         }
 
-        String remoteAssetFileUri = "/remoteassets/remote_asset.jpeg";
+        String remoteAssetFileUri = "/remoteassets/remote_asset." + files[0];
         String assetFileExtension = FilenameUtils.getExtension(assetNode.getName());
         String parentNodeFileExtension = FilenameUtils.getExtension(renditionNode.getName());
         for (String file : files) {
