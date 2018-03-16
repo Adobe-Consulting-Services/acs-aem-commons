@@ -56,11 +56,6 @@ public final class FileExtensionMimeTypeConstants {
     public static final String _AFM = "application/x-font-type1";
 
     /**
-     * .ai mime type constant.
-     */
-    public static final String _AI = "application/postscript";
-
-    /**
      * .aiff mime type constant.
      */
     public static final String _AIFF = "audio/x-aiff";
@@ -91,9 +86,9 @@ public final class FileExtensionMimeTypeConstants {
     public static final String _DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
     /**
-     * .eps and .ps mime type constant.
+     * .ai, .eps and .ps mime type constant.
      */
-    public static final String _EPS_PS = "application/postscript";
+    public static final String _AI_EPS_PS = "application/postscript";
 
     /**
      * .eps #1 mime type constant.
@@ -161,6 +156,11 @@ public final class FileExtensionMimeTypeConstants {
     public static final String _INDD = "application/x-indesign";
 
     /**
+     * .jar mime type constant.
+     */
+    public static final String _JAR = "application/java-archive";
+
+    /**
      * .jpeg and .jpg mime type constant.
      */
     public static final String _JPEG_JPG = "image/jpeg";
@@ -174,6 +174,11 @@ public final class FileExtensionMimeTypeConstants {
      * .m4v mime type constant.
      */
     public static final String _M4V = "video/x-m4v";
+
+    /**
+     * .midi mime type constant.
+     */
+    public static final String _MIDI = "audio/midi";
 
     /**
      * .mov mime type constant.
@@ -246,6 +251,11 @@ public final class FileExtensionMimeTypeConstants {
     public static final String _PSD = "image/vnd.adobe.photoshop";
 
     /**
+     * .rar mime type constant.
+     */
+    public static final String _RAR = "application/x-rar-compressed";
+
+    /**
      * .rtf mime type constant.
      */
     public static final String _RTF = "application/rtf";
@@ -261,9 +271,9 @@ public final class FileExtensionMimeTypeConstants {
     public static final String _TAR = "application/x-tar";
 
     /**
-     * .tiff and .tif mime type constant.
+     * .tif and .tiff mime type constant.
      */
-    public static final String _TIFF_TIF = "image/tiff";
+    public static final String _TIF_TIFF = "image/tiff";
 
     /**
      * .ttc and .ttf mime type constant.
