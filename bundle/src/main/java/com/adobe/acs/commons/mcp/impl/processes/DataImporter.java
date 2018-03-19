@@ -23,26 +23,17 @@ import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.util.Spreadsheet;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import static javax.jcr.Property.JCR_PRIMARY_TYPE;
 import javax.jcr.RepositoryException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -81,10 +72,10 @@ public class DataImporter extends ProcessDefinition {
     };
 
     @FormField(
-            name = "Import data file",
-            description = "Data file containing import data",
+            name = "Excel File",
+            description = "Provide the .xlsx file that defines the nodes being imported",
             component = FileUploadComponent.class,
-            required = true
+            options = {"mimeTypes=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "required"}
     )
     private transient RequestParameter importFile;
 
@@ -98,7 +89,7 @@ public class DataImporter extends ProcessDefinition {
 
     @FormField(
             name = "Structure node type",
-            description = "Type assigned to missing nodes (unless specified via jcr:primayType column)",
+            description = "Type assigned to new nodes (ignored if spreadsheet has a jcr:primayType column) -- for ordered folders use sling:OrderedFolder",
             options = {"default=sling:Folder"}
     )
     private String defaultNodeType = "sling:Folder";
@@ -126,12 +117,6 @@ public class DataImporter extends ProcessDefinition {
     )
     private boolean presortData = true;
 
-    
-    private String fileName;
-    private int rowCount;
-    transient List<String> fileHeader;
-    transient List<Map<String, String>> nodeData;
-
     EnumMap<ReportColumns, Object> createdNodes
             = trackActivity("Total", "Create", 0);
     EnumMap<ReportColumns, Object> updatedNodes
@@ -146,6 +131,7 @@ public class DataImporter extends ProcessDefinition {
         item, action, count
     }
 
+    Spreadsheet data;
     List<EnumMap<ReportColumns, Object>> reportRows;
 
     protected synchronized EnumMap<ReportColumns, Object> trackActivity(String item, String action, Integer count) {
@@ -173,11 +159,15 @@ public class DataImporter extends ProcessDefinition {
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         try {
-            parseInputFile();
-            instance.getInfo().setDescription("Import " + fileName + " (" + rowCount + " rows)");
+            data = new Spreadsheet(importFile, PATH);
+            if (presortData) {
+
+                Collections.sort(data.getDataRows(), (a, b) -> b.get(PATH).compareTo(a.get(PATH)));
+            }
+            instance.getInfo().setDescription("Import " + data.getFileName() + " (" + data.getRowCount() + " rows)");
         } catch (IOException ex) {
             LOG.error("Unable to process import", ex);
-            instance.getInfo().setDescription("Import " + fileName + " (failed)");
+            instance.getInfo().setDescription("Import " + data.getFileName() + " (failed)");
             throw new RepositoryException("Unable to parse input file", ex);
         }
         instance.defineCriticalAction("Import Data", rr, this::importData);
@@ -192,7 +182,7 @@ public class DataImporter extends ProcessDefinition {
     }
 
     private void importData(ActionManager manager) {
-        nodeData.forEach((row) -> {
+        data.getDataRows().forEach((row) -> {
             manager.deferredWithResolver(rr -> {
                 String path = row.get(PATH);
                 Resource r = rr.getResource(path);
@@ -231,42 +221,9 @@ public class DataImporter extends ProcessDefinition {
         });
     }
 
-    /**
-     * Parse out the input file synchronously for easier unit test validation
-     *
-     * @return List of files that will be imported, including any renditions
-     * @throws IOException if the file couldn't be read
-     */
-    private void parseInputFile() throws IOException {
-        try (InputStream binaryData = importFile.getInputStream()) {
-            XSSFWorkbook workbook = new XSSFWorkbook(binaryData);
-
-            final XSSFSheet sheet = workbook.getSheetAt(0);
-            fileName = importFile.getFileName();
-            rowCount = sheet.getLastRowNum();
-            final Iterator<Row> rows = sheet.rowIterator();
-
-            fileHeader = readRow(rows.next()).stream()
-                    .map(s -> String.valueOf(s))
-                    .map(String::toLowerCase)
-                    .map(s -> s.replaceAll("[^0-9a-zA-Z:]+", "_"))
-                    .collect(Collectors.toList());
-
-            Iterable<Row> remainingRows = () -> rows;
-            nodeData = StreamSupport.stream(remainingRows.spliterator(), false)
-                    .map(this::buildRow)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toList());
-            if (presortData) {
-                Collections.sort(nodeData, (a, b) -> b.get(PATH).compareTo(a.get(PATH)));
-            }
-        }
-    }
-
     private void updateMetadata(ResourceResolver rr, Map<String, String> nodeInfo) throws PersistenceException {
         ModifiableValueMap resourceProperties = rr.getResource(nodeInfo.get(PATH)).adaptTo(ModifiableValueMap.class);
-        for (String prop : fileHeader) {
+        for (String prop : data.getHeaderRow()) {
             if (!prop.equals(PATH)
                     && (mergeMode.overwriteProps || !resourceProperties.containsKey(prop))) {
                 String value = nodeInfo.get(prop);
@@ -295,63 +252,6 @@ public class DataImporter extends ProcessDefinition {
                 trackActivity(nodeInfo.get(PATH), "No Change", null);
             }
             incrementCount(noChangeNodes, 1);
-        }
-    }
-
-    private List<String> readRow(Row row) {
-        Iterator<Cell> iterator = row.cellIterator();
-        List<String> rowOut = new ArrayList<>();
-        while (iterator.hasNext()) {
-            Cell c = iterator.next();
-            while (c.getColumnIndex() > rowOut.size()) {
-                rowOut.add(null);
-            }
-            rowOut.add(getStringValueFromCell(c));
-        }
-        return rowOut;
-    }
-
-    private String getStringValueFromCell(Cell cell) {
-        if (cell == null) {
-            return null;
-        }
-        int cellType = cell.getCellType();
-        if (cellType == Cell.CELL_TYPE_FORMULA) {
-            cellType = cell.getCachedFormulaResultType();
-        }
-        switch (cellType) {
-            case Cell.CELL_TYPE_BOOLEAN:
-                return Boolean.toString(cell.getBooleanCellValue());
-            case Cell.CELL_TYPE_BLANK:
-                return null;
-            case Cell.CELL_TYPE_NUMERIC:
-                double number = cell.getNumericCellValue();
-                if (Math.floor(number) == number) {
-                    return Integer.toString((int) number);
-                } else {
-                    return Double.toString(cell.getNumericCellValue());
-                }
-            case Cell.CELL_TYPE_STRING:
-                return cell.getStringCellValue();
-            default:
-                return "???";
-        }
-    }
-
-    private Optional<Map<String, String>> buildRow(Row row) {
-        Map<String, String> out = new LinkedHashMap<>();
-        List<String> data = readRow(row);
-        boolean empty = true;
-        for (int i = 0; i < data.size() && i < fileHeader.size(); i++) {
-            if (data.get(i) != null && !data.get(i).trim().isEmpty()) {
-                empty = false;
-                out.put(fileHeader.get(i), data.get(i));
-            }
-        }
-        if (empty || !out.containsKey(PATH)) {
-            return Optional.empty();
-        } else {
-            return Optional.of(out);
         }
     }
 }
