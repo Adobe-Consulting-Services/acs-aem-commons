@@ -44,21 +44,31 @@ public class Spreadsheet {
     private transient List<String> headerRow;
     private transient List<Map<String, String>> dataRows;
     private final List<String> requiredColumns;
+    private boolean enableHeaderNameConversion = true;
 
-    public Spreadsheet(InputStream file, String... required) throws IOException {
+    public Spreadsheet(boolean convertHeaderNames, InputStream file, String... required) throws IOException {
+        this.enableHeaderNameConversion = convertHeaderNames;
         if (required == null || required.length == 0) {
             requiredColumns = Collections.EMPTY_LIST;
         } else {
-            requiredColumns = Arrays.asList(required);
+            requiredColumns = Arrays.stream(required).map(this::convertHeaderName).collect(Collectors.toList());
         }
         parseInputFile(file);
+    }
+
+    public Spreadsheet(boolean convertHeaderNames, RequestParameter file, String... required) throws IOException {
+        this(convertHeaderNames, file.getInputStream(), required);
+        fileName = file.getFileName();
     }    
 
-    public Spreadsheet(RequestParameter file, String... required) throws IOException {
-        this(file.getInputStream(), required);
-        fileName = file.getFileName();
+    public Spreadsheet(InputStream file, String... required) throws IOException {
+        this(true, file, required);
     }
     
+    public Spreadsheet(RequestParameter file, String... required) throws IOException {
+        this(true, file, required);
+    }
+        
     /**
      * Parse out the input file synchronously for easier unit test validation
      *
@@ -74,9 +84,7 @@ public class Spreadsheet {
         final Iterator<Row> rows = sheet.rowIterator();
 
         headerRow = readRow(rows.next()).stream()
-                .map(s -> String.valueOf(s))
-                .map(String::toLowerCase)
-                .map(s -> s.replaceAll("[^0-9a-zA-Z:]+", "_"))
+                .map(this::convertHeaderName)
                 .collect(Collectors.toList());
 
         Iterable<Row> remainingRows = () -> rows;
@@ -177,5 +185,13 @@ public class Spreadsheet {
      */
     public List<String> getRequiredColumns() {
         return requiredColumns;
+    }
+    
+    public String convertHeaderName(String str) {
+        if (enableHeaderNameConversion) {
+            return String.valueOf(str).toLowerCase().replaceAll("[^0-9a-zA-Z:]+", "_");
+        } else {
+            return String.valueOf(str);
+        }
     }
 }
