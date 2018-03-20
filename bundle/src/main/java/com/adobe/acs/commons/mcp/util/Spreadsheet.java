@@ -34,24 +34,29 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.request.RequestParameter;
 
 /**
- * Simple abstraction of reading a single spreadsheet of values.
- * Expects a header row of named columns (case-sensitive)
+ * Simple abstraction of reading a single spreadsheet of values. Expects a header row of named columns (case-sensitive)
  * If provided, will also filter data rows missing required columns to prevent processing errors.
  */
 public class Spreadsheet {
-    private String fileName;
+
+    private String fileName = "unknown";
     private int rowCount;
     private transient List<String> headerRow;
     private transient List<Map<String, String>> dataRows;
-    private List<String> requiredColumns;
+    private final List<String> requiredColumns;
 
-    public Spreadsheet(RequestParameter file, String... required) throws IOException {
+    public Spreadsheet(InputStream file, String... required) throws IOException {
         if (required == null || required.length == 0) {
             requiredColumns = Collections.EMPTY_LIST;
         } else {
             requiredColumns = Arrays.asList(required);
         }
         parseInputFile(file);
+    }    
+
+    public Spreadsheet(RequestParameter file, String... required) throws IOException {
+        this(file.getInputStream(), required);
+        fileName = file.getFileName();
     }
     
     /**
@@ -60,28 +65,26 @@ public class Spreadsheet {
      * @return List of files that will be imported, including any renditions
      * @throws IOException if the file couldn't be read
      */
-    private void parseInputFile(RequestParameter importFile) throws IOException {
-        try (InputStream binaryData = importFile.getInputStream()) {
-            XSSFWorkbook workbook = new XSSFWorkbook(binaryData);
+    private void parseInputFile(InputStream file) throws IOException {
 
-            final XSSFSheet sheet = workbook.getSheetAt(0);
-            fileName = importFile.getFileName();
-            rowCount = sheet.getLastRowNum();
-            final Iterator<Row> rows = sheet.rowIterator();
+        XSSFWorkbook workbook = new XSSFWorkbook(file);
 
-            headerRow = readRow(rows.next()).stream()
-                    .map(s -> String.valueOf(s))
-                    .map(String::toLowerCase)
-                    .map(s -> s.replaceAll("[^0-9a-zA-Z:]+", "_"))
-                    .collect(Collectors.toList());
+        final XSSFSheet sheet = workbook.getSheetAt(0);
+        rowCount = sheet.getLastRowNum();
+        final Iterator<Row> rows = sheet.rowIterator();
 
-            Iterable<Row> remainingRows = () -> rows;
-            dataRows = StreamSupport.stream(remainingRows.spliterator(), false)
-                    .map(this::buildRow)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toList());
-        }
+        headerRow = readRow(rows.next()).stream()
+                .map(s -> String.valueOf(s))
+                .map(String::toLowerCase)
+                .map(s -> s.replaceAll("[^0-9a-zA-Z:]+", "_"))
+                .collect(Collectors.toList());
+
+        Iterable<Row> remainingRows = () -> rows;
+        dataRows = StreamSupport.stream(remainingRows.spliterator(), false)
+                .map(this::buildRow)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     private List<String> readRow(Row row) {
@@ -139,7 +142,7 @@ public class Spreadsheet {
         } else {
             return Optional.of(out);
         }
-    }    
+    }
 
     /**
      * @return the fileName
