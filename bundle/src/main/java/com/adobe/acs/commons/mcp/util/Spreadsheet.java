@@ -46,12 +46,12 @@ public class Spreadsheet {
     private List<String> requiredColumns;
 
     public Spreadsheet(RequestParameter file, String... required) throws IOException {
-        parseInputFile(file);
         if (required == null || required.length == 0) {
             requiredColumns = Collections.EMPTY_LIST;
         } else {
             requiredColumns = Arrays.asList(required);
         }
+        parseInputFile(file);
     }
     
     /**
