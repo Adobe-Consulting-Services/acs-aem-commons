@@ -266,7 +266,7 @@ public final class EnsureServiceUser {
                     acl.removeAccessControlEntry(ace);
 
                 } else {
-                    final Ace serviceUserAce = serviceUser.getAce(ace);
+                    final Ace serviceUserAce = serviceUser.getAce(ace, acl.getPath());
                     if (serviceUserAce == null) {
                         acl.removeAccessControlEntry(ace);
                         log.debug("Removed System ACE as it doesn't exist in Service User [ {} ] configuration", serviceUser.getPrincipalName());
