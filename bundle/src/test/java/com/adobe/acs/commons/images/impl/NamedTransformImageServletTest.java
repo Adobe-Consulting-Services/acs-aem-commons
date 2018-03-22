@@ -36,7 +36,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -77,6 +79,12 @@ public class NamedTransformImageServletTest {
     private NamedTransformImageServlet servlet;
 
     private MockSlingHttpServletRequest mockRequest;
+
+    @Mock
+    private Layer layer;
+
+    @Mock
+    private Rectangle rectangle;
 
     @Mock
     private Resource mockImageResource;
@@ -184,7 +192,7 @@ public class NamedTransformImageServletTest {
 
         final ValueMap imageTransformersWithParams = servlet.getImageTransformersWithParams(selectedNamedImageTransformers);
 
-        servlet.transform(mock(Layer.class), imageTransformersWithParams);
+        servlet.transform(mock(Layer.class), imageTransformersWithParams, mockRequest);
 
         org.mockito.Mockito.verify(resizeImageTransformer, times(1)).transform(any(Layer.class), any(ValueMap.class));
         org.mockito.Mockito.verify(greyscaleImageTransformer, times(1)).transform(any(Layer.class), any(ValueMap.class));
