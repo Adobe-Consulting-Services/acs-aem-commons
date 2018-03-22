@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.dam.RenditionPatternPicker;
+import com.adobe.acs.commons.images.CropConstants;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.PathInfoUtil;
@@ -147,6 +148,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final String TYPE_PROGRESSIVE = "progressive";
 
+    private static final String PROP_ADD_URL_PARAMETERS = "addUrlParams";
+
     private Pattern lastSuffixPattern = Pattern.compile(DEFAULT_FILENAME_PATTERN);
 
     private Map<String, NamedImageTransformer> namedImageTransformers =
@@ -227,7 +230,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
         
         // Transform the image
-        layer = this.transform(layer, imageTransformersWithParams);
+        layer = this.transform(layer, imageTransformersWithParams, request);
 
         // Get the quality
         final double quality = this.getQuality(mimeType,
@@ -253,9 +256,11 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      *
      * @param layer the Image layer
      * @param imageTransformersWithParams the transforms and their params
+     * @param request                     the SlingHttpServletRequest
      * @return the transformed Image layer
      */
-    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams) {
+    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams,
+            SlingHttpServletRequest request) {
 
         for (final String type : imageTransformersWithParams.keySet()) {
             if (StringUtils.equals(TYPE_QUALITY, type)) {
@@ -269,9 +274,16 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 continue;
             }
 
-            final ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
+            ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
 
             if (transformParams != null) {
+                if (Boolean.valueOf(transformParams.get(PROP_ADD_URL_PARAMETERS, false))) {
+                    LinkedHashMap<String, Object> cropParamsFromUrl = getCropParamsFromUrl(request);
+                    if(!cropParamsFromUrl.isEmpty()) {
+                        transformParams = new ValueMapDecorator(new LinkedHashMap<String, Object>(transformParams));
+                        transformParams.putAll(cropParamsFromUrl);
+                    }
+                }
                 layer = imageTransformer.transform(layer, transformParams);
             }
         }
@@ -470,6 +482,21 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 return MIME_TYPE_PNG;
             }
         }
+    }
+
+    private LinkedHashMap<String, Object> getCropParamsFromUrl(SlingHttpServletRequest request) {
+        LinkedHashMap<String, Object> urlParams = new LinkedHashMap<String, Object>();
+
+        String transformName = PathInfoUtil.getFirstSuffixSegment(request);
+        String extension = PathInfoUtil.getLastSuffixSegment(request);
+
+        String paramsString = StringUtils.substringBetween(request.getRequestURI(), transformName + "/", extension);
+        String[] params = StringUtils.split(paramsString, "/");
+        for (String param : params) {
+            urlParams.put(StringUtils.substringBefore(param, ":"),
+                    StringUtils.substringAfter(param, CropConstants.PARAM_SEPARATOR));
+        }
+        return urlParams;
     }
 
     /**
