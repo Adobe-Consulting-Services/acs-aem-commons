@@ -12,6 +12,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
 
+### Added
+
+- #1237 - Reporting feature: Adding a report column for finding references to a resource 
+
+### Fixed
+
+- #1286 - Error page handler now verifies parent resource is not a NonExistingResource
+- #1288 - Restrict the redirect map file upload to .txt file extension
+
 ## [3.14.10] - 2018-03-08
 
 ### Added
