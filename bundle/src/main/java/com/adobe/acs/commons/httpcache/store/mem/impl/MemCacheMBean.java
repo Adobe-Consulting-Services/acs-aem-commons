@@ -19,14 +19,14 @@
  */
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
-import com.adobe.acs.commons.util.impl.GenericCacheMBean;
+import com.adobe.acs.commons.util.impl.CacheMBean;
 import com.adobe.granite.jmx.annotation.Description;
 
 /**
  * JMX MBean for MEM cache store.
  */
 @Description("ACS AEM Commons - Http Cache - Mem Cache")
-public interface MemCacheMBean extends GenericCacheMBean {
+public interface MemCacheMBean extends CacheMBean {
 
     @Description("Cache TTL in Seconds. -1 value represent no TTL.")
     long getTtl();

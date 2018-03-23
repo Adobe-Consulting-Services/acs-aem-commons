@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>3.14.7-SNAPSHOT</version>
+        <version>3.14.11-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -57,7 +57,7 @@
                 <groupId>org.apache.sling</groupId>
                 <artifactId>maven-sling-plugin</artifactId>
                 <configuration>
-                    <slingUrl>http://${crx.host}:${crx.port}/apps/acs-commons/install</slingUrl>
+                    <slingUrl>http://${crx.host}:${crx.port}${crx.contextRoot}/apps/acs-commons/install</slingUrl>
                     <usePut>true</usePut>
                 </configuration>
             </plugin>

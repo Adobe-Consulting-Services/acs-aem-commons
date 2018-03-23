@@ -29,7 +29,7 @@
 								<fmt:message key="Redirect Map File" /> *
 							</label>
 							<div class="coral-InputGroup coral-Form-field">
-								<input is="coral-Textfield" class="coral-InputGroup-input coral-Textfield" type="file" name="./redirectMap.txt" />
+								<input is="coral-Textfield" class="coral-InputGroup-input coral-Textfield" type="file" name="./redirectMap.txt" accept=".txt" />
 							</div>
 							<coral-icon class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" icon="infoCircle" size="S" id="file-info" role="img" aria-label="info circle"></coral-icon>
 							<coral-tooltip variant="info" placement="right" target="#file-info" class="coral3-Tooltip coral3-Tooltip--info" aria-hidden="true" tabindex="-1" role="tooltip" style="display: none;">

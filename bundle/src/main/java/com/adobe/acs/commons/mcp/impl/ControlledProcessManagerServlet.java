@@ -19,8 +19,12 @@ import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -93,10 +97,25 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
                     throw new IllegalArgumentException("Action not understood.");
             }
         } catch (Exception ex) {
-                result = "Exception occurred " + ex.getMessage();
+            result = "Exception occurred " + ex.getMessage();
             LOG.error(ex.getMessage() + " -- End of line.", ex);
         }
-        Gson gson = new Gson();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.addSerializationExclusionStrategy(new ExclusionStrategy() {
+            @Override
+            public boolean shouldSkipField(FieldAttributes fa) {
+                return (fa.hasModifier(Modifier.TRANSIENT) || fa.hasModifier(Modifier.VOLATILE));
+            }
+
+            @Override
+            public boolean shouldSkipClass(Class<?> type) {
+                return !type.isArray()
+                        && !type.isPrimitive()
+                        && type.getPackage().getName().startsWith("java.io");
+            }
+        });
+        gsonBuilder.disableInnerClassSerialization();
+        Gson gson = gsonBuilder.create();
         gson.toJson(result, response.getWriter());
     }
 
@@ -171,19 +190,14 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
                         entry -> {
                             final RequestParameter[] values = entry.getValue();
 
-                            try {
-                                if (values.length == 1) {
-                                    if (values[0].getFileName() != null) {
-                                        return values[0].getInputStream();
-                                    } else {
-                                        return values[0].getString();
-                                    }
+                            if (values.length == 1) {
+                                if (values[0].getFileName() != null) {
+                                    return values[0];
                                 } else {
-                                    return Arrays.stream(values).collect(Collectors.toList());
+                                    return values[0].getString();
                                 }
-                            } catch (IOException e) {
-                                LOG.error("Unable to get InputStream for uploaded file [ {} ]", entry.getKey(), e);
-                                return null;
+                            } else {
+                                return Arrays.stream(values).collect(Collectors.toList());
                             }
                         }
                 ));

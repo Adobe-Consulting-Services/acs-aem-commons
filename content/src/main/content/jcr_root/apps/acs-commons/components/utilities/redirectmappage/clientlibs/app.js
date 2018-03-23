@@ -33,7 +33,7 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
                 url: $form.attr('action'),
                 data: new FormData($form[0]),
                 cache: false,
-                contentType: 'multipart/form-data',
+                contentType: false,
                 processData: false,
                 type: 'POST',
                 success: function(data){

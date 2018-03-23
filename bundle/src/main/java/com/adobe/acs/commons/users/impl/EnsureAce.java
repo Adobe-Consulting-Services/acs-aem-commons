@@ -1,21 +1,12 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
+ * #%L ACS AEM Commons Bundle %% Copyright (C) 2015 Adobe %% Licensed under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License. #L%
  */
 
 package com.adobe.acs.commons.users.impl;
@@ -111,7 +102,7 @@ public class EnsureAce {
                     acl.removeAccessControlEntry(ace);
 
                 } else {
-                    final Ace serviceUserAce = authorizable.getAce(ace);
+                    final Ace serviceUserAce = authorizable.getAce(ace, acl.getPath());
                     if (serviceUserAce == null) {
                         acl.removeAccessControlEntry(ace);
                         log.debug("Removed System ACE as it doesn't exist in Service User [ {} ] configuration",
@@ -253,9 +244,9 @@ public class EnsureAce {
             try {
                 Resource aceResource = resourceResolver.getResource(hit.getPath());
 
-                //first parent is the rep:policy node
-                //second parent (grand-parent) is the content node this ACE controls
-                //that is the node we need to use the JackrabbitAccessControlManager api
+                // first parent is the rep:policy node
+                // second parent (grand-parent) is the content node this ACE controls
+                // that is the node we need to use the JackrabbitAccessControlManager api
                 Resource contentResource = aceResource.getParent().getParent();
 
                 if (!paths.contains(contentResource.getPath())) {

@@ -23,7 +23,6 @@ import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
@@ -40,13 +39,15 @@ import java.util.stream.Collectors;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
 import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
+import java.io.IOException;
+import org.apache.sling.api.request.RequestParameter;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
  */
 public class AnnotatedFieldDeserializer {
 
-    private static final Logger log = LoggerFactory.getLogger(AnnotatedFieldDeserializer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AnnotatedFieldDeserializer.class);
 
     public static void deserializeFormFields(Object target, ValueMap input) throws DeserializeException {
         List<Field> fields = FieldUtils.getFieldsListWithAnnotation(target.getClass(), FormField.class);
@@ -89,9 +90,17 @@ public class AnnotatedFieldDeserializer {
                 val = ((Object[]) value)[0];
             }
 
-            if (val instanceof InputStream) {
+            if (val instanceof RequestParameter) {
                 /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
-                FieldUtils.writeField(field, target, val, true);
+                if (field.getType() == RequestParameter.class) {
+                    FieldUtils.writeField(field, target, val, true);
+                } else {
+                    try {
+                        FieldUtils.writeField(field, target, ((RequestParameter) val).getInputStream(), true);
+                    } catch (IOException ex) {
+                        LOG.error("Unable to get InputStream for uploaded file [ {} ]", ((RequestParameter) val).getName(), ex);
+                    }
+                }
             } else{
                 parseInputValue(target, String.valueOf(val), field);
             }
@@ -181,7 +190,7 @@ public class AnnotatedFieldDeserializer {
                         component.setup(f.getName(), f, fieldDefinition, sling);
                         return component;
                     } catch (InstantiationException | IllegalAccessException ex) {
-                        log.error("Unable to instantiate field component for " + f.getName(), ex);
+                        LOG.error("Unable to instantiate field component for " + f.getName(), ex);
                     }
                     return null;
                 }, (a, b) -> a, LinkedHashMap::new));
