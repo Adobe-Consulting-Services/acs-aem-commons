@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
@@ -26,20 +26,24 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.mime.MimeTypeService;
 
+/**
+ * Factory for asset import processes
+ */
 @Component
 @Service(ProcessDefinitionFactory.class)
-public class FileAssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFactory<FileAssetIngestor> {
+public class UrlAssetImportFactory extends AdministratorsOnlyProcessDefinitionFactory<UrlAssetImport> {
 
     @Reference
-    MimeTypeService mimetypeService;
+    transient private MimeTypeService mimeTypeService;
+
+    @Override
+    protected UrlAssetImport createProcessDefinitionInstance() {
+        return new UrlAssetImport(mimeTypeService);
+    }
 
     @Override
     public String getName() {
-        return "Asset Ingestor";
+        return "URL Asset Import";
     }
-
-    @Override
-    public FileAssetIngestor createProcessDefinitionInstance() {
-        return new FileAssetIngestor(mimetypeService);
-    }
+    
 }

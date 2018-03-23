@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.Actions;
@@ -90,7 +90,8 @@ public class FileAssetIngestor extends AssetIngestor {
                 if (canImportFile(fs)) {
                     manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fs, manager)));
                 } else {
-                    filesSkipped.incrementAndGet();
+                    incrementCount(skippedFiles, 1);
+                    trackDetailedActivity(fs.getName(), "Skip", "Skipping file", 0L);
                 }
             });        
         });

@@ -17,47 +17,29 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
-import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.commons.mime.MimeTypeService;
 
 @Component
 @Service(ProcessDefinitionFactory.class)
-public class S3AssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFactory<ProcessDefinition> {
+public class FileAssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFactory<FileAssetIngestor> {
 
     @Reference
     MimeTypeService mimetypeService;
 
     @Override
     public String getName() {
-        return "S3 Asset Ingestor";
+        return "Asset Ingestor";
     }
 
     @Override
-    public ProcessDefinition createProcessDefinitionInstance() {
-        return new S3AssetIngestor(mimetypeService);
-    }
-
-    @Override
-    public boolean isAllowed(User user) {
-        if (super.isAllowed(user)) {
-            // check if S3 SDK is available
-            try {
-                new AmazonS3Client();
-                return true;
-            } catch (NoClassDefFoundError e) {
-                // ignore
-            }
-        }
-        return false;
+    public FileAssetIngestor createProcessDefinitionInstance() {
+        return new FileAssetIngestor(mimetypeService);
     }
 }

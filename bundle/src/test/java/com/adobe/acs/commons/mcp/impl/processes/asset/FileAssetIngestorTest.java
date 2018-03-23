@@ -17,8 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.asset;
 
+import com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestor;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.day.cq.dam.api.AssetManager;

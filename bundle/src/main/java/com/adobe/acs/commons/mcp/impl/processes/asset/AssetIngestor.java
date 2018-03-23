@@ -17,12 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
@@ -45,22 +46,37 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class AssetIngestor extends ProcessDefinition {
-    private final MimeTypeService mimetypeService;
+
+    transient protected final MimeTypeService mimetypeService;
 
     @SuppressWarnings("squid:S00115")
-    public enum AssetAction {
+    static public enum AssetAction {
         skip, version, replace
     }
 
     public AssetIngestor(MimeTypeService mimeTypeService) {
         this.mimetypeService = mimeTypeService;
     }
+
+    @FormField(
+            name = "Dry run",
+            description = "If checked, no import happens.  Useful for data validation",
+            component = CheckboxComponent.class
+    )
+    boolean dryRunMode = false;
+
+    @FormField(
+            name = "Detailed report",
+            description = "If checked, information about every asset is recorded",
+            component = CheckboxComponent.class,
+            options = "checked"
+    )
+    boolean detailedReport = true;
 
     @FormField(
             name = "Target JCR Folder",
@@ -70,7 +86,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
             required = true,
             options = {"default=/content/dam", "base=/content/dam"}
     )
-    String jcrBasePath;
+    String jcrBasePath = "/content/dam";
     @FormField(
             name = "Ignore folders",
             description = "List of folder names to be ignored",
@@ -102,31 +118,70 @@ public abstract class AssetIngestor extends ProcessDefinition {
             name = "Existing action",
             description = "What to do if an asset exists",
             component = RadioComponent.EnumerationSelector.class,
-            options={"default=skip","vertical"}
+            options = {"default=skip", "vertical"}
     )
-    AssetAction existingAssetAction;
+    transient private AssetAction existingAssetAction;
     @FormField(
             name = "Minimum size",
             description = "Min size to import (in bytes), 0=none",
             hint = "1024...",
             options = {"default=1024"}
     )
-    long minimumSize;
+    transient private long minimumSize;
     @FormField(
             name = "Maximum size",
             description = "Max size to import (in bytes), 0=none",
             hint = "1gb = 1073741824",
             options = {"default=1073741824"}
     )
-    long maximumSize;
+    transient private long maximumSize;
 
     protected static final String DEFAULT_FOLDER_TYPE = "sling:Folder";
     protected static final String CHANGED_BY_WORKFLOW = "changedByWorkflowProcess";
 
-    AtomicInteger folderCount = new AtomicInteger();
-    AtomicInteger assetCount = new AtomicInteger();
-    AtomicInteger filesSkipped = new AtomicInteger();
-    AtomicLong totalImportedData = new AtomicLong();
+    EnumMap<ReportColumns, Object> createdFolders
+            = trackActivity("All folders", "Create", "Count of all folders created", 0L);
+    EnumMap<ReportColumns, Object> importedAssets
+            = trackActivity("All Assets", "Import", "Count of all assets imports", 0L);
+    EnumMap<ReportColumns, Object> skippedFiles
+            = trackActivity("All Assets", "Skipped", "Count of skipped files", 0L);
+    EnumMap<ReportColumns, Object> importedData
+            = trackActivity("All Assets", "Data imported", "Count of bytes imported", 0L);
+
+    @SuppressWarnings("squid:S00115")
+    public static enum ReportColumns {
+        item, action, description, count, @FieldFormat(ValueFormat.storageSize) bytes
+    }
+
+    List<EnumMap<ReportColumns, Object>> reportRows;
+
+    private synchronized EnumMap<ReportColumns, Object> trackActivity(String item, String action, String description, Long bytes) {
+        if (reportRows == null) {
+            reportRows = Collections.synchronizedList(new ArrayList<>());
+        }
+        EnumMap<ReportColumns, Object> reportRow = new EnumMap<>(ReportColumns.class);
+        reportRow.put(ReportColumns.item, item);
+        reportRow.put(ReportColumns.action, action);
+        reportRow.put(ReportColumns.description, description);
+        reportRow.put(ReportColumns.count, 0);
+        reportRow.put(ReportColumns.bytes, bytes);
+        reportRows.add(reportRow);
+        return reportRow;
+    }
+    
+    protected synchronized EnumMap<ReportColumns, Object> trackDetailedActivity(String item, String action, String description, Long bytes) {
+        if (detailedReport) {
+            return trackActivity(item, action, description, bytes);
+        } else {
+            return null;
+        }
+    }    
+
+    protected void incrementCount(EnumMap<ReportColumns, Object> row, long amt) {
+        synchronized (row) {
+            row.put(ReportColumns.count, (long) row.getOrDefault(ReportColumns.count, 0) + amt);
+        }
+    }
 
     @Override
     public void init() throws RepositoryException {
@@ -146,23 +201,32 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @SuppressWarnings("squid:S00112")
     private void createAsset(Source source, String assetPath, ResourceResolver r, boolean versioning) throws Exception {
-        r.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(CHANGED_BY_WORKFLOW);
-        AssetManager assetManager = r.adaptTo(AssetManager.class);
-        String type = mimetypeService.getMimeType(source.getName());
-        if (versioning) {
-            //is asset is null, no version gets created
-            Asset asset = r.getResource(assetPath).adaptTo(Asset.class);
-            //once you are past this first version, default behavior is to start numbering 1.0, 1.1 and so on
-            assetManager.createRevision(asset, "initial version of asset", asset.getName());
+        boolean versioned = false;
+        if (!dryRunMode) {
+            r.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(CHANGED_BY_WORKFLOW);
+            AssetManager assetManager = r.adaptTo(AssetManager.class);
+            String type = mimetypeService.getMimeType(source.getName());
+            if (versioning) {
+                //if asset is null, no version gets created
+                Asset asset = r.getResource(assetPath).adaptTo(Asset.class);
+                versioned = asset != null;
+                //once you are past this first version, default behavior is to start numbering 1.0, 1.1 and so on
+                assetManager.createRevision(asset, "initial version of asset", asset.getName());
+                r.commit();
+                r.refresh();
+                //once version is committed we are safe to create, which only replaces the original version
+            }
+            assetManager.createAsset(assetPath, source.getStream(), type, false);
             r.commit();
             r.refresh();
-            //once version is committed we are safe to create, which only replaces the original version
         }
-        assetManager.createAsset(assetPath, source.getStream(), type, false);
-        r.commit();
-        r.refresh();
-        totalImportedData.accumulateAndGet(source.getLength(), (p,x) -> p+x);
-        assetCount.incrementAndGet();
+        if (versioned) {
+            trackDetailedActivity(assetPath, "Revised", "Created new version of asset", source.getLength());
+        } else {
+            trackDetailedActivity(assetPath, "Create", "Imported asset", source.getLength());
+        }
+        incrementCount(importedData, source.getLength());
+        incrementCount(importedAssets, 1L);
     }
 
     protected void handleExistingAsset(Source source, String assetPath, ResourceResolver r) throws Exception {
@@ -172,7 +236,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 if (r.getResource(assetPath) == null) {
                     createAsset(source, assetPath, r, false);
                 } else {
-                    filesSkipped.incrementAndGet();
+                    incrementCount(skippedFiles, 1L);
+                    trackDetailedActivity(assetPath, "Skip", "Skipped existing asset", 0L);
                 }
                 break;
             case replace:
@@ -188,6 +253,9 @@ public abstract class AssetIngestor extends ProcessDefinition {
     protected boolean createFolderNode(HierarchialElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
         if (el == null || !el.isFolder()) {
             return false;
+        }
+        if (dryRunMode) {
+            return true;
         }
         String folderPath = el.getNodePath();
         String name = el.getName();
@@ -214,7 +282,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
             createFolderNode(parent, r);
         }
         Node child = s.getNode(parentPath).addNode(el.getNodeName(), DEFAULT_FOLDER_TYPE);
-        folderCount.incrementAndGet();
+        trackDetailedActivity(el.getNodePath(), "Create Folder", "Create folder", 0L);
+        incrementCount(createdFolders, 1L);
         if (!folderPath.equals(jcrBasePath)) {
             child.setProperty(JcrConstants.JCR_TITLE, name);
         }
@@ -250,7 +319,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
         if (name.contains(".")) {
             int extPos = name.lastIndexOf('.');
-            String ext = name.substring(extPos+1);
+            String ext = name.substring(extPos + 1);
             if (ignoreExtensionList.contains(ext)) {
                 return false;
             }
@@ -281,21 +350,11 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
-    @SuppressWarnings("squid:S00115")
-    enum ReportColumns {folder_count, asset_count, files_skipped, @FieldFormat(ValueFormat.storageSize) data_imported}
-
-    GenericReport report = new GenericReport();
+    transient private GenericReport report = new GenericReport();
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
-        EnumMap<ReportColumns, Object> values = new EnumMap<>(ReportColumns.class);
-        List<EnumMap<ReportColumns,Object>> rows = new ArrayList<>();
-        rows.add(values);
-        values.put(ReportColumns.folder_count, folderCount);
-        values.put(ReportColumns.asset_count, assetCount);
-        values.put(ReportColumns.files_skipped, filesSkipped);
-        values.put(ReportColumns.data_imported, totalImportedData);
-        report.setRows(rows, ReportColumns.class);
+        report.setRows(reportRows, ReportColumns.class);
         report.persist(rr, instance.getPath() + "/jcr:content/report");
     }
 
