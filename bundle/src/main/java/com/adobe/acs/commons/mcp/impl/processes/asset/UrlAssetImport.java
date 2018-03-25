@@ -73,8 +73,16 @@ public class UrlAssetImport extends AssetIngestor {
             component = FileUploadComponent.class,
             required = true
     )
-
     transient RequestParameter importFile;
+    
+    @FormField(
+            name = "Default prefix",
+            description = "Added to source if it starts with / e.g. file:/ | file:/C: | http://www.somewebsite",
+            required = true,
+            options = ("default=file:/")
+    )
+    private String defaultPrefix = "file:/";
+    
     transient Set<FileOrRendition> files;
     transient Map<String, Folder> folders = new TreeMap<>();
 
@@ -227,6 +235,9 @@ public class UrlAssetImport extends AssetIngestor {
         String source = assetData.get(SOURCE);
         if (source == null) {
             return null;
+        }
+        if (source.startsWith("/")) {
+            source = defaultPrefix + source;
         }
         String name = source.substring(source.lastIndexOf('/') + 1);
         Folder folder = extractFolder(assetData);
