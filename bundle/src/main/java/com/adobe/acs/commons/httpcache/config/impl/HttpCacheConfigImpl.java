@@ -142,12 +142,13 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Property(label = "Cache store",
               description = "Cache store for caching the response for this request URI. Example - MEM. This should "
                       + "be one of the cache stores active in this installation. Mandatory parameter.",
-              propertyPrivate = true, // Made private as only MEM implementation available now.
+              propertyPrivate = false,
               options = {
                       @PropertyOption(name = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
                                          value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE),
-                      @PropertyOption(name = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
-                                      value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE),
+                      // Only MEM and JCR implementations are available now.
+                      //@PropertyOption(name = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
+                      //                value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE),
                       @PropertyOption(name = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
                                       value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE)
               },

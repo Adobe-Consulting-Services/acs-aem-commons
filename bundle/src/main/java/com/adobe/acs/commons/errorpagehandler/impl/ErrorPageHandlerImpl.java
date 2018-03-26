@@ -541,7 +541,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Quick check for the Parent; Handles common case of deactivated pages
         final Resource parent = resource.getParent();
-        if (parent != null) {
+        if (parent != null && !ResourceUtil.isNonExistingResource(resource)) {
             log.debug("Found real aggregate resource via getParent() at [ {} ]", parent.getPath());
             return parent;
         }

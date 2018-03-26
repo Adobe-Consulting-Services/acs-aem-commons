@@ -137,6 +137,7 @@ public final class ProtectedSystemUsers {
                 "acs-commons-dispatcher-flush-service",
                 "acs-commons-twitter-updater-service",
                 "acs-commons-review-task-asset-mover-service",
+                "acs-commons-httpcache-jcr-storage-service",
                 "acs-commons-automatic-package-replicator-service",
                 "acs-commons-manage-controlled-processes-service"
     };
