@@ -7,15 +7,32 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.8...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.10...HEAD
 
 ### Added
 
+- #1237 - Reporting feature: Adding a report column for finding references to a resource 
+
+### Fixed
+
+- #1286 - Error page handler now verifies parent resource is not a NonExistingResource
+- #1288 - Restrict the redirect map file upload to .txt file extension
+
+## [3.14.10] - 2018-03-08
+
+### Added
+
+- #1247 - Added the new component for dynamically population of dropdown in Report Builder Parameter
 - #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
 - #1242 - New ResourceUtil utility class.
 - #1245 - On-Deploy Scripts Framework
 - #1255 - Add trimming to the dispatcher flush rules to allow multi line xml configs
 - #1256 - Allow adding of context root maven property for deploying acs-aem-commons locally
+- #1274 - MCP now supports RequestParameter in process definitions.  This gives access to file binary and other metadata such as name and size.
+
+### Fixed
+
+- #1260 - MCP serialization issue; using file upload would break the UI if large files were uploaded
 
 ## [3.14.8] - 2018-02-13
 
