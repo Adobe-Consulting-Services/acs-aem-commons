@@ -194,7 +194,7 @@ public class S3AssetIngestorTest {
         assertFalse(context.resourceResolver().hasChanges());
         assertEquals(3, ingestor.getCount(ingestor.importedAssets));
         assertEquals(3, ingestor.getCount(ingestor.createdFolders));
-        assertEquals(FILE_SIZE * 3, ingestor.importedData.get(ReportColumns.bytes));
+        assertEquals(FILE_SIZE * 3, (long) ingestor.importedData.get(ReportColumns.bytes));
         verify(assetManager, times(3)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals(Arrays.asList("/content/dam/folder1/image.png", "/content/dam/folder2/folder3/image.png", "/content/dam/image.png"), assetPathCaptor.getAllValues());
 
@@ -215,7 +215,7 @@ public class S3AssetIngestorTest {
         assertNull(context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
         assertEquals(1, ingestor.getCount(ingestor.importedAssets));
         assertEquals(0, ingestor.getCount(ingestor.createdFolders));
-        assertEquals(FILE_SIZE, ingestor.importedData.get(ReportColumns.bytes));
+        assertEquals(FILE_SIZE, (long)  ingestor.importedData.get(ReportColumns.bytes));
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 
@@ -238,7 +238,7 @@ public class S3AssetIngestorTest {
         assertEquals("testTitle", context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
         assertEquals(1, ingestor.getCount(ingestor.importedAssets));
         assertEquals(0, ingestor.getCount(ingestor.createdFolders));
-        assertEquals(FILE_SIZE, ingestor.importedData.get(ReportColumns.bytes));
+        assertEquals(FILE_SIZE, (long) ingestor.importedData.get(ReportColumns.bytes));
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 
@@ -263,7 +263,7 @@ public class S3AssetIngestorTest {
         assertFalse(context.resourceResolver().hasChanges());
         assertEquals(1, ingestor.getCount(ingestor.importedAssets));
         assertEquals(1, ingestor.getCount(ingestor.createdFolders));
-        assertEquals(FILE_SIZE, ingestor.importedData.get(ReportColumns.bytes));
+        assertEquals(FILE_SIZE, (long) ingestor.importedData.get(ReportColumns.bytes));
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/folder3/image.png", assetPathCaptor.getValue());
 

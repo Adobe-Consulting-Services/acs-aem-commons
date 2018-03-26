@@ -205,7 +205,7 @@ public class FileAssetIngestorTest {
         assertFalse(context.resourceResolver().hasChanges());
         assertEquals(3, ingestor.getCount(ingestor.importedAssets));
         assertEquals(3, ingestor.getCount(ingestor.createdFolders));
-        assertEquals(FILE_SIZE * 3, ingestor.importedData.get(AssetIngestor.ReportColumns.bytes));
+        assertEquals(FILE_SIZE * 3, (long) ingestor.importedData.get(AssetIngestor.ReportColumns.bytes));
         verify(assetManager, times(3)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertThat(assetPathCaptor.getAllValues(),
                 containsInAnyOrder("/content/dam/folder1/image.png", "/content/dam/folder2/folder3/image.png", "/content/dam/image.png"));
@@ -229,7 +229,7 @@ public class FileAssetIngestorTest {
         assertNull(context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
         assertEquals(1, ingestor.getCount(ingestor.importedAssets));
         assertEquals(0, ingestor.getCount(ingestor.createdFolders));
-        assertEquals(FILE_SIZE, ingestor.importedData.get(AssetIngestor.ReportColumns.bytes));
+        assertEquals(FILE_SIZE, (long) ingestor.importedData.get(AssetIngestor.ReportColumns.bytes));
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 
@@ -253,7 +253,7 @@ public class FileAssetIngestorTest {
         assertEquals("testTitle", context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
         assertEquals(1, ingestor.getCount(ingestor.importedAssets));
         assertEquals(0, ingestor.getCount(ingestor.createdFolders));
-        assertEquals(FILE_SIZE, ingestor.importedData.get(AssetIngestor.ReportColumns.bytes));
+        assertEquals(FILE_SIZE, (long) ingestor.importedData.get(AssetIngestor.ReportColumns.bytes));
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 

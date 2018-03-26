@@ -177,11 +177,20 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }    
 
-    protected void incrementCount(EnumMap<ReportColumns, Object> row, long amt) {
+    private void increment(EnumMap<ReportColumns, Object> row, ReportColumns col, long amt) {
         synchronized (row) {
-            row.put(ReportColumns.count, (Long) row.getOrDefault(ReportColumns.count, 0) + amt);
+            row.put(col, (Long) row.getOrDefault(col, 0) + amt);
         }
     }
+    
+    protected void incrementCount(EnumMap<ReportColumns, Object> row, long amt) {
+        increment(row, ReportColumns.count, amt);
+    }
+    
+    protected void incrementBytes(EnumMap<ReportColumns, Object> row, long amt) {
+        increment(row, ReportColumns.bytes, amt);
+    }    
+    
     
     protected long getCount(EnumMap<ReportColumns, Object> row) {
         return (long) row.getOrDefault(ReportColumns.count, 0);
@@ -229,7 +238,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         } else {
             trackDetailedActivity(assetPath, "Create", "Imported asset", source.getLength());
         }
-        incrementCount(importedData, source.getLength());
+        incrementBytes(importedData, source.getLength());
         incrementCount(importedAssets, 1L);
     }
 
