@@ -120,7 +120,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
             component = RadioComponent.EnumerationSelector.class,
             options = {"default=skip", "vertical"}
     )
-    transient private AssetAction existingAssetAction;
+    transient protected AssetAction existingAssetAction;
     @FormField(
             name = "Minimum size",
             description = "Min size to import (in bytes), 0=none",
@@ -163,7 +163,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         reportRow.put(ReportColumns.item, item);
         reportRow.put(ReportColumns.action, action);
         reportRow.put(ReportColumns.description, description);
-        reportRow.put(ReportColumns.count, 0);
+        reportRow.put(ReportColumns.count, 0L);
         reportRow.put(ReportColumns.bytes, bytes);
         reportRows.add(reportRow);
         return reportRow;
@@ -179,8 +179,12 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     protected void incrementCount(EnumMap<ReportColumns, Object> row, long amt) {
         synchronized (row) {
-            row.put(ReportColumns.count, (long) row.getOrDefault(ReportColumns.count, 0) + amt);
+            row.put(ReportColumns.count, (Long) row.getOrDefault(ReportColumns.count, 0) + amt);
         }
+    }
+    
+    protected long getCount(EnumMap<ReportColumns, Object> row) {
+        return (long) row.getOrDefault(ReportColumns.count, 0);
     }
 
     @Override
