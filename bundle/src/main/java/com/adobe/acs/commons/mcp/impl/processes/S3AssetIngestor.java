@@ -153,7 +153,7 @@ public class S3AssetIngestor extends AssetIngestor {
             }
         });
         if (listing.isTruncated()) {
-            createFolders(manager, s3Client.listNextBatchOfObjects(listing));
+        	importAssets(manager, s3Client.listNextBatchOfObjects(listing));
         }
     }
 
