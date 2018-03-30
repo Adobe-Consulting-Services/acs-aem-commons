@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.10...HEAD
 
+### Changed
+- #1284 - Expose the shared and global properties resources via bindings.
+
 ### Added
 
 - #1237 - Reporting feature: Adding a report column for finding references to a resource 
