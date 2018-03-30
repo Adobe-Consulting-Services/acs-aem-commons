@@ -90,7 +90,7 @@
 
             if (cellSearchPathInfo) {
                 for(var i = 0; i < parNames.length; i++) {
-                    var prop = parNames[i];
+                    var prop = parNames[i].replace(/_\d+$/, "");
                     if (_.has(cellSearchPathInfo, prop)) { 
                         cellSearchPathInfo = cellSearchPathInfo[prop];
                     } 
