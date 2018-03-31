@@ -45,7 +45,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
@@ -122,6 +124,10 @@ public class AbstractDispatcherCacheHeaderFilterTest {
 
         when(request.getMethod()).thenReturn("GET");
         when(request.getParameterMap()).thenReturn(params);
+
+        final Map<String, Object> attributes = new HashMap<>();
+        doAnswer(i -> attributes.put(i.getArgumentAt(0, String.class), i.getArgumentAt(1, Object.class))).when(request).setAttribute(any(), any());
+        when(request.getAttribute(any())).thenAnswer(i -> attributes.get(i.getArgumentAt(0, String.class)));
     }
 
     @After
@@ -336,8 +342,24 @@ public class AbstractDispatcherCacheHeaderFilterTest {
         verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
+        verify(request).getAttribute("com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.header.Header Name");
+        verify(request).setAttribute(eq("com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.header.Header Name"), any());
         verify(response).addHeader(headerName, headerValue);
         verifyNoMoreInteractions(request, this.request, response, chain);
+    }
+
+
+    @Test
+    public void testMultipleFilters() throws Exception {
+        agents.add(AbstractDispatcherCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
+                .thenAnswer(i -> Collections.enumeration(agents));
+
+        filter.doFilter(request, response, chain);
+        filter.doFilter(request, response, chain);
+
+        verify(response, times(1)).addHeader(headerName, headerValue);
+
     }
 
 }

@@ -81,6 +81,8 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
      */
     protected abstract void doActivate(ComponentContext context) throws Exception;
 
+    private static final Object MARKER = new Object();
+
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
 
@@ -101,8 +103,14 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
         if (this.accepts(request)) {
             String header = getHeaderName();
             String val = getHeaderValue();
-            log.debug("Adding header {}: {}", header, val);
-            response.addHeader(header, val);
+            String attributeName = AbstractDispatcherCacheHeaderFilter.class.getName() + ".header." + header;
+            if (request.getAttribute(attributeName) == null) {
+                log.debug("Adding header {}: {}", header, val);
+                response.addHeader(header, val);
+                request.setAttribute(attributeName, MARKER);
+            } else {
+                log.debug("Header {} was already set. Skipping.", header);
+            }
         }
         filterChain.doFilter(request, response);
     }
