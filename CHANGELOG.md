@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1288 - Restrict the redirect map file upload to .txt file extension
 - #1272 - Ensure Service User service is not restricted ACE by path
 - #1142 - Make sure report tabulation is thread-safe
+- #1298 - Ensure that dispatcher cache headers are only written once per header name
 
 ## [3.14.10] - 2018-03-08
 
