@@ -24,3 +24,4 @@ content/src/main/content/jcr_root/etc/clientlibs/.content.xml
 .pmd
 .metadata
 
+/bundle/nbproject/

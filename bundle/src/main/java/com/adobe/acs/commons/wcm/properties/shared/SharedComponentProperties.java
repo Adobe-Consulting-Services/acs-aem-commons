@@ -28,6 +28,9 @@ public interface SharedComponentProperties {
     String GLOBAL_PROPERTIES = "globalProperties";
     String MERGED_PROPERTIES = "mergedProperties";
 
+    String SHARED_PROPERTIES_RESOURCE = SHARED_PROPERTIES + "Resource";
+    String GLOBAL_PROPERTIES_RESOURCE = GLOBAL_PROPERTIES + "Resource";
+
     String NN_GLOBAL_COMPONENT_PROPERTIES = "global-component-properties";
     String NN_SHARED_COMPONENT_PROPERTIES = "shared-component-properties";
 }

@@ -9,6 +9,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.10...HEAD
 
+### Changed
+- #1284 - Expose the shared and global properties resources via bindings.
+
+### Added
+
+- #1237 - Reporting feature: Adding a report column for finding references to a resource 
+
+### Fixed
+
+- #1291 - S3 Asset Ingestor stops after 1000 Assets attempting to be imported
+- #1286 - Error page handler now verifies parent resource is not a NonExistingResource
+- #1288 - Restrict the redirect map file upload to .txt file extension
+- #1298 - Ensure that dispatcher cache headers are only written once per header name
+
 ## [3.14.10] - 2018-03-08
 
 ### Added

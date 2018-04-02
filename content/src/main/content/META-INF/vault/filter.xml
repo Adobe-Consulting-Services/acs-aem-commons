@@ -99,5 +99,12 @@
         <include pattern="/var/acs-commons/reports"/>
         <include pattern="/var/acs-commons/reports/jcr:content"/>
         <include pattern="/etc/acs-commons/reports(.*)?" mode="merge"/>
+        <include pattern="/var/acs-commons/httpcache"/>
     </filter>
+    <filter root="/etc/notification/email">
+        <include pattern="/etc/notification/email/rep:policy"/>
+        <include pattern="/etc/notification/email/acs-commons"/>
+        <include pattern="/etc/notification/email/acs-commons/(.*)?"/>
+    </filter>
+    <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
 </workspaceFilter>

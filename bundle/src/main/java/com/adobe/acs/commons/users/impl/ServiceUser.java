@@ -91,9 +91,9 @@ public final class ServiceUser {
         return aces;
     }
 
-    public Ace getAce(JackrabbitAccessControlEntry actual) throws RepositoryException {
+    public Ace getAce(JackrabbitAccessControlEntry actual, String path) throws RepositoryException {
         for (Ace ace : getAces()) {
-            if (ace.isSameAs(actual)) {
+            if (StringUtils.equals(path, ace.getContentPath()) && ace.isSameAs(actual)) {
                 return ace;
             }
         }
