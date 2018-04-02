@@ -147,6 +147,9 @@ var ScriptRunner = {
                 for (i = 0; i < response.length; i++) {
                     process = response[i];
                     noErrors = noErrors && ScriptRunner.cleanProcessObject(process);
+                    if (!noErrors) {
+                        break;
+                    }
                     if (process.infoBean.isRunning) {
                         ScriptRunner.watchList.push(process.id);
                     }
@@ -204,6 +207,9 @@ var ScriptRunner = {
                         for (i = 0; i < statusList.length; i++) {
                             process = statusList[i];
                             noErrors = noErrors && ScriptRunner.cleanProcessObject(process);
+                            if (!noErrors) {
+                                break;
+                            }
                             processRow = jQuery(ScriptRunner.processTable).find("#process-" + process.id);
                             if (process.infoBean.isRunning) {
                                 ScriptRunner.watchList.push(process.id);
