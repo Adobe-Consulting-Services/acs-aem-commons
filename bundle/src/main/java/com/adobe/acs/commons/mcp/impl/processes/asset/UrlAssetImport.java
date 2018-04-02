@@ -254,16 +254,12 @@ public class UrlAssetImport extends AssetIngestor {
     private String getTargetFolder(Map<String, String> assetData) {
         String target = assetData.get(TARGET_FOLDER);
         if (target == null || target.isEmpty()) {
-            return guessTargetFolder(assetData);
+            return UNKNOWN_TARGET_FOLDER;
         } else if (!target.startsWith(CONTENT_BASE)) {
             return jcrBasePath + (target.startsWith("/") ? target : ("/" + target));
         } else {
             return target;
         }
-    }
-
-    private String guessTargetFolder(Map<String, String> assetData) {
-        return UNKNOWN_TARGET_FOLDER;
     }
 
     private Optional<FileOrRendition> findOriginalRendition(Collection<FileOrRendition> allFiles, FileOrRendition rendition) {

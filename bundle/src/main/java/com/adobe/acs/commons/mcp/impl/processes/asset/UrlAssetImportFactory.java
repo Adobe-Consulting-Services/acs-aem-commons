@@ -34,7 +34,7 @@ import org.apache.sling.commons.mime.MimeTypeService;
 public class UrlAssetImportFactory extends AdministratorsOnlyProcessDefinitionFactory<UrlAssetImport> {
 
     @Reference
-    transient private MimeTypeService mimeTypeService;
+    private transient MimeTypeService mimeTypeService;
 
     @Override
     protected UrlAssetImport createProcessDefinitionInstance() {

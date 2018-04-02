@@ -97,7 +97,7 @@ public class FileOrRendition extends HashMap<String, String> implements Hierarch
 
     @Override
     public String getItemName() {
-        return name;
+        return getName();
     }
 
     @Override

@@ -51,11 +51,12 @@ import java.util.EnumMap;
 import java.util.List;
 
 public abstract class AssetIngestor extends ProcessDefinition {
+    public static final String ALL_ASSETS = "All Assets";
 
-    transient protected final MimeTypeService mimetypeService;
+    protected transient final MimeTypeService mimetypeService;
 
     @SuppressWarnings("squid:S00115")
-    static public enum AssetAction {
+    public static enum AssetAction {
         skip, version, replace
     }
 
@@ -120,21 +121,21 @@ public abstract class AssetIngestor extends ProcessDefinition {
             component = RadioComponent.EnumerationSelector.class,
             options = {"default=skip", "vertical"}
     )
-    transient protected AssetAction existingAssetAction = AssetAction.skip;
+    protected transient AssetAction existingAssetAction = AssetAction.skip;
     @FormField(
             name = "Minimum size",
             description = "Min size to import (in bytes), 0=none",
             hint = "1024...",
             options = {"default=1024"}
     )
-    transient private long minimumSize = 1024;
+    private transient long minimumSize = 1024;
     @FormField(
             name = "Maximum size",
             description = "Max size to import (in bytes), 0=none",
             hint = "1gb = 1073741824",
             options = {"default=1073741824"}
     )
-    transient private long maximumSize = 1073741824;
+    private transient long maximumSize = 1073741824;
 
     protected static final String DEFAULT_FOLDER_TYPE = "sling:Folder";
     protected static final String CHANGED_BY_WORKFLOW = "changedByWorkflowProcess";
@@ -142,11 +143,11 @@ public abstract class AssetIngestor extends ProcessDefinition {
     EnumMap<ReportColumns, Object> createdFolders
             = trackActivity("All folders", "Create", "Count of all folders created", 0L);
     EnumMap<ReportColumns, Object> importedAssets
-            = trackActivity("All Assets", "Import", "Count of all assets imports", 0L);
+            = trackActivity(ALL_ASSETS, "Import", "Count of all assets imports", 0L);
     EnumMap<ReportColumns, Object> skippedFiles
-            = trackActivity("All Assets", "Skipped", "Count of skipped files", 0L);
+            = trackActivity(ALL_ASSETS, "Skipped", "Count of skipped files", 0L);
     EnumMap<ReportColumns, Object> importedData
-            = trackActivity("All Assets", "Data imported", "Count of bytes imported", 0L);
+            = trackActivity(ALL_ASSETS, "Data imported", "Count of bytes imported", 0L);
 
     @SuppressWarnings("squid:S00115")
     public static enum ReportColumns {
@@ -363,7 +364,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
-    transient private GenericReport report = new GenericReport();
+    private transient GenericReport report = new GenericReport();
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {

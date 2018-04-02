@@ -31,7 +31,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static javax.jcr.Property.JCR_PRIMARY_TYPE;
 import javax.jcr.RepositoryException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.request.RequestParameter;
@@ -43,6 +42,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static javax.jcr.Property.JCR_PRIMARY_TYPE;
 
 /**
  * Read node and metadata from a spreadsheet and update underlying node storage with provided data.
@@ -53,12 +53,12 @@ public class DataImporter extends ProcessDefinition {
     private static final String PATH = "path";
 
     public enum MergeMode {
-        create_and_overwrite_properties(true, true, true),
-        create_and_merge_properties(true, true, false),
-        create_only_skip_existing(true, false, false),
-        overwrite_existing_only(false, true, true),
-        merge_existing_only(false, true, false),
-        do_nothing(false, false, false);
+        CREATE_AND_OVERWRITE_PROPERTIES(true, true, true),
+        CREATE_AND_MERGE_PROPERTIES(true, true, false),
+        CREATE_ONLY_SKIP_EXISTING(true, false, false),
+        OVERWRITE_EXISTING_ONLY(false, true, true),
+        MERGE_EXISTING_ONLY(false, true, false),
+        DO_NOTHING(false, false, false);
 
         boolean create = false;
         boolean update = false;
@@ -69,7 +69,7 @@ public class DataImporter extends ProcessDefinition {
             update = u;
             overwriteProps = o;
         }
-    };
+    }
 
     @FormField(
             name = "Excel File",
@@ -85,7 +85,7 @@ public class DataImporter extends ProcessDefinition {
             component = RadioComponent.EnumerationSelector.class,
             options = {"default=create_and_overwrite_properties", "vertical"}
     )
-    private MergeMode mergeMode = MergeMode.create_and_overwrite_properties;
+    private MergeMode mergeMode = MergeMode.CREATE_AND_OVERWRITE_PROPERTIES;
 
     @FormField(
             name = "Structure node type",
@@ -116,15 +116,16 @@ public class DataImporter extends ProcessDefinition {
             options = "checked"
     )
     private boolean presortData = true;
+    public static final String TOTAL = "Total";
 
     EnumMap<ReportColumns, Object> createdNodes
-            = trackActivity("Total", "Create", 0);
+            = trackActivity(TOTAL, "Create", 0);
     EnumMap<ReportColumns, Object> updatedNodes
-            = trackActivity("Total", "Updated", 0);
+            = trackActivity(TOTAL, "Updated", 0);
     EnumMap<ReportColumns, Object> skippedNodes
-            = trackActivity("Total", "Skipped", 0);
+            = trackActivity(TOTAL, "Skipped", 0);
     EnumMap<ReportColumns, Object> noChangeNodes
-            = trackActivity("Total", "No Change", 0);
+            = trackActivity(TOTAL, "No Change", 0);
 
     @SuppressWarnings("squid:S00115")
     public static enum ReportColumns {
@@ -146,6 +147,7 @@ public class DataImporter extends ProcessDefinition {
         return reportRow;
     }
 
+    @SuppressWarnings("squid:S2445")
     protected void incrementCount(EnumMap<ReportColumns, Object> row, int amt) {
         synchronized (row) {
             row.put(ReportColumns.count, (int) row.getOrDefault(ReportColumns.count, 0) + amt);
@@ -154,6 +156,7 @@ public class DataImporter extends ProcessDefinition {
 
     @Override
     public void init() throws RepositoryException {
+        // Nothing to do here
     }
 
     @Override
@@ -173,7 +176,7 @@ public class DataImporter extends ProcessDefinition {
         instance.defineCriticalAction("Import Data", rr, this::importData);
     }
 
-    transient private GenericReport report = new GenericReport();
+    private transient GenericReport report = new GenericReport();
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
@@ -229,12 +232,10 @@ public class DataImporter extends ProcessDefinition {
                 String value = nodeInfo.get(prop);
                 if (value == null) {
                     nodeInfo.remove(prop);
+                } else if (value.contains(",")) {
+                    resourceProperties.put(prop, value.split(","));
                 } else {
-                    if (value.contains(",")) {
-                        resourceProperties.put(prop, value.split(","));
-                    } else {
-                        resourceProperties.put(prop, value);
-                    }
+                    resourceProperties.put(prop, value);
                 }
             }
         }
