@@ -80,7 +80,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @FormField(
             name = "Target JCR Folder",
-            description = "Base folder for ingestion",
+            description = "Prepended to target path if it does not begin with /content",
             hint = "/content/dam",
             component = PathfieldComponent.FolderSelectComponent.class,
             required = true,
@@ -93,7 +93,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
             hint = "tmp,.DS_STORE",
             options = {"default=tmp,ds_store,.ds_store,.thumbs,.appledouble"}
     )
-    String ignoreFolders;
+    String ignoreFolders = "tmp,ds_store,.ds_store,.thumbs,.appledouble";
     List<String> ignoreFolderList;
 
     @FormField(
@@ -102,7 +102,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
             hint = "full file names, comma separated",
             options = {"default=ds_store,.ds_store"}
     )
-    String ignoreFiles;
+    String ignoreFiles = "ds_store,.ds_store";
     List<String> ignoreFileList;
 
     @FormField(
@@ -111,7 +111,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
             hint = "mp4,txt, etc.",
             options = {"default=txt,html,css,js,thm,exe,db"}
     )
-    String ignoreExtensions;
+    String ignoreExtensions = "txt,html,css,js,thm,exe,db";
     List<String> ignoreExtensionList;
 
     @FormField(
@@ -120,21 +120,21 @@ public abstract class AssetIngestor extends ProcessDefinition {
             component = RadioComponent.EnumerationSelector.class,
             options = {"default=skip", "vertical"}
     )
-    transient protected AssetAction existingAssetAction;
+    transient protected AssetAction existingAssetAction = AssetAction.skip;
     @FormField(
             name = "Minimum size",
             description = "Min size to import (in bytes), 0=none",
             hint = "1024...",
             options = {"default=1024"}
     )
-    transient private long minimumSize;
+    transient private long minimumSize = 1024;
     @FormField(
             name = "Maximum size",
             description = "Max size to import (in bytes), 0=none",
             hint = "1gb = 1073741824",
             options = {"default=1073741824"}
     )
-    transient private long maximumSize;
+    transient private long maximumSize = 1073741824;
 
     protected static final String DEFAULT_FOLDER_TYPE = "sling:Folder";
     protected static final String CHANGED_BY_WORKFLOW = "changedByWorkflowProcess";
