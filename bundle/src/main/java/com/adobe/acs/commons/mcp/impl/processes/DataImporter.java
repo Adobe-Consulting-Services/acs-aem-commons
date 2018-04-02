@@ -42,6 +42,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import static javax.jcr.Property.JCR_PRIMARY_TYPE;
 
 /**
@@ -127,7 +128,7 @@ public class DataImporter extends ProcessDefinition {
     EnumMap<ReportColumns, Object> noChangeNodes
             = trackActivity(TOTAL, "No Change", 0);
 
-    @SuppressWarnings("squid:S00115")
+    @SuppressWarnings("squid:S00115")  
     public static enum ReportColumns {
         item, action, count
     }
@@ -190,28 +191,7 @@ public class DataImporter extends ProcessDefinition {
                 String path = row.get(PATH);
                 Resource r = rr.getResource(path);
                 if (r == null) {
-                    if (mergeMode.create) {
-                        if (!dryRunMode) {
-                            String parentPath = StringUtils.substringBeforeLast(path, "/");
-                            Resource parent = ResourceUtil.getOrCreateResource(rr, parentPath, defaultNodeType, defaultNodeType, true);
-                            String nodeName = StringUtils.substringAfterLast(path, "/");
-                            if (!row.containsKey(JCR_PRIMARY_TYPE)) {
-                                row.put("JCR_TYPE", defaultNodeType);
-                            }
-                            Map<String, Object> nodeProps = new HashMap(row);
-                            rr.refresh();
-                            rr.create(parent, nodeName, nodeProps);
-                        }
-                        incrementCount(createdNodes, 1);
-                        if (detailedReport) {
-                            trackActivity(path, "Created", null);
-                        }
-                    } else {
-                        incrementCount(skippedNodes, 1);
-                        if (detailedReport) {
-                            trackActivity(path, "Skipped missing", null);
-                        }
-                    }
+                    handleMissingNode(path, rr, row);
                 } else if (mergeMode.update) {
                     updateMetadata(rr, row);
                 } else {
@@ -224,21 +204,38 @@ public class DataImporter extends ProcessDefinition {
         });
     }
 
-    private void updateMetadata(ResourceResolver rr, Map<String, String> nodeInfo) throws PersistenceException {
-        ModifiableValueMap resourceProperties = rr.getResource(nodeInfo.get(PATH)).adaptTo(ModifiableValueMap.class);
-        for (String prop : data.getHeaderRow()) {
-            if (!prop.equals(PATH)
-                    && (mergeMode.overwriteProps || !resourceProperties.containsKey(prop))) {
-                String value = nodeInfo.get(prop);
-                if (value == null) {
-                    nodeInfo.remove(prop);
-                } else if (value.contains(",")) {
-                    resourceProperties.put(prop, value.split(","));
-                } else {
-                    resourceProperties.put(prop, value);
-                }
+    public void handleMissingNode(String path, ResourceResolver rr, Map<String, String> row) throws PersistenceException {
+        if (mergeMode.create) {
+            if (!dryRunMode) {
+                createMissingNode(path, rr, row);
+            }
+            incrementCount(createdNodes, 1);
+            if (detailedReport) {
+                trackActivity(path, "Created", null);
+            }
+        } else {
+            incrementCount(skippedNodes, 1);
+            if (detailedReport) {
+                trackActivity(path, "Skipped missing", null);
             }
         }
+    }
+
+    public void createMissingNode(String path, ResourceResolver rr, Map<String, String> row) throws PersistenceException {
+        String parentPath = StringUtils.substringBeforeLast(path, "/");
+        Resource parent = ResourceUtil.getOrCreateResource(rr, parentPath, defaultNodeType, defaultNodeType, true);
+        String nodeName = StringUtils.substringAfterLast(path, "/");
+        if (!row.containsKey(JCR_PRIMARY_TYPE)) {
+            row.put("JCR_TYPE", defaultNodeType);
+        }
+        Map<String, Object> nodeProps = new HashMap(row);
+        rr.refresh();
+        rr.create(parent, nodeName, nodeProps);
+    }
+
+    private void updateMetadata(ResourceResolver rr, Map<String, String> nodeInfo) throws PersistenceException {
+        ModifiableValueMap resourceProperties = rr.getResource(nodeInfo.get(PATH)).adaptTo(ModifiableValueMap.class);
+        populateMetadataFromRow(resourceProperties, nodeInfo);
         if (rr.hasChanges()) {
             incrementCount(updatedNodes, 1);
             if (detailedReport) {
@@ -253,6 +250,22 @@ public class DataImporter extends ProcessDefinition {
                 trackActivity(nodeInfo.get(PATH), "No Change", null);
             }
             incrementCount(noChangeNodes, 1);
+        }
+    }
+
+    public void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, String> nodeInfo) {
+        for (String prop : data.getHeaderRow()) {
+            if (!prop.equals(PATH)
+                    && (mergeMode.overwriteProps || !resourceProperties.containsKey(prop))) {
+                String value = nodeInfo.get(prop);
+                if (value == null) {
+                    nodeInfo.remove(prop);
+                } else if (value.contains(",")) {
+                    resourceProperties.put(prop, value.split(","));
+                } else {
+                    resourceProperties.put(prop, value);
+                }
+            }
         }
     }
 }

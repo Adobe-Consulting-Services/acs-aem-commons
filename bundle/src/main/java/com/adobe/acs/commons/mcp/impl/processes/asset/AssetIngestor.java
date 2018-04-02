@@ -53,7 +53,7 @@ import java.util.List;
 public abstract class AssetIngestor extends ProcessDefinition {
     public static final String ALL_ASSETS = "All Assets";
 
-    protected transient final MimeTypeService mimetypeService;
+    protected final transient MimeTypeService mimetypeService;
 
     @SuppressWarnings("squid:S00115")
     public static enum AssetAction {
@@ -178,6 +178,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }    
 
+    @SuppressWarnings("squid:S2445")
     private void increment(EnumMap<ReportColumns, Object> row, ReportColumns col, long amt) {
         synchronized (row) {
             row.put(col, (Long) row.getOrDefault(col, 0) + amt);

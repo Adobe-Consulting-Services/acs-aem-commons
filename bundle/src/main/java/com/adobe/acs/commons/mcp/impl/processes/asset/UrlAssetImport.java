@@ -159,30 +159,35 @@ public class UrlAssetImport extends AssetIngestor {
             if (dryRunMode) {
                 return;
             }
-            if (rr.hasChanges()) {
-                rr.commit();
-                rr.refresh();
-            }
+            commitAndRefresh(rr);
             ModifiableValueMap meta = rr.getResource(file.getNodePath() + "/jcr:content/metadata").adaptTo(ModifiableValueMap.class);
-            for (String prop : fileData.getHeaderRow()) {
-                if (prop.contains(":")) {
-                    String value = file.get(prop);
-                    if (value == null) {
-                        meta.remove(prop);
+            updateMetadataFromRow(file, meta);
+            commitAndRefresh(rr);
+        };
+    }
+
+    public void commitAndRefresh(ResourceResolver rr) throws PersistenceException {
+        if (rr.hasChanges()) {
+            rr.commit();
+        }
+        rr.refresh();
+    }
+
+    public void updateMetadataFromRow(FileOrRendition file, ModifiableValueMap meta) {
+        for (String prop : fileData.getHeaderRow()) {
+            if (prop.contains(":")) {
+                String value = file.get(prop);
+                if (value == null) {
+                    meta.remove(prop);
+                } else {
+                    if (value.contains(":") || value.contains(",")) {
+                        meta.put(prop, value.split(","));
                     } else {
-                        if (value.contains(":") || value.contains(",")) {
-                            meta.put(prop, value.split(","));
-                        } else {
-                            meta.put(prop, value);
-                        }
+                        meta.put(prop, value);
                     }
                 }
             }
-            if (rr.hasChanges()) {
-                rr.commit();
-                rr.refresh();
-            }
-        };
+        }
     }
 
     private CheckedConsumer<ResourceResolver> importRenditions(FileOrRendition file, ActionManager manager) throws PersistenceException {
