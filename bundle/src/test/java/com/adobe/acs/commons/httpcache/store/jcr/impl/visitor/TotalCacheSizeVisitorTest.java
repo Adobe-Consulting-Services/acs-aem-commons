@@ -6,7 +6,6 @@ import javax.jcr.Node;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -16,7 +15,7 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockF
 @RunWith(PowerMockRunner.class)
 public class TotalCacheSizeVisitorTest
 {
-    private static final long TEST_FILE_SIZE = 65;
+    private static final long TEST_FILE_SIZE = 63 + System.lineSeparator().length() * 2;
 
     @Test public void test() throws Exception
     {

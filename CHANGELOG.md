@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1286 - Error page handler now verifies parent resource is not a NonExistingResource
 - #1288 - Restrict the redirect map file upload to .txt file extension
 - #1298 - Ensure that dispatcher cache headers are only written once per header name
+- #1303 - Updated HTTP Cache test to handle all platforms more agnostically
 
 ## [3.14.10] - 2018-03-08
 
