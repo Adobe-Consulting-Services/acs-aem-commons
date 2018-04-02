@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - #1237 - Reporting feature: Adding a report column for finding references to a resource 
+- #1279 - New import tools for node metadata and file/url-based asset ingestion
 
 ### Fixed
 
