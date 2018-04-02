@@ -124,7 +124,7 @@ public class UrlAssetImport extends AssetIngestor {
         return allFiles;
     }
 
-    private void createFolders(ActionManager manager) throws IOException {
+    protected void createFolders(ActionManager manager) throws IOException {
         manager.deferredWithResolver(r -> {
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             folders.values().forEach(f
@@ -136,7 +136,7 @@ public class UrlAssetImport extends AssetIngestor {
         });
     }
 
-    private void importAssets(ActionManager manager) throws IOException {
+    protected void importAssets(ActionManager manager) throws IOException {
         manager.setCurrentItem(jcrBasePath);
         files.stream().filter(this::canImportContainingFolder).forEach(file -> {
             // Check the file using the deferral method so that any failures at retrieving file size can be retried.

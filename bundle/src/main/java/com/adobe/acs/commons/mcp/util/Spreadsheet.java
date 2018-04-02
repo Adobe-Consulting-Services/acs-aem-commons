@@ -46,6 +46,18 @@ public class Spreadsheet {
     private final List<String> requiredColumns;
     private boolean enableHeaderNameConversion = true;
 
+    /**
+     * Simple constructor used for unit testing purposes
+     * @param convertHeaderNames If true, header names are converted
+     * @param header List of strings for header columns
+     */
+    public Spreadsheet(boolean convertHeaderNames, String... header) {
+        this.enableHeaderNameConversion = convertHeaderNames;
+        headerRow = Arrays.stream(header).map(this::convertHeaderName).collect(Collectors.toList());
+        requiredColumns = Collections.EMPTY_LIST;
+        dataRows = new ArrayList<>();
+    }
+    
     public Spreadsheet(boolean convertHeaderNames, InputStream file, String... required) throws IOException {
         this.enableHeaderNameConversion = convertHeaderNames;
         if (required == null || required.length == 0) {
