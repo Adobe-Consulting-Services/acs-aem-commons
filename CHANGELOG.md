@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Fixed
 - #1262 - MCP race condition affects showing completion status for processes that finish very quickly
+- #1276 - Bulk workflow now works with 6.4 and the user-event-data is pre-selected (commit button not grayed out anymore)
 - #1291 - S3 Asset Ingestor stops after 1000 Assets attempting to be imported
 - #1286 - Error page handler now verifies parent resource is not a NonExistingResource
 - #1288 - Restrict the redirect map file upload to .txt file extension
