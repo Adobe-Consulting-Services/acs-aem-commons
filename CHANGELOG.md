@@ -7,7 +7,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.10...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.12...HEAD
+
+## [3.14.12] - 2018-04-03
+
+### Fixed
+
+- #1291 - S3 Asset Ingestor stops after 1000 Assets attempting to be imported
+- #1286 - Error page handler now verifies parent resource is not a NonExistingResource
+- #1288 - Restrict the redirect map file upload to .txt file extension
+- #1272 - Ensure Service User service is not restricted ACE by path
+- #1142 - Make sure report tabulation is thread-safe
+- #1298 - Ensure that dispatcher cache headers are only written once per header name
 
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
