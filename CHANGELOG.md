@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 
 - #1291 - S3 Asset Ingestor stops after 1000 Assets attempting to be imported
+- #1286 - Error page handler now verifies parent resource is not a NonExistingResource
+- #1288 - Restrict the redirect map file upload to .txt file extension
+- #1272 - Ensure Service User service is not restricted ACE by path
+- #1142 - Make sure report tabulation is thread-safe
 
 ## [3.14.10] - 2018-03-08
 
