@@ -78,6 +78,14 @@ public abstract class AssetIngestor extends ProcessDefinition {
             options = "checked"
     )
     boolean detailedReport = true;
+    
+    @FormField(
+            name = "Inhibit workflow",
+            description = "If checked, disables asset processing workflow",
+            component = CheckboxComponent.class,
+            options = "checked"
+    )
+    boolean inhibitWorkflow = true;
 
     @FormField(
             name = "Target JCR Folder",
@@ -218,7 +226,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
     private void createAsset(Source source, String assetPath, ResourceResolver r, boolean versioning) throws Exception {
         boolean versioned = false;
         if (!dryRunMode) {
-            r.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(CHANGED_BY_WORKFLOW);
+            disableWorkflowProcessing(r);
             AssetManager assetManager = r.adaptTo(AssetManager.class);
             String type = mimetypeService.getMimeType(source.getName());
             if (versioning) {
@@ -365,6 +373,12 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
+    protected void disableWorkflowProcessing(ResourceResolver rr) throws RepositoryException {
+        if (inhibitWorkflow) {
+            rr.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(CHANGED_BY_WORKFLOW);
+        }        
+    }
+    
     private transient GenericReport report = new GenericReport();
 
     @Override

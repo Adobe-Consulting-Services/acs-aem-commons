@@ -160,6 +160,7 @@ public class UrlAssetImport extends AssetIngestor {
                 return;
             }
             commitAndRefresh(rr);
+            disableWorkflowProcessing(rr);
             ModifiableValueMap meta = rr.getResource(file.getNodePath() + "/jcr:content/metadata").adaptTo(ModifiableValueMap.class);
             updateMetadataFromRow(file, meta);
             commitAndRefresh(rr);
@@ -201,6 +202,7 @@ public class UrlAssetImport extends AssetIngestor {
                         renditionName += "." + extension;
                     }
                     if (!dryRunMode) {
+                        disableWorkflowProcessing(rr);
                         Asset asset = rr.getResource(file.getNodePath()).adaptTo(Asset.class);
                         asset.addRendition(renditionName, renditionFile.getSource().getStream(), type);
                     }
