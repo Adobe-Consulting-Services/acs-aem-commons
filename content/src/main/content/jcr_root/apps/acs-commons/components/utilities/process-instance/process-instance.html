@@ -53,6 +53,12 @@ limitations under the License.
                     <a is="coral-anchorbutton" icon="download" href="${resource.path}/report.xlsx">Download (Excel)</a>
                 </span>
             </section>
+            <section class="coral-Form-fieldset" data-sly-test="${resource['failures/jcr:primaryType']}">
+                <label class="coral-Form-fieldlabel">Errors</label>
+                <span class="process-dialog-field">
+                    <a is="coral-anchorbutton" icon="browse" href="${resource.path}.errors.html" target="_new">View</a>
+                </span>
+            </section>
         </form>
     </body>
 </html>
