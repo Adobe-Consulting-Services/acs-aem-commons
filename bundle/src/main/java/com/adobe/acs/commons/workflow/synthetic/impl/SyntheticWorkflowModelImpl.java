@@ -59,12 +59,17 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
             throw new WorkflowException(ex.getMessage(), ex);
         }
 
-        if (!StringUtils.endsWith(modelId, WORKFLOW_MODEL_PATH_SUFFIX)) {
+        WorkflowModel model = workflowSession.getModel(modelId);
+        if (model == null && !StringUtils.endsWith(modelId, WORKFLOW_MODEL_PATH_SUFFIX)) {
             modelId = modelId + WORKFLOW_MODEL_PATH_SUFFIX;
+            model = workflowSession.getModel(modelId);
         }
 
-        final WorkflowModel model = workflowSession.getModel(modelId);
-
+        if (model == null) {
+            log.error("Unable to locate workflow starting node for " + modelId);
+            throw new WorkflowException("Unable to locate workflow starting node for " + modelId);            
+        }
+        
         log.debug("Located Workflow Model [ {} ] with modelId [ {} ]", model.getTitle(), modelId);
 
         final List<WorkflowNode> nodes = model.getNodes();
