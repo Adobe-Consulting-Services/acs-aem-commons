@@ -39,9 +39,10 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowModelImpl.class);
 
     private static final String[] WORKFLOW_MODEL_PATH_PREFIXES = new String[]{
+        "",
         "/conf/global/settings/workflow/models",
-        "/etc/workflow/models/",
-        "/var/workflow/models/"
+        "/etc/workflow/models",
+        "/var/workflow/models"
     };
     
     private static final String WORKFLOW_MODEL_PATH_SUFFIX = "/jcr:content/model";
@@ -60,10 +61,6 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
         }
 
         WorkflowModel model = workflowSession.getModel(modelId);
-        if (model == null && !StringUtils.endsWith(modelId, WORKFLOW_MODEL_PATH_SUFFIX)) {
-            modelId = modelId + WORKFLOW_MODEL_PATH_SUFFIX;
-            model = workflowSession.getModel(modelId);
-        }
 
         if (model == null) {
             log.error("Unable to locate workflow starting node for " + modelId);
@@ -116,12 +113,13 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
     }
 
     private String findWorkflowModel(WorkflowSession workflowSession, String modelId) throws RepositoryException {
-        if (workflowSession.getSession().nodeExists(modelId)) {
-            return modelId;
-        }
+        String separator = modelId.startsWith("/") ? "" : "/";
         for (String prefix : WORKFLOW_MODEL_PATH_PREFIXES) {
-            String testPath = prefix + modelId;
-            if (workflowSession.getSession().nodeExists(testPath)) {
+            String testPath = prefix + separator + modelId;
+            String olderWorkflowStyle = testPath + WORKFLOW_MODEL_PATH_SUFFIX;
+            if (workflowSession.getSession().nodeExists(olderWorkflowStyle)) {
+                return olderWorkflowStyle;
+            } else if (workflowSession.getSession().nodeExists(testPath)) {
                 return testPath;
             }
         }
