@@ -40,9 +40,7 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
 
     private static final String[] WORKFLOW_MODEL_PATH_PREFIXES = new String[]{
         "",
-        "/conf/global/settings/workflow/models",
-        "/etc/workflow/models",
-        "/var/workflow/models"
+        "/etc/workflow/models"
     };
     
     private static final String WORKFLOW_MODEL_PATH_SUFFIX = "/jcr:content/model";
