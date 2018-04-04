@@ -59,6 +59,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1230 - Fixed issue causing XHR requests to undefined.2.json from TouchUI Parsys-related ClientLibs
 - #1239 - Fixing issue which prevented ACS AEM Commons 3.14.0, 3.14.2 and 3.14.4 being installed on AEM 6.2.
+- #1244 - Added Ensure Group functionality.
 
 ## [3.14.4] - 2018-01-24
 
