@@ -80,7 +80,7 @@ public class ProcessErrorReportExcelServlet extends SlingSafeMethodsServlet {
     }
 
     @SuppressWarnings("squid:S3776")
-    private Workbook createSpreadsheet(ManagedProcess report) {
+    protected Workbook createSpreadsheet(ManagedProcess report) {
         Workbook wb = new XSSFWorkbook();
 
         String name = report.getName();
