@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.12...HEAD
 
+### Added
+- #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
+
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
 

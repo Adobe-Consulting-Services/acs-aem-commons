@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Users to CSV Exporter"
+    jcr:description="Export AEM users to CSV for reporting."
+    icon="usersShare"
+    href="/miscadmin#/etc/acs-commons/exporters"
+    id="acs-commons__exporters"
+    target="_blank"/>
