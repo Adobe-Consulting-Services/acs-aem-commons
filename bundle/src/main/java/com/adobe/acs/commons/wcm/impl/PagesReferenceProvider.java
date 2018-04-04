@@ -132,7 +132,7 @@ public final class PagesReferenceProvider implements ReferenceProvider {
     private Reference getReference(Page page) {
         return new Reference(TYPE_PAGE,
                 String.format("%s (Page)", page.getName()),
-                page.getContentResource(),
+                page.getContentResource().getParent(),
                 getLastModifiedTimeOfResource(page));
     }
 
